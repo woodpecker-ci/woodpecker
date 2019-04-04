@@ -1,12 +1,12 @@
 workspace:
   base: /go
-  path: src/github.com/drone/drone
+  path: src/github.com/laszlocph/drone-oss-08
 
 pipeline:
   test:
     image: golang:1.8
     commands:
-      - go get -u github.com/drone/drone-ui/dist
+      - go get -u github.com/laszlocph/drone-ui/dist
       - go get -u golang.org/x/tools/cmd/cover
       - go get -u golang.org/x/net/context
       - go get -u golang.org/x/net/context/ctxhttp
@@ -20,7 +20,7 @@ pipeline:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test github.com/drone/drone/store/datastore
+      - go test github.com/laszlocph/drone-oss-08/store/datastore
 
   test_mysql:
     image: golang:1.8
@@ -28,7 +28,7 @@ pipeline:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test github.com/drone/drone/store/datastore
+      - go test github.com/laszlocph/drone-oss-08/store/datastore
 
   build:
     image: golang:1.8

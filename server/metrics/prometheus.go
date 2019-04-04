@@ -18,7 +18,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/drone/drone/server"
+	"github.com/laszlocph/drone-oss-08/server"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

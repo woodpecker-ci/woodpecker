@@ -24,12 +24,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/remote"
-	"github.com/drone/drone/shared/httputil"
-	"github.com/drone/drone/shared/oauth2"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
+	"github.com/laszlocph/drone-oss-08/shared/httputil"
+	"github.com/laszlocph/drone-oss-08/shared/oauth2"
 
-	"github.com/drone/drone/remote/gitlab/client"
+	"github.com/laszlocph/drone-oss-08/remote/gitlab/client"
 )
 
 const DefaultScope = "api"

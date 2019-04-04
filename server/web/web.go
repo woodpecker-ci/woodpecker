@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/drone/drone-ui/dist"
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/shared/token"
-	"github.com/drone/drone/version"
+	"github.com/laszlocph/drone-ui/dist"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/shared/token"
+	"github.com/laszlocph/drone-oss-08/version"
 
 	"github.com/dimfeld/httptreemux"
 )

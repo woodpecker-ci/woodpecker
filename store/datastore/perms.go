@@ -15,8 +15,8 @@
 package datastore
 
 import (
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/store/datastore/sql"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/store/datastore/sql"
 
 	"github.com/russross/meddler"
 )

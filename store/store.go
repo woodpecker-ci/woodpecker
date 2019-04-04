@@ -17,7 +17,7 @@ package store
 import (
 	"io"
 
-	"github.com/drone/drone/model"
+	"github.com/laszlocph/drone-oss-08/model"
 
 	"golang.org/x/net/context"
 )
