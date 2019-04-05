@@ -6,7 +6,6 @@ pipeline:
   test:
     image: golang:1.8
     commands:
-      - go get -u github.com/laszlocph/drone-ui/dist
       - go get -u golang.org/x/tools/cmd/cover
       - go get -u golang.org/x/net/context
       - go get -u golang.org/x/net/context/ctxhttp
