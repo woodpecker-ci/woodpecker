@@ -19,8 +19,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/drone/drone/store"
-	"github.com/drone/drone/store/datastore/ddl"
+	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/drone-oss-08/store/datastore/ddl"
 	"github.com/russross/meddler"
 
 	"github.com/Sirupsen/logrus"

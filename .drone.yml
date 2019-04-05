@@ -1,12 +1,12 @@
 workspace:
   base: /go
-  path: src/github.com/drone/drone
+  path: src/github.com/laszlocph/drone-oss-08
 
 pipeline:
   test:
     image: golang:1.8
     commands:
-      - go get -u github.com/drone/drone-ui/dist
+      - go get -u github.com/laszlocph/drone-ui/dist
       - go get -u golang.org/x/tools/cmd/cover
       - go get -u golang.org/x/net/context
       - go get -u golang.org/x/net/context/ctxhttp
@@ -20,7 +20,7 @@ pipeline:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test github.com/drone/drone/store/datastore
+      - go test github.com/laszlocph/drone-oss-08/store/datastore
 
   test_mysql:
     image: golang:1.8
@@ -28,18 +28,17 @@ pipeline:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test github.com/drone/drone/store/datastore
+      - go test github.com/laszlocph/drone-oss-08/store/datastore
 
   build:
     image: golang:1.8
     commands: sh .drone.sh
-    secrets: [ ssh_key ]
     when:
       event: [ push, tag ]
 
   publish_server_alpine:
     image: plugins/docker
-    repo: drone/drone
+    repo: laszlocloud/drone-oss-08-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
     tag: [ alpine ]
@@ -49,7 +48,17 @@ pipeline:
 
   publish_server:
     image: plugins/docker
-    repo: drone/drone
+    repo: laszlocloud/drone-oss-08-server
+    secrets: [ docker_username, docker_password ]
+    tag: [ latest ]
+    when:
+      branch: master
+      event: push
+
+  publish_agent:
+    image: plugins/docker
+    repo: laszlocloud/drone-oss-08-agent
+    dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
     when:
@@ -58,7 +67,7 @@ pipeline:
 
   publish_agent_alpine:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
     tag: [ alpine ]
@@ -68,7 +77,7 @@ pipeline:
 
   publish_agent_arm:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.linux.arm
     secrets: [ docker_username, docker_password ]
     tag: [ linux-arm ]
@@ -78,7 +87,7 @@ pipeline:
 
   publish_agent_arm64:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.linux.arm64
     secrets: [ docker_username, docker_password ]
     tag: [ linux-arm64 ]
@@ -88,7 +97,7 @@ pipeline:
 
   publish_agent_amd64:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
@@ -98,36 +107,36 @@ pipeline:
 
   release_server_alpine:
     image: plugins/docker
-    repo: drone/drone
+    repo: laszlocloud/drone-oss-08-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8-alpine ]
+    tag: [ 0.8.91-alpine ]
     when:
       event: tag
 
   release_agent_alpine:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8-alpine ]
+    tag: [ 0.8.91-alpine ]
     when:
       event: tag
 
   release_server:
     image: plugins/docker
-    repo: drone/drone
+    repo: laszlocloud/drone-oss-08-server
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8, 0.8.9 ]
+    tag: [ 0.8.91 ]
     when:
       event: tag
 
   release_agent:
     image: plugins/docker
-    repo: drone/agent
+    repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8, 0.8.9 ]
+    tag: [ 0.8.91 ]
     when:
       event: tag
 

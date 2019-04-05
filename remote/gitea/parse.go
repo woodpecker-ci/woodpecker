@@ -18,7 +18,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/drone/drone/model"
+	"github.com/laszlocph/drone-oss-08/model"
 )
 
 const (

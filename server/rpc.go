@@ -34,9 +34,9 @@ import (
 	"github.com/cncd/pubsub"
 	"github.com/cncd/queue"
 
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/remote"
-	"github.com/drone/drone/store"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
+	"github.com/laszlocph/drone-oss-08/store"
 
 	"github.com/drone/expr"
 )

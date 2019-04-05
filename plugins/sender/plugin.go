@@ -3,8 +3,8 @@ package sender
 import (
 	"fmt"
 
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/plugins/internal"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/plugins/internal"
 )
 
 type plugin struct {

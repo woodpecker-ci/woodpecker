@@ -19,11 +19,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/drone/drone/model"
-	"github.com/drone/drone/remote"
-	"github.com/drone/drone/shared/httputil"
-	"github.com/drone/drone/shared/token"
-	"github.com/drone/drone/store"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
+	"github.com/laszlocph/drone-oss-08/shared/httputil"
+	"github.com/laszlocph/drone-oss-08/shared/token"
+	"github.com/laszlocph/drone-oss-08/store"
 	"github.com/gorilla/securecookie"
 
 	"github.com/Sirupsen/logrus"

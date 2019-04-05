@@ -20,8 +20,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/drone/drone/router/middleware/session"
-	"github.com/drone/drone/store"
+	"github.com/laszlocph/drone-oss-08/router/middleware/session"
+	"github.com/laszlocph/drone-oss-08/store"
 	"github.com/gin-gonic/gin"
 )
 

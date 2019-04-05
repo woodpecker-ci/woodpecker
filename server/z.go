@@ -15,8 +15,8 @@
 package server
 
 import (
-	"github.com/drone/drone/store"
-	"github.com/drone/drone/version"
+	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/drone-oss-08/version"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +32,7 @@ func Health(c *gin.Context) {
 // Version endpoint returns the server version and build information.
 func Version(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"source":  "https://github.com/drone/drone",
+		"source":  "https://github.com/laszlocph/drone-oss-08",
 		"version": version.Version.String(),
 	})
 }
