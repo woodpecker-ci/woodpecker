@@ -1,7 +1,6 @@
 1. Install go 1.9 or later
 2. Install dependencies
 
-    go get -u github.com/laszlocph/drone-ui/dist
     go get -u golang.org/x/net/context
     go get -u golang.org/x/net/context/ctxhttp
     go get -u github.com/golang/protobuf/proto
