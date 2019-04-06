@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cncd/queue"
+	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/dimfeld/httptreemux"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/plugins/registry"

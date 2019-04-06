@@ -1,0 +1,16 @@
+workspace:
+  base: /go
+  path: src/github.com/drone/envsubst
+
+clone:
+  git:
+    image: plugins/git
+    depth: 50
+
+pipeline:
+  build:
+    image: golang:1.7
+    commands:
+      - go get -t ./...
+      - go build
+      - go test -v

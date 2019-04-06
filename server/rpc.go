@@ -28,11 +28,11 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cncd/logging"
-	"github.com/cncd/pipeline/pipeline/rpc"
-	"github.com/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/cncd/pubsub"
-	"github.com/cncd/queue"
+	"github.com/laszlocph/drone-oss-08/cncd/logging"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
+	"github.com/laszlocph/drone-oss-08/cncd/queue"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
