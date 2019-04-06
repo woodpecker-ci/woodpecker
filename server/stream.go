@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cncd/logging"
-	"github.com/cncd/pubsub"
+	"github.com/laszlocph/drone-oss-08/cncd/logging"
+	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/router/middleware/session"
 	"github.com/laszlocph/drone-oss-08/store"

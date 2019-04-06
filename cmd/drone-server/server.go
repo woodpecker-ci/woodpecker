@@ -33,9 +33,9 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/cncd/logging"
-	"github.com/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/cncd/pubsub"
+	"github.com/laszlocph/drone-oss-08/cncd/logging"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/plugins/sender"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/router"

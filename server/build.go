@@ -25,9 +25,9 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/cncd/pipeline/pipeline/rpc"
-	"github.com/cncd/pubsub"
-	"github.com/cncd/queue"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
+	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/store"

@@ -29,11 +29,11 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/cncd/pipeline/pipeline"
-	"github.com/cncd/pipeline/pipeline/backend"
-	"github.com/cncd/pipeline/pipeline/backend/docker"
-	"github.com/cncd/pipeline/pipeline/multipart"
-	"github.com/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/docker"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/multipart"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 
 	"github.com/drone/signal"
 	"github.com/rs/zerolog"

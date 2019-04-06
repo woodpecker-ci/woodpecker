@@ -1,0 +1,231 @@
+{
+  "pipeline": [
+    {
+      "name": "pipeline_clone",
+      "alias": "clone",
+      "steps": [
+        {
+          "name": "pipeline_clone",
+          "image": "plugins/git:latest",
+          "working_dir": "/go/src/github.com/go-sql-driver/mysql",
+          "environment": {
+            "CI": "pipec",
+            "CI_BUILD_CREATED": "1486119586",
+            "CI_BUILD_EVENT": "push",
+            "CI_BUILD_NUMBER": "530",
+            "CI_BUILD_STARTED": "1486119585",
+            "CI_COMMIT_AUTHOR": "egorsmkv",
+            "CI_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "CI_COMMIT_BRANCH": "master",
+            "CI_COMMIT_MESSAGE": "Fix many urls",
+            "CI_COMMIT_REF": "refs/heads/master",
+            "CI_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "CI_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "CI_REPO": "go-sql-driver/mysql",
+            "CI_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "CI_REPO_NAME": "go-sql-driver/mysql",
+            "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "DRONE_BUILD_CREATED": "1486119586",
+            "DRONE_BUILD_EVENT": "push",
+            "DRONE_BUILD_NUMBER": "530",
+            "DRONE_BUILD_STARTED": "1486119585",
+            "DRONE_COMMIT_AUTHOR": "egorsmkv",
+            "DRONE_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "DRONE_COMMIT_BRANCH": "master",
+            "DRONE_COMMIT_MESSAGE": "Fix many urls",
+            "DRONE_COMMIT_REF": "refs/heads/master",
+            "DRONE_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "DRONE_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_REPO": "go-sql-driver/mysql",
+            "DRONE_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "DRONE_REPO_NAME": "go-sql-driver/mysql",
+            "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_SYSTEM": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
+            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "DRONE_SYSTEM_NAME": "pipec",
+            "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "PLUGIN_DEPTH": "0"
+          },
+          "volumes": [
+            "pipeline_default:/go"
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": null
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        }
+      ]
+    },
+    {
+      "name": "pipeline_services",
+      "alias": "services",
+      "steps": [
+        {
+          "name": "pipeline_services_0",
+          "alias": "database",
+          "image": "mysql:latest",
+          "detach": true,
+          "environment": {
+            "CI": "pipec",
+            "CI_BUILD_CREATED": "1486119586",
+            "CI_BUILD_EVENT": "push",
+            "CI_BUILD_NUMBER": "530",
+            "CI_BUILD_STARTED": "1486119585",
+            "CI_COMMIT_AUTHOR": "egorsmkv",
+            "CI_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "CI_COMMIT_BRANCH": "master",
+            "CI_COMMIT_MESSAGE": "Fix many urls",
+            "CI_COMMIT_REF": "refs/heads/master",
+            "CI_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "CI_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "CI_REPO": "go-sql-driver/mysql",
+            "CI_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "CI_REPO_NAME": "go-sql-driver/mysql",
+            "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "DRONE_BUILD_CREATED": "1486119586",
+            "DRONE_BUILD_EVENT": "push",
+            "DRONE_BUILD_NUMBER": "530",
+            "DRONE_BUILD_STARTED": "1486119585",
+            "DRONE_COMMIT_AUTHOR": "egorsmkv",
+            "DRONE_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "DRONE_COMMIT_BRANCH": "master",
+            "DRONE_COMMIT_MESSAGE": "Fix many urls",
+            "DRONE_COMMIT_REF": "refs/heads/master",
+            "DRONE_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "DRONE_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_REPO": "go-sql-driver/mysql",
+            "DRONE_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "DRONE_REPO_NAME": "go-sql-driver/mysql",
+            "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_SYSTEM": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
+            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "DRONE_SYSTEM_NAME": "pipec",
+            "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "MYSQL_ALLOW_EMPTY_PASSWORD": "yes",
+            "MYSQL_DATABASE": "gotest"
+          },
+          "volumes": [
+            "pipeline_default:/go"
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": [
+                "database"
+              ]
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        }
+      ]
+    },
+    {
+      "name": "pipeline_stage_0",
+      "alias": "build",
+      "steps": [
+        {
+          "name": "pipeline_step_0",
+          "alias": "build",
+          "image": "golang:1.7",
+          "working_dir": "/go/src/github.com/go-sql-driver/mysql",
+          "environment": {
+            "CI": "pipec",
+            "CI_BUILD_CREATED": "1486119586",
+            "CI_BUILD_EVENT": "push",
+            "CI_BUILD_NUMBER": "530",
+            "CI_BUILD_STARTED": "1486119585",
+            "CI_COMMIT_AUTHOR": "egorsmkv",
+            "CI_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "CI_COMMIT_BRANCH": "master",
+            "CI_COMMIT_MESSAGE": "Fix many urls",
+            "CI_COMMIT_REF": "refs/heads/master",
+            "CI_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "CI_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "CI_REPO": "go-sql-driver/mysql",
+            "CI_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "CI_REPO_NAME": "go-sql-driver/mysql",
+            "CI_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICJzbGVlcCAyMCIKc2xlZXAgMjAKCmVjaG8gKyAiZ28gZ2V0IC12IC10IgpnbyBnZXQgLXYgLXQKCmVjaG8gKyAiZ28gdGVzdCAtdiIKZ28gdGVzdCAtdgoK",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "DRONE_BUILD_CREATED": "1486119586",
+            "DRONE_BUILD_EVENT": "push",
+            "DRONE_BUILD_NUMBER": "530",
+            "DRONE_BUILD_STARTED": "1486119585",
+            "DRONE_COMMIT_AUTHOR": "egorsmkv",
+            "DRONE_COMMIT_AUTHOR_NAME": "egorsmkv",
+            "DRONE_COMMIT_BRANCH": "master",
+            "DRONE_COMMIT_MESSAGE": "Fix many urls",
+            "DRONE_COMMIT_REF": "refs/heads/master",
+            "DRONE_COMMIT_SHA": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+            "DRONE_REMOTE_URL": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_REPO": "go-sql-driver/mysql",
+            "DRONE_REPO_LINK": "https://github.com/go-sql-driver/mysql",
+            "DRONE_REPO_NAME": "go-sql-driver/mysql",
+            "DRONE_REPO_REMOTE": "https://github.com/go-sql-driver/mysql.git",
+            "DRONE_SYSTEM": "pipec",
+            "DRONE_SYSTEM_ARCH": "linux/amd64",
+            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "DRONE_SYSTEM_NAME": "pipec",
+            "DRONE_WORKSPACE": "/go/src/github.com/go-sql-driver/mysql",
+            "HOME": "/root",
+            "MYSQL_TEST_ADDR": "database:3306",
+            "SHELL": "/bin/sh"
+          },
+          "entrypoint": [
+            "/bin/sh",
+            "-c"
+          ],
+          "command": [
+            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+          ],
+          "volumes": [
+            "pipeline_default:/go"
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": [
+                "database"
+              ]
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        }
+      ]
+    }
+  ],
+  "networks": [
+    {
+      "name": "pipeline_default",
+      "driver": "bridge"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "pipeline_default",
+      "driver": "local"
+    }
+  ]
+}

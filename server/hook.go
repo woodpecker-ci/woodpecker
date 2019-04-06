@@ -36,15 +36,15 @@ import (
 	"github.com/laszlocph/drone-oss-08/store"
 	"github.com/drone/envsubst"
 
-	"github.com/cncd/pipeline/pipeline/backend"
-	"github.com/cncd/pipeline/pipeline/frontend"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml/compiler"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml/linter"
-	"github.com/cncd/pipeline/pipeline/frontend/yaml/matrix"
-	"github.com/cncd/pipeline/pipeline/rpc"
-	"github.com/cncd/pubsub"
-	"github.com/cncd/queue"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/compiler"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/matrix"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
+	"github.com/laszlocph/drone-oss-08/cncd/queue"
 )
 
 //

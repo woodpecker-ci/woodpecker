@@ -1,0 +1,20 @@
+workspace:
+  base: /go
+  path: src/github.com/go-sql-driver/mysql
+
+pipeline:
+  build:
+    image: golang:1.7
+    environment:
+      MYSQL_TEST_ADDR: database:3306
+    commands:
+      - sleep 20
+      - go get -v -t
+      - go test -v
+
+services:
+  database:
+    image: mysql
+    environment:
+      - MYSQL_DATABASE=gotest
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes

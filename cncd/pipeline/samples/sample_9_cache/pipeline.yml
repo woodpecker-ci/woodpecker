@@ -1,0 +1,10 @@
+cache:
+  - node_modules
+
+pipeline:
+  build:
+    image: node
+    commands:
+      - npm install
+      - npm test
+
