@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/laszlocph/drone-oss-08/cli/drone/autoscale"
 	"github.com/laszlocph/drone-oss-08/cli/drone/build"
 	"github.com/laszlocph/drone-oss-08/cli/drone/deploy"
 	"github.com/laszlocph/drone-oss-08/cli/drone/exec"
@@ -13,7 +12,6 @@ import (
 	"github.com/laszlocph/drone-oss-08/cli/drone/registry"
 	"github.com/laszlocph/drone-oss-08/cli/drone/repo"
 	"github.com/laszlocph/drone-oss-08/cli/drone/secret"
-	"github.com/laszlocph/drone-oss-08/cli/drone/server"
 	"github.com/laszlocph/drone-oss-08/cli/drone/user"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -40,11 +38,6 @@ func main() {
 			Name:   "s, server",
 			Usage:  "server address",
 			EnvVar: "DRONE_SERVER",
-		},
-		cli.StringFlag{
-			Name:   "autoscaler",
-			Usage:  "autoscaler address",
-			EnvVar: "DRONE_AUTOSCALER",
 		},
 		cli.BoolFlag{
 			Name:   "skip-verify",
@@ -75,8 +68,6 @@ func main() {
 		secret.Command,
 		repo.Command,
 		user.Command,
-		server.Command,
-		autoscale.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {
