@@ -3,7 +3,7 @@ package docker
 import (
 	"context"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
 
@@ -11,7 +11,9 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/pkg/term"
 )
 
 type engine struct {
@@ -73,10 +75,11 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
 	if proc.Pull {
-		rc, perr := e.client.ImagePull(ctx, config.Image, pullopts)
+		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
-			io.Copy(ioutil.Discard, rc)
-			rc.Close()
+			defer responseBody.Close()
+			fd, isTerminal := term.GetFdInfo(os.Stdout)
+			jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
 		}
 		// fix for drone/drone#1917
 		if perr != nil && proc.AuthConfig.Password != "" {
@@ -88,12 +91,13 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	if client.IsErrImageNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
-		rc, perr := e.client.ImagePull(ctx, config.Image, pullopts)
+		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr != nil {
 			return perr
 		}
-		io.Copy(ioutil.Discard, rc)
-		rc.Close()
+		defer responseBody.Close()
+		fd, isTerminal := term.GetFdInfo(os.Stdout)
+		jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
 
 		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
 	}
