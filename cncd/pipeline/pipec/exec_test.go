@@ -57,7 +57,7 @@ func TestKubeExec(t *testing.T) {
 		t.Errorf("Could not parse pipeline %f", err)
 	}
 
-	os.Setenv("KUBECONFIG", "/etc/rancher/k3s/k3s.yaml")
+	// os.Setenv("KUBECONFIG", "/etc/rancher/k3s/k3s.yaml")
 	engine, err := kubernetes.New()
 	if err != nil {
 		t.Errorf("Could not start Kubernetes engine %f", err)

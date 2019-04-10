@@ -74,7 +74,7 @@
         {
           "name": "pipeline_step_0",
           "alias": "build",
-          "image": "golang:1.7",
+          "image": "golang:1.11",
           "working_dir": "/go/src/github.com/drone/envsubst",
           "environment": {
             "CI": "pipec",
