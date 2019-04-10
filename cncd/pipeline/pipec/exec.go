@@ -75,11 +75,10 @@ func executeAction(c *cli.Context) (err error) {
 
 	var engine backend.Engine
 	if c.Bool("kubernetes") {
-		engine = kubernetes.New(
-			c.String("kubernetes-namepsace"),
-			c.String("kubernetes-endpoint"),
-			c.String("kubernetes-token"),
-		)
+		engine, err = kubernetes.New()
+		if err != nil {
+			return err
+		}
 	} else {
 		engine, err = docker.NewEnv()
 		if err != nil {
