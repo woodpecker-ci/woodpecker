@@ -10,24 +10,27 @@ import (
 )
 
 func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
+
 	var vols []v1.Volume
 	var volMounts []v1.VolumeMount
-	for _, vol := range step.Volumes {
-		vols = append(vols, v1.Volume{
-			Name: volumeName(vol),
-			VolumeSource: v1.VolumeSource{
-				PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-					ClaimName: volumeName(vol),
-					ReadOnly:  false,
+	if step.WorkingDir != "" {
+		for _, vol := range step.Volumes {
+			vols = append(vols, v1.Volume{
+				Name: volumeName(vol),
+				VolumeSource: v1.VolumeSource{
+					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+						ClaimName: volumeName(vol),
+						ReadOnly:  false,
+					},
 				},
-			},
-		})
+			})
 
-		volMounts = append(volMounts, v1.VolumeMount{
-			Name:      volumeName(vol),
-			MountPath: volumeMountPath(step.WorkingDir),
-			//MountPath: volumeMountPath(vol.Target),
-		})
+			volMounts = append(volMounts, v1.VolumeMount{
+				Name:      volumeName(vol),
+				MountPath: volumeMountPath(step.WorkingDir),
+				//MountPath: volumeMountPath(vol.Target),
+			})
+		}
 	}
 
 	pullPolicy := v1.PullIfNotPresent
@@ -39,7 +42,7 @@ func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
 	args := step.Command
 	envs := mapToEnvVars(step.Environment)
 
-	if !strings.HasSuffix(step.Name, "_clone_0") {
+	if _, hasScript := step.Environment["CI_SCRIPT"]; !strings.HasSuffix(step.Name, "_clone") && hasScript {
 		command = []string{"/bin/sh", "-c"}
 		args = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}

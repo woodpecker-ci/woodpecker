@@ -103,15 +103,17 @@ func (e *engine) Exec(ctx context.Context, step *backend.Step) error {
 		return err
 	}
 
-	// for _, n := range proc.Networks {
-	// 	svc := Service(e.namespace, n.Aliases[0], pod.Name, nil)
-	// 	if svc == nil {
-	// 		continue
-	// 	}
-	// 	if _, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
-	// 		return err
-	// 	}
-	// }
+	for _, n := range step.Networks {
+		if len(n.Aliases) > 0 {
+			svc := Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
+			if svc == nil {
+				continue
+			}
+			if _, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
+				return err
+			}
+		}
+	}
 
 	_, err = e.kubeClient.CoreV1().Pods(e.namespace).Create(pod)
 	return err
@@ -249,15 +251,15 @@ func (e *engine) Destroy(ctx context.Context, conf *backend.Config) error {
 				return err
 			}
 
-			// for _, n := range step.Networks {
-			// 	svc := Service(e.namespace, n.Aliases[0], step.Alias, n.Ports)
-			// 	if svc == nil {
-			// 		continue
-			// 	}
-			// 	if err := e.client.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
-			// 		return err
-			// 	}
-			// }
+			for _, n := range step.Networks {
+				svc := Service(e.namespace, n.Aliases[0], step.Alias, step.Ports)
+				if svc == nil {
+					continue
+				}
+				if err := e.kubeClient.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
+					return err
+				}
+			}
 		}
 	}
 

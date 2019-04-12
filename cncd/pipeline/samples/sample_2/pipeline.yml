@@ -4,7 +4,7 @@ workspace:
 
 pipeline:
   build:
-    image: golang:1.7
+    image: golang:1.11
     environment:
       MYSQL_TEST_ADDR: database:3306
     commands:

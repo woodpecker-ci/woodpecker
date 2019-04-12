@@ -75,6 +75,7 @@
           "alias": "database",
           "image": "mysql:latest",
           "detach": true,
+          "ports": [ 3306 ],
           "environment": {
             "CI": "pipec",
             "CI_BUILD_CREATED": "1486119586",
@@ -143,7 +144,7 @@
         {
           "name": "pipeline_step_0",
           "alias": "build",
-          "image": "golang:1.7",
+          "image": "golang:1.11",
           "working_dir": "/go/src/github.com/go-sql-driver/mysql",
           "environment": {
             "CI": "pipec",

@@ -8,6 +8,7 @@
           "name": "pipeline_services_0",
           "alias": "redis1",
           "image": "redis:3.0",
+          "ports": [ 6379 ],
           "detach": true,
           "environment": {
             "CI": "drone",
@@ -23,7 +24,7 @@
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
           },
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/drone-oss-08/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "pipeline_default:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {
@@ -40,6 +41,7 @@
           "name": "pipeline_services_1",
           "alias": "redis2",
           "image": "redis:3.0",
+          "ports": [ 6379 ],
           "detach": true,
           "environment": {
             "CI": "drone",
@@ -55,7 +57,7 @@
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
           },
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/drone-oss-08/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "pipeline_default:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {
@@ -103,7 +105,7 @@
             "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
           ],
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/drone-oss-08/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "pipeline_default:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {

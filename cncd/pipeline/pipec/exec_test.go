@@ -46,7 +46,8 @@ func TestExec(t *testing.T) {
 }
 
 func TestKubeExec(t *testing.T) {
-	reader, err := os.Open("../samples/sample_1/pipeline.json")
+	// reader, err := os.Open("../samples/sample_1/pipeline.json")
+	reader, err := os.Open("../samples/sample_7_redis/pipeline.json")
 	if err != nil {
 		t.Errorf("Could not read pipeline %f", err)
 	}
