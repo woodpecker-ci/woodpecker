@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/docker"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 	"github.com/laszlocph/drone-oss-08/runner"
 
@@ -120,7 +121,14 @@ func loop(c *cli.Context) error {
 				if sigterm.IsSet() {
 					return
 				}
-				r := runner.NewRunner(client, filter, hostname, counter)
+
+				engine, err := docker.NewEnv()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot create docker client")
+					return
+				}
+
+				r := runner.NewRunner(client, filter, hostname, counter, &engine)
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return

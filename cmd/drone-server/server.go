@@ -24,13 +24,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
-	kubernetes "github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/kubernetes"
+	"github.com/laszlocph/drone-oss-08/runner"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
@@ -39,6 +36,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/laszlocph/drone-oss-08/cncd/logging"
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/kubernetes"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/interrupt"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
@@ -56,14 +54,6 @@ import (
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/urfave/cli"
 	oldcontext "golang.org/x/net/context"
-)
-
-// NOTE we need to limit the size of the logs and files that we upload.
-// The maximum grpc payload size is 4194304. So until we implement streaming
-// for uploads, we need to set these limits below the maximum.
-const (
-	maxLogsUpload = 2000000 // this is per step
-	maxFileUpload = 1000000
 )
 
 var flags = []cli.Flag{
@@ -582,6 +572,12 @@ func server(c *cli.Context) error {
 	if c.Bool("kubernetes") {
 		workEngine := droneserver.NewRPC(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Pubsub, droneserver.Config.Services.Logs, store_)
 
+		var counter = &runner.State{
+			Polling:  0,
+			Running:  0,
+			Metadata: map[string]runner.Info{},
+		}
+
 		g.Go(func() error {
 			logrus.Infoln("Starting Kubernetes backend")
 			for {
@@ -598,7 +594,6 @@ func server(c *cli.Context) error {
 					}
 
 					log.Print("pipeline: request next execution\n")
-
 					work, err := workEngine.Next(ctx, rpc.NoFilter)
 					if err != nil {
 						logrus.Error(err)
@@ -606,144 +601,14 @@ func server(c *cli.Context) error {
 					}
 					log.Printf("pipeline: received next execution: %s", work.ID)
 
-					go func() {
-						logger := log.With().
-							Str("repo", extractRepositoryName(work.Config)). // hack
-							Str("build", extractBuildNumber(work.Config)).   // hack
-							Str("id", work.ID).
-							Logger()
+					engine, err := kubernetes.New()
+					if err != nil {
+						logrus.Error(err)
+						return err
+					}
 
-						engine, err := kubernetes.New()
-						if err != nil {
-							logrus.Error(err)
-							return
-						}
-
-						timeout := time.Hour
-						if minutes := work.Timeout; minutes != 0 {
-							timeout = time.Duration(minutes) * time.Minute
-						}
-
-						ctx, cancel := context.WithTimeout(context.Background(), timeout)
-						defer cancel()
-
-						cancelled := abool.New()
-						go func() {
-							werr := workEngine.Wait(ctx, work.ID)
-							if werr != nil {
-								cancelled.SetTo(true) // TODO verify error is really an error
-								log.Printf("pipeline: cancel signal received: %s: %s", work.ID, werr)
-								cancel()
-							} else {
-								log.Printf("pipeline: cancel channel closed: %s", work.ID)
-							}
-						}()
-
-						go func() {
-							for {
-								select {
-								case <-ctx.Done():
-									log.Printf("pipeline: cancel ping loop: %s", work.ID)
-									return
-								case <-time.After(time.Minute):
-									log.Printf("pipeline: ping queue: %s", work.ID)
-									workEngine.Extend(ctx, work.ID)
-								}
-							}
-						}()
-
-						state := rpc.State{}
-						state.Started = time.Now().Unix()
-						err = workEngine.Init(context.Background(), work.ID, state)
-						if err != nil {
-							log.Printf("pipeline: error signaling pipeline init: %s: %s", work.ID, err)
-						}
-
-						uploads, defaultLogger := agent.DefaultLogger(logger, *work, r.client, ctxmeta)
-
-						defaultTracer := pipeline.TraceFunc(func(state *pipeline.State) error {
-							procState := rpc.State{
-								Proc:     state.Pipeline.Step.Alias,
-								Exited:   state.Process.Exited,
-								ExitCode: state.Process.ExitCode,
-								Started:  time.Now().Unix(), // TODO do not do this
-								Finished: time.Now().Unix(),
-							}
-							defer func() {
-								if uerr := workEngine.Update(context.Background(), work.ID, procState); uerr != nil {
-									log.Printf("Pipeine: error updating pipeline step status: %s: %s: %s", work.ID, procState.Proc, uerr)
-								}
-							}()
-							if state.Process.Exited {
-								return nil
-							}
-							if state.Pipeline.Step.Environment == nil {
-								state.Pipeline.Step.Environment = map[string]string{}
-							}
-							state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
-							state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-							state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
-							state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
-							state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-							state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
-							if state.Pipeline.Error != nil {
-								state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
-								state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
-							}
-							return nil
-						})
-
-						err = pipeline.New(work.Config,
-							pipeline.WithContext(ctx),
-							pipeline.WithLogger(defaultLogger),
-							pipeline.WithTracer(defaultTracer),
-							pipeline.WithEngine(engine),
-						).Run()
-
-						state.Finished = time.Now().Unix()
-						state.Exited = true
-						if err != nil {
-							switch xerr := err.(type) {
-							case *pipeline.ExitError:
-								state.ExitCode = xerr.Code
-							default:
-								state.ExitCode = 1
-								state.Error = err.Error()
-							}
-							if cancelled.IsSet() {
-								state.ExitCode = 137
-							}
-						}
-
-						logger.Debug().
-							Str("error", state.Error).
-							Int("exit_code", state.ExitCode).
-							Msg("pipeline complete")
-
-						logger.Debug().
-							Msg("uploading logs")
-
-						uploads.Wait()
-
-						logger.Debug().
-							Msg("uploading logs complete")
-
-						logger.Debug().
-							Str("error", state.Error).
-							Int("exit_code", state.ExitCode).
-							Msg("updating pipeline status")
-
-						err = workEngine.Done(ctx, work.ID, state)
-						if err != nil {
-							logger.Error().Err(err).
-								Msg("updating pipeline status failed")
-						} else {
-							logger.Debug().
-								Msg("updating pipeline status complete")
-						}
-					}()
+					r := runner.NewRunner(&workEngine, rpc.NoFilter, "", counter, &engine)
+					go r.ProcessWork(*work, ctx)
 				}
 			}
 		})
@@ -945,14 +810,4 @@ func cacheDir() string {
 		return filepath.Join(xdg, base)
 	}
 	return filepath.Join(os.Getenv("HOME"), ".cache", base)
-}
-
-// extract repository name from the configuration
-func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_REPO"]
-}
-
-// extract build number from the configuration
-func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_BUILD_NUMBER"]
 }
