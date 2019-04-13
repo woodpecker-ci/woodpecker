@@ -100,6 +100,16 @@ type RPC struct {
 	host   string
 }
 
+func NewRPC(remote_ remote.Remote, queue_ queue.Queue, pubsub_ pubsub.Publisher, logger_ logging.Log, store_ store.Store) RPC {
+	return RPC{
+		remote: remote_,
+		store:  store_,
+		queue:  queue_,
+		pubsub: pubsub_,
+		logger: logger_,
+	}
+}
+
 // Next implements the rpc.Next function
 func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) {
 	metadata, ok := metadata.FromContext(c)
