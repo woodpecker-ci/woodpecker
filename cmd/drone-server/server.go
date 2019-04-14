@@ -517,10 +517,24 @@ var flags = []cli.Flag{
 		Name:   "kubernetes",
 		Usage:  "Kubernetes backend is enabled",
 	},
+	cli.StringFlag{
+		EnvVar: "DRONE_KUBERNETES_NAMESPACE",
+		Name:   "namespace",
+		Usage:  "Kubernetes namespace to create resource in",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_KUBERNETES_STORAGECLASS",
+		Name:   "storageclass",
+		Usage:  "Kubernetes storageclass to use for volumes",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_KUBERNETES_VOLUME_SIZE",
+		Name:   "volumesize",
+		Usage:  "Size of the volume available for the pipeline",
+	},
 }
 
 func server(c *cli.Context) error {
-
 	// debug level if requested by user
 	if c.Bool("debug") {
 		logrus.SetLevel(logrus.DebugLevel)
@@ -601,7 +615,7 @@ func server(c *cli.Context) error {
 					}
 					log.Printf("pipeline: received next execution: %s", work.ID)
 
-					engine, err := kubernetes.New()
+					engine, err := kubernetes.New(c.String("namespace"), c.String("storageclass"), c.String("volumesize"))
 					if err != nil {
 						logrus.Error(err)
 						return err

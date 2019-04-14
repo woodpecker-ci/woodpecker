@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -25,13 +24,15 @@ import (
 )
 
 type engine struct {
-	logs       *bytes.Buffer
-	kubeClient kubernetes.Interface
-	namespace  string
+	logs         *bytes.Buffer
+	kubeClient   kubernetes.Interface
+	namespace    string
+	storageClass string
+	volumeSize   string
 }
 
 // New returns a new Kubernetes Engine.
-func New() (backend.Engine, error) {
+func New(namespace1 string, storageClass1 string, size string) (backend.Engine, error) {
 	var kubeClient kubernetes.Interface
 	_, err := rest.InClusterConfig()
 	if err != nil {
@@ -45,9 +46,11 @@ func New() (backend.Engine, error) {
 	}
 
 	return &engine{
-		logs:       new(bytes.Buffer),
-		kubeClient: kubeClient,
-		namespace:  "default",
+		logs:         new(bytes.Buffer),
+		kubeClient:   kubeClient,
+		namespace:    namespace1,
+		storageClass: storageClass1,
+		volumeSize:   size,
 	}, nil
 }
 
@@ -55,38 +58,9 @@ func New() (backend.Engine, error) {
 func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 	e.logs.WriteString("Setting up Kubernetes primitives\n")
 
-	// We don't need to create a PVC if no volumes are requested
-	if len(conf.Volumes) == 0 {
-		return nil
-	}
-
-	nodeList, err := e.kubeClient.CoreV1().Nodes().List(metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-
-	var nodeNames []string
-	for _, n := range nodeList.Items {
-		nodeNames = append(nodeNames, n.Name)
-	}
-
-	// Pick random node for now.
-	var node string
-	if len(nodeNames) == 1 {
-		node = nodeNames[0]
-	} else {
-		node = nodeNames[rand.Intn(len(nodeNames)-1)]
-	}
-
 	for _, vol := range conf.Volumes {
-		pv := PersistentVolume(node, e.namespace, vol.Name)
-		_, err := e.kubeClient.CoreV1().PersistentVolumes().Create(pv)
-		if err != nil {
-			return err
-		}
-
-		pvc := PersistentVolumeClaim(e.namespace, vol.Name)
-		_, err = e.kubeClient.CoreV1().PersistentVolumeClaims(e.namespace).Create(pvc)
+		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize)
+		_, err := e.kubeClient.CoreV1().PersistentVolumeClaims(e.namespace).Create(pvc)
 		if err != nil {
 			return err
 		}
@@ -264,14 +238,8 @@ func (e *engine) Destroy(ctx context.Context, conf *backend.Config) error {
 	}
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.namespace, vol.Name)
+		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize)
 		err := e.kubeClient.CoreV1().PersistentVolumeClaims(e.namespace).Delete(pvc.Name, deleteOpts)
-		if err != nil {
-			return err
-		}
-
-		pv := PersistentVolume("", e.namespace, vol.Name)
-		err = e.kubeClient.CoreV1().PersistentVolumes().Delete(pv.Name, deleteOpts)
 		if err != nil {
 			return err
 		}
