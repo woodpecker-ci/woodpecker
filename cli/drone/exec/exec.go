@@ -20,7 +20,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/interrupt"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/multipart"
-	"github.com/drone/envsubst"
+	"github.com/laszlocph/drone-oss-08/envsubst"
 
 	"github.com/urfave/cli"
 )

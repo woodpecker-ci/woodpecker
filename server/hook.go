@@ -34,7 +34,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/store"
-	"github.com/drone/envsubst"
+	"github.com/laszlocph/drone-oss-08/envsubst"
 
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"

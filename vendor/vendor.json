@@ -284,24 +284,6 @@
 			"revisionTime": "2018-05-15T16:51:39Z"
 		},
 		{
-			"checksumSHA1": "oX91yMnimWNI17gVk7iQIE0p2pw=",
-			"path": "github.com/drone/envsubst",
-			"revision": "15e3f9b7e16332eee3bbdff9ef31f95d23c5da2c",
-			"revisionTime": "2018-10-18T14:46:17Z"
-		},
-		{
-			"checksumSHA1": "CCV0ixQVgQNOsnUn8JlxGJ1v8c4=",
-			"path": "github.com/drone/envsubst/parse",
-			"revision": "15e3f9b7e16332eee3bbdff9ef31f95d23c5da2c",
-			"revisionTime": "2018-10-18T14:46:17Z"
-		},
-		{
-			"checksumSHA1": "k8a4yeccwcAfBwHgj16Da0F9iQE=",
-			"path": "github.com/drone/envsubst/path",
-			"revision": "15e3f9b7e16332eee3bbdff9ef31f95d23c5da2c",
-			"revisionTime": "2018-10-18T14:46:17Z"
-		},
-		{
 			"checksumSHA1": "AT++gcbYW/VQxkmbInFJk1Feg3o=",
 			"path": "github.com/drone/expr",
 			"revision": "72f4df4a266b7e1e15b75d4ab8e43e273fcbe1d7",
