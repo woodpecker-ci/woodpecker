@@ -34,8 +34,8 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/docker"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/multipart"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/drone-oss-08/signal"
 
-	"github.com/drone/signal"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"

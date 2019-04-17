@@ -314,12 +314,6 @@
 			"revisionTime": "2017-09-09T01:06:28Z"
 		},
 		{
-			"checksumSHA1": "ZOASUqqEP4pfH5MNjImiyemkjOA=",
-			"path": "github.com/drone/signal",
-			"revision": "ac5d07ef13150b4db403b96152e1ea54335df400",
-			"revisionTime": "2017-09-15T01:38:02Z"
-		},
-		{
 			"checksumSHA1": "++oBqqmh8bt50iB6/I+BHnrzC80=",
 			"origin": "github.com/docker/libcompose/vendor/github.com/flynn/go-shlex",
 			"path": "github.com/flynn/go-shlex",
