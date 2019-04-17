@@ -284,18 +284,6 @@
 			"revisionTime": "2018-05-15T16:51:39Z"
 		},
 		{
-			"checksumSHA1": "AT++gcbYW/VQxkmbInFJk1Feg3o=",
-			"path": "github.com/drone/expr",
-			"revision": "72f4df4a266b7e1e15b75d4ab8e43e273fcbe1d7",
-			"revisionTime": "2017-09-09T01:06:28Z"
-		},
-		{
-			"checksumSHA1": "ndkZW2hZSw4AE5WQmWS8sPk79NY=",
-			"path": "github.com/drone/expr/parse",
-			"revision": "72f4df4a266b7e1e15b75d4ab8e43e273fcbe1d7",
-			"revisionTime": "2017-09-09T01:06:28Z"
-		},
-		{
 			"checksumSHA1": "++oBqqmh8bt50iB6/I+BHnrzC80=",
 			"origin": "github.com/docker/libcompose/vendor/github.com/flynn/go-shlex",
 			"path": "github.com/flynn/go-shlex",

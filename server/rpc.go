@@ -38,7 +38,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/store"
 
-	"github.com/drone/expr"
+	"github.com/laszlocph/drone-oss-08/expr"
 )
 
 // This file is a complete disaster because I'm trying to wedge in some

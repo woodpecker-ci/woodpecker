@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/drone/expr/parse"
+	"github.com/laszlocph/drone-oss-08/expr/parse"
 )
 
 // state represents the state of an execution. It's not part of the
