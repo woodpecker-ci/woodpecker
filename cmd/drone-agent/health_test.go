@@ -17,11 +17,13 @@ package main
 import (
 	"testing"
 	"time"
+
+	"github.com/laszlocph/drone-oss-08/runner"
 )
 
 func TestHealthy(t *testing.T) {
-	s := state{}
-	s.Metadata = map[string]info{}
+	s := runner.State{}
+	s.Metadata = map[string]runner.Info{}
 
 	s.Add("1", time.Hour, "octocat/hello-world", "42")
 
@@ -35,7 +37,7 @@ func TestHealthy(t *testing.T) {
 		t.Errorf("got repository name %s, want %s", got, want)
 	}
 
-	s.Metadata["1"] = info{
+	s.Metadata["1"] = runner.Info{
 		Timeout: time.Hour,
 		Started: time.Now().UTC(),
 	}
@@ -43,14 +45,14 @@ func TestHealthy(t *testing.T) {
 		t.Error("want healthy status when timeout not exceeded, got false")
 	}
 
-	s.Metadata["1"] = info{
+	s.Metadata["1"] = runner.Info{
 		Started: time.Now().UTC().Add(-(time.Minute * 30)),
 	}
 	if s.Healthy() == false {
 		t.Error("want healthy status when timeout+buffer not exceeded, got false")
 	}
 
-	s.Metadata["1"] = info{
+	s.Metadata["1"] = runner.Info{
 		Started: time.Now().UTC().Add(-(time.Hour + time.Minute)),
 	}
 	if s.Healthy() == true {

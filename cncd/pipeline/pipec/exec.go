@@ -41,6 +41,16 @@ var executeCommand = cli.Command{
 			Value:  "default",
 		},
 		cli.StringFlag{
+			EnvVar: "CI_KUBERNETES_STORAGECLASS",
+			Name:   "storageclass",
+			Value:  "local-storage",
+		},
+		cli.StringFlag{
+			EnvVar: "CI_KUBERNETES_VOLUME_SIZE",
+			Name:   "volumesize",
+			Value:  "100Mi",
+		},
+		cli.StringFlag{
 			Name:   "kubernetes-endpoint",
 			EnvVar: "CI_KUBERNETES_ENDPOINT",
 		},
@@ -75,7 +85,7 @@ func executeAction(c *cli.Context) (err error) {
 
 	var engine backend.Engine
 	if c.Bool("kubernetes") {
-		engine, err = kubernetes.New()
+		engine, err = kubernetes.New(c.String("kubernetes-namespace"), c.String("storageclass"), c.String("volumesize"))
 		if err != nil {
 			return err
 		}
