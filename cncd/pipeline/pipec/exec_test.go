@@ -59,7 +59,7 @@ func TestKubeExec(t *testing.T) {
 	}
 
 	// os.Setenv("KUBECONFIG", "/etc/rancher/k3s/k3s.yaml")
-	engine, err := kubernetes.New("default", "local-storage", "100Mi")
+	engine, err := kubernetes.New("default", "example-nfs", "100Mi")
 	if err != nil {
 		t.Errorf("Could not start Kubernetes engine %f", err)
 	}

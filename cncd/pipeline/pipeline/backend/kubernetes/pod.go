@@ -9,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
+func Pod(namespace string, step *backend.Step) *v1.Pod {
 
 	var vols []v1.Volume
 	var volMounts []v1.VolumeMount
@@ -47,6 +47,12 @@ func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
 		args = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
+	hostAliases := []v1.HostAlias{}
+	for _, extraHost := range step.ExtraHosts {
+		host := strings.Split(extraHost, ":")
+		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
+	}
+
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName(step),
@@ -57,6 +63,7 @@ func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
 		},
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,
+			HostAliases:   hostAliases,
 			Containers: []v1.Container{{
 				Name:            podName(step),
 				Image:           step.Image,
@@ -70,7 +77,7 @@ func Pod(namespace string, step *backend.Step) (*v1.Pod, error) {
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
 		},
-	}, nil
+	}
 }
 
 func podName(s *backend.Step) string {

@@ -66,30 +66,60 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 		}
 	}
 
+	extraHosts := []string{}
+
+	for _, stage := range conf.Stages {
+		if stage.Alias == "services" {
+			for _, step := range stage.Steps {
+				e.logs.WriteString("Creating service\n")
+				pod := Pod(e.namespace, step)
+
+				var svc *v1.Service
+				for _, n := range step.Networks {
+					if len(n.Aliases) > 0 {
+						svc = Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
+					}
+				}
+
+				if _, err := e.kubeClient.CoreV1().Pods(e.namespace).Create(pod); err != nil {
+					return err
+				}
+				if svc, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
+					return err
+				} else {
+					extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
+				}
+			}
+		}
+	}
+
+	for _, stage := range conf.Stages {
+		if stage.Alias == "build" {
+			for _, step := range stage.Steps {
+				step.ExtraHosts = extraHosts
+			}
+		}
+	}
+
 	return nil
 }
 
 // Start the pipeline step.
 func (e *engine) Exec(ctx context.Context, step *backend.Step) error {
 	e.logs.WriteString("Creating pod\n")
-	pod, err := Pod(e.namespace, step)
-	if err != nil {
-		return err
-	}
+	pod := Pod(e.namespace, step)
 
+	var svc *v1.Service
 	for _, n := range step.Networks {
 		if len(n.Aliases) > 0 {
-			svc := Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
-			if svc == nil {
-				continue
-			}
-			if _, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
-				return err
-			}
+			svc = Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
 		}
 	}
+	if svc != nil {
+		return nil // Pods with services are created already in Setup()
+	}
 
-	_, err = e.kubeClient.CoreV1().Pods(e.namespace).Create(pod)
+	_, err := e.kubeClient.CoreV1().Pods(e.namespace).Create(pod)
 	return err
 }
 
