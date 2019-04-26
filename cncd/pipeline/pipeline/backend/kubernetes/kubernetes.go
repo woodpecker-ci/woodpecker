@@ -72,18 +72,13 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				e.logs.WriteString("Creating service\n")
-				pod := Pod(e.namespace, step)
-
 				var svc *v1.Service
 				for _, n := range step.Networks {
 					if len(n.Aliases) > 0 {
-						svc = Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
+						svc = Service(e.namespace, n.Aliases[0], podName(step), step.Ports)
 					}
 				}
 
-				if _, err := e.kubeClient.CoreV1().Pods(e.namespace).Create(pod); err != nil {
-					return err
-				}
 				if svc, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
 					return err
 				} else {
@@ -108,17 +103,6 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 func (e *engine) Exec(ctx context.Context, step *backend.Step) error {
 	e.logs.WriteString("Creating pod\n")
 	pod := Pod(e.namespace, step)
-
-	var svc *v1.Service
-	for _, n := range step.Networks {
-		if len(n.Aliases) > 0 {
-			svc = Service(e.namespace, n.Aliases[0], pod.Name, step.Ports)
-		}
-	}
-	if svc != nil {
-		return nil // Pods with services are created already in Setup()
-	}
-
 	_, err := e.kubeClient.CoreV1().Pods(e.namespace).Create(pod)
 	return err
 }
@@ -251,17 +235,22 @@ func (e *engine) Destroy(ctx context.Context, conf *backend.Config) error {
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
+			e.logs.WriteString("Deleting pod\n")
 			if err := e.kubeClient.CoreV1().Pods(e.namespace).Delete(podName(step), deleteOpts); err != nil {
 				return err
 			}
+		}
+	}
 
-			for _, n := range step.Networks {
-				svc := Service(e.namespace, n.Aliases[0], step.Alias, step.Ports)
-				if svc == nil {
-					continue
-				}
-				if err := e.kubeClient.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
-					return err
+	for _, stage := range conf.Stages {
+		if stage.Alias == "services" {
+			for _, step := range stage.Steps {
+				e.logs.WriteString("Deleting service\n")
+				for _, n := range step.Networks {
+					svc := Service(e.namespace, n.Aliases[0], step.Alias, step.Ports)
+					if err := e.kubeClient.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
+						return err
+					}
 				}
 			}
 		}

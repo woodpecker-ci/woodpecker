@@ -7,11 +7,6 @@ import (
 )
 
 func Service(namespace, name, podName string, ports []int) *v1.Service {
-	// We don't need a service, if we don't have ports
-	if len(ports) == 0 {
-		return nil
-	}
-
 	var svcPorts []v1.ServicePort
 	for _, p := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{

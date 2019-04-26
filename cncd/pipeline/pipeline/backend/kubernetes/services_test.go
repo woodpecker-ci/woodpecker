@@ -8,9 +8,6 @@ import (
 )
 
 func TestService(t *testing.T) {
-	s := Service("foo", "bar", "baz", []int{})
-	assert.Nil(t, s)
-
 	expected := `
 	{
 	  "metadata": {
@@ -43,7 +40,7 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s = Service("foo", "bar", "baz", []int{1, 2, 3})
+	s := Service("foo", "bar", "baz", []int{1, 2, 3})
 	j, err := json.Marshal(s)
 	assert.Nil(t, err)
 	assert.JSONEq(t, expected, string(j))
