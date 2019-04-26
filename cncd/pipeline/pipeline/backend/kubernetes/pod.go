@@ -6,6 +6,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
 	// "github.com/vincent-petithory/dataurl"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -53,6 +54,17 @@ func Pod(namespace string, step *backend.Step) *v1.Pod {
 		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
 	}
 
+	resources := v1.ResourceRequirements{
+		Requests: v1.ResourceList{
+			v1.ResourceMemory: resource.MustParse("256Mi"),
+			v1.ResourceCPU:    resource.MustParse("500m"),
+		},
+		Limits: v1.ResourceList{
+			v1.ResourceMemory: resource.MustParse("512Mi"),
+			v1.ResourceCPU:    resource.MustParse("1000m"),
+		},
+	}
+
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName(step),
@@ -73,6 +85,7 @@ func Pod(namespace string, step *backend.Step) *v1.Pod {
 				WorkingDir:      step.WorkingDir,
 				Env:             envs,
 				VolumeMounts:    volMounts,
+				Resources:       resources,
 			}},
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
