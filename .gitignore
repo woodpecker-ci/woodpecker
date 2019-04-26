@@ -2,7 +2,7 @@ drone/drone
 *.sqlite
 *.txt
 *.out
-.env
+/.env
 extras/
 release/
 cli/release/
