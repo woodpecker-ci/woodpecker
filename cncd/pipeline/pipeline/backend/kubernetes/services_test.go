@@ -40,7 +40,7 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s := Service("foo", "bar", "baz", []int{1, 2, 3})
+	s, _ := Service("foo", "bar", "baz", []string{"1", "2", "3"})
 	j, err := json.Marshal(s)
 	assert.Nil(t, err)
 	assert.JSONEq(t, expected, string(j))

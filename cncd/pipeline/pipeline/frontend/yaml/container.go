@@ -58,6 +58,7 @@ type (
 		Sysctls       libcompose.SliceorMap     `yaml:"sysctls,omitempty"`
 		Constraints   Constraints               `yaml:"when,omitempty"`
 		Vargs         map[string]interface{}    `yaml:",inline"`
+		Ports         []string                  `yaml:"ports,omitempty"`
 	}
 )
 

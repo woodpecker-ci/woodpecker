@@ -13,5 +13,7 @@ pipeline:
 services:
   redis1:
     image: redis:3.0
+    ports: ["6379"]
   redis2:
     image: redis:3.0
+    ports: ["6379"]

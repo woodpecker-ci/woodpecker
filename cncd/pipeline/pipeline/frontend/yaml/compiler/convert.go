@@ -142,6 +142,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	if c.reslimit.CPUSet != "" {
 		cpuSet = c.reslimit.CPUSet
 	}
+	ports := container.Ports
 
 	return &backend.Step{
 		Name:         name,
@@ -176,5 +177,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 			container.Constraints.Status.Match("failure"),
 		NetworkMode: network_mode,
 		IpcMode:     ipc_mode,
+		Ports:       ports,
 	}
 }

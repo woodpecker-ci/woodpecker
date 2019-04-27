@@ -48,7 +48,7 @@ type (
 		NetworkMode  string            `json:"network_mode,omitempty"`
 		IpcMode      string            `json:"ipc_mode,omitempty"`
 		Sysctls      map[string]string `json:"sysctls,omitempty"`
-		Ports        []int             `json:"ports,omitempty"`
+		Ports        []string          `json:"ports,omitempty"`
 	}
 
 	// Auth defines registry authentication credentials.

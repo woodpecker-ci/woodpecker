@@ -137,7 +137,10 @@
             }
           ],
           "on_success": true,
-          "auth_config": {}
+          "auth_config": {},
+          "ports": [
+            "6379"
+          ]
         },
         {
           "name": "pipeline_services_1",
@@ -201,7 +204,10 @@
             }
           ],
           "on_success": true,
-          "auth_config": {}
+          "auth_config": {},
+          "ports": [
+            "6379"
+          ]
         }
       ]
     },
