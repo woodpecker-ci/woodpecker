@@ -7,5 +7,7 @@ extras/
 release/
 cli/release/
 
+kubeconfig.yaml
+
 server/swagger/files/*.json
 .idea/
