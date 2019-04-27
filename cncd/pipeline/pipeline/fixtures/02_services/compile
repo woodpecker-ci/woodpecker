@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
+
+cd $script_dir/../../../pipec/
+go build
+
+cd $script_dir
+../../../pipec/pipec compile
