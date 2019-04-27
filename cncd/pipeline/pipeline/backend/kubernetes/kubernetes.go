@@ -72,15 +72,9 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				e.logs.WriteString("Creating service\n")
-				var svc *v1.Service
-				var err error
-				for _, n := range step.Networks {
-					if len(n.Aliases) > 0 {
-						svc, err = Service(e.namespace, n.Aliases[0], podName(step), step.Ports)
-						if err != nil {
-							return err
-						}
-					}
+				svc, err := Service(e.namespace, step.Name, podName(step), step.Ports)
+				if err != nil {
+					return err
 				}
 
 				if svc, err := e.kubeClient.CoreV1().Services(e.namespace).Create(svc); err != nil {
@@ -250,14 +244,12 @@ func (e *engine) Destroy(ctx context.Context, conf *backend.Config) error {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				e.logs.WriteString("Deleting service\n")
-				for _, n := range step.Networks {
-					svc, err := Service(e.namespace, n.Aliases[0], step.Alias, step.Ports)
-					if err != nil {
-						return err
-					}
-					if err := e.kubeClient.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
-						return err
-					}
+				svc, err := Service(e.namespace, step.Name, step.Alias, step.Ports)
+				if err != nil {
+					return err
+				}
+				if err := e.kubeClient.CoreV1().Services(e.namespace).Delete(svc.Name, deleteOpts); err != nil {
+					return err
 				}
 			}
 		}
