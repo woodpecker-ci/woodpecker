@@ -86,11 +86,10 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 		}
 	}
 
+	e.logs.WriteString(strings.Join(extraHosts, ", ") + "\n")
 	for _, stage := range conf.Stages {
-		if stage.Alias == "build" {
-			for _, step := range stage.Steps {
-				step.ExtraHosts = extraHosts
-			}
+		for _, step := range stage.Steps {
+			step.ExtraHosts = extraHosts
 		}
 	}
 
@@ -100,6 +99,7 @@ func (e *engine) Setup(ctx context.Context, conf *backend.Config) error {
 // Start the pipeline step.
 func (e *engine) Exec(ctx context.Context, step *backend.Step) error {
 	e.logs.WriteString("Creating pod\n")
+	e.logs.WriteString(strings.Join(step.ExtraHosts, " ") + "\n")
 	pod := Pod(e.namespace, step)
 	_, err := e.kubeClient.CoreV1().Pods(e.namespace).Create(pod)
 	return err

@@ -3,15 +3,15 @@ workspace:
   path: src/github.com/laszlocph/drone-oss-08
 
 pipeline:
-  test:
-    image: golang:1.12
-    commands:
-      - go get -u golang.org/x/tools/cmd/cover
-      - go get -u golang.org/x/net/context
-      - go get -u golang.org/x/net/context/ctxhttp
-      - go get -u github.com/golang/protobuf/proto
-      - go get -u github.com/golang/protobuf/protoc-gen-go
-      - go test -cover $(go list ./... | grep -v /vendor/)
+  # test:
+  #   image: golang:1.12
+  #   commands:
+  #     - go get -u golang.org/x/tools/cmd/cover
+  #     - go get -u golang.org/x/net/context
+  #     - go get -u golang.org/x/net/context/ctxhttp
+  #     - go get -u github.com/golang/protobuf/proto
+  #     - go get -u github.com/golang/protobuf/protoc-gen-go
+  #     - go test -cover $(go list ./... | grep -v /vendor/)
 
   test_postgres:
     image: golang:1.12
