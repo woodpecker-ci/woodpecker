@@ -143,6 +143,10 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 	ports := container.Ports
+	resources := backend.Resources{
+		MemoryLimit: container.Resources.MemoryLimit,
+		CPULimit:    container.Resources.CPULimit,
+	}
 
 	return &backend.Step{
 		Name:         name,
@@ -178,5 +182,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		NetworkMode: network_mode,
 		IpcMode:     ipc_mode,
 		Ports:       ports,
+		Resources:   resources,
 	}
 }

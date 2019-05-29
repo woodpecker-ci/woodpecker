@@ -62,6 +62,10 @@ tmpfs:
   - /var/lib/test
 when:
   branch: master
+ports: ["5432"]
+resources:
+  mem_limit: 1G
+  cpu_limit: 1
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -91,6 +95,8 @@ func TestUnmarshalContainer(t *testing.T) {
 		MemSwapLimit:  libcompose.MemStringorInt(1024),
 		MemSwappiness: libcompose.MemStringorInt(1024),
 		Name:          "my-build-container",
+		Ports:         []string{"5432"},
+		Resources:     Resources{MemoryLimit: "1G", CPULimit: "1"},
 		Networks: libcompose.Networks{
 			Networks: []*libcompose.Network{
 				{Name: "some-network"},

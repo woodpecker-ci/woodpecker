@@ -54,14 +54,31 @@ func Pod(namespace string, step *backend.Step) *v1.Pod {
 		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
 	}
 
+	if step.Resources.CPULimit == "" {
+		step.Resources.CPULimit = "2"
+	}
+	if step.Resources.MemoryLimit == "" {
+		step.Resources.MemoryLimit = "2G"
+	}
+
+	memoryLimit := resource.MustParse(step.Resources.MemoryLimit)
+	CPULimit := resource.MustParse(step.Resources.CPULimit)
+
+	memoryLimitValue, _ := memoryLimit.AsInt64()
+	CPULimitValue, _ := CPULimit.AsInt64()
+	loadfactor := 0.5
+
+	memoryRequest := resource.NewQuantity(int64(float64(memoryLimitValue)*loadfactor), resource.DecimalSI)
+	CPURequest := resource.NewQuantity(int64(float64(CPULimitValue)*loadfactor), resource.DecimalSI)
+
 	resources := v1.ResourceRequirements{
 		Requests: v1.ResourceList{
-			v1.ResourceMemory: resource.MustParse("256Mi"),
-			v1.ResourceCPU:    resource.MustParse("500m"),
+			v1.ResourceMemory: *memoryRequest,
+			v1.ResourceCPU:    *CPURequest,
 		},
 		Limits: v1.ResourceList{
-			v1.ResourceMemory: resource.MustParse("512Mi"),
-			v1.ResourceCPU:    resource.MustParse("1000m"),
+			v1.ResourceMemory: memoryLimit,
+			v1.ResourceCPU:    CPULimit,
 		},
 	}
 

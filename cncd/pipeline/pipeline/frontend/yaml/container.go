@@ -59,8 +59,15 @@ type (
 		Constraints   Constraints               `yaml:"when,omitempty"`
 		Vargs         map[string]interface{}    `yaml:",inline"`
 		Ports         []string                  `yaml:"ports,omitempty"`
+		Resources     Resources                 `yaml:"resources,omitempty"`
 	}
 )
+
+// Resources defines pod resources limits.
+type Resources struct {
+	CPULimit    string `yaml:"cpu_limit,omitempty"`
+	MemoryLimit string `yaml:"mem_limit,omitempty"`
+}
 
 // UnmarshalYAML implements the Unmarshaller interface.
 func (c *Containers) UnmarshalYAML(unmarshal func(interface{}) error) error {

@@ -49,6 +49,7 @@ type (
 		IpcMode      string            `json:"ipc_mode,omitempty"`
 		Sysctls      map[string]string `json:"sysctls,omitempty"`
 		Ports        []string          `json:"ports,omitempty"`
+		Resources    Resources         `json:"resources,omitempty"`
 	}
 
 	// Auth defines registry authentication credentials.
@@ -84,6 +85,12 @@ type (
 		Value string `json:"value,omitempty"`
 		Mount string `json:"mount,omitempty"`
 		Mask  bool   `json:"mask,omitempty"`
+	}
+
+	// Resources defines pod resources limits.
+	Resources struct {
+		CPULimit    string `json:"cpu_limit"`
+		MemoryLimit string `json:"mem_limit"`
 	}
 
 	// State defines a container state.
