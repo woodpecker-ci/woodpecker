@@ -11,3 +11,4 @@ kubeconfig.yaml
 
 server/swagger/files/*.json
 .idea/
+.vscode/
