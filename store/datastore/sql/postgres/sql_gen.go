@@ -94,7 +94,8 @@ WHERE repo_active = true
 `
 
 var countBuilds = `
-SELECT currval('builds_build_id_seq');
+SELECT count(1)
+FROM builds;
 `
 
 var feedLatestBuild = `
