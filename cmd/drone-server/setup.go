@@ -243,10 +243,6 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			runningJobs.Set(float64(stats.Stats.Running))
 			workers.Set(float64(stats.Stats.Workers))
-
-			buildCount, _ := store_.GetBuildCount()
-			builds.Set(float64(buildCount))
-
 			time.Sleep(500 * time.Millisecond)
 		}
 	})
@@ -254,6 +250,8 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 		for {
 			repoCount, _ := store_.GetRepoCount()
 			userCount, _ := store_.GetUserCount()
+			buildCount, _ := store_.GetBuildCount()
+			builds.Set(float64(buildCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
 			time.Sleep(10 * time.Second)

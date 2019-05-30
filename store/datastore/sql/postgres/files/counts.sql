@@ -11,4 +11,5 @@ WHERE repo_active = true
 
 -- name: count-builds
 
-SELECT currval('builds_build_id_seq');
+SELECT count(1)
+FROM builds
