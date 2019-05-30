@@ -540,6 +540,12 @@
 			"revisionTime": "2019-05-28T13:29:58Z"
 		},
 		{
+			"checksumSHA1": "BFMAsj5z3cYaNKx9fwHrazQRFvI=",
+			"path": "github.com/prometheus/client_golang/prometheus/promauto",
+			"revision": "f0a455664ecb0634bfb64d58b0c8226c2dab0804",
+			"revisionTime": "2019-05-28T13:29:58Z"
+		},
+		{
 			"checksumSHA1": "tqpiUpHWFso3wcHDAPXoEhT2CoM=",
 			"path": "github.com/prometheus/client_golang/prometheus/promhttp",
 			"revision": "7d9484283ebefa862b5b7727d4344cfdf9a0d138",
