@@ -587,6 +587,8 @@ func server(c *cli.Context) error {
 		return nil
 	})
 
+	setupMetrics(&g, store_)
+
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {
 		g.Go(func() error {
@@ -607,8 +609,6 @@ func server(c *cli.Context) error {
 		})
 		return g.Wait()
 	}
-
-	setupMetrics(g, store_)
 
 	// start the server without tls enabled
 	if !c.Bool("lets-encrypt") {

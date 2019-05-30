@@ -205,7 +205,7 @@ func setupTree(c *cli.Context) *httptreemux.ContextMux {
 
 func before(c *cli.Context) error { return nil }
 
-func setupMetrics(g errgroup.Group, store_ store.Store) {
+func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "drone",
 		Name:      "pending_jobs",
