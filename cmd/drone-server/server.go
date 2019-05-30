@@ -608,6 +608,8 @@ func server(c *cli.Context) error {
 		return g.Wait()
 	}
 
+	setupMetrics(g, store_)
+
 	// start the server without tls enabled
 	if !c.Bool("lets-encrypt") {
 		return http.ListenAndServe(

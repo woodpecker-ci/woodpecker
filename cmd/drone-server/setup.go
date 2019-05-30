@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/dimfeld/httptreemux"
+	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/plugins/registry"
 	"github.com/laszlocph/drone-oss-08/plugins/secrets"
@@ -32,9 +32,13 @@ import (
 	"github.com/laszlocph/drone-oss-08/remote/gitlab"
 	"github.com/laszlocph/drone-oss-08/remote/gitlab3"
 	"github.com/laszlocph/drone-oss-08/remote/gogs"
+	droneserver "github.com/laszlocph/drone-oss-08/server"
 	"github.com/laszlocph/drone-oss-08/server/web"
 	"github.com/laszlocph/drone-oss-08/store"
 	"github.com/laszlocph/drone-oss-08/store/datastore"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"
 )
@@ -200,3 +204,59 @@ func setupTree(c *cli.Context) *httptreemux.ContextMux {
 }
 
 func before(c *cli.Context) error { return nil }
+
+func setupMetrics(g errgroup.Group, store_ store.Store) {
+	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "pending_jobs",
+		Help:      "Total number of pending build processes.",
+	})
+	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "running_jobs",
+		Help:      "Total number of running build processes.",
+	})
+	workers := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "worker_count",
+		Help:      "Total number of workers.",
+	})
+	builds := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "build_count",
+		Help:      "Total number of builds.",
+	})
+	users := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "user_count",
+		Help:      "Total number of users.",
+	})
+	repos := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "repo_count",
+		Help:      "Total number of repos.",
+	})
+
+	g.Go(func() error {
+		for {
+			stats := droneserver.Config.Services.Queue.Info(nil)
+			pendingJobs.Set(float64(stats.Stats.Pending))
+			runningJobs.Set(float64(stats.Stats.Running))
+			workers.Set(float64(stats.Stats.Workers))
+
+			buildCount, _ := store_.GetBuildCount()
+			builds.Set(float64(buildCount))
+
+			time.Sleep(500 * time.Millisecond)
+		}
+	})
+	g.Go(func() error {
+		for {
+			repoCount, _ := store_.GetRepoCount()
+			userCount, _ := store_.GetUserCount()
+			users.Set(float64(userCount))
+			repos.Set(float64(repoCount))
+			time.Sleep(10 * time.Second)
+		}
+	})
+}
