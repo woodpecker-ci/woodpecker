@@ -271,7 +271,7 @@ func PostHook(c *gin.Context) {
 		Link:  httputil.GetURL(c.Request),
 		Yaml:  conf.Data,
 	}
-	items, err := b.Build()
+	buildItems, err := b.Build()
 	if err != nil {
 		build.Status = model.StatusError
 		build.Started = time.Now().Unix()
@@ -281,9 +281,20 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	var pcounter = len(items)
+	setBuildProcs(build, buildItems)
 
-	for _, item := range items {
+	err = store.FromContext(c).ProcCreate(build.Procs)
+	if err != nil {
+		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
+	}
+
+	publishToTopic(c, build, repo)
+	queueBuild(build, repo, buildItems)
+}
+
+func setBuildProcs(build *model.Build, buildItems []*buildItem) {
+	pcounter := len(buildItems)
+	for _, item := range buildItems {
 		build.Procs = append(build.Procs, item.Proc)
 		item.Proc.BuildID = build.ID
 
@@ -306,14 +317,9 @@ func PostHook(c *gin.Context) {
 			}
 		}
 	}
-	err = store.FromContext(c).ProcCreate(build.Procs)
-	if err != nil {
-		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
-	}
+}
 
-	//
-	// publish topic
-	//
+func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -327,13 +333,11 @@ func PostHook(c *gin.Context) {
 		Repo:  *repo,
 		Build: buildCopy,
 	})
-	// TODO remove global reference
 	Config.Services.Pubsub.Publish(c, "topic/events", message)
-	//
-	// end publish topic
-	//
+}
 
-	for _, item := range items {
+func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
+	for _, item := range buildItems {
 		task := new(queue.Task)
 		task.ID = fmt.Sprint(item.Proc.ID)
 		task.Labels = map[string]string{}
@@ -341,12 +345,12 @@ func PostHook(c *gin.Context) {
 			task.Labels[k] = v
 		}
 		task.Labels["platform"] = item.Platform
-		task.Labels["repo"] = b.Repo.FullName
+		task.Labels["repo"] = repo.FullName
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Proc.ID),
 			Config:  item.Config,
-			Timeout: b.Repo.Timeout,
+			Timeout: repo.Timeout,
 		})
 
 		Config.Services.Logs.Open(context.Background(), task.ID)
@@ -427,6 +431,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
+// Takes the hook data and the yaml and returns in internal data model
 type builder struct {
 	Repo  *model.Repo
 	Curr  *model.Build
