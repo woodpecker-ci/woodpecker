@@ -72,6 +72,7 @@ func (db *datastore) GetBuildQueue() ([]*model.Feed, error) {
 }
 
 func (db *datastore) CreateBuild(build *model.Build, procs ...*model.Proc) error {
+	build.Trim()
 	id, err := db.incrementRepoRetry(build.RepoID)
 	if err != nil {
 		return err

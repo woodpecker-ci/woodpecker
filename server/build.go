@@ -393,6 +393,7 @@ func GetBuildQueue(c *gin.Context) {
 	c.JSON(200, out)
 }
 
+// PostBuild restarts a build
 func PostBuild(c *gin.Context) {
 	remote_ := remote.FromContext(c)
 	repo := session.Repo(c)

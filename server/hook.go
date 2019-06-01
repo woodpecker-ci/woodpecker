@@ -142,31 +142,18 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	// fetch the build file from the database
-	confb, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
+	// fetch the build file from the remote
+	remoteYamlConfig, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
 		return
 	}
-	sha := shasum(confb)
-	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
+	conf, err := findOrPersistPipelineConfig(repo, remoteYamlConfig)
 	if err != nil {
-		conf = &model.Config{
-			RepoID: repo.ID,
-			Data:   string(confb),
-			Hash:   sha,
-		}
-		err = Config.Storage.Config.ConfigCreate(conf)
-		if err != nil {
-			// retry in case we receive two hooks at the same time
-			conf, err = Config.Storage.Config.ConfigFind(repo, sha)
-			if err != nil {
-				logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
-				c.AbortWithError(500, err)
-				return
-			}
-		}
+		logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
+		c.AbortWithError(500, err)
+		return
 	}
 	build.ConfigID = conf.ID
 
@@ -177,9 +164,9 @@ func PostHook(c *gin.Context) {
 	}
 
 	// verify the branches can be built vs skipped
-	branches, err := yaml.ParseString(conf.Data)
+	parsedPipelineConfig, err := yaml.ParseString(conf.Data)
 	if err == nil {
-		if !branches.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
+		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
 			c.String(200, "Branch does not match restrictions defined in yaml")
 			return
 		}
@@ -197,7 +184,6 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	build.Trim()
 	err = store.CreateBuild(c, build, build.Procs...)
 	if err != nil {
 		logrus.Errorf("failure to save commit for %s. %s", repo.FullName, err)
@@ -275,6 +261,28 @@ func PostHook(c *gin.Context) {
 
 	publishToTopic(c, build, repo)
 	queueBuild(build, repo, buildItems)
+}
+
+func findOrPersistPipelineConfig(repo *model.Repo, remoteYamlConfig []byte) (*model.Config, error) {
+	sha := shasum(remoteYamlConfig)
+	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
+	if err != nil {
+		conf = &model.Config{
+			RepoID: repo.ID,
+			Data:   string(remoteYamlConfig),
+			Hash:   sha,
+		}
+		err = Config.Storage.Config.ConfigCreate(conf)
+		if err != nil {
+			// retry in case we receive two hooks at the same time
+			conf, err = Config.Storage.Config.ConfigFind(repo, sha)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return conf, nil
 }
 
 func setBuildProcs(build *model.Build, buildItems []*buildItem) {
