@@ -157,13 +157,7 @@ func PostHook(c *gin.Context) {
 	}
 	build.ConfigID = conf.ID
 
-	netrc, err := remote_.Netrc(user, repo)
-	if err != nil {
-		c.String(500, "Failed to generate netrc file. %s", err)
-		return
-	}
-
-	// verify the branches can be built vs skipped
+	// verify that pipeline can be built at all
 	parsedPipelineConfig, err := yaml.ParseString(conf.Data)
 	if err == nil {
 		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
@@ -172,17 +166,17 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	// update some build fields
-	build.RepoID = repo.ID
-	build.Verified = true
-	build.Status = model.StatusPending
-
 	if repo.IsGated {
 		allowed, _ := Config.Services.Senders.SenderAllowed(user, repo, build, conf)
 		if !allowed {
 			build.Status = model.StatusBlocked
 		}
 	}
+
+	// update some build fields
+	build.RepoID = repo.ID
+	build.Verified = true
+	build.Status = model.StatusPending
 
 	err = store.CreateBuild(c, build, build.Procs...)
 	if err != nil {
@@ -194,6 +188,12 @@ func PostHook(c *gin.Context) {
 	c.JSON(200, build)
 
 	if build.Status == model.StatusBlocked {
+		return
+	}
+
+	netrc, err := remote_.Netrc(user, repo)
+	if err != nil {
+		c.String(500, "Failed to generate netrc file. %s", err)
 		return
 	}
 
@@ -215,13 +215,8 @@ func PostHook(c *gin.Context) {
 		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 
-	// get the previous build so that we can send
-	// on status change notifications
+	// get the previous build so that we can send status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
-
-	//
-	// BELOW: NEW
-	//
 
 	defer func() {
 		uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
