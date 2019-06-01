@@ -29,12 +29,12 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/drone/envsubst"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/store"
-	"github.com/drone/envsubst"
 
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"
@@ -210,11 +210,6 @@ func PostHook(c *gin.Context) {
 		if !allowed {
 			build.Status = model.StatusBlocked
 		}
-	}
-
-	if err = Config.Services.Limiter.LimitBuild(user, repo, build); err != nil {
-		c.String(403, "Build blocked by limiter")
-		return
 	}
 
 	build.Trim()

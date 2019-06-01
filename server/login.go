@@ -19,12 +19,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/securecookie"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/store"
-	"github.com/gorilla/securecookie"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -93,11 +93,6 @@ func HandleAuth(c *gin.Context) {
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
-		}
-
-		if err = Config.Services.Limiter.LimitUser(u); err != nil {
-			c.String(403, "User activation blocked by limiter")
-			return
 		}
 
 		// insert the user into the database
