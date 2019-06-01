@@ -39,13 +39,6 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
 )
 
-//
-// CANARY IMPLEMENTATION
-//
-// This file is a complete disaster because I'm trying to wedge in some
-// experimental code. Please pardon our appearance during renovations.
-//
-
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 func init() {

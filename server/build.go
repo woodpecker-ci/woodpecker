@@ -267,14 +267,6 @@ func PostApproval(c *gin.Context) {
 	build.Reviewed = time.Now().Unix()
 	build.Reviewer = user.Login
 
-	//
-	//
-	// This code is copied pasted until I have a chance
-	// to refactor into a proper function. Lots of changes
-	// and technical debt. No judgement please!
-	//
-	//
-
 	// fetch the build file from the database
 	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
 	if err != nil {
