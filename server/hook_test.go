@@ -21,7 +21,7 @@ import (
 )
 
 func TestMultilineEnvsubst(t *testing.T) {
-	b := builder{
+	b := procBuilder{
 		Repo: &model.Repo{},
 		Curr: &model.Build{
 			Message: `aaa
