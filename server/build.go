@@ -25,13 +25,13 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/store"
-	"github.com/gin-gonic/gin"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/router/middleware/session"
@@ -326,7 +326,7 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
-	b := builder{
+	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -581,7 +581,7 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	b := builder{
+	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
