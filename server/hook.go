@@ -235,7 +235,7 @@ func PostHook(c *gin.Context) {
 		Regs:  regs,
 		Envs:  envs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: []string{conf.Data},
 	}
 	buildItems, err := b.Build()
 	if err != nil {

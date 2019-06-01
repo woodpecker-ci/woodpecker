@@ -39,7 +39,7 @@ type procBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yaml  string
+	Yamls []string
 	Envs  map[string]string
 }
 
@@ -51,139 +51,127 @@ type buildItem struct {
 }
 
 func (b *procBuilder) Build() ([]*buildItem, error) {
-
-	axes, err := matrix.ParseString(b.Yaml)
-	if err != nil {
-		return nil, err
-	}
-	if len(axes) == 0 {
-		axes = append(axes, matrix.Axis{})
-	}
-
 	var items []*buildItem
-	for i, axis := range axes {
-		proc := &model.Proc{
-			BuildID: b.Curr.ID,
-			PID:     i + 1,
-			PGID:    i + 1,
-			State:   model.StatusPending,
-			Environ: axis,
-		}
 
-		metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
-		environ := metadata.Environ()
-		for k, v := range metadata.EnvironDrone() {
-			environ[k] = v
-		}
-		for k, v := range axis {
-			environ[k] = v
-		}
-
-		var secrets []compiler.Secret
-		for _, sec := range b.Secs {
-			if !sec.Match(b.Curr.Event) {
-				continue
-			}
-			secrets = append(secrets, compiler.Secret{
-				Name:  sec.Name,
-				Value: sec.Value,
-				Match: sec.Images,
-			})
-		}
-
-		y := b.Yaml
-		s, err := envsubst.Eval(y, func(name string) string {
-			env := environ[name]
-			if strings.Contains(env, "\n") {
-				env = fmt.Sprintf("%q", env)
-			}
-			return env
-		})
+	for _, y := range b.Yamls {
+		axes, err := matrix.ParseString(y)
 		if err != nil {
 			return nil, err
 		}
-		y = s
-
-		parsed, err := yaml.ParseString(y)
-		if err != nil {
-			return nil, err
-		}
-		metadata.Sys.Arch = parsed.Platform
-		if metadata.Sys.Arch == "" {
-			metadata.Sys.Arch = "linux/amd64"
+		if len(axes) == 0 {
+			axes = append(axes, matrix.Axis{})
 		}
 
-		lerr := linter.New(
-			linter.WithTrusted(b.Repo.IsTrusted),
-		).Lint(parsed)
-		if lerr != nil {
-			return nil, lerr
-		}
+		for i, axis := range axes {
+			proc := &model.Proc{
+				BuildID: b.Curr.ID,
+				PID:     i + 1,
+				PGID:    i + 1,
+				State:   model.StatusPending,
+				Environ: axis,
+			}
 
-		var registries []compiler.Registry
-		for _, reg := range b.Regs {
-			registries = append(registries, compiler.Registry{
-				Hostname: reg.Address,
-				Username: reg.Username,
-				Password: reg.Password,
-				Email:    reg.Email,
+			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
+			environ := metadata.Environ()
+			for k, v := range metadata.EnvironDrone() {
+				environ[k] = v
+			}
+			for k, v := range axis {
+				environ[k] = v
+			}
+
+			var secrets []compiler.Secret
+			for _, sec := range b.Secs {
+				if !sec.Match(b.Curr.Event) {
+					continue
+				}
+				secrets = append(secrets, compiler.Secret{
+					Name:  sec.Name,
+					Value: sec.Value,
+					Match: sec.Images,
+				})
+			}
+
+			s, err := envsubst.Eval(y, func(name string) string {
+				env := environ[name]
+				if strings.Contains(env, "\n") {
+					env = fmt.Sprintf("%q", env)
+				}
+				return env
 			})
-		}
+			if err != nil {
+				return nil, err
+			}
+			y = s
 
-		ir := compiler.New(
-			compiler.WithEnviron(environ),
-			compiler.WithEnviron(b.Envs),
-			compiler.WithEscalated(Config.Pipeline.Privileged...),
-			compiler.WithResourceLimit(Config.Pipeline.Limits.MemSwapLimit, Config.Pipeline.Limits.MemLimit, Config.Pipeline.Limits.ShmSize, Config.Pipeline.Limits.CPUQuota, Config.Pipeline.Limits.CPUShares, Config.Pipeline.Limits.CPUSet),
-			compiler.WithVolumes(Config.Pipeline.Volumes...),
-			compiler.WithNetworks(Config.Pipeline.Networks...),
-			compiler.WithLocal(false),
-			compiler.WithOption(
-				compiler.WithNetrc(
-					b.Netrc.Login,
-					b.Netrc.Password,
-					b.Netrc.Machine,
+			parsed, err := yaml.ParseString(y)
+			if err != nil {
+				return nil, err
+			}
+			metadata.Sys.Arch = parsed.Platform
+			if metadata.Sys.Arch == "" {
+				metadata.Sys.Arch = "linux/amd64"
+			}
+
+			lerr := linter.New(
+				linter.WithTrusted(b.Repo.IsTrusted),
+			).Lint(parsed)
+			if lerr != nil {
+				return nil, lerr
+			}
+
+			var registries []compiler.Registry
+			for _, reg := range b.Regs {
+				registries = append(registries, compiler.Registry{
+					Hostname: reg.Address,
+					Username: reg.Username,
+					Password: reg.Password,
+					Email:    reg.Email,
+				})
+			}
+
+			ir := compiler.New(
+				compiler.WithEnviron(environ),
+				compiler.WithEnviron(b.Envs),
+				compiler.WithEscalated(Config.Pipeline.Privileged...),
+				compiler.WithResourceLimit(Config.Pipeline.Limits.MemSwapLimit, Config.Pipeline.Limits.MemLimit, Config.Pipeline.Limits.ShmSize, Config.Pipeline.Limits.CPUQuota, Config.Pipeline.Limits.CPUShares, Config.Pipeline.Limits.CPUSet),
+				compiler.WithVolumes(Config.Pipeline.Volumes...),
+				compiler.WithNetworks(Config.Pipeline.Networks...),
+				compiler.WithLocal(false),
+				compiler.WithOption(
+					compiler.WithNetrc(
+						b.Netrc.Login,
+						b.Netrc.Password,
+						b.Netrc.Machine,
+					),
+					b.Repo.IsPrivate,
 				),
-				b.Repo.IsPrivate,
-			),
-			compiler.WithRegistry(registries...),
-			compiler.WithSecret(secrets...),
-			compiler.WithPrefix(
-				fmt.Sprintf(
-					"%d_%d",
-					proc.ID,
-					rand.Int(),
+				compiler.WithRegistry(registries...),
+				compiler.WithSecret(secrets...),
+				compiler.WithPrefix(
+					fmt.Sprintf(
+						"%d_%d",
+						proc.ID,
+						rand.Int(),
+					),
 				),
-			),
-			compiler.WithEnviron(proc.Environ),
-			compiler.WithProxy(),
-			compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
-			compiler.WithMetadata(metadata),
-		).Compile(parsed)
+				compiler.WithEnviron(proc.Environ),
+				compiler.WithProxy(),
+				compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+				compiler.WithMetadata(metadata),
+			).Compile(parsed)
 
-		// for _, sec := range b.Secs {
-		// 	if !sec.MatchEvent(b.Curr.Event) {
-		// 		continue
-		// 	}
-		// 	if b.Curr.Verified || sec.SkipVerify {
-		// 		ir.Secrets = append(ir.Secrets, &backend.Secret{
-		// 			Mask:  sec.Conceal,
-		// 			Name:  sec.Name,
-		// 			Value: sec.Value,
-		// 		})
-		// 	}
-		// }
-
-		item := &buildItem{
-			Proc:     proc,
-			Config:   ir,
-			Labels:   parsed.Labels,
-			Platform: metadata.Sys.Arch,
+			item := &buildItem{
+				Proc:     proc,
+				Config:   ir,
+				Labels:   parsed.Labels,
+				Platform: metadata.Sys.Arch,
+			}
+			if item.Labels == nil {
+				item.Labels = map[string]string{}
+			}
+			items = append(items, item)
 		}
-		if item.Labels == nil {
-			item.Labels = map[string]string{}
-		}
-		items = append(items, item)
 	}
 
 	return items, nil

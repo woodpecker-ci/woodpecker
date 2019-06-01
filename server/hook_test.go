@@ -32,11 +32,12 @@ bbb`,
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yaml: `pipeline:
+		Yamls: []string{`pipeline:
   xxx:
     image: scratch
     yyy: ${DRONE_COMMIT_MESSAGE}
 `,
+		},
 	}
 
 	if _, err := b.Build(); err != nil {

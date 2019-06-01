@@ -323,7 +323,7 @@ func PostApproval(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: []string{conf.Data},
 		Envs:  envs,
 	}
 	buildItems, err := b.Build()
@@ -512,7 +512,7 @@ func PostBuild(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: []string{conf.Data},
 		Envs:  buildParams,
 	}
 	buildItems, err := b.Build()
