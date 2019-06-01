@@ -15,6 +15,7 @@
 package server
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/laszlocph/drone-oss-08/model"
@@ -36,11 +37,55 @@ bbb`,
   xxx:
     image: scratch
     yyy: ${DRONE_COMMIT_MESSAGE}
+`, `pipeline:
+  build:
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
 `,
 		},
 	}
 
-	if _, err := b.Build(); err != nil {
+	if buildItems, err := b.Build(); err != nil {
+		t.Fatal(err)
+	} else {
+		fmt.Println(buildItems)
+		build := &model.Build{}
+		setBuildProcs(build, buildItems)
+		fmt.Println(build)
+	}
+}
+
+func TestMultiPipeline(t *testing.T) {
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &model.Build{},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []string{`pipeline:
+  lint:
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
+`, `pipeline:
+  test:
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
+`,
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
 		t.Fatal(err)
 	}
+	if len(buildItems) != 2 {
+		t.Fatal("Should have generated 2 buildItems")
+	}
+
+	// fmt.Println(buildItems)
+	// build := &model.Build{}
+	// setBuildProcs(build, buildItems)
+	// fmt.Println(build)
 }
