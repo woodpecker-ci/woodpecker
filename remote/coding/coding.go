@@ -238,16 +238,6 @@ func (c *Coding) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return data, nil
 }
 
-// FileRef fetches a file from the remote repository for the given ref
-// and returns in string format.
-func (c *Coding) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	data, err := c.newClient(u).GetFile(r.Owner, r.Name, ref, f)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
 // Status sends the commit status to the remote system.
 func (c *Coding) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	// EMPTY: not implemented in Coding OAuth API

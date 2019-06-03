@@ -22,9 +22,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/gogits/go-gogs-client"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/gogits/go-gogs-client"
 )
 
 // Opts defines configuration options.
@@ -200,11 +200,6 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	}
 	cfg, err := client.GetFile(r.Owner, r.Name, ref, f)
 	return cfg, err
-}
-
-// FileRef fetches the file from the Gogs repository and returns its contents.
-func (c *client) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	return c.newClientToken(u.Token).GetFile(r.Owner, r.Name, ref, f)
 }
 
 // Status is not supported by the Gogs driver.

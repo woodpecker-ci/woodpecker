@@ -225,15 +225,10 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches the file from the GitHub repository and returns its contents.
 func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	return c.FileRef(u, r, b.Commit, f)
-}
-
-// FileRef fetches the file from the GitHub repository and returns its contents.
-func (c *client) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = ref
+	opts.Ref = b.Commit
 	data, _, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
 	if err != nil {
 		return nil, err

@@ -202,12 +202,7 @@ func (c *config) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches the file from the Bitbucket repository and returns its contents.
 func (c *config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	return c.FileRef(u, r, b.Commit, f)
-}
-
-// FileRef fetches the file from the Bitbucket repository and returns its contents.
-func (c *config) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	config, err := c.newClient(u).FindSource(r.Owner, r.Name, ref, f)
+	config, err := c.newClient(u).FindSource(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
 	}

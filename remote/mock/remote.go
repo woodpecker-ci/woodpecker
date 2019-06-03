@@ -98,29 +98,6 @@ func (_m *Remote) File(u *model.User, r *model.Repo, b *model.Build, f string) (
 	return r0, r1
 }
 
-// FileRef provides a mock function with given fields: u, r, ref, f
-func (_m *Remote) FileRef(u *model.User, r *model.Repo, ref string, f string) ([]byte, error) {
-	ret := _m.Called(u, r, ref, f)
-
-	var r0 []byte
-	if rf, ok := ret.Get(0).(func(*model.User, *model.Repo, string, string) []byte); ok {
-		r0 = rf(u, r, ref, f)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.User, *model.Repo, string, string) error); ok {
-		r1 = rf(u, r, ref, f)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Hook provides a mock function with given fields: r
 func (_m *Remote) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 	ret := _m.Called(r)

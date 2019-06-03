@@ -179,12 +179,6 @@ func (c *Config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
 }
 
-func (c *Config) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
-
-	return client.FindFileForRepo(r.Owner, r.Name, f, ref)
-}
-
 // Status is not supported by the bitbucketserver driver.
 func (c *Config) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	status := internal.BuildStatus{
