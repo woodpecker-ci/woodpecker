@@ -103,6 +103,10 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return nil, nil
 }
 
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // Status is not supported by the Gogs driver.
 func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	return nil

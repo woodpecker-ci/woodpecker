@@ -249,6 +249,10 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return cfg, err
 }
 
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // Status is supported by the Gitea driver.
 func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	client := c.newClientToken(u.Token)

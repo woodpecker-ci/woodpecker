@@ -338,6 +338,10 @@ func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f 
 	return out, err
 }
 
+func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // NOTE Currently gitlab doesn't support status for commits and events,
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.

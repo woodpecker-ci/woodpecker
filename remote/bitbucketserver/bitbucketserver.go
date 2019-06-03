@@ -179,6 +179,10 @@ func (c *Config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
 }
 
+func (c *Config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // Status is not supported by the bitbucketserver driver.
 func (c *Config) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	status := internal.BuildStatus{

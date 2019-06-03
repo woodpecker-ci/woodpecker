@@ -236,6 +236,31 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return data.Decode()
 }
 
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	client := c.newClientToken(u.Token)
+
+	opts := new(github.RepositoryContentGetOptions)
+	opts.Ref = b.Commit
+	_, data, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []*remote.FileMeta
+	for _, file := range data {
+		data, err := file.Decode()
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, &remote.FileMeta{
+			Name: *file.Name,
+			Data: data,
+		})
+	}
+
+	return files, nil
+}
+
 // Netrc returns a netrc file capable of authenticating GitHub requests and
 // cloning GitHub repositories. The netrc will use the global machine account
 // when configured.

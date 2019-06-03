@@ -51,6 +51,9 @@ type Remote interface {
 	// format.
 	File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error)
 
+	// Dir fetches a folder from the remote repository
+	Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*FileMeta, error)
+
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
 	Status(u *model.User, r *model.Repo, b *model.Build, link string) error
@@ -69,6 +72,12 @@ type Remote interface {
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(r *http.Request) (*model.Repo, *model.Build, error)
+}
+
+// FileMeta represents a file in version control
+type FileMeta struct {
+	Name string
+	Data []byte
 }
 
 // Refresher refreshes an oauth token and expiration for the given user. It
@@ -159,6 +168,20 @@ func FileBackoff(remote Remote, u *model.User, r *model.Repo, b *model.Build, f 
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
 			out, err = remote.File(u, r, b, f)
+			if err == nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+// DirBackoff fetches the folder using an exponential backoff.
+func DirBackoff(remote Remote, u *model.User, r *model.Repo, b *model.Build, f string) (out []*FileMeta, err error) {
+	for i := 0; i < 5; i++ {
+		select {
+		case <-time.After(time.Second * time.Duration(i)):
+			out, err = remote.Dir(u, r, b, f)
 			if err == nil {
 				return
 			}

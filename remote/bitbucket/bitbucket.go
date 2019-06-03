@@ -209,6 +209,10 @@ func (c *config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return []byte(config.Data), err
 }
 
+func (c *config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // Status creates a build status for the Bitbucket commit.
 func (c *config) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
 	status := internal.BuildStatus{

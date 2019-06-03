@@ -15,9 +15,11 @@
 package mock
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -96,6 +98,10 @@ func (_m *Remote) File(u *model.User, r *model.Repo, b *model.Build, f string) (
 	}
 
 	return r0, r1
+}
+
+func (c *Remote) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
 }
 
 // Hook provides a mock function with given fields: r
