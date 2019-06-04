@@ -27,3 +27,5 @@ you shouldn't necessarily. Paying for Drone 1.0 is a fine choice.
 
 Check the issues and releases of this project if you are evaluating this project.
 Also you can check the devlog to get the nuances: https://laszlo.cloud/drone-oss-08-devlog-1
+
+The project is currently used by one user, with 50+ repos and 500+ builds a week.
