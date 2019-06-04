@@ -33,7 +33,6 @@ import (
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/store"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
@@ -143,35 +142,37 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	remoteYamlConfig, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
+	configFetcher := &configFetcher{remote_: remote_, user: user, repo: repo, build: build}
+	remoteYamlConfigs, err := configFetcher.Fetch()
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
 		return
 	}
-	conf, err := findOrPersistPipelineConfig(repo, remoteYamlConfig)
-	if err != nil {
-		logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
-		return
-	}
-	build.ConfigID = conf.ID
+	// persist the build config for historical correctness, restarts, etc
+	// conf, err := findOrPersistPipelineConfig(repo, remoteYamlConfig)
+	// if err != nil {
+	// 	logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
+	// 	c.AbortWithError(500, err)
+	// 	return
+	// }
+	// build.ConfigID = conf.ID
 
 	// verify that pipeline can be built at all
-	parsedPipelineConfig, err := yaml.ParseString(conf.Data)
-	if err == nil {
-		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-			c.String(200, "Branch does not match restrictions defined in yaml")
-			return
-		}
-	}
+	// parsedPipelineConfig, err := yaml.ParseString(conf.Data)
+	// if err == nil {
+	// 	if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
+	// 		c.String(200, "Branch does not match restrictions defined in yaml")
+	// 		return
+	// 	}
+	// }
 
-	if repo.IsGated {
-		allowed, _ := Config.Services.Senders.SenderAllowed(user, repo, build, conf)
-		if !allowed {
-			build.Status = model.StatusBlocked
-		}
-	}
+	// if repo.IsGated {
+	// 	allowed, _ := Config.Services.Senders.SenderAllowed(user, repo, build, conf)
+	// 	if !allowed {
+	// 		build.Status = model.StatusBlocked
+	// 	}
+	// }
 
 	// update some build fields
 	build.RepoID = repo.ID
@@ -226,6 +227,11 @@ func PostHook(c *gin.Context) {
 		}
 	}()
 
+	var yamls []string
+	for _, y := range remoteYamlConfigs {
+		yamls = append(yamls, string(y.Data))
+	}
+
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -235,7 +241,7 @@ func PostHook(c *gin.Context) {
 		Regs:  regs,
 		Envs:  envs,
 		Link:  httputil.GetURL(c.Request),
-		Yamls: []string{conf.Data},
+		Yamls: yamls,
 	}
 	buildItems, err := b.Build()
 	if err != nil {

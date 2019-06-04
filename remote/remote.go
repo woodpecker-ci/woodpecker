@@ -18,7 +18,6 @@ package remote
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/laszlocph/drone-oss-08/model"
 
@@ -160,32 +159,4 @@ func Refresh(c context.Context, u *model.User) (bool, error) {
 		return false, nil
 	}
 	return refresher.Refresh(u)
-}
-
-// FileBackoff fetches the file using an exponential backoff.
-func FileBackoff(remote Remote, u *model.User, r *model.Repo, b *model.Build, f string) (out []byte, err error) {
-	for i := 0; i < 5; i++ {
-		select {
-		case <-time.After(time.Second * time.Duration(i)):
-			out, err = remote.File(u, r, b, f)
-			if err == nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-// DirBackoff fetches the folder using an exponential backoff.
-func DirBackoff(remote Remote, u *model.User, r *model.Repo, b *model.Build, f string) (out []*FileMeta, err error) {
-	for i := 0; i < 5; i++ {
-		select {
-		case <-time.After(time.Second * time.Duration(i)):
-			out, err = remote.Dir(u, r, b, f)
-			if err == nil {
-				return
-			}
-		}
-	}
-	return
 }

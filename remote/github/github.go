@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
@@ -233,6 +234,9 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	if err != nil {
 		return nil, err
 	}
+	if data == nil {
+		return nil, fmt.Errorf("%s is a folder not a file use Dir(..)", f)
+	}
 	return data.Decode()
 }
 
@@ -246,17 +250,44 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 		return nil, err
 	}
 
-	var files []*remote.FileMeta
+	fc := make(chan *remote.FileMeta)
+	errc := make(chan error)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(data))
+
 	for _, file := range data {
-		data, err := file.Decode()
-		if err != nil {
-			return nil, err
-		}
-		files = append(files, &remote.FileMeta{
-			Name: *file.Name,
-			Data: data,
-		})
+		go func(path string) {
+			content, err := c.File(u, r, b, path)
+			if err != nil {
+				errc <- err
+			}
+			fc <- &remote.FileMeta{
+				Name: path,
+				Data: content,
+			}
+		}(f + "/" + *file.Name)
 	}
+
+	var files []*remote.FileMeta
+	var errors []error
+
+	go func() {
+		for {
+			select {
+			case err := <-errc:
+				errors = append(errors, err)
+				wg.Done()
+			case fileMeta := <-fc:
+				files = append(files, fileMeta)
+				wg.Done()
+			}
+		}
+	}()
+
+	wg.Wait()
+	close(fc)
+	close(errc)
 
 	return files, nil
 }
