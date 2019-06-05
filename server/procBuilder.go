@@ -53,7 +53,7 @@ type buildItem struct {
 func (b *procBuilder) Build() ([]*buildItem, error) {
 	var items []*buildItem
 
-	for _, y := range b.Yamls {
+	for j, y := range b.Yamls {
 		axes, err := matrix.ParseString(y)
 		if err != nil {
 			return nil, err
@@ -65,8 +65,8 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 		for i, axis := range axes {
 			proc := &model.Proc{
 				BuildID: b.Curr.ID,
-				PID:     i + 1,
-				PGID:    i + 1,
+				PID:     j + i + 1,
+				PGID:    j + i + 1,
 				State:   model.StatusPending,
 				Environ: axis,
 			}
@@ -174,7 +174,36 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 		}
 	}
 
+	setBuildProcs(b.Curr, items)
+
 	return items, nil
+}
+
+func setBuildProcs(build *model.Build, buildItems []*buildItem) {
+	pcounter := len(buildItems)
+	for _, item := range buildItems {
+		build.Procs = append(build.Procs, item.Proc)
+		item.Proc.BuildID = build.ID
+
+		for _, stage := range item.Config.Stages {
+			var gid int
+			for _, step := range stage.Steps {
+				pcounter++
+				if gid == 0 {
+					gid = pcounter
+				}
+				proc := &model.Proc{
+					BuildID: build.ID,
+					Name:    step.Alias,
+					PID:     pcounter,
+					PPID:    item.Proc.PID,
+					PGID:    gid,
+					State:   model.StatusPending,
+				}
+				build.Procs = append(build.Procs, proc)
+			}
+		}
+	}
 }
 
 // return the metadata from the cli context.

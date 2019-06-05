@@ -253,8 +253,6 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	setBuildProcs(build, buildItems)
-
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
 		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
@@ -284,33 +282,6 @@ func findOrPersistPipelineConfig(repo *model.Repo, remoteYamlConfig []byte) (*mo
 	}
 
 	return conf, nil
-}
-
-func setBuildProcs(build *model.Build, buildItems []*buildItem) {
-	pcounter := len(buildItems)
-	for _, item := range buildItems {
-		build.Procs = append(build.Procs, item.Proc)
-		item.Proc.BuildID = build.ID
-
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pcounter++
-				if gid == 0 {
-					gid = pcounter
-				}
-				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pcounter,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
-				}
-				build.Procs = append(build.Procs, proc)
-			}
-		}
-	}
 }
 
 func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {

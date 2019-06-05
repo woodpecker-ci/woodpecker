@@ -83,9 +83,4 @@ func TestMultiPipeline(t *testing.T) {
 	if len(buildItems) != 2 {
 		t.Fatal("Should have generated 2 buildItems")
 	}
-
-	// fmt.Println(buildItems)
-	// build := &model.Build{}
-	// setBuildProcs(build, buildItems)
-	// fmt.Println(build)
 }
