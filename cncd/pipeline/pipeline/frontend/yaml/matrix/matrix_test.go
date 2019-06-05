@@ -25,10 +25,10 @@ func TestMatrix(t *testing.T) {
 			g.Assert(len(set)).Equal(24)
 		})
 
-		g.It("Should return nil if no matrix", func() {
+		g.It("Should return empty array if no matrix", func() {
 			axis, err := ParseString("")
 			g.Assert(err == nil).IsTrue()
-			g.Assert(axis == nil).IsTrue()
+			g.Assert(len(axis) == 0).IsTrue()
 		})
 
 		g.It("Should return included axis", func() {
