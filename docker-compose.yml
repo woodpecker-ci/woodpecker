@@ -28,4 +28,4 @@ services:
     environment:
       - DRONE_SERVER=drone-server:9000
       - DRONE_SECRET=${DRONE_SECRET}
-      - DRONE_MAX_PROCS=1
+      - DRONE_MAX_PROCS=2

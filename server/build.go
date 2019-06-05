@@ -336,7 +336,6 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	setBuildProcs(build, buildItems)
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
 		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
@@ -524,8 +523,6 @@ func PostBuild(c *gin.Context) {
 		c.JSON(500, build)
 		return
 	}
-
-	setBuildProcs(build, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {

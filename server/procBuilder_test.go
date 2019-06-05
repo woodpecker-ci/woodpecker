@@ -49,9 +49,6 @@ bbb`,
 		t.Fatal(err)
 	} else {
 		fmt.Println(buildItems)
-		build := &model.Build{}
-		setBuildProcs(build, buildItems)
-		fmt.Println(build)
 	}
 }
 
