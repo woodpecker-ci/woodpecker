@@ -261,10 +261,11 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 			content, err := c.File(u, r, b, path)
 			if err != nil {
 				errc <- err
-			}
-			fc <- &remote.FileMeta{
-				Name: path,
-				Data: content,
+			} else {
+				fc <- &remote.FileMeta{
+					Name: path,
+					Data: content,
+				}
 			}
 		}(f + "/" + *file.Name)
 	}
@@ -275,12 +276,16 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 	go func() {
 		for {
 			select {
-			case err := <-errc:
-				errors = append(errors, err)
-				wg.Done()
-			case fileMeta := <-fc:
-				files = append(files, fileMeta)
-				wg.Done()
+			case err, open := <-errc:
+				if open {
+					errors = append(errors, err)
+					wg.Done()
+				}
+			case fileMeta, open := <-fc:
+				if open {
+					files = append(files, fileMeta)
+					wg.Done()
+				}
 			}
 		}
 	}()
