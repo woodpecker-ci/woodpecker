@@ -28,10 +28,9 @@ type Syncer interface {
 }
 
 type syncer struct {
-	remote  remote.Remote
-	store   store.Store
-	perms   model.PermStore
-	limiter model.Limiter
+	remote remote.Remote
+	store  store.Store
+	perms  model.PermStore
 }
 
 func (s *syncer) Sync(user *model.User) error {
@@ -39,10 +38,6 @@ func (s *syncer) Sync(user *model.User) error {
 	repos, err := s.remote.Repos(user)
 	if err != nil {
 		return err
-	}
-
-	if s.limiter != nil {
-		repos = s.limiter.LimitRepos(user, repos)
 	}
 
 	var perms []*model.Perm

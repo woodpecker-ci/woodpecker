@@ -46,10 +46,9 @@ func GetFeed(c *gin.Context) {
 		store.FromContext(c).UpdateUser(user)
 
 		sync := syncer{
-			remote:  remote.FromContext(c),
-			store:   store.FromContext(c),
-			perms:   store.FromContext(c),
-			limiter: Config.Services.Limiter,
+			remote: remote.FromContext(c),
+			store:  store.FromContext(c),
+			perms:  store.FromContext(c),
 		}
 		if err := sync.Sync(user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
@@ -89,10 +88,9 @@ func GetRepos(c *gin.Context) {
 		store.FromContext(c).UpdateUser(user)
 
 		sync := syncer{
-			remote:  remote.FromContext(c),
-			store:   store.FromContext(c),
-			perms:   store.FromContext(c),
-			limiter: Config.Services.Limiter,
+			remote: remote.FromContext(c),
+			store:  store.FromContext(c),
+			perms:  store.FromContext(c),
 		}
 		if err := sync.Sync(user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
