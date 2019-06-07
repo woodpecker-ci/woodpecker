@@ -268,7 +268,7 @@ func PostApproval(c *gin.Context) {
 	build.Reviewer = user.Login
 
 	// fetch the build file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigLoad(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -315,6 +315,11 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
+	var yamls []string
+	for _, y := range configs {
+		yamls = append(yamls, string(y.Data))
+	}
+
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -323,7 +328,7 @@ func PostApproval(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yamls: []string{conf.Data},
+		Yamls: yamls,
 		Envs:  envs,
 	}
 	buildItems, err := b.Build()
@@ -435,7 +440,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the .drone.yml file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigLoad(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -503,6 +508,11 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
+	var yamls []string
+	for _, y := range configs {
+		yamls = append(yamls, string(y.Data))
+	}
+
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -511,7 +521,7 @@ func PostBuild(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yamls: []string{conf.Data},
+		Yamls: yamls,
 		Envs:  buildParams,
 	}
 	buildItems, err := b.Build()

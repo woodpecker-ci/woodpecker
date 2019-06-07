@@ -16,7 +16,7 @@ package model
 
 // ConfigStore persists pipeline configuration to storage.
 type ConfigStore interface {
-	ConfigLoad(ID int64) (*Config, error)
+	ConfigLoad(buildID int64) ([]*Config, error)
 	ConfigFind(repo *Repo, sha string) (*Config, error)
 	ConfigFindApproved(*Config) (bool, error)
 	ConfigCreate(*Config) error
@@ -24,8 +24,10 @@ type ConfigStore interface {
 
 // Config represents a pipeline configuration.
 type Config struct {
-	ID     int64  `json:"-"    meddler:"config_id,pk"`
-	RepoID int64  `json:"-"    meddler:"config_repo_id"`
-	Data   string `json:"data" meddler:"config_data"`
-	Hash   string `json:"hash" meddler:"config_hash"`
+	ID      int64  `json:"-"    meddler:"config_id,pk"`
+	RepoID  int64  `json:"-"    meddler:"config_repo_id"`
+	BuildID int64  `json:"-"    meddler:"config_build_id"`
+	Data    string `json:"data" meddler:"config_data"`
+	Hash    string `json:"hash" meddler:"config_hash"`
+	Name    string `json:"name" meddler:"config_name"`
 }

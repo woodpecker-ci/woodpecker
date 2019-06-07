@@ -22,11 +22,11 @@ import (
 	"github.com/russross/meddler"
 )
 
-func (db *datastore) ConfigLoad(id int64) (*model.Config, error) {
+func (db *datastore) ConfigLoad(buildID int64) ([]*model.Config, error) {
 	stmt := sql.Lookup(db.driver, "config-find-id")
-	conf := new(model.Config)
-	err := meddler.QueryRow(db, conf, stmt, id)
-	return conf, err
+	var configs = []*model.Config{}
+	err := meddler.QueryAll(db, &configs, stmt, buildID)
+	return configs, err
 }
 
 func (db *datastore) ConfigFind(repo *model.Repo, hash string) (*model.Config, error) {

@@ -28,15 +28,18 @@ func TestConfig(t *testing.T) {
 	}()
 
 	var (
-		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+		data    = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
+		hash    = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+		buildID = int64(1)
 	)
 
 	if err := s.ConfigCreate(
 		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Hash:   hash,
+			RepoID:  2,
+			BuildID: 1,
+			Data:    data,
+			Hash:    hash,
+			Name:    "default",
 		},
 	); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
@@ -54,19 +57,25 @@ func TestConfig(t *testing.T) {
 	if got, want := config.RepoID, int64(2); got != want {
 		t.Errorf("Want config repo id %d, got %d", want, got)
 	}
+	if got, want := config.BuildID, buildID; got != want {
+		t.Errorf("Want config build id %d, got %d", want, got)
+	}
 	if got, want := config.Data, data; got != want {
 		t.Errorf("Want config data %s, got %s", want, got)
 	}
 	if got, want := config.Hash, hash; got != want {
 		t.Errorf("Want config hash %s, got %s", want, got)
 	}
+	if got, want := config.Name, "default"; got != want {
+		t.Errorf("Want config name %s, got %s", want, got)
+	}
 
-	loaded, err := s.ConfigLoad(config.ID)
+	loaded, err := s.ConfigLoad(buildID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
 	}
-	if got, want := loaded.ID, config.ID; got != want {
+	if got, want := loaded[0].ID, config.ID; got != want {
 		t.Errorf("Want config by id %d, got %d", want, got)
 	}
 }
@@ -89,46 +98,57 @@ func TestConfigApproved(t *testing.T) {
 	s.CreateRepo(repo)
 
 	var (
-		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-		conf = &model.Config{
+		data         = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
+		hash         = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+		buildBlocked = &model.Build{
 			RepoID: repo.ID,
-			Data:   data,
-			Hash:   hash,
+			Status: model.StatusBlocked,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		}
+		buildPending = &model.Build{
+			RepoID: repo.ID,
+			Status: model.StatusPending,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		}
+		buildRunning = &model.Build{
+			RepoID: repo.ID,
+			Status: model.StatusRunning,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
 	)
 
+	s.CreateBuild(buildBlocked)
+	s.CreateBuild(buildPending)
+	conf := &model.Config{
+		RepoID:  repo.ID,
+		BuildID: buildBlocked.ID,
+		Data:    data,
+		Hash:    hash,
+	}
 	if err := s.ConfigCreate(conf); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
-		ConfigID: conf.ID,
-		Status:   model.StatusBlocked,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
-		ConfigID: conf.ID,
-		Status:   model.StatusPending,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
 
-	if ok, _ := s.ConfigFindApproved(conf); ok == true {
-		t.Errorf("Want config not approved, when blocked or pending")
+	if approved, err := s.ConfigFindApproved(conf); approved != false || err != nil {
+		t.Errorf("Want config not approved, when blocked or pending. %v", err)
 		return
 	}
 
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
-		ConfigID: conf.ID,
-		Status:   model.StatusRunning,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
+	s.CreateBuild(buildRunning)
+	conf2 := &model.Config{
+		RepoID:  repo.ID,
+		BuildID: buildRunning.ID,
+		Data:    data,
+		Hash:    "xxx",
+	}
+	if err := s.ConfigCreate(conf2); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
 
-	if ok, _ := s.ConfigFindApproved(conf); ok == false {
-		t.Errorf("Want config approved, when running.")
+	if approved, err := s.ConfigFindApproved(conf2); approved != true || err != nil {
+		t.Errorf("Want config approved, when running. %v", err)
 		return
 	}
 }

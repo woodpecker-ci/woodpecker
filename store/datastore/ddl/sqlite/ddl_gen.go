@@ -1,17 +1,3 @@
-// Copyright 2018 Drone.IO Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package sqlite
 
 import (
@@ -173,6 +159,22 @@ var migrations = []struct {
 	{
 		name: "alter-table-update-file-meta",
 		stmt: alterTableUpdateFileMeta,
+	},
+	{
+		name: "alter-table-add-config-build-id",
+		stmt: alterTableAddConfigBuildId,
+	},
+	{
+		name: "update-table-set-config-config-id",
+		stmt: updateTableSetConfigConfigId,
+	},
+	{
+		name: "alter-table-add-config-name",
+		stmt: alterTableAddConfigName,
+	},
+	{
+		name: "update-table-set-config-name",
+		stmt: updateTableSetConfigName,
 	},
 }
 
@@ -636,4 +638,28 @@ UPDATE files SET
  file_meta_passed=0
 ,file_meta_failed=0
 ,file_meta_skipped=0
+`
+
+//
+// 019_add_column_config_build_id.sql
+//
+
+var alterTableAddConfigBuildId = `
+ALTER TABLE config ADD COLUMN config_build_id INTEGER
+`
+
+var updateTableSetConfigConfigId = `
+UPDATE config SET config_build_id = (SELECT builds.build_id FROM builds WHERE builds.build_config_id = config.config_id)
+`
+
+//
+// 020_add_column_config_name.sql
+//
+
+var alterTableAddConfigName = `
+ALTER TABLE config ADD COLUMN config_name TEXT
+`
+
+var updateTableSetConfigName = `
+UPDATE config SET config_name = "default"
 `

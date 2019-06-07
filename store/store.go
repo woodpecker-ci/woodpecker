@@ -111,7 +111,7 @@ type Store interface {
 	PermDelete(perm *model.Perm) error
 	PermFlush(user *model.User, before int64) error
 
-	ConfigLoad(int64) (*model.Config, error)
+	ConfigLoad(int64) ([]*model.Config, error)
 	ConfigFind(*model.Repo, string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
