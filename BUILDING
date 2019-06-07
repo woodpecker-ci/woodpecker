@@ -10,3 +10,20 @@
 
     go install github.com/laszlocph/drone-oss-08/cmd/drone-agent
     go install github.com/laszlocph/drone-oss-08/cmd/drone-server
+
+---
+
+0. To generate SQL files
+
+go get github.com/vektra/mockery/.../
+
+export download_url=$(curl -s https://api.github.com/repos/go-swagger/go-swagger/releases/latest | \
+  jq -r '.assets[] | select(.name | contains("'"$(uname | tr '[:upper:]' '[:lower:]')"'_amd64")) | .browser_download_url')
+curl -o swagger -L'#' "$download_url"
+chmod +x swagger
+sudo mv swagger /usr/local/bin
+
+go get github.com/laszlocph/togo
+
+go generate
+
