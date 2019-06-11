@@ -22,17 +22,17 @@ import (
 	"github.com/russross/meddler"
 )
 
-func (db *datastore) ConfigLoad(buildID int64) ([]*model.Config, error) {
+func (db *datastore) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
 	stmt := sql.Lookup(db.driver, "config-find-id")
 	var configs = []*model.Config{}
 	err := meddler.QueryAll(db, &configs, stmt, buildID)
 	return configs, err
 }
 
-func (db *datastore) ConfigFind(repo *model.Repo, hash string) (*model.Config, error) {
+func (db *datastore) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
 	stmt := sql.Lookup(db.driver, "config-find-repo-hash")
 	conf := new(model.Config)
-	err := meddler.QueryRow(db, conf, stmt, repo.ID, hash)
+	err := meddler.QueryRow(db, conf, stmt, repoID, hash)
 	return conf, err
 }
 
@@ -50,4 +50,8 @@ func (db *datastore) ConfigFindApproved(config *model.Config) (bool, error) {
 
 func (db *datastore) ConfigCreate(config *model.Config) error {
 	return meddler.Insert(db, "config", config)
+}
+
+func (db *datastore) BuildConfigCreate(buildConfig *model.BuildConfig) error {
+	return meddler.Insert(db, "build_config", buildConfig)
 }

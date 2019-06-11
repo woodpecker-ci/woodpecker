@@ -149,14 +149,6 @@ func PostHook(c *gin.Context) {
 		c.AbortWithError(404, err)
 		return
 	}
-	// persist the build config for historical correctness, restarts, etc
-	// conf, err := findOrPersistPipelineConfig(repo, remoteYamlConfig)
-	// if err != nil {
-	// 	logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
-	// 	c.AbortWithError(500, err)
-	// 	return
-	// }
-	// build.ConfigID = conf.ID
 
 	// verify that pipeline can be built at all
 	// parsedPipelineConfig, err := yaml.ParseString(conf.Data)
@@ -184,6 +176,17 @@ func PostHook(c *gin.Context) {
 		logrus.Errorf("failure to save commit for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
+	}
+
+	// persist the build config for historical correctness, restarts, etc
+	for _, remoteYamlConfig := range remoteYamlConfigs {
+		conf, err := findOrPersistPipelineConfig(build, remoteYamlConfig.Data)
+		fmt.Println(conf)
+		if err != nil {
+			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
+			c.AbortWithError(500, err)
+			return
+		}
 	}
 
 	c.JSON(200, build)
@@ -262,23 +265,32 @@ func PostHook(c *gin.Context) {
 	queueBuild(build, repo, buildItems)
 }
 
-func findOrPersistPipelineConfig(repo *model.Repo, remoteYamlConfig []byte) (*model.Config, error) {
+func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig []byte) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig)
-	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
+	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
-			RepoID: repo.ID,
+			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig),
 			Hash:   sha,
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = Config.Storage.Config.ConfigFind(repo, sha)
+			conf, err = Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
 		}
+	}
+
+	buildConfig := &model.BuildConfig{
+		ConfigID: conf.ID,
+		BuildID:  build.ID,
+	}
+	err = Config.Storage.Config.BuildConfigCreate(buildConfig)
+	if err != nil {
+		return nil, err
 	}
 
 	return conf, nil

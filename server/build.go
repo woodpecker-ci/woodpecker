@@ -268,7 +268,7 @@ func PostApproval(c *gin.Context) {
 	build.Reviewer = user.Login
 
 	// fetch the build file from the database
-	configs, err := Config.Storage.Config.ConfigLoad(build.ID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -440,7 +440,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the .drone.yml file from the database
-	configs, err := Config.Storage.Config.ConfigLoad(build.ID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)

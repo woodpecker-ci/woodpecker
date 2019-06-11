@@ -161,12 +161,8 @@ var migrations = []struct {
 		stmt: alterTableUpdateFileMeta,
 	},
 	{
-		name: "alter-table-add-config-build-id",
-		stmt: alterTableAddConfigBuildId,
-	},
-	{
-		name: "update-table-set-config-config-id",
-		stmt: updateTableSetConfigConfigId,
+		name: "create-table-build-config",
+		stmt: createTableBuildConfig,
 	},
 	{
 		name: "alter-table-add-config-name",
@@ -641,15 +637,17 @@ UPDATE files SET
 `
 
 //
-// 019_add_column_config_build_id.sql
+// 019_create_table_build_config.sql
 //
 
-var alterTableAddConfigBuildId = `
-ALTER TABLE config ADD COLUMN config_build_id INTEGER
-`
-
-var updateTableSetConfigConfigId = `
-UPDATE config SET config_build_id = (SELECT builds.build_id FROM builds WHERE builds.build_config_id = config.config_id)
+var createTableBuildConfig = `
+CREATE TABLE IF NOT EXISTS build_config (
+ config_id       INTEGER NOT NULL
+,build_id        INTEGER NOT NULL
+,PRIMARY KEY (config_id, build_id)
+,FOREIGN KEY (config_id) REFERENCES config (config_id)
+,FOREIGN KEY (build_id) REFERENCES builds (build_id)
+);
 `
 
 //

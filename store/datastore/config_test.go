@@ -33,20 +33,28 @@ func TestConfig(t *testing.T) {
 		buildID = int64(1)
 	)
 
-	if err := s.ConfigCreate(
-		&model.Config{
-			RepoID:  2,
-			BuildID: 1,
-			Data:    data,
-			Hash:    hash,
-			Name:    "default",
+	config := &model.Config{
+		RepoID: 2,
+		Data:   data,
+		Hash:   hash,
+		Name:   "default",
+	}
+	if err := s.ConfigCreate(config); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
+
+	if err := s.BuildConfigCreate(
+		&model.BuildConfig{
+			ConfigID: config.ID,
+			BuildID:  buildID,
 		},
 	); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
 
-	config, err := s.ConfigFind(&model.Repo{ID: 2}, hash)
+	config, err := s.ConfigFindIdentical(int64(2), hash)
 	if err != nil {
 		t.Error(err)
 		return
@@ -56,9 +64,6 @@ func TestConfig(t *testing.T) {
 	}
 	if got, want := config.RepoID, int64(2); got != want {
 		t.Errorf("Want config repo id %d, got %d", want, got)
-	}
-	if got, want := config.BuildID, buildID; got != want {
-		t.Errorf("Want config build id %d, got %d", want, got)
 	}
 	if got, want := config.Data, data; got != want {
 		t.Errorf("Want config data %s, got %s", want, got)
@@ -70,7 +75,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Want config name %s, got %s", want, got)
 	}
 
-	loaded, err := s.ConfigLoad(buildID)
+	loaded, err := s.ConfigsForBuild(buildID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
@@ -120,13 +125,17 @@ func TestConfigApproved(t *testing.T) {
 	s.CreateBuild(buildBlocked)
 	s.CreateBuild(buildPending)
 	conf := &model.Config{
-		RepoID:  repo.ID,
-		BuildID: buildBlocked.ID,
-		Data:    data,
-		Hash:    hash,
+		ID:     int64(8),
+		RepoID: repo.ID,
+		Data:   data,
+		Hash:   hash,
 	}
-	if err := s.ConfigCreate(conf); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
+	buildConfig := &model.BuildConfig{
+		ConfigID: int64(8),
+		BuildID:  buildBlocked.ID,
+	}
+	if err := s.BuildConfigCreate(buildConfig); err != nil {
+		t.Errorf("Unexpected error: insert build_config: %s", err)
 		return
 	}
 
@@ -137,12 +146,16 @@ func TestConfigApproved(t *testing.T) {
 
 	s.CreateBuild(buildRunning)
 	conf2 := &model.Config{
-		RepoID:  repo.ID,
-		BuildID: buildRunning.ID,
-		Data:    data,
-		Hash:    "xxx",
+		ID:     int64(9),
+		RepoID: repo.ID,
+		Data:   data,
+		Hash:   "xxx",
 	}
-	if err := s.ConfigCreate(conf2); err != nil {
+	buildConfig2 := &model.BuildConfig{
+		ConfigID: int64(9),
+		BuildID:  buildRunning.ID,
+	}
+	if err := s.BuildConfigCreate(buildConfig2); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}

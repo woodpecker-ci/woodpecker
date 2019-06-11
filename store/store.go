@@ -111,10 +111,11 @@ type Store interface {
 	PermDelete(perm *model.Perm) error
 	PermFlush(user *model.User, before int64) error
 
-	ConfigLoad(int64) ([]*model.Config, error)
-	ConfigFind(*model.Repo, string) (*model.Config, error)
+	ConfigsForBuild(buildID int64) ([]*model.Config, error)
+	ConfigFindIdentical(repoID int64, sha string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
+	BuildConfigCreate(*model.BuildConfig) error
 
 	SenderFind(*model.Repo, string) (*model.Sender, error)
 	SenderList(*model.Repo) ([]*model.Sender, error)
