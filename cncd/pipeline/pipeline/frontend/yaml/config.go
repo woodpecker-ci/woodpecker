@@ -22,6 +22,7 @@ type (
 		Networks  Networks
 		Volumes   Volumes
 		Labels    libcompose.SliceorMap
+		DependsOn []string `yaml:"depends_on,omitempty"`
 	}
 
 	// Workspace defines a pipeline workspace.
