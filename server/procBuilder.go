@@ -28,6 +28,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
 )
 
 // Takes the hook data and the yaml and returns in internal data model
@@ -39,15 +40,16 @@ type procBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yamls []string
+	Yamls []*remote.FileMeta
 	Envs  map[string]string
 }
 
 type buildItem struct {
-	Proc     *model.Proc
-	Platform string
-	Labels   map[string]string
-	Config   *backend.Config
+	Proc      *model.Proc
+	Platform  string
+	Labels    map[string]string
+	DependsOn []string
+	Config    *backend.Config
 }
 
 func (b *procBuilder) Build() ([]*buildItem, error) {
@@ -55,7 +57,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 
 	for j, y := range b.Yamls {
 		// matrix axes
-		axes, err := matrix.ParseString(y)
+		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
 			return nil, err
 		}
@@ -70,6 +72,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				PGID:    j + i + 1,
 				State:   model.StatusPending,
 				Environ: axis,
+				Name:    sanitizePath(y.Name),
 			}
 			b.Curr.Procs = append(b.Curr.Procs, proc)
 
@@ -77,13 +80,13 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			environ := b.environmentVariables(metadata, axis)
 
 			// substitute vars
-			y, err := b.envsubst_(y, environ)
+			substituted, err := b.envsubst_(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
 
 			// parse yaml pipeline
-			parsed, err := yaml.ParseString(y)
+			parsed, err := yaml.ParseString(substituted)
 			if err != nil {
 				return nil, err
 			}
@@ -101,10 +104,11 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
 			item := &buildItem{
-				Proc:     proc,
-				Config:   ir,
-				Labels:   parsed.Labels,
-				Platform: metadata.Sys.Arch,
+				Proc:      proc,
+				Config:    ir,
+				Labels:    parsed.Labels,
+				DependsOn: parsed.DependsOn,
+				Platform:  metadata.Sys.Arch,
 			}
 			if item.Labels == nil {
 				item.Labels = map[string]string{}
@@ -288,4 +292,11 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Arch: "linux/amd64",
 		},
 	}
+}
+
+func sanitizePath(path string) string {
+	path = strings.TrimSuffix(path, ".yml")
+	path = strings.TrimPrefix(path, ".drone/")
+	path = strings.TrimPrefix(path, ".")
+	return path
 }

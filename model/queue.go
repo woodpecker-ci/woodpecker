@@ -54,7 +54,7 @@ type persistentQueue struct {
 	store TaskStore
 }
 
-// Push pushes an task to the tail of this queue.
+// Push pushes a task to the tail of this queue.
 func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
 	q.store.TaskInsert(&Task{
 		ID:     task.ID,
@@ -64,6 +64,24 @@ func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
 	err := q.Queue.Push(c, task)
 	if err != nil {
 		q.store.TaskDelete(task.ID)
+	}
+	return err
+}
+
+// Push pushes multiple tasks to the tail of this queue.
+func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) error {
+	for _, task := range tasks {
+		q.store.TaskInsert(&Task{
+			ID:     task.ID,
+			Data:   task.Data,
+			Labels: task.Labels,
+		})
+	}
+	err := q.Queue.PushAtOnce(c, tasks)
+	if err != nil {
+		for _, task := range tasks {
+			q.store.TaskDelete(task.ID)
+		}
 	}
 	return err
 }

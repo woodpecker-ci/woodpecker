@@ -23,6 +23,9 @@ type Task struct {
 
 	// Labels represents the key-value pairs the entry is lebeled with.
 	Labels map[string]string `json:"labels,omitempty"`
+
+	// Task IDs this task depend on
+	Dependencies []string
 }
 
 // InfoT provides runtime information.
@@ -44,8 +47,11 @@ type Filter func(*Task) bool
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
-	// Push pushes an task to the tail of this queue.
+	// Push pushes a task to the tail of this queue.
 	Push(c context.Context, task *Task) error
+
+	// Push pushes a task to the tail of this queue.
+	PushAtOnce(c context.Context, tasks []*Task) error
 
 	// Poll retrieves and removes a task head of this queue.
 	Poll(c context.Context, f Filter) (*Task, error)

@@ -180,8 +180,7 @@ func PostHook(c *gin.Context) {
 
 	// persist the build config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		conf, err := findOrPersistPipelineConfig(build, remoteYamlConfig.Data)
-		fmt.Println(conf)
+		_, err := findOrPersistPipelineConfig(build, remoteYamlConfig)
 		if err != nil {
 			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
 			c.AbortWithError(500, err)
@@ -230,11 +229,6 @@ func PostHook(c *gin.Context) {
 		}
 	}()
 
-	var yamls []string
-	for _, y := range remoteYamlConfigs {
-		yamls = append(yamls, string(y.Data))
-	}
-
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -244,7 +238,7 @@ func PostHook(c *gin.Context) {
 		Regs:  regs,
 		Envs:  envs,
 		Link:  httputil.GetURL(c.Request),
-		Yamls: yamls,
+		Yamls: remoteYamlConfigs,
 	}
 	buildItems, err := b.Build()
 	if err != nil {
@@ -265,14 +259,15 @@ func PostHook(c *gin.Context) {
 	queueBuild(build, repo, buildItems)
 }
 
-func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig []byte) (*model.Config, error) {
-	sha := shasum(remoteYamlConfig)
+func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+	sha := shasum(remoteYamlConfig.Data)
 	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
 			RepoID: build.RepoID,
-			Data:   string(remoteYamlConfig),
+			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
+			Name:   sanitizePath(remoteYamlConfig.Name),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
@@ -296,6 +291,7 @@ func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig []byte) (*
 	return conf, nil
 }
 
+// publishes message to UI clients
 func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 	message := pubsub.Message{
 		Labels: map[string]string{
@@ -314,6 +310,7 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 }
 
 func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
+	var tasks []*queue.Task
 	for _, item := range buildItems {
 		task := new(queue.Task)
 		task.ID = fmt.Sprint(item.Proc.ID)
@@ -323,6 +320,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 		}
 		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
+		task.Dependencies = taskIds(item.DependsOn, buildItems)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Proc.ID),
@@ -331,8 +329,21 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 		})
 
 		Config.Services.Logs.Open(context.Background(), task.ID)
-		Config.Services.Queue.Push(context.Background(), task)
+		tasks = append(tasks, task)
 	}
+	Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+}
+
+func taskIds(dependsOn []string, buildItems []*buildItem) []string {
+	taskIds := []string{}
+	for _, dep := range dependsOn {
+		for _, buildItem := range buildItems {
+			if buildItem.Proc.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(buildItem.Proc.ID))
+			}
+		}
+	}
+	return taskIds
 }
 
 func shasum(raw []byte) string {

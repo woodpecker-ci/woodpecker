@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 type entry struct {
@@ -47,6 +49,19 @@ func (q *fifo) Push(c context.Context, task *Task) error {
 	q.pending.PushBack(task)
 	q.Unlock()
 	go q.process()
+	return nil
+}
+
+// Push pushes an item to the tail of this queue.
+func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
+	q.Lock()
+	for _, task := range tasks {
+		q.pending.PushBack(task)
+	}
+	q.Unlock()
+	for range tasks {
+		go q.process()
+	}
 	return nil
 }
 
@@ -187,21 +202,48 @@ func (q *fifo) process() {
 loop:
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		item := e.Value.(*Task)
+		task := e.Value.(*Task)
+		logrus.Debugf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
+		if q.depsInQueue(task) {
+			continue
+		}
 		for w := range q.workers {
-			if w.filter(item) {
+			if w.filter(task) {
 				delete(q.workers, w)
 				q.pending.Remove(e)
 
-				q.running[item.ID] = &entry{
-					item:     item,
+				q.running[task.ID] = &entry{
+					item:     task,
 					done:     make(chan bool),
 					deadline: time.Now().Add(q.extension),
 				}
 
-				w.channel <- item
+				logrus.Debugf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
+				w.channel <- task
 				break loop
 			}
 		}
 	}
+}
+
+func (q *fifo) depsInQueue(task *Task) bool {
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		possibleDep, ok := e.Value.(*Task)
+		logrus.Debugf("queue: in queue right now: %v", possibleDep.ID)
+		for _, dep := range task.Dependencies {
+			if ok && possibleDep.ID == dep {
+				return true
+			}
+		}
+	}
+	for possibleDepID := range q.running {
+		for _, dep := range task.Dependencies {
+			if possibleDepID == dep {
+				return true
+			}
+		}
+	}
+	return false
 }

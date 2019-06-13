@@ -315,9 +315,9 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
-	var yamls []string
+	var yamls []*remote.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, string(y.Data))
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
 	}
 
 	b := procBuilder{
@@ -478,6 +478,13 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
+	err = persistBuildConfigs(configs, build.ID)
+	if err != nil {
+		logrus.Errorf("failure to persist build config for %s. %s", repo.FullName, err)
+		c.AbortWithError(500, err)
+		return
+	}
+
 	// Read query string parameters into buildParams, exclude reserved params
 	var buildParams = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
@@ -508,9 +515,9 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	var yamls []string
+	var yamls []*remote.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, string(y.Data))
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
 	}
 
 	b := procBuilder{
@@ -587,6 +594,20 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
+}
+
+func persistBuildConfigs(configs []*model.Config, buildID int64) error {
+	for _, conf := range configs {
+		buildConfig := &model.BuildConfig{
+			ConfigID: conf.ID,
+			BuildID:  buildID,
+		}
+		err := Config.Storage.Config.BuildConfigCreate(buildConfig)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 var deleteStr = `[

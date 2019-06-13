@@ -117,3 +117,30 @@ func TestFifoEvict(t *testing.T) {
 		t.Errorf("expect not found error when evicting item not in queue, got %s", err)
 	}
 }
+
+func TestFifoDependencies(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+	}
+
+	q := New().(*fifo)
+	q.Push(noContext, task2)
+	q.Push(noContext, task1)
+
+	got, _ := q.Poll(noContext, func(*Task) bool { return true })
+	if got != task1 {
+		t.Errorf("expect task1 returned from queue as task2 depends on it")
+		return
+	}
+
+	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	if got != task2 {
+		t.Errorf("expect task2 returned from queue")
+		return
+	}
+}
