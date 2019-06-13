@@ -211,7 +211,7 @@ func (c *config) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	return []byte(config.Data), err
+	return []byte(*config), err
 }
 
 // Status creates a build status for the Bitbucket commit.

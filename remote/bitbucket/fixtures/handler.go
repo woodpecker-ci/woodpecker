@@ -30,7 +30,7 @@ func Handler() http.Handler {
 	e.POST("/site/oauth2/access_token", getOauth)
 	e.GET("/2.0/repositories/:owner/:name", getRepo)
 	e.GET("/2.0/repositories/:owner/:name/hooks", getRepoHooks)
-	e.GET("/1.0/repositories/:owner/:name/src/:commit/:file", getRepoFile)
+	e.GET("/2.0/repositories/:owner/:name/src/:commit/:file", getRepoFile)
 	e.DELETE("/2.0/repositories/:owner/:name/hooks/:hook", deleteRepoHook)
 	e.POST("/2.0/repositories/:owner/:name/hooks", createRepoHook)
 	e.POST("/2.0/repositories/:owner/:name/commit/:commit/statuses/build", createRepoStatus)
@@ -214,11 +214,7 @@ const repoHookPayload = `
 }
 `
 
-const repoFilePayload = `
-{
-  "data": "{ platform: linux/amd64 }"
-}
-`
+const repoFilePayload = "dummy payload"
 
 const userPayload = `
 {
