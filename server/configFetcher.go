@@ -5,6 +5,8 @@ import (
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
+
+	"sort"
 )
 
 type configFetcher struct {
@@ -30,8 +32,16 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 			if direrr != nil {
 				return nil, direrr
 			}
+
+			sort.Sort(byName(dir))
 			return dir, nil
 		}
 	}
 	return []*remote.FileMeta{}, nil
 }
+
+type byName []*remote.FileMeta
+
+func (a byName) Len() int           { return len(a) }
+func (a byName) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a byName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
