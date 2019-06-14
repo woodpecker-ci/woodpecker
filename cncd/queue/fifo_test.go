@@ -138,6 +138,8 @@ func TestFifoDependencies(t *testing.T) {
 		return
 	}
 
+	q.Done(noContext, got.ID)
+
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task2 {
 		t.Errorf("expect task2 returned from queue")
