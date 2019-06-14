@@ -1,3 +1,7 @@
+clone:
+  git:
+    image: plugins/git:next
+
 workspace:
   base: /go
   path: src/github.com/laszlocph/drone-oss-08
