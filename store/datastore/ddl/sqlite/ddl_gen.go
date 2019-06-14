@@ -659,5 +659,5 @@ ALTER TABLE config ADD COLUMN config_name TEXT
 `
 
 var updateTableSetConfigName = `
-UPDATE config SET config_name = "default"
+UPDATE config SET config_name = "drone"
 `

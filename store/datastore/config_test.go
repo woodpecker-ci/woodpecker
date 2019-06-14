@@ -23,18 +23,31 @@ import (
 func TestConfig(t *testing.T) {
 	s := newTest()
 	defer func() {
+		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
 		s.Exec("delete from config")
 		s.Close()
 	}()
 
 	var (
-		data    = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash    = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-		buildID = int64(1)
+		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
+		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
 	)
 
+	repo := &model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/drone",
+		Owner:    "bradrydzewski",
+		Name:     "drone",
+	}
+	if err := s.CreateRepo(repo); err != nil {
+		t.Errorf("Unexpected error: insert repo: %s", err)
+		return
+	}
+
 	config := &model.Config{
-		RepoID: 2,
+		RepoID: repo.ID,
 		Data:   data,
 		Hash:   hash,
 		Name:   "default",
@@ -44,17 +57,27 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if err := s.BuildConfigCreate(
-		&model.BuildConfig{
-			ConfigID: config.ID,
-			BuildID:  buildID,
-		},
-	); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
+	build := &model.Build{
+		RepoID: repo.ID,
+		Status: model.StatusRunning,
+		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+	}
+	if err := s.CreateBuild(build); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
 
-	config, err := s.ConfigFindIdentical(int64(2), hash)
+	if err := s.BuildConfigCreate(
+		&model.BuildConfig{
+			ConfigID: config.ID,
+			BuildID:  build.ID,
+		},
+	); err != nil {
+		t.Errorf("Unexpected error: insert build config: %s", err)
+		return
+	}
+
+	config, err := s.ConfigFindIdentical(repo.ID, hash)
 	if err != nil {
 		t.Error(err)
 		return
@@ -62,7 +85,7 @@ func TestConfig(t *testing.T) {
 	if got, want := config.ID, int64(1); got != want {
 		t.Errorf("Want config id %d, got %d", want, got)
 	}
-	if got, want := config.RepoID, int64(2); got != want {
+	if got, want := config.RepoID, repo.ID; got != want {
 		t.Errorf("Want config repo id %d, got %d", want, got)
 	}
 	if got, want := config.Data, data; got != want {
@@ -75,7 +98,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Want config name %s, got %s", want, got)
 	}
 
-	loaded, err := s.ConfigsForBuild(buildID)
+	loaded, err := s.ConfigsForBuild(build.ID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
@@ -88,9 +111,10 @@ func TestConfig(t *testing.T) {
 func TestConfigApproved(t *testing.T) {
 	s := newTest()
 	defer func() {
-		s.Exec("delete from config")
-		s.Exec("delete from builds")
 		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
+		s.Exec("delete from config")
 		s.Close()
 	}()
 
@@ -100,7 +124,10 @@ func TestConfigApproved(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "drone",
 	}
-	s.CreateRepo(repo)
+	if err := s.CreateRepo(repo); err != nil {
+		t.Errorf("Unexpected error: insert repo: %s", err)
+		return
+	}
 
 	var (
 		data         = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
@@ -122,16 +149,25 @@ func TestConfigApproved(t *testing.T) {
 		}
 	)
 
-	s.CreateBuild(buildBlocked)
-	s.CreateBuild(buildPending)
+	if err := s.CreateBuild(buildBlocked); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
+		return
+	}
+	if err := s.CreateBuild(buildPending); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
+		return
+	}
 	conf := &model.Config{
-		ID:     int64(8),
 		RepoID: repo.ID,
 		Data:   data,
 		Hash:   hash,
 	}
+	if err := s.ConfigCreate(conf); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
 	buildConfig := &model.BuildConfig{
-		ConfigID: int64(8),
+		ConfigID: conf.ID,
 		BuildID:  buildBlocked.ID,
 	}
 	if err := s.BuildConfigCreate(buildConfig); err != nil {
@@ -146,13 +182,16 @@ func TestConfigApproved(t *testing.T) {
 
 	s.CreateBuild(buildRunning)
 	conf2 := &model.Config{
-		ID:     int64(9),
 		RepoID: repo.ID,
 		Data:   data,
 		Hash:   "xxx",
 	}
+	if err := s.ConfigCreate(conf2); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
 	buildConfig2 := &model.BuildConfig{
-		ConfigID: int64(9),
+		ConfigID: conf2.ID,
 		BuildID:  buildRunning.ID,
 	}
 	if err := s.BuildConfigCreate(buildConfig2); err != nil {
@@ -169,6 +208,9 @@ func TestConfigApproved(t *testing.T) {
 func TestConfigIndexes(t *testing.T) {
 	s := newTest()
 	defer func() {
+		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
 		s.Exec("delete from config")
 		s.Close()
 	}()
