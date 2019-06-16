@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
+	"sort"
 	"strings"
 
 	"github.com/drone/envsubst"
@@ -54,6 +55,8 @@ type buildItem struct {
 
 func (b *procBuilder) Build() ([]*buildItem, error) {
 	var items []*buildItem
+
+	sort.Sort(remote.ByName(b.Yamls))
 
 	for j, y := range b.Yamls {
 		// matrix axes
