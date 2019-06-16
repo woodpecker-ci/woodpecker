@@ -97,10 +97,11 @@ func (q *fifo) Done(c context.Context, id string) error {
 // Error signals that the item is done executing with error.
 func (q *fifo) Error(c context.Context, id string, err error) error {
 	q.Lock()
-	state, ok := q.running[id]
+	taskEntry, ok := q.running[id]
 	if ok {
-		state.error = err
-		close(state.done)
+		q.updateDepStatusInQueue(id, err == nil)
+		taskEntry.error = err
+		close(taskEntry.done)
 		delete(q.running, id)
 	}
 	q.Unlock()
@@ -246,4 +247,24 @@ func (q *fifo) depsInQueue(task *Task) bool {
 		}
 	}
 	return false
+}
+
+func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		pending, ok := e.Value.(*Task)
+		for _, dep := range pending.Dependencies {
+			if ok && taskID == dep {
+				pending.DepStatus[dep] = success
+			}
+		}
+	}
+	for _, running := range q.running {
+		for _, dep := range running.item.Dependencies {
+			if taskID == dep {
+				running.item.DepStatus[dep] = success
+			}
+		}
+	}
 }

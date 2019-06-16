@@ -24,8 +24,38 @@ type Task struct {
 	// Labels represents the key-value pairs the entry is lebeled with.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// Task IDs this task depend on
+	// Task IDs this task depend
 	Dependencies []string
+
+	// If dep finished sucessfully
+	DepStatus map[string]bool
+
+	// RunOn failure or success
+	RunOn []string
+}
+
+// ShouldRun tells if a task should be run or skipped, based on dependencies
+func (t *Task) ShouldRun() bool {
+	if runsOnFailure(t.RunOn) {
+		return true
+	}
+
+	for _, success := range t.DepStatus {
+		if !success {
+			return false
+		}
+	}
+
+	return true
+}
+
+func runsOnFailure(runsOn []string) bool {
+	for _, status := range runsOn {
+		if status == "failure" {
+			return true
+		}
+	}
+	return false
 }
 
 // InfoT provides runtime information.
@@ -74,46 +104,3 @@ type Queue interface {
 	// Info returns internal queue information.
 	Info(c context.Context) InfoT
 }
-
-// // global instance of the queue.
-// var global = New()
-//
-// // Set sets the global queue.
-// func Set(queue Queue) {
-// 	global = queue
-// }
-//
-// // Push pushes an task to the tail of the global queue.
-// func Push(c context.Context, task *Task) error {
-// 	return global.Push(c, task)
-// }
-//
-// // Poll retrieves and removes a task head of the global queue.
-// func Poll(c context.Context, f Filter) (*Task, error) {
-// 	return global.Poll(c, f)
-// }
-//
-// // Extend extends the deadline for a task.
-// func Extend(c context.Context, id string) error {
-// 	return global.Extend(c, id)
-// }
-//
-// // Done signals the task is complete.
-// func Done(c context.Context, id string) error {
-// 	return global.Done(c, id)
-// }
-//
-// // Error signals the task is complete with errors.
-// func Error(c context.Context, id string, err error) {
-// 	global.Error(c, id, err)
-// }
-//
-// // Wait waits until the task is complete.
-// func Wait(c context.Context, id string) error {
-// 	return global.Wait(c, id)
-// }
-//
-// // Info returns internal queue information.
-// func Info(c context.Context) InfoT {
-// 	return global.Info(c)
-// }
