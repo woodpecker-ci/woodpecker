@@ -127,7 +127,7 @@ func TestFifoDependencies(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: make(map[string]bool),
+		DepStatus:    make(map[string]bool),
 	}
 
 	q := New().(*fifo)
@@ -157,14 +157,14 @@ func TestFifoErrors(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: make(map[string]bool),
+		DepStatus:    make(map[string]bool),
 	}
 
 	task3 := &Task{
 		ID:           "3",
 		Dependencies: []string{"1"},
-		DepStatus: make(map[string]bool),
-		RunOn: []string{"success", "failure"},
+		DepStatus:    make(map[string]bool),
+		RunOn:        []string{"success", "failure"},
 	}
 
 	q := New().(*fifo)
@@ -199,6 +199,72 @@ func TestFifoErrors(t *testing.T) {
 
 	if !got.ShouldRun() {
 		t.Errorf("expect task3 should run, task1 failed, but task3 runs on failure too")
+		return
+	}
+}
+
+func TestShouldRun(t *testing.T) {
+	task := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]bool{
+			"1": true,
+		},
+		RunOn: []string{"failure"},
+	}
+	if task.ShouldRun() {
+		t.Errorf("expect task to not run, it runs on failure only")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]bool{
+			"1": true,
+		},
+		RunOn: []string{"failure", "success"},
+	}
+	if !task.ShouldRun() {
+		t.Errorf("expect task to run")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]bool{
+			"1": false,
+		},
+	}
+	if task.ShouldRun() {
+		t.Errorf("expect task to not run")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]bool{
+			"1": true,
+		},
+		RunOn: []string{"success"},
+	}
+	if !task.ShouldRun() {
+		t.Errorf("expect task to run")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]bool{
+			"1": false,
+		},
+		RunOn: []string{"failure"},
+	}
+	if !task.ShouldRun() {
+		t.Errorf("expect task to run")
 		return
 	}
 }

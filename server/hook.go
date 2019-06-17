@@ -321,6 +321,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
 		task.Dependencies = taskIds(item.DependsOn, buildItems)
+		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]bool)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{

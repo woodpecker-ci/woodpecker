@@ -36,22 +36,47 @@ type Task struct {
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies
 func (t *Task) ShouldRun() bool {
-	if runsOnFailure(t.RunOn) {
+	if runsOnFailure(t.RunOn) && runsOnSuccess(t.RunOn) {
 		return true
 	}
 
-	for _, success := range t.DepStatus {
-		if !success {
-			return false
+	if !runsOnFailure(t.RunOn) && runsOnSuccess(t.RunOn) {
+		for _, success := range t.DepStatus {
+			if !success {
+				return false
+			}
 		}
+		return true
 	}
 
-	return true
+	if runsOnFailure(t.RunOn) && !runsOnSuccess(t.RunOn) {
+		for _, success := range t.DepStatus {
+			if success {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
 }
 
 func runsOnFailure(runsOn []string) bool {
 	for _, status := range runsOn {
 		if status == "failure" {
+			return true
+		}
+	}
+	return false
+}
+
+func runsOnSuccess(runsOn []string) bool {
+	if len(runsOn) == 0 {
+		return true
+	}
+
+	for _, status := range runsOn {
+		if status == "success" {
 			return true
 		}
 	}

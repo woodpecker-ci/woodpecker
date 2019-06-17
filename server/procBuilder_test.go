@@ -124,3 +124,37 @@ depends_on:
 		t.Fatal("Should depend on test")
 	}
 }
+
+func TestRunsOn(t *testing.T) {
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &model.Build{},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Data: []byte(`
+pipeline:
+  deploy:
+    image: scratch
+
+runs_on:
+  - success
+  - failure
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems[0].RunsOn) != 2 {
+		t.Fatal("Should run on success and failure")
+	}
+	if buildItems[0].RunsOn[1] != "failure" {
+		t.Fatal("Should run on failure")
+	}
+}

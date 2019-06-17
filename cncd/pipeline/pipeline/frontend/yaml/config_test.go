@@ -40,6 +40,8 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Labels["com.example.type"]).Equal("build")
 				g.Assert(out.DependsOn[0]).Equal("lint")
 				g.Assert(out.DependsOn[1]).Equal("test")
+				g.Assert(out.RunsOn[0]).Equal("success")
+				g.Assert(out.RunsOn[1]).Equal("failure")
 			})
 			// Check to make sure variable expansion works in yaml.MapSlice
 			// g.It("Should unmarshal variables", func() {
@@ -99,6 +101,9 @@ labels:
 depends_on:
   - lint
   - test
+runs_on:
+  - success
+  - failure
 `
 
 var sampleVarYaml = `

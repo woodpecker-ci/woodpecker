@@ -50,6 +50,7 @@ type buildItem struct {
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
+	RunsOn    []string
 	Config    *backend.Config
 }
 
@@ -111,6 +112,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				Config:    ir,
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
+				RunsOn:    parsed.RunsOn,
 				Platform:  metadata.Sys.Arch,
 			}
 			if item.Labels == nil {
