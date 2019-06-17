@@ -214,7 +214,7 @@ func (c *config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 }
 
 // Status creates a build status for the Bitbucket commit.
-func (c *config) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *config) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),

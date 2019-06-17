@@ -108,7 +108,7 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	return nil
 }
 

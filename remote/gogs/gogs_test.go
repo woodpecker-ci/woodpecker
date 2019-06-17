@@ -163,7 +163,7 @@ func Test_gogs(t *testing.T) {
 
 		g.It("Should return no-op for usupporeted features", func() {
 			_, err1 := c.Auth("octocat", "4vyW6b49Z")
-			err2 := c.Status(nil, nil, nil, "")
+			err2 := c.Status(nil, nil, nil, "", nil)
 			err3 := c.Deactivate(nil, nil, "")
 			g.Assert(err1 != nil).IsTrue()
 			g.Assert(err2 == nil).IsTrue()

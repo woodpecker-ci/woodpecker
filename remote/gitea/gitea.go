@@ -254,7 +254,7 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 }
 
 // Status is supported by the Gitea driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := c.newClientToken(u.Token)
 
 	status := getStatus(b.Status)

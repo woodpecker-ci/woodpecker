@@ -55,7 +55,7 @@ type Remote interface {
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(u *model.User, r *model.Repo, b *model.Build, link string) error
+	Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.
@@ -127,8 +127,8 @@ func Perm(c context.Context, u *model.User, owner, repo string) (*model.Perm, er
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func Status(c context.Context, u *model.User, r *model.Repo, b *model.Build, link string) error {
-	return FromContext(c).Status(u, r, b, link)
+func Status(c context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+	return FromContext(c).Status(u, r, b, link, proc)
 }
 
 // Netrc returns a .netrc file that can be used to clone

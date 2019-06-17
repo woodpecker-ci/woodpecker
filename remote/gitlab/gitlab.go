@@ -345,7 +345,7 @@ func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 // NOTE Currently gitlab doesn't support status for commits and events,
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.
-func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string) error {
+func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 
 	status := getStatus(b.Status)

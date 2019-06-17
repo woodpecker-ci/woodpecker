@@ -430,17 +430,17 @@ func matchingHooks(hooks []github.Hook, rawurl string) *github.Hook {
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := c.newClientToken(u.Token)
 	switch b.Event {
 	case "deployment":
 		return deploymentStatus(client, r, b, link)
 	default:
-		return repoStatus(client, r, b, link, c.Context)
+		return repoStatus(client, r, b, link, c.Context, proc)
 	}
 }
 
-func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string) error {
+func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
 	context := ctx
 	switch b.Event {
 	case model.EventPull:
@@ -451,10 +451,19 @@ func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx 
 		}
 	}
 
+	status := github.String(convertStatus(b.Status))
+	desc := github.String(convertDesc(b.Status))
+
+	if proc != nil {
+		context += "/" + proc.Name
+		status = github.String(convertStatus(proc.State))
+		desc = github.String(convertDesc(proc.State))
+	}
+
 	data := github.RepoStatus{
 		Context:     github.String(context),
-		State:       github.String(convertStatus(b.Status)),
-		Description: github.String(convertDesc(b.Status)),
+		State:       status,
+		Description: desc,
 		TargetURL:   github.String(link),
 	}
 	_, _, err := client.Repositories.CreateStatus(r.Owner, r.Name, b.Commit, &data)

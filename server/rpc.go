@@ -401,7 +401,13 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
-		s.updateRemoteStatus(repo, build)
+		if !isMultiPipeline(procs) {
+			s.updateRemoteStatus(repo, build, nil)
+		}
+	}
+
+	if isMultiPipeline(procs) {
+		s.updateRemoteStatus(repo, build, proc)
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
@@ -411,6 +417,16 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.notify(c, repo, build, procs)
 
 	return nil
+}
+
+func isMultiPipeline(procs []*model.Proc) bool {
+	countPPIDZero := 0
+	for _, proc := range procs {
+		if proc.PPID == 0 {
+			countPPIDZero++
+		}
+	}
+	return countPPIDZero > 1
 }
 
 // Log implements the rpc.Log function
@@ -474,7 +490,7 @@ func buildStatus(procs []*model.Proc) string {
 	return status
 }
 
-func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build) {
+func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
@@ -484,7 +500,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build) {
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", s.host, repo.FullName, build.Number)
-		err = s.remote.Status(user, repo, build, uri)
+		err = s.remote.Status(user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 		}

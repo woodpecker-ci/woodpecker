@@ -221,14 +221,6 @@ func PostHook(c *gin.Context) {
 	// get the previous build so that we can send status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 
-	defer func() {
-		uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-		err = remote_.Status(user, repo, build, uri)
-		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
-	}()
-
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -254,6 +246,20 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
+
+	defer func() {
+		for _, item := range buildItems {
+			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			if len(buildItems) > 1 {
+				err = remote_.Status(user, repo, build, uri, item.Proc)
+			} else {
+				err = remote_.Status(user, repo, build, uri, nil)
+			}
+			if err != nil {
+				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			}
+		}
+	}()
 
 	publishToTopic(c, build, repo)
 	queueBuild(build, repo, buildItems)

@@ -184,7 +184,7 @@ func (c *Config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *Config) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
