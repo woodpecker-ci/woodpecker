@@ -159,12 +159,9 @@ func PostHook(c *gin.Context) {
 	// 	}
 	// }
 
-	// if repo.IsGated {
-	// 	allowed, _ := Config.Services.Senders.SenderAllowed(user, repo, build, conf)
-	// 	if !allowed {
-	// 		build.Status = model.StatusBlocked
-	// 	}
-	// }
+	if repo.IsGated { // This feature is not clear to me. Reenabling once better understood
+		build.Status = model.StatusBlocked
+	}
 
 	// update some build fields
 	build.RepoID = repo.ID
