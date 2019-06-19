@@ -425,10 +425,10 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "hmMnLbqq5stRt+XMnqnVglxk8pg=",
+			"checksumSHA1": "c9aYXHdgU88JBRO151jAiA3C/qo=",
 			"path": "github.com/laszlocph/drone-ui/dist",
-			"revision": "0dbf167b5c9efd822bbdf2723bdfa5b8499992ba",
-			"revisionTime": "2019-06-05T04:37:12Z"
+			"revision": "b285ace6d5f88a4eb29a01d8a72e211c536e0a31",
+			"revisionTime": "2019-06-19T08:13:15Z"
 		},
 		{
 			"path": "github.com/lib/pq",
