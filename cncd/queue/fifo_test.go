@@ -203,6 +203,41 @@ func TestFifoErrors(t *testing.T) {
 	}
 }
 
+func TestFifoCancel(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]bool),
+	}
+
+	task3 := &Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]bool),
+		RunOn:        []string{"success", "failure"},
+	}
+
+	q := New().(*fifo)
+	q.Push(noContext, task2)
+	q.Push(noContext, task3)
+	q.Push(noContext, task1)
+
+	_, _ = q.Poll(noContext, func(*Task) bool { return true })
+	q.Error(noContext, task1.ID, fmt.Errorf("cancelled"))
+	q.Error(noContext, task2.ID, fmt.Errorf("cancelled"))
+	q.Error(noContext, task3.ID, fmt.Errorf("cancelled"))
+
+	info := q.Info(noContext)
+	if len(info.Pending) != 0 {
+		t.Errorf("All pipelines should be cancelled")
+		return
+	}
+}
+
 func TestShouldRun(t *testing.T) {
 	task := &Task{
 		ID:           "2",

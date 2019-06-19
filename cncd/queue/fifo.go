@@ -103,6 +103,8 @@ func (q *fifo) Error(c context.Context, id string, err error) error {
 		taskEntry.error = err
 		close(taskEntry.done)
 		delete(q.running, id)
+	} else {
+		q.removeFromPending(id)
 	}
 	q.Unlock()
 	return nil
@@ -265,6 +267,20 @@ func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
 			if taskID == dep {
 				running.item.DepStatus[dep] = success
 			}
+		}
+	}
+}
+
+func (q *fifo) removeFromPending(taskID string) {
+	logrus.Debugf("queue: trying to remove %s", taskID)
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		task := e.Value.(*Task)
+		if task.ID == taskID {
+			logrus.Debugf("queue: %s is removed from pending", taskID)
+			q.pending.Remove(e)
+			return
 		}
 	}
 }

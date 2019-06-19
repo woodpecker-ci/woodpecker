@@ -156,13 +156,12 @@ func GetProcLogs(c *gin.Context) {
 	io.Copy(c.Writer, rc)
 }
 
+// DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	repo := session.Repo(c)
 
-	// parse the build number and job sequence number from
-	// the repquest parameter.
+	// parse the build number from the request parameter.
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
-	seq, _ := strconv.Atoi(c.Params.ByName("job"))
 
 	build, err := store.GetBuildNumber(c, repo, num)
 	if err != nil {
@@ -170,27 +169,40 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	proc, err := store.FromContext(c).ProcFind(build, seq)
+	procs, err := store.FromContext(c).ProcList(build)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
 	}
 
-	if proc.State != model.StatusRunning {
+	cancelled := false
+	for _, proc := range procs {
+		if proc.PPID != 0 {
+			continue
+		}
+
+		if proc.State != model.StatusRunning && proc.State != model.StatusPending {
+			continue
+		}
+
+		proc.State = model.StatusKilled
+		proc.Stopped = time.Now().Unix()
+		if proc.Started == 0 {
+			proc.Started = proc.Stopped
+		}
+		proc.ExitCode = 137
+		// TODO cancel child procs
+		store.FromContext(c).ProcUpdate(proc)
+
+		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
+		cancelled = true
+	}
+
+	if !cancelled {
 		c.String(400, "Cannot cancel a non-running build")
 		return
 	}
 
-	proc.State = model.StatusKilled
-	proc.Stopped = time.Now().Unix()
-	if proc.Started == 0 {
-		proc.Started = proc.Stopped
-	}
-	proc.ExitCode = 137
-	// TODO cancel child procs
-	store.FromContext(c).ProcUpdate(proc)
-
-	Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	c.String(204, "")
 }
 

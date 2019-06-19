@@ -441,7 +441,11 @@ func (s *RPC) updateProcState(proc *model.Proc, state rpc.State) {
 	proc.Stopped = state.Finished
 	proc.Error = state.Error
 	proc.ExitCode = state.ExitCode
-	proc.State = model.StatusSuccess
+	if state.Started == 0 {
+		proc.State = model.StatusSkipped
+	} else {
+		proc.State = model.StatusSuccess
+	}
 	if proc.ExitCode != 0 || proc.Error != "" {
 		proc.State = model.StatusFailure
 	}
@@ -522,21 +526,6 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 	s.pubsub.Publish(c, "topic/events", message)
 }
 
-func (s *RPC) checkCancelled(pipeline *rpc.Pipeline) (bool, error) {
-	pid, err := strconv.ParseInt(pipeline.ID, 10, 64)
-	if err != nil {
-		return false, err
-	}
-	proc, err := s.store.ProcLoad(pid)
-	if err != nil {
-		return false, err
-	}
-	if proc.State == model.StatusKilled {
-		return true, nil
-	}
-	return false, err
-}
-
 func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
 	var st *expr.Selector
 	var err error
@@ -606,42 +595,6 @@ func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto
 	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
 
 	return res, err
-
-	// fn := func(task *queue.Task) bool {
-	// 	for k, v := range req.GetFilter().Labels {
-	// 		if task.Labels[k] != v {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// }
-	// task, err := s.Queue.Poll(c, fn)
-	// if err != nil {
-	// 	return nil, err
-	// } else if task == nil {
-	// 	return nil, nil
-	// }
-	//
-	// pipeline := new(rpc.Pipeline)
-	// json.Unmarshal(task.Data, pipeline)
-	//
-	// res := new(proto.NextReply)
-	// res.Pipeline = new(proto.Pipeline)
-	// res.Pipeline.Id = pipeline.ID
-	// res.Pipeline.Timeout = pipeline.Timeout
-	// res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
-	//
-	// // check if the process was previously cancelled
-	// // cancelled, _ := s.checkCancelled(pipeline)
-	// // if cancelled {
-	// // 	logrus.Debugf("ignore pid %v: cancelled by user", pipeline.ID)
-	// // 	if derr := s.queue.Done(c, pipeline.ID); derr != nil {
-	// // 		logrus.Errorf("error: done: cannot ack proc_id %v: %s", pipeline.ID, err)
-	// // 	}
-	// // 	return nil, nil
-	// // }
-	//
-	// return res, nil
 }
 
 func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
