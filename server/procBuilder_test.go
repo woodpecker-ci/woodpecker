@@ -158,3 +158,49 @@ runs_on:
 		t.Fatal("Should run on failure")
 	}
 }
+
+func TestBranchFilter(t *testing.T) {
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &model.Build{Branch: "dev"},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Data: []byte(`
+pipeline:
+  xxx:
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
+branches: master
+`)},
+			&remote.FileMeta{Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 2 {
+		t.Fatal("Should have generated 2 buildItems")
+	}
+	if buildItems[0].Proc.State != model.StatusSkipped {
+		t.Fatal("Should not run on dev branch")
+	}
+	for _, child := range buildItems[0].Proc.Children {
+		if child.State != model.StatusSkipped {
+			t.Fatal("Children should skipped status too")
+		}
+	}
+	if buildItems[1].Proc.State != model.StatusPending {
+		t.Fatal("Should not run on dev branch")
+	}
+}

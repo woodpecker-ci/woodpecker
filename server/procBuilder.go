@@ -103,6 +103,10 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				return nil, lerr
 			}
 
+			if !parsed.Branches.Match(b.Curr.Branch) {
+				proc.State = model.StatusSkipped
+			}
+
 			metadata.SetPlatform(parsed.Platform)
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
@@ -219,6 +223,9 @@ func setBuildSteps(build *model.Build, buildItems []*buildItem) {
 					PPID:    item.Proc.PID,
 					PGID:    gid,
 					State:   model.StatusPending,
+				}
+				if item.Proc.State == model.StatusSkipped {
+					proc.State = model.StatusSkipped
 				}
 				build.Procs = append(build.Procs, proc)
 			}

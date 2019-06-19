@@ -33,6 +33,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/store"
 
+	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
 	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
@@ -150,14 +151,10 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	// verify that pipeline can be built at all
-	// parsedPipelineConfig, err := yaml.ParseString(conf.Data)
-	// if err == nil {
-	// 	if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-	// 		c.String(200, "Branch does not match restrictions defined in yaml")
-	// 		return
-	// 	}
-	// }
+	if branchFiltered(build, remoteYamlConfigs) {
+		c.String(200, "Branch does not match restrictions defined in yaml")
+		return
+	}
 
 	if repo.IsGated { // This feature is not clear to me. Reenabling once better understood
 		build.Status = model.StatusBlocked
@@ -262,6 +259,19 @@ func PostHook(c *gin.Context) {
 	queueBuild(build, repo, buildItems)
 }
 
+func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+	for _, remoteYamlConfig := range remoteYamlConfigs {
+		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
+		if err == nil {
+			if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
+			} else {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
 	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
@@ -315,6 +325,9 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
+		if item.Proc.State == model.StatusSkipped {
+			continue
+		}
 		task := new(queue.Task)
 		task.ID = fmt.Sprint(item.Proc.ID)
 		task.Labels = map[string]string{}
