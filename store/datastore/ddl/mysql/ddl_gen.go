@@ -168,6 +168,10 @@ var migrations = []struct {
 		name: "update-table-set-config-name",
 		stmt: updateTableSetConfigName,
 	},
+	{
+		name: "populate-build-config",
+		stmt: populateBuildConfig,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -659,4 +663,13 @@ ALTER TABLE config ADD COLUMN config_name TEXT
 
 var updateTableSetConfigName = `
 UPDATE config SET config_name = "drone"
+`
+
+//
+// 021_populate_build_config.sql
+//
+
+var populateBuildConfig = `
+INSERT INTO build_config (config_id, build_id)
+SELECT build_config_id, build_id FROM builds
 `
