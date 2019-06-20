@@ -1,0 +1,24 @@
+workspace:
+  base: /go
+  path: src/github.com/laszlocph/drone-oss-08
+
+pipeline:
+  deps:
+    image: golang:1.12.4
+    commands:
+      - go get -u golang.org/x/tools/cmd/cover
+      - go get -u golang.org/x/net/context
+      - go get -u golang.org/x/net/context/ctxhttp
+      - go get -u github.com/golang/protobuf/proto
+      - go get -u github.com/golang/protobuf/protoc-gen-go
+
+  test:
+    image: golang:1.12.4
+    commands:
+      - go test -cover $(go list ./... | grep -v /vendor/)
+
+  build:
+    image: golang:1.12.4
+    commands: sh .drone.sh
+    when:
+      event: [ push, tag ]
