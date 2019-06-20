@@ -1,4 +1,4 @@
-## Yes, it's a fork
+## Yes, it's a fork...
 
 This repository is a hard fork of the Drone CI system.
 
