@@ -107,6 +107,7 @@ func (q *fifo) Error(c context.Context, id string, err error) error {
 		q.removeFromPending(id)
 	}
 	q.Unlock()
+	go q.process()
 	return nil
 }
 
