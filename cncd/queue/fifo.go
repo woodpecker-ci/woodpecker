@@ -192,15 +192,7 @@ func (q *fifo) process() {
 	q.Lock()
 	defer q.Unlock()
 
-	// TODO(bradrydzewski) move this to a helper function
-	// push items to the front of the queue if the item expires.
-	for id, state := range q.running {
-		if time.Now().After(state.deadline) {
-			q.pending.PushFront(state.item)
-			delete(q.running, id)
-			close(state.done)
-		}
-	}
+	q.resubmitExpiredBuilds()
 
 	var next *list.Element
 loop:
@@ -209,6 +201,7 @@ loop:
 		task := e.Value.(*Task)
 		logrus.Debugf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 		if q.depsInQueue(task) {
+			logrus.Debugf("queue: skipping due to unmet dependencies %v", task.ID)
 			continue
 		}
 		for w := range q.workers {
@@ -230,12 +223,22 @@ loop:
 	}
 }
 
+func (q *fifo) resubmitExpiredBuilds() {
+	for id, state := range q.running {
+		if time.Now().After(state.deadline) {
+			q.pending.PushFront(state.item)
+			delete(q.running, id)
+			close(state.done)
+		}
+	}
+}
+
 func (q *fifo) depsInQueue(task *Task) bool {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		possibleDep, ok := e.Value.(*Task)
-		logrus.Debugf("queue: in queue right now: %v", possibleDep.ID)
+		logrus.Debugf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
 				return true
@@ -243,6 +246,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 		}
 	}
 	for possibleDepID := range q.running {
+		logrus.Debugf("queue: running right now: %v", possibleDepID)
 		for _, dep := range task.Dependencies {
 			if possibleDepID == dep {
 				return true
