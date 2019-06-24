@@ -24,6 +24,7 @@ type (
 		Labels    libcompose.SliceorMap
 		DependsOn []string `yaml:"depends_on,omitempty"`
 		RunsOn    []string `yaml:"runs_on,omitempty"`
+		SkipClone bool     `yaml:"skip_clone"`
 	}
 
 	// Workspace defines a pipeline workspace.
