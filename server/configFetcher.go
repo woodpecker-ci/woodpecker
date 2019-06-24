@@ -1,6 +1,7 @@
 package server
 
 import (
+	"strings"
 	"time"
 
 	"github.com/laszlocph/drone-oss-08/model"
@@ -18,7 +19,8 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
-			file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config) // either a file
+			// either a file
+			file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
 			if fileerr == nil {
 				return []*remote.FileMeta{&remote.FileMeta{
 					Name: cf.repo.Config,
@@ -26,7 +28,8 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 				}}, nil
 			}
 
-			dir, direrr := cf.remote_.Dir(cf.user, cf.repo, cf.build, ".drone") // or a folder
+			// or a folder
+			dir, direrr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
 			if direrr != nil {
 				return nil, direrr
 			}
