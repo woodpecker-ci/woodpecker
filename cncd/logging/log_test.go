@@ -30,7 +30,7 @@ func TestLogging(t *testing.T) {
 		logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() })
 	}()
 
-	<-time.After(time.Millisecond)
+	<-time.After(500 * time.Millisecond)
 
 	wg.Add(4)
 	go func() {
@@ -45,7 +45,7 @@ func TestLogging(t *testing.T) {
 		logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() })
 	}()
 
-	<-time.After(time.Millisecond)
+	<-time.After(500 * time.Millisecond)
 
 	wg.Wait()
 	cancel()

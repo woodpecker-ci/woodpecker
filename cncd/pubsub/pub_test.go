@@ -30,7 +30,7 @@ func TestPubsub(t *testing.T) {
 		broker.Subscribe(ctx, testTopic, func(message Message) { wg.Done() })
 	}()
 
-	<-time.After(time.Millisecond)
+	<-time.After(500 * time.Millisecond)
 
 	if _, ok := broker.(*publisher).topics[testTopic]; !ok {
 		t.Errorf("Expect topic registered with publisher")
@@ -86,7 +86,7 @@ func TestSubscriptionClosed(t *testing.T) {
 		wg.Done()
 	}()
 
-	<-time.After(time.Millisecond)
+	<-time.After(500 * time.Millisecond)
 
 	if _, ok := broker.(*publisher).topics[testTopic]; !ok {
 		t.Errorf("Expect topic registered with publisher")
