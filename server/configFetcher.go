@@ -19,8 +19,17 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
+			// .drone.yml takes precedence
+			file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
+			if fileerr == nil {
+				return []*remote.FileMeta{&remote.FileMeta{
+					Name: cf.repo.Config,
+					Data: file,
+				}}, nil
+			}
+
 			// either a file
-			file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
+			file, fileerr = cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
 			if fileerr == nil {
 				return []*remote.FileMeta{&remote.FileMeta{
 					Name: cf.repo.Config,
