@@ -180,6 +180,14 @@ var migrations = []struct {
 		name: "alter-table-add-task-run-on",
 		stmt: alterTableAddTaskRunOn,
 	},
+	{
+		name: "alter-table-add-repo-fallback",
+		stmt: alterTableAddRepoFallback,
+	},
+	{
+		name: "update-table-set-repo-fallback",
+		stmt: updateTableSetRepoFallback,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -692,4 +700,16 @@ ALTER TABLE tasks ADD COLUMN task_dependencies MEDIUMBLOB
 
 var alterTableAddTaskRunOn = `
 ALTER TABLE tasks ADD COLUMN task_run_on MEDIUMBLOB
+`
+
+//
+// 023_add_repo_fallback_column.sql
+//
+
+var alterTableAddRepoFallback = `
+ALTER TABLE repos ADD COLUMN repo_fallback BOOLEAN
+`
+
+var updateTableSetRepoFallback = `
+UPDATE repos SET repo_fallback='false'
 `
