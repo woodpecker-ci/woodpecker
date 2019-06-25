@@ -176,6 +176,14 @@ var migrations = []struct {
 		name: "populate-build-config",
 		stmt: populateBuildConfig,
 	},
+	{
+		name: "alter-table-add-task-dependencies",
+		stmt: alterTableAddTaskDependencies,
+	},
+	{
+		name: "alter-table-add-task-run-on",
+		stmt: alterTableAddTaskRunOn,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -673,4 +681,16 @@ UPDATE config SET config_name = "drone"
 var populateBuildConfig = `
 INSERT INTO build_config (config_id, build_id)
 SELECT build_config_id, build_id FROM builds
+`
+
+//
+// 022_add_task_columns.sql
+//
+
+var alterTableAddTaskDependencies = `
+ALTER TABLE tasks ADD COLUMN task_dependencies BLOB
+`
+
+var alterTableAddTaskRunOn = `
+ALTER TABLE tasks ADD COLUMN task_run_on BLOB
 `
