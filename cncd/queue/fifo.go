@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/Sirupsen/logrus"
 )
 
 type entry struct {
@@ -50,6 +52,17 @@ func (q *fifo) Push(c context.Context, task *Task) error {
 	return nil
 }
 
+// Push pushes an item to the tail of this queue.
+func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
+	q.Lock()
+	for _, task := range tasks {
+		q.pending.PushBack(task)
+	}
+	q.Unlock()
+	go q.process()
+	return nil
+}
+
 // Poll retrieves and removes the head of this queue.
 func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 	q.Lock()
@@ -82,11 +95,14 @@ func (q *fifo) Done(c context.Context, id string) error {
 // Error signals that the item is done executing with error.
 func (q *fifo) Error(c context.Context, id string, err error) error {
 	q.Lock()
-	state, ok := q.running[id]
+	taskEntry, ok := q.running[id]
 	if ok {
-		state.error = err
-		close(state.done)
+		q.updateDepStatusInQueue(id, err == nil)
+		taskEntry.error = err
+		close(taskEntry.done)
 		delete(q.running, id)
+	} else {
+		q.removeFromPending(id)
 	}
 	q.Unlock()
 	return nil
@@ -173,8 +189,44 @@ func (q *fifo) process() {
 	q.Lock()
 	defer q.Unlock()
 
-	// TODO(bradrydzewski) move this to a helper function
-	// push items to the front of the queue if the item expires.
+	q.resubmitExpiredBuilds()
+
+	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
+		task := pending.Value.(*Task)
+		delete(q.workers, worker)
+		q.pending.Remove(pending)
+		q.running[task.ID] = &entry{
+			item:     task,
+			done:     make(chan bool),
+			deadline: time.Now().Add(q.extension),
+		}
+		worker.channel <- task
+	}
+}
+
+func (q *fifo) assignToWorker() (*list.Element, *worker) {
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		task := e.Value.(*Task)
+		logrus.Debugf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
+		if q.depsInQueue(task) {
+			logrus.Debugf("queue: skipping due to unmet dependencies %v", task.ID)
+			continue
+		}
+
+		for w := range q.workers {
+			if w.filter(task) {
+				logrus.Debugf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
+				return e, w
+			}
+		}
+	}
+
+	return nil, nil
+}
+
+func (q *fifo) resubmitExpiredBuilds() {
 	for id, state := range q.running {
 		if time.Now().After(state.deadline) {
 			q.pending.PushFront(state.item)
@@ -182,26 +234,61 @@ func (q *fifo) process() {
 			close(state.done)
 		}
 	}
+}
 
+func (q *fifo) depsInQueue(task *Task) bool {
 	var next *list.Element
-loop:
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		item := e.Value.(*Task)
-		for w := range q.workers {
-			if w.filter(item) {
-				delete(q.workers, w)
-				q.pending.Remove(e)
-
-				q.running[item.ID] = &entry{
-					item:     item,
-					done:     make(chan bool),
-					deadline: time.Now().Add(q.extension),
-				}
-
-				w.channel <- item
-				break loop
+		possibleDep, ok := e.Value.(*Task)
+		logrus.Debugf("queue: pending right now: %v", possibleDep.ID)
+		for _, dep := range task.Dependencies {
+			if ok && possibleDep.ID == dep {
+				return true
 			}
+		}
+	}
+	for possibleDepID := range q.running {
+		logrus.Debugf("queue: running right now: %v", possibleDepID)
+		for _, dep := range task.Dependencies {
+			if possibleDepID == dep {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		pending, ok := e.Value.(*Task)
+		for _, dep := range pending.Dependencies {
+			if ok && taskID == dep {
+				pending.DepStatus[dep] = success
+			}
+		}
+	}
+	for _, running := range q.running {
+		for _, dep := range running.item.Dependencies {
+			if taskID == dep {
+				running.item.DepStatus[dep] = success
+			}
+		}
+	}
+}
+
+func (q *fifo) removeFromPending(taskID string) {
+	logrus.Debugf("queue: trying to remove %s", taskID)
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		task := e.Value.(*Task)
+		if task.ID == taskID {
+			logrus.Debugf("queue: %s is removed from pending", taskID)
+			q.pending.Remove(e)
+			return
 		}
 	}
 }

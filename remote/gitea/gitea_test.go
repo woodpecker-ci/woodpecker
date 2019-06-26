@@ -18,10 +18,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote/gitea/fixtures"
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote/gitea/fixtures"
 )
 
 func Test_gitea(t *testing.T) {
@@ -149,7 +149,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return nil from send build status", func() {
-			err := c.Status(fakeUser, fakeRepo, fakeBuild, "http://gitea.io")
+			err := c.Status(fakeUser, fakeRepo, fakeBuild, "http://gitea.io", nil)
 			g.Assert(err == nil).IsTrue()
 		})
 

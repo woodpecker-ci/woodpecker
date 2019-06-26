@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/franela/goblin"
+	"github.com/laszlocph/drone-oss-08/model"
 )
 
 func TestBuilds(t *testing.T) {

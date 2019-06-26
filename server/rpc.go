@@ -113,26 +113,22 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 	if err != nil {
 		return nil, err
 	}
-	task, err := s.queue.Poll(c, fn)
-	if err != nil {
-		return nil, err
-	} else if task == nil {
-		return nil, nil
+	for {
+		task, err := s.queue.Poll(c, fn)
+		if err != nil {
+			return nil, err
+		} else if task == nil {
+			return nil, nil
+		}
+
+		if task.ShouldRun() {
+			pipeline := new(rpc.Pipeline)
+			err = json.Unmarshal(task.Data, pipeline)
+			return pipeline, err
+		} else {
+			s.Done(c, task.ID, rpc.State{})
+		}
 	}
-	pipeline := new(rpc.Pipeline)
-
-	// check if the process was previously cancelled
-	// cancelled, _ := s.checkCancelled(pipeline)
-	// if cancelled {
-	// 	logrus.Debugf("ignore pid %v: cancelled by user", pipeline.ID)
-	// 	if derr := s.queue.Done(c, pipeline.ID); derr != nil {
-	// 		logrus.Errorf("error: done: cannot ack proc_id %v: %s", pipeline.ID, err)
-	// 	}
-	// 	return nil, nil
-	// }
-
-	err = json.Unmarshal(task.Data, pipeline)
-	return pipeline, err
 }
 
 // Wait implements the rpc.Wait function
@@ -383,76 +379,139 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	proc.Stopped = state.Finished
-	proc.Error = state.Error
-	proc.ExitCode = state.ExitCode
-	proc.State = model.StatusSuccess
-	if proc.ExitCode != 0 || proc.Error != "" {
-		proc.State = model.StatusFailure
-	}
-	if err := s.store.ProcUpdate(proc); err != nil {
-		log.Printf("error: done: cannot update proc_id %d state: %s", procID, err)
-	}
+	s.updateProcState(proc, state)
 
-	if err := s.queue.Done(c, id); err != nil {
+	var queueErr error
+	if proc.Failing() {
+		queueErr = s.queue.Error(c, id, fmt.Errorf("Proc finished with exitcode %d, %s", state.ExitCode, state.Error))
+	} else {
+		queueErr = s.queue.Done(c, id)
+	}
+	if queueErr != nil {
 		log.Printf("error: done: cannot ack proc_id %d: %s", procID, err)
 	}
 
-	// TODO handle this error
 	procs, _ := s.store.ProcList(build)
-	for _, p := range procs {
-		if p.Running() && p.PPID == proc.PID {
-			p.State = model.StatusSkipped
-			if p.Started != 0 {
-				p.State = model.StatusSuccess // for deamons that are killed
-				p.Stopped = proc.Stopped
-			}
-			if err := s.store.ProcUpdate(p); err != nil {
-				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
-			}
-		}
-	}
+	s.completeChildrenIfParentCompleted(procs, proc)
 
-	running := false
-	status := model.StatusSuccess
-	for _, p := range procs {
-		if p.PPID == 0 {
-			if p.Running() {
-				running = true
-			}
-			if p.Failing() {
-				status = p.State
-			}
-		}
-	}
-	if !running {
-		build.Status = status
+	if !isThereRunningStage(procs) {
+		build.Status = buildStatus(procs)
 		build.Finished = proc.Stopped
 		if err := s.store.UpdateBuild(build); err != nil {
 			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
-		// update the status
-		user, err := s.store.GetUser(repo.UserID)
-		if err == nil {
-			if refresher, ok := s.remote.(remote.Refresher); ok {
-				ok, _ := refresher.Refresh(user)
-				if ok {
-					s.store.UpdateUser(user)
-				}
-			}
-			uri := fmt.Sprintf("%s/%s/%d", s.host, repo.FullName, build.Number)
-			err = s.remote.Status(user, repo, build, uri)
-			if err != nil {
-				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-			}
+		if !isMultiPipeline(procs) {
+			s.updateRemoteStatus(repo, build, nil)
 		}
+	}
+
+	if isMultiPipeline(procs) {
+		s.updateRemoteStatus(repo, build, proc)
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Printf("error: done: cannot close build_id %d logger: %s", proc.ID, err)
 	}
 
+	s.notify(c, repo, build, procs)
+
+	return nil
+}
+
+func isMultiPipeline(procs []*model.Proc) bool {
+	countPPIDZero := 0
+	for _, proc := range procs {
+		if proc.PPID == 0 {
+			countPPIDZero++
+		}
+	}
+	return countPPIDZero > 1
+}
+
+// Log implements the rpc.Log function
+func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
+	entry := new(logging.Entry)
+	entry.Data, _ = json.Marshal(line)
+	s.logger.Write(c, id, entry)
+	return nil
+}
+
+func (s *RPC) updateProcState(proc *model.Proc, state rpc.State) {
+	proc.Stopped = state.Finished
+	proc.Error = state.Error
+	proc.ExitCode = state.ExitCode
+	if state.Started == 0 {
+		proc.State = model.StatusSkipped
+	} else {
+		proc.State = model.StatusSuccess
+	}
+	if proc.ExitCode != 0 || proc.Error != "" {
+		proc.State = model.StatusFailure
+	}
+	if err := s.store.ProcUpdate(proc); err != nil {
+		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+	}
+}
+
+func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
+	for _, p := range procs {
+		if p.Running() && p.PPID == completedProc.PID {
+			p.State = model.StatusSkipped
+			if p.Started != 0 {
+				p.State = model.StatusSuccess // for deamons that are killed
+				p.Stopped = completedProc.Stopped
+			}
+			if err := s.store.ProcUpdate(p); err != nil {
+				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
+			}
+		}
+	}
+}
+
+func isThereRunningStage(procs []*model.Proc) bool {
+	for _, p := range procs {
+		if p.PPID == 0 {
+			if p.Running() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func buildStatus(procs []*model.Proc) string {
+	status := model.StatusSuccess
+
+	for _, p := range procs {
+		if p.PPID == 0 {
+			if p.Failing() {
+				status = p.State
+			}
+		}
+	}
+
+	return status
+}
+
+func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *model.Proc) {
+	user, err := s.store.GetUser(repo.UserID)
+	if err == nil {
+		if refresher, ok := s.remote.(remote.Refresher); ok {
+			ok, _ := refresher.Refresh(user)
+			if ok {
+				s.store.UpdateUser(user)
+			}
+		}
+		uri := fmt.Sprintf("%s/%s/%d", s.host, repo.FullName, build.Number)
+		err = s.remote.Status(user, repo, build, uri, proc)
+		if err != nil {
+			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+		}
+	}
+}
+
+func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) {
 	build.Procs = model.Tree(procs)
 	message := pubsub.Message{
 		Labels: map[string]string{
@@ -465,31 +524,6 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		Build: *build,
 	})
 	s.pubsub.Publish(c, "topic/events", message)
-
-	return nil
-}
-
-// Log implements the rpc.Log function
-func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
-	entry := new(logging.Entry)
-	entry.Data, _ = json.Marshal(line)
-	s.logger.Write(c, id, entry)
-	return nil
-}
-
-func (s *RPC) checkCancelled(pipeline *rpc.Pipeline) (bool, error) {
-	pid, err := strconv.ParseInt(pipeline.ID, 10, 64)
-	if err != nil {
-		return false, err
-	}
-	proc, err := s.store.ProcLoad(pid)
-	if err != nil {
-		return false, err
-	}
-	if proc.State == model.StatusKilled {
-		return true, nil
-	}
-	return false, err
 }
 
 func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
@@ -561,42 +595,6 @@ func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto
 	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
 
 	return res, err
-
-	// fn := func(task *queue.Task) bool {
-	// 	for k, v := range req.GetFilter().Labels {
-	// 		if task.Labels[k] != v {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// }
-	// task, err := s.Queue.Poll(c, fn)
-	// if err != nil {
-	// 	return nil, err
-	// } else if task == nil {
-	// 	return nil, nil
-	// }
-	//
-	// pipeline := new(rpc.Pipeline)
-	// json.Unmarshal(task.Data, pipeline)
-	//
-	// res := new(proto.NextReply)
-	// res.Pipeline = new(proto.Pipeline)
-	// res.Pipeline.Id = pipeline.ID
-	// res.Pipeline.Timeout = pipeline.Timeout
-	// res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
-	//
-	// // check if the process was previously cancelled
-	// // cancelled, _ := s.checkCancelled(pipeline)
-	// // if cancelled {
-	// // 	logrus.Debugf("ignore pid %v: cancelled by user", pipeline.ID)
-	// // 	if derr := s.queue.Done(c, pipeline.ID); derr != nil {
-	// // 		logrus.Errorf("error: done: cannot ack proc_id %v: %s", pipeline.ID, err)
-	// // 	}
-	// // 	return nil, nil
-	// // }
-	//
-	// return res, nil
 }
 
 func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {

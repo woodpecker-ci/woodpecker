@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
+	"sort"
 	"strings"
 
 	"github.com/drone/envsubst"
@@ -28,6 +29,7 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/drone-oss-08/remote"
 )
 
 // Takes the hook data and the yaml and returns in internal data model
@@ -39,154 +41,196 @@ type procBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yaml  string
+	Yamls []*remote.FileMeta
 	Envs  map[string]string
 }
 
 type buildItem struct {
-	Proc     *model.Proc
-	Platform string
-	Labels   map[string]string
-	Config   *backend.Config
+	Proc      *model.Proc
+	Platform  string
+	Labels    map[string]string
+	DependsOn []string
+	RunsOn    []string
+	Config    *backend.Config
 }
 
 func (b *procBuilder) Build() ([]*buildItem, error) {
-
-	axes, err := matrix.ParseString(b.Yaml)
-	if err != nil {
-		return nil, err
-	}
-	if len(axes) == 0 {
-		axes = append(axes, matrix.Axis{})
-	}
-
 	var items []*buildItem
-	for i, axis := range axes {
-		proc := &model.Proc{
-			BuildID: b.Curr.ID,
-			PID:     i + 1,
-			PGID:    i + 1,
-			State:   model.StatusPending,
-			Environ: axis,
-		}
 
-		metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
-		environ := metadata.Environ()
-		for k, v := range metadata.EnvironDrone() {
-			environ[k] = v
-		}
-		for k, v := range axis {
-			environ[k] = v
-		}
+	sort.Sort(remote.ByName(b.Yamls))
 
-		var secrets []compiler.Secret
-		for _, sec := range b.Secs {
-			if !sec.Match(b.Curr.Event) {
-				continue
-			}
-			secrets = append(secrets, compiler.Secret{
-				Name:  sec.Name,
-				Value: sec.Value,
-				Match: sec.Images,
-			})
-		}
-
-		y := b.Yaml
-		s, err := envsubst.Eval(y, func(name string) string {
-			env := environ[name]
-			if strings.Contains(env, "\n") {
-				env = fmt.Sprintf("%q", env)
-			}
-			return env
-		})
+	for j, y := range b.Yamls {
+		// matrix axes
+		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
 			return nil, err
 		}
-		y = s
-
-		parsed, err := yaml.ParseString(y)
-		if err != nil {
-			return nil, err
-		}
-		metadata.Sys.Arch = parsed.Platform
-		if metadata.Sys.Arch == "" {
-			metadata.Sys.Arch = "linux/amd64"
+		if len(axes) == 0 {
+			axes = append(axes, matrix.Axis{})
 		}
 
-		lerr := linter.New(
-			linter.WithTrusted(b.Repo.IsTrusted),
-		).Lint(parsed)
-		if lerr != nil {
-			return nil, lerr
-		}
+		for i, axis := range axes {
+			proc := &model.Proc{
+				BuildID: b.Curr.ID,
+				PID:     j + i + 1,
+				PGID:    j + i + 1,
+				State:   model.StatusPending,
+				Environ: axis,
+				Name:    sanitizePath(y.Name),
+			}
+			b.Curr.Procs = append(b.Curr.Procs, proc)
 
-		var registries []compiler.Registry
-		for _, reg := range b.Regs {
-			registries = append(registries, compiler.Registry{
-				Hostname: reg.Address,
-				Username: reg.Username,
-				Password: reg.Password,
-				Email:    reg.Email,
-			})
-		}
+			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
+			environ := b.environmentVariables(metadata, axis)
 
-		ir := compiler.New(
-			compiler.WithEnviron(environ),
-			compiler.WithEnviron(b.Envs),
-			compiler.WithEscalated(Config.Pipeline.Privileged...),
-			compiler.WithResourceLimit(Config.Pipeline.Limits.MemSwapLimit, Config.Pipeline.Limits.MemLimit, Config.Pipeline.Limits.ShmSize, Config.Pipeline.Limits.CPUQuota, Config.Pipeline.Limits.CPUShares, Config.Pipeline.Limits.CPUSet),
-			compiler.WithVolumes(Config.Pipeline.Volumes...),
-			compiler.WithNetworks(Config.Pipeline.Networks...),
-			compiler.WithLocal(false),
-			compiler.WithOption(
-				compiler.WithNetrc(
-					b.Netrc.Login,
-					b.Netrc.Password,
-					b.Netrc.Machine,
-				),
-				b.Repo.IsPrivate,
-			),
-			compiler.WithRegistry(registries...),
-			compiler.WithSecret(secrets...),
-			compiler.WithPrefix(
-				fmt.Sprintf(
-					"%d_%d",
-					proc.ID,
-					rand.Int(),
-				),
-			),
-			compiler.WithEnviron(proc.Environ),
-			compiler.WithProxy(),
-			compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
-			compiler.WithMetadata(metadata),
-		).Compile(parsed)
+			// substitute vars
+			substituted, err := b.envsubst_(string(y.Data), environ)
+			if err != nil {
+				return nil, err
+			}
 
-		// for _, sec := range b.Secs {
-		// 	if !sec.MatchEvent(b.Curr.Event) {
-		// 		continue
-		// 	}
-		// 	if b.Curr.Verified || sec.SkipVerify {
-		// 		ir.Secrets = append(ir.Secrets, &backend.Secret{
-		// 			Mask:  sec.Conceal,
-		// 			Name:  sec.Name,
-		// 			Value: sec.Value,
-		// 		})
-		// 	}
-		// }
+			// parse yaml pipeline
+			parsed, err := yaml.ParseString(substituted)
+			if err != nil {
+				return nil, err
+			}
 
-		item := &buildItem{
-			Proc:     proc,
-			Config:   ir,
-			Labels:   parsed.Labels,
-			Platform: metadata.Sys.Arch,
+			// lint pipeline
+			lerr := linter.New(
+				linter.WithTrusted(b.Repo.IsTrusted),
+			).Lint(parsed)
+			if lerr != nil {
+				return nil, lerr
+			}
+
+			if !parsed.Branches.Match(b.Curr.Branch) {
+				proc.State = model.StatusSkipped
+			}
+
+			metadata.SetPlatform(parsed.Platform)
+
+			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+
+			item := &buildItem{
+				Proc:      proc,
+				Config:    ir,
+				Labels:    parsed.Labels,
+				DependsOn: parsed.DependsOn,
+				RunsOn:    parsed.RunsOn,
+				Platform:  metadata.Sys.Arch,
+			}
+			if item.Labels == nil {
+				item.Labels = map[string]string{}
+			}
+			items = append(items, item)
 		}
-		if item.Labels == nil {
-			item.Labels = map[string]string{}
-		}
-		items = append(items, item)
 	}
+
+	setBuildSteps(b.Curr, items)
 
 	return items, nil
+}
+
+func (b *procBuilder) envsubst_(y string, environ map[string]string) (string, error) {
+	return envsubst.Eval(y, func(name string) string {
+		env := environ[name]
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
+	})
+}
+
+func (b *procBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+	environ := metadata.Environ()
+	for k, v := range metadata.EnvironDrone() {
+		environ[k] = v
+	}
+	for k, v := range axis {
+		environ[k] = v
+	}
+	return environ
+}
+
+func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+	var secrets []compiler.Secret
+	for _, sec := range b.Secs {
+		if !sec.Match(b.Curr.Event) {
+			continue
+		}
+		secrets = append(secrets, compiler.Secret{
+			Name:  sec.Name,
+			Value: sec.Value,
+			Match: sec.Images,
+		})
+	}
+
+	var registries []compiler.Registry
+	for _, reg := range b.Regs {
+		registries = append(registries, compiler.Registry{
+			Hostname: reg.Address,
+			Username: reg.Username,
+			Password: reg.Password,
+			Email:    reg.Email,
+		})
+	}
+
+	return compiler.New(
+		compiler.WithEnviron(environ),
+		compiler.WithEnviron(b.Envs),
+		compiler.WithEscalated(Config.Pipeline.Privileged...),
+		compiler.WithResourceLimit(Config.Pipeline.Limits.MemSwapLimit, Config.Pipeline.Limits.MemLimit, Config.Pipeline.Limits.ShmSize, Config.Pipeline.Limits.CPUQuota, Config.Pipeline.Limits.CPUShares, Config.Pipeline.Limits.CPUSet),
+		compiler.WithVolumes(Config.Pipeline.Volumes...),
+		compiler.WithNetworks(Config.Pipeline.Networks...),
+		compiler.WithLocal(false),
+		compiler.WithOption(
+			compiler.WithNetrc(
+				b.Netrc.Login,
+				b.Netrc.Password,
+				b.Netrc.Machine,
+			),
+			b.Repo.IsPrivate,
+		),
+		compiler.WithRegistry(registries...),
+		compiler.WithSecret(secrets...),
+		compiler.WithPrefix(
+			fmt.Sprintf(
+				"%d_%d",
+				procID,
+				rand.Int(),
+			),
+		),
+		compiler.WithProxy(),
+		compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+		compiler.WithMetadata(metadata),
+	).Compile(parsed)
+}
+
+func setBuildSteps(build *model.Build, buildItems []*buildItem) {
+	pcounter := len(buildItems)
+	for _, item := range buildItems {
+		for _, stage := range item.Config.Stages {
+			var gid int
+			for _, step := range stage.Steps {
+				pcounter++
+				if gid == 0 {
+					gid = pcounter
+				}
+				proc := &model.Proc{
+					BuildID: build.ID,
+					Name:    step.Alias,
+					PID:     pcounter,
+					PPID:    item.Proc.PID,
+					PGID:    gid,
+					State:   model.StatusPending,
+				}
+				if item.Proc.State == model.StatusSkipped {
+					proc.State = model.StatusSkipped
+				}
+				build.Procs = append(build.Procs, proc)
+			}
+		}
+	}
 }
 
 // return the metadata from the cli context.
@@ -260,4 +304,11 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Arch: "linux/amd64",
 		},
 	}
+}
+
+func sanitizePath(path string) string {
+	path = strings.TrimSuffix(path, ".yml")
+	path = strings.TrimPrefix(path, ".drone/")
+	path = strings.TrimPrefix(path, ".")
+	return path
 }

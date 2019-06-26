@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
@@ -225,20 +226,75 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches the file from the GitHub repository and returns its contents.
 func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	return c.FileRef(u, r, b.Commit, f)
-}
-
-// FileRef fetches the file from the GitHub repository and returns its contents.
-func (c *client) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = ref
+	opts.Ref = b.Commit
 	data, _, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
 	if err != nil {
 		return nil, err
 	}
+	if data == nil {
+		return nil, fmt.Errorf("%s is a folder not a file use Dir(..)", f)
+	}
 	return data.Decode()
+}
+
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	client := c.newClientToken(u.Token)
+
+	opts := new(github.RepositoryContentGetOptions)
+	opts.Ref = b.Commit
+	_, data, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	fc := make(chan *remote.FileMeta)
+	errc := make(chan error)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(data))
+
+	for _, file := range data {
+		go func(path string) {
+			content, err := c.File(u, r, b, path)
+			if err != nil {
+				errc <- err
+			} else {
+				fc <- &remote.FileMeta{
+					Name: path,
+					Data: content,
+				}
+			}
+		}(f + "/" + *file.Name)
+	}
+
+	var files []*remote.FileMeta
+	var errors []error
+
+	go func() {
+		for {
+			select {
+			case err, open := <-errc:
+				if open {
+					errors = append(errors, err)
+					wg.Done()
+				}
+			case fileMeta, open := <-fc:
+				if open {
+					files = append(files, fileMeta)
+					wg.Done()
+				}
+			}
+		}
+	}()
+
+	wg.Wait()
+	close(fc)
+	close(errc)
+
+	return files, nil
 }
 
 // Netrc returns a netrc file capable of authenticating GitHub requests and
@@ -374,17 +430,17 @@ func matchingHooks(hooks []github.Hook, rawurl string) *github.Hook {
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := c.newClientToken(u.Token)
 	switch b.Event {
 	case "deployment":
 		return deploymentStatus(client, r, b, link)
 	default:
-		return repoStatus(client, r, b, link, c.Context)
+		return repoStatus(client, r, b, link, c.Context, proc)
 	}
 }
 
-func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string) error {
+func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
 	context := ctx
 	switch b.Event {
 	case model.EventPull:
@@ -395,10 +451,19 @@ func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx 
 		}
 	}
 
+	status := github.String(convertStatus(b.Status))
+	desc := github.String(convertDesc(b.Status))
+
+	if proc != nil {
+		context += "/" + proc.Name
+		status = github.String(convertStatus(proc.State))
+		desc = github.String(convertDesc(proc.State))
+	}
+
 	data := github.RepoStatus{
 		Context:     github.String(context),
-		State:       github.String(convertStatus(b.Status)),
-		Description: github.String(convertDesc(b.Status)),
+		State:       status,
+		Description: desc,
 		TargetURL:   github.String(link),
 	}
 	_, _, err := client.Repositories.CreateStatus(r.Owner, r.Name, b.Commit, &data)
