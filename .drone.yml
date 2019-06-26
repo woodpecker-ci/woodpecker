@@ -113,7 +113,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.96-multi-pipeline-alpine ]
+    tag: [ 0.8.97-alpine ]
     when:
       event: tag
 
@@ -122,7 +122,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.96-multi-pipeline-alpine ]
+    tag: [ 0.8.97-alpine ]
     when:
       event: tag
 
@@ -130,7 +130,7 @@ pipeline:
     image: plugins/docker
     repo: laszlocloud/drone-oss-08-server
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.96-multi-pipeline ]
+    tag: [ 0.8.97 ]
     when:
       event: tag
 
@@ -139,7 +139,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.96-multi-pipeline ]
+    tag: [ 0.8.97 ]
     when:
       event: tag
 
