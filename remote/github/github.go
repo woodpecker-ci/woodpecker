@@ -105,7 +105,7 @@ type client struct {
 
 // Login authenticates the session and returns the remote user details.
 func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(httputil.GetURL(req))
+	config := c.newConfig(req)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -348,7 +348,16 @@ func (c *client) newContext() context.Context {
 }
 
 // helper function to return the GitHub oauth2 config
-func (c *client) newConfig(redirect string) *oauth2.Config {
+func (c *client) newConfig(req *http.Request) *oauth2.Config {
+	var redirect string
+
+	intendedURL := req.URL.Query()["url"]
+	if len(intendedURL) > 0 {
+		redirect = fmt.Sprintf("%s/authorize?url=%s", httputil.GetURL(req), intendedURL[0])
+	} else {
+		redirect = fmt.Sprintf("%s/authorize", httputil.GetURL(req))
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -357,7 +366,7 @@ func (c *client) newConfig(redirect string) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
+		RedirectURL: redirect,
 	}
 }
 

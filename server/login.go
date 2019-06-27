@@ -38,7 +38,12 @@ func HandleLogin(c *gin.Context) {
 	if err := r.FormValue("error"); err != "" {
 		http.Redirect(w, r, "/login/error?code="+err, 303)
 	} else {
-		http.Redirect(w, r, "/authorize", 303)
+		intendedURL := r.URL.Query()["url"]
+		if len(intendedURL) > 0 {
+			http.Redirect(w, r, "/authorize?url="+intendedURL[0], 303)
+		} else {
+			http.Redirect(w, r, "/authorize", 303)
+		}
 	}
 }
 
@@ -136,8 +141,13 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenstr)
-	c.Redirect(303, "/")
 
+	intendedURL := c.Request.URL.Query()["url"]
+	if len(intendedURL) > 0 {
+		c.Redirect(303, intendedURL[0])
+	} else {
+		c.Redirect(303, "/")
+	}
 }
 
 func GetLogout(c *gin.Context) {

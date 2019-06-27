@@ -425,10 +425,10 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "R/gRUF6hXEFbDGSIOKt6VdCPwHE=",
+			"checksumSHA1": "0EDT2W8Q8n8qx0eTWKpYy1Zt/6c=",
 			"path": "github.com/laszlocph/drone-ui/dist",
-			"revision": "cb186a44722ce1a6a6795aa36ebce1a53375e118",
-			"revisionTime": "2019-06-26T08:23:24Z",
+			"revision": "81a0263ee4e9b251a5741270b8b4120190fa6747",
+			"revisionTime": "2019-06-27T06:23:05Z",
 			"version": "master",
 			"versionExact": "master"
 		},
