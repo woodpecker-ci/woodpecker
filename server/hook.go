@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"strconv"
 	"time"
@@ -49,6 +50,16 @@ func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(200,
 		Config.Services.Queue.Info(c),
 	)
+}
+
+func PauseQueue(c *gin.Context) {
+	Config.Services.Queue.Pause()
+	c.Status(http.StatusOK)
+}
+
+func ResumeQueue(c *gin.Context) {
+	Config.Services.Queue.Resume()
+	c.Status(http.StatusOK)
 }
 
 func PostHook(c *gin.Context) {

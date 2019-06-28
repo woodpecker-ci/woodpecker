@@ -93,6 +93,7 @@ type InfoT struct {
 		Running  int `json:"running_count"`
 		Complete int `json:"completed_count"`
 	} `json:"stats"`
+	Paused bool
 }
 
 // Filter filters tasks in the queue. If the Filter returns false,
@@ -128,4 +129,10 @@ type Queue interface {
 
 	// Info returns internal queue information.
 	Info(c context.Context) InfoT
+
+	// Stops the queue from handing out new work items in Poll
+	Pause()
+
+	// Starts the queue again, Poll returns new items
+	Resume()
 }
