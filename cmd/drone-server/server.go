@@ -563,23 +563,17 @@ func server(c *cli.Context) error {
 		auther := &authorizer{
 			password: c.String("agent-secret"),
 		}
-		s := grpc.NewServer(
+		grpcServer := grpc.NewServer(
 			grpc.StreamInterceptor(auther.streamInterceptor),
 			grpc.UnaryInterceptor(auther.unaryIntercaptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		ss := new(droneserver.DroneServer)
-		ss.Queue = droneserver.Config.Services.Queue
-		ss.Logger = droneserver.Config.Services.Logs
-		ss.Pubsub = droneserver.Config.Services.Pubsub
-		ss.Remote = remote_
-		ss.Store = store_
-		ss.Host = droneserver.Config.Server.Host
-		proto.RegisterDroneServer(s, ss)
+		droneServer := droneserver.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
+		proto.RegisterDroneServer(grpcServer, droneServer)
 
-		err = s.Serve(lis)
+		err = grpcServer.Serve(lis)
 		if err != nil {
 			logrus.Error(err)
 			return err
@@ -651,11 +645,6 @@ func server(c *cli.Context) error {
 	return g.Wait()
 }
 
-// HACK please excuse the message during this period of heavy refactoring.
-// We are currently transitioning from storing services (ie database, queue)
-// in the gin.Context to storing them in a struct. We are also moving away
-// from gin to gorilla. We will temporarily use global during our refactoring
-// which will be removing in the final implementation.
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// storage

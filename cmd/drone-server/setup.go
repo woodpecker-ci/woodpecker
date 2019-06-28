@@ -219,7 +219,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	})
 	builds := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "drone",
-		Name:      "build_count",
+		Name:      "build_total_count",
 		Help:      "Total number of builds.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
