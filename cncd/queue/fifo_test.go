@@ -238,6 +238,52 @@ func TestFifoCancel(t *testing.T) {
 	}
 }
 
+func TestFifoPause(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	q := New().(*fifo)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		_, _ = q.Poll(noContext, func(*Task) bool { return true })
+		wg.Done()
+	}()
+
+
+	q.Pause()
+	t0 := time.Now()
+	q.Push(noContext, task1)
+	time.Sleep(20 * time.Millisecond)
+	q.Resume()
+
+	wg.Wait()
+	t1 := time.Now()
+
+	if t1.Sub(t0) < 20 * time.Millisecond {
+		t.Errorf("Should have waited til resume")
+	}
+
+	q.Pause()
+	q.Push(noContext, task1)
+	q.Resume()
+	_, _ = q.Poll(noContext, func(*Task) bool { return true })
+}
+
+func TestFifoPauseResume(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	q := New().(*fifo)
+	q.Pause()
+	q.Push(noContext, task1)
+	q.Resume()
+
+	_, _ = q.Poll(noContext, func(*Task) bool { return true })
+}
+
 func TestShouldRun(t *testing.T) {
 	task := &Task{
 		ID:           "2",

@@ -31,6 +31,7 @@ type fifo struct {
 	running   map[string]*entry
 	pending   *list.List
 	extension time.Duration
+	paused    bool
 }
 
 // New returns a new fifo queue.
@@ -40,6 +41,7 @@ func New() Queue {
 		running:   map[string]*entry{},
 		pending:   list.New(),
 		extension: time.Minute * 10,
+		paused:    false,
 	}
 }
 
@@ -167,14 +169,32 @@ func (q *fifo) Info(c context.Context) InfoT {
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
 	}
+	stats.Paused = q.paused
 
 	q.Unlock()
 	return stats
 }
 
+func (q *fifo) Pause() {
+	q.Lock()
+	q.paused = true
+	q.Unlock()
+}
+
+func (q *fifo) Resume() {
+	q.Lock()
+	q.paused = false
+	q.Unlock()
+	go q.process()
+}
+
 // helper function that loops through the queue and attempts to
 // match the item to a single subscriber.
 func (q *fifo) process() {
+	if q.paused {
+		return
+	}
+
 	defer func() {
 		// the risk of panic is low. This code can probably be removed
 		// once the code has been used in real world installs without issue.
