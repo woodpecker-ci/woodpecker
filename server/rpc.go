@@ -33,6 +33,8 @@ import (
 	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
 	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
@@ -41,11 +43,6 @@ import (
 	"github.com/drone/expr"
 )
 
-// This file is a complete disaster because I'm trying to wedge in some
-// experimental code. Please pardon our appearance during renovations.
-
-// Config is an evil global configuration that will be used as we transition /
-// refactor the codebase to move away from storing these values in the Context.
 var Config = struct {
 	Services struct {
 		Pubsub     pubsub.Publisher
@@ -91,12 +88,14 @@ var Config = struct {
 }{}
 
 type RPC struct {
-	remote remote.Remote
-	queue  queue.Queue
-	pubsub pubsub.Publisher
-	logger logging.Log
-	store  store.Store
-	host   string
+	remote     remote.Remote
+	queue      queue.Queue
+	pubsub     pubsub.Publisher
+	logger     logging.Log
+	store      store.Store
+	host       string
+	buildTime  *prometheus.GaugeVec
+	buildCount *prometheus.CounterVec
 }
 
 // Next implements the rpc.Next function
@@ -416,6 +415,14 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	s.notify(c, repo, build, procs)
 
+	if build.Status == model.StatusSuccess || build.Status == model.StatusFailure {
+		s.buildCount.WithLabelValues(repo.FullName, build.Branch, build.Status, "total").Inc()
+		s.buildTime.WithLabelValues(repo.FullName, build.Branch, build.Status, "total").Set(float64(build.Finished - build.Started))
+	}
+	if isMultiPipeline(procs) {
+		s.buildTime.WithLabelValues(repo.FullName, build.Branch, proc.State, proc.Name).Set(float64(proc.Stopped - proc.Started))
+	}
+
 	return nil
 }
 
@@ -558,30 +565,41 @@ func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
 
 // DroneServer is a grpc server implementation.
 type DroneServer struct {
-	Remote remote.Remote
-	Queue  queue.Queue
-	Pubsub pubsub.Publisher
-	Logger logging.Log
-	Store  store.Store
-	Host   string
+	peer RPC
+}
+
+func NewDroneServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *DroneServer {
+	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "build_time",
+		Help:      "Build time.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "drone",
+		Name:      "build_count",
+		Help:      "Build count.",
+	}, []string{"repo", "branch", "status", "pipeline"})
+	peer := RPC{
+		remote:     remote,
+		store:      store,
+		queue:      queue,
+		pubsub:     pubsub,
+		logger:     logger,
+		host:       host,
+		buildTime:  buildTime,
+		buildCount: buildCount,
+	}
+	return &DroneServer{peer: peer}
 }
 
 func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 		Expr:   req.GetFilter().GetExpr(),
 	}
 
 	res := new(proto.NextReply)
-	pipeline, err := peer.Next(c, filter)
+	pipeline, err := s.peer.Next(c, filter)
 	if err != nil {
 		return res, err
 	}
@@ -598,14 +616,6 @@ func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto
 }
 
 func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -615,19 +625,11 @@ func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
-	err := peer.Init(c, req.GetId(), state)
+	err := s.peer.Init(c, req.GetId(), state)
 	return res, err
 }
 
 func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -637,19 +639,11 @@ func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*p
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
-	err := peer.Update(c, req.GetId(), state)
+	err := s.peer.Update(c, req.GetId(), state)
 	return res, err
 }
 
 func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	file := &rpc.File{
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
@@ -661,19 +655,11 @@ func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*p
 	}
 
 	res := new(proto.Empty)
-	err := peer.Upload(c, req.GetId(), file)
+	err := s.peer.Upload(c, req.GetId(), file)
 	return res, err
 }
 
 func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -683,47 +669,23 @@ func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
-	err := peer.Done(c, req.GetId(), state)
+	err := s.peer.Done(c, req.GetId(), state)
 	return res, err
 }
 
 func (s *DroneServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	res := new(proto.Empty)
-	err := peer.Wait(c, req.GetId())
+	err := s.peer.Wait(c, req.GetId())
 	return res, err
 }
 
 func (s *DroneServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	res := new(proto.Empty)
-	err := peer.Extend(c, req.GetId())
+	err := s.peer.Extend(c, req.GetId())
 	return res, err
 }
 
 func (s *DroneServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
-	peer := RPC{
-		remote: s.Remote,
-		store:  s.Store,
-		queue:  s.Queue,
-		pubsub: s.Pubsub,
-		logger: s.Logger,
-		host:   s.Host,
-	}
 	line := &rpc.Line{
 		Out:  req.GetLine().GetOut(),
 		Pos:  int(req.GetLine().GetPos()),
@@ -731,6 +693,6 @@ func (s *DroneServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.E
 		Proc: req.GetLine().GetProc(),
 	}
 	res := new(proto.Empty)
-	err := peer.Log(c, req.GetId(), line)
+	err := s.peer.Log(c, req.GetId(), line)
 	return res, err
 }
