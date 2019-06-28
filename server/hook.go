@@ -62,6 +62,16 @@ func ResumeQueue(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func BlockTilQueueHasRunningItem(c *gin.Context) {
+	for {
+		info := Config.Services.Queue.Info(c)
+		if info.Stats.Running == 0 {
+			break
+		}
+	}
+	c.Status(http.StatusOK)
+}
+
 func PostHook(c *gin.Context) {
 	remote_ := remote.FromContext(c)
 

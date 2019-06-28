@@ -158,6 +158,10 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 			session.MustAdmin(),
 			server.ResumeQueue,
 		)
+		queue.GET("/norunningbuilds",
+			session.MustAdmin(),
+			server.BlockTilQueueHasRunningItem,
+		)
 	}
 
 	auth := e.Group("/authorize")
