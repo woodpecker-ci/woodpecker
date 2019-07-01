@@ -57,11 +57,6 @@ import (
 )
 
 var flags = []cli.Flag{
-	cli.StringFlag{
-		EnvVar: "TEST_RUNE",
-		Name:   "test.run",
-		Usage:  "VSCode sets this flag",
-	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_DEBUG",
 		Name:   "debug",

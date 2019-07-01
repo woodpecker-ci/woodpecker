@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build manual
+
 package main
 
 import (
@@ -36,6 +38,13 @@ func Test_main(t *testing.T) {
 	app.Version = version.Version.String()
 	app.Usage = "drone server"
 	app.Action = server
+
+	flags = append(flags, cli.StringFlag{
+		EnvVar: "TEST_RUN",
+		Name:   "test.run",
+		Usage:  "VSCode sets this flag",
+	})
+
 	app.Flags = flags
 	app.Before = before
 
