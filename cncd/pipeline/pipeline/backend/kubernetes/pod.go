@@ -28,8 +28,7 @@ func Pod(namespace string, step *backend.Step) *v1.Pod {
 
 			volMounts = append(volMounts, v1.VolumeMount{
 				Name:      volumeName(vol),
-				MountPath: volumeMountPath(step.WorkingDir),
-				//MountPath: volumeMountPath(vol.Target),
+				MountPath: volumeMountPath(vol),
 			})
 		}
 	}
