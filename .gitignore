@@ -3,6 +3,7 @@ drone/drone
 *.txt
 *.out
 /.env
+cmd/drone-server/.env
 extras/
 release/
 cli/release/

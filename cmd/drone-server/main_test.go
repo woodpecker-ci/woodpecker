@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build manual
-
 package main
 
 import (
@@ -21,27 +19,17 @@ import (
 	"os"
 	"testing"
 
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/laszlocph/drone-oss-08/version"
 	"github.com/urfave/cli"
 )
 
 func Test_main(t *testing.T) {
-	os.Setenv("KUBECONFIG", "/home/laszlo/go/src/github.com/laszlocph/drone-oss-08/kubeconfig.yaml")
-	os.Setenv("DRONE_HOST", "xxx")
-	os.Setenv("DRONE_GITHUB", "true")
-	// os.Setenv("DATABASE_CONFIG", "/var/lib/drone/drone.sqlite")
-	os.Setenv("DATABASE_DRIVER", "sqlite3")
-	os.Setenv("DRONE_DEBUG", "true")
-	os.Setenv("DRONE_KUBERNETES", "true")
-	os.Setenv("DRONE_KUBERNETES_NAMESPACE", "default")
-	os.Setenv("DRONE_KUBERNETES_STORAGECLASS", "example-nfs")
-	os.Setenv("DRONE_KUBERNETES_VOLUME_SIZE", "100Mi")
-
-	os.Setenv("DRONE_ADMIN", "laszlocph")
-	os.Setenv("DRONE_OPEN", "true")
-	os.Setenv("DRONE_GITHUB_CLIENT", "xxx")
-	os.Setenv("DRONE_GITHUB_SECRET", "xxx")
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
 
 	app := cli.NewApp()
 	app.Name = "drone-server"
