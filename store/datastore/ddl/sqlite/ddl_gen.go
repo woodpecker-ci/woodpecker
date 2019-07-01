@@ -1,17 +1,3 @@
-// Copyright 2018 Drone.IO Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package sqlite
 
 import (
@@ -173,6 +159,38 @@ var migrations = []struct {
 	{
 		name: "alter-table-update-file-meta",
 		stmt: alterTableUpdateFileMeta,
+	},
+	{
+		name: "create-table-build-config",
+		stmt: createTableBuildConfig,
+	},
+	{
+		name: "alter-table-add-config-name",
+		stmt: alterTableAddConfigName,
+	},
+	{
+		name: "update-table-set-config-name",
+		stmt: updateTableSetConfigName,
+	},
+	{
+		name: "populate-build-config",
+		stmt: populateBuildConfig,
+	},
+	{
+		name: "alter-table-add-task-dependencies",
+		stmt: alterTableAddTaskDependencies,
+	},
+	{
+		name: "alter-table-add-task-run-on",
+		stmt: alterTableAddTaskRunOn,
+	},
+	{
+		name: "alter-table-add-repo-fallback",
+		stmt: alterTableAddRepoFallback,
+	},
+	{
+		name: "update-table-set-repo-fallback",
+		stmt: updateTableSetRepoFallback,
 	},
 }
 
@@ -636,4 +654,63 @@ UPDATE files SET
  file_meta_passed=0
 ,file_meta_failed=0
 ,file_meta_skipped=0
+`
+
+//
+// 019_create_table_build_config.sql
+//
+
+var createTableBuildConfig = `
+CREATE TABLE IF NOT EXISTS build_config (
+ config_id       INTEGER NOT NULL
+,build_id        INTEGER NOT NULL
+,PRIMARY KEY (config_id, build_id)
+,FOREIGN KEY (config_id) REFERENCES config (config_id)
+,FOREIGN KEY (build_id) REFERENCES builds (build_id)
+);
+`
+
+//
+// 020_add_column_config_name.sql
+//
+
+var alterTableAddConfigName = `
+ALTER TABLE config ADD COLUMN config_name TEXT
+`
+
+var updateTableSetConfigName = `
+UPDATE config SET config_name = "drone"
+`
+
+//
+// 021_populate_build_config.sql
+//
+
+var populateBuildConfig = `
+INSERT INTO build_config (config_id, build_id)
+SELECT build_config_id, build_id FROM builds
+`
+
+//
+// 022_add_task_columns.sql
+//
+
+var alterTableAddTaskDependencies = `
+ALTER TABLE tasks ADD COLUMN task_dependencies BLOB
+`
+
+var alterTableAddTaskRunOn = `
+ALTER TABLE tasks ADD COLUMN task_run_on BLOB
+`
+
+//
+// 023_add_repo_fallback_column.sql
+//
+
+var alterTableAddRepoFallback = `
+ALTER TABLE repos ADD COLUMN repo_fallback BOOLEAN
+`
+
+var updateTableSetRepoFallback = `
+UPDATE repos SET repo_fallback='false'
 `

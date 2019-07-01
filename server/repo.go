@@ -41,11 +41,6 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	if err := Config.Services.Limiter.LimitRepo(user, repo); err != nil {
-		c.String(403, "Repository activation blocked by limiter")
-		return
-	}
-
 	repo.IsActive = true
 	repo.UserID = user.ID
 	if !repo.AllowPush && !repo.AllowPull && !repo.AllowDeploy && !repo.AllowTag {
@@ -154,6 +149,9 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.BuildCounter != nil {
 		repo.Counter = *in.BuildCounter
+	}
+	if in.Fallback != nil {
+		repo.Fallback = *in.Fallback
 	}
 
 	err := store.UpdateRepo(c, repo)

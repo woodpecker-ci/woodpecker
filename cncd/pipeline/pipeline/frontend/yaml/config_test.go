@@ -7,7 +7,7 @@ import (
 	"github.com/franela/goblin"
 )
 
-func xTestParse(t *testing.T) {
+func TestParse(t *testing.T) {
 	g := goblin.Goblin(t)
 
 	g.Describe("Parser", func() {
@@ -35,9 +35,14 @@ func xTestParse(t *testing.T) {
 				g.Assert(out.Pipeline.Containers[1].Commands).Equal(yaml.Stringorslice{"go build"})
 				g.Assert(out.Pipeline.Containers[2].Name).Equal("notify")
 				g.Assert(out.Pipeline.Containers[2].Image).Equal("slack")
-				g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
+				// g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
 				g.Assert(out.Labels["com.example.team"]).Equal("frontend")
 				g.Assert(out.Labels["com.example.type"]).Equal("build")
+				g.Assert(out.DependsOn[0]).Equal("lint")
+				g.Assert(out.DependsOn[1]).Equal("test")
+				g.Assert(out.RunsOn[0]).Equal("success")
+				g.Assert(out.RunsOn[1]).Equal("failure")
+				g.Assert(out.SkipClone).Equal(false)
 			})
 			// Check to make sure variable expansion works in yaml.MapSlice
 			// g.It("Should unmarshal variables", func() {
@@ -94,6 +99,12 @@ volumes:
 labels:
   com.example.type: "build"
   com.example.team: "frontend"
+depends_on:
+  - lint
+  - test
+runs_on:
+  - success
+  - failure
 `
 
 var sampleVarYaml = `

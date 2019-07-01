@@ -17,7 +17,6 @@ package server
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,13 +24,11 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
-	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
+	"github.com/gin-gonic/gin"
 	"github.com/laszlocph/drone-oss-08/cncd/queue"
 	"github.com/laszlocph/drone-oss-08/remote"
 	"github.com/laszlocph/drone-oss-08/shared/httputil"
 	"github.com/laszlocph/drone-oss-08/store"
-	"github.com/gin-gonic/gin"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/router/middleware/session"
@@ -159,13 +156,12 @@ func GetProcLogs(c *gin.Context) {
 	io.Copy(c.Writer, rc)
 }
 
+// DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	repo := session.Repo(c)
 
-	// parse the build number and job sequence number from
-	// the repquest parameter.
+	// parse the build number from the request parameter.
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
-	seq, _ := strconv.Atoi(c.Params.ByName("job"))
 
 	build, err := store.GetBuildNumber(c, repo, num)
 	if err != nil {
@@ -173,27 +169,40 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	proc, err := store.FromContext(c).ProcFind(build, seq)
+	procs, err := store.FromContext(c).ProcList(build)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
 	}
 
-	if proc.State != model.StatusRunning {
+	cancelled := false
+	for _, proc := range procs {
+		if proc.PPID != 0 {
+			continue
+		}
+
+		if proc.State != model.StatusRunning && proc.State != model.StatusPending {
+			continue
+		}
+
+		proc.State = model.StatusKilled
+		proc.Stopped = time.Now().Unix()
+		if proc.Started == 0 {
+			proc.Started = proc.Stopped
+		}
+		proc.ExitCode = 137
+		// TODO cancel child procs
+		store.FromContext(c).ProcUpdate(proc)
+
+		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
+		cancelled = true
+	}
+
+	if !cancelled {
 		c.String(400, "Cannot cancel a non-running build")
 		return
 	}
 
-	proc.State = model.StatusKilled
-	proc.Stopped = time.Now().Unix()
-	if proc.Started == 0 {
-		proc.Started = proc.Stopped
-	}
-	proc.ExitCode = 137
-	// TODO cancel child procs
-	store.FromContext(c).ProcUpdate(proc)
-
-	Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	c.String(204, "")
 }
 
@@ -270,16 +279,8 @@ func PostApproval(c *gin.Context) {
 	build.Reviewed = time.Now().Unix()
 	build.Reviewer = user.Login
 
-	//
-	//
-	// This code is copied pasted until I have a chance
-	// to refactor into a proper function. Lots of changes
-	// and technical debt. No judgement please!
-	//
-	//
-
 	// fetch the build file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -318,15 +319,12 @@ func PostApproval(c *gin.Context) {
 		}
 	}
 
-	defer func() {
-		uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-		err = remote_.Status(user, repo, build, uri)
-		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
-	}()
+	var yamls []*remote.FileMeta
+	for _, y := range configs {
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+	}
 
-	b := builder{
+	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -334,10 +332,10 @@ func PostApproval(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: yamls,
 		Envs:  envs,
 	}
-	items, err := b.Build()
+	buildItems, err := b.Build()
 	if err != nil {
 		build.Status = model.StatusError
 		build.Started = time.Now().Unix()
@@ -347,73 +345,27 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	var pcounter = len(items)
-	for _, item := range items {
-		build.Procs = append(build.Procs, item.Proc)
-		item.Proc.BuildID = build.ID
+	err = store.FromContext(c).ProcCreate(build.Procs)
+	if err != nil {
+		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
+	}
 
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pcounter++
-				if gid == 0 {
-					gid = pcounter
-				}
-				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pcounter,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
-				}
-				build.Procs = append(build.Procs, proc)
+	defer func() {
+		for _, item := range buildItems {
+			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			if len(buildItems) > 1 {
+				err = remote_.Status(user, repo, build, uri, item.Proc)
+			} else {
+				err = remote_.Status(user, repo, build, uri, nil)
+			}
+			if err != nil {
+				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 			}
 		}
-	}
-	store.FromContext(c).ProcCreate(build.Procs)
+	}()
 
-	//
-	// publish topic
-	//
-	buildCopy := *build
-	buildCopy.Procs = model.Tree(buildCopy.Procs)
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
-		},
-	}
-	message.Data, _ = json.Marshal(model.Event{
-		Type:  model.Enqueued,
-		Repo:  *repo,
-		Build: buildCopy,
-	})
-	// TODO remove global reference
-	Config.Services.Pubsub.Publish(c, "topic/events", message)
-
-	//
-	// end publish topic
-	//
-
-	for _, item := range items {
-		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Proc.ID)
-		task.Labels = map[string]string{}
-		task.Labels["platform"] = item.Platform
-		for k, v := range item.Labels {
-			task.Labels[k] = v
-		}
-
-		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Proc.ID),
-			Config:  item.Config,
-			Timeout: b.Repo.Timeout,
-		})
-
-		Config.Services.Logs.Open(context.Background(), task.ID)
-		Config.Services.Queue.Push(context.Background(), task)
-	}
+	publishToTopic(c, build, repo)
+	queueBuild(build, repo, buildItems)
 }
 
 func PostDecline(c *gin.Context) {
@@ -446,7 +398,7 @@ func PostDecline(c *gin.Context) {
 	}
 
 	uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-	err = remote_.Status(user, repo, build, uri)
+	err = remote_.Status(user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
@@ -463,15 +415,8 @@ func GetBuildQueue(c *gin.Context) {
 	c.JSON(200, out)
 }
 
-//
-//
-//
-//
-//
-//
-
+// PostBuild restarts a build
 func PostBuild(c *gin.Context) {
-
 	remote_ := remote.FromContext(c)
 	repo := session.Repo(c)
 
@@ -513,7 +458,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the .drone.yml file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -551,6 +496,13 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
+	err = persistBuildConfigs(configs, build.ID)
+	if err != nil {
+		logrus.Errorf("failure to persist build config for %s. %s", repo.FullName, err)
+		c.AbortWithError(500, err)
+		return
+	}
+
 	// Read query string parameters into buildParams, exclude reserved params
 	var buildParams = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
@@ -581,7 +533,12 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	b := builder{
+	var yamls []*remote.FileMeta
+	for _, y := range configs {
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+	}
+
+	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -589,10 +546,10 @@ func PostBuild(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: yamls,
 		Envs:  buildParams,
 	}
-	items, err := b.Build()
+	buildItems, err := b.Build()
 	if err != nil {
 		build.Status = model.StatusError
 		build.Started = time.Now().Unix()
@@ -600,31 +557,6 @@ func PostBuild(c *gin.Context) {
 		build.Error = err.Error()
 		c.JSON(500, build)
 		return
-	}
-
-	var pcounter = len(items)
-	for _, item := range items {
-		build.Procs = append(build.Procs, item.Proc)
-		item.Proc.BuildID = build.ID
-
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pcounter++
-				if gid == 0 {
-					gid = pcounter
-				}
-				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pcounter,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
-				}
-				build.Procs = append(build.Procs, proc)
-			}
-		}
 	}
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
@@ -637,54 +569,11 @@ func PostBuild(c *gin.Context) {
 		c.JSON(500, build)
 		return
 	}
-
 	c.JSON(202, build)
 
-	//
-	// publish topic
-	//
-	buildCopy := *build
-	buildCopy.Procs = model.Tree(buildCopy.Procs)
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
-		},
-	}
-	message.Data, _ = json.Marshal(model.Event{
-		Type:  model.Enqueued,
-		Repo:  *repo,
-		Build: buildCopy,
-	})
-	// TODO remove global reference
-	Config.Services.Pubsub.Publish(c, "topic/events", message)
-	//
-	// end publish topic
-	//
-
-	for _, item := range items {
-		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Proc.ID)
-		task.Labels = map[string]string{}
-		task.Labels["platform"] = item.Platform
-		for k, v := range item.Labels {
-			task.Labels[k] = v
-		}
-
-		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Proc.ID),
-			Config:  item.Config,
-			Timeout: b.Repo.Timeout,
-		})
-
-		Config.Services.Logs.Open(context.Background(), task.ID)
-		Config.Services.Queue.Push(context.Background(), task)
-	}
+	publishToTopic(c, build, repo)
+	queueBuild(build, repo, buildItems)
 }
-
-//
-///
-//
 
 func DeleteBuildLogs(c *gin.Context) {
 	repo := session.Repo(c)
@@ -723,6 +612,20 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
+}
+
+func persistBuildConfigs(configs []*model.Config, buildID int64) error {
+	for _, conf := range configs {
+		buildConfig := &model.BuildConfig{
+			ConfigID: conf.ID,
+			BuildID:  buildID,
+		}
+		err := Config.Storage.Config.BuildConfigCreate(buildConfig)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 var deleteStr = `[

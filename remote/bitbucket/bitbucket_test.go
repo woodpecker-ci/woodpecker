@@ -283,7 +283,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(fakeUser, fakeRepo, fakeBuild, "http://127.0.0.1")
+			err := c.Status(fakeUser, fakeRepo, fakeBuild, "http://127.0.0.1", nil)
 			g.Assert(err == nil).IsTrue()
 		})
 

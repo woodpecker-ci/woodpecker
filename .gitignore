@@ -11,5 +11,6 @@ cli/release/
 kubeconfig.yaml
 
 server/swagger/files/*.json
+server/swagger/swagger_gen.go
 .idea/
 .vscode/

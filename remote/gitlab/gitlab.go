@@ -325,28 +325,27 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches a file from the remote repository and returns in string format.
 func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f string) ([]byte, error) {
-	return g.FileRef(user, repo, build.Commit, f)
-}
-
-// FileRef fetches the file from the GitHub repository and returns its contents.
-func (g *Gitlab) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	var client = NewClient(g.URL, u.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, r.Owner, r.Name)
+	var client = NewClient(g.URL, user.Token, g.SkipVerify)
+	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	out, err := client.RepoRawFileRef(id, ref, f)
+	out, err := client.RepoRawFileRef(id, build.Commit, f)
 	if err != nil {
 		return nil, err
 	}
 	return out, err
 }
 
+func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
 // NOTE Currently gitlab doesn't support status for commits and events,
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.
-func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string) error {
+func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 
 	status := getStatus(b.Status)

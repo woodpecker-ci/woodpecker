@@ -40,9 +40,8 @@ func Parse(data []byte) ([]Axis, error) {
 		return nil, err
 	}
 
-	// if not a matrix build return an array with just the single axis.
 	if len(matrix) == 0 {
-		return nil, nil
+		return []Axis{}, nil
 	}
 
 	return calc(matrix), nil

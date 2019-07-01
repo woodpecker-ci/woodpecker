@@ -18,7 +18,6 @@ package remote
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/laszlocph/drone-oss-08/model"
 
@@ -51,13 +50,12 @@ type Remote interface {
 	// format.
 	File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error)
 
-	// FileRef fetches a file from the remote repository for the given ref
-	// and returns in string format.
-	FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error)
+	// Dir fetches a folder from the remote repository
+	Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*FileMeta, error)
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(u *model.User, r *model.Repo, b *model.Build, link string) error
+	Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.
@@ -74,6 +72,18 @@ type Remote interface {
 	// required data in a standard format.
 	Hook(r *http.Request) (*model.Repo, *model.Build, error)
 }
+
+// FileMeta represents a file in version control
+type FileMeta struct {
+	Name string
+	Data []byte
+}
+
+type ByName []*FileMeta
+
+func (a ByName) Len() int           { return len(a) }
+func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 // Refresher refreshes an oauth token and expiration for the given user. It
 // returns true if the token was refreshed, false if the token was not refreshed,
@@ -115,22 +125,10 @@ func Perm(c context.Context, u *model.User, owner, repo string) (*model.Perm, er
 	return FromContext(c).Perm(u, owner, repo)
 }
 
-// File fetches a file from the remote repository and returns in string format.
-func File(c context.Context, u *model.User, r *model.Repo, b *model.Build, f string) (out []byte, err error) {
-	for i := 0; i < 12; i++ {
-		out, err = FromContext(c).File(u, r, b, f)
-		if err == nil {
-			return
-		}
-		time.Sleep(5 * time.Second)
-	}
-	return
-}
-
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func Status(c context.Context, u *model.User, r *model.Repo, b *model.Build, link string) error {
-	return FromContext(c).Status(u, r, b, link)
+func Status(c context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+	return FromContext(c).Status(u, r, b, link, proc)
 }
 
 // Netrc returns a .netrc file that can be used to clone
@@ -167,19 +165,4 @@ func Refresh(c context.Context, u *model.User) (bool, error) {
 		return false, nil
 	}
 	return refresher.Refresh(u)
-}
-
-// FileBackoff fetches the file using an exponential backoff.
-// TODO replace this with a proper backoff
-func FileBackoff(remote Remote, u *model.User, r *model.Repo, b *model.Build, f string) (out []byte, err error) {
-	for i := 0; i < 5; i++ {
-		select {
-		case <-time.After(time.Second * time.Duration(i)):
-			out, err = remote.File(u, r, b, f)
-			if err == nil {
-				return
-			}
-		}
-	}
-	return
 }

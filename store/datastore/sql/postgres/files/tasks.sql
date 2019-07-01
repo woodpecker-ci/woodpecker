@@ -4,6 +4,8 @@ SELECT
  task_id
 ,task_data
 ,task_labels
+,task_dependencies
+,task_run_on
 FROM tasks
 
 -- name: task-delete

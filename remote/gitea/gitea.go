@@ -249,13 +249,12 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return cfg, err
 }
 
-// FileRef fetches the file from the Gitea repository and returns its contents.
-func (c *client) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	return c.newClientToken(u.Token).GetFile(r.Owner, r.Name, ref, f)
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is supported by the Gitea driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := c.newClientToken(u.Token)
 
 	status := getStatus(b.Status)
