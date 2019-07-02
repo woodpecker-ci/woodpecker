@@ -102,6 +102,9 @@ func Pod(namespace string, step *backend.Step) *v1.Pod {
 				Env:             envs,
 				VolumeMounts:    volMounts,
 				Resources:       resources,
+				SecurityContext: &v1.SecurityContext{
+					Privileged: &step.Privileged,
+				},
 			}},
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
