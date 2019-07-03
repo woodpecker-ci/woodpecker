@@ -515,12 +515,12 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "PvhCV0/csykcsMY7xAINwKzfDuw=",
+			"checksumSHA1": "+nrc+BCL/GC/8mFkNA9+CCTlNPM=",
 			"path": "github.com/laszlocph/drone-ui/dist",
-			"revision": "81b05a6144386109cc2672db4cdc6061da8cd3ae",
-			"revisionTime": "2019-06-27T07:36:30Z",
-			"version": "master",
-			"versionExact": "master"
+			"revision": "c173cd615d809101ae8dd67f920943e353650882",
+			"revisionTime": "2019-07-03T11:20:13Z",
+			"version": "kube",
+			"versionExact": "kube"
 		},
 		{
 			"path": "github.com/lib/pq",
