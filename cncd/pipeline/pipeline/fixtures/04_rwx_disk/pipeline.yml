@@ -1,0 +1,16 @@
+pipeline:
+  step1:
+    group: parallel
+    image: debian:stable-slim
+    commands:
+      - touch step1.txt
+      - while [ ! -f step2.txt ]; do sleep 1; done
+      - echo "step2.txt found"
+
+  step2:
+    group: parallel
+    image: debian:stable-slim
+    commands:
+      - touch step2.txt
+      - while [ ! -f step1.txt ]; do sleep 1; done
+      - echo "step1.txt found"

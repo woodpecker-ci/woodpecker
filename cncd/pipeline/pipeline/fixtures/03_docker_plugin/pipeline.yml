@@ -1,0 +1,4 @@
+pipeline:
+  docker-build:
+    image: plugins/docker
+    dry_run: true

@@ -34,6 +34,15 @@ func Test_Kubernetes_02_services(t *testing.T) {
 	run(t, "fixtures/02_services/pipeline.json", false)
 }
 
+func Test_Docker_04_rwx_disk(t *testing.T) {
+	run(t, "fixtures/04_rwx_disk/pipeline.json", true)
+}
+
+func Test_Kubernetes_04_rwx_disk(t *testing.T) {
+	run(t, "fixtures/04_rwx_disk/pipeline.json", false)
+}
+
+
 func run(t *testing.T, fixture string, dockerEngine bool) {
 	reader, err := os.Open(fixture)
 	if err != nil {
