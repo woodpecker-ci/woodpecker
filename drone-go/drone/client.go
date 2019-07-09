@@ -48,53 +48,6 @@ type client struct {
 	addr   string
 }
 
-// // Options provides a list of client options.
-// type Options struct {
-// 	token string
-// 	proxy string
-// 	pool  *x509.CertPool
-// 	conf  *tls.Config
-// 	skip  bool
-// }
-//
-// // Option defines client options.
-// type Option func(opts *Options)
-//
-// // WithToken returns an option to set the token.
-// func WithToken(token string) Option {
-// 	return func(opts *Options) {
-// 		opts.token = token
-// 	}
-// }
-//
-// // WithTLS returns an option to use custom tls configuration.
-// func WithTLS(conf *tls.Config) Option {
-// 	return func(opts *Options) {
-// 		opts.conf = conf
-// 	}
-// }
-//
-// // WithSocks returns a client option to provide a socks5 proxy.
-// func WithSocks(proxy string) Option {
-// 	return func(opts *Options) {
-// 		opts.proxy = proxy
-// 	}
-// }
-//
-// // WithSkipVerify returns a client option to skip ssl verification.
-// func WithSkipVerify(skip bool) Option {
-// 	return func(opts *Options) {
-// 		opts.skip = skip
-// 	}
-// }
-//
-// // WithCertPool returns a client option to provide a custom cert pool.
-// func WithCertPool(pool *x509.CertPool) Option {
-// 	return func(opts *Options) {
-// 		opts.pool = pool
-// 	}
-// }
-
 // New returns a client at the specified url.
 func New(uri string) Client {
 	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
