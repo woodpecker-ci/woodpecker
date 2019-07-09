@@ -131,8 +131,7 @@ func TestFifoDependencies(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.Push(noContext, task2)
-	q.Push(noContext, task1)
+	q.PushAtOnce(noContext, []*Task{task2, task1})
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != task1 {
@@ -168,9 +167,7 @@ func TestFifoErrors(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.Push(noContext, task2)
-	q.Push(noContext, task3)
-	q.Push(noContext, task1)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != task1 {
@@ -222,9 +219,7 @@ func TestFifoCancel(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.Push(noContext, task2)
-	q.Push(noContext, task3)
-	q.Push(noContext, task1)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
 
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
 	q.Error(noContext, task1.ID, fmt.Errorf("cancelled"))
@@ -251,7 +246,6 @@ func TestFifoPause(t *testing.T) {
 		wg.Done()
 	}()
 
-
 	q.Pause()
 	t0 := time.Now()
 	q.Push(noContext, task1)
@@ -261,7 +255,7 @@ func TestFifoPause(t *testing.T) {
 	wg.Wait()
 	t1 := time.Now()
 
-	if t1.Sub(t0) < 20 * time.Millisecond {
+	if t1.Sub(t0) < 20*time.Millisecond {
 		t.Errorf("Should have waited til resume")
 	}
 
@@ -282,6 +276,46 @@ func TestFifoPauseResume(t *testing.T) {
 	q.Resume()
 
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
+}
+
+func TestWaitingVsPending(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]bool),
+	}
+
+	task3 := &Task{
+		ID:           "3",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]bool),
+		RunOn:        []string{"success", "failure"},
+	}
+
+	q := New().(*fifo)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+
+	got, _ := q.Poll(noContext, func(*Task) bool { return true })
+
+	info := q.Info(noContext)
+	if info.Stats.WaitingOnDeps != 2 {
+		t.Errorf("2 should wait on deps")
+	}
+
+	q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+
+	info = q.Info(noContext)
+	if info.Stats.WaitingOnDeps != 0 {
+		t.Errorf("0 should wait on deps")
+	}
+	if info.Stats.Pending != 1 {
+		t.Errorf("1 should wait for worker")
+	}
 }
 
 func TestShouldRun(t *testing.T) {

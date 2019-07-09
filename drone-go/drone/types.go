@@ -150,10 +150,11 @@ type (
 	// Info provides queue stats.
 	Info struct {
 		Stats struct {
-			Workers  int `json:"worker_count"`
-			Pending  int `json:"pending_count"`
-			Running  int `json:"running_count"`
-			Complete int `json:"completed_count"`
+			Workers       int `json:"worker_count"`
+			Pending       int `json:"pending_count"`
+			WaitingOnDeps int `json:"waiting_on_deps_count"`
+			Running       int `json:"running_count"`
+			Complete      int `json:"completed_count"`
 		} `json:"stats"`
 		Paused bool `json:"paused,omitempty"`
 	}

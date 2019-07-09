@@ -27,21 +27,23 @@ type worker struct {
 type fifo struct {
 	sync.Mutex
 
-	workers   map[*worker]struct{}
-	running   map[string]*entry
-	pending   *list.List
-	extension time.Duration
-	paused    bool
+	workers       map[*worker]struct{}
+	running       map[string]*entry
+	pending       *list.List
+	waitingOnDeps *list.List
+	extension     time.Duration
+	paused        bool
 }
 
 // New returns a new fifo queue.
 func New() Queue {
 	return &fifo{
-		workers:   map[*worker]struct{}{},
-		running:   map[string]*entry{},
-		pending:   list.New(),
-		extension: time.Minute * 10,
-		paused:    false,
+		workers:       map[*worker]struct{}{},
+		running:       map[string]*entry{},
+		pending:       list.New(),
+		waitingOnDeps: list.New(),
+		extension:     time.Minute * 10,
+		paused:        false,
 	}
 }
 
@@ -161,10 +163,14 @@ func (q *fifo) Info(c context.Context) InfoT {
 	stats := InfoT{}
 	stats.Stats.Workers = len(q.workers)
 	stats.Stats.Pending = q.pending.Len()
+	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
 		stats.Pending = append(stats.Pending, e.Value.(*Task))
+	}
+	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
+		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*Task))
 	}
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
@@ -210,7 +216,7 @@ func (q *fifo) process() {
 	defer q.Unlock()
 
 	q.resubmitExpiredBuilds()
-
+	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 		task := pending.Value.(*Task)
 		delete(q.workers, worker)
@@ -224,16 +230,41 @@ func (q *fifo) process() {
 	}
 }
 
+func (q *fifo) filterWaiting() {
+	// resubmits all waiting tasks to pending, deps may have cleared
+	var nextWaiting *list.Element
+	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
+		nextWaiting = e.Next()
+		task := e.Value.(*Task)
+		q.pending.PushBack(task)
+	}
+
+	// rebuild waitingDeps
+	q.waitingOnDeps = list.New()
+	filtered := []*list.Element{}
+	var nextPending *list.Element
+	for e := q.pending.Front(); e != nil; e = nextPending {
+		nextPending = e.Next()
+		task := e.Value.(*Task)
+		if q.depsInQueue(task) {
+			logrus.Debugf("queue: waiting due to unmet dependencies %v", task.ID)
+			q.waitingOnDeps.PushBack(task)
+			filtered = append(filtered, e)
+		}
+	}
+
+	// filter waiting tasks
+	for _, f := range filtered {
+		q.pending.Remove(f)
+	}
+}
+
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		task := e.Value.(*Task)
 		logrus.Debugf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
-		if q.depsInQueue(task) {
-			logrus.Debugf("queue: skipping due to unmet dependencies %v", task.ID)
-			continue
-		}
 
 		for w := range q.workers {
 			if w.filter(task) {
@@ -290,10 +321,22 @@ func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
 			}
 		}
 	}
+
 	for _, running := range q.running {
 		for _, dep := range running.item.Dependencies {
 			if taskID == dep {
 				running.item.DepStatus[dep] = success
+			}
+		}
+	}
+
+	var n *list.Element
+	for e := q.waitingOnDeps.Front(); e != nil; e = n {
+		next = e.Next()
+		waiting, ok := e.Value.(*Task)
+		for _, dep := range waiting.Dependencies {
+			if ok && taskID == dep {
+				waiting.DepStatus[dep] = success
 			}
 		}
 	}
