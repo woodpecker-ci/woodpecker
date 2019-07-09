@@ -35,11 +35,7 @@ const (
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
-	pathServers        = "%s/api/servers"
-	pathServer         = "%s/api/servers/%s"
-	pathScalerPause    = "%s/api/pause"
-	pathScalerResume   = "%s/api/resume"
-	pathVarz           = "%s/varz"
+	pathQueue          = "%s/api/queue"
 	pathVersion        = "%s/version"
 )
 
@@ -47,53 +43,6 @@ type client struct {
 	client *http.Client
 	addr   string
 }
-
-// // Options provides a list of client options.
-// type Options struct {
-// 	token string
-// 	proxy string
-// 	pool  *x509.CertPool
-// 	conf  *tls.Config
-// 	skip  bool
-// }
-//
-// // Option defines client options.
-// type Option func(opts *Options)
-//
-// // WithToken returns an option to set the token.
-// func WithToken(token string) Option {
-// 	return func(opts *Options) {
-// 		opts.token = token
-// 	}
-// }
-//
-// // WithTLS returns an option to use custom tls configuration.
-// func WithTLS(conf *tls.Config) Option {
-// 	return func(opts *Options) {
-// 		opts.conf = conf
-// 	}
-// }
-//
-// // WithSocks returns a client option to provide a socks5 proxy.
-// func WithSocks(proxy string) Option {
-// 	return func(opts *Options) {
-// 		opts.proxy = proxy
-// 	}
-// }
-//
-// // WithSkipVerify returns a client option to skip ssl verification.
-// func WithSkipVerify(skip bool) Option {
-// 	return func(opts *Options) {
-// 		opts.skip = skip
-// 	}
-// }
-//
-// // WithCertPool returns a client option to provide a custom cert pool.
-// func WithCertPool(pool *x509.CertPool) Option {
-// 	return func(opts *Options) {
-// 		opts.pool = pool
-// 	}
-// }
 
 // New returns a client at the specified url.
 func New(uri string) Client {
@@ -406,52 +355,9 @@ func (c *client) SecretDelete(owner, name, secret string) error {
 	return c.delete(uri)
 }
 
-// Server returns the named servers details.
-func (c *client) Server(name string) (*Server, error) {
-	out := new(Server)
-	uri := fmt.Sprintf(pathServer, c.addr, name)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// ServerList returns a list of all active build servers.
-func (c *client) ServerList() ([]*Server, error) {
-	var out []*Server
-	uri := fmt.Sprintf(pathServers, c.addr)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// ServerCreate creates a new server.
-func (c *client) ServerCreate() (*Server, error) {
-	out := new(Server)
-	uri := fmt.Sprintf(pathServers, c.addr)
-	err := c.post(uri, nil, out)
-	return out, err
-}
-
-// ServerDelete terminates a server.
-func (c *client) ServerDelete(name string) error {
-	uri := fmt.Sprintf(pathServer, c.addr, name)
-	return c.delete(uri)
-}
-
-// AutoscalePause pauses the autoscaler.
-func (c *client) AutoscalePause() error {
-	uri := fmt.Sprintf(pathScalerPause, c.addr)
-	return c.post(uri, nil, nil)
-}
-
-// AutoscaleResume resumes the autoscaler.
-func (c *client) AutoscaleResume() error {
-	uri := fmt.Sprintf(pathScalerResume, c.addr)
-	return c.post(uri, nil, nil)
-}
-
-// AutoscaleVersion resumes the autoscaler.
-func (c *client) AutoscaleVersion() (*Version, error) {
-	out := new(Version)
-	uri := fmt.Sprintf(pathVersion, c.addr)
+func (c *client) QueueInfo() (*Info, error) {
+	out := new(Info)
+	uri := fmt.Sprintf(pathQueue+"/info", c.addr)
 	err := c.get(uri, out)
 	return out, err
 }

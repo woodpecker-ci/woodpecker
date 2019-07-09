@@ -140,33 +140,21 @@ type (
 		Email    string `json:"author_email,omitempty"`
 	}
 
-	// Server represents a server node.
-	Server struct {
-		ID       string `json:"id"`
-		Provider string `json:"provider"`
-		State    string `json:"state"`
-		Name     string `json:"name"`
-		Image    string `json:"image"`
-		Region   string `json:"region"`
-		Size     string `json:"size"`
-		Address  string `json:"address"`
-		Capacity int    `json:"capacity"`
-		Secret   string `json:"secret"`
-		Error    string `json:"error"`
-		CAKey    []byte `json:"ca_key"`
-		CACert   []byte `json:"ca_cert"`
-		TLSKey   []byte `json:"tls_key"`
-		TLSCert  []byte `json:"tls_cert"`
-		Created  int64  `json:"created"`
-		Updated  int64  `json:"updated"`
-		Started  int64  `json:"started"`
-		Stopped  int64  `json:"stopped"`
-	}
-
 	// Version provides system version details.
 	Version struct {
 		Source  string `json:"source,omitempty"`
 		Version string `json:"version,omitempty"`
 		Commit  string `json:"commit,omitempty"`
+	}
+
+	// Info provides queue stats.
+	Info struct {
+		Stats struct {
+			Workers  int `json:"worker_count"`
+			Pending  int `json:"pending_count"`
+			Running  int `json:"running_count"`
+			Complete int `json:"completed_count"`
+		} `json:"stats"`
+		Paused bool `json:"paused,omitempty"`
 	}
 )
