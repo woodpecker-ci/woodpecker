@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/laszlocph/drone-oss-08/cli/drone/internal"
-	"github.com/drone/drone-go/drone"
+	"github.com/laszlocph/drone-oss-08/drone-go/drone"
 
 	"github.com/urfave/cli"
 )
