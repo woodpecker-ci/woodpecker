@@ -413,10 +413,10 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "rDtytQW0+4gz4qQjzA2vcDaFeXY=",
-			"path": "github.com/laszlocph/drone-ui/dist",
-			"revision": "cf441286eb88d97dc0f684fb91f13cbd5b0c765a",
-			"revisionTime": "2019-07-04T06:57:11Z",
+			"checksumSHA1": "J9u40mdSKve2ZmJ6fJ152J91Ysk=",
+			"path": "github.com/laszlocph/woodpecker-ui/dist",
+			"revision": "44c428705a137f001759eebfd26c76658b263f6f",
+			"revisionTime": "2019-07-09T10:47:28Z",
 			"version": "master",
 			"versionExact": "master"
 		},
