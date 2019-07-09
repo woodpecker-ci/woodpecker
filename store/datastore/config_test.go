@@ -23,6 +23,9 @@ import (
 func TestConfig(t *testing.T) {
 	s := newTest()
 	defer func() {
+		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
 		s.Exec("delete from config")
 		s.Close()
 	}()
@@ -32,18 +35,49 @@ func TestConfig(t *testing.T) {
 		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
 	)
 
-	if err := s.ConfigCreate(
-		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Hash:   hash,
-		},
-	); err != nil {
+	repo := &model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/drone",
+		Owner:    "bradrydzewski",
+		Name:     "drone",
+	}
+	if err := s.CreateRepo(repo); err != nil {
+		t.Errorf("Unexpected error: insert repo: %s", err)
+		return
+	}
+
+	config := &model.Config{
+		RepoID: repo.ID,
+		Data:   data,
+		Hash:   hash,
+		Name:   "default",
+	}
+	if err := s.ConfigCreate(config); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
 
-	config, err := s.ConfigFind(&model.Repo{ID: 2}, hash)
+	build := &model.Build{
+		RepoID: repo.ID,
+		Status: model.StatusRunning,
+		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+	}
+	if err := s.CreateBuild(build); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
+		return
+	}
+
+	if err := s.BuildConfigCreate(
+		&model.BuildConfig{
+			ConfigID: config.ID,
+			BuildID:  build.ID,
+		},
+	); err != nil {
+		t.Errorf("Unexpected error: insert build config: %s", err)
+		return
+	}
+
+	config, err := s.ConfigFindIdentical(repo.ID, hash)
 	if err != nil {
 		t.Error(err)
 		return
@@ -51,7 +85,7 @@ func TestConfig(t *testing.T) {
 	if got, want := config.ID, int64(1); got != want {
 		t.Errorf("Want config id %d, got %d", want, got)
 	}
-	if got, want := config.RepoID, int64(2); got != want {
+	if got, want := config.RepoID, repo.ID; got != want {
 		t.Errorf("Want config repo id %d, got %d", want, got)
 	}
 	if got, want := config.Data, data; got != want {
@@ -60,13 +94,16 @@ func TestConfig(t *testing.T) {
 	if got, want := config.Hash, hash; got != want {
 		t.Errorf("Want config hash %s, got %s", want, got)
 	}
+	if got, want := config.Name, "default"; got != want {
+		t.Errorf("Want config name %s, got %s", want, got)
+	}
 
-	loaded, err := s.ConfigLoad(config.ID)
+	loaded, err := s.ConfigsForBuild(build.ID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
 	}
-	if got, want := loaded.ID, config.ID; got != want {
+	if got, want := loaded[0].ID, config.ID; got != want {
 		t.Errorf("Want config by id %d, got %d", want, got)
 	}
 }
@@ -74,9 +111,10 @@ func TestConfig(t *testing.T) {
 func TestConfigApproved(t *testing.T) {
 	s := newTest()
 	defer func() {
-		s.Exec("delete from config")
-		s.Exec("delete from builds")
 		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
+		s.Exec("delete from config")
 		s.Close()
 	}()
 
@@ -86,49 +124,83 @@ func TestConfigApproved(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "drone",
 	}
-	s.CreateRepo(repo)
+	if err := s.CreateRepo(repo); err != nil {
+		t.Errorf("Unexpected error: insert repo: %s", err)
+		return
+	}
 
 	var (
-		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-		conf = &model.Config{
+		data         = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
+		hash         = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+		buildBlocked = &model.Build{
 			RepoID: repo.ID,
-			Data:   data,
-			Hash:   hash,
+			Status: model.StatusBlocked,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		}
+		buildPending = &model.Build{
+			RepoID: repo.ID,
+			Status: model.StatusPending,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		}
+		buildRunning = &model.Build{
+			RepoID: repo.ID,
+			Status: model.StatusRunning,
+			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
 	)
 
+	if err := s.CreateBuild(buildBlocked); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
+		return
+	}
+	if err := s.CreateBuild(buildPending); err != nil {
+		t.Errorf("Unexpected error: insert build: %s", err)
+		return
+	}
+	conf := &model.Config{
+		RepoID: repo.ID,
+		Data:   data,
+		Hash:   hash,
+	}
 	if err := s.ConfigCreate(conf); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
+	buildConfig := &model.BuildConfig{
 		ConfigID: conf.ID,
-		Status:   model.StatusBlocked,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
-		ConfigID: conf.ID,
-		Status:   model.StatusPending,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
-
-	if ok, _ := s.ConfigFindApproved(conf); ok == true {
-		t.Errorf("Want config not approved, when blocked or pending")
+		BuildID:  buildBlocked.ID,
+	}
+	if err := s.BuildConfigCreate(buildConfig); err != nil {
+		t.Errorf("Unexpected error: insert build_config: %s", err)
 		return
 	}
 
-	s.CreateBuild(&model.Build{
-		RepoID:   repo.ID,
-		ConfigID: conf.ID,
-		Status:   model.StatusRunning,
-		Commit:   "85f8c029b902ed9400bc600bac301a0aadb144ac",
-	})
+	if approved, err := s.ConfigFindApproved(conf); approved != false || err != nil {
+		t.Errorf("Want config not approved, when blocked or pending. %v", err)
+		return
+	}
 
-	if ok, _ := s.ConfigFindApproved(conf); ok == false {
-		t.Errorf("Want config approved, when running.")
+	s.CreateBuild(buildRunning)
+	conf2 := &model.Config{
+		RepoID: repo.ID,
+		Data:   data,
+		Hash:   "xxx",
+	}
+	if err := s.ConfigCreate(conf2); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
+	buildConfig2 := &model.BuildConfig{
+		ConfigID: conf2.ID,
+		BuildID:  buildRunning.ID,
+	}
+	if err := s.BuildConfigCreate(buildConfig2); err != nil {
+		t.Errorf("Unexpected error: insert config: %s", err)
+		return
+	}
+
+	if approved, err := s.ConfigFindApproved(conf2); approved != true || err != nil {
+		t.Errorf("Want config approved, when running. %v", err)
 		return
 	}
 }
@@ -136,6 +208,9 @@ func TestConfigApproved(t *testing.T) {
 func TestConfigIndexes(t *testing.T) {
 	s := newTest()
 	defer func() {
+		s.Exec("delete from repos")
+		s.Exec("delete from builds")
+		s.Exec("delete from procs")
 		s.Exec("delete from config")
 		s.Close()
 	}()

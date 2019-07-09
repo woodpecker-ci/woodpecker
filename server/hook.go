@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"strconv"
 	"time"
@@ -49,6 +50,26 @@ func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(200,
 		Config.Services.Queue.Info(c),
 	)
+}
+
+func PauseQueue(c *gin.Context) {
+	Config.Services.Queue.Pause()
+	c.Status(http.StatusOK)
+}
+
+func ResumeQueue(c *gin.Context) {
+	Config.Services.Queue.Resume()
+	c.Status(http.StatusOK)
+}
+
+func BlockTilQueueHasRunningItem(c *gin.Context) {
+	for {
+		info := Config.Services.Queue.Info(c)
+		if info.Stats.Running == 0 {
+			break
+		}
+	}
+	c.Status(http.StatusOK)
 }
 
 func PostHook(c *gin.Context) {
@@ -143,34 +164,21 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	remoteYamlConfig, err := remote.FileBackoff(remote_, user, repo, build, repo.Config)
+	configFetcher := &configFetcher{remote_: remote_, user: user, repo: repo, build: build}
+	remoteYamlConfigs, err := configFetcher.Fetch()
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
 		return
 	}
-	conf, err := findOrPersistPipelineConfig(repo, remoteYamlConfig)
-	if err != nil {
-		logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+
+	if branchFiltered(build, remoteYamlConfigs) {
+		c.String(200, "Branch does not match restrictions defined in yaml")
 		return
 	}
-	build.ConfigID = conf.ID
 
-	// verify that pipeline can be built at all
-	parsedPipelineConfig, err := yaml.ParseString(conf.Data)
-	if err == nil {
-		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-			c.String(200, "Branch does not match restrictions defined in yaml")
-			return
-		}
-	}
-
-	if repo.IsGated {
-		allowed, _ := Config.Services.Senders.SenderAllowed(user, repo, build, conf)
-		if !allowed {
-			build.Status = model.StatusBlocked
-		}
+	if repo.IsGated { // This feature is not clear to me. Reenabling once better understood
+		build.Status = model.StatusBlocked
 	}
 
 	// update some build fields
@@ -183,6 +191,16 @@ func PostHook(c *gin.Context) {
 		logrus.Errorf("failure to save commit for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
+	}
+
+	// persist the build config for historical correctness, restarts, etc
+	for _, remoteYamlConfig := range remoteYamlConfigs {
+		_, err := findOrPersistPipelineConfig(build, remoteYamlConfig)
+		if err != nil {
+			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
+			c.AbortWithError(500, err)
+			return
+		}
 	}
 
 	c.JSON(200, build)
@@ -218,14 +236,6 @@ func PostHook(c *gin.Context) {
 	// get the previous build so that we can send status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 
-	defer func() {
-		uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-		err = remote_.Status(user, repo, build, uri)
-		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
-	}()
-
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -235,7 +245,7 @@ func PostHook(c *gin.Context) {
 		Regs:  regs,
 		Envs:  envs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: remoteYamlConfigs,
 	}
 	buildItems, err := b.Build()
 	if err != nil {
@@ -247,66 +257,75 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	setBuildProcs(build, buildItems)
-
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
 		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
 
+	defer func() {
+		for _, item := range buildItems {
+			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			if len(buildItems) > 1 {
+				err = remote_.Status(user, repo, build, uri, item.Proc)
+			} else {
+				err = remote_.Status(user, repo, build, uri, nil)
+			}
+			if err != nil {
+				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			}
+		}
+	}()
+
 	publishToTopic(c, build, repo)
 	queueBuild(build, repo, buildItems)
 }
 
-func findOrPersistPipelineConfig(repo *model.Repo, remoteYamlConfig []byte) (*model.Config, error) {
-	sha := shasum(remoteYamlConfig)
-	conf, err := Config.Storage.Config.ConfigFind(repo, sha)
+func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+	for _, remoteYamlConfig := range remoteYamlConfigs {
+		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
+		if err == nil {
+			if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
+			} else {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+	sha := shasum(remoteYamlConfig.Data)
+	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
-			RepoID: repo.ID,
-			Data:   string(remoteYamlConfig),
+			RepoID: build.RepoID,
+			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
+			Name:   sanitizePath(remoteYamlConfig.Name),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = Config.Storage.Config.ConfigFind(repo, sha)
+			conf, err = Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
+	buildConfig := &model.BuildConfig{
+		ConfigID: conf.ID,
+		BuildID:  build.ID,
+	}
+	err = Config.Storage.Config.BuildConfigCreate(buildConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	return conf, nil
 }
 
-func setBuildProcs(build *model.Build, buildItems []*buildItem) {
-	pcounter := len(buildItems)
-	for _, item := range buildItems {
-		build.Procs = append(build.Procs, item.Proc)
-		item.Proc.BuildID = build.ID
-
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pcounter++
-				if gid == 0 {
-					gid = pcounter
-				}
-				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pcounter,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
-				}
-				build.Procs = append(build.Procs, proc)
-			}
-		}
-	}
-}
-
+// publishes message to UI clients
 func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 	message := pubsub.Message{
 		Labels: map[string]string{
@@ -325,7 +344,11 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
 }
 
 func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
+	var tasks []*queue.Task
 	for _, item := range buildItems {
+		if item.Proc.State == model.StatusSkipped {
+			continue
+		}
 		task := new(queue.Task)
 		task.ID = fmt.Sprint(item.Proc.ID)
 		task.Labels = map[string]string{}
@@ -334,6 +357,9 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 		}
 		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
+		task.Dependencies = taskIds(item.DependsOn, buildItems)
+		task.RunOn = item.RunsOn
+		task.DepStatus = make(map[string]bool)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Proc.ID),
@@ -342,8 +368,21 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 		})
 
 		Config.Services.Logs.Open(context.Background(), task.ID)
-		Config.Services.Queue.Push(context.Background(), task)
+		tasks = append(tasks, task)
 	}
+	Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+}
+
+func taskIds(dependsOn []string, buildItems []*buildItem) []string {
+	taskIds := []string{}
+	for _, dep := range dependsOn {
+		for _, buildItem := range buildItems {
+			if buildItem.Proc.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(buildItem.Proc.ID))
+			}
+		}
+	}
+	return taskIds
 }
 
 func shasum(raw []byte) string {

@@ -1,3 +1,7 @@
+clone:
+  git:
+    image: plugins/git:next
+
 workspace:
   base: /go
   path: src/github.com/laszlocph/drone-oss-08
@@ -109,7 +113,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.95-bitbucket-alpine ]
+    tag: "${DRONE_TAG}-alpine"
     when:
       event: tag
 
@@ -118,7 +122,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.95-bitbucket-alpine ]
+    tag: "${DRONE_TAG}-alpine"
     when:
       event: tag
 
@@ -126,7 +130,7 @@ pipeline:
     image: plugins/docker
     repo: laszlocloud/drone-oss-08-server
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.95-bitbucket ]
+    tag: ${DRONE_TAG}
     when:
       event: tag
 
@@ -135,7 +139,7 @@ pipeline:
     repo: laszlocloud/drone-oss-08-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
-    tag: [ 0.8.95-bitbucket ]
+    tag: ${DRONE_TAG}
     when:
       event: tag
 

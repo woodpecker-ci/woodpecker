@@ -272,18 +272,6 @@
 			"revisionTime": "2017-02-10T18:43:46Z"
 		},
 		{
-			"checksumSHA1": "yfdQVdrwsfoEu9o+dCafeDA2tf4=",
-			"path": "github.com/drone/drone-go",
-			"revision": "7f20e6c113d3ffa2af80401c4eba7d510c8fd875",
-			"revisionTime": "2018-05-15T16:51:39Z"
-		},
-		{
-			"checksumSHA1": "xp0TXa8YZe0ADl2YNY7e5N02FNs=",
-			"path": "github.com/drone/drone-go/drone",
-			"revision": "7f20e6c113d3ffa2af80401c4eba7d510c8fd875",
-			"revisionTime": "2018-05-15T16:51:39Z"
-		},
-		{
 			"checksumSHA1": "oX91yMnimWNI17gVk7iQIE0p2pw=",
 			"path": "github.com/drone/envsubst",
 			"revision": "15e3f9b7e16332eee3bbdff9ef31f95d23c5da2c",
@@ -425,10 +413,12 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "hmMnLbqq5stRt+XMnqnVglxk8pg=",
+			"checksumSHA1": "rDtytQW0+4gz4qQjzA2vcDaFeXY=",
 			"path": "github.com/laszlocph/drone-ui/dist",
-			"revision": "0dbf167b5c9efd822bbdf2723bdfa5b8499992ba",
-			"revisionTime": "2019-06-05T04:37:12Z"
+			"revision": "cf441286eb88d97dc0f684fb91f13cbd5b0c765a",
+			"revisionTime": "2019-07-04T06:57:11Z",
+			"version": "master",
+			"versionExact": "master"
 		},
 		{
 			"path": "github.com/lib/pq",

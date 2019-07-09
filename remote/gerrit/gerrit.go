@@ -103,13 +103,12 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return nil, nil
 }
 
-// File is not supported by the Gerrit driver.
-func (c *client) FileRef(u *model.User, r *model.Repo, ref, f string) ([]byte, error) {
-	return nil, nil
+func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string) error {
+func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	return nil
 }
 

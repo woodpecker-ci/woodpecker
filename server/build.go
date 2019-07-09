@@ -156,13 +156,12 @@ func GetProcLogs(c *gin.Context) {
 	io.Copy(c.Writer, rc)
 }
 
+// DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	repo := session.Repo(c)
 
-	// parse the build number and job sequence number from
-	// the repquest parameter.
+	// parse the build number from the request parameter.
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
-	seq, _ := strconv.Atoi(c.Params.ByName("job"))
 
 	build, err := store.GetBuildNumber(c, repo, num)
 	if err != nil {
@@ -170,27 +169,40 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	proc, err := store.FromContext(c).ProcFind(build, seq)
+	procs, err := store.FromContext(c).ProcList(build)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
 	}
 
-	if proc.State != model.StatusRunning {
+	cancelled := false
+	for _, proc := range procs {
+		if proc.PPID != 0 {
+			continue
+		}
+
+		if proc.State != model.StatusRunning && proc.State != model.StatusPending {
+			continue
+		}
+
+		proc.State = model.StatusKilled
+		proc.Stopped = time.Now().Unix()
+		if proc.Started == 0 {
+			proc.Started = proc.Stopped
+		}
+		proc.ExitCode = 137
+		// TODO cancel child procs
+		store.FromContext(c).ProcUpdate(proc)
+
+		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
+		cancelled = true
+	}
+
+	if !cancelled {
 		c.String(400, "Cannot cancel a non-running build")
 		return
 	}
 
-	proc.State = model.StatusKilled
-	proc.Stopped = time.Now().Unix()
-	if proc.Started == 0 {
-		proc.Started = proc.Stopped
-	}
-	proc.ExitCode = 137
-	// TODO cancel child procs
-	store.FromContext(c).ProcUpdate(proc)
-
-	Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	c.String(204, "")
 }
 
@@ -268,7 +280,7 @@ func PostApproval(c *gin.Context) {
 	build.Reviewer = user.Login
 
 	// fetch the build file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -307,13 +319,10 @@ func PostApproval(c *gin.Context) {
 		}
 	}
 
-	defer func() {
-		uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-		err = remote_.Status(user, repo, build, uri)
-		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
-	}()
+	var yamls []*remote.FileMeta
+	for _, y := range configs {
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+	}
 
 	b := procBuilder{
 		Repo:  repo,
@@ -323,7 +332,7 @@ func PostApproval(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: yamls,
 		Envs:  envs,
 	}
 	buildItems, err := b.Build()
@@ -336,11 +345,24 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	setBuildProcs(build, buildItems)
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
 		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
+
+	defer func() {
+		for _, item := range buildItems {
+			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			if len(buildItems) > 1 {
+				err = remote_.Status(user, repo, build, uri, item.Proc)
+			} else {
+				err = remote_.Status(user, repo, build, uri, nil)
+			}
+			if err != nil {
+				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			}
+		}
+	}()
 
 	publishToTopic(c, build, repo)
 	queueBuild(build, repo, buildItems)
@@ -376,7 +398,7 @@ func PostDecline(c *gin.Context) {
 	}
 
 	uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
-	err = remote_.Status(user, repo, build, uri)
+	err = remote_.Status(user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
@@ -436,7 +458,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the .drone.yml file from the database
-	conf, err := Config.Storage.Config.ConfigLoad(build.ConfigID)
+	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -474,6 +496,13 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
+	err = persistBuildConfigs(configs, build.ID)
+	if err != nil {
+		logrus.Errorf("failure to persist build config for %s. %s", repo.FullName, err)
+		c.AbortWithError(500, err)
+		return
+	}
+
 	// Read query string parameters into buildParams, exclude reserved params
 	var buildParams = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
@@ -504,6 +533,11 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
+	var yamls []*remote.FileMeta
+	for _, y := range configs {
+		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+	}
+
 	b := procBuilder{
 		Repo:  repo,
 		Curr:  build,
@@ -512,7 +546,7 @@ func PostBuild(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Link:  httputil.GetURL(c.Request),
-		Yaml:  conf.Data,
+		Yamls: yamls,
 		Envs:  buildParams,
 	}
 	buildItems, err := b.Build()
@@ -524,8 +558,6 @@ func PostBuild(c *gin.Context) {
 		c.JSON(500, build)
 		return
 	}
-
-	setBuildProcs(build, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -580,6 +612,20 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
+}
+
+func persistBuildConfigs(configs []*model.Config, buildID int64) error {
+	for _, conf := range configs {
+		buildConfig := &model.BuildConfig{
+			ConfigID: conf.ID,
+			BuildID:  buildID,
+		}
+		err := Config.Storage.Config.BuildConfigCreate(buildConfig)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 var deleteStr = `[

@@ -2,7 +2,7 @@
 
 ```Go
 import (
-	"github.com/drone/drone-go/drone"
+	"github.com/laszlocph/drone-oss-08/drone-go/drone"
 	"golang.org/x/oauth2"
 )
 

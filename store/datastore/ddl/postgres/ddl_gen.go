@@ -1,17 +1,3 @@
-// Copyright 2018 Drone.IO Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package postgres
 
 import (
@@ -169,6 +155,38 @@ var migrations = []struct {
 	{
 		name: "alter-table-update-file-meta",
 		stmt: alterTableUpdateFileMeta,
+	},
+	{
+		name: "create-table-build-config",
+		stmt: createTableBuildConfig,
+	},
+	{
+		name: "alter-table-add-config-name",
+		stmt: alterTableAddConfigName,
+	},
+	{
+		name: "update-table-set-config-name",
+		stmt: updateTableSetConfigName,
+	},
+	{
+		name: "populate-build-config",
+		stmt: populateBuildConfig,
+	},
+	{
+		name: "alter-table-add-task-dependencies",
+		stmt: alterTableAddTaskDependencies,
+	},
+	{
+		name: "alter-table-add-task-run-on",
+		stmt: alterTableAddTaskRunOn,
+	},
+	{
+		name: "alter-table-add-repo-fallback",
+		stmt: alterTableAddRepoFallback,
+	},
+	{
+		name: "update-table-set-repo-fallback",
+		stmt: updateTableSetRepoFallback,
 	},
 }
 
@@ -530,7 +548,7 @@ CREATE INDEX IF NOT EXISTS sender_repo_ix ON senders (sender_repo_id);
 //
 
 var alterTableAddRepoVisibility = `
-ALTER TABLE repos ADD COLUMN repo_visibility VARCHAR(50)
+ALTER TABLE repos ADD COLUMN repo_visibility VARCHAR(50);
 `
 
 var updateTableSetRepoVisibility = `
@@ -538,7 +556,7 @@ UPDATE repos
 SET repo_visibility = (CASE
   WHEN repo_private = false THEN 'public'
   ELSE 'private'
-  END)
+  END);
 `
 
 //
@@ -554,12 +572,13 @@ UPDATE repos SET repo_counter = (
   SELECT max(build_number)
   FROM builds
   WHERE builds.build_repo_id = repos.repo_id
-)
+);
 `
 
 var updateTableSetRepoSeqDefault = `
 UPDATE repos SET repo_counter = 0
 WHERE repo_counter IS NULL
+;
 `
 
 //
@@ -567,11 +586,11 @@ WHERE repo_counter IS NULL
 //
 
 var alterTableAddRepoActive = `
-ALTER TABLE repos ADD COLUMN repo_active BOOLEAN
+ALTER TABLE repos ADD COLUMN repo_active BOOLEAN;
 `
 
 var updateTableSetRepoActive = `
-UPDATE repos SET repo_active = true
+UPDATE repos SET repo_active = true;
 `
 
 //
@@ -583,7 +602,7 @@ ALTER TABLE users ADD COLUMN user_synced INTEGER;
 `
 
 var updateTableSetUserSynced = `
-UPDATE users SET user_synced = 0
+UPDATE users SET user_synced = 0;
 `
 
 //
@@ -615,19 +634,19 @@ CREATE INDEX IF NOT EXISTS ix_perms_user ON perms (perm_user_id);
 //
 
 var alterTableAddFilePid = `
-ALTER TABLE files ADD COLUMN file_pid INTEGER
+ALTER TABLE files ADD COLUMN file_pid INTEGER;
 `
 
 var alterTableAddFileMetaPassed = `
-ALTER TABLE files ADD COLUMN file_meta_passed INTEGER
+ALTER TABLE files ADD COLUMN file_meta_passed INTEGER;
 `
 
 var alterTableAddFileMetaFailed = `
-ALTER TABLE files ADD COLUMN file_meta_failed INTEGER
+ALTER TABLE files ADD COLUMN file_meta_failed INTEGER;
 `
 
 var alterTableAddFileMetaSkipped = `
-ALTER TABLE files ADD COLUMN file_meta_skipped INTEGER
+ALTER TABLE files ADD COLUMN file_meta_skipped INTEGER;
 `
 
 var alterTableUpdateFileMeta = `
@@ -635,4 +654,64 @@ UPDATE files SET
  file_meta_passed=0
 ,file_meta_failed=0
 ,file_meta_skipped=0
+;
+`
+
+//
+// 019_create_table_build_config.sql
+//
+
+var createTableBuildConfig = `
+CREATE TABLE IF NOT EXISTS build_config (
+ config_id       INTEGER NOT NULL
+,build_id        INTEGER NOT NULL
+,PRIMARY KEY (config_id, build_id)
+,FOREIGN KEY (config_id) REFERENCES config (config_id)
+,FOREIGN KEY (build_id) REFERENCES builds (build_id)
+);
+`
+
+//
+// 020_add_column_config_name.sql
+//
+
+var alterTableAddConfigName = `
+ALTER TABLE config ADD COLUMN config_name TEXT
+`
+
+var updateTableSetConfigName = `
+UPDATE config SET config_name = 'drone'
+`
+
+//
+// 021_populate_build_config.sql
+//
+
+var populateBuildConfig = `
+INSERT INTO build_config (config_id, build_id)
+SELECT build_config_id, build_id FROM builds
+`
+
+//
+// 022_add_task_columns.sql
+//
+
+var alterTableAddTaskDependencies = `
+ALTER TABLE tasks ADD COLUMN task_dependencies BYTEA
+`
+
+var alterTableAddTaskRunOn = `
+ALTER TABLE tasks ADD COLUMN task_run_on BYTEA
+`
+
+//
+// 023_add_repo_fallback_column.sql
+//
+
+var alterTableAddRepoFallback = `
+ALTER TABLE repos ADD COLUMN repo_fallback BOOLEAN
+`
+
+var updateTableSetRepoFallback = `
+UPDATE repos SET repo_fallback='false'
 `

@@ -184,11 +184,6 @@ func Test_coding(t *testing.T) {
 				g.Assert(err == nil).IsTrue()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
-			g.It("Should return file for specified ref", func() {
-				data, err := c.FileRef(fakeUser, fakeRepo, "master", ".drone.yml")
-				g.Assert(err == nil).IsTrue()
-				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
-			})
 		})
 
 		g.Describe("When requesting a netrc config", func() {

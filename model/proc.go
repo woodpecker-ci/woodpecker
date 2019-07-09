@@ -14,6 +14,8 @@
 
 package model
 
+import "fmt"
+
 // ProcStore persists process information to storage.
 type ProcStore interface {
 	ProcLoad(int64) (*Proc, error)
@@ -57,18 +59,24 @@ func (p *Proc) Failing() bool {
 
 // Tree creates a process tree from a flat process list.
 func Tree(procs []*Proc) []*Proc {
-	var (
-		nodes  []*Proc
-		parent *Proc
-	)
+	var nodes []*Proc
 	for _, proc := range procs {
 		if proc.PPID == 0 {
 			nodes = append(nodes, proc)
-			parent = proc
-			continue
 		} else {
+			parent, _ := findNode(nodes, proc.PPID)
 			parent.Children = append(parent.Children, proc)
 		}
 	}
 	return nodes
+}
+
+func findNode(nodes []*Proc, pid int) (*Proc, error) {
+	for _, node := range nodes {
+		if node.PID == pid {
+			return node, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Corrupt proc structure")
 }

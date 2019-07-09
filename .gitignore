@@ -8,4 +8,5 @@ release/
 cli/release/
 
 server/swagger/files/*.json
+server/swagger/swagger_gen.go
 .idea/
