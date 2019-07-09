@@ -140,16 +140,12 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 		)
 	}
 
-	info := e.Group("/api/info")
+	queue := e.Group("/api/queue")
 	{
-		info.GET("/queue",
+		queue.GET("/info",
 			session.MustAdmin(),
 			server.GetQueueInfo,
 		)
-	}
-
-	queue := e.Group("/api/queue")
-	{
 		queue.GET("/pause",
 			session.MustAdmin(),
 			server.PauseQueue,
