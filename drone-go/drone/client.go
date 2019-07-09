@@ -35,11 +35,6 @@ const (
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
-	pathServers        = "%s/api/servers"
-	pathServer         = "%s/api/servers/%s"
-	pathScalerPause    = "%s/api/pause"
-	pathScalerResume   = "%s/api/resume"
-	pathVarz           = "%s/varz"
 	pathVersion        = "%s/version"
 )
 
@@ -357,56 +352,6 @@ func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
 	return c.delete(uri)
-}
-
-// Server returns the named servers details.
-func (c *client) Server(name string) (*Server, error) {
-	out := new(Server)
-	uri := fmt.Sprintf(pathServer, c.addr, name)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// ServerList returns a list of all active build servers.
-func (c *client) ServerList() ([]*Server, error) {
-	var out []*Server
-	uri := fmt.Sprintf(pathServers, c.addr)
-	err := c.get(uri, &out)
-	return out, err
-}
-
-// ServerCreate creates a new server.
-func (c *client) ServerCreate() (*Server, error) {
-	out := new(Server)
-	uri := fmt.Sprintf(pathServers, c.addr)
-	err := c.post(uri, nil, out)
-	return out, err
-}
-
-// ServerDelete terminates a server.
-func (c *client) ServerDelete(name string) error {
-	uri := fmt.Sprintf(pathServer, c.addr, name)
-	return c.delete(uri)
-}
-
-// AutoscalePause pauses the autoscaler.
-func (c *client) AutoscalePause() error {
-	uri := fmt.Sprintf(pathScalerPause, c.addr)
-	return c.post(uri, nil, nil)
-}
-
-// AutoscaleResume resumes the autoscaler.
-func (c *client) AutoscaleResume() error {
-	uri := fmt.Sprintf(pathScalerResume, c.addr)
-	return c.post(uri, nil, nil)
-}
-
-// AutoscaleVersion resumes the autoscaler.
-func (c *client) AutoscaleVersion() (*Version, error) {
-	out := new(Version)
-	uri := fmt.Sprintf(pathVersion, c.addr)
-	err := c.get(uri, out)
-	return out, err
 }
 
 //

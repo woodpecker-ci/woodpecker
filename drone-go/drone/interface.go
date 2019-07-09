@@ -122,25 +122,4 @@ type Client interface {
 
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
-
-	// Server returns the named servers details.
-	Server(name string) (*Server, error)
-
-	// ServerList returns a list of all active build servers.
-	ServerList() ([]*Server, error)
-
-	// ServerCreate creates a new server.
-	ServerCreate() (*Server, error)
-
-	// ServerDelete terminates a server.
-	ServerDelete(name string) error
-
-	// AutoscalePause pauses the autoscaler.
-	AutoscalePause() error
-
-	// AutoscaleResume resumes the autoscaler.
-	AutoscaleResume() error
-
-	// AutoscaleVersion returns the autoscaler version.
-	AutoscaleVersion() (*Version, error)
 }
