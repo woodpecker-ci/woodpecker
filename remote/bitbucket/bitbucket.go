@@ -206,7 +206,7 @@ func (c *config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	if err != nil {
 		return nil, err
 	}
-	return []byte(config.Data), err
+	return []byte(*config), err
 }
 
 func (c *config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
