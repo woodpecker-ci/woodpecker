@@ -122,4 +122,7 @@ type Client interface {
 
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
+
+	// QueueInfo returns the queue state.
+	QueueInfo() (*Info, error)
 }

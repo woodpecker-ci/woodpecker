@@ -35,6 +35,7 @@ const (
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
+	pathQueue          = "%s/api/queue"
 	pathVersion        = "%s/version"
 )
 
@@ -352,6 +353,13 @@ func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
 	return c.delete(uri)
+}
+
+func (c *client) QueueInfo() (*Info, error) {
+	out := new(Info)
+	uri := fmt.Sprintf(pathQueue+"/info", c.addr)
+	err := c.get(uri, out)
+	return out, err
 }
 
 //
