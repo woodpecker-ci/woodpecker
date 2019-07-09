@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/laszlocph/drone-ui/dist"
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/shared/token"
 	"github.com/laszlocph/drone-oss-08/version"
+	"github.com/laszlocph/woodpecker-ui/dist"
 
 	"github.com/dimfeld/httptreemux"
 )
