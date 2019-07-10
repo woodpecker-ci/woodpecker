@@ -27,6 +27,7 @@ func Test_QueueInfo(t *testing.T) {
 			"stats": {
 					"worker_count": 3,
 					"pending_count": 0,
+					"waiting_on_deps_count": 0,
 					"running_count": 1,
 					"completed_count": 0
 			},
