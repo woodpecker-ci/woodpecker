@@ -207,6 +207,11 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 		Name:      "pending_jobs",
 		Help:      "Total number of pending build processes.",
 	})
+	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "drone",
+		Name:      "waiting_jobs",
+		Help:      "Total number of builds waiting on deps.",
+	})
 	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "drone",
 		Name:      "running_jobs",
@@ -237,6 +242,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 		for {
 			stats := droneserver.Config.Services.Queue.Info(nil)
 			pendingJobs.Set(float64(stats.Stats.Pending))
+			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))
 			workers.Set(float64(stats.Stats.Workers))
 			time.Sleep(500 * time.Millisecond)
