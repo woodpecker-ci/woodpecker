@@ -192,6 +192,10 @@ var migrations = []struct {
 		name: "update-table-set-repo-fallback",
 		stmt: updateTableSetRepoFallback,
 	},
+	{
+		name: "update-table-set-repo-fallback-again",
+		stmt: updateTableSetRepoFallbackAgain,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -712,5 +716,13 @@ ALTER TABLE repos ADD COLUMN repo_fallback BOOLEAN
 `
 
 var updateTableSetRepoFallback = `
+UPDATE repos SET repo_fallback='false'
+`
+
+//
+// 024_add_repo_fallback_column.sql
+//
+
+var updateTableSetRepoFallbackAgain = `
 UPDATE repos SET repo_fallback='false'
 `
