@@ -23,7 +23,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/laszlocph/drone-oss-08/model"
 	"github.com/laszlocph/drone-oss-08/remote"
@@ -253,9 +252,6 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 	fc := make(chan *remote.FileMeta)
 	errc := make(chan error)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(len(data))
-
 	for _, file := range data {
 		go func(path string) {
 			content, err := c.File(u, r, b, path)
@@ -273,24 +269,15 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 	var files []*remote.FileMeta
 	var errors []error
 
-	go func() {
-		for {
-			select {
-			case err, open := <-errc:
-				if open {
-					errors = append(errors, err)
-					wg.Done()
-				}
-			case fileMeta, open := <-fc:
-				if open {
-					files = append(files, fileMeta)
-					wg.Done()
-				}
-			}
+	for i := 0; i < len(data); i++ {
+		select {
+		case err, _ := <-errc:
+			errors = append(errors, err)
+		case fileMeta, _ := <-fc:
+			files = append(files, fileMeta)
 		}
-	}()
+	}
 
-	wg.Wait()
 	close(fc)
 	close(errc)
 
