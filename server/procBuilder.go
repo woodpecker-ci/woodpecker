@@ -59,7 +59,9 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 
 	sort.Sort(remote.ByName(b.Yamls))
 
-	for j, y := range b.Yamls {
+	pidSequence := 1
+
+	for _, y := range b.Yamls {
 		// matrix axes
 		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
@@ -69,11 +71,11 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		for i, axis := range axes {
+		for _, axis := range axes {
 			proc := &model.Proc{
 				BuildID: b.Curr.ID,
-				PID:     j + i + 1,
-				PGID:    j + i + 1,
+				PID:     pidSequence,
+				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    sanitizePath(y.Name),
@@ -123,6 +125,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				item.Labels = map[string]string{}
 			}
 			items = append(items, item)
+			pidSequence++
 		}
 	}
 
