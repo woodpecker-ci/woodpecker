@@ -80,7 +80,6 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				Environ: axis,
 				Name:    sanitizePath(y.Name),
 			}
-			b.Curr.Procs = append(b.Curr.Procs, proc)
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
@@ -113,6 +112,10 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
+			if len(ir.Stages) == 0 {
+				continue
+			}
+
 			item := &buildItem{
 				Proc:      proc,
 				Config:    ir,
@@ -124,6 +127,8 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			if item.Labels == nil {
 				item.Labels = map[string]string{}
 			}
+
+			b.Curr.Procs = append(b.Curr.Procs, proc)
 			items = append(items, item)
 			pidSequence++
 		}

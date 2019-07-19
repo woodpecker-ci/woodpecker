@@ -205,6 +205,42 @@ pipeline:
 	}
 }
 
+func TestZeroSteps(t *testing.T) {
+	build := &model.Build{Branch: "dev"}
+
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Data: []byte(`
+skip_clone: true
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+    yyy: ${DRONE_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 0 {
+		t.Fatal("Should not generate a build item if there are no steps")
+	}
+	if len(build.Procs) != 0 {
+		t.Fatal("Should not generate a build item if there are no steps")
+	}
+}
+
 func TestTree(t *testing.T) {
 	build := &model.Build{}
 
