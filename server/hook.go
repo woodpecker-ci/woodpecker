@@ -177,6 +177,11 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
+	if zeroSteps(*build, remoteYamlConfigs) {
+		c.String(200, "Step conditions yield zero runnable steps")
+		return
+	}
+
 	// update some build fields
 	build.RepoID = repo.ID
 	build.Verified = true
@@ -291,6 +296,30 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bo
 		}
 	}
 	return true
+}
+
+// uses pass by value as procBuilder has side effects on build. Something to be fixed
+func zeroSteps(build model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: remoteYamlConfigs,
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		return false
+	}
+	if len(buildItems) == 0 {
+		return true
+	}
+
+	return false
 }
 
 func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {

@@ -59,7 +59,9 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 
 	sort.Sort(remote.ByName(b.Yamls))
 
-	for j, y := range b.Yamls {
+	pidSequence := 1
+
+	for _, y := range b.Yamls {
 		// matrix axes
 		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
@@ -69,16 +71,15 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		for i, axis := range axes {
+		for _, axis := range axes {
 			proc := &model.Proc{
 				BuildID: b.Curr.ID,
-				PID:     j + i + 1,
-				PGID:    j + i + 1,
+				PID:     pidSequence,
+				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    sanitizePath(y.Name),
 			}
-			b.Curr.Procs = append(b.Curr.Procs, proc)
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
@@ -111,6 +112,10 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
+			if len(ir.Stages) == 0 {
+				continue
+			}
+
 			item := &buildItem{
 				Proc:      proc,
 				Config:    ir,
@@ -122,7 +127,10 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 			if item.Labels == nil {
 				item.Labels = map[string]string{}
 			}
+
+			b.Curr.Procs = append(b.Curr.Procs, proc)
 			items = append(items, item)
+			pidSequence++
 		}
 	}
 
