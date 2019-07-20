@@ -182,14 +182,14 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if repo.IsGated { // This feature is not clear to me. Reenabling once better understood
-		build.Status = model.StatusBlocked
-	}
-
 	// update some build fields
 	build.RepoID = repo.ID
 	build.Verified = true
 	build.Status = model.StatusPending
+
+	if repo.IsGated && build.Sender != user.Login {
+		build.Status = model.StatusBlocked
+	}
 
 	err = store.CreateBuild(c, build, build.Procs...)
 	if err != nil {
