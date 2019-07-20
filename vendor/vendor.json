@@ -413,10 +413,10 @@
 			"revisionTime": "2016-05-04T02:26:26Z"
 		},
 		{
-			"checksumSHA1": "CnKB7OYSt+kjXOICViCD5AjrPV0=",
+			"checksumSHA1": "V1Su0eCRaVf2lh7Lqv6AAPq7Ejw=",
 			"path": "github.com/laszlocph/woodpecker-ui/dist",
-			"revision": "e072f29f48eea081b4b066eaba4a85e6333aa6d8",
-			"revisionTime": "2019-07-16T13:08:29Z",
+			"revision": "450a04abd274db91db6013d3db48c073525e6669",
+			"revisionTime": "2019-07-20T19:55:32Z",
 			"version": "master",
 			"versionExact": "master"
 		},
