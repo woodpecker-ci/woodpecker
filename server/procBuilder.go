@@ -133,7 +133,42 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 		}
 	}
 
+	items = filterItemsWithMissingDependencies(items)
+
 	return items, nil
+}
+
+func filterItemsWithMissingDependencies(items []*buildItem) []*buildItem {
+	itemsToRemove := make([]*buildItem, 0)
+
+	for _, item := range items {
+		for _, dep := range item.DependsOn {
+			if !containsItemWithName(dep, items) {
+				itemsToRemove = append(itemsToRemove, item)
+			}
+		}
+	}
+
+	if len(itemsToRemove) > 0 {
+		filtered := make([]*buildItem, 0)
+		for _, item := range items {
+			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
+				filtered = append(filtered, item)
+			}
+		}
+		return filtered
+	}
+
+	return items
+}
+
+func containsItemWithName(name string, items []*buildItem) bool {
+	for _, item := range items {
+		if name == item.Proc.Name {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *procBuilder) envsubst_(y string, environ map[string]string) (string, error) {

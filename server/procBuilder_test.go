@@ -70,13 +70,11 @@ func TestMultiPipeline(t *testing.T) {
 pipeline:
   xxx:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 `)},
 			&remote.FileMeta{Data: []byte(`
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -100,6 +98,16 @@ func TestDependsOn(t *testing.T) {
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Name: "lint", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			&remote.FileMeta{Name: "test", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
 			&remote.FileMeta{Data: []byte(`
 pipeline:
   deploy:
@@ -108,7 +116,6 @@ pipeline:
 depends_on:
   - lint
   - test
-  - build
 `)},
 		},
 	}
@@ -117,7 +124,7 @@ depends_on:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems[0].DependsOn) != 3 {
+	if len(buildItems[0].DependsOn) != 2 {
 		t.Fatal("Should have 3 dependencies")
 	}
 	if buildItems[0].DependsOn[1] != "test" {
@@ -173,14 +180,12 @@ func TestBranchFilter(t *testing.T) {
 pipeline:
   xxx:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 branches: master
 `)},
 			&remote.FileMeta{Data: []byte(`
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -224,7 +229,6 @@ pipeline:
     when:
       branch: notdev
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -236,8 +240,51 @@ pipeline:
 	if len(buildItems) != 0 {
 		t.Fatal("Should not generate a build item if there are no steps")
 	}
-	if len(build.Procs) != 0 {
-		t.Fatal("Should not generate a build item if there are no steps")
+}
+
+func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
+	build := &model.Build{Branch: "dev"}
+
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Name: "zerostep", Data: []byte(`
+skip_clone: true
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			&remote.FileMeta{Name: "justastep", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			&remote.FileMeta{Name: "shouldbefiltered", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ zerostep ]
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
+	}
+	if "justastep" != buildItems[0].Proc.Name {
+		t.Fatal("justastep should have been generated")
 	}
 }
 
@@ -257,7 +304,6 @@ func TestTree(t *testing.T) {
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
 `)},
 		},
 	}
