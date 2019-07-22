@@ -384,7 +384,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	if proc.Failing() {
 		queueErr = s.queue.Error(c, id, fmt.Errorf("Proc finished with exitcode %d, %s", state.ExitCode, state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id)
+		queueErr = s.queue.Done(c, id, proc.State)
 	}
 	if queueErr != nil {
 		log.Printf("error: done: cannot ack proc_id %d: %s", procID, err)

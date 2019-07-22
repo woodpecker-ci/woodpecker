@@ -11,6 +11,12 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
+const (
+	StatusSkipped = "skipped"
+	StatusSuccess = "success"
+	StatusFailure = "failure"
+)
+
 type entry struct {
 	item     *Task
 	done     chan bool
@@ -92,22 +98,26 @@ func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string) error {
-	return q.Error(c, id, nil)
+func (q *fifo) Done(c context.Context, id string, exitStatus string) error {
+	return q.finished(id, exitStatus, nil)
 }
 
 // Error signals that the item is done executing with error.
 func (q *fifo) Error(c context.Context, id string, err error) error {
+	return q.finished(id, StatusFailure, err)
+}
+
+func (q *fifo) finished(id string, exitStatus string, err error) error {
 	q.Lock()
 	taskEntry, ok := q.running[id]
 	if ok {
-		q.updateDepStatusInQueue(id, err == nil)
 		taskEntry.error = err
 		close(taskEntry.done)
 		delete(q.running, id)
 	} else {
 		q.removeFromPending(id)
 	}
+	q.updateDepStatusInQueue(id, exitStatus)
 	q.Unlock()
 	return nil
 }
@@ -310,14 +320,14 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
+func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		pending, ok := e.Value.(*Task)
 		for _, dep := range pending.Dependencies {
 			if ok && taskID == dep {
-				pending.DepStatus[dep] = success
+				pending.DepStatus[dep] = status
 			}
 		}
 	}
@@ -325,7 +335,7 @@ func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
 	for _, running := range q.running {
 		for _, dep := range running.item.Dependencies {
 			if taskID == dep {
-				running.item.DepStatus[dep] = success
+				running.item.DepStatus[dep] = status
 			}
 		}
 	}
@@ -336,7 +346,7 @@ func (q *fifo) updateDepStatusInQueue(taskID string, success bool) {
 		waiting, ok := e.Value.(*Task)
 		for _, dep := range waiting.Dependencies {
 			if ok && taskID == dep {
-				waiting.DepStatus[dep] = success
+				waiting.DepStatus[dep] = status
 			}
 		}
 	}

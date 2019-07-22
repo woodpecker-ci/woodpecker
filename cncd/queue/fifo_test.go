@@ -37,7 +37,7 @@ func TestFifo(t *testing.T) {
 		return
 	}
 
-	q.Done(noContext, got.ID)
+	q.Done(noContext, got.ID, StatusSuccess)
 	info = q.Info(noContext)
 	if len(info.Pending) != 0 {
 		t.Errorf("expect task removed from pending queue")
@@ -94,7 +94,7 @@ func TestFifoWait(t *testing.T) {
 	}()
 
 	<-time.After(time.Millisecond)
-	q.Done(noContext, got.ID)
+	q.Done(noContext, got.ID, StatusSuccess)
 	wg.Wait()
 }
 
@@ -127,7 +127,7 @@ func TestFifoDependencies(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 	}
 
 	q := New().(*fifo)
@@ -139,7 +139,7 @@ func TestFifoDependencies(t *testing.T) {
 		return
 	}
 
-	q.Done(noContext, got.ID)
+	q.Done(noContext, got.ID, StatusSuccess)
 
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task2 {
@@ -156,13 +156,13 @@ func TestFifoErrors(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 	}
 
 	task3 := &Task{
 		ID:           "3",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 		RunOn:        []string{"success", "failure"},
 	}
 
@@ -200,6 +200,55 @@ func TestFifoErrors(t *testing.T) {
 	}
 }
 
+func TestFifoTransitiveErrors(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]string),
+	}
+
+	task3 := &Task{
+		ID:           "3",
+		Dependencies: []string{"2"},
+		DepStatus:    make(map[string]string),
+	}
+
+	q := New().(*fifo)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+
+	got, _ := q.Poll(noContext, func(*Task) bool { return true })
+	if got != task1 {
+		t.Errorf("expect task1 returned from queue as task2 depends on it")
+		return
+	}
+	q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+
+	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	if got != task2 {
+		t.Errorf("expect task2 returned from queue")
+		return
+	}
+	if got.ShouldRun() {
+		t.Errorf("expect task2 should not run, since task1 failed")
+		return
+	}
+	q.Done(noContext, got.ID, StatusSkipped)
+
+	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	if got != task3 {
+		t.Errorf("expect task3 returned from queue")
+		return
+	}
+	if got.ShouldRun() {
+		t.Errorf("expect task3 should not run, task1 failed, thus task2 was skipped, task3 should be skipped too")
+		return
+	}
+}
+
 func TestFifoCancel(t *testing.T) {
 	task1 := &Task{
 		ID: "1",
@@ -208,13 +257,13 @@ func TestFifoCancel(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 	}
 
 	task3 := &Task{
 		ID:           "3",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 		RunOn:        []string{"success", "failure"},
 	}
 
@@ -286,13 +335,13 @@ func TestWaitingVsPending(t *testing.T) {
 	task2 := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 	}
 
 	task3 := &Task{
 		ID:           "3",
 		Dependencies: []string{"1"},
-		DepStatus:    make(map[string]bool),
+		DepStatus:    make(map[string]string),
 		RunOn:        []string{"success", "failure"},
 	}
 
@@ -322,8 +371,8 @@ func TestShouldRun(t *testing.T) {
 	task := &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: map[string]bool{
-			"1": true,
+		DepStatus: map[string]string{
+			"1": StatusSuccess,
 		},
 		RunOn: []string{"failure"},
 	}
@@ -335,8 +384,8 @@ func TestShouldRun(t *testing.T) {
 	task = &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: map[string]bool{
-			"1": true,
+		DepStatus: map[string]string{
+			"1": StatusSuccess,
 		},
 		RunOn: []string{"failure", "success"},
 	}
@@ -348,8 +397,8 @@ func TestShouldRun(t *testing.T) {
 	task = &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: map[string]bool{
-			"1": false,
+		DepStatus: map[string]string{
+			"1": StatusFailure,
 		},
 	}
 	if task.ShouldRun() {
@@ -360,8 +409,8 @@ func TestShouldRun(t *testing.T) {
 	task = &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: map[string]bool{
-			"1": true,
+		DepStatus: map[string]string{
+			"1": StatusSuccess,
 		},
 		RunOn: []string{"success"},
 	}
@@ -373,13 +422,38 @@ func TestShouldRun(t *testing.T) {
 	task = &Task{
 		ID:           "2",
 		Dependencies: []string{"1"},
-		DepStatus: map[string]bool{
-			"1": false,
+		DepStatus: map[string]string{
+			"1": StatusFailure,
 		},
 		RunOn: []string{"failure"},
 	}
 	if !task.ShouldRun() {
 		t.Errorf("expect task to run")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]string{
+			"1": StatusSkipped,
+		},
+	}
+	if task.ShouldRun() {
+		t.Errorf("Tasked should not run if dependency is skipped")
+		return
+	}
+
+	task = &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus: map[string]string{
+			"1": StatusSkipped,
+		},
+		RunOn: []string{"failure"},
+	}
+	if !task.ShouldRun() {
+		t.Errorf("On Failure tasks should run on skipped deps, something failed higher up the chain")
 		return
 	}
 }

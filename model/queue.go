@@ -49,7 +49,7 @@ func WithTaskStore(q queue.Queue, s TaskStore) queue.Queue {
 			Labels:       task.Labels,
 			Dependencies: task.Dependencies,
 			RunOn:        task.RunOn,
-			DepStatus:    make(map[string]bool),
+			DepStatus:    make(map[string]string),
 		})
 	}
 	q.PushAtOnce(context.Background(), toEnqueue)

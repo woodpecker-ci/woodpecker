@@ -27,8 +27,8 @@ type Task struct {
 	// Task IDs this task depend
 	Dependencies []string
 
-	// If dep finished sucessfully
-	DepStatus map[string]bool
+	// Dependency's exit status
+	DepStatus map[string]string
 
 	// RunOn failure or success
 	RunOn []string
@@ -41,8 +41,8 @@ func (t *Task) ShouldRun() bool {
 	}
 
 	if !runsOnFailure(t.RunOn) && runsOnSuccess(t.RunOn) {
-		for _, success := range t.DepStatus {
-			if !success {
+		for _, status := range t.DepStatus {
+			if StatusSuccess != status {
 				return false
 			}
 		}
@@ -50,8 +50,8 @@ func (t *Task) ShouldRun() bool {
 	}
 
 	if runsOnFailure(t.RunOn) && !runsOnSuccess(t.RunOn) {
-		for _, success := range t.DepStatus {
-			if success {
+		for _, status := range t.DepStatus {
+			if StatusSuccess == status {
 				return false
 			}
 		}
@@ -118,7 +118,7 @@ type Queue interface {
 	Extend(c context.Context, id string) error
 
 	// Done signals the task is complete.
-	Done(c context.Context, id string) error
+	Done(c context.Context, exitStatus string, id string) error
 
 	// Error signals the task is complete with errors.
 	Error(c context.Context, id string, err error) error
