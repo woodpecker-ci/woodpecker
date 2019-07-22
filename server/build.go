@@ -344,6 +344,7 @@ func PostApproval(c *gin.Context) {
 		store.UpdateBuild(c, build)
 		return
 	}
+	build = setBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -558,6 +559,7 @@ func PostBuild(c *gin.Context) {
 		c.JSON(500, build)
 		return
 	}
+	build = setBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {

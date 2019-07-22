@@ -177,7 +177,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if zeroSteps(*build, remoteYamlConfigs) {
+	if zeroSteps(build, remoteYamlConfigs) {
 		c.String(200, "Step conditions yield zero runnable steps")
 		return
 	}
@@ -261,6 +261,7 @@ func PostHook(c *gin.Context) {
 		store.UpdateBuild(c, build)
 		return
 	}
+	build = setBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -298,11 +299,10 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bo
 	return true
 }
 
-// uses pass by value as procBuilder has side effects on build. Something to be fixed
-func zeroSteps(build model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	b := procBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &build,
+		Curr:  build,
 		Last:  &model.Build{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},

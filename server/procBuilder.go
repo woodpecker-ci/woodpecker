@@ -128,15 +128,48 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				item.Labels = map[string]string{}
 			}
 
-			b.Curr.Procs = append(b.Curr.Procs, proc)
 			items = append(items, item)
 			pidSequence++
 		}
 	}
 
-	setBuildSteps(b.Curr, items)
+	items = filterItemsWithMissingDependencies(items)
 
 	return items, nil
+}
+
+func filterItemsWithMissingDependencies(items []*buildItem) []*buildItem {
+	itemsToRemove := make([]*buildItem, 0)
+
+	for _, item := range items {
+		for _, dep := range item.DependsOn {
+			if !containsItemWithName(dep, items) {
+				itemsToRemove = append(itemsToRemove, item)
+			}
+		}
+	}
+
+	if len(itemsToRemove) > 0 {
+		filtered := make([]*buildItem, 0)
+		for _, item := range items {
+			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
+				filtered = append(filtered, item)
+			}
+		}
+		// Recursive to handle transitive deps
+		return filterItemsWithMissingDependencies(filtered)
+	}
+
+	return items
+}
+
+func containsItemWithName(name string, items []*buildItem) bool {
+	for _, item := range items {
+		if name == item.Proc.Name {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *procBuilder) envsubst_(y string, environ map[string]string) (string, error) {
@@ -214,8 +247,12 @@ func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func setBuildSteps(build *model.Build, buildItems []*buildItem) {
-	pcounter := len(buildItems)
+func setBuildStepsOnBuild(build *model.Build, buildItems []*buildItem) *model.Build {
+	for _, item := range buildItems {
+		build.Procs = append(build.Procs, item.Proc)
+	}
+	pcounter := len(build.Procs)
+
 	for _, item := range buildItems {
 		for _, stage := range item.Config.Stages {
 			var gid int
@@ -239,6 +276,8 @@ func setBuildSteps(build *model.Build, buildItems []*buildItem) {
 			}
 		}
 	}
+
+	return build
 }
 
 // return the metadata from the cli context.
