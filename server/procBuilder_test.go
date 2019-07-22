@@ -288,6 +288,58 @@ depends_on: [ zerostep ]
 	}
 }
 
+func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
+	build := &model.Build{Branch: "dev"}
+
+	b := procBuilder{
+		Repo:  &model.Repo{},
+		Curr:  build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Name: "zerostep", Data: []byte(`
+skip_clone: true
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			&remote.FileMeta{Name: "justastep", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			&remote.FileMeta{Name: "shouldbefiltered", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ zerostep ]
+`)},
+			&remote.FileMeta{Name: "shouldbefilteredtoo", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ shouldbefiltered ]
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
+	}
+	if "justastep" != buildItems[0].Proc.Name {
+		t.Fatal("justastep should have been generated")
+	}
+}
+
 func TestTree(t *testing.T) {
 	build := &model.Build{}
 
