@@ -262,7 +262,8 @@ pipeline:
 		},
 	}
 
-	_, err := b.Build()
+	buildItems, err := b.Build()
+	build = setBuildStepsOnBuild(build, buildItems)
 	if err != nil {
 		t.Fatal(err)
 	}
