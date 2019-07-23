@@ -248,23 +248,26 @@ func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 }
 
 func setBuildStepsOnBuild(build *model.Build, buildItems []*buildItem) *model.Build {
+	var pidSequence int
 	for _, item := range buildItems {
 		build.Procs = append(build.Procs, item.Proc)
+		if pidSequence < item.Proc.PID {
+			pidSequence = item.Proc.PID
+		}
 	}
-	pcounter := len(build.Procs)
 
 	for _, item := range buildItems {
 		for _, stage := range item.Config.Stages {
 			var gid int
 			for _, step := range stage.Steps {
-				pcounter++
+				pidSequence++
 				if gid == 0 {
-					gid = pcounter
+					gid = pidSequence
 				}
 				proc := &model.Proc{
 					BuildID: build.ID,
 					Name:    step.Alias,
-					PID:     pcounter,
+					PID:     pidSequence,
 					PPID:    item.Proc.PID,
 					PGID:    gid,
 					State:   model.StatusPending,
