@@ -1,4 +1,4 @@
-# Drone-OSS-08
+# Woodpecker
 
 An opinionated fork of the Drone CI system.
 
