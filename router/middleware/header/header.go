@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/version"
+	"github.com/laszlocph/woodpecker/version"
 	"github.com/gin-gonic/gin"
 )
 

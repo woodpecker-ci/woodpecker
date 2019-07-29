@@ -17,7 +17,7 @@ package datastore
 import (
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/woodpecker/model"
 	"github.com/franela/goblin"
 )
 

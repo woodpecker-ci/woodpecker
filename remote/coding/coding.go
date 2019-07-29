@@ -20,10 +20,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/remote/coding/internal"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/remote/coding/internal"
+	"github.com/laszlocph/woodpecker/shared/httputil"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"

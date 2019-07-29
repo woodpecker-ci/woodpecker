@@ -15,7 +15,7 @@
 package middleware
 
 import (
-	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/woodpecker/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"

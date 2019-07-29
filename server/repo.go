@@ -23,12 +23,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
-	"github.com/laszlocph/drone-oss-08/shared/token"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/laszlocph/woodpecker/shared/token"
+	"github.com/laszlocph/woodpecker/store"
 )
 
 func PostRepo(c *gin.Context) {

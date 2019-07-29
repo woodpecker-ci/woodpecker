@@ -1,8 +1,8 @@
 package pipeline
 
 import (
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/multipart"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
 )
 
 // Logger handles the process logging.

@@ -15,9 +15,9 @@
 package sql
 
 import (
-	"github.com/laszlocph/drone-oss-08/store/datastore/sql/mysql"
-	"github.com/laszlocph/drone-oss-08/store/datastore/sql/postgres"
-	"github.com/laszlocph/drone-oss-08/store/datastore/sql/sqlite"
+	"github.com/laszlocph/woodpecker/store/datastore/sql/mysql"
+	"github.com/laszlocph/woodpecker/store/datastore/sql/postgres"
+	"github.com/laszlocph/woodpecker/store/datastore/sql/sqlite"
 )
 
 // Supported database drivers

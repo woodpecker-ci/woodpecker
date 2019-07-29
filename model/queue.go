@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/laszlocph/drone-oss-08/cncd/queue"
+	"github.com/laszlocph/woodpecker/cncd/queue"
 )
 
 // Task defines scheduled pipeline Task.

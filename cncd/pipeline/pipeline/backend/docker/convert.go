@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
 
 	"github.com/docker/docker/api/types/container"
 )

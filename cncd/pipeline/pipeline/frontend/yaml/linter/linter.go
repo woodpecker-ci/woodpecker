@@ -3,7 +3,7 @@ package linter
 import (
 	"fmt"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 )
 
 const (

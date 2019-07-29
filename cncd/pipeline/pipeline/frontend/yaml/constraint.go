@@ -3,8 +3,8 @@ package yaml
 import (
 	"path/filepath"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/types"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
 	libcompose "github.com/docker/libcompose/yaml"
 )
 

@@ -28,16 +28,16 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
-	"github.com/laszlocph/drone-oss-08/shared/token"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/laszlocph/woodpecker/shared/token"
+	"github.com/laszlocph/woodpecker/store"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
-	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
-	"github.com/laszlocph/drone-oss-08/cncd/queue"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/woodpecker/cncd/pubsub"
+	"github.com/laszlocph/woodpecker/cncd/queue"
 )
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)

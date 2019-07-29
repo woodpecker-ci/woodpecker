@@ -24,9 +24,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/shared/httputil"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
