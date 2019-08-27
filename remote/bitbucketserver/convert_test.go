@@ -17,8 +17,8 @@ package bitbucketserver
 import (
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote/bitbucketserver/internal"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote/bitbucketserver/internal"
 	"github.com/franela/goblin"
 	"github.com/mrjones/oauth"
 )

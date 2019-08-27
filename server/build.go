@@ -25,13 +25,13 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/drone-oss-08/cncd/queue"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/cncd/queue"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/laszlocph/woodpecker/store"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
 )
 
 func GetBuilds(c *gin.Context) {

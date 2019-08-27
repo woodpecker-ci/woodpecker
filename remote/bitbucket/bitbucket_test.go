@@ -20,9 +20,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote/bitbucket/fixtures"
-	"github.com/laszlocph/drone-oss-08/remote/bitbucket/internal"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote/bitbucket/fixtures"
+	"github.com/laszlocph/woodpecker/remote/bitbucket/internal"
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"

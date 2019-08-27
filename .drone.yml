@@ -4,7 +4,7 @@ clone:
 
 workspace:
   base: /go
-  path: src/github.com/laszlocph/drone-oss-08
+  path: src/github.com/laszlocph/woodpecker
 
 pipeline:
   test:
@@ -23,7 +23,7 @@ pipeline:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test github.com/laszlocph/drone-oss-08/store/datastore
+      - go test github.com/laszlocph/woodpecker/store/datastore
 
   test_mysql:
     image: golang:1.12.4
@@ -31,7 +31,7 @@ pipeline:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test github.com/laszlocph/drone-oss-08/store/datastore
+      - go test github.com/laszlocph/woodpecker/store/datastore
 
   build:
     image: golang:1.12.4
@@ -41,7 +41,7 @@ pipeline:
 
   publish_server_alpine:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-server
+    repo: laszlocloud/woodpecker-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
     tag: [ alpine ]
@@ -51,7 +51,7 @@ pipeline:
 
   publish_server:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-server
+    repo: laszlocloud/woodpecker-server
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
     when:
@@ -60,7 +60,7 @@ pipeline:
 
   publish_agent:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
@@ -70,7 +70,7 @@ pipeline:
 
   publish_agent_alpine:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
     tag: [ alpine ]
@@ -80,7 +80,7 @@ pipeline:
 
   publish_agent_arm:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.linux.arm
     secrets: [ docker_username, docker_password ]
     tag: [ linux-arm ]
@@ -90,7 +90,7 @@ pipeline:
 
   publish_agent_arm64:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.linux.arm64
     secrets: [ docker_username, docker_password ]
     tag: [ linux-arm64 ]
@@ -100,7 +100,7 @@ pipeline:
 
   publish_agent_amd64:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
@@ -110,7 +110,7 @@ pipeline:
 
   release_server_alpine:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-server
+    repo: laszlocloud/woodpecker-server
     dockerfile: Dockerfile.alpine
     secrets: [ docker_username, docker_password ]
     tag: "${DRONE_TAG}-alpine"
@@ -119,7 +119,7 @@ pipeline:
 
   release_agent_alpine:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
     tag: "${DRONE_TAG}-alpine"
@@ -128,7 +128,7 @@ pipeline:
 
   release_server:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-server
+    repo: laszlocloud/woodpecker-server
     secrets: [ docker_username, docker_password ]
     tag: ${DRONE_TAG}
     when:
@@ -136,7 +136,7 @@ pipeline:
 
   release_agent:
     image: plugins/docker
-    repo: laszlocloud/drone-oss-08-agent
+    repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: ${DRONE_TAG}

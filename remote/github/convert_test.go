@@ -17,7 +17,7 @@ package github
 import (
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/woodpecker/model"
 	"github.com/google/go-github/github"
 
 	"github.com/franela/goblin"

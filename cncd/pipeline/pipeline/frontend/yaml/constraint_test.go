@@ -3,7 +3,7 @@ package yaml
 import (
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
 
 	"gopkg.in/yaml.v2"
 )

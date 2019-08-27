@@ -19,7 +19,7 @@ package remote
 import (
 	"net/http"
 
-	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/woodpecker/model"
 
 	"golang.org/x/net/context"
 )

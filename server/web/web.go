@@ -24,9 +24,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/shared/token"
-	"github.com/laszlocph/drone-oss-08/version"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/shared/token"
+	"github.com/laszlocph/woodpecker/version"
 	"github.com/laszlocph/woodpecker-ui/dist"
 
 	"github.com/dimfeld/httptreemux"

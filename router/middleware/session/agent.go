@@ -15,7 +15,7 @@
 package session
 
 import (
-	"github.com/laszlocph/drone-oss-08/shared/token"
+	"github.com/laszlocph/woodpecker/shared/token"
 	"github.com/gin-gonic/gin"
 )
 

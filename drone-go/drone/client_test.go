@@ -17,7 +17,7 @@ func Test_QueueInfo(t *testing.T) {
 							"data": "",
 							"labels": {
 									"platform": "linux/amd64",
-									"repo": "laszlocph/drone-oss-08"
+									"repo": "laszlocph/woodpecker"
 							},
 							"Dependencies": [],
 							"DepStatus": {},

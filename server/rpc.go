@@ -28,17 +28,17 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/laszlocph/drone-oss-08/cncd/logging"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
-	"github.com/laszlocph/drone-oss-08/cncd/queue"
+	"github.com/laszlocph/woodpecker/cncd/logging"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/laszlocph/woodpecker/cncd/pubsub"
+	"github.com/laszlocph/woodpecker/cncd/queue"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/store"
 
 	"github.com/drone/expr"
 )

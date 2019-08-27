@@ -20,8 +20,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote/coding/fixtures"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote/coding/fixtures"
 
 	"github.com/franela/goblin"
 )

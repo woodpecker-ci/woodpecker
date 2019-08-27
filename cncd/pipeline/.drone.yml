@@ -1,15 +1,15 @@
 workspace:
   base: /go
-  path: src/github.com/laszlocph/drone-oss-08/cncd/pipeline
+  path: src/github.com/laszlocph/woodpecker/cncd/pipeline
 
 pipeline:
   install:
     image: golang:1.8
     commands:
-      - go install github.com/laszlocph/drone-oss-08/cncd/pipeline/pipec
-      - go install github.com/laszlocph/drone-oss-08/cncd/pipeline/piped
+      - go install github.com/laszlocph/woodpecker/cncd/pipeline/pipec
+      - go install github.com/laszlocph/woodpecker/cncd/pipeline/piped
 
   test:
     image: golang:1.8
     commands:
-      - go test -cover github.com/laszlocph/drone-oss-08/cncd/pipeline/...
+      - go test -cover github.com/laszlocph/woodpecker/cncd/pipeline/...

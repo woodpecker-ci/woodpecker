@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/laszlocph/drone-oss-08/version"
+	"github.com/laszlocph/woodpecker/version"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"

@@ -17,9 +17,9 @@ package token
 import (
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/laszlocph/woodpecker/store"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"

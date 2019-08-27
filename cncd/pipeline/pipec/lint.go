@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
 
 	"github.com/kr/pretty"
 	"github.com/urfave/cli"

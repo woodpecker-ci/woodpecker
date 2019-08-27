@@ -6,8 +6,8 @@ import (
 	"time"
 	"log"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

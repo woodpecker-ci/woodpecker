@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
+	"github.com/laszlocph/woodpecker/model"
 )
 
 func TestFileFind(t *testing.T) {

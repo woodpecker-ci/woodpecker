@@ -5,9 +5,9 @@ An opinionated fork of the Drone CI system.
 - Based on the v0.8 code tree
 - Focused on developer experience.
 
-[![Build Status](https://cloud.drone.io/api/badges/laszlocph/drone-oss-08/status.svg)](https://cloud.drone.io/laszlocph/drone-oss-08) [![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/drone-oss-08)](https://goreportcard.com/report/github.com/laszlocph/drone-oss-08) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://cloud.drone.io/api/badges/laszlocph/woodpecker/status.svg)](https://cloud.drone.io/laszlocph/woodpecker) [![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/woodpecker)](https://goreportcard.com/report/github.com/laszlocph/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-![Drone-OSS-08](docs/drone.png)
+![woodpecker](docs/drone.png)
 
 ## Table of contents
 
@@ -315,12 +315,12 @@ See the [proxy guide](docs/administration/proxy.md) if you want to see a setup b
 
 ## Contributing
 
-Drone-OSS-08 is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
+woodpecker is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
 
 [How to build the project]()
 
 ## License
 
-Drone-OSS-08 is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
+woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
 Files under the `docs/` folder is licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License. It is a derivative work of the https://github.com/drone/docs git repository.
