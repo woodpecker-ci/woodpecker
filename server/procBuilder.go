@@ -22,14 +22,14 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/compiler"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/linter"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/frontend/yaml/matrix"
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
 )
 
 // Takes the hook data and the yaml and returns in internal data model

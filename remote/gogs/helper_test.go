@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote/gogs/fixtures"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote/gogs/fixtures"
 
 	"github.com/franela/goblin"
 	"github.com/gogits/go-gogs-client"

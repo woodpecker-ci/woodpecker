@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/cli/drone/internal"
-	"github.com/laszlocph/drone-oss-08/drone-go/drone"
+	"github.com/laszlocph/woodpecker/cli/drone/internal"
+	"github.com/laszlocph/woodpecker/drone-go/drone"
 
 	"github.com/urfave/cli"
 )

@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/laszlocph/drone-oss-08/cli/drone/internal"
+	"github.com/laszlocph/woodpecker/cli/drone/internal"
 	"github.com/urfave/cli"
 )
 

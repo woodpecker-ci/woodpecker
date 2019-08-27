@@ -8,8 +8,8 @@
 
 3. Install binaries to $GOPATH/bin
 
-    go install github.com/laszlocph/drone-oss-08/cmd/drone-agent
-    go install github.com/laszlocph/drone-oss-08/cmd/drone-server
+    go install github.com/laszlocph/woodpecker/cmd/drone-agent
+    go install github.com/laszlocph/woodpecker/cmd/drone-server
 
 ---
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
 )
 
 type engine struct {

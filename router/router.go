@@ -20,13 +20,13 @@ import (
 	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 
-	"github.com/laszlocph/drone-oss-08/router/middleware/header"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
-	"github.com/laszlocph/drone-oss-08/router/middleware/token"
-	"github.com/laszlocph/drone-oss-08/server"
-	"github.com/laszlocph/drone-oss-08/server/debug"
-	"github.com/laszlocph/drone-oss-08/server/metrics"
-	"github.com/laszlocph/drone-oss-08/server/web"
+	"github.com/laszlocph/woodpecker/router/middleware/header"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/laszlocph/woodpecker/router/middleware/token"
+	"github.com/laszlocph/woodpecker/server"
+	"github.com/laszlocph/woodpecker/server/debug"
+	"github.com/laszlocph/woodpecker/server/metrics"
+	"github.com/laszlocph/woodpecker/server/web"
 )
 
 // Load loads the router

@@ -6,7 +6,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/laszlocph/drone-oss-08/cli/drone/internal"
+	"github.com/laszlocph/woodpecker/cli/drone/internal"
 )
 
 var registryListCmd = cli.Command{

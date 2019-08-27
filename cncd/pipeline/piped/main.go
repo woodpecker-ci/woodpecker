@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/backend/docker"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/interrupt"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/multipart"
-	"github.com/laszlocph/drone-oss-08/cncd/pipeline/pipeline/rpc"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/docker"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/tevino/abool"

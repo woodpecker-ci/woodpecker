@@ -17,9 +17,9 @@ package session
 import (
 	"net/http"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/shared/token"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/shared/token"
+	"github.com/laszlocph/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 )

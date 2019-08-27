@@ -17,8 +17,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
 
 	"github.com/gin-gonic/gin"
 )

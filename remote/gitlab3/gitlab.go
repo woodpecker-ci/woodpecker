@@ -24,12 +24,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/remote"
-	"github.com/laszlocph/drone-oss-08/shared/httputil"
-	"github.com/laszlocph/drone-oss-08/shared/oauth2"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/remote"
+	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/laszlocph/woodpecker/shared/oauth2"
 
-	"github.com/laszlocph/drone-oss-08/remote/gitlab3/client"
+	"github.com/laszlocph/woodpecker/remote/gitlab3/client"
 )
 
 const DefaultScope = "api"

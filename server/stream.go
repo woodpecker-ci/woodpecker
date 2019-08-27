@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/laszlocph/drone-oss-08/cncd/logging"
-	"github.com/laszlocph/drone-oss-08/cncd/pubsub"
-	"github.com/laszlocph/drone-oss-08/model"
-	"github.com/laszlocph/drone-oss-08/router/middleware/session"
-	"github.com/laszlocph/drone-oss-08/store"
+	"github.com/laszlocph/woodpecker/cncd/logging"
+	"github.com/laszlocph/woodpecker/cncd/pubsub"
+	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/laszlocph/woodpecker/store"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"

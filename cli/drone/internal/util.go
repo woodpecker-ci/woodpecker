@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"github.com/laszlocph/drone-oss-08/drone-go/drone"
+	"github.com/laszlocph/woodpecker/drone-go/drone"
 )
 
 // NewClient returns a new client from the CLI context.
