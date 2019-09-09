@@ -172,7 +172,12 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if branchFiltered(build, remoteYamlConfigs) {
+	filtered, err := branchFiltered(build, remoteYamlConfigs)
+	if err != nil {
+		logrus.Errorf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
+		c.AbortWithError(400, err)
+	}
+	if filtered {
 		c.String(200, "Branch does not match restrictions defined in yaml")
 		return
 	}
@@ -286,17 +291,19 @@ func PostHook(c *gin.Context) {
 	queueBuild(build, repo, buildItems)
 }
 
-func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
-		if err == nil {
-			if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-			} else {
-				return false
-			}
+		if err != nil {
+			return false, err
+		}
+
+		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
+		} else {
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
 }
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
