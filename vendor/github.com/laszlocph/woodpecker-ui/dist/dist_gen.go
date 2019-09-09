@@ -3829,7 +3829,7 @@ var LOGO = _react2["default"].createElement(
 			_react2["default"].createElement(
 				"a",
 				{
-					href: "https://github.com/laszlocph/woodpecker/",
+					href: "https://github.com/laszlocph/drone-oss-08/",
 					target: "_blank",
 					rel: "noopener noreferrer"
 				},
