@@ -69,13 +69,13 @@ type pullRequestHook struct {
 			Email    string `json:"email"`
 			Avatar   string `json:"avatar_url"`
 		} `json:"user"`
-		Title     string   `json:"title"`
-		Body      string   `json:"body"`
-		State     string   `json:"state"`
-		URL       string   `json:"html_url"`
-		Mergeable bool     `json:"mergeable"`
-		Merged    bool     `json:"merged"`
-		MergeBase string   `json:"merge_base"`
+		Title     string `json:"title"`
+		Body      string `json:"body"`
+		State     string `json:"state"`
+		URL       string `json:"html_url"`
+		Mergeable bool   `json:"mergeable"`
+		Merged    bool   `json:"merged"`
+		MergeBase string `json:"merge_base"`
 		Base      struct {
 			Label string `json:"label"`
 			Ref   string `json:"ref"`

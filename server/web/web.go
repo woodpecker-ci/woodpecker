@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/laszlocph/woodpecker-ui/dist"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/shared/token"
 	"github.com/laszlocph/woodpecker/version"
-	"github.com/laszlocph/woodpecker-ui/dist"
 
 	"github.com/dimfeld/httptreemux"
 )

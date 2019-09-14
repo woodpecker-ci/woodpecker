@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/drone/envsubst"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/docker"
@@ -20,7 +21,6 @@ import (
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
-	"github.com/drone/envsubst"
 
 	"github.com/urfave/cli"
 )
@@ -275,7 +275,7 @@ var Command = cli.Command{
 			EnvVar: "DRONE_JOB_NUMBER",
 		},
 		cli.StringSliceFlag{
-			Name: "env, e",
+			Name:   "env, e",
 			EnvVar: "DRONE_ENV",
 		},
 	},

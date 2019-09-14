@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 	"encoding/json"
-	"time"
 	"log"
+	"time"
 
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"

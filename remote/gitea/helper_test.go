@@ -19,9 +19,9 @@ import (
 	"testing"
 
 	"code.gitea.io/sdk/gitea"
+	"github.com/franela/goblin"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/remote/gitea/fixtures"
-	"github.com/franela/goblin"
 )
 
 func Test_parse(t *testing.T) {

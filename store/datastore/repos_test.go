@@ -17,8 +17,8 @@ package datastore
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
 	"github.com/franela/goblin"
+	"github.com/laszlocph/woodpecker/model"
 )
 
 func TestRepos(t *testing.T) {
