@@ -15,7 +15,7 @@ pipeline:
       - go get -u golang.org/x/net/context/ctxhttp
       - go get -u github.com/golang/protobuf/proto
       - go get -u github.com/golang/protobuf/protoc-gen-go
-      - go test -cover $(go list ./... | grep -v /vendor/)
+      - go test -cover -timeout 30s $(go list ./... | grep -v /vendor/)
 
   test_postgres:
     image: golang:1.12.4
@@ -23,7 +23,7 @@ pipeline:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test github.com/laszlocph/woodpecker/store/datastore
+      - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
   test_mysql:
     image: golang:1.12.4
@@ -31,7 +31,7 @@ pipeline:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test github.com/laszlocph/woodpecker/store/datastore
+      - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
   build:
     image: golang:1.12.4
