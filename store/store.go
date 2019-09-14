@@ -249,7 +249,3 @@ func GetBuildQueue(c context.Context) ([]*model.Feed, error) {
 func CreateBuild(c context.Context, build *model.Build, procs ...*model.Proc) error {
 	return FromContext(c).CreateBuild(build, procs...)
 }
-
-func UpdateBuild(c context.Context, build *model.Build) error {
-	return FromContext(c).UpdateBuild(build)
-}

@@ -249,9 +249,10 @@ func ZombieKill(c *gin.Context) {
 		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	}
 
-	build.Status = model.StatusKilled
-	build.Finished = time.Now().Unix()
-	store.FromContext(c).UpdateBuild(build)
+	if _, err := UpdateToStatusKilled(store.FromContext(c), *build); err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
 
 	c.String(204, "")
 }
@@ -275,9 +276,6 @@ func PostApproval(c *gin.Context) {
 		c.String(500, "cannot decline a build with status %s", build.Status)
 		return
 	}
-	build.Status = model.StatusPending
-	build.Reviewed = time.Now().Unix()
-	build.Reviewer = user.Login
 
 	// fetch the build file from the database
 	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
@@ -289,12 +287,12 @@ func PostApproval(c *gin.Context) {
 
 	netrc, err := remote_.Netrc(user, repo)
 	if err != nil {
-		c.String(500, "Failed to generate netrc file. %s", err)
+		c.String(500, "failed to generate netrc file. %s", err)
 		return
 	}
 
-	if uerr := store.UpdateBuild(c, build); err != nil {
-		c.String(500, "error updating build. %s", uerr)
+	if build, err = UpdateToStatusPending(store.FromContext(c), *build, user.Login); err != nil {
+		c.String(500, "error updating build. %s", err)
 		return
 	}
 
@@ -337,11 +335,9 @@ func PostApproval(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		build.Status = model.StatusError
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Error = err.Error()
-		store.UpdateBuild(c, build)
+		if _, err = UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
+		}
 		return
 	}
 	build = setBuildStepsOnBuild(b.Curr, buildItems)
@@ -388,12 +384,8 @@ func PostDecline(c *gin.Context) {
 		c.String(500, "cannot decline a build with status %s", build.Status)
 		return
 	}
-	build.Status = model.StatusDeclined
-	build.Reviewed = time.Now().Unix()
-	build.Reviewer = user.Login
 
-	err = store.UpdateBuild(c, build)
-	if err != nil {
+	if _, err = UpdateToStatusDeclined(store.FromContext(c), *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}

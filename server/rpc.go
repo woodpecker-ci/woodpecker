@@ -326,9 +326,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	if build.Status == model.StatusPending {
-		build.Status = model.StatusRunning
-		build.Started = state.Started
-		if err := s.store.UpdateBuild(build); err != nil {
+		if build, err = UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
 			log.Printf("error: init: cannot update build_id %d state: %s", build.ID, err)
 		}
 	}
@@ -394,9 +392,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !isThereRunningStage(procs) {
-		build.Status = buildStatus(procs)
-		build.Finished = proc.Stopped
-		if err := s.store.UpdateBuild(build); err != nil {
+		if build, err = UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
 			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
