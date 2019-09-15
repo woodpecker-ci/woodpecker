@@ -179,27 +179,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if state.Exited {
-		proc.Stopped = state.Finished
-		proc.ExitCode = state.ExitCode
-		proc.Error = state.Error
-		proc.State = model.StatusSuccess
-		if state.ExitCode != 0 || state.Error != "" {
-			proc.State = model.StatusFailure
-		}
-		if state.ExitCode == 137 {
-			proc.State = model.StatusKilled
-		}
-	} else {
-		proc.Started = state.Started
-		proc.State = model.StatusRunning
-	}
-
-	if proc.Started == 0 && proc.Stopped != 0 {
-		proc.Started = build.Started
-	}
-
-	if err := s.store.ProcUpdate(proc); err != nil {
+	if proc, err = UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Printf("error: rpc.update: cannot update proc: %s", err)
 	}
 
@@ -346,9 +326,8 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		s.pubsub.Publish(c, "topic/events", message)
 	}()
 
-	proc.Started = state.Started
-	proc.State = model.StatusRunning
-	return s.store.ProcUpdate(proc)
+	_, err = UpdateProcToStatusStarted(s.store, *proc, state)
+	return err
 }
 
 // Done implements the rpc.Done function
@@ -376,7 +355,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	s.updateProcState(proc, state)
+	if proc, err = UpdateProcStatusToDone(s.store, *proc, state); err != nil {
+		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+	}
 
 	var queueErr error
 	if proc.Failing() {
@@ -440,32 +421,10 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) updateProcState(proc *model.Proc, state rpc.State) {
-	proc.Stopped = state.Finished
-	proc.Error = state.Error
-	proc.ExitCode = state.ExitCode
-	if state.Started == 0 {
-		proc.State = model.StatusSkipped
-	} else {
-		proc.State = model.StatusSuccess
-	}
-	if proc.ExitCode != 0 || proc.Error != "" {
-		proc.State = model.StatusFailure
-	}
-	if err := s.store.ProcUpdate(proc); err != nil {
-		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
-	}
-}
-
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
-			p.State = model.StatusSkipped
-			if p.Started != 0 {
-				p.State = model.StatusSuccess // for deamons that are killed
-				p.Stopped = completedProc.Stopped
-			}
-			if err := s.store.ProcUpdate(p); err != nil {
+			if _, err := UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
 				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
 			}
 		}

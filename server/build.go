@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -185,14 +186,10 @@ func DeleteBuild(c *gin.Context) {
 			continue
 		}
 
-		proc.State = model.StatusKilled
-		proc.Stopped = time.Now().Unix()
-		if proc.Started == 0 {
-			proc.Started = proc.Stopped
-		}
-		proc.ExitCode = 137
 		// TODO cancel child procs
-		store.FromContext(c).ProcUpdate(proc)
+		if _, err = UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+			log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+		}
 
 		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 		cancelled = true
@@ -235,17 +232,12 @@ func ZombieKill(c *gin.Context) {
 
 	for _, proc := range procs {
 		if proc.Running() {
-			proc.State = model.StatusKilled
-			proc.ExitCode = 137
-			proc.Stopped = time.Now().Unix()
-			if proc.Started == 0 {
-				proc.Started = proc.Stopped
+			if _, err := UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+				log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 			}
+		} else {
+			store.FromContext(c).ProcUpdate(proc)
 		}
-	}
-
-	for _, proc := range procs {
-		store.FromContext(c).ProcUpdate(proc)
 		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	}
 
