@@ -285,7 +285,7 @@ func PostHook(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo)
+	publishToTopic(c, build, repo, model.Enqueued)
 	queueBuild(build, repo, buildItems)
 }
 
@@ -360,7 +360,7 @@ func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.Fi
 }
 
 // publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo) {
+func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,

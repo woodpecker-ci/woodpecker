@@ -113,7 +113,7 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 		repo.POST("/move", session.MustRepoAdmin(), server.MoveRepo)
 
 		repo.POST("/builds/:number", session.MustPush, server.PostBuild)
-		repo.DELETE("/builds/:number", session.MustRepoAdmin(), server.ZombieKill)
+		repo.DELETE("/builds/:number", session.MustPush, server.DeleteBuild)
 		repo.POST("/builds/:number/approve", session.MustPush, server.PostApproval)
 		repo.POST("/builds/:number/decline", session.MustPush, server.PostDecline)
 		repo.DELETE("/builds/:number/:job", session.MustPush, server.DeleteBuild)

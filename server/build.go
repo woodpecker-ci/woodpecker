@@ -160,8 +160,6 @@ func GetProcLogs(c *gin.Context) {
 // DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	repo := session.Repo(c)
-
-	// parse the build number from the request parameter.
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
 
 	build, err := store.GetBuildNumber(c, repo, num)
@@ -176,74 +174,61 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	cancelled := false
+	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
+		c.String(400, "Cannot cancel a non-running or non-pending build")
+		return
+	}
+
+	// First cancel/evict procs in the queue in one go
+	procToCancel := []string{}
+	procToEvict := []string{}
 	for _, proc := range procs {
 		if proc.PPID != 0 {
 			continue
 		}
-
-		if proc.State != model.StatusRunning && proc.State != model.StatusPending {
-			continue
+		if proc.State == model.StatusRunning {
+			procToCancel = append(procToCancel, fmt.Sprint(proc.ID))
 		}
-
-		// TODO cancel child procs
-		if _, err = UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
-			log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+		if proc.State == model.StatusPending {
+			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
 		}
-
-		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
-		cancelled = true
 	}
+	Config.Services.Queue.EvictAtOnce(context.Background(), procToEvict)
+	Config.Services.Queue.ErrorAtOnce(context.Background(), procToEvict, queue.ErrCancel)
+	Config.Services.Queue.ErrorAtOnce(context.Background(), procToCancel, queue.ErrCancel)
 
-	if !cancelled {
-		c.String(400, "Cannot cancel a non-running build")
-		return
-	}
-
-	c.String(204, "")
-}
-
-// ZombieKill kills zombie processes stuck in an infinite pending
-// or running state. This can only be invoked by administrators and
-// may have negative effects.
-func ZombieKill(c *gin.Context) {
-	repo := session.Repo(c)
-
-	// parse the build number and job sequence number from
-	// the repquest parameter.
-	num, _ := strconv.Atoi(c.Params.ByName("number"))
-
-	build, err := store.GetBuildNumber(c, repo, num)
-	if err != nil {
-		c.AbortWithError(404, err)
-		return
-	}
-
-	procs, err := store.FromContext(c).ProcList(build)
-	if err != nil {
-		c.AbortWithError(404, err)
-		return
-	}
-
-	if build.Status != model.StatusRunning {
-		c.String(400, "Cannot force cancel a non-running build")
-		return
-	}
-
+	// Then update the DB status for pending builds
+	// Running ones will be set when the agents stop on the cancel signal
 	for _, proc := range procs {
-		if proc.Running() {
-			if _, err := UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
-				log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+		if proc.State == model.StatusPending {
+			if proc.PPID != 0 {
+				if _, err = UpdateProcToStatusSkipped(store.FromContext(c), *proc, 0); err != nil {
+					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+				}
+			} else {
+				if _, err = UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+				}
 			}
-		} else {
-			store.FromContext(c).ProcUpdate(proc)
 		}
-		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	}
 
-	if _, err := UpdateToStatusKilled(store.FromContext(c), *build); err != nil {
+	killedBuild, err := UpdateToStatusKilled(store.FromContext(c), *build)
+	if err != nil {
 		c.AbortWithError(500, err)
 		return
+	}
+
+	// For pending builds, we stream the UI the latest state.
+	// For running builds, the UI will be updated when the agents acknowledge the cancel
+	if build.Status == model.StatusPending {
+		procs, err = store.FromContext(c).ProcList(killedBuild)
+		if err != nil {
+			c.AbortWithError(404, err)
+			return
+		}
+		killedBuild.Procs = model.Tree(procs)
+		publishToTopic(c, killedBuild, repo, model.Cancelled)
 	}
 
 	c.String(204, "")
@@ -353,7 +338,7 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo)
+	publishToTopic(c, build, repo, model.Enqueued)
 	queueBuild(build, repo, buildItems)
 }
 
@@ -557,7 +542,7 @@ func PostBuild(c *gin.Context) {
 	}
 	c.JSON(202, build)
 
-	publishToTopic(c, build, repo)
+	publishToTopic(c, build, repo, model.Enqueued)
 	queueBuild(build, repo, buildItems)
 }
 
