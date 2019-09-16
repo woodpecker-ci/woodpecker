@@ -17,9 +17,9 @@ package bitbucketserver
 import (
 	"testing"
 
+	"github.com/franela/goblin"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/remote/bitbucketserver/internal"
-	"github.com/franela/goblin"
 	"github.com/mrjones/oauth"
 )
 

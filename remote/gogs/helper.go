@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/laszlocph/woodpecker/model"
 	"github.com/gogits/go-gogs-client"
+	"github.com/laszlocph/woodpecker/model"
 )
 
 // helper function that converts a Gogs repository to a Drone repository.

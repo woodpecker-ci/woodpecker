@@ -3,9 +3,9 @@ package yaml
 import (
 	"path/filepath"
 
+	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
-	libcompose "github.com/docker/libcompose/yaml"
 )
 
 type (

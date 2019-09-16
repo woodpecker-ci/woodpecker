@@ -259,11 +259,9 @@ func PostHook(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		build.Status = model.StatusError
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Error = err.Error()
-		store.UpdateBuild(c, build)
+		if _, err = UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
+		}
 		return
 	}
 	build = setBuildStepsOnBuild(b.Curr, buildItems)

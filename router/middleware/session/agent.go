@@ -15,8 +15,8 @@
 package session
 
 import (
-	"github.com/laszlocph/woodpecker/shared/token"
 	"github.com/gin-gonic/gin"
+	"github.com/laszlocph/woodpecker/shared/token"
 )
 
 // AuthorizeAgent authorizes requsts from build agents to access the queue.

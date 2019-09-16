@@ -20,9 +20,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/laszlocph/woodpecker/router/middleware/session"
 	"github.com/laszlocph/woodpecker/store"
-	"github.com/gin-gonic/gin"
 )
 
 // FileList gets a list file by build.

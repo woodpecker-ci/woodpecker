@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/franela/goblin"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/remote/gitlab3/testdata"
-	"github.com/franela/goblin"
 )
 
 func Test_Gitlab(t *testing.T) {

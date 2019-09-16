@@ -17,8 +17,8 @@ package github
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
 	"github.com/google/go-github/github"
+	"github.com/laszlocph/woodpecker/model"
 
 	"github.com/franela/goblin"
 )

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -185,14 +186,10 @@ func DeleteBuild(c *gin.Context) {
 			continue
 		}
 
-		proc.State = model.StatusKilled
-		proc.Stopped = time.Now().Unix()
-		if proc.Started == 0 {
-			proc.Started = proc.Stopped
-		}
-		proc.ExitCode = 137
 		// TODO cancel child procs
-		store.FromContext(c).ProcUpdate(proc)
+		if _, err = UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+			log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+		}
 
 		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 		cancelled = true
@@ -235,23 +232,19 @@ func ZombieKill(c *gin.Context) {
 
 	for _, proc := range procs {
 		if proc.Running() {
-			proc.State = model.StatusKilled
-			proc.ExitCode = 137
-			proc.Stopped = time.Now().Unix()
-			if proc.Started == 0 {
-				proc.Started = proc.Stopped
+			if _, err := UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+				log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 			}
+		} else {
+			store.FromContext(c).ProcUpdate(proc)
 		}
-	}
-
-	for _, proc := range procs {
-		store.FromContext(c).ProcUpdate(proc)
 		Config.Services.Queue.Error(context.Background(), fmt.Sprint(proc.ID), queue.ErrCancel)
 	}
 
-	build.Status = model.StatusKilled
-	build.Finished = time.Now().Unix()
-	store.FromContext(c).UpdateBuild(build)
+	if _, err := UpdateToStatusKilled(store.FromContext(c), *build); err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
 
 	c.String(204, "")
 }
@@ -275,9 +268,6 @@ func PostApproval(c *gin.Context) {
 		c.String(500, "cannot decline a build with status %s", build.Status)
 		return
 	}
-	build.Status = model.StatusPending
-	build.Reviewed = time.Now().Unix()
-	build.Reviewer = user.Login
 
 	// fetch the build file from the database
 	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
@@ -289,12 +279,12 @@ func PostApproval(c *gin.Context) {
 
 	netrc, err := remote_.Netrc(user, repo)
 	if err != nil {
-		c.String(500, "Failed to generate netrc file. %s", err)
+		c.String(500, "failed to generate netrc file. %s", err)
 		return
 	}
 
-	if uerr := store.UpdateBuild(c, build); err != nil {
-		c.String(500, "error updating build. %s", uerr)
+	if build, err = UpdateToStatusPending(store.FromContext(c), *build, user.Login); err != nil {
+		c.String(500, "error updating build. %s", err)
 		return
 	}
 
@@ -337,11 +327,9 @@ func PostApproval(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		build.Status = model.StatusError
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Error = err.Error()
-		store.UpdateBuild(c, build)
+		if _, err = UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
+		}
 		return
 	}
 	build = setBuildStepsOnBuild(b.Curr, buildItems)
@@ -388,12 +376,8 @@ func PostDecline(c *gin.Context) {
 		c.String(500, "cannot decline a build with status %s", build.Status)
 		return
 	}
-	build.Status = model.StatusDeclined
-	build.Reviewed = time.Now().Unix()
-	build.Reviewer = user.Login
 
-	err = store.UpdateBuild(c, build)
-	if err != nil {
+	if _, err = UpdateToStatusDeclined(store.FromContext(c), *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
