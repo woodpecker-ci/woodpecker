@@ -99,41 +99,57 @@ func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 
 // Done signals that the item is done executing.
 func (q *fifo) Done(c context.Context, id string, exitStatus string) error {
-	return q.finished(id, exitStatus, nil)
+	return q.finished([]string{id}, exitStatus, nil)
 }
 
 // Error signals that the item is done executing with error.
 func (q *fifo) Error(c context.Context, id string, err error) error {
+	return q.finished([]string{id}, StatusFailure, err)
+}
+
+// Error signals that the item is done executing with error.
+func (q *fifo) ErrorAtOnce(c context.Context, id []string, err error) error {
 	return q.finished(id, StatusFailure, err)
 }
 
-func (q *fifo) finished(id string, exitStatus string, err error) error {
+func (q *fifo) finished(ids []string, exitStatus string, err error) error {
 	q.Lock()
-	taskEntry, ok := q.running[id]
-	if ok {
-		taskEntry.error = err
-		close(taskEntry.done)
-		delete(q.running, id)
-	} else {
-		q.removeFromPending(id)
+
+	for _, id := range ids {
+		taskEntry, ok := q.running[id]
+		if ok {
+			taskEntry.error = err
+			close(taskEntry.done)
+			delete(q.running, id)
+		} else {
+			q.removeFromPending(id)
+		}
+		q.updateDepStatusInQueue(id, exitStatus)
 	}
-	q.updateDepStatusInQueue(id, exitStatus)
+
 	q.Unlock()
 	return nil
 }
 
 // Evict removes a pending task from the queue.
 func (q *fifo) Evict(c context.Context, id string) error {
+	return q.EvictAtOnce(c, []string{id})
+}
+
+// Evict removes a pending task from the queue.
+func (q *fifo) EvictAtOnce(c context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
 
-	var next *list.Element
-	for e := q.pending.Front(); e != nil; e = next {
-		next = e.Next()
-		task, ok := e.Value.(*Task)
-		if ok && task.ID == id {
-			q.pending.Remove(e)
-			return nil
+	for _, id := range ids {
+		var next *list.Element
+		for e := q.pending.Front(); e != nil; e = next {
+			next = e.Next()
+			task, ok := e.Value.(*Task)
+			if ok && task.ID == id {
+				q.pending.Remove(e)
+				return nil
+			}
 		}
 	}
 	return ErrNotFound

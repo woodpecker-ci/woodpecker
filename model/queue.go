@@ -119,3 +119,14 @@ func (q *persistentQueue) Evict(c context.Context, id string) error {
 	}
 	return err
 }
+
+// Evict removes a pending task from the queue.
+func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
+	err := q.Queue.EvictAtOnce(c, ids)
+	if err == nil {
+		for _, id := range ids {
+			q.store.TaskDelete(id)
+		}
+	}
+	return err
+}

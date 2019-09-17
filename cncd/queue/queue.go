@@ -123,8 +123,14 @@ type Queue interface {
 	// Error signals the task is complete with errors.
 	Error(c context.Context, id string, err error) error
 
+	// Error signals the task is complete with errors.
+	ErrorAtOnce(c context.Context, id []string, err error) error
+
 	// Evict removes a pending task from the queue.
 	Evict(c context.Context, id string) error
+
+	// Evict removes a pending task from the queue.
+	EvictAtOnce(c context.Context, id []string) error
 
 	// Wait waits until the task is complete.
 	Wait(c context.Context, id string) error
