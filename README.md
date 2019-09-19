@@ -5,7 +5,7 @@ An opinionated fork of the Drone CI system.
 - Based on the v0.8 code tree
 - Focused on developer experience.
 
-[![Build Status](https://cloud.drone.io/api/badges/laszlocph/woodpecker/status.svg)](https://cloud.drone.io/laszlocph/woodpecker) [![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/woodpecker)](https://goreportcard.com/report/github.com/laszlocph/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/woodpecker)](https://goreportcard.com/report/github.com/laszlocph/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ![woodpecker](docs/drone.png)
 
