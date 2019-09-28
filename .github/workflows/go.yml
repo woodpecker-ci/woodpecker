@@ -11,6 +11,8 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.12.4
+      env:
+        GOPATH: /home/runner/work/woodpecker/go
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
@@ -25,9 +27,7 @@ jobs:
         echo ${GITHUB_WORKSPACE}
         echo ${GOPATH}
         echo ${GOROOT}
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
-
+        
     - name: Test
       run: |
         go get -u golang.org/x/tools/cmd/cover
@@ -36,10 +36,6 @@ jobs:
         go get -u github.com/golang/protobuf/proto
         go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
-
+        
     - name: Build
       run: ./.drone.sh
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
