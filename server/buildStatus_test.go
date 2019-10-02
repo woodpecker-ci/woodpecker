@@ -22,8 +22,6 @@ import (
 	"github.com/laszlocph/woodpecker/model"
 )
 
-const TIMEOUT = 3 * time.Second
-
 type mockUpdateBuildStore struct {
 }
 
