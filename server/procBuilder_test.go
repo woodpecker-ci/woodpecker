@@ -23,6 +23,8 @@ import (
 )
 
 func TestMultilineEnvsubst(t *testing.T) {
+	t.Parallel()
+
 	b := procBuilder{
 		Repo: &model.Repo{},
 		Curr: &model.Build{
@@ -57,6 +59,8 @@ pipeline:
 }
 
 func TestMultiPipeline(t *testing.T) {
+	t.Parallel()
+
 	b := procBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
@@ -89,6 +93,8 @@ pipeline:
 }
 
 func TestDependsOn(t *testing.T) {
+	t.Parallel()
+
 	b := procBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
@@ -133,6 +139,8 @@ depends_on:
 }
 
 func TestRunsOn(t *testing.T) {
+	t.Parallel()
+
 	b := procBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
@@ -167,6 +175,8 @@ runs_on:
 }
 
 func TestBranchFilter(t *testing.T) {
+	t.Parallel()
+
 	b := procBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{Branch: "dev"},
@@ -211,6 +221,8 @@ pipeline:
 }
 
 func TestZeroSteps(t *testing.T) {
+	t.Parallel()
+
 	build := &model.Build{Branch: "dev"}
 
 	b := procBuilder{
@@ -243,6 +255,8 @@ pipeline:
 }
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
+	t.Parallel()
+
 	build := &model.Build{Branch: "dev"}
 
 	b := procBuilder{
@@ -289,6 +303,8 @@ depends_on: [ zerostep ]
 }
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
+	t.Parallel()
+
 	build := &model.Build{Branch: "dev"}
 
 	b := procBuilder{
@@ -341,6 +357,8 @@ depends_on: [ shouldbefiltered ]
 }
 
 func TestTree(t *testing.T) {
+	t.Parallel()
+
 	build := &model.Build{}
 
 	b := procBuilder{

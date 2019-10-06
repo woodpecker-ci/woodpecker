@@ -8,6 +8,8 @@ import (
 )
 
 func TestFetchGithub(t *testing.T) {
+	t.Parallel()
+
 	github, err := github.New(github.Opts{URL: "https://github.com"})
 	if err != nil {
 		t.Fatal(err)
