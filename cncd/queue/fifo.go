@@ -223,6 +223,9 @@ func (q *fifo) Resume() {
 // helper function that loops through the queue and attempts to
 // match the item to a single subscriber.
 func (q *fifo) process() {
+	q.Lock()
+	defer q.Unlock()
+
 	if q.paused {
 		return
 	}
@@ -237,9 +240,6 @@ func (q *fifo) process() {
 			log.Printf("queue: unexpected panic: %v\n%s", err, buf)
 		}
 	}()
-
-	q.Lock()
-	defer q.Unlock()
 
 	q.resubmitExpiredBuilds()
 	q.filterWaiting()
