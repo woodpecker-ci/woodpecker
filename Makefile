@@ -21,13 +21,13 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 test-agent:
-	$(DOCKER_RUN) go test -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-agent $(go list ./... | grep -v /vendor/)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-agent $(go list ./... | grep -v /vendor/)
 
 test-server:
-	$(DOCKER_RUN) go test -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-server
 
 test-lib:
-	$(DOCKER_RUN) go test -timeout 30s $(shell go list ./... | grep -v '/cmd/')
+	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
 test: test-lib test-agent test-server
 
