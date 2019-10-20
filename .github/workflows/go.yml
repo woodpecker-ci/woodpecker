@@ -39,9 +39,6 @@ jobs:
         go get -u github.com/golang/protobuf/proto
         go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
-        GO111MODULE: on
       with:
         fetch-depth: 1
         path: ./pkg/mod/github.com/${{ github.repository }}
