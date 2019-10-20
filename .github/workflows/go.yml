@@ -39,6 +39,8 @@ jobs:
       env:
         GOPATH: /home/runner/work/woodpecker/go
         GO111MODULE: on
+      with:
+        path: go/pkg/mod/github.com/laszlocph/woodpecker
 
     - name: Build
       run: ./.drone.sh
