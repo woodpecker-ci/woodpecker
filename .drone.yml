@@ -4,7 +4,7 @@ clone:
 
 workspace:
   base: /go
-  path: src/github.com/laszlocph/woodpecker
+  path: pkg/mod/github.com/laszlocph/woodpecker
 
 pipeline:
   test:
