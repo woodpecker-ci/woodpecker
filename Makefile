@@ -26,7 +26,7 @@ test-server:
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
-test: test-lib test-agent test-server
+test: gomod test-lib test-agent test-server
 
 build-agent:
 	$(DOCKER_RUN) go build -o build/drone-agent github.com/laszlocph/woodpecker/cmd/drone-agent/
