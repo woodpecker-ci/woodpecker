@@ -42,6 +42,9 @@ jobs:
       env:
         GOPATH: /home/runner/work/woodpecker/go
         GO111MODULE: on
+      with:
+        fetch-depth: 1
+        path: ./pkg/mod/github.com/${{ github.repository }}
 
     - name: Build
       run: ./.drone.sh
