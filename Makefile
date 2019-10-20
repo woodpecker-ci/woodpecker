@@ -1,18 +1,15 @@
 GO_VERSION=1.12.4
-export GO111MODULE=off
+export GO111MODULE=on
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 
 DOCKER_RUN?=
 _with-docker:
-	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd)/../../..:/go/src/ -v $(shell pwd)/build:/build -w / golang:$(GO_VERSION))
+	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd)/../../..:/go/pkg/mod/ -v $(shell pwd)/build:/build -w / golang:$(GO_VERSION))
 
-all: deps build
+all: gomod build
 
-deps:
-	go get -u golang.org/x/net/context
-	go get -u golang.org/x/net/context/ctxhttp
-	go get -u github.com/golang/protobuf/proto
-	go get -u github.com/golang/protobuf/protoc-gen-go
+gomod:
+	go mod download
 
 formatcheck:
 	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)
@@ -32,10 +29,10 @@ test-lib:
 test: test-lib test-agent test-server
 
 build-agent:
-	$(DOCKER_RUN) go build -o build/drone-agent github.com/laszlocph/woodpecker/cmd/drone-agent
+	$(DOCKER_RUN) go build -o build/drone-agent github.com/laszlocph/woodpecker/cmd/drone-agent/
 
 build-server:
-	$(DOCKER_RUN) go build -o build/drone-server github.com/laszlocph/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go build -o build/drone-server github.com/laszlocph/woodpecker/cmd/drone-server/
 
 build: build-agent build-server
 
