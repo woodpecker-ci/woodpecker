@@ -38,6 +38,7 @@ jobs:
         go test -cover $(go list ./... | grep -v /vendor/)
       env:
         GOPATH: /home/runner/work/woodpecker/go
+        GO111MODULE: on
 
     - name: Build
       run: ./.drone.sh
