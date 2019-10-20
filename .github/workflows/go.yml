@@ -5,6 +5,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ runner.workspace }}
+      GO111MODULE: on
     steps:
 
     - name: Set up Go 1.12
@@ -16,7 +19,7 @@ jobs:
       uses: actions/checkout@v1
       with:
         fetch-depth: 1
-        path: go/pkg/mod/github.com/laszlocph/woodpecker
+        path: ./pkg/mod/github.com/${{ github.repository }}
 
     - name: Debug
       run: |
@@ -29,11 +32,6 @@ jobs:
         GOPATH: /home/runner/work/woodpecker/go
 
     - name: Test
-      with:
-        path: go/pkg/mod/github.com/laszlocph/woodpecker
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
-        GO111MODULE: on      
       run: |
         go get -u golang.org/x/tools/cmd/cover
         go get -u golang.org/x/net/context
@@ -41,7 +39,9 @@ jobs:
         go get -u github.com/golang/protobuf/proto
         go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
-
+      env:
+        GOPATH: /home/runner/work/woodpecker/go
+        GO111MODULE: on
 
     - name: Build
       run: ./.drone.sh
