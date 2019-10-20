@@ -40,7 +40,6 @@ jobs:
         go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
       with:
-        fetch-depth: 1
         path: ./pkg/mod/github.com/${{ github.repository }}
 
     - name: Build
