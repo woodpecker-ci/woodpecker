@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v1
       with:
         fetch-depth: 1
-        path: go/src/github.com/laszlocph/woodpecker
+        path: go/pkg/mod/github.com/laszlocph/woodpecker
 
     - name: Debug
       run: |
