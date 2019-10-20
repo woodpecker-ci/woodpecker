@@ -29,6 +29,11 @@ jobs:
         GOPATH: /home/runner/work/woodpecker/go
 
     - name: Test
+      with:
+        path: go/pkg/mod/github.com/laszlocph/woodpecker
+      env:
+        GOPATH: /home/runner/work/woodpecker/go
+        GO111MODULE: on      
       run: |
         go get -u golang.org/x/tools/cmd/cover
         go get -u golang.org/x/net/context
@@ -36,11 +41,7 @@ jobs:
         go get -u github.com/golang/protobuf/proto
         go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
-        GO111MODULE: on
-      with:
-        path: go/pkg/mod/github.com/laszlocph/woodpecker
+
 
     - name: Build
       run: ./.drone.sh
