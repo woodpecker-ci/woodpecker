@@ -12,8 +12,8 @@ require (
 	github.com/dgrijalva/jwt-go v0.0.0-20150904212456-c1da56349675
 	github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9
 	github.com/docker/distribution v2.5.0-rc.1.0.20161110230334-8016d2d8903e+incompatible // indirect
-	github.com/docker/docker v1.13.0
-	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/docker v1.13.1
+	github.com/docker/go-connections v0.2.0 // indirect
 	github.com/docker/go-units v0.3.0 // indirect
 	github.com/docker/libcompose v0.0.0-20170210184346-1c4bd4542afb
 	github.com/drone/envsubst v0.0.0-20181018144617-15e3f9b7e163

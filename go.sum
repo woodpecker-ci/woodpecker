@@ -22,10 +22,10 @@ github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9 h1:8wCo5wT8cOx
 github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9/go.mod h1:rbUlSV+CCpv/SuqUTP/8Bk2O3LyUV436/yaRGkhP6Z0=
 github.com/docker/distribution v2.5.0-rc.1.0.20161110230334-8016d2d8903e+incompatible h1:qe6NNuwqD9ucJghpJsmLQxAPmfyunijRARoSRdA0xOQ=
 github.com/docker/distribution v2.5.0-rc.1.0.20161110230334-8016d2d8903e+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
-github.com/docker/docker v1.13.0 h1:A5bSnWdwEvPOZ72/0cMjcYIyuvLCHk/KVrT8qOwdKkw=
-github.com/docker/docker v1.13.0/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
-github.com/docker/go-connections v0.4.0 h1:El9xVISelRB7BuFusrZozjnkIM5YnzCViNKohAFqRJQ=
-github.com/docker/go-connections v0.4.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
+github.com/docker/docker v1.13.1 h1:IkZjBSIc8hBjLpqeAbeE5mca5mNgeatLHBy3GO78BWo=
+github.com/docker/docker v1.13.1/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
+github.com/docker/go-connections v0.2.0 h1:tV+S3i76CmPRYmR3NMDUFyr2HTP+3gL+xEPy146TPig=
+github.com/docker/go-connections v0.2.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
 github.com/docker/go-units v0.3.0 h1:69LhctGQbg0wZ2bTvwFsuPXPnhe6T2+0UMsxh+rBYZg=
 github.com/docker/go-units v0.3.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/docker/libcompose v0.0.0-20170210184346-1c4bd4542afb h1:SjmUzamE1RxgQhflzllPEa3YYmUAmsxRIxYTaO67U6g=
