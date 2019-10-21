@@ -144,7 +144,7 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 	if err == nil {
 		for _, token := range tokens {
 			if token.Name == "drone" {
-				accessToken = token.Sha1
+				accessToken = token.Token
 				break
 			}
 		}
@@ -160,7 +160,7 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		if terr != nil {
 			return nil, terr
 		}
-		accessToken = token.Sha1
+		accessToken = token.Token
 	}
 
 	client = c.newClientToken(accessToken)
