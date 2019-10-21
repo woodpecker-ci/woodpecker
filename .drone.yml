@@ -15,7 +15,8 @@ pipeline:
       - go get -u golang.org/x/net/context/ctxhttp
       - go get -u github.com/golang/protobuf/proto
       - go get -u github.com/golang/protobuf/protoc-gen-go
-      - go test -cover -timeout 30s $(go list ./... | grep -v /vendor/)
+      - GO111MODULE=on go mod download
+      - GO111MODULE=on go test -cover -timeout 30s ./...
 
   test_postgres:
     image: golang:1.12.4
