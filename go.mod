@@ -13,7 +13,7 @@ require (
 	github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9
 	github.com/docker/distribution v2.5.0-rc.1.0.20161110230334-8016d2d8903e+incompatible // indirect
 	github.com/docker/docker v1.13.1
-	github.com/docker/go-connections v0.2.0 // indirect
+	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.0 // indirect
 	github.com/docker/libcompose v0.0.0-20170210184346-1c4bd4542afb
 	github.com/drone/envsubst v0.0.0-20181018144617-15e3f9b7e163
@@ -42,7 +42,7 @@ require (
 	github.com/mattn/go-sqlite3 v0.0.0-20170901084005-05548ff55570
 	github.com/mrjones/oauth v0.0.0-20160405235802-31f1e8e5addd
 	github.com/opencontainers/runc v0.1.1 // indirect
-	github.com/opencontainers/runtime-spec v0.4.0 // indirect
+	github.com/opencontainers/runtime-spec v0.5.0 // indirect
 	github.com/prometheus/client_golang v0.9.1
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
 	github.com/prometheus/common v0.4.1 // indirect
@@ -55,10 +55,12 @@ require (
 	github.com/tevino/abool v0.0.0-20160628101133-3c25f2fe7cd0
 	github.com/urfave/cli v0.0.0-20190203184040-693af58b4d51
 	github.com/vbatts/tar-split v0.11.1 // indirect
-	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793
-	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/net v0.0.0-20191021144547-ec77196f6094
 	golang.org/x/oauth2 v0.0.0-20160121061903-8a57ed94ffd4
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/sys v0.0.0-20191020212454-3e7259c5e7c2 // indirect
+	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20170531203552-aa2eb687b4d3 // indirect
 	google.golang.org/grpc v0.0.0-20170626232044-9cb02b885b41
