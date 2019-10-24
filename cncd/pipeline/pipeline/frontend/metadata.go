@@ -205,6 +205,8 @@ func (m *Metadata) EnvironDrone() map[string]string {
 		"DRONE_JOB_NUMBER":           fmt.Sprintf("%d", m.Job.Number),
 		"DRONE_JOB_STARTED":          fmt.Sprintf("%d", m.Curr.Started), // ISSUE: no job started
 		"DRONE_BRANCH":               m.Curr.Commit.Branch,
+		"DRONE_TARGET_BRANCH":        m.Curr.Commit.Branch,
+		"DRONE_SOURCE_BRANCH":        m.Curr.Commit.Branch,
 		"DRONE_COMMIT":               m.Curr.Commit.Sha,
 		"DRONE_VERSION":              m.Sys.Version,
 		"DRONE_DEPLOY_TO":            m.Curr.Target,
