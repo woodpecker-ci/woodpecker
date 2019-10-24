@@ -162,17 +162,26 @@ func (m *Metadata) EnvironDrone() map[string]string {
 	// * DRONE_YAML_VERIFIED
 	// * DRONE_YAML_VERIFIED
 	var (
-		owner string
-		name  string
+		owner        string
+		name         string
+		sourceBranch string
+		targetBranch string
 
-		parts = strings.Split(m.Repo.Name, "/")
+		repoParts   = strings.Split(m.Repo.Name, "/")
+		branchParts = strings.Split(m.Curr.Commit.Refspec, ":")
 	)
-	if len(parts) == 2 {
-		owner = strings.Split(m.Repo.Name, "/")[0]
-		name = strings.Split(m.Repo.Name, "/")[1]
+	if len(repoParts) == 2 {
+		owner = repoParts[0]
+		name = repoParts[1]
 	} else {
 		name = m.Repo.Name
 	}
+
+	if len(branchParts) == 2 {
+		sourceBranch = branchParts[0]
+		targetBranch = branchParts[1]
+	}
+
 	params := map[string]string{
 		"CI":                         "drone",
 		"DRONE":                      "true",
@@ -205,8 +214,8 @@ func (m *Metadata) EnvironDrone() map[string]string {
 		"DRONE_JOB_NUMBER":           fmt.Sprintf("%d", m.Job.Number),
 		"DRONE_JOB_STARTED":          fmt.Sprintf("%d", m.Curr.Started), // ISSUE: no job started
 		"DRONE_BRANCH":               m.Curr.Commit.Branch,
-		"DRONE_TARGET_BRANCH":        m.Curr.Commit.Branch,
-		"DRONE_SOURCE_BRANCH":        m.Curr.Commit.Branch,
+		"DRONE_SOURCE_BRANCH":        sourceBranch,
+		"DRONE_TARGET_BRANCH":        targetBranch,
 		"DRONE_COMMIT":               m.Curr.Commit.Sha,
 		"DRONE_VERSION":              m.Sys.Version,
 		"DRONE_DEPLOY_TO":            m.Curr.Target,

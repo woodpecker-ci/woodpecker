@@ -6,9 +6,6 @@ pipeline:
   test:
     image: golang:1.12.4
     commands:
-      - echo $CI_COMMIT_REF
-      - echo $CI_COMMIT_REFSPEC
-      - echo $DRONE_BRANCH
       - go test -cover -timeout 30s $(go list ./...)
 
   test_postgres:
