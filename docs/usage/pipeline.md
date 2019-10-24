@@ -687,6 +687,8 @@ This is the reference list of all environment variables available to your build 
 | `DRONE_JOB_STARTED`          | job started                            |
 | `DRONE_JOB_FINISHED`         | job finished                           |
 | `DRONE_BRANCH`               | commit branch                          |
+| `DRONE_TARGET_BRANCH`        | The target branch of a Pull Request    |
+| `DRONE_SOURCE_BRANCH`        | The source branch of a Pull Request    |
 | `DRONE_COMMIT`               | commit sha                             |
 | `DRONE_TAG`                  | commit tag                             |
 | `DRONE_PULL_REQUEST`         | pull request number                    |
