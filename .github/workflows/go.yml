@@ -19,7 +19,7 @@ jobs:
 
     - name: Test
       run: |
-        go test -cover $(go list ./... | grep -v /vendor/)
+        go test -cover $(go list ./...)
 
     - name: Build
       run: ./.drone.sh

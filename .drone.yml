@@ -6,7 +6,7 @@ pipeline:
   test:
     image: golang:1.12.4
     commands:
-      - go test -cover -timeout 30s $(go list ./... | grep -v /vendor/)
+      - go test -cover -timeout 30s $(go list ./...)
 
   test_postgres:
     image: golang:1.12.4
