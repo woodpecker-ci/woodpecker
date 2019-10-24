@@ -16,30 +16,10 @@ jobs:
       uses: actions/checkout@v1
       with:
         fetch-depth: 1
-        path: go/src/github.com/laszlocph/woodpecker
-
-    - name: Debug
-      run: |
-        pwd
-        echo ${HOME}
-        echo ${GITHUB_WORKSPACE}
-        echo ${GOPATH}
-        echo ${GOROOT}
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
 
     - name: Test
       run: |
-        go get -u golang.org/x/tools/cmd/cover
-        go get -u golang.org/x/net/context
-        go get -u golang.org/x/net/context/ctxhttp
-        go get -u github.com/golang/protobuf/proto
-        go get -u github.com/golang/protobuf/protoc-gen-go
         go test -cover $(go list ./... | grep -v /vendor/)
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
 
     - name: Build
       run: ./.drone.sh
-      env:
-        GOPATH: /home/runner/work/woodpecker/go
