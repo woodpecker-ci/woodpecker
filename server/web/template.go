@@ -96,6 +96,9 @@ const partials = `
 {{end}}
 
 {{define "version"}}
+	<script>
+		window.DRONE_VERSION = {{ .version }};
+	</script>
 	<meta name="version" content="{{ .version }}">
 {{end}}
 
