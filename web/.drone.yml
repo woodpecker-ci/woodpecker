@@ -1,0 +1,9 @@
+pipeline:
+  build:
+    image: node:8
+    commands:
+      - yarn install
+      - yarn run lesshint
+      - yarn run test
+      - yarn run lint --quiet
+      - yarn run build

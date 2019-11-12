@@ -10,3 +10,8 @@ cli/release/
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
 .idea/
+
+web/node_modules
+web/dist/files
+web/*.log
+web/.env

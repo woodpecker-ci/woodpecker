@@ -1,0 +1,17 @@
+{
+    "fileExtensions": [".less", ".css"],
+
+    "excludedFiles": ["ansi.less"],
+
+    "spaceAfterPropertyColon": {
+        "enabled": true,
+        "style": "one_space"
+    },
+
+    "emptyRule": true,
+    "qualifyingElement": false,
+    "trailingWhitespace": true,
+    "zeroUnit": {
+        "exclude": ["flex"]
+    }
+}

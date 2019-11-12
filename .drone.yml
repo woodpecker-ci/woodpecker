@@ -24,6 +24,16 @@ pipeline:
     commands:
       - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
+  test_frontend:
+    image: node:10.17.0-stretch
+    commands:
+      - make test-frontend
+
+  build_frontend:
+    image: node:10.17.0-stretch
+    commands:
+      - make build-frontend
+
   build:
     image: golang:1.12.4
     commands: sh .drone.sh
