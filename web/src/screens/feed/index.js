@@ -168,16 +168,13 @@ const LOGO = (
 	<div className={style.brand}>
 		<DroneIcon />
 		<p>
-			Woodpecker<br />
+			Woodpecker<span style="margin-left: 4px;">v0.10.0</span><br />
 			<span>
-				yes,&nbsp;
-				<a
-					href="https://github.com/laszlocph/drone-oss-08/"
+        <a
+					href="https://github.com/laszlocph/woodpecker/blob/master/docs/usage/pipeline.md"
 					target="_blank"
 					rel="noopener noreferrer"
-				>
-					it&#39;s a fork
-				</a>
+				>Docs</a>
 			</span>
 		</p>
 	</div>

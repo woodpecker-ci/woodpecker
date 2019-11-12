@@ -20,14 +20,16 @@ import (
 
 	"github.com/laszlocph/woodpecker/version"
 
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
 )
 
 func main() {
+	godotenv.Load(".env")
 	app := cli.NewApp()
 	app.Name = "drone-server"
-	app.Version = version.Version.String()
+	app.Version = version.String()
 	app.Usage = "drone server"
 	app.Action = server
 	app.Flags = flags

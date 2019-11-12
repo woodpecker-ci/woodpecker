@@ -8,7 +8,6 @@ require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/Sirupsen/logrus v0.10.0
 	github.com/beorn7/perks v1.0.0 // indirect
-	github.com/coreos/go-semver v0.0.0-20170209201757-5e3acbb5668c
 	github.com/dgrijalva/jwt-go v0.0.0-20150904212456-c1da56349675
 	github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9
 	github.com/docker/distribution v2.6.0-rc.1.0.20170112224556-c965e24c8cd2+incompatible // indirect
