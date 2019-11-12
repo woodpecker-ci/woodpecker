@@ -5,42 +5,52 @@ clone:
 pipeline:
   test:
     image: golang:1.12.4
+    group: test
     commands:
       - go test -cover -timeout 30s $(go list ./...)
 
-  test_postgres:
+  test-frontend:
+    image: node:10.17.0-stretch
+    group: test
+    commands:
+      - (cd web/; yarn install)
+      - (cd web/; yarn run lesshint)
+      - (cd web/; yarn run lint --quiet)
+      - make test-frontend
+
+  test-postgres:
     image: golang:1.12.4
+    group: db-test
     environment:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
-  test_mysql:
+  test-mysql:
     image: golang:1.12.4
+    group: db-test
     environment:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
-  test_frontend:
-    image: node:10.17.0-stretch
-    commands:
-      - make test-frontend
-
-  build_frontend:
+  build-frontend:
     image: node:10.17.0-stretch
     commands:
       - make build-frontend
 
   build:
     image: golang:1.12.4
-    commands: sh .drone.sh
+    commands:
+      - go get github.com/laszlocph/togo
+      - (cd web/; go generate ./...)
+      - sh .drone.sh
     when:
       event: [ push, tag ]
 
-  publish_server_alpine:
+  publish-server-alpine:
     image: plugins/docker
     repo: laszlocloud/woodpecker-server
     dockerfile: Dockerfile.alpine
@@ -50,7 +60,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_server:
+  publish-server:
     image: plugins/docker
     repo: laszlocloud/woodpecker-server
     secrets: [ docker_username, docker_password ]
@@ -59,7 +69,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_agent:
+  publish-agent:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
@@ -69,7 +79,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_agent_alpine:
+  publish-agent-alpine:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.alpine
@@ -79,7 +89,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_agent_arm:
+  publish-agent-arm:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.linux.arm
@@ -89,7 +99,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_agent_arm64:
+  publish-agent-arm64:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.linux.arm64
@@ -99,7 +109,7 @@ pipeline:
       branch: master
       event: push
 
-  publish_agent_amd64:
+  publish-agent-amd64:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
@@ -109,7 +119,7 @@ pipeline:
       branch: master
       event: push
 
-  release_server_alpine:
+  release-server-alpine:
     image: plugins/docker
     repo: laszlocloud/woodpecker-server
     dockerfile: Dockerfile.alpine
@@ -118,7 +128,7 @@ pipeline:
     when:
       event: tag
 
-  release_agent_alpine:
+  release-agent-alpine:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent.alpine
@@ -127,7 +137,7 @@ pipeline:
     when:
       event: tag
 
-  release_server:
+  release-server:
     image: plugins/docker
     repo: laszlocloud/woodpecker-server
     secrets: [ docker_username, docker_password ]
@@ -135,7 +145,7 @@ pipeline:
     when:
       event: tag
 
-  release_agent:
+  release-agent:
     image: plugins/docker
     repo: laszlocloud/woodpecker-agent
     dockerfile: Dockerfile.agent
