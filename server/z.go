@@ -33,6 +33,6 @@ func Health(c *gin.Context) {
 func Version(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"source":  "https://github.com/laszlocph/woodpecker",
-		"version": version.Version.String(),
+		"version": version.String(),
 	})
 }

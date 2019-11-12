@@ -1,5 +1,5 @@
 GO_VERSION=1.12.4
-export GO111MODULE=off
+export GO111MODULE=on
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 
 DOCKER_RUN?=

@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/version"
 )
 
 // NoCache is a middleware function that appends headers
@@ -60,12 +59,4 @@ func Secure(c *gin.Context) {
 
 	// Also consider adding Content-Security-Policy headers
 	// c.Header("Content-Security-Policy", "script-src 'self' https://cdnjs.cloudflare.com")
-}
-
-// Version is a middleware function that appends the Drone
-// version information to the HTTP response. This is intended
-// for debugging and troubleshooting.
-func Version(c *gin.Context) {
-	c.Header("X-DRONE-VERSION", version.Version.String())
-	c.Next()
 }

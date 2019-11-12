@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/laszlocph/woodpecker/web/dist"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/shared/token"
 	"github.com/laszlocph/woodpecker/version"
+	"github.com/laszlocph/woodpecker/web/dist"
 
 	"github.com/dimfeld/httptreemux"
 )
@@ -104,7 +104,7 @@ func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 		"user":    user,
 		"csrf":    csrf,
 		"syncing": syncing,
-		"version": version.Version.String(),
+		"version": version.String(),
 	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 

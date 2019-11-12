@@ -46,7 +46,7 @@ pipeline:
     commands:
       - go get github.com/laszlocph/togo
       - (cd web/; go generate ./...)
-      - sh .drone.sh
+      - ./.drone.sh
     when:
       event: [ push, tag ]
 

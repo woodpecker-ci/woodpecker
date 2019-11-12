@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2019 Laszlo Fogas
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,26 +14,16 @@
 
 package version
 
-import "github.com/coreos/go-semver/semver"
-
 var (
-	// VersionMajor is for an API incompatible changes.
-	VersionMajor int64
-	// VersionMinor is for functionality in a backwards-compatible manner.
-	VersionMinor int64 = 8
-	// VersionPatch is for backwards-compatible bug fixes.
-	VersionPatch int64 = 9
-	// VersionPre indicates prerelease.
-	VersionPre string
-	// VersionDev indicates development branch. Releases will be empty string.
-	VersionDev string
+	// Version of Woodpecker, set with ldflags, from Git tag
+	Version string
 )
 
-// Version is the specification version that the package types support.
-var Version = semver.Version{
-	Major:      VersionMajor,
-	Minor:      VersionMinor,
-	Patch:      VersionPatch,
-	PreRelease: semver.PreRelease(VersionPre),
-	Metadata:   VersionDev,
+// String returns the Version set at build time or "dev"
+func String() string {
+	if Version == "" {
+		return "dev"
+	}
+
+	return Version
 }
