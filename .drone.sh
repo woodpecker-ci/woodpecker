@@ -6,7 +6,7 @@ set -x
 VERSION=$DRONE_TAG
 
 if [ -z "$VERSION" ]; then
-  VERSION=$DRONE_COMMIT_SHA
+  VERSION=${DRONE_COMMIT_SHA:0:8}
 fi
 
 echo "Building $VERSION"
