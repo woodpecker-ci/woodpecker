@@ -49,7 +49,7 @@ func handleVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/json")
 	json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/laszlocph/woodpecker",
-		Version: version.Version.String(),
+		Version: version.String(),
 	})
 }
 

@@ -28,7 +28,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "drone-agent"
-	app.Version = version.Version.String()
+	app.Version = version.String()
 	app.Usage = "drone agent"
 	app.Action = loop
 	app.Commands = []cli.Command{
