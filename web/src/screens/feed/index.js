@@ -172,7 +172,7 @@ const LOGO = (
 			<br />
 			<span>
 				<a
-					href="https://github.com/laszlocph/woodpecker/blob/master/docs/usage/pipeline.md"
+					href="https://woodpecker.laszlo.cloud"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
