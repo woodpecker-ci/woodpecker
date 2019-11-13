@@ -1,11 +1,13 @@
-Drone comes with experimental support for Bitbucket Server, formerly known as Atlassian Stash. To enable Bitbucket Server you should configure the Drone container using the following environment variables:
+# Bitbucket Server
+
+Woodpecker comes with experimental support for Bitbucket Server, formerly known as Atlassian Stash. To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
 ```diff
-version: '2'
+version: '3'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     ports:
       - 80:8000
       - 9000
@@ -25,19 +27,19 @@ services:
     volumes:
 +     - /path/to/key.pem:/path/to/key.pem
 
-  drone-agent:
-    image: drone/agent:{{% version %}}
+  woodpecker-agent:
+    image: laszlocloud/woodpecker-agent:v0.9.0
     restart: always
     depends_on:
-      - drone-server
+      - woodpecker-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone-server:9000
+      - DRONE_SERVER=woodpecker-server:9000
       - DRONE_SECRET=${DRONE_SECRET}
 ```
 
-# Private Key File
+## Private Key File
 
 The OAuth process in Bitbucket server requires a private and a public RSA certificate. This is how you create the private RSA certificate.
 
@@ -51,16 +53,16 @@ This stores the private RSA certificate in `key.pem`. The next command generates
 openssl rsa -in /etc/bitbucket/key.pem -pubout >> /etc/bitbucket/key.pub
 ```
 
-Please note that the private key file can be mounted into your Drone conatiner at runtime or as an environment variable
+Please note that the private key file can be mounted into your Woodpecker conatiner at runtime or as an environment variable
 
-Private key file mounted into your Drone container at runtime as a volume.
+Private key file mounted into your Woodpecker container at runtime as a volume.
 
 ```diff
 version: '2'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     environment:
     - DRONE_OPEN=true
     - DRONE_HOST=${DRONE_HOST}
@@ -78,11 +80,11 @@ services:
 Private key as environment variable
 
 ```diff
-version: '2'
+version: '3'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     environment:
     - DRONE_OPEN=true
     - DRONE_HOST=${DRONE_HOST}
@@ -95,18 +97,18 @@ services:
       - DRONE_SECRET=${DRONE_SECRET}
 ```
 
-# Service Account
+## Service Account
 
-Drone uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with oauth token. To work around this limitation, you must create a service account and provide the username and password to Drone. This service account will be used to authenticate and clone private repositories.
+Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with oauth token. To work around this limitation, you must create a service account and provide the username and password to Woodpecker. This service account will be used to authenticate and clone private repositories.
 
-# Registration
+## Registration
 
 You must register your application with Bitbucket Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
 
 Please use http://drone.mycompany.com/authorize as the Authorization callback URL.
 
 
-# Configuration
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 

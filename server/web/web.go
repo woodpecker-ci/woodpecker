@@ -80,7 +80,7 @@ type website struct {
 func (w *website) Register(mux *httptreemux.ContextMux) {
 	h := http.FileServer(w.fs)
 	h = setupCache(h)
-	mux.Handler("GET", "/favicon.png", h)
+	mux.Handler("GET", "/favicon.svg", h)
 	mux.Handler("GET", "/static/*filepath", h)
 	mux.NotFoundHandler = w.handleIndex
 }

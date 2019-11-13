@@ -1,11 +1,13 @@
-Drone comes with built-in support for Bitbucket Cloud. To enable Bitbucket Cloud you should configure the Drone container using the following environment variables:
+# Bitbucket
+
+Woodpecker comes with built-in support for Bitbucket Cloud. To enable Bitbucket Cloud you should configure the Woodpecker container using the following environment variables:
 
 ```diff
-version: '2'
+version: '3'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     ports:
       - 80:8000
       - 9000
@@ -20,19 +22,19 @@ services:
 +     - DRONE_BITBUCKET_SECRET=30f5064039e6b359e075
       - DRONE_SECRET=${DRONE_SECRET}
 
-  drone-agent:
-    image: drone/agent:{{% version %}}
+  woodpecker-agent:
+    image: laszlocloud/woodpecker-agent:v0.9.0
     restart: always
     depends_on:
-      - drone-server
+      - woodpecker-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone-server:9000
+      - DRONE_SERVER=woodpecker-server:9000
       - DRONE_SECRET=${DRONE_SECRET}
 ```
 
-# Configuration
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
@@ -45,7 +47,7 @@ DRONE_BITBUCKET_CLIENT
 DRONE_BITBUCKET_SECRET
 : Bitbucket oauth2 client secret
 
-# Registration
+## Registration
 
 You must register your application with Bitbucket in order to generate a client and secret. Navigate to your account settings and choose OAuth from the menu, and click Add Consumer.
 
@@ -65,6 +67,6 @@ Repositories:Read
 Webhooks:Read and Write
 ```
 
-# Missing Features
+## Missing Features
 
-Merge requests are not currently supported. We are interested in patches to include this functionality. If you are interested in contributing to Drone and submitting a patch please [contact us](https://discourse.drone.io).
+Merge requests are not currently supported. We are interested in patches to include this functionality. If you are interested in contributing to Woodpecker and submitting a patch please [contact us](https://discourse.drone.io).

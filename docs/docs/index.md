@@ -21,7 +21,7 @@ pipeline:
       - echo "Testing.."
 ```
 
-## Build steps are containers
+### Build steps are containers
 
 - Define any Docker image as context
 - Install the needed tools in custom Docker images, use them as context
@@ -35,7 +35,7 @@ pipeline:
       - aws help
 ```
 
-## File changes are incremental
+### File changes are incremental
 
 - Woodpecker clones the source code in the beginning pipeline
 - Changes to files are persisted through steps as the same volume is mounted to all steps
