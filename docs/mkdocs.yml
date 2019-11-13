@@ -1,3 +1,9 @@
-site_name: My Docs
+site_name: Woodpecker
 theme:
   name: 'material'
+  logo: 'images/logo.svg'
+  favicon: 'images/favicon.svg'
+markdown_extensions:
+  - admonition
+  - codehilite:
+      linenums: true
