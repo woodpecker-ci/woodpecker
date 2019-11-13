@@ -89,36 +89,6 @@ pipeline:
       branch: master
       event: push
 
-  publish-agent-arm:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
-    dockerfile: Dockerfile.agent.linux.arm
-    secrets: [ docker_username, docker_password ]
-    tag: [ linux-arm ]
-    when:
-      branch: master
-      event: push
-
-  publish-agent-arm64:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
-    dockerfile: Dockerfile.agent.linux.arm64
-    secrets: [ docker_username, docker_password ]
-    tag: [ linux-arm64 ]
-    when:
-      branch: master
-      event: push
-
-  publish-agent-amd64:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
-    dockerfile: Dockerfile.agent
-    secrets: [ docker_username, docker_password ]
-    tag: [ latest ]
-    when:
-      branch: master
-      event: push
-
   release-server-alpine:
     image: plugins/docker
     repo: laszlocloud/woodpecker-server
