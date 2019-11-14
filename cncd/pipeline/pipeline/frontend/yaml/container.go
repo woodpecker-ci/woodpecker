@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	libcompose "github.com/docker/libcompose/yaml"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -62,23 +62,26 @@ type (
 )
 
 // UnmarshalYAML implements the Unmarshaller interface.
-func (c *Containers) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	slice := yaml.MapSlice{}
-	if err := unmarshal(&slice); err != nil {
+func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
+	containers := map[string]Container{}
+	err := value.Decode(&containers)
+	if err != nil {
 		return err
 	}
 
-	for _, s := range slice {
-		container := Container{}
-		out, _ := yaml.Marshal(s.Value)
+	for i, n := range value.Content {
+		if i%2 == 1 {
+			container := Container{}
+			err := n.Decode(&container)
+			if err != nil {
+				return err
+			}
 
-		if err := yaml.Unmarshal(out, &container); err != nil {
-			return err
+			if container.Name == "" {
+				container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
+			}
+			c.Containers = append(c.Containers, &container)
 		}
-		if container.Name == "" {
-			container.Name = fmt.Sprintf("%v", s.Key)
-		}
-		c.Containers = append(c.Containers, &container)
 	}
 	return nil
 }

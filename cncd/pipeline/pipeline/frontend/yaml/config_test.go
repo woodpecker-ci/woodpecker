@@ -45,7 +45,15 @@ func TestParse(t *testing.T) {
 				g.Assert(out.SkipClone).Equal(false)
 			})
 
-			// Check to make sure variable expansion works in yaml.MapSlice
+			g.It("Should handle simple yaml anchors", func() {
+				out, err := ParseString(simpleYamlAnchors)
+				if err != nil {
+					g.Fail(err)
+				}
+				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_success")
+				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
+			})
+
 			g.It("Should unmarshal variables", func() {
 				out, err := ParseString(sampleVarYaml)
 				if err != nil {
@@ -106,6 +114,14 @@ depends_on:
 runs_on:
   - success
   - failure
+`
+
+var simpleYamlAnchors = `
+vars:
+  image: &image plugins/slack
+pipeline:
+  notify_success:
+    image: *image
 `
 
 var sampleVarYaml = `

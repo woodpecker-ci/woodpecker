@@ -6,7 +6,7 @@ import (
 	"os"
 
 	libcompose "github.com/docker/libcompose/yaml"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 type (

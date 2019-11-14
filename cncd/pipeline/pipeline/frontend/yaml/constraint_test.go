@@ -5,7 +5,7 @@ import (
 
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
 
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 func TestConstraint(t *testing.T) {

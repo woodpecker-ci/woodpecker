@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 func TestUnmarshalVolume(t *testing.T) {

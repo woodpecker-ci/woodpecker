@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 func TestBoolTrue(t *testing.T) {
@@ -44,7 +44,7 @@ func TestBoolTrue(t *testing.T) {
 			})
 
 			g.It("should throw error when invalid", func() {
-				in := []byte("{ }") // string value should fail parse
+				in := []byte("abc") // string value should fail parse
 				out := BoolTrue{}
 				err := yaml.Unmarshal(in, &out)
 				g.Assert(err != nil).IsTrue("expects error")

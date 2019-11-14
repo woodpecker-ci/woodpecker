@@ -1,6 +1,10 @@
 package types
 
-import "strconv"
+import (
+	"strconv"
+
+	"gopkg.in/yaml.v3"
+)
 
 // BoolTrue is a custom Yaml boolean type that defaults to true.
 type BoolTrue struct {
@@ -8,16 +12,16 @@ type BoolTrue struct {
 }
 
 // UnmarshalYAML implements custom Yaml unmarshaling.
-func (b *BoolTrue) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (b *BoolTrue) UnmarshalYAML(value *yaml.Node) error {
 	var s string
-	err := unmarshal(&s)
-	if err != nil {
-		return err
-	}
+	value.Decode(&s)
 
-	value, err := strconv.ParseBool(s)
+	v, err := strconv.ParseBool(s)
 	if err == nil {
-		b.value = !value
+		b.value = !v
+	}
+	if s != "" && err != nil {
+		return err
 	}
 	return nil
 }

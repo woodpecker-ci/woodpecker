@@ -1,11 +1,13 @@
 package yaml
 
 import (
+	"fmt"
 	"path/filepath"
 
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
+	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -85,7 +87,7 @@ func (c *Constraint) Excludes(v string) bool {
 }
 
 // UnmarshalYAML unmarshals the constraint.
-func (c *Constraint) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Constraint) UnmarshalYAML(value *yaml.Node) error {
 	var out1 = struct {
 		Include libcompose.Stringorslice
 		Exclude libcompose.Stringorslice
@@ -93,14 +95,20 @@ func (c *Constraint) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	var out2 libcompose.Stringorslice
 
-	unmarshal(&out1)
-	unmarshal(&out2)
+	err1 := value.Decode(&out1)
+	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
 	c.Include = append(
 		out1.Include,
 		out2...,
 	)
+
+	if err1 != nil && err2 != nil {
+		y, _ := yaml.Marshal(value)
+		return fmt.Errorf("Could not parse condition: %s", y)
+	}
+
 	return nil
 }
 

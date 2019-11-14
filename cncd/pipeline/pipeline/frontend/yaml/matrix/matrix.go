@@ -3,7 +3,7 @@ package matrix
 import (
 	"strings"
 
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 const (

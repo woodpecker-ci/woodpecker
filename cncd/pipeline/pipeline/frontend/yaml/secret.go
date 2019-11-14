@@ -1,5 +1,7 @@
 package yaml
 
+import "gopkg.in/yaml.v3"
+
 type (
 	// Secrets defines a collection of secrets.
 	Secrets struct {
@@ -14,9 +16,11 @@ type (
 )
 
 // UnmarshalYAML implements the Unmarshaller interface.
-func (s *Secrets) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *Secrets) UnmarshalYAML(value *yaml.Node) error {
+	y, _ := yaml.Marshal(value)
+
 	var strslice []string
-	err := unmarshal(&strslice)
+	err := yaml.Unmarshal(y, &strslice)
 	if err == nil {
 		for _, str := range strslice {
 			s.Secrets = append(s.Secrets, &Secret{
@@ -26,5 +30,5 @@ func (s *Secrets) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		}
 		return nil
 	}
-	return unmarshal(&s.Secrets)
+	return yaml.Unmarshal(y, &s.Secrets)
 }
