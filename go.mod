@@ -19,7 +19,7 @@ require (
 	github.com/drone/expr v0.0.0-20170909010628-72f4df4a266b
 	github.com/drone/signal v0.0.0-20170915013802-ac5d07ef1315
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
-	github.com/franela/goblin v0.0.0-20160123211154-889391d73023
+	github.com/franela/goblin v0.0.0-20181003173013-ead4ad1d2727
 	github.com/ghodss/yaml v0.0.0-20161207003320-04f313413ffd
 	github.com/gin-gonic/contrib v0.0.0-20150815172543-14f66d54cdb9
 	github.com/gin-gonic/gin v0.0.0-20160130002857-3d002e382355
