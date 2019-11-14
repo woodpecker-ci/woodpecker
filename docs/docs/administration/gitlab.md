@@ -1,11 +1,13 @@
-Drone comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Drone container using the following environment variables:
+# Gitlab
+
+Woodpecker comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
 ```diff
 version: '2'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     ports:
       - 80:8000
       - 9000
@@ -19,19 +21,19 @@ services:
 +     - DRONE_GITLAB_URL=http://gitlab.mycompany.com
       - DRONE_SECRET=${DRONE_SECRET}
 
-  drone-agent:
-    image: drone/agent:{{% version %}}
+  woodpecker-agent:
+    image: laszlocloud/woodpecker-agent:v0.9.0
     restart: always
     depends_on:
-      - drone-server
+      - woodpecker-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone-server:9000
+      - DRONE_SERVER=woodpecker-server:9000
       - DRONE_SECRET=${DRONE_SECRET}
 ```
 
-# Configuration
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
@@ -59,8 +61,8 @@ DRONE_GITLAB_SKIP_VERIFY=false
 DRONE_GITLAB_PRIVATE_MODE=false
 : Set to true if GitLab is running in private mode.
 
-# Registration
+## Registration
 
 You must register your application with GitLab in order to generate a Client and Secret. Navigate to your account settings and choose Applications from the menu, and click New Application.
 
-Please use `http://drone.mycompany.com/authorize` as the Authorization callback URL. Grant `api` scope to the application.
+Please use `http://woodpecker.mycompany.com/authorize` as the Authorization callback URL. Grant `api` scope to the application.

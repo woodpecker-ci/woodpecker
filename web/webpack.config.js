@@ -87,7 +87,7 @@ module.exports = {
 			filename: "static/vendor.[hash].js"
 		}),
 		new HtmlWebpackPlugin({
-			favicon: "src/public/favicon.png",
+			favicon: "src/public/favicon.svg",
 			template: "src/index.html"
 		})
 	].concat(

@@ -1,0 +1,26 @@
+site_name: Woodpecker
+repo_name: 'laszlocph/woodpecker'
+repo_url: 'https://github.com/laszlocph/woodpecker'
+copyright: 'Creative Commons Attribution-ShareAlike 4.0 International Public License.<br />It is a derivative work of the https://github.com/drone/docs git repository'
+nav:
+  - Home: index.md
+  - Server setup: server-setup.md
+theme:
+  name: 'material'
+  logo: 'images/favicon.svg'
+  favicon: 'images/favicon.svg'
+  palette:
+    primary: 'green'
+    accent: 'red'
+markdown_extensions:
+  - admonition
+  - codehilite:
+      linenums: true
+  - pymdownx.inlinehilite
+
+extra:
+  social:
+    - type: globe
+      link: http://woodpecker.laszlo.cloud
+    - type: twitter
+      link: https://twitter.com/laszlocph

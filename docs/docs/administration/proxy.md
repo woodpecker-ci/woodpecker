@@ -1,11 +1,5 @@
-**Table of Contents**
-- [Apache](#apache)
-- [Nginx](#nginx)
-- [Caddy](#caddy)
-- [Ngrok](#ngrok)
-
-# Apache
-This guide provides a brief overview for installing Drone server behind the Apache2 webserver. This is an example configuration:
+## Apache
+This guide provides a brief overview for installing Woodpecker server behind the Apache2 webserver. This is an example configuration:
 
 ```nohighlight
 ProxyPreserveHost On
@@ -34,16 +28,16 @@ ProxyPass / http://127.0.0.1:8000/
 ProxyPassReverse / http://127.0.0.1:8000/
 ```
 
-# Nginx
+## Nginx
 
-This guide provides a basic overview for installing Drone server behind the nginx webserver. For more advanced configuration options please consult the official nginx [documentation](https://www.nginx.com/resources/admin-guide/).
+This guide provides a basic overview for installing Woodpecker server behind the nginx webserver. For more advanced configuration options please consult the official nginx [documentation](https://www.nginx.com/resources/admin-guide/).
 
 Example configuration:
 
 ```nginx
 server {
     listen 80;
-    server_name drone.example.com;
+    server_name woodpecker.example.com;
 
     location / {
         proxy_set_header X-Forwarded-For $remote_addr;
@@ -65,7 +59,7 @@ You must configure the proxy to set `X-Forwarded` proxy headers:
 ```diff
 server {
     listen 80;
-    server_name drone.example.com;
+    server_name woodpecker.example.com;
 
     location / {
 +       proxy_set_header X-Forwarded-For $remote_addr;
@@ -81,12 +75,12 @@ server {
 }
 ```
 
-# Caddy
+## Caddy
 
-This guide provides a brief overview for installing Drone server behind the [Caddy webserver](https://caddyserver.com/). This is an example caddyfile proxy configuration:
+This guide provides a brief overview for installing Woodpecker server behind the [Caddy webserver](https://caddyserver.com/). This is an example caddyfile proxy configuration:
 
 ```nohighlight
-drone.mycompany.com {
+woodpecker.mycompany.com {
     gzip {
         not /stream/
     }
@@ -99,7 +93,7 @@ drone.mycompany.com {
 You must disable gzip compression for streamed data otherwise the live updates won't be instant:
 
 ```diff
-drone.mycompany.com {
+woodpecker.mycompany.com {
 +   gzip {
 +       not /stream/
 +   }
@@ -113,7 +107,7 @@ drone.mycompany.com {
 You must configure the proxy to enable websocket upgrades:
 
 ```diff
-drone.mycompany.com {
+woodpecker.mycompany.com {
     gzip {
         not /stream/
     }
@@ -127,7 +121,7 @@ drone.mycompany.com {
 You must configure the proxy to include `X-Forwarded` headers using the `transparent` directive:
 
 ```diff
-drone.mycompany.com {
+woodpecker.mycompany.com {
     gzip {
         not /stream/
     }
@@ -138,7 +132,7 @@ drone.mycompany.com {
 }
 ```
 
-# Ngrok
+## Ngrok
 After installing [ngrok](https://ngrok.com/), open a new console and run:
 
 ```

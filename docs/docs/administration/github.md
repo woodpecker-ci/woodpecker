@@ -1,11 +1,13 @@
-Drone comes with built-in support for GitHub and GitHub Enterprise. To enable GitHub you should configure the Drone container using the following environment variables:
+# Github
+
+Woodpecker comes with built-in support for GitHub and GitHub Enterprise. To enable GitHub you should configure the Woodpecker container using the following environment variables:
 
 ```diff
-version: '2'
+version: '3'
 
 services:
-  drone-server:
-    image: drone/drone:{{% version %}}
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
     ports:
       - 80:8000
       - 9000
@@ -20,19 +22,19 @@ services:
 +     - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
       - DRONE_SECRET=${DRONE_SECRET}
 
-  drone-agent:
-    image: drone/agent:{{% version %}}
+  woodpecker-agent:
+    image: laszlocloud/woodpecker-agent:v0.9.0
     restart: always
     depends_on:
-      - drone-server
+      - woodpecker-server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone-server:9000
+      - DRONE_SERVER=woodpecker-server:9000
       - DRONE_SECRET=${DRONE_SECRET}
 ```
 
-# Registration
+## Registration
 
 Register your application with GitHub to create your client id and secret. It is very import the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
 
@@ -40,7 +42,7 @@ Please use this screenshot for reference:
 
 ![github oauth setup](github_oauth.png)
 
-# Configuration
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 

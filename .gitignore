@@ -1,6 +1,5 @@
 drone/drone
 *.sqlite
-*.txt
 *.out
 /.env
 extras/
@@ -15,3 +14,5 @@ web/node_modules
 web/dist/files
 web/*.log
 web/.env
+
+docs/venv
