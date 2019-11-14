@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	libcompose "github.com/docker/libcompose/yaml"
-	"gopkg.in/yaml.v2"
+	"github.com/laszlocph/yaml"
 )
 
 type (

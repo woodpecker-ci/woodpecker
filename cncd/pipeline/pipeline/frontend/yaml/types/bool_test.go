@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"gopkg.in/yaml.v2"
+	"github.com/laszlocph/yaml"
 )
 
 func TestBoolTrue(t *testing.T) {

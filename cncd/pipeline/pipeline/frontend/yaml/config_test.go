@@ -44,19 +44,20 @@ func TestParse(t *testing.T) {
 				g.Assert(out.RunsOn[1]).Equal("failure")
 				g.Assert(out.SkipClone).Equal(false)
 			})
+
 			// Check to make sure variable expansion works in yaml.MapSlice
-			// g.It("Should unmarshal variables", func() {
-			// 	out, err := ParseString(sampleVarYaml)
-			// 	if err != nil {
-			// 		g.Fail(err)
-			// 	}
-			// 	g.Assert(out.Pipeline[0].Name).Equal("notify_fail")
-			// 	g.Assert(out.Pipeline[0].Image).Equal("plugins/slack")
-			// 	g.Assert(len(out.Pipeline[0].Constraints.Event.Include)).Equal(0)
-			// 	g.Assert(out.Pipeline[1].Name).Equal("notify_success")
-			// 	g.Assert(out.Pipeline[1].Image).Equal("plugins/slack")
-			// 	g.Assert(out.Pipeline[1].Constraints.Event.Include).Equal([]string{"success"})
-			// })
+			g.It("Should unmarshal variables", func() {
+				out, err := ParseString(sampleVarYaml)
+				if err != nil {
+					g.Fail(err)
+				}
+				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_fail")
+				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
+				g.Assert(len(out.Pipeline.Containers[0].Constraints.Event.Include)).Equal(0)
+				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
+				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
+				g.Assert(out.Pipeline.Containers[1].Constraints.Event.Include).Equal([]string{"success"})
+			})
 		})
 	})
 }
