@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
-	"gopkg.in/yaml.v2"
+	"github.com/laszlocph/yaml"
 )
 
 func TestUnmarshalNetwork(t *testing.T) {

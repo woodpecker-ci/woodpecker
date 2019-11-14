@@ -4,7 +4,7 @@ clone:
 
 pipeline:
   test:
-    image: golang:1.12.4
+    image: golang:1.13.3
     group: test
     commands:
       - go test -cover -timeout 30s $(go list ./...)
@@ -19,7 +19,7 @@ pipeline:
       - make test-frontend
 
   test-postgres:
-    image: golang:1.12.4
+    image: golang:1.13.3
     group: db-test
     environment:
       - DATABASE_DRIVER=postgres
@@ -28,7 +28,7 @@ pipeline:
       - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
   test-mysql:
-    image: golang:1.12.4
+    image: golang:1.13.3
     group: db-test
     environment:
       - DATABASE_DRIVER=mysql
@@ -42,7 +42,7 @@ pipeline:
       - make build-frontend
 
   build:
-    image: golang:1.12.4
+    image: golang:1.13.3
     commands:
       - go get github.com/laszlocph/togo
       - (cd web/; go generate ./...)
