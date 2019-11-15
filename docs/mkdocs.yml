@@ -4,8 +4,16 @@ repo_url: 'https://github.com/laszlocph/woodpecker'
 copyright: 'Creative Commons Attribution-ShareAlike 4.0 International Public License.<br />It is a derivative work of the https://github.com/drone/docs git repository'
 nav:
   - Home: index.md
-  - Server setup: server-setup.md
+  - Server Setup: server-setup.md
+  - Getting Started: getting-started.md
   - Pipelines: pipeline.md
+  - Services: services.md
+  - Plugins: plugins.md
+  - Environment Variables: environment-variables.md
+  - Secrets: secrets.md
+  - Volumes: volumes.md
+  - Matrix Builds: matrix-builds.md
+  - Multi Pipeline Builds: multi-pipeline.md
 theme:
   name: 'material'
   logo: 'images/favicon.svg'
