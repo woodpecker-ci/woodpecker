@@ -11,19 +11,19 @@ import { repositorySlug } from "./repository";
  * @param {string} name - The repository name.
  */
 export const fetchRegistryList = (tree, client, owner, name) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	tree.unset(["registry", "loaded"]);
-	tree.unset(["registry", "error"]);
+  tree.unset(["registry", "loaded"]);
+  tree.unset(["registry", "error"]);
 
-	client.getRegistryList(owner, name).then(results => {
-		let list = {};
-		results.map(registry => {
-			list[registry.address] = registry;
-		});
-		tree.set(["registry", "data", slug], list);
-		tree.set(["registry", "loaded"], true);
-	});
+  client.getRegistryList(owner, name).then(results => {
+    let list = {};
+    results.map(registry => {
+      list[registry.address] = registry;
+    });
+    tree.set(["registry", "data", slug], list);
+    tree.set(["registry", "loaded"], true);
+  });
 };
 
 /**
@@ -37,17 +37,17 @@ export const fetchRegistryList = (tree, client, owner, name) => {
  * @param {Object} registry - The registry hostname.
  */
 export const createRegistry = (tree, client, owner, name, registry) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	client
-		.createRegistry(owner, name, registry)
-		.then(result => {
-			tree.set(["registry", "data", slug, registry.address], result);
-			displayMessage(tree, "Successfully stored the registry credentials");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to store the registry credentials");
-		});
+  client
+    .createRegistry(owner, name, registry)
+    .then(result => {
+      tree.set(["registry", "data", slug, registry.address], result);
+      displayMessage(tree, "Successfully stored the registry credentials");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to store the registry credentials");
+    });
 };
 
 /**
@@ -61,15 +61,15 @@ export const createRegistry = (tree, client, owner, name, registry) => {
  * @param {Object} registry - The registry hostname.
  */
 export const deleteRegistry = (tree, client, owner, name, registry) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	client
-		.deleteRegistry(owner, name, registry)
-		.then(result => {
-			tree.unset(["registry", "data", slug, registry]);
-			displayMessage(tree, "Successfully deleted the registry credentials");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to delete the registry credentials");
-		});
+  client
+    .deleteRegistry(owner, name, registry)
+    .then(result => {
+      tree.unset(["registry", "data", slug, registry]);
+      displayMessage(tree, "Successfully deleted the registry credentials");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to delete the registry credentials");
+    });
 };

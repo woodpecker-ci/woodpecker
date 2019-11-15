@@ -5,8 +5,8 @@ import { render } from "react-dom";
 let root;
 
 function init() {
-	let App = require("./screens/drone").default;
-	root = render(<App />, document.body, root);
+  let App = require("./screens/drone").default;
+  root = render(<App />, document.body, root);
 }
 
 init();

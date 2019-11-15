@@ -11,19 +11,19 @@ import { repositorySlug } from "./repository";
  * @param {string} name - The repository name.
  */
 export const fetchSecretList = (tree, client, owner, name) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	tree.unset(["secrets", "loaded"]);
-	tree.unset(["secrets", "error"]);
+  tree.unset(["secrets", "loaded"]);
+  tree.unset(["secrets", "error"]);
 
-	client.getSecretList(owner, name).then(results => {
-		let list = {};
-		results.map(secret => {
-			list[secret.name] = secret;
-		});
-		tree.set(["secrets", "data", slug], list);
-		tree.set(["secrets", "loaded"], true);
-	});
+  client.getSecretList(owner, name).then(results => {
+    let list = {};
+    results.map(secret => {
+      list[secret.name] = secret;
+    });
+    tree.set(["secrets", "data", slug], list);
+    tree.set(["secrets", "loaded"], true);
+  });
 };
 
 /**
@@ -37,17 +37,17 @@ export const fetchSecretList = (tree, client, owner, name) => {
  * @param {Object} secret - The secret object.
  */
 export const createSecret = (tree, client, owner, name, secret) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	client
-		.createSecret(owner, name, secret)
-		.then(result => {
-			tree.set(["secrets", "data", slug, secret.name], result);
-			displayMessage(tree, "Successfully added the secret");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to create the secret");
-		});
+  client
+    .createSecret(owner, name, secret)
+    .then(result => {
+      tree.set(["secrets", "data", slug, secret.name], result);
+      displayMessage(tree, "Successfully added the secret");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to create the secret");
+    });
 };
 
 /**
@@ -61,15 +61,15 @@ export const createSecret = (tree, client, owner, name, secret) => {
  * @param {string} secret - The secret name.
  */
 export const deleteSecret = (tree, client, owner, name, secret) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	client
-		.deleteSecret(owner, name, secret)
-		.then(result => {
-			tree.unset(["secrets", "data", slug, secret]);
-			displayMessage(tree, "Successfully removed the secret");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to remove the secret");
-		});
+  client
+    .deleteSecret(owner, name, secret)
+    .then(result => {
+      tree.unset(["secrets", "data", slug, secret]);
+      displayMessage(tree, "Successfully removed the secret");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to remove the secret");
+    });
 };

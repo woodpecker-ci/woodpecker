@@ -6,24 +6,24 @@
  * @param {Object} client - The drone client.
  */
 export const fetchFeed = (tree, client) => {
-	client
-		.getBuildFeed({ latest: true })
-		.then(results => {
-			let list = {};
-			let sorted = results.sort(compareFeedItem);
-			sorted.map(repo => {
-				list[repo.full_name] = repo;
-			});
-			if (sorted && sorted.length > 0) {
-				tree.set(["feed", "latest"], sorted[0]);
-			}
-			tree.set(["feed", "loaded"], true);
-			tree.set(["feed", "data"], list);
-		})
-		.catch(error => {
-			tree.set(["feed", "loaded"], true);
-			tree.set(["feed", "error"], error);
-		});
+  client
+    .getBuildFeed({ latest: true })
+    .then(results => {
+      let list = {};
+      let sorted = results.sort(compareFeedItem);
+      sorted.map(repo => {
+        list[repo.full_name] = repo;
+      });
+      if (sorted && sorted.length > 0) {
+        tree.set(["feed", "latest"], sorted[0]);
+      }
+      tree.set(["feed", "loaded"], true);
+      tree.set(["feed", "data"], list);
+    })
+    .catch(error => {
+      tree.set(["feed", "loaded"], true);
+      tree.set(["feed", "error"], error);
+    });
 };
 
 /**
@@ -34,11 +34,11 @@ export const fetchFeed = (tree, client) => {
  * @param {Object} client - The drone client.
  */
 export function fetchFeedOnce(tree, client) {
-	if (fetchFeedOnce.fired) {
-		return;
-	}
-	fetchFeedOnce.fired = true;
-	return fetchFeed(tree, client);
+  if (fetchFeedOnce.fired) {
+    return;
+  }
+  fetchFeedOnce.fired = true;
+  return fetchFeed(tree, client);
 }
 
 /**
@@ -49,18 +49,18 @@ export function fetchFeedOnce(tree, client) {
  * @param {Object} client - The drone client.
  */
 export const subscribeToFeed = (tree, client) => {
-	return client.on(data => {
-		const { repo, build } = data;
+  return client.on(data => {
+    const { repo, build } = data;
 
-		if (tree.exists("feed", "data", repo.full_name)) {
-			const cursor = tree.select(["feed", "data", repo.full_name]);
-			cursor.merge(build);
-		}
+    if (tree.exists("feed", "data", repo.full_name)) {
+      const cursor = tree.select(["feed", "data", repo.full_name]);
+      cursor.merge(build);
+    }
 
-		if (tree.exists("builds", "data", repo.full_name)) {
-			tree.set(["builds", "data", repo.full_name, build.number], build);
-		}
-	});
+    if (tree.exists("builds", "data", repo.full_name)) {
+      tree.set(["builds", "data", repo.full_name, build.number], build);
+    }
+  });
 };
 
 /**
@@ -71,11 +71,11 @@ export const subscribeToFeed = (tree, client) => {
  * @param {Object} client - The drone client.
  */
 export function subscribeToFeedOnce(tree, client) {
-	if (subscribeToFeedOnce.fired) {
-		return;
-	}
-	subscribeToFeedOnce.fired = true;
-	return subscribeToFeed(tree, client);
+  if (subscribeToFeedOnce.fired) {
+    return;
+  }
+  subscribeToFeedOnce.fired = true;
+  return subscribeToFeed(tree, client);
 }
 
 /**
@@ -85,7 +85,7 @@ export function subscribeToFeedOnce(tree, client) {
  * @returns {number}
  */
 export const compareFeedItem = (a, b) => {
-	return (
-		(b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1)
-	);
+  return (
+    (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1)
+  );
 };
