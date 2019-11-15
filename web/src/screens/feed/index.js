@@ -26,7 +26,7 @@ export default class Sidebar extends Component {
     this.setState({
       starred: JSON.parse(localStorage.getItem("starred") || "[]"),
       starredOpen: (localStorage.getItem("starredOpen") || "true") === "true",
-      reposOpen: (localStorage.getItem("reposOpen") || "true") === "true"
+      reposOpen: (localStorage.getItem("reposOpen") || "true") === "true",
     });
 
     this.handleFilter = this.handleFilter.bind(this);
@@ -44,7 +44,7 @@ export default class Sidebar extends Component {
 
   handleFilter(e) {
     this.setState({
-      filter: e.target.value
+      filter: e.target.value,
     });
   }
 
@@ -122,13 +122,15 @@ export default class Sidebar extends Component {
           triggerOpenedClassName={style.Collapsible__trigger}
           triggerClassName={style.Collapsible__trigger}
         >
-          {feed.loaded === false
-            ? LOADING
-            : feed.error
-            ? ERROR
-            : list.length === 0
-            ? EMPTY
-            : this.renderFeed(list, true)}
+          {feed.loaded === false ? (
+            LOADING
+          ) : feed.error ? (
+            ERROR
+          ) : list.length === 0 ? (
+            EMPTY
+          ) : (
+            this.renderFeed(list, true)
+          )}
         </Collapsible>
         <Collapsible
           trigger="Repos"
@@ -145,15 +147,17 @@ export default class Sidebar extends Component {
             placeholder="Search …"
             onChange={this.handleFilter}
           />
-          {feed.loaded === false
-            ? LOADING
-            : feed.error
-            ? ERROR
-            : list.length === 0
-            ? EMPTY
-            : filtered.length > 0
-            ? this.renderFeed(filtered.sort(compareFeedItem), false)
-            : NO_MATCHES}
+          {feed.loaded === false ? (
+            LOADING
+          ) : feed.error ? (
+            ERROR
+          ) : list.length === 0 ? (
+            EMPTY
+          ) : filtered.length > 0 ? (
+            this.renderFeed(filtered.sort(compareFeedItem), false)
+          ) : (
+            NO_MATCHES
+          )}
         </Collapsible>
       </div>
     );

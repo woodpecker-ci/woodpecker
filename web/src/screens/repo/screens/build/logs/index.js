@@ -24,7 +24,7 @@ const binding = (props, context) => {
     eof: ["logs", "data", slug, number, pid, "eof"],
     loading: ["logs", "data", slug, number, pid, "loading"],
     error: ["logs", "data", slug, number, pid, "error"],
-    follow: ["logs", "follow"]
+    follow: ["logs", "follow"],
   };
 };
 
@@ -57,7 +57,7 @@ export default class Output extends Component {
         nextProps.match.params.owner,
         nextProps.match.params.repo,
         nextProps.build.number,
-        nextProps.proc.pid
+        nextProps.proc.pid,
       );
     }
 
@@ -68,7 +68,7 @@ export default class Output extends Component {
         nextProps.match.params.owner,
         nextProps.match.params.repo,
         nextProps.build.number,
-        nextProps.proc
+        nextProps.proc,
       );
     }
   }

@@ -27,7 +27,6 @@ module.exports = {
       "error",
       {
         trailingComma: "all",
-        useTabs: true
       }
     ]
   }

@@ -5,7 +5,7 @@ export class Elapsed extends Component {
     super(props);
 
     this.state = {
-      elapsed: 0
+      elapsed: 0,
     };
 
     this.tick = this.tick.bind(this);
@@ -23,7 +23,7 @@ export class Elapsed extends Component {
     const { start } = this.props;
     const stop = ~~(Date.now() / 1000);
     this.setState({
-      elapsed: stop - start
+      elapsed: stop - start,
     });
   }
 
@@ -33,11 +33,13 @@ export class Elapsed extends Component {
     date.setSeconds(elapsed);
     return (
       <time>
-        {!elapsed
-          ? undefined
-          : elapsed > 3600
-          ? date.toISOString().substr(11, 8)
-          : date.toISOString().substr(14, 5)}
+        {!elapsed ? (
+          undefined
+        ) : elapsed > 3600 ? (
+          date.toISOString().substr(11, 8)
+        ) : (
+          date.toISOString().substr(14, 5)
+        )}
       </time>
     );
   }

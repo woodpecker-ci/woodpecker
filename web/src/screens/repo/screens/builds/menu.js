@@ -8,7 +8,7 @@ export default class RepoMenu extends Component {
       { to: `/${owner}/${repo}`, label: "Builds" },
       { to: `/${owner}/${repo}/settings/secrets`, label: "Secrets" },
       { to: `/${owner}/${repo}/settings/registry`, label: "Registry" },
-      { to: `/${owner}/${repo}/settings`, label: "Settings" }
+      { to: `/${owner}/${repo}/settings`, label: "Settings" },
     ];
     return <Menu items={menu} {...this.props} />;
   }

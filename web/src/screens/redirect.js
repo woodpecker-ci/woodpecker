@@ -7,7 +7,7 @@ const binding = (props, context) => {
   return {
     feed: ["feed"],
     user: ["user", "data"],
-    syncing: ["user", "syncing"]
+    syncing: ["user", "syncing"],
   };
 };
 

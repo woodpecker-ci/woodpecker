@@ -5,7 +5,7 @@ import { fetchBuild, approveBuild, declineBuild } from "shared/utils/build";
 import {
   STATUS_BLOCKED,
   STATUS_DECLINED,
-  STATUS_ERROR
+  STATUS_ERROR,
 } from "shared/constants/status";
 
 import { findChildProcess } from "shared/utils/proc";
@@ -29,7 +29,7 @@ const binding = (props, context) => {
 
   return {
     repo: ["repos", "data", slug],
-    build: ["builds", "data", slug, number]
+    build: ["builds", "data", slug, number],
   };
 };
 
@@ -54,7 +54,7 @@ export default class BuildLogs extends Component {
       drone,
       repo.owner,
       repo.name,
-      build.number
+      build.number,
     );
   }
 
@@ -65,7 +65,7 @@ export default class BuildLogs extends Component {
       drone,
       repo.owner,
       repo.name,
-      build.number
+      build.number,
     );
   }
 
@@ -81,7 +81,7 @@ export default class BuildLogs extends Component {
         fetchRepository,
         props.drone,
         props.match.params.owner,
-        props.match.params.repo
+        props.match.params.repo,
       );
     }
     if (!props.build || !props.build.procs) {
@@ -90,7 +90,7 @@ export default class BuildLogs extends Component {
         props.drone,
         props.match.params.owner,
         props.match.params.repo,
-        props.match.params.build
+        props.match.params.build,
       );
     }
   }
@@ -160,9 +160,11 @@ export default class BuildLogs extends Component {
           </div>
           <div className={styles.left}>
             <div className={styles.logerror}>
-              {build.status === STATUS_ERROR
-                ? build.error
-                : "Pipeline execution was declined"}
+              {build.status === STATUS_ERROR ? (
+                build.error
+              ) : (
+                "Pipeline execution was declined"
+              )}
             </div>
           </div>
         </div>
@@ -247,7 +249,7 @@ export class BuildLogsTitle extends Component {
             key={`${owner}-${repo}-${build}`}
           >
             {build}
-          </Link>
+          </Link>,
         ]}
       />
     );

@@ -11,7 +11,7 @@ export default class Header extends Component {
           elements={[
             <Link to={`/${owner}/${repo}`} key={`${owner}-${repo}`}>
               {owner} / {repo}
-            </Link>
+            </Link>,
           ]}
         />
       </div>

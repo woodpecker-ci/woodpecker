@@ -41,5 +41,5 @@ export {
   StarIcon,
   SyncIcon,
   TagIcon,
-  TimelapseIcon
+  TimelapseIcon,
 };

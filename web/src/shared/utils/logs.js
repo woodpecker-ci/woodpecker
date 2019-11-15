@@ -20,7 +20,7 @@ export function fetchLogs(tree, client, owner, repo, build, proc) {
   const slug = repositorySlug(owner, repo);
   const init = {
     data: [],
-    loading: true
+    loading: true,
   };
 
   tree.set(["logs", "data", slug, build, proc], init);

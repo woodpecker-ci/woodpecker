@@ -6,7 +6,7 @@ export const drone = (client, Component) => {
   const component = class extends React.Component {
     getChildContext() {
       return {
-        drone: client
+        drone: client,
       };
     }
 
@@ -16,7 +16,7 @@ export const drone = (client, Component) => {
   };
 
   component.childContextTypes = {
-    drone: (props, propName) => {}
+    drone: (props, propName) => {},
   };
 
   return component;

@@ -5,12 +5,12 @@ import {
   DeployIcon,
   LaunchIcon,
   MergeIcon,
-  TagIcon
+  TagIcon,
 } from "shared/components/icons/index";
 import {
   EVENT_TAG,
   EVENT_PULL_REQUEST,
-  EVENT_DEPLOY
+  EVENT_DEPLOY,
 } from "shared/constants/events";
 
 import styles from "./build_event.less";
@@ -40,13 +40,15 @@ export default class BuildEvent extends Component {
             )}
           </div>
           <div>
-            {event === EVENT_TAG && refs
-              ? trimTagRef(refs)
-              : event === EVENT_PULL_REQUEST && refspec
-              ? trimMergeRef(refs)
-              : event === EVENT_DEPLOY && target
-              ? target
-              : branch}
+            {event === EVENT_TAG && refs ? (
+              trimTagRef(refs)
+            ) : event === EVENT_PULL_REQUEST && refspec ? (
+              trimMergeRef(refs)
+            ) : event === EVENT_DEPLOY && target ? (
+              target
+            ) : (
+              branch
+            )}
           </div>
         </div>
         <a href={link} target="_blank">

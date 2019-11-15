@@ -15,7 +15,7 @@ const binding = (props, context) => {
   const number = parseInt(build);
   return {
     repo: ["repos", "data", slug],
-    build: ["builds", "data", slug, number]
+    build: ["builds", "data", slug, number],
   };
 };
 
@@ -44,7 +44,7 @@ export default class BuildMenu extends Component {
       repo.owner,
       repo.name,
       build.number,
-      proc.ppid
+      proc.ppid,
     );
   }
 

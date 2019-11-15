@@ -34,7 +34,7 @@ const binding = (props, context) => {
     user: ["user"],
     message: ["message"],
     sidebar: ["sidebar"],
-    menu: ["menu"]
+    menu: ["menu"],
   };
 };
 
@@ -42,7 +42,7 @@ const mapScreenSizeToProps = screenSize => {
   return {
     isTablet: screenSize["small"],
     isMobile: screenSize["mobile"],
-    isDesktop: screenSize["> small"]
+    isDesktop: screenSize["> small"],
   };
 };
 
@@ -54,7 +54,7 @@ export default class Default extends Component {
     super(props, context);
     this.state = {
       menu: false,
-      feed: false
+      feed: false,
     };
 
     this.openMenu = this.openMenu.bind(this);

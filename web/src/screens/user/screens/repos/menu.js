@@ -7,7 +7,7 @@ import Menu from "shared/components/menu";
 
 const binding = (props, context) => {
   return {
-    repos: ["repos"]
+    repos: ["repos"],
   };
 };
 

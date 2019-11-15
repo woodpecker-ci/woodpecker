@@ -11,62 +11,62 @@ const state = {
     data: user,
     error: undefined,
     loaded: true,
-    syncing: sync
+    syncing: sync,
   },
 
   feed: {
     loaded: false,
     error: undefined,
-    data: {}
+    data: {},
   },
 
   repos: {
     loaded: false,
     error: undefined,
-    data: {}
+    data: {},
   },
 
   secrets: {
     loaded: false,
     error: undefined,
-    data: {}
+    data: {},
   },
 
   registry: {
     error: undefined,
     loaded: false,
-    data: {}
+    data: {},
   },
 
   builds: {
     loaded: false,
     error: undefined,
-    data: {}
+    data: {},
   },
 
   logs: {
     follow: false,
     loading: true,
     error: false,
-    data: {}
+    data: {},
   },
 
   token: {
     value: undefined,
     error: undefined,
-    loading: false
+    loading: false,
   },
 
   message: {
     show: false,
     text: undefined,
-    error: false
+    error: false,
   },
 
   location: {
     protocol: window.location.protocol,
-    host: window.location.host
-  }
+    host: window.location.host,
+  },
 };
 
 const tree = new Baobab(state);

@@ -10,7 +10,7 @@ import {
   STATUS_RUNNING,
   STATUS_SKIPPED,
   STATUS_STARTED,
-  STATUS_SUCCESS
+  STATUS_SUCCESS,
 } from "shared/constants/status";
 import style from "./status.less";
 
@@ -19,7 +19,7 @@ import {
   CloseIcon,
   ClockIcon,
   RefreshIcon,
-  RemoveIcon
+  RemoveIcon,
 } from "./icons/index";
 
 const defaultIconSize = 15;

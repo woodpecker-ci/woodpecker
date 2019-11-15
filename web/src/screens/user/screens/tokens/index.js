@@ -8,7 +8,7 @@ import styles from "./index.less";
 const binding = (props, context) => {
   return {
     location: ["location"],
-    token: ["token"]
+    token: ["token"],
   };
 };
 
@@ -48,9 +48,7 @@ export default class Tokens extends Component {
 }
 
 const usageWithCURL = (location, token) => {
-  return `curl -i ${location.protocol}//${
-    location.host
-  }/api/user -H "Authorization: Bearer ${token}"`;
+  return `curl -i ${location.protocol}//${location.host}/api/user -H "Authorization: Bearer ${token}"`;
 };
 
 const usageWithCLI = (location, token) => {

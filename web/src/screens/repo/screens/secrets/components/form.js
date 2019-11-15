@@ -4,7 +4,7 @@ import {
   EVENT_PUSH,
   EVENT_TAG,
   EVENT_PULL_REQUEST,
-  EVENT_DEPLOY
+  EVENT_DEPLOY,
 } from "shared/constants/events";
 
 import styles from "./form.less";
@@ -16,7 +16,7 @@ export class Form extends Component {
     this.state = {
       name: "",
       value: "",
-      event: [EVENT_PUSH, EVENT_TAG, EVENT_DEPLOY]
+      event: [EVENT_PUSH, EVENT_TAG, EVENT_DEPLOY],
     };
 
     this._handleNameChange = this._handleNameChange.bind(this);
@@ -55,7 +55,7 @@ export class Form extends Component {
     const detail = {
       name: this.state.name,
       value: this.state.value,
-      event: this.state.event
+      event: this.state.event,
     };
 
     onsubmit({ detail });

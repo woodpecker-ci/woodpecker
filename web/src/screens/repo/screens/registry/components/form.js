@@ -8,7 +8,7 @@ export class Form extends Component {
     this.state = {
       address: "",
       username: "",
-      password: ""
+      password: "",
     };
 
     this._handleAddressChange = this._handleAddressChange.bind(this);
@@ -37,7 +37,7 @@ export class Form extends Component {
     const detail = {
       address: this.state.address,
       username: this.state.username,
-      password: this.state.password
+      password: this.state.password,
     };
 
     onsubmit({ detail });

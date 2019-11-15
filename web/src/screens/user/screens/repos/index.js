@@ -6,7 +6,7 @@ import { inject } from "config/client/inject";
 import {
   fetchRepostoryList,
   disableRepository,
-  enableRepository
+  enableRepository,
 } from "shared/utils/repository";
 
 import { List, Item } from "./components";
@@ -18,7 +18,7 @@ const binding = (props, context) => {
   return {
     repos: ["repos", "data"],
     loaded: ["repos", "loaded"],
-    error: ["repos", "error"]
+    error: ["repos", "error"],
   };
 };
 
@@ -35,7 +35,7 @@ export default class UserRepos extends Component {
 
   handleFilter(e) {
     this.setState({
-      search: e.target.value
+      search: e.target.value,
     });
   }
 

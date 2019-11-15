@@ -17,7 +17,7 @@ const binding = (props, context) => {
     repo: ["repos", "data", slug],
     builds: ["builds", "data", slug],
     loaded: ["builds", "loaded"],
-    error: ["builds", "error"]
+    error: ["builds", "error"],
   };
 };
 
@@ -75,7 +75,7 @@ export default class Main extends Component {
       drone,
       match.params.owner,
       match.params.repo,
-      page
+      page,
     );
   }
 

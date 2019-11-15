@@ -6,13 +6,13 @@ import { inject } from "config/client/inject";
 import {
   fetchRepository,
   updateRepository,
-  repositorySlug
+  repositorySlug,
 } from "shared/utils/repository";
 
 import {
   VISIBILITY_PUBLIC,
   VISIBILITY_PRIVATE,
-  VISIBILITY_INTERNAL
+  VISIBILITY_INTERNAL,
 } from "shared/constants/visibility";
 
 import styles from "./index.less";
@@ -22,7 +22,7 @@ const binding = (props, context) => {
   const slug = repositorySlug(owner, repo);
   return {
     user: ["user", "data"],
-    repo: ["repos", "data", slug]
+    repo: ["repos", "data", slug],
   };
 };
 

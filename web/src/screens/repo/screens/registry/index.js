@@ -4,7 +4,7 @@ import { repositorySlug } from "shared/utils/repository";
 import {
   fetchRegistryList,
   createRegistry,
-  deleteRegistry
+  deleteRegistry,
 } from "shared/utils/registry";
 
 import { branch } from "baobab-react/higher-order";
@@ -19,7 +19,7 @@ const binding = (props, context) => {
   const slug = repositorySlug(owner, repo);
   return {
     loaded: ["registry", "loaded"],
-    registries: ["registry", "data", slug]
+    registries: ["registry", "data", slug],
   };
 };
 
@@ -49,7 +49,7 @@ export default class RepoRegistry extends Component {
     const registry = {
       address: e.detail.address,
       username: e.detail.username,
-      password: e.detail.password
+      password: e.detail.password,
     };
 
     dispatch(createRegistry, drone, owner, repo, registry);

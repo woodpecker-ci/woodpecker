@@ -4,7 +4,7 @@ import { repositorySlug } from "shared/utils/repository";
 import {
   fetchSecretList,
   createSecret,
-  deleteSecret
+  deleteSecret,
 } from "shared/utils/secrets";
 
 import { branch } from "baobab-react/higher-order";
@@ -19,7 +19,7 @@ const binding = (props, context) => {
   const slug = repositorySlug(owner, repo);
   return {
     loaded: ["secrets", "loaded"],
-    secrets: ["secrets", "data", slug]
+    secrets: ["secrets", "data", slug],
   };
 };
 
@@ -47,7 +47,7 @@ export default class RepoSecrets extends Component {
     const secret = {
       name: e.detail.name,
       value: e.detail.value,
-      event: e.detail.event
+      event: e.detail.event,
     };
 
     dispatch(createSecret, drone, owner, repo, secret);
