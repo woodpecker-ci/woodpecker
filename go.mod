@@ -34,7 +34,6 @@ require (
 	github.com/joho/godotenv v0.0.0-20150907010228-4ed13390c0ac
 	github.com/kr/pretty v0.0.0-20160708215748-737b74a46c4b
 	github.com/kr/text v0.0.0-20160504234017-7cafcd837844 // indirect
-	github.com/laszlocph/yaml v0.0.0-20191114195230-2ec4ce7a1d34
 	github.com/lib/pq v0.0.0-20151015211310-83c4f410d0ae
 	github.com/manucorporat/sse v0.0.0-20160126180136-ee05b128a739 // indirect
 	github.com/mattn/go-sqlite3 v0.0.0-20170901084005-05548ff55570
@@ -59,4 +58,5 @@ require (
 	google.golang.org/grpc v0.0.0-20170626232044-9cb02b885b41
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.17.1 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20191107175235-0b070bb63a18
 )

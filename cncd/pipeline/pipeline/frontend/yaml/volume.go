@@ -3,7 +3,7 @@ package yaml
 import (
 	"fmt"
 
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -21,23 +21,18 @@ type (
 )
 
 // UnmarshalYAML implements the Unmarshaller interface.
-func (v *Volumes) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	slice := yaml.MapSlice{}
-	err := unmarshal(&slice)
+func (v *Volumes) UnmarshalYAML(value *yaml.Node) error {
+	y, _ := yaml.Marshal(value)
+
+	volumes := map[string]Volume{}
+	err := yaml.Unmarshal(y, &volumes)
 	if err != nil {
 		return err
 	}
 
-	for _, s := range slice {
-		vv := Volume{}
-		out, _ := yaml.Marshal(s.Value)
-
-		err = yaml.Unmarshal(out, &vv)
-		if err != nil {
-			return err
-		}
+	for key, vv := range volumes {
 		if vv.Name == "" {
-			vv.Name = fmt.Sprintf("%v", s.Key)
+			vv.Name = fmt.Sprintf("%v", key)
 		}
 		if vv.Driver == "" {
 			vv.Driver = "local"

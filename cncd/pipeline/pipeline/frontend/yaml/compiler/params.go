@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	json "github.com/ghodss/yaml"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 // paramsToEnv uses reflection to convert a map[string]interface to a list

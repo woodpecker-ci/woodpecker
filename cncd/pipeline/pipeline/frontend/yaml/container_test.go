@@ -6,7 +6,7 @@ import (
 
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/kr/pretty"
-	"github.com/laszlocph/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 var containerYaml = []byte(`
@@ -54,10 +54,6 @@ volumes:
   - /var/lib/mysql
   - /opt/data:/var/lib/mysql
   - /etc/configs:/etc/configs/:ro
-ulimits:
-  nofile:
-    soft: 20000
-    hard: 40000
 tmpfs:
   - /var/lib/test
 when:
@@ -102,11 +98,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		Privileged:  true,
 		ShmSize:     libcompose.MemStringorInt(1024),
 		Tmpfs:       libcompose.Stringorslice{"/var/lib/test"},
-		Ulimits: libcompose.Ulimits{
-			Elements: []libcompose.Ulimit{
-				libcompose.NewUlimit("nofile", 20000, 40000),
-			},
-		},
 		Volumes: libcompose.Volumes{
 			Volumes: []*libcompose.Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -179,7 +170,8 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test)
-		err := yaml.Unmarshal(in, new(Containers))
+		containers := new(Containers)
+		err := yaml.Unmarshal(in, &containers)
 		if err == nil {
 			t.Errorf("wanted error for containers %q", test)
 		}

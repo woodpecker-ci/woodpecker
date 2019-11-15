@@ -77,8 +77,6 @@ github.com/kr/pretty v0.0.0-20160708215748-737b74a46c4b h1:LJ9zj3Zit+pLjAQtA1gxl
 github.com/kr/pretty v0.0.0-20160708215748-737b74a46c4b/go.mod h1:Bvhd+E3laJ0AVkG0c9rmtZcnhV0HQ3+c3YxxqTvc/gA=
 github.com/kr/text v0.0.0-20160504234017-7cafcd837844 h1:kpzneEBeC0dMewP3gr/fADv1OlblH9r1goWVwpOt3TU=
 github.com/kr/text v0.0.0-20160504234017-7cafcd837844/go.mod h1:sjUstKUATFIcff4qlB53Kml0wQPtJVc/3fWrmuUmcfA=
-github.com/laszlocph/yaml v0.0.0-20191114195230-2ec4ce7a1d34 h1:+4tKButWtRq7Xw8EUpabOmZYAk2gtinHF585AmWu2Qk=
-github.com/laszlocph/yaml v0.0.0-20191114195230-2ec4ce7a1d34/go.mod h1:E1nYupUAMCOPyW4ZX78x63SP3/nKFQ5aj8tlwzMdYuo=
 github.com/lib/pq v0.0.0-20151015211310-83c4f410d0ae h1:rBqRT7VqVLePKGtyV6xDFLXeqD56CvZKEqI0XWzVTxM=
 github.com/lib/pq v0.0.0-20151015211310-83c4f410d0ae/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/manucorporat/sse v0.0.0-20160126180136-ee05b128a739 h1:ykXz+pRRTibcSjG1yRhpdSHInF8yZY/mfn+Rz2Nd1rE=
@@ -158,3 +156,5 @@ gopkg.in/go-playground/validator.v8 v8.17.1 h1:W1Q1z7rfiJiNhoBkHYqb9TJAdOqPXsyNe
 gopkg.in/go-playground/validator.v8 v8.17.1/go.mod h1:RX2a/7Ha8BgOhfk7j780h4/u/RRjR0eouCJSH80/M2Y=
 gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v3 v3.0.0-20191107175235-0b070bb63a18 h1:VaaR1yHVgJQaTGM1DXum4OU6He6gaZXAPII85hHgSzQ=
+gopkg.in/yaml.v3 v3.0.0-20191107175235-0b070bb63a18/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
