@@ -2,6 +2,8 @@
 
 Woodpecker is a simple CI engine with great extensibility.
 
+![woodpecker](/images/woodpecker.png)
+
 ## .woodpecker.yml
 
 - Place your pipeline in a file named `.woodpecker.yml` in your repository

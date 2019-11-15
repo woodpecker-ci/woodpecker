@@ -3,135 +3,98 @@
 An opinionated fork of the Drone CI system.
 
 - Based on the v0.8 code tree
-- Focused on developer experience.
+- Focused on team usage
+- Fully Apache 2.0, no tiers
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/woodpecker)](https://goreportcard.com/report/github.com/laszlocph/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-![woodpecker](docs/drone.png)
+![woodpecker](docs/docs/images/woodpecker.png)
 
-## Table of contents
+## .woodpecker.yml
 
-- [About this fork](#about-this-fork)
-  - [Motivation](#motivation)
-  - [The focus of this fork](#the-focus-of-this-fork)
-  - [Who uses this fork](#who-uses-this-fork)
-- [Pipelines](#pipelines)
-  - [Getting started](#getting-started)
-  - [Pipeline documentation](#pipeline-documentation)
-- [Plugins](#plugins)
-  - [Custom plugins](#custom-plugins)
-- [Contributing](#contributing)
-- [License](#license)
-
-## About this fork
-
-#### Motivation
-
-Why fork? See my [motivation](docs/motivation.md)
-
-#### The focus of this fork
-
-This fork is not meant to compete with Drone or reimplement its enterprise features in the open.
-
-Instead, I'm taking a proven CI system - that Drone 0.8 is - and applying a distinct set of product ideas focusing on:
-
-- UI experience
-- the developer feedback loop
-- documentation and best practices
-- tighter Github integration
-- Kubernetes backend
-
-with less focus on:
-
-- niche git systems like gitea, gogs
-- computing architectures like arm64
-- new pipeline formats like jsonnet
-
-#### Who uses this fork
-
-Currently I know of one organization using this fork. With 50+ users, 130+ repos and more than 300 builds a week.
-
-## Pipelines
-
-#### Getting started
-
-Place this snippet into a file called `.drone.yml`
+- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Pipeline steps can be named as you like
+- Run any command in the commands section
 
 ```yaml
+# .woodpecker.yml
 pipeline:
   build:
-    image: debian:stable-slim
+    image: debian
     commands:
       - echo "This is the build step"
   a-test-step:
-    image: debian:stable-slim
+    image: debian
     commands:
       - echo "Testing.."
 ```
 
-The pipeline runs on the Drone CI server and typically triggered by webhooks. One benefit of the container architecture is that it runs on your laptop too:
+## Build steps are containers
 
-```sh
-$ drone exec --local
-stable-slim: Pulling from library/debian
-a94641239323: Pull complete
-Digest: sha256:d846d80f98c8aca7d3db0fadd14a0a4c51a2ce1eb2e9e14a550b3bd0c45ba941
-Status: Downloaded newer image for debian:stable-slim
-[build:L0:0s] + echo "This is the build step"
-[build:L1:0s] This is the build step
-[a-test-step:L0:0s] + echo "Testing.."
-[a-test-step:L1:0s] Testing..
+- Define any Docker image as context
+- Install the needed tools in custom Docker images, use them as context
+
+```diff
+pipeline:
+  build:
+-    image: debian
++   image: mycompany/image-with-awscli
+    commands:
+      - aws help
 ```
 
-Pipeline steps are commands running in container images.
-These containers are wired together and they share a volume with the source code on it.
+## File changes are incremental
 
-#### Pipeline documentation
-
-See all [pipeline features](docs/usage/pipeline.md).
-
-## Plugins
-
-Plugins are Docker containers that perform pre-defined tasks and are configured as steps in your pipeline. Plugins can be used to deploy code, publish artifacts, send notification, and more.
-
-Example pipeline using the Docker and Slack plugins:
+- Woodpecker clones the source code in the beginning pipeline
+- Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
+# .woodpecker.yml
 pipeline:
-  backend:
-    image: golang
+  build:
+    image: debian
     commands:
-      - go get
-      - go build
-      - go test
-
-  docker:
-    image: plugins/docker
-    username: kevinbacon
-    password: pa55word
-    repo: foo/bar
-    tags: latest
-
-  notify:
-    image: plugins/slack
-    channel: developers
-    username: drone
+      - touch myfile
+  a-test-step:
+    image: debian
+    commands:
+      - cat myfile
 ```
 
-#### Custom plugins
+## Plugins are straighforward
 
-Plugins are Docker containers with their entrypoint set to a predefined script.
+- If you copy the same shell script from project to project
+- Pack it into a plugin instead
+- And make the yaml declarative
+- Plugins are Docker images with your script as an entrypoint
 
-[See how an example plugin can be implemented in a bash script](docs/usage/bash_plugin.md).
+```Dockerfile
+# Dockerfile
+FROM laszlocloud/kubectl
+COPY deploy /usr/local/deploy
+ENTRYPOINT ["/usr/local/deploy"]
+```
 
-## Server setup
+```bash
+# deploy
+kubectl apply -f $PLUGIN_TEMPLATE
+```
 
+```yaml
+# .woodpecker.yml
+pipeline:
+  deploy-to-k8s:
+    image: laszlocloud/my-k8s-plugin
+    template: config/k8s/service.yml
+```
 
-## Contributing
+## Documentation
 
-woodpecker is Apache 2.0 licensed and accepts contributions via GitHub pull requests.
+https://woodpecker.laszlo.cloud
 
-[How to build the project]()
+## Who uses Woodpecker
+
+Currently I know of one organization using this fork. With 50+ users, 130+ repos and more than 1100 builds a week.
 
 ## License
 
