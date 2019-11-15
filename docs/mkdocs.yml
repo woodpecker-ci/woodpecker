@@ -5,6 +5,7 @@ copyright: 'Creative Commons Attribution-ShareAlike 4.0 International Public Lic
 nav:
   - Home: index.md
   - Server setup: server-setup.md
+  - Pipelines: pipeline.md
 theme:
   name: 'material'
   logo: 'images/favicon.svg'

@@ -82,3 +82,4 @@ pipeline:
     template: config/k8s/service.yml
 ```
 
+See a [detailed plugin example](/usage/bash-plugin).

@@ -1,63 +1,4 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
-
-- [Pipeline basics](#pipeline-basics)
-  - [Activation](#activation)
-  - [Configuration](#configuration)
-  - [Execution](#execution)
-- [Pipelines](#pipelines)
-  - [Build Steps](#build-steps)
-  - [Images](#images)
-    - [Images from private registries](#images-from-private-registries)
-    - [GCR Registry Support](#gcr-registry-support)
-  - [Parallel Execution](#parallel-execution)
-  - [Conditional Pipeline Execution](#conditional-pipeline-execution)
-  - [Conditional Step Execution](#conditional-step-execution)
-    - [Failure Execution](#failure-execution)
-- [Services](#services)
-  - [Configuration](#configuration-1)
-  - [Detachment](#detachment)
-  - [Initialization](#initialization)
-- [Plugins](#plugins)
-  - [Plugin Isolation](#plugin-isolation)
-  - [Plugin Marketplace](#plugin-marketplace)
-- [Environment variables](#environment-variables)
-  - [Built-in environment variables](#built-in-environment-variables)
-  - [String Substitution](#string-substitution)
-  - [String Operations](#string-operations)
-- [Secrets](#secrets)
-  - [Adding Secrets](#adding-secrets)
-  - [Alternate Names](#alternate-names)
-  - [Pull Requests](#pull-requests)
-  - [Examples](#examples)
-- [Volumes](#volumes)
-- [Webhooks](#webhooks)
-  - [Required Permissions](#required-permissions)
-  - [Skip Commits](#skip-commits)
-  - [Skip Branches](#skip-branches)
-- [Workspace](#workspace)
-- [Cloning](#cloning)
-  - [Git Submodules](#git-submodules)
-- [Privileged mode](#privileged-mode)
-- [Promoting](#promoting)
-  - [Triggering Deployments](#triggering-deployments)
-- [Matrix builds](#matrix-builds)
-  - [Interpolation](#interpolation)
-  - [Examples](#examples-1)
-- [Multi-pipeline builds](#multi-pipeline-builds)
-  - [Example multi-pipeline definition](#example-multi-pipeline-definition)
-  - [Flow control](#flow-control)
-  - [Status lines](#status-lines)
-  - [Rational](#rational)
-- [Badges](#badges)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-This document explains the process for activating and configuring a continuous delivery pipeline.
-
-# Pipeline basics
+# Pipelines
 
 ## Activation
 
@@ -65,7 +6,7 @@ To activate your project navigate to your account settings. You will see a list 
 
 Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Drone which will in turn trigger pipeline execution.
 
-![repository list](`repo_list.png)
+![repository list](`/images/repo_list.png)
 
 ## Configuration
 
