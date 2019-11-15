@@ -1,6 +1,7 @@
 site_name: Woodpecker
 repo_name: 'laszlocph/woodpecker'
 repo_url: 'https://github.com/laszlocph/woodpecker'
+edit_uri: 'blob/master/docs/docs/'
 copyright: 'Creative Commons Attribution-ShareAlike 4.0 International Public License.<br />It is a derivative work of the https://github.com/drone/docs git repository'
 nav:
   - Home: index.md
