@@ -16,37 +16,37 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import styles from "./drone.less";
 
 if (module.hot) {
-	require("preact/devtools");
+  require("preact/devtools");
 }
 
 class App extends Component {
-	render() {
-		return (
-			<BrowserRouter>
-				<div>
-					<Title />
-					<Switch>
-						<Route path="/" exact={true} component={RedirectRoot} />
-						<Route path="/login/form" exact={true} component={LoginForm} />
-						<Route path="/login/error" exact={true} component={LoginError} />
-						<Route path="/" exact={false} component={Layout} />
-					</Switch>
-				</div>
-			</BrowserRouter>
-		);
-	}
+  render() {
+    return (
+      <BrowserRouter>
+        <div>
+          <Title />
+          <Switch>
+            <Route path="/" exact={true} component={RedirectRoot} />
+            <Route path="/login/form" exact={true} component={LoginForm} />
+            <Route path="/login/error" exact={true} component={LoginError} />
+            <Route path="/" exact={false} component={Layout} />
+          </Switch>
+        </div>
+      </BrowserRouter>
+    );
+  }
 }
 
 if (tree.exists(["user", "data"])) {
-	fetchFeedOnce(tree, client);
-	subscribeToFeedOnce(tree, client);
+  fetchFeedOnce(tree, client);
+  subscribeToFeedOnce(tree, client);
 }
 
 client.onerror = error => {
-	console.error(error);
-	if (error.status === 401) {
-		tree.unset(["user", "data"]);
-	}
+  console.error(error);
+  if (error.status === 401) {
+    tree.unset(["user", "data"]);
+  }
 };
 
 export default root(tree, drone(client, App));

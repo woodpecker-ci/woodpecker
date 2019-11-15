@@ -13,26 +13,26 @@ import { STATUS_PENDING, STATUS_RUNNING } from "shared/constants/status";
  * @param {number|string} number - The build number.
  */
 export const fetchBuild = (tree, client, owner, name, number) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	tree.unset(["builds", "loaded"]);
-	client
-		.getBuild(owner, name, number)
-		.then(build => {
-			const path = ["builds", "data", slug, build.number];
+  tree.unset(["builds", "loaded"]);
+  client
+    .getBuild(owner, name, number)
+    .then(build => {
+      const path = ["builds", "data", slug, build.number];
 
-			if (tree.exists(path)) {
-				tree.deepMerge(path, build);
-			} else {
-				tree.set(path, build);
-			}
+      if (tree.exists(path)) {
+        tree.deepMerge(path, build);
+      } else {
+        tree.set(path, build);
+      }
 
-			tree.set(["builds", "loaded"], true);
-		})
-		.catch(error => {
-			tree.set(["builds", "loaded"], true);
-			tree.set(["builds", "error"], error);
-		});
+      tree.set(["builds", "loaded"], true);
+    })
+    .catch(error => {
+      tree.set(["builds", "loaded"], true);
+      tree.set(["builds", "error"], error);
+    });
 };
 
 /**
@@ -45,33 +45,33 @@ export const fetchBuild = (tree, client, owner, name, number) => {
  * @param {string} name - The repository name.
  */
 export const fetchBuildList = (tree, client, owner, name, page = 1) => {
-	const slug = repositorySlug(owner, name);
+  const slug = repositorySlug(owner, name);
 
-	tree.unset(["builds", "loaded"]);
-	tree.unset(["builds", "error"]);
+  tree.unset(["builds", "loaded"]);
+  tree.unset(["builds", "error"]);
 
-	client
-		.getBuildList(owner, name, { page: page })
-		.then(results => {
-			let list = {};
-			results.map(build => {
-				list[build.number] = build;
-			});
+  client
+    .getBuildList(owner, name, { page: page })
+    .then(results => {
+      let list = {};
+      results.map(build => {
+        list[build.number] = build;
+      });
 
-			const path = ["builds", "data", slug];
-			if (tree.exists(path)) {
-				tree.deepMerge(path, list);
-			} else {
-				tree.set(path, list);
-			}
+      const path = ["builds", "data", slug];
+      if (tree.exists(path)) {
+        tree.deepMerge(path, list);
+      } else {
+        tree.set(path, list);
+      }
 
-			tree.unset(["builds", "error"]);
-			tree.set(["builds", "loaded"], true);
-		})
-		.catch(error => {
-			tree.set(["builds", "error"], error);
-			tree.set(["builds", "loaded"], true);
-		});
+      tree.unset(["builds", "error"]);
+      tree.set(["builds", "loaded"], true);
+    })
+    .catch(error => {
+      tree.set(["builds", "error"], error);
+      tree.set(["builds", "loaded"], true);
+    });
 };
 
 /**
@@ -85,14 +85,14 @@ export const fetchBuildList = (tree, client, owner, name, page = 1) => {
  * @param {number} proc - The process number.
  */
 export const cancelBuild = (tree, client, owner, repo, build, proc) => {
-	client
-		.cancelBuild(owner, repo, build, proc)
-		.then(result => {
-			displayMessage(tree, "Successfully cancelled your build");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to cancel your build");
-		});
+  client
+    .cancelBuild(owner, repo, build, proc)
+    .then(result => {
+      displayMessage(tree, "Successfully cancelled your build");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to cancel your build");
+    });
 };
 
 /**
@@ -105,14 +105,14 @@ export const cancelBuild = (tree, client, owner, repo, build, proc) => {
  * @param {number} build - The build number.
  */
 export const restartBuild = (tree, client, owner, repo, build) => {
-	client
-		.restartBuild(owner, repo, build, { fork: true })
-		.then(result => {
-			displayMessage(tree, "Successfully restarted your build");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to restart your build");
-		});
+  client
+    .restartBuild(owner, repo, build, { fork: true })
+    .then(result => {
+      displayMessage(tree, "Successfully restarted your build");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to restart your build");
+    });
 };
 
 /**
@@ -125,14 +125,14 @@ export const restartBuild = (tree, client, owner, repo, build) => {
  * @param {number} build - The build number.
  */
 export const approveBuild = (tree, client, owner, repo, build) => {
-	client
-		.approveBuild(owner, repo, build)
-		.then(result => {
-			displayMessage(tree, "Successfully processed your approval decision");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to process your approval decision");
-		});
+  client
+    .approveBuild(owner, repo, build)
+    .then(result => {
+      displayMessage(tree, "Successfully processed your approval decision");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to process your approval decision");
+    });
 };
 
 /**
@@ -145,14 +145,14 @@ export const approveBuild = (tree, client, owner, repo, build) => {
  * @param {number} build - The build number.
  */
 export const declineBuild = (tree, client, owner, repo, build) => {
-	client
-		.declineBuild(owner, repo, build)
-		.then(result => {
-			displayMessage(tree, "Successfully processed your decline decision");
-		})
-		.catch(() => {
-			displayMessage(tree, "Failed to process your decline decision");
-		});
+  client
+    .declineBuild(owner, repo, build)
+    .then(result => {
+      displayMessage(tree, "Successfully processed your decline decision");
+    })
+    .catch(() => {
+      displayMessage(tree, "Failed to process your decline decision");
+    });
 };
 
 /**
@@ -163,7 +163,7 @@ export const declineBuild = (tree, client, owner, repo, build) => {
  * @returns {number}
  */
 export const compareBuild = (a, b) => {
-	return b.number - a.number;
+  return b.number - a.number;
 };
 
 /**
@@ -173,7 +173,7 @@ export const compareBuild = (a, b) => {
  * @returns {boolean}
  */
 export const assertBuildFinished = build => {
-	return build.status !== STATUS_RUNNING && build.status !== STATUS_PENDING;
+  return build.status !== STATUS_RUNNING && build.status !== STATUS_PENDING;
 };
 
 /**
@@ -183,5 +183,5 @@ export const assertBuildFinished = build => {
  * @returns {boolean}
  */
 export const assertBuildMatrix = build => {
-	return build && build.procs && build.procs.length > 1;
+  return build && build.procs && build.procs.length > 1;
 };

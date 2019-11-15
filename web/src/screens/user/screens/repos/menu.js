@@ -6,36 +6,36 @@ import { SyncIcon } from "shared/components/icons";
 import Menu from "shared/components/menu";
 
 const binding = (props, context) => {
-	return {
-		repos: ["repos"],
-	};
+  return {
+    repos: ["repos"]
+  };
 };
 
 @inject
 @branch(binding)
 export default class UserReposMenu extends Component {
-	constructor(props, context) {
-		super(props, context);
+  constructor(props, context) {
+    super(props, context);
 
-		this.handleClick = this.handleClick.bind(this);
-	}
+    this.handleClick = this.handleClick.bind(this);
+  }
 
-	handleClick() {
-		const { dispatch, drone } = this.props;
-		dispatch(syncRepostoryList, drone);
-	}
+  handleClick() {
+    const { dispatch, drone } = this.props;
+    dispatch(syncRepostoryList, drone);
+  }
 
-	render() {
-		const { loaded } = this.props.repos;
-		const right = (
-			<section>
-				<button disabled={!loaded} onClick={this.handleClick}>
-					<SyncIcon />
-					<span>Synchronize</span>
-				</button>
-			</section>
-		);
+  render() {
+    const { loaded } = this.props.repos;
+    const right = (
+      <section>
+        <button disabled={!loaded} onClick={this.handleClick}>
+          <SyncIcon />
+          <span>Synchronize</span>
+        </button>
+      </section>
+    );
 
-		return <Menu items={[]} right={right} />;
-	}
+    return <Menu items={[]} right={right} />;
+  }
 }

@@ -5,11 +5,11 @@
  * @param {string} message - The message text.
  */
 export const displayMessage = (tree, message) => {
-	tree.set(["message", "text"], message);
+  tree.set(["message", "text"], message);
 
-	setTimeout(() => {
-		hideMessage(tree);
-	}, 5000);
+  setTimeout(() => {
+    hideMessage(tree);
+  }, 5000);
 };
 
 /**
@@ -18,5 +18,5 @@ export const displayMessage = (tree, message) => {
  * @param {Object} tree - The drone state tree.
  */
 export const hideMessage = tree => {
-	tree.unset(["message", "text"]);
+  tree.unset(["message", "text"]);
 };

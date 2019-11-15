@@ -10,12 +10,12 @@ export const BACK_BUTTON = <BackIcon size={18} className={style.back} />;
 
 // helper function to render a list item.
 const renderItem = (element, index) => {
-	return <li key={index}>{element}</li>;
+  return <li key={index}>{element}</li>;
 };
 
 export default class Breadcrumb extends Component {
-	render() {
-		const { elements } = this.props;
-		return <ol className={style.breadcrumb}>{elements.map(renderItem)}</ol>;
-	}
+  render() {
+    const { elements } = this.props;
+    return <ol className={style.breadcrumb}>{elements.map(renderItem)}</ol>;
+  }
 }
