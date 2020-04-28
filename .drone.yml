@@ -130,6 +130,7 @@ services:
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
   mysql:
     image: mysql:5.6.27
     ports: ["3306"]
