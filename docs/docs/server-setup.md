@@ -190,3 +190,167 @@ A [Prometheus endpoint](/administration/prometheus) is exposed.
 ## Behind a proxy
 
 See the [proxy guide](/administration/proxy) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
+
+## Deploying on Kubernetes
+
+Woodpecker does not support Kubernetes natively, but being a container first CI engine, it can be deployed to Kubernetes.
+
+The following yamls represent a server (backed by sqlite and Persistent Volumes) and an agent deployment. The agents can be scaled by the `replica` field.
+
+By design, Woodpecker spins up a new container for each workflow step. It talks to the Docker agent to do that.
+
+However in Kubernetes, the Docker agent is not accessible, therefore this deployment follows a Docker in Docker setup and we deploy a DinD sidecar with the agent.
+Build step containers are started up within the agent pod.
+
+Warning: this approach requires `privileged` access. Also DinD's reputation hasn't been too high in the early days of Docker - this changed somewhat over time, and there are organizations succeeding with this approach.
+
+server.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: woodpecker
+  namespace: tools
+  labels:
+    app: woodpecker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: woodpecker
+  template:
+    metadata:
+      labels:
+        app: woodpecker
+      annotations:
+        prometheus.io/scrape: 'true'
+    spec:
+      containers:
+      - image: laszlocloud/woodpecker-server:v0.9.2
+        imagePullPolicy: Always
+        name: woodpecker
+        env:
+          - name: "DRONE_ADMIN"
+            value: "xxx"
+          - name: "DRONE_HOST"
+            value: "https://xxx"
+          - name: "DRONE_GITHUB"
+            value: "true"
+          - name: "DRONE_GITHUB_CLIENT"
+            value: "xxx"
+          - name: "DRONE_GITHUB_SECRET"
+            value: "xxx"
+          - name: "DRONE_SECRET"
+            value: "xxx"
+        volumeMounts:
+          - name: sqlite-volume
+            mountPath: /var/lib/drone
+      volumes:
+        - name: sqlite-volume
+          persistentVolumeClaim:
+            claimName: woodpecker-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: woodpecker-pvc
+  namespace: tools
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: woodpecker
+  namespace: tools
+spec:
+  type: ClusterIP
+  selector:
+    app: woodpecker
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 8000
+  - protocol: TCP
+    name: grpc
+    port: 9000
+    targetPort: 9000
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: woodpecker
+  namespace: tools
+spec:
+  tls:
+  - hosts:
+    - xxx
+    secretName: xxx
+  rules:
+  - host: xxx
+    http:
+      paths:
+      - backend:
+          serviceName: woodpecker
+          servicePort: 80
+```
+
+agent.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: woodpecker-agent
+  namespace: tools
+  labels:
+    app: woodpecker-agent
+spec:
+  selector:
+    matchLabels:
+      app: woodpecker-agent
+  replicas: 2
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: woodpecker-agent
+    spec:
+      containers:
+      - name: agent
+        image: laszlocloud/woodpecker-agent:v0.9.2
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+          - name: DRONE_SERVER
+            value: woodpecker.tools.svc.cluster.local:9000
+          - name: DRONE_SECRET
+            value: "xxx"
+          - name: DOCKER_HOST
+            value: tcp://localhost:2375
+        resources:
+          limits:
+            cpu: 2
+            memory: 2Gi
+      - name: dind
+        image: "docker:19.03.5-dind"
+        env:
+        - name: DOCKER_DRIVER
+          value: overlay2
+        - name: DOCKER_TLS_CERTDIR
+          value: "" # due to https://github.com/docker-library/docker/pull/166 & https://gitlab.com/gitlab-org/gitlab-runner/issues/4512
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+        securityContext:
+          privileged: true
+```
