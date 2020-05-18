@@ -2,26 +2,26 @@ package docker
 
 import (
 	"context"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/pkg/term"
 	"io"
 	"os"
 
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/pkg/term"
+	"docker.io/go-docker"
+	"docker.io/go-docker/api/types"
+	"docker.io/go-docker/api/types/network"
+	"docker.io/go-docker/api/types/volume"
 )
 
 type engine struct {
-	client client.APIClient
+	client docker.APIClient
 }
 
 // New returns a new Docker Engine using the given client.
-func New(cli client.APIClient) backend.Engine {
+func New(cli docker.APIClient) backend.Engine {
 	return &engine{
 		client: cli,
 	}
@@ -30,7 +30,7 @@ func New(cli client.APIClient) backend.Engine {
 // NewEnv returns a new Docker Engine using the client connection
 // environment variables.
 func NewEnv() (backend.Engine, error) {
-	cli, err := client.NewEnvClient()
+	cli, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +78,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
 			defer responseBody.Close()
+
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
 		}
@@ -88,7 +89,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	}
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
-	if client.IsErrImageNotFound(err) {
+	if docker.IsErrImageNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
@@ -133,12 +134,13 @@ func (e *engine) Kill(_ context.Context, proc *backend.Step) error {
 }
 
 func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
-	_, err := e.client.ContainerWait(ctx, proc.Name)
-	if err != nil {
-		// todo
+	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
+	select {
+	case <-wait:
+	case <-errc:
 	}
 
-	info, err := e.client.ContainerInspect(noContext, proc.Name)
+	info, err := e.client.ContainerInspect(ctx, proc.Name)
 	if err != nil {
 		return nil, err
 	}

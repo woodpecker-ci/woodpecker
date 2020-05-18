@@ -22,8 +22,8 @@ import (
 	"github.com/laszlocph/woodpecker/remote"
 	"github.com/laszlocph/woodpecker/store"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func Repo(c *gin.Context) *model.Repo {

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestTrimImage(t *testing.T) {
+func Test_trimImage(t *testing.T) {
 	testdata := []struct {
 		from string
 		want string
@@ -35,6 +35,10 @@ func TestTrimImage(t *testing.T) {
 		},
 		{
 			from: "index.docker.io/library/golang:1.0.0",
+			want: "golang",
+		},
+		{
+			from: "docker.io/library/golang:1.0.0",
 			want: "golang",
 		},
 		{
@@ -55,38 +59,38 @@ func TestTrimImage(t *testing.T) {
 	}
 }
 
-func TestExpandImage(t *testing.T) {
+func Test_expandImage(t *testing.T) {
 	testdata := []struct {
 		from string
 		want string
 	}{
 		{
 			from: "golang",
-			want: "golang:latest",
+			want: "docker.io/library/golang:latest",
 		},
 		{
 			from: "golang:latest",
-			want: "golang:latest",
+			want: "docker.io/library/golang:latest",
 		},
 		{
 			from: "golang:1.0.0",
-			want: "golang:1.0.0",
+			want: "docker.io/library/golang:1.0.0",
 		},
 		{
 			from: "library/golang",
-			want: "golang:latest",
+			want: "docker.io/library/golang:latest",
 		},
 		{
 			from: "library/golang:latest",
-			want: "golang:latest",
+			want: "docker.io/library/golang:latest",
 		},
 		{
 			from: "library/golang:1.0.0",
-			want: "golang:1.0.0",
+			want: "docker.io/library/golang:1.0.0",
 		},
 		{
 			from: "index.docker.io/library/golang:1.0.0",
-			want: "golang:1.0.0",
+			want: "docker.io/library/golang:1.0.0",
 		},
 		{
 			from: "gcr.io/golang",
@@ -110,7 +114,7 @@ func TestExpandImage(t *testing.T) {
 	}
 }
 
-func TestMatchImage(t *testing.T) {
+func Test_matchImage(t *testing.T) {
 	testdata := []struct {
 		from, to string
 		want     bool
@@ -194,7 +198,7 @@ func TestMatchImage(t *testing.T) {
 	}
 }
 
-func TestMatchHostname(t *testing.T) {
+func Test_matchHostname(t *testing.T) {
 	testdata := []struct {
 		image, hostname string
 		want            bool
@@ -207,6 +211,11 @@ func TestMatchHostname(t *testing.T) {
 		{
 			image:    "golang:latest",
 			hostname: "docker.io",
+			want:     true,
+		},
+		{
+			image:    "golang:latest",
+			hostname: "index.docker.io",
 			want:     true,
 		},
 		{
@@ -233,6 +242,11 @@ func TestMatchHostname(t *testing.T) {
 			image:    "1.2.3.4:8000/golang:1.0.0",
 			hostname: "1.2.3.4:8000",
 			want:     true,
+		},
+		{
+			image:    "*&^%",
+			hostname: "1.2.3.4:8000",
+			want:     false,
 		},
 	}
 	for _, test := range testdata {

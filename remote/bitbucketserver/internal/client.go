@@ -25,9 +25,9 @@ import (
 
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/mrjones/oauth"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

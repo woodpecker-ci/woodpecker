@@ -1,14 +1,13 @@
 package docker
 
 import (
+	"docker.io/go-docker/api/types/container"
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
 	"strings"
 
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-
-	"github.com/docker/docker/api/types/container"
 )
 
 // returns a container configuration.

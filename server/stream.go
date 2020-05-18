@@ -28,8 +28,8 @@ import (
 	"github.com/laszlocph/woodpecker/router/middleware/session"
 	"github.com/laszlocph/woodpecker/store"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 //

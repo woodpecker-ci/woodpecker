@@ -21,8 +21,8 @@ import (
 	"github.com/laszlocph/woodpecker/router/middleware/session"
 	"github.com/laszlocph/woodpecker/store"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func Refresh(c *gin.Context) {

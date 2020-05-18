@@ -43,8 +43,8 @@ import (
 	droneserver "github.com/laszlocph/woodpecker/server"
 	"github.com/laszlocph/woodpecker/store"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/contrib/ginrus"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	oldcontext "golang.org/x/net/context"
 )
@@ -712,7 +712,7 @@ func (a *authorizer) unaryIntercaptor(ctx oldcontext.Context, req interface{}, i
 }
 
 func (a *authorizer) authorize(ctx context.Context) error {
-	if md, ok := metadata.FromContext(ctx); ok {
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if len(md["password"]) > 0 && md["password"][0] == a.password {
 			return nil
 		}
