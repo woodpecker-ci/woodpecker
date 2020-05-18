@@ -39,6 +39,7 @@ func setupConfig(c *cli.Context) *model.Settings {
 		Secret: c.String("agent-secret"),
 		Admins: sliceToMap2(c.StringSlice("admin")),
 		Orgs:   sliceToMap2(c.StringSlice("orgs")),
+		OwnersWhitelist: sliceToMap2(c.StringSlice("repo-owner")),
 	}
 }
 

@@ -102,6 +102,11 @@ var flags = []cli.Flag{
 		Name:   "orgs",
 		Usage:  "list of approved organizations",
 	},
+	cli.StringSliceFlag{
+		EnvVar: "DRONE_REPO_OWNERS",
+		Name: "repo-owners",
+		Usage: "List of syncable repo owners",
+	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_OPEN",
 		Name:   "open",
