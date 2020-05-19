@@ -21,6 +21,7 @@ import (
 	"github.com/dimfeld/httptreemux"
 	"github.com/laszlocph/woodpecker/cncd/queue"
 	"github.com/laszlocph/woodpecker/model"
+	"github.com/laszlocph/woodpecker/plugins/environments"
 	"github.com/laszlocph/woodpecker/plugins/registry"
 	"github.com/laszlocph/woodpecker/plugins/secrets"
 	"github.com/laszlocph/woodpecker/remote"
@@ -63,7 +64,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return nil
+	return environments.Filesystem(c.StringSlice("environment"))
 }
 
 func setupPubsub(c *cli.Context)        {}
