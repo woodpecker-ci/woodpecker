@@ -60,7 +60,14 @@ func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
-	return registry.New(s)
+	if c.String("docker-config") != "" {
+		return registry.Combined(
+			registry.New(s),
+			registry.Filesystem(c.String("docker-config")),
+		)
+	} else {
+		return registry.New(s)
+	}
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
