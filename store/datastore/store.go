@@ -23,7 +23,7 @@ import (
 	"github.com/laszlocph/woodpecker/store/datastore/ddl"
 	"github.com/russross/meddler"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // datastore is an implementation of a model.Store built on top

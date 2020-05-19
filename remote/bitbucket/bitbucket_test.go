@@ -119,7 +119,7 @@ func Test_bitbucket(t *testing.T) {
 			})
 			g.It("Should handle an empty access token", func() {
 				ok, err := c.Refresh(fakeUserRefreshEmpty)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err == nil).IsFalse()
 				g.Assert(ok).IsFalse()
 			})
 			g.It("Should handle a failure to refresh", func() {

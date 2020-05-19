@@ -4,59 +4,66 @@ go 1.12
 
 require (
 	code.gitea.io/sdk v0.0.0-20170506013721-8cff72208aa4
+	docker.io/go-docker v1.0.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/Microsoft/go-winio v0.4.14 // indirect
-	github.com/Sirupsen/logrus v0.10.0
-	github.com/beorn7/perks v1.0.0 // indirect
+	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/dgrijalva/jwt-go v0.0.0-20150904212456-c1da56349675
-	github.com/dimfeld/httptreemux v0.0.0-20170728181113-4faa6bbd32f9
-	github.com/docker/distribution v2.6.0-rc.1.0.20170112224556-c965e24c8cd2+incompatible // indirect
-	github.com/docker/docker v0.0.0-20170124170827-f645ffca04ab
+	github.com/dimfeld/httptreemux v5.0.1+incompatible
+	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/docker/go-units v0.3.0 // indirect
-	github.com/docker/libcompose v0.0.0-20170210184346-1c4bd4542afb
-	github.com/drone/envsubst v0.0.0-20181018144617-15e3f9b7e163
-	github.com/drone/expr v0.0.0-20170909010628-72f4df4a266b
-	github.com/drone/signal v0.0.0-20170915013802-ac5d07ef1315
+	github.com/docker/go-units v0.4.0 // indirect
+	github.com/docker/libcompose v0.4.0
+	github.com/drone/envsubst v1.0.2
+	github.com/drone/expr v0.0.0-20170909060652-c0e474cb2b07
+	github.com/drone/signal v1.0.0
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
-	github.com/franela/goblin v0.0.0-20181003173013-ead4ad1d2727
-	github.com/ghodss/yaml v0.0.0-20161207003320-04f313413ffd
-	github.com/gin-gonic/contrib v0.0.0-20150815172543-14f66d54cdb9
-	github.com/gin-gonic/gin v0.0.0-20160130002857-3d002e382355
-	github.com/go-sql-driver/mysql v1.3.0
+	github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
+	github.com/ghodss/yaml v1.0.0
+	github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
+	github.com/gin-gonic/gin v1.6.3
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
-	github.com/golang/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/golang/protobuf v1.4.2
+	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
-	github.com/google/go-querystring v0.0.0-20140906084135-d8840cbb2baa // indirect
-	github.com/gorilla/securecookie v0.0.0-20140409111100-1b0c7f6e9ab3
-	github.com/gorilla/websocket v1.0.0
+	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/gorilla/securecookie v1.1.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
-	github.com/joho/godotenv v0.0.0-20150907010228-4ed13390c0ac
-	github.com/kr/pretty v0.0.0-20160708215748-737b74a46c4b
-	github.com/kr/text v0.0.0-20160504234017-7cafcd837844 // indirect
-	github.com/lib/pq v0.0.0-20151015211310-83c4f410d0ae
-	github.com/manucorporat/sse v0.0.0-20160126180136-ee05b128a739 // indirect
-	github.com/mattn/go-sqlite3 v0.0.0-20170901084005-05548ff55570
-	github.com/mrjones/oauth v0.0.0-20160405235802-31f1e8e5addd
-	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
-	github.com/prometheus/client_golang v0.9.1
-	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
-	github.com/prometheus/common v0.4.1 // indirect
-	github.com/prometheus/procfs v0.0.1 // indirect
-	github.com/rs/zerolog v0.0.0-20170911215232-9d194eb6f50e
-	github.com/russross/meddler v0.0.0-20130919212315-308c3d0e5e45
-	github.com/sourcegraph/jsonrpc2 v0.0.0-20170220125533-277d2464cfb1
-	github.com/stretchr/testify v1.3.0
-	github.com/tevino/abool v0.0.0-20160628101133-3c25f2fe7cd0
-	github.com/urfave/cli v0.0.0-20190203184040-693af58b4d51
-	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793
-	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
-	golang.org/x/oauth2 v0.0.0-20160121061903-8a57ed94ffd4
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4
-	google.golang.org/appengine v1.5.0 // indirect
-	google.golang.org/genproto v0.0.0-20170531203552-aa2eb687b4d3 // indirect
-	google.golang.org/grpc v0.0.0-20170626232044-9cb02b885b41
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/go-playground/validator.v8 v8.17.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20191107175235-0b070bb63a18
+	github.com/joho/godotenv v1.3.0
+	github.com/kr/pretty v0.2.0
+	github.com/kr/text v0.2.0 // indirect
+	github.com/lib/pq v1.5.2
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_golang v1.6.0
+	github.com/prometheus/common v0.10.0 // indirect
+	github.com/rs/zerolog v1.18.0
+	github.com/russross/meddler v1.0.0
+	github.com/sirupsen/logrus v1.6.0
+	github.com/sourcegraph/jsonrpc2 v0.0.0-20200429184054-15c2290dcb37
+	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/stretchr/testify v1.5.1
+	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
+	github.com/urfave/cli v1.22.4
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+	golang.org/x/net v0.0.0-20200513185701-a91f0712d120
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	golang.org/x/sys v0.0.0-20200515095857-1151b9dac4a9 // indirect
+	google.golang.org/appengine v1.6.6 // indirect
+	google.golang.org/genproto v0.0.0-20200515170657-fc4c6c6a6587 // indirect
+	google.golang.org/grpc v1.29.1
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86
+	gotest.tools v2.2.0+incompatible // indirect
 )

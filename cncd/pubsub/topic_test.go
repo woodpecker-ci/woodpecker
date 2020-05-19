@@ -36,7 +36,7 @@ func TestTopicClose(t *testing.T) {
 	}()
 	select {
 	case <-top.done:
-	case <-time.After(1 * time.Millisecond):
+	case <-time.After(1 * time.Second):
 		t.Errorf("Expect subscription closed")
 	}
 }

@@ -24,12 +24,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/laszlocph/woodpecker/cncd/queue"
 	"github.com/laszlocph/woodpecker/remote"
 	"github.com/laszlocph/woodpecker/shared/httputil"
 	"github.com/laszlocph/woodpecker/store"
+	"github.com/sirupsen/logrus"
 
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/router/middleware/session"

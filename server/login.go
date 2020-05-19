@@ -26,8 +26,8 @@ import (
 	"github.com/laszlocph/woodpecker/shared/token"
 	"github.com/laszlocph/woodpecker/store"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func HandleLogin(c *gin.Context) {
