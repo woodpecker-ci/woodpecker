@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -201,7 +202,7 @@ func setupTree(c *cli.Context) *httptreemux.ContextMux {
 
 func before(c *cli.Context) error { return nil }
 
-func setupMetrics(g *errgroup.Group, store_ store.Store) {
+func setupMetrics(ctx context.Context, g *errgroup.Group, store_ store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "drone",
 		Name:      "pending_jobs",
@@ -239,24 +240,35 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	})
 
 	g.Go(func() error {
+		const interval = time.Millisecond * 500
 		for {
-			stats := droneserver.Config.Services.Queue.Info(nil)
-			pendingJobs.Set(float64(stats.Stats.Pending))
-			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
-			runningJobs.Set(float64(stats.Stats.Running))
-			workers.Set(float64(stats.Stats.Workers))
-			time.Sleep(500 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-time.After(interval):
+				stats := droneserver.Config.Services.Queue.Info(nil)
+				pendingJobs.Set(float64(stats.Stats.Pending))
+				waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
+				runningJobs.Set(float64(stats.Stats.Running))
+				workers.Set(float64(stats.Stats.Workers))
+			}
 		}
 	})
+
 	g.Go(func() error {
+		const interval = time.Second * 10
 		for {
-			repoCount, _ := store_.GetRepoCount()
-			userCount, _ := store_.GetUserCount()
-			buildCount, _ := store_.GetBuildCount()
-			builds.Set(float64(buildCount))
-			users.Set(float64(userCount))
-			repos.Set(float64(repoCount))
-			time.Sleep(10 * time.Second)
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-time.After(interval):
+				repoCount, _ := store_.GetRepoCount()
+				userCount, _ := store_.GetUserCount()
+				buildCount, _ := store_.GetBuildCount()
+				builds.Set(float64(buildCount))
+				users.Set(float64(userCount))
+				repos.Set(float64(repoCount))
+			}
 		}
 	})
 }

@@ -18,6 +18,10 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"github.com/drone/signal"
+	"github.com/laszlocph/woodpecker/autoscaler/autoscaler"
+	"github.com/laszlocph/woodpecker/autoscaler/providers/google"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 	"net"
 	"net/http"
 	"net/url"
@@ -34,7 +38,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/laszlocph/woodpecker/cncd/logging"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 	"github.com/laszlocph/woodpecker/cncd/pubsub"
 	"github.com/laszlocph/woodpecker/plugins/sender"
 	"github.com/laszlocph/woodpecker/remote"
@@ -500,6 +503,43 @@ var flags = []cli.Flag{
 		Name:   "keepalive-min-time",
 		Usage:  "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
+	cli.BoolFlag{
+		EnvVar: "DRONE_AUTOSCALING",
+		Name:   "autoscaling",
+		Usage:  "enables autoscaling",
+	},
+	cli.IntFlag{
+		EnvVar: "DRONE_AUTOSCALING_CAPACITY_PER_AGENT",
+		Name:   "autoscaling-capacity-per-agent",
+		Value:  1,
+	},
+	cli.DurationFlag{
+		EnvVar: "DRONE_AUTOSCALING_INSTANCE_MINIMUM_AGE",
+		Name:   "autoscaling-instance-minimum-age",
+		Value:  time.Hour,
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_AUTOSCALING_GOOGLE_PROJECT",
+		Name:   "autoscaling-google-project",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_AUTOSCALING_GOOGLE_INSTANCE_GROUP",
+		Name:   "autoscaling-google-instance-group",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_AUTOSCALING_GOOGLE_ZONE",
+		Name:   "autoscaling-google-zone",
+	},
+	cli.IntFlag{
+		Name: "autoscaling-minimum-instance-size",
+		EnvVar: "DRONE_AUTOSCALING_MINIMUM_INSTANCE_SIZE",
+		Value: 0,
+	},
+	cli.IntFlag{
+		Name: "autoscaling-maximum-instance-size",
+		EnvVar: "DRONE_AUTOSCALING_MAXIMUM_INSTANCE_SIZE",
+		Value: 10,
+	},
 }
 
 func server(c *cli.Context) error {
@@ -528,6 +568,10 @@ func server(c *cli.Context) error {
 		)
 	}
 
+	ctx := signal.WithContext(
+		context.Background(),
+	)
+
 	remote_, err := SetupRemote(c)
 	if err != nil {
 		logrus.Fatal(err)
@@ -553,26 +597,25 @@ func server(c *cli.Context) error {
 	var g errgroup.Group
 
 	// start the grpc server
+	lis, err := net.Listen("tcp", ":9000")
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+	auther := &authorizer{
+		password: c.String("agent-secret"),
+	}
+	grpcServer := grpc.NewServer(
+		grpc.StreamInterceptor(auther.streamInterceptor),
+		grpc.UnaryInterceptor(auther.unaryIntercaptor),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime: c.Duration("keepalive-min-time"),
+		}),
+	)
+	droneServer := droneserver.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
+	proto.RegisterDroneServer(grpcServer, droneServer)
+
 	g.Go(func() error {
-
-		lis, err := net.Listen("tcp", ":9000")
-		if err != nil {
-			logrus.Error(err)
-			return err
-		}
-		auther := &authorizer{
-			password: c.String("agent-secret"),
-		}
-		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(auther.streamInterceptor),
-			grpc.UnaryInterceptor(auther.unaryIntercaptor),
-			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-				MinTime: c.Duration("keepalive-min-time"),
-			}),
-		)
-		droneServer := droneserver.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
-		proto.RegisterDroneServer(grpcServer, droneServer)
-
 		err = grpcServer.Serve(lis)
 		if err != nil {
 			logrus.Error(err)
@@ -580,58 +623,104 @@ func server(c *cli.Context) error {
 		}
 		return nil
 	})
+	g.Go(func() error {
+		select {
+		case <-ctx.Done():
+			grpcServer.Stop()
+			return nil
+		}
+	})
 
-	setupMetrics(&g, store_)
+	setupMetrics(ctx, &g, store_)
+
+	if c.Bool("autoscaling") {
+		g.Go(func() error {
+			provider, err := google.New(
+				google.WithProject(c.String("autoscaling-google-project")),
+				google.WithInstanceGroup(c.String("autoscaling-google-instance-group")),
+				google.WithZone(c.String("autoscaling-google-zone")),
+			)
+			if err != nil {
+				return err
+			}
+			scaler := autoscaler.New(
+				c.Int("autoscaling-capacity-per-agent"),
+				provider,
+				c.Duration("autoscaling-instance-minimum-age"),
+				c.Int("autoscaling-minimum-instance-size"),
+				c.Int("autoscaling-maximum-instance-size"),
+			)
+			scaler.Start(ctx)
+			return nil
+		})
+	}
 
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {
+		tlsServe := &http.Server{
+			Addr:    ":https",
+			Handler: handler,
+			TLSConfig: &tls.Config{
+				NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
+			},
+		}
+		serve := &http.Server{
+			Addr:    ":http",
+			Handler: http.HandlerFunc(redirect),
+		}
 		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+			return serve.ListenAndServe()
 		})
 		g.Go(func() error {
-			serve := &http.Server{
-				Addr:    ":https",
-				Handler: handler,
-				TLSConfig: &tls.Config{
-					NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
-				},
+			select {
+			case <-ctx.Done():
+				{
+					if err := serve.Shutdown(ctx); err != nil {
+						return err
+					}
+					return tlsServe.Shutdown(ctx)
+				}
 			}
-			return serve.ListenAndServeTLS(
+		})
+		g.Go(func() error {
+			return tlsServe.ListenAndServeTLS(
 				c.String("server-cert"),
 				c.String("server-key"),
 			)
 		})
-		return g.Wait()
-	}
+	} else if !c.Bool("lets-encrypt") {
+		serve := &http.Server{Addr: c.String("server-addr"), Handler: handler}
+		g.Go(func() error {
+			return serve.ListenAndServe()
+		})
+		g.Go(func() error {
+			select {
+			case <-ctx.Done():
+				return serve.Shutdown(ctx)
+			}
+		})
+	} else {
 
-	// start the server without tls enabled
-	if !c.Bool("lets-encrypt") {
-		return http.ListenAndServe(
-			c.String("server-addr"),
-			handler,
-		)
-	}
+		// start the server with lets encrypt enabled
+		// listen on ports 443 and 80
+		address, err := url.Parse(c.String("server-host"))
+		if err != nil {
+			return err
+		}
 
-	// start the server with lets encrypt enabled
-	// listen on ports 443 and 80
-	address, err := url.Parse(c.String("server-host"))
-	if err != nil {
-		return err
-	}
+		dir := cacheDir()
+		os.MkdirAll(dir, 0700)
 
-	dir := cacheDir()
-	os.MkdirAll(dir, 0700)
-
-	manager := &autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(address.Host),
-		Cache:      autocert.DirCache(dir),
-	}
-	g.Go(func() error {
-		return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
-	})
-	g.Go(func() error {
+		manager := &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(address.Host),
+			Cache:      autocert.DirCache(dir),
+		}
 		serve := &http.Server{
+			Addr:    ":http",
+			Handler: manager.HTTPHandler(http.HandlerFunc(redirect)),
+		}
+		tlsServe := &http.Server{
 			Addr:    ":https",
 			Handler: handler,
 			TLSConfig: &tls.Config{
@@ -639,9 +728,25 @@ func server(c *cli.Context) error {
 				NextProtos:     []string{"http/1.1"}, // disable h2 because Safari :(
 			},
 		}
-		return serve.ListenAndServeTLS("", "")
-	})
+		g.Go(func() error {
+			return serve.ListenAndServe()
+		})
+		g.Go(func() error {
+			return tlsServe.ListenAndServeTLS("", "")
+		})
 
+		g.Go(func() error {
+			select {
+			case <-ctx.Done():
+				{
+					if err := serve.Shutdown(ctx); err != nil {
+						return err
+					}
+					return tlsServe.Shutdown(ctx)
+				}
+			}
+		})
+	}
 	return g.Wait()
 }
 
@@ -722,7 +827,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = droneserver.Config.Server.Host
+	var serverHost = droneserver.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"
