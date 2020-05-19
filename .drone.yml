@@ -50,15 +50,15 @@ pipeline:
     when:
       event: [ push, tag ]
 
-  publish-server-alpine:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-server
-    dockerfile: Dockerfile.alpine
-    secrets: [ docker_username, docker_password ]
-    tag: [ alpine ]
-    when:
-      branch: master
-      event: push
+  # publish-server-alpine:
+  #   image: plugins/docker
+  #   repo: laszlocloud/woodpecker-server
+  #   dockerfile: Dockerfile.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: [ alpine ]
+  #   when:
+  #     branch: master
+  #     event: push
 
   publish-server:
     image: plugins/docker
@@ -79,15 +79,15 @@ pipeline:
       branch: master
       event: push
 
-  publish-agent-alpine:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
-    dockerfile: Dockerfile.agent.alpine
-    secrets: [ docker_username, docker_password ]
-    tag: [ alpine ]
-    when:
-      branch: master
-      event: push
+  # publish-agent-alpine:
+  #   image: plugins/docker
+  #   repo: laszlocloud/woodpecker-agent
+  #   dockerfile: Dockerfile.agent.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: [ alpine ]
+  #   when:
+  #     branch: master
+  #     event: push
 
   release-server-alpine:
     image: plugins/docker
