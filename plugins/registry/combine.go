@@ -31,15 +31,15 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 }
 
 func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
-	var registeries []*model.Registry
-	for _, registory := range c.registries {
-		list, err := registory.RegistryList(repo)
+	var registries []*model.Registry
+	for _, registry := range c.registries {
+		list, err := registry.RegistryList(repo)
 		if err != nil {
 			return nil, err
 		}
-		registeries = append(registeries, list...)
+		registries = append(registries, list...)
 	}
-	return registeries, nil
+	return registries, nil
 }
 
 func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {
