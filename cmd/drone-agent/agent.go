@@ -16,7 +16,9 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
+	grpccredentials "google.golang.org/grpc/credentials"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -83,9 +85,15 @@ func loop(c *cli.Context) error {
 
 	// grpc.Dial(target, ))
 
+	var transport = grpc.WithInsecure()
+
+	if c.Bool("secure-grpc") {
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+	}
+
 	conn, err := grpc.Dial(
 		c.String("server"),
-		grpc.WithInsecure(),
+		transport,
 		grpc.WithPerRPCCredentials(&credentials{
 			username: c.String("username"),
 			password: c.String("password"),

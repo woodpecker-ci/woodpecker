@@ -109,6 +109,16 @@ func main() {
 			Usage:  "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
 			Value:  time.Second * 20,
 		},
+		cli.BoolFlag{
+			Name:   "secure-grpc",
+			Usage:  "should the connection to DRONE_SERVER be made using a secure transport",
+			EnvVar: "DRONE_GRPC_SECURE",
+		},
+		cli.BoolTFlag{
+			Name:   "skip-insecure-grpc",
+			Usage:  "should the grpc server certificate be verified, only valid when DRONE_GRPC_SECURE is true",
+			EnvVar: "DRONE_GRPC_VERIFY",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
