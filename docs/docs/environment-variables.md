@@ -92,6 +92,14 @@ This is the reference list of all environment variables available to your build 
 | `DRONE_PULL_REQUEST`         | pull request number                    |
 | `DRONE_DEPLOY_TO`            | deployment target (ie production)      |
 
+## Global environment variables
+
+If you want specific environment variables to be available in all of your builds use the `DRONE_ENVIRONMENT` setting on the Woodpecker server.
+
+```.env
+DRONE_ENVIRONMENT=first_var:value1,second_var:value2
+```
+
 ## String Substitution
 
 Woodpecker provides the ability to substitute environment variables at runtime. This gives us the ability to use dynamic build or commit details in our pipeline configuration.
