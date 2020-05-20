@@ -125,6 +125,34 @@ Example registry hostname matching logic:
 - Hostname `docker.io` matches `bradyrydzewski/golang`
 - Hostname `docker.io` matches `bradyrydzewski/golang:latest`
 
+#### Global registry setting
+
+If you want to make available a specific private registry to all pipelines, use the `DRONE_DOCKER_CONFIG` server configuration.
+Point it to your server's docker config.
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
+    ports:
+      - 80:8000
+      - 9000
+    volumes:
+      - woodpecker-server-data:/var/lib/drone/
+    restart: always
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_HOST=${DRONE_HOST}
+      - DRONE_GITHUB=true
+      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
+      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
+      - DRONE_SECRET=${DRONE_SECRET}
++     - DRONE_DOCKER_CONFIG=/home/user/.docker/config.json
+```
+
 #### GCR Registry Support
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
