@@ -31,6 +31,12 @@ type RegistryService interface {
 	RegistryDelete(*Repo, string) error
 }
 
+// RegistryService defines a service for managing registries.
+type ReadOnlyRegistryService interface {
+	RegistryFind(*Repo, string) (*Registry, error)
+	RegistryList(*Repo) ([]*Registry, error)
+}
+
 // RegistryStore persists registry information to storage.
 type RegistryStore interface {
 	RegistryFind(*Repo, string) (*Registry, error)
