@@ -354,3 +354,24 @@ spec:
         securityContext:
           privileged: true
 ```
+
+## Filtering repositories
+
+Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of Github, you may end up syncing more repos into Woodpecker than preferred.
+
+Use the `DRONE_REPO_OWNERS` variable to filter which Github user's repos should be synced only. You typically want to put here your company's Github name.
+
+```diff
+services:
+  woodpecker-server:
+    image: laszlocloud/woodpecker-server:v0.9.0
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_ORGS=dolores,dogpatch
++     - DRONE_REPO_OWNERS=mycompany,mycompanyossgithubuser
+      - DRONE_HOST=${DRONE_HOST}
+      - DRONE_GITHUB=true
+      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
+      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
+      - DRONE_SECRET=${DRONE_SECRET}
+```
