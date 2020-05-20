@@ -31,6 +31,35 @@ type syncer struct {
 	remote remote.Remote
 	store  store.Store
 	perms  model.PermStore
+	match FilterFunc
+}
+
+// FilterFunc can be used to filter which repositories are
+// synchronized with the local datastore.
+type FilterFunc func(*model.Repo) bool
+
+// NamespaceFilter
+func NamespaceFilter(namespaces map[string]bool) FilterFunc {
+	if namespaces == nil || len(namespaces) == 0 {
+		return noopFilter
+	}
+	return func(repo *model.Repo) bool {
+		if namespaces[repo.Owner] {
+			return true
+		} else {
+			return false
+		}
+	}
+}
+
+// noopFilter is a filter function that always returns true.
+func noopFilter(*model.Repo) bool {
+	return true
+}
+
+// SetFilter sets the filter function.
+func (s *syncer) SetFilter(fn FilterFunc) {
+	s.match = fn
 }
 
 func (s *syncer) Sync(user *model.User) error {
@@ -40,22 +69,27 @@ func (s *syncer) Sync(user *model.User) error {
 		return err
 	}
 
+	var remote []*model.Repo
 	var perms []*model.Perm
+
 	for _, repo := range repos {
-		perm := model.Perm{
-			UserID: user.ID,
-			Repo:   repo.FullName,
-			Pull:   true,
-			Synced: unix,
+		if s.match(repo) {
+			remote = append(remote, repo)
+			perm := model.Perm{
+				UserID: user.ID,
+				Repo:   repo.FullName,
+				Pull:   true,
+				Synced: unix,
+			}
+			if repo.Perm != nil {
+				perm.Push = repo.Perm.Push
+				perm.Admin = repo.Perm.Admin
+			}
+			perms = append(perms, &perm)
 		}
-		if repo.Perm != nil {
-			perm.Push = repo.Perm.Push
-			perm.Admin = repo.Perm.Admin
-		}
-		perms = append(perms, &perm)
 	}
 
-	err = s.store.RepoBatch(repos)
+	err = s.store.RepoBatch(remote)
 	if err != nil {
 		return err
 	}
