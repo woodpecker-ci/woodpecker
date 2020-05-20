@@ -89,23 +89,23 @@ pipeline:
   #     branch: master
   #     event: push
 
-  release-server-alpine:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-server
-    dockerfile: Dockerfile.alpine
-    secrets: [ docker_username, docker_password ]
-    tag: "${DRONE_TAG}-alpine"
-    when:
-      event: tag
-
-  release-agent-alpine:
-    image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
-    dockerfile: Dockerfile.agent.alpine
-    secrets: [ docker_username, docker_password ]
-    tag: "${DRONE_TAG}-alpine"
-    when:
-      event: tag
+#  release-server-alpine:
+#    image: plugins/docker
+#    repo: laszlocloud/woodpecker-server
+#    dockerfile: Dockerfile.alpine
+#    secrets: [ docker_username, docker_password ]
+#    tag: "${DRONE_TAG}-alpine"
+#    when:
+#      event: tag
+#
+#  release-agent-alpine:
+#    image: plugins/docker
+#    repo: laszlocloud/woodpecker-agent
+#    dockerfile: Dockerfile.agent.alpine
+#    secrets: [ docker_username, docker_password ]
+#    tag: "${DRONE_TAG}-alpine"
+#    when:
+#      event: tag
 
   release-server:
     image: plugins/docker
