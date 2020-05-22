@@ -138,30 +138,28 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 
 	client := c.newClient()
 
-	// try to fetch drone token if it exists
+	// since api does not return token secret, if drone token exists create new one
 	var accessToken string
-	tokens, err := client.ListAccessTokens(username, password)
+	client.SetBasicAuth(username, password)
+	tokens, err := client.ListAccessTokens(gitea.ListAccessTokensOptions{})
 	if err == nil {
 		for _, token := range tokens {
 			if token.Name == "drone" {
-				accessToken = token.Sha1
+				if err := client.DeleteAccessToken(token.ID); err != nil {
+					return nil, err
+				}
 				break
 			}
 		}
 	}
 
-	// if drone token not found, create it
-	if accessToken == "" {
-		token, terr := client.CreateAccessToken(
-			username,
-			password,
-			gitea.CreateAccessTokenOption{Name: "drone"},
-		)
-		if terr != nil {
-			return nil, terr
-		}
-		accessToken = token.Sha1
+	token, terr := client.CreateAccessToken(
+		gitea.CreateAccessTokenOption{Name: "drone"},
+	)
+	if terr != nil {
+		return nil, terr
 	}
+	accessToken = token.Token
 
 	client = c.newClientToken(accessToken)
 	account, err := client.GetUserInfo(username)
@@ -185,7 +183,7 @@ func (c *client) Auth(token, secret string) (string, error) {
 // Teams is supported by the Gitea driver.
 func (c *client) Teams(u *model.User) ([]*model.Team, error) {
 	client := c.newClientToken(u.Token)
-	orgs, err := client.ListMyOrgs()
+	orgs, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +219,7 @@ func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 	repos := []*model.Repo{}
 
 	client := c.newClientToken(u.Token)
-	all, err := client.ListMyRepos()
+	all, err := client.ListMyRepos(gitea.ListReposOptions{})
 	if err != nil {
 		return repos, err
 	}
@@ -318,7 +316,7 @@ func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
 func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
 	client := c.newClientToken(u.Token)
 
-	hooks, err := client.ListRepoHooks(r.Owner, r.Name)
+	hooks, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
 	if err != nil {
 		return err
 	}
