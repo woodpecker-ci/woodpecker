@@ -334,25 +334,30 @@ spec:
             value: woodpecker.tools.svc.cluster.local:9000
           - name: DRONE_SECRET
             value: "xxx"
-          - name: DOCKER_HOST
-            value: tcp://localhost:2375
         resources:
           limits:
             cpu: 2
             memory: 2Gi
+        volumeMounts:
+        - name: sock-dir
+          path: /var/run
       - name: dind
         image: "docker:19.03.5-dind"
         env:
         - name: DOCKER_DRIVER
           value: overlay2
-        - name: DOCKER_TLS_CERTDIR
-          value: "" # due to https://github.com/docker-library/docker/pull/166 & https://gitlab.com/gitlab-org/gitlab-runner/issues/4512
         resources:
           limits:
             cpu: 1
             memory: 2Gi
         securityContext:
           privileged: true
+        volumeMounts:
+        - name: sock-dir
+          path: /var/run
+      volumes:
+        name: sock-dir
+        emptyDir: {}
 ```
 
 ## Filtering repositories
