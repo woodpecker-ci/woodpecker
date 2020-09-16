@@ -136,33 +136,31 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	client := c.newClient()
-
-	// since api does not return token secret, if drone token exists create new one
-	var accessToken string
-	client.SetBasicAuth(username, password)
-	tokens, err := client.ListAccessTokens(gitea.ListAccessTokensOptions{})
-	if err == nil {
-		for _, token := range tokens {
-			if token.Name == "drone" {
-				if err := client.DeleteAccessToken(token.ID); err != nil {
-					return nil, err
-				}
-				break
-			}
-		}
+	client, err := c.newClientToken("")
+	if err != nil {
+		return nil, err
 	}
 
-	token, terr := client.CreateAccessToken(
+	// since api does not return token secret, if drone token exists create new one
+	client.SetBasicAuth(username, password)
+	resp, err := client.DeleteAccessToken("drone")
+	if err != nil && !(resp != nil && resp.StatusCode == 404) {
+		return nil, err
+	}
+
+	token, _, terr := client.CreateAccessToken(
 		gitea.CreateAccessTokenOption{Name: "drone"},
 	)
 	if terr != nil {
 		return nil, terr
 	}
-	accessToken = token.Token
+	accessToken := token.Token
 
-	client = c.newClientToken(accessToken)
-	account, err := client.GetUserInfo(username)
+	client, err = c.newClientToken(accessToken)
+	if err != nil {
+		return nil, err
+	}
+	account, _, err := client.GetUserInfo(username)
 	if err != nil {
 		return nil, err
 	}
@@ -182,8 +180,12 @@ func (c *client) Auth(token, secret string) (string, error) {
 
 // Teams is supported by the Gitea driver.
 func (c *client) Teams(u *model.User) ([]*model.Team, error) {
-	client := c.newClientToken(u.Token)
-	orgs, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -202,8 +204,12 @@ func (c *client) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 
 // Repo returns the named Gitea repository.
 func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, _, err := client.GetRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -218,8 +224,12 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 	repos := []*model.Repo{}
 
-	client := c.newClientToken(u.Token)
-	all, err := client.ListMyRepos(gitea.ListReposOptions{})
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	all, _, err := client.ListMyRepos(gitea.ListReposOptions{})
 	if err != nil {
 		return repos, err
 	}
@@ -232,8 +242,12 @@ func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 
 // Perm returns the user permissions for the named Gitea repository.
 func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, _, err := client.GetRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -242,8 +256,12 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches the file from the Gitea repository and returns its contents.
 func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	client := c.newClientToken(u.Token)
-	cfg, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, _, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
 	return cfg, err
 }
 
@@ -253,12 +271,15 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 
 // Status is supported by the Gitea driver.
 func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client := c.newClientToken(u.Token)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return err
+	}
 
 	status := getStatus(b.Status)
 	desc := getDesc(b.Status)
 
-	_, err := client.CreateStatus(
+	_, _, err = client.CreateStatus(
 		r.Owner,
 		r.Name,
 		b.Commit,
@@ -306,24 +327,31 @@ func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
 		Active: true,
 	}
 
-	client := c.newClientToken(u.Token)
-	_, err := client.CreateRepoHook(r.Owner, r.Name, hook)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return err
+	}
+	_, _, err = client.CreateRepoHook(r.Owner, r.Name, hook)
 	return err
 }
 
 // Deactivate deactives the repository be removing repository push hooks from
 // the Gitea repository.
 func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
-	client := c.newClientToken(u.Token)
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return err
+	}
 
-	hooks, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
+	hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
 	if err != nil {
 		return err
 	}
 
 	hook := matchingHooks(hooks, link)
 	if hook != nil {
-		return client.DeleteRepoHook(r.Owner, r.Name, hook.ID)
+		_, err := client.DeleteRepoHook(r.Owner, r.Name, hook.ID)
+		return err
 	}
 
 	return nil
@@ -336,21 +364,14 @@ func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 }
 
 // helper function to return the Gitea client
-func (c *client) newClient() *gitea.Client {
-	return c.newClientToken("")
-}
-
-// helper function to return the Gitea client
-func (c *client) newClientToken(token string) *gitea.Client {
-	client := gitea.NewClient(c.URL, token)
+func (c *client) newClientToken(token string) (*gitea.Client, error) {
+	httpClient := &http.Client{}
 	if c.SkipVerify {
-		httpClient := &http.Client{}
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-		client.SetHTTPClient(httpClient)
 	}
-	return client
+	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
 }
 
 // helper function to return matching hooks.
