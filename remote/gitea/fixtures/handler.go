@@ -101,7 +101,7 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.10"})
+	c.JSON(200, map[string]interface{}{"version": "1.12"})
 }
 
 const listRepoHookPayloads = `
