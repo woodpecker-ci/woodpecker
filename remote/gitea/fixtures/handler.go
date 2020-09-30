@@ -33,6 +33,7 @@ func Handler() http.Handler {
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
 	e.GET("/api/v1/user/repos", getUserRepos)
+	e.GET("/api/v1/version", getVersion)
 
 	return e
 }
@@ -97,6 +98,10 @@ func getUserRepos(c *gin.Context) {
 	default:
 		c.String(200, userRepoPayload)
 	}
+}
+
+func getVersion(c *gin.Context) {
+	c.JSON(200, map[string]interface{}{"version": "1.10"})
 }
 
 const listRepoHookPayloads = `
