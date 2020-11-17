@@ -2,7 +2,9 @@ package exec
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -19,6 +21,7 @@ import (
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
 
@@ -287,6 +290,34 @@ func exec(c *cli.Context) error {
 		file = ".drone.yml"
 	}
 
+	dat, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	axes, err := matrix.ParseString(string(dat))
+	if err != nil {
+		return fmt.Errorf("Parse matrix fail")
+	}
+
+	if len(axes) == 0 {
+		axes = append(axes, matrix.Axis{})
+	}
+	for _, axis := range axes {
+		err := execWithAxis(c, axis)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func execWithAxis(c *cli.Context, axis matrix.Axis) error {
+	file := c.Args().First()
+	if file == "" {
+		file = ".drone.yml"
+	}
+
 	metadata := metadataFromContext(c)
 	environ := metadata.Environ()
 	secrets := []compiler.Secret{}
@@ -301,6 +332,16 @@ func exec(c *cli.Context) error {
 		})
 	}
 
+	if len(axis) != 0 {
+		fmt.Println("===============================================")
+		fmt.Println("Execute with matrix:")
+		for k, v := range axis {
+			fmt.Printf(" %s: %s\n", k, v)
+			environ[k] = v
+		}
+		fmt.Println("===============================================")
+	}
+
 	drone_env := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
@@ -311,6 +352,7 @@ func exec(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	confstr, err := tmpl.Execute(func(name string) string {
 		return environ[name]
 	})
@@ -379,7 +421,6 @@ func exec(c *cli.Context) error {
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(drone_env),
 	).Compile(conf)
-
 	engine, err := docker.NewEnv()
 	if err != nil {
 		return err
