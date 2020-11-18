@@ -333,26 +333,21 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 	}
 
 	if len(axis) != 0 {
-		fmt.Println("===============================================")
-		fmt.Println("Execute with matrix:")
 		for k, v := range axis {
-			fmt.Printf(" %s: %s\n", k, v)
 			environ[k] = v
 		}
-		fmt.Println("===============================================")
 	}
 
-	drone_env := make(map[string]string)
+	droneEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		drone_env[envs[0]] = envs[1]
+		droneEnv[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
 	if err != nil {
 		return err
 	}
-
 	confstr, err := tmpl.Execute(func(name string) string {
 		return environ[name]
 	})
@@ -419,7 +414,7 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(drone_env),
+		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
 	engine, err := docker.NewEnv()
 	if err != nil {
