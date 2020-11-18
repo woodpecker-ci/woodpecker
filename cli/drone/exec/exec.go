@@ -2,7 +2,9 @@ package exec
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -19,6 +21,7 @@ import (
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
 
@@ -287,6 +290,34 @@ func exec(c *cli.Context) error {
 		file = ".drone.yml"
 	}
 
+	dat, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	axes, err := matrix.ParseString(string(dat))
+	if err != nil {
+		return fmt.Errorf("Parse matrix fail")
+	}
+
+	if len(axes) == 0 {
+		axes = append(axes, matrix.Axis{})
+	}
+	for _, axis := range axes {
+		err := execWithAxis(c, axis)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func execWithAxis(c *cli.Context, axis matrix.Axis) error {
+	file := c.Args().First()
+	if file == "" {
+		file = ".drone.yml"
+	}
+
 	metadata := metadataFromContext(c)
 	environ := metadata.Environ()
 	secrets := []compiler.Secret{}
@@ -301,10 +332,16 @@ func exec(c *cli.Context) error {
 		})
 	}
 
-	drone_env := make(map[string]string)
+	if len(axis) != 0 {
+		for k, v := range axis {
+			environ[k] = v
+		}
+	}
+
+	droneEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		drone_env[envs[0]] = envs[1]
+		droneEnv[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -377,9 +414,8 @@ func exec(c *cli.Context) error {
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(drone_env),
+		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
-
 	engine, err := docker.NewEnv()
 	if err != nil {
 		return err
