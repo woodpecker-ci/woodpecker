@@ -87,6 +87,15 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		})
 	}
 
+	// create secrets for mask
+	for _, sec := range c.secrets {
+		config.Secrets = append(config.Secrets, &backend.Secret{
+			Name:  sec.Name,
+			Value: sec.Value,
+			Mask:  true,
+		})
+	}
+
 	// overrides the default workspace paths when specified
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {
