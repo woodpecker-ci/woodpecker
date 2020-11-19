@@ -196,6 +196,14 @@ var migrations = []struct {
 		name: "update-table-set-repo-fallback-again",
 		stmt: updateTableSetRepoFallbackAgain,
 	},
+	{
+		name: "create-table-globalsecrets",
+		stmt: createTableGlobalSecrets,
+	},
+	{
+		name: "create-index-globalsecrets-name",
+		stmt: createIndexGlobalSecretsName,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -725,4 +733,25 @@ UPDATE repos SET repo_fallback='false'
 
 var updateTableSetRepoFallbackAgain = `
 UPDATE repos SET repo_fallback='false'
+`
+
+//
+// 025_create_table_globalsecets.sql
+//
+
+var createTableGlobalSecrets = `
+CREATE TABLE IF NOT EXISTS global_secrets (
+ secret_id          INTEGER PRIMARY KEY AUTOINCREMENT
+,secret_name        TEXT
+,secret_value       TEXT
+,secret_images      TEXT
+,secret_events      TEXT
+,secret_skip_verify BOOLEAN
+,secret_conceal     BOOLEAN
+,UNIQUE(secret_name)
+);
+`
+
+var createIndexGlobalSecretsName = `
+CREATE INDEX IF NOT EXISTS ix_globalsecrets_name ON global_secrets (secret_name);
 `

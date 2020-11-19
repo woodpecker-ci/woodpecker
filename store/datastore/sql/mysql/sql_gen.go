@@ -51,6 +51,9 @@ var index = map[string]string{
 	"user-find-login":             userFindLogin,
 	"user-update":                 userUpdate,
 	"user-delete":                 userDelete,
+	"global-secret-find":          globalSecretFind,
+	"global-secret-find-name":     globalSecretFindName,
+	"global-secret-delete":        globalSecretDelete,
 }
 
 var configFindId = `
@@ -617,4 +620,33 @@ WHERE user_id = ?
 
 var userDelete = `
 DELETE FROM users WHERE user_id = ?
+`
+
+var globalSecretFind = `
+SELECT
+ secret_id
+,secret_name
+,secret_value
+,secret_images
+,secret_events
+,secret_conceal
+,secret_skip_verify
+FROM global_secrets
+`
+
+var globalSecretFindName = `
+SELECT
+secret_id
+,secret_name
+,secret_value
+,secret_images
+,secret_events
+,secret_conceal
+,secret_skip_verify
+FROM global_secrets
+WHERE secret_name = ?
+`
+
+var globalSecretDelete = `
+DELETE FROM global_secrets WHERE secret_id = ?
 `

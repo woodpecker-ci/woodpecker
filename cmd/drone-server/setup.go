@@ -22,6 +22,7 @@ import (
 	"github.com/laszlocph/woodpecker/cncd/queue"
 	"github.com/laszlocph/woodpecker/model"
 	"github.com/laszlocph/woodpecker/plugins/environments"
+	"github.com/laszlocph/woodpecker/plugins/globalsecrets"
 	"github.com/laszlocph/woodpecker/plugins/registry"
 	"github.com/laszlocph/woodpecker/plugins/secrets"
 	"github.com/laszlocph/woodpecker/remote"
@@ -53,6 +54,10 @@ func setupStore(c *cli.Context) store.Store {
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return model.WithTaskStore(queue.New(), s)
+}
+
+func setupGlobalSecretService(c *cli.Context, s store.Store) model.GlobalSecretService {
+	return globalsecrets.New(s)
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
