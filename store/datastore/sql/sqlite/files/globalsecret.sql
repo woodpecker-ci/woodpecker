@@ -1,4 +1,4 @@
--- name: globalsecret-find
+-- name: global-secret-find
 
 SELECT
  secret_id
@@ -10,7 +10,7 @@ SELECT
 ,secret_skip_verify
 FROM global_secrets
 
--- name: globalsecret-find-name
+-- name: global-secret-find-name
 
 SELECT
 secret_id
@@ -23,6 +23,6 @@ secret_id
 FROM global_secrets
 WHERE secret_name = ?
 
--- name: globalsecret-delete
+-- name: global-secret-delete
 
 DELETE FROM global_secrets WHERE secret_id = ?

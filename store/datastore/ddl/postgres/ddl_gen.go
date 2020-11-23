@@ -193,11 +193,11 @@ var migrations = []struct {
 		stmt: updateTableSetRepoFallbackAgain,
 	},
 	{
-		name: "create-table-globalsecrets",
+		name: "create-table-global-secrets",
 		stmt: createTableGlobalSecrets,
 	},
 	{
-		name: "create-index-globalsecrets-name",
+		name: "create-index-global-secrets-name",
 		stmt: createIndexGlobalSecretsName,
 	},
 }
@@ -737,21 +737,21 @@ UPDATE repos SET repo_fallback='false'
 `
 
 //
-// 025_create_table_globalsecets.sql
+// 025_create_table_global_secets.sql
 //
 
 var createTableGlobalSecrets = `
 CREATE TABLE IF NOT EXISTS global_secrets (
- secret_id          INTEGER PRIMARY KEY AUTO_INCREMENT
+ secret_id          SERIAL PRIMARY KEY
 ,secret_name        VARCHAR(250)
-,secret_value       MEDIUMBLOB
+,secret_value       BYTEA
 ,secret_images      VARCHAR(2000)
 ,secret_events      VARCHAR(2000)
 ,secret_skip_verify BOOLEAN
 ,secret_conceal     BOOLEAN
 
 ,UNIQUE(secret_name)
-);   
+);
 `
 
 var createIndexGlobalSecretsName = `

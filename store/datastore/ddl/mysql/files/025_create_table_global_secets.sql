@@ -1,4 +1,4 @@
--- name: create-table-globalsecrets
+-- name: create-table-global-secrets
 
 CREATE TABLE IF NOT EXISTS global_secrets (
  secret_id          INTEGER PRIMARY KEY AUTO_INCREMENT
@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS global_secrets (
 ,UNIQUE(secret_name)
 );
 
--- name: create-index-globalsecrets-name
+-- name: create-index-global-secrets-name
 
 CREATE INDEX ix_globalsecrets_name  ON global_secrets  (secret_name);

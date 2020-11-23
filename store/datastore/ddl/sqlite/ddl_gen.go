@@ -197,11 +197,11 @@ var migrations = []struct {
 		stmt: updateTableSetRepoFallbackAgain,
 	},
 	{
-		name: "create-table-globalsecrets",
+		name: "create-table-global-secrets",
 		stmt: createTableGlobalSecrets,
 	},
 	{
-		name: "create-index-globalsecrets-name",
+		name: "create-index-global-secrets-name",
 		stmt: createIndexGlobalSecretsName,
 	},
 }
@@ -736,7 +736,7 @@ UPDATE repos SET repo_fallback='false'
 `
 
 //
-// 025_create_table_globalsecets.sql
+// 025_create_table_global_secets.sql
 //
 
 var createTableGlobalSecrets = `
