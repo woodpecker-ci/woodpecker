@@ -91,7 +91,7 @@ func MustAdmin() gin.HandlerFunc {
 			c.String(401, "User not authorized")
 			c.Abort()
 		case user.Admin == false:
-			c.String(413, "User not authorized")
+			c.String(403, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
