@@ -42,29 +42,29 @@ var Command = cli.Command{
 		cli.BoolTFlag{
 			Name:   "local",
 			Usage:  "build from local directory",
-			EnvVar: "DRONE_LOCAL",
+			EnvVar: "DRONE_LOCAL,WOODPECKER_LOCAL",
 		},
 		cli.DurationFlag{
 			Name:   "timeout",
 			Usage:  "build timeout",
 			Value:  time.Hour,
-			EnvVar: "DRONE_TIMEOUT",
+			EnvVar: "DRONE_TIMEOUT,WOODPECKER_TIMEOUT",
 		},
 		cli.StringSliceFlag{
 			Name:   "volumes",
 			Usage:  "build volumes",
-			EnvVar: "DRONE_VOLUMES",
+			EnvVar: "DRONE_VOLUMES,WOODPECKER_VOLUMES",
 		},
 		cli.StringSliceFlag{
 			Name:   "network",
 			Usage:  "external networks",
-			EnvVar: "DRONE_NETWORKS",
+			EnvVar: "DRONE_NETWORKS,WOODPECKER_NETWORKS",
 		},
 		cli.StringFlag{
 			Name:   "prefix",
 			Value:  "drone",
 			Usage:  "prefix containers created by drone",
-			EnvVar: "DRONE_DOCKER_PREFIX",
+			EnvVar: "DRONE_DOCKER_PREFIX,WOODPECKER_DOCKER_PREFIX",
 			Hidden: true,
 		},
 		cli.StringSliceFlag{
@@ -89,27 +89,27 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name:   "workspace-base",
 			Value:  "/drone",
-			EnvVar: "DRONE_WORKSPACE_BASE",
+			EnvVar: "DRONE_WORKSPACE_BASE,WOODPECKER_WORKSPACE_BASE",
 		},
 		cli.StringFlag{
 			Name:   "workspace-path",
 			Value:  "src",
-			EnvVar: "DRONE_WORKSPACE_PATH",
+			EnvVar: "DRONE_WORKSPACE_PATH,WOODPECKER_WORKSPACE_PATH",
 		},
 		//
 		// netrc parameters
 		//
 		cli.StringFlag{
 			Name:   "netrc-username",
-			EnvVar: "DRONE_NETRC_USERNAME",
+			EnvVar: "DRONE_NETRC_USERNAME,WOODPECKER_NETRC_USERNAME",
 		},
 		cli.StringFlag{
 			Name:   "netrc-password",
-			EnvVar: "DRONE_NETRC_PASSWORD",
+			EnvVar: "DRONE_NETRC_PASSWORD,WOODPECKER_NETRC_PASSWORD",
 		},
 		cli.StringFlag{
 			Name:   "netrc-machine",
-			EnvVar: "DRONE_NETRC_MACHINE",
+			EnvVar: "DRONE_NETRC_MACHINE,WOODPECKER_NETRC_MACHINE",
 		},
 		//
 		// metadata parameters
@@ -117,169 +117,169 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name:   "system-arch",
 			Value:  "linux/amd64",
-			EnvVar: "DRONE_SYSTEM_ARCH",
+			EnvVar: "DRONE_SYSTEM_ARCH,WOODPECKER_SYSTEM_ARCH",
 		},
 		cli.StringFlag{
 			Name:   "system-name",
 			Value:  "pipec",
-			EnvVar: "DRONE_SYSTEM_NAME",
+			EnvVar: "DRONE_SYSTEM_NAME,WOODPECKER_SYSTEM_NAME",
 		},
 		cli.StringFlag{
 			Name:   "system-link",
 			Value:  "https://github.com/cncd/pipec",
-			EnvVar: "DRONE_SYSTEM_LINK",
+			EnvVar: "DRONE_SYSTEM_LINK,WOODPECKER_SYSTEM_LINK",
 		},
 		cli.StringFlag{
 			Name:   "repo-name",
-			EnvVar: "DRONE_REPO_NAME",
+			EnvVar: "DRONE_REPO_NAME,WOODPECKER_REPO_NAME",
 		},
 		cli.StringFlag{
 			Name:   "repo-link",
-			EnvVar: "DRONE_REPO_LINK",
+			EnvVar: "DRONE_REPO_LINK,WOODPECKER_REPO_LINK",
 		},
 		cli.StringFlag{
 			Name:   "repo-remote-url",
-			EnvVar: "DRONE_REPO_REMOTE",
+			EnvVar: "DRONE_REPO_REMOTE,WOODPECKER_REPO_REMOTE",
 		},
 		cli.StringFlag{
 			Name:   "repo-private",
-			EnvVar: "DRONE_REPO_PRIVATE",
+			EnvVar: "DRONE_REPO_PRIVATE,WOODPECKER_REPO_PRIVATE",
 		},
 		cli.IntFlag{
 			Name:   "build-number",
-			EnvVar: "DRONE_BUILD_NUMBER",
+			EnvVar: "DRONE_BUILD_NUMBER,WOODPECKER_BUILD_NUMBER",
 		},
 		cli.IntFlag{
 			Name:   "parent-build-number",
-			EnvVar: "DRONE_PARENT_BUILD_NUMBER",
+			EnvVar: "DRONE_PARENT_BUILD_NUMBER,WOODPECKER_PARENT_BUILD_NUMBER",
 		},
 		cli.Int64Flag{
 			Name:   "build-created",
-			EnvVar: "DRONE_BUILD_CREATED",
+			EnvVar: "DRONE_BUILD_CREATED,WOODPECKER_BUILD_CREATED",
 		},
 		cli.Int64Flag{
 			Name:   "build-started",
-			EnvVar: "DRONE_BUILD_STARTED",
+			EnvVar: "DRONE_BUILD_STARTED,WOODPECKER_BUILD_STARTED",
 		},
 		cli.Int64Flag{
 			Name:   "build-finished",
-			EnvVar: "DRONE_BUILD_FINISHED",
+			EnvVar: "DRONE_BUILD_FINISHED,WOODPECKER_BUILD_FINISHED",
 		},
 		cli.StringFlag{
 			Name:   "build-status",
-			EnvVar: "DRONE_BUILD_STATUS",
+			EnvVar: "DRONE_BUILD_STATUS,WOODPECKER_BUILD_STATUS",
 		},
 		cli.StringFlag{
 			Name:   "build-event",
-			EnvVar: "DRONE_BUILD_EVENT",
+			EnvVar: "DRONE_BUILD_EVENT,WOODPECKER_BUILD_EVENT",
 		},
 		cli.StringFlag{
 			Name:   "build-link",
-			EnvVar: "DRONE_BUILD_LINK",
+			EnvVar: "DRONE_BUILD_LINK,WOODPECKER_BUILD_LINK",
 		},
 		cli.StringFlag{
 			Name:   "build-target",
-			EnvVar: "DRONE_BUILD_TARGET",
+			EnvVar: "DRONE_BUILD_TARGET,WOODPECKER_BUILD_TARGET",
 		},
 		cli.StringFlag{
 			Name:   "commit-sha",
-			EnvVar: "DRONE_COMMIT_SHA",
+			EnvVar: "DRONE_COMMIT_SHA,WOODPECKER_COMMIT_SHA",
 		},
 		cli.StringFlag{
 			Name:   "commit-ref",
-			EnvVar: "DRONE_COMMIT_REF",
+			EnvVar: "DRONE_COMMIT_REF,WOODPECKER_COMMIT_REF",
 		},
 		cli.StringFlag{
 			Name:   "commit-refspec",
-			EnvVar: "DRONE_COMMIT_REFSPEC",
+			EnvVar: "DRONE_COMMIT_REFSPEC,WOODPECKER_COMMIT_REFSPEC",
 		},
 		cli.StringFlag{
 			Name:   "commit-branch",
-			EnvVar: "DRONE_COMMIT_BRANCH",
+			EnvVar: "DRONE_COMMIT_BRANCH,WOODPECKER_COMMIT_BRANCH",
 		},
 		cli.StringFlag{
 			Name:   "commit-message",
-			EnvVar: "DRONE_COMMIT_MESSAGE",
+			EnvVar: "DRONE_COMMIT_MESSAGE,WOODPECKER_COMMIT_MESSAGE",
 		},
 		cli.StringFlag{
 			Name:   "commit-author-name",
-			EnvVar: "DRONE_COMMIT_AUTHOR_NAME",
+			EnvVar: "DRONE_COMMIT_AUTHOR_NAME,WOODPECKER_COMMIT_AUTHOR_NAME",
 		},
 		cli.StringFlag{
 			Name:   "commit-author-avatar",
-			EnvVar: "DRONE_COMMIT_AUTHOR_AVATAR",
+			EnvVar: "DRONE_COMMIT_AUTHOR_AVATAR,WOODPECKER_COMMIT_AUTHOR_AVATAR",
 		},
 		cli.StringFlag{
 			Name:   "commit-author-email",
-			EnvVar: "DRONE_COMMIT_AUTHOR_EMAIL",
+			EnvVar: "DRONE_COMMIT_AUTHOR_EMAIL,WOODPECKER_COMMIT_AUTHOR_EMAIL",
 		},
 		cli.IntFlag{
 			Name:   "prev-build-number",
-			EnvVar: "DRONE_PREV_BUILD_NUMBER",
+			EnvVar: "DRONE_PREV_BUILD_NUMBER,WOODPECKER_PREV_BUILD_NUMBER",
 		},
 		cli.Int64Flag{
 			Name:   "prev-build-created",
-			EnvVar: "DRONE_PREV_BUILD_CREATED",
+			EnvVar: "DRONE_PREV_BUILD_CREATED,WOODPECKER_PREV_BUILD_CREATED",
 		},
 		cli.Int64Flag{
 			Name:   "prev-build-started",
-			EnvVar: "DRONE_PREV_BUILD_STARTED",
+			EnvVar: "DRONE_PREV_BUILD_STARTED,WOODPECKER_PREV_BUILD_STARTED",
 		},
 		cli.Int64Flag{
 			Name:   "prev-build-finished",
-			EnvVar: "DRONE_PREV_BUILD_FINISHED",
+			EnvVar: "DRONE_PREV_BUILD_FINISHED,WOODPECKER_PREV_BUILD_FINISHED",
 		},
 		cli.StringFlag{
 			Name:   "prev-build-status",
-			EnvVar: "DRONE_PREV_BUILD_STATUS",
+			EnvVar: "DRONE_PREV_BUILD_STATUS,WOODPECKER_PREV_BUILD_STATUS",
 		},
 		cli.StringFlag{
 			Name:   "prev-build-event",
-			EnvVar: "DRONE_PREV_BUILD_EVENT",
+			EnvVar: "DRONE_PREV_BUILD_EVENT,WOODPECKER_PREV_BUILD_EVENT",
 		},
 		cli.StringFlag{
 			Name:   "prev-build-link",
-			EnvVar: "DRONE_PREV_BUILD_LINK",
+			EnvVar: "DRONE_PREV_BUILD_LINK,WOODPECKER_PREV_BUILD_LINK",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-sha",
-			EnvVar: "DRONE_PREV_COMMIT_SHA",
+			EnvVar: "DRONE_PREV_COMMIT_SHA,WOODPECKER_PREV_COMMIT_SHA",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-ref",
-			EnvVar: "DRONE_PREV_COMMIT_REF",
+			EnvVar: "DRONE_PREV_COMMIT_REF,WOODPECKER_PREV_COMMIT_REF",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-refspec",
-			EnvVar: "DRONE_PREV_COMMIT_REFSPEC",
+			EnvVar: "DRONE_PREV_COMMIT_REFSPEC,WOODPECKER_PREV_COMMIT_REFSPEC",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-branch",
-			EnvVar: "DRONE_PREV_COMMIT_BRANCH",
+			EnvVar: "DRONE_PREV_COMMIT_BRANCH,WOODPECKER_PREV_COMMIT_BRANCH",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-message",
-			EnvVar: "DRONE_PREV_COMMIT_MESSAGE",
+			EnvVar: "DRONE_PREV_COMMIT_MESSAGE,WOODPECKER_PREV_COMMIT_MESSAGE",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-author-name",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_NAME",
+			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_NAME,WOODPECKER_PREV_COMMIT_AUTHOR_NAME",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-author-avatar",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_AVATAR",
+			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_AVATAR,WOODPECKER_PREV_COMMIT_AUTHOR_AVATAR",
 		},
 		cli.StringFlag{
 			Name:   "prev-commit-author-email",
-			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_EMAIL",
+			EnvVar: "DRONE_PREV_COMMIT_AUTHOR_EMAIL,WOODPECKER_PREV_COMMIT_AUTHOR_EMAIL",
 		},
 		cli.IntFlag{
 			Name:   "job-number",
-			EnvVar: "DRONE_JOB_NUMBER",
+			EnvVar: "DRONE_JOB_NUMBER,WOODPECKER_JOB_NUMBER",
 		},
 		cli.StringSliceFlag{
 			Name:   "env, e",
-			EnvVar: "DRONE_ENV",
+			EnvVar: "DRONE_ENV,WOODPECKER_ENV",
 		},
 	},
 }

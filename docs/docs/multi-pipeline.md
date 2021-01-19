@@ -1,6 +1,8 @@
 
 # Multi-pipeline builds
 
+**NOTE: Feature is only available for Github repositories. Folow [this](https://github.com/laszlocph/woodpecker/issues/131) issue to support further development.**
+
 By default, Woodpecker looks for the pipeline definition in `.drone.yml` in the project root.
 
 The Multi-Pipeline feature allows the pipeline to be splitted to several files and placed in the `.drone/` folder

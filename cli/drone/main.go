@@ -32,18 +32,18 @@ func main() {
 		cli.StringFlag{
 			Name:   "t, token",
 			Usage:  "server auth token",
-			EnvVar: "DRONE_TOKEN",
+			EnvVar: "DRONE_TOKEN,WOODPECKER_TOKEN",
 		},
 
 		cli.StringFlag{
 			Name:   "s, server",
 			Usage:  "server address",
-			EnvVar: "DRONE_SERVER",
+			EnvVar: "DRONE_SERVER,WOODPECKER_SERVER",
 		},
 		cli.BoolFlag{
 			Name:   "skip-verify",
 			Usage:  "skip ssl verfification",
-			EnvVar: "DRONE_SKIP_VERIFY",
+			EnvVar: "DRONE_SKIP_VERIFY,WOODPECKER_SKIP_VERIFY",
 			Hidden: true,
 		},
 		cli.StringFlag{
