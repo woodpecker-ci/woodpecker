@@ -160,7 +160,11 @@ export default class Default extends Component {
           <Switch>
             <Route path="/account/token" exact={true} component={UserTokens} />
             <Route path="/account/repos" exact={true} component={UserRepos} />
-            <Route path="/account/global-secrets" exact={true} component={GlobalSecrets} />
+            <Route
+              path="/account/global-secrets"
+              exact={true}
+              component={GlobalSecrets}
+            />
             <Route
               path="/:owner/:repo/settings/secrets"
               exact={true}

@@ -89,5 +89,7 @@ function renderGlobalSecret(secret) {
 const LOADING = <div className={styles.loading}>Loading</div>;
 
 const EMPTY = (
-  <div className={styles.empty}>There are no global secrets for this repository.</div>
+  <div className={styles.empty}>
+    There are no global secrets for this repository.
+  </div>
 );
