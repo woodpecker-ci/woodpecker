@@ -3,7 +3,7 @@ module github.com/laszlocph/woodpecker
 go 1.12
 
 require (
-	code.gitea.io/sdk/gitea v0.13.1
+	code.gitea.io/sdk/gitea v0.13.2
 	docker.io/go-docker v1.0.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
@@ -34,7 +34,6 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/websocket v1.4.2
-	github.com/hashicorp/go-version v1.2.1 // indirect
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.0
