@@ -7,7 +7,8 @@ pipeline:
     image: golang:1.16
     group: test
     commands:
-      - go test -cover -timeout 30s $(go list ./...)
+      - make deps
+      - make test
 
   test-frontend:
     image: node:10.17.0-stretch

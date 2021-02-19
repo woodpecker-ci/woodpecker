@@ -3,7 +3,7 @@ GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -
 
 DOCKER_RUN?=
 _with-docker:
-	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd)/../../..:/go/src/ -v $(shell pwd)/build:/build -w / golang:$(GO_VERSION))
+	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(GO_VERSION))
 
 all: deps build
 
