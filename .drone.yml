@@ -4,7 +4,7 @@ clone:
 
 pipeline:
   test:
-    image: golang:1.13.3
+    image: golang:1.16
     group: test
     commands:
       - go test -cover -timeout 30s $(go list ./...)
@@ -19,7 +19,7 @@ pipeline:
       - make test-frontend
 
   test-postgres:
-    image: golang:1.13.3
+    image: golang:1.16
     group: db-test
     environment:
       - DATABASE_DRIVER=postgres
@@ -28,7 +28,7 @@ pipeline:
       - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
 
   test-mysql:
-    image: golang:1.13.3
+    image: golang:1.16
     group: db-test
     environment:
       - DATABASE_DRIVER=mysql
@@ -42,7 +42,7 @@ pipeline:
       - make build-frontend
 
   build:
-    image: golang:1.13.3
+    image: golang:1.16
     commands:
       - go get github.com/laszlocph/togo
       - (cd web/; go generate ./...)
@@ -59,6 +59,10 @@ pipeline:
   #   when:
   #     branch: master
   #     event: push
+
+  build-cli:
+    image: golang:1.16
+    commands: sh .cli.sh
 
   publish-server:
     image: plugins/docker
@@ -121,6 +125,17 @@ pipeline:
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: ${DRONE_TAG}
+    when:
+      event: tag
+
+  release-cli:
+    image: plugins/github-release
+    files:
+      - release/drone_*.tar.gz
+      - release/drone_checksums.txt
+    secrets:
+      - source: github_token
+        target: github_release_api_key
     when:
       event: tag
 
