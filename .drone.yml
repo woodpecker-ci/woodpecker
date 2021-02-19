@@ -132,8 +132,8 @@ pipeline:
   release-cli:
     image: plugins/github-release
     files:
-      - release/drone_*.tar.gz
-      - release/drone_checksums.txt
+      - release/woodpecker_*.tar.gz
+      - release/woodpecker_checksums.txt
     secrets:
       - source: github_token
         target: github_release_api_key
