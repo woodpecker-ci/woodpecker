@@ -104,8 +104,8 @@ var flags = []cli.Flag{
 	},
 	cli.StringSliceFlag{
 		EnvVar: "DRONE_REPO_OWNERS,WOODPECKER_REPO_OWNERS",
-		Name: "repo-owners",
-		Usage: "List of syncable repo owners",
+		Name:   "repo-owners",
+		Usage:  "List of syncable repo owners",
 	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_OPEN,WOODPECKER_OPEN",

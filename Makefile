@@ -1,5 +1,4 @@
-GO_VERSION=1.12.4
-export GO111MODULE=on
+GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 
 DOCKER_RUN?=
@@ -13,6 +12,7 @@ deps:
 	go get -u golang.org/x/net/context/ctxhttp
 	go get -u github.com/golang/protobuf/proto
 	go get -u github.com/golang/protobuf/protoc-gen-go
+	go get -d docker.io/go-docker
 
 formatcheck:
 	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)

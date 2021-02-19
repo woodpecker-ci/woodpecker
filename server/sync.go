@@ -31,7 +31,7 @@ type syncer struct {
 	remote remote.Remote
 	store  store.Store
 	perms  model.PermStore
-	match FilterFunc
+	match  FilterFunc
 }
 
 // FilterFunc can be used to filter which repositories are
