@@ -13,6 +13,7 @@ deps:
 	go get -u github.com/golang/protobuf/proto
 	go get -u github.com/golang/protobuf/protoc-gen-go
 	go get -d docker.io/go-docker
+	go get -d github.com/jackspirou/syscerts
 
 formatcheck:
 	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)
