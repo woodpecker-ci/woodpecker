@@ -2,6 +2,14 @@ This project contains the source code for the drone user interface. The generate
 
 ## Building
 
+> As the frontend build requires specific `npm` and `yarn` versions, you can build the frontend using:
+> 
+> ```docker run --rm -it -v `pwd`:/app --workdir /app node:10.17.0-stretch make build-frontend```
+> 
+> from within the root of the repo.
+> 
+> If you prefer to run this manually, note that you need: `node:10.17`, `yarn:1.17`, `webpack:3.5.6`
+
 To compile the source and create minified css and javascript assets:
 
 ```text
