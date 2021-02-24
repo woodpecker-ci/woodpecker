@@ -101,6 +101,5 @@
     "webpack": "5.24.1",
     "webpack-cli": "4.5.0",
     "webpack-dev-server": "3.11.2"
-
   }
 }
