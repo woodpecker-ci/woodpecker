@@ -90,6 +90,16 @@ module.exports = {
     ]
   },
 
+  optimization: {
+      splitChunks: {
+       cacheGroups: {
+         defaultVendors: {
+           filename: "static/vendor.[hash].js"
+          },
+       }
+     }
+  },
+
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "src/public/favicon.svg",
