@@ -46,7 +46,7 @@ build-server:
 	$(DOCKER_RUN) go build -o build/drone-server github.com/laszlocph/woodpecker/cmd/drone-server
 
 build-frontend:
-	(cd web/; yarn run build)
+	(cd web/; yarn install; yarn run build)
 
 
 build: build-agent build-server

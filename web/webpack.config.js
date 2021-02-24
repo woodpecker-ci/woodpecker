@@ -68,9 +68,18 @@ module.exports = {
       {
         test: /\.(less|css)$/,
         loader: "css-loader",
-        query: {
-          modules: true,
-          localIdentName: "[name]__[local]___[hash:base64:5]"
+        options: {
+          modules: {
+            compileType: "module",
+            mode: "local",
+            auto: true,
+            localIdentName: "[name]__[local]___[hash:base64:5]",
+            localIdentContext: path.resolve(__dirname, "src"),
+            localIdentHashPrefix: "my-custom-hash",
+            namedExport: true,
+            exportLocalsConvention: "camelCase",
+            exportOnlyLocals: false
+         }
         }
       },
 
@@ -82,10 +91,6 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
-      filename: "static/vendor.[hash].js"
-    }),
     new HtmlWebpackPlugin({
       favicon: "src/public/favicon.svg",
       template: "src/index.html"

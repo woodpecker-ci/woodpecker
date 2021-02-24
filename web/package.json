@@ -8,7 +8,7 @@
     "lint": "eslint src/",
     "lesshint": "lesshint --config .lesshintrc src/",
     "test": "jest",
-    "start": "webpack-dev-server --progress --hot --inline",
+    "start": "webpack serve --mode development",
     "format": "prettier --use-tabs --trailing-comma all --write {src/*.js,src/**/*.js,src/**/*/*.js,src/*/*/*/*.js,src/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*/*.js}"
   },
   "jest": {
@@ -82,7 +82,7 @@
     "eslint-plugin-react": "^7.3.0",
     "eslint-plugin-standard": "^3.0.1",
     "file-loader": "^0.11.2",
-    "html-webpack-plugin": "^2.30.1",
+    "html-webpack-plugin": "4.5.2",
     "identity-obj-proxy": "^3.0.0",
     "jasmine-expect": "^3.7.1",
     "jest": "^21.0.1",
@@ -98,7 +98,9 @@
     "sinon-chai": "^2.13.0",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
-    "webpack": "^3.4.1",
-    "webpack-dev-server": "^3.1.11"
+    "webpack": "5.24.1",
+    "webpack-cli": "4.5.0",
+    "webpack-dev-server": "3.11.2"
+
   }
 }
