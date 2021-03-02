@@ -1,7 +1,7 @@
 
 # Multi-pipeline builds
 
-**NOTE: Feature is only available for Github repositories. Folow [this](https://github.com/laszlocph/woodpecker/issues/131) issue to support further development.**
+**NOTE: Feature is only available for Github repositories. Follow [this](https://github.com/laszlocph/woodpecker/issues/131) issue to support further development.**
 
 By default, Woodpecker looks for the pipeline definition in `.drone.yml` in the project root.
 
@@ -11,7 +11,7 @@ The Multi-Pipeline feature allows the pipeline to be splitted to several files a
 
 - faster lint/test feedback, the pipeline doesn't have to run fully to have a lint status pushed to the the remote
 - better organization of the pipeline along various concerns: testing, linting, feature apps
-- utilizaing more agents to speed up build
+- utilizing more agents to speed up build
 
 ## Example multi-pipeline definition
 
