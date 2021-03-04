@@ -8,6 +8,33 @@
 	}
 }
 
+.group {
+	cursor: pointer;
+	position: relative;
+}
+
+.expanded:after {
+	content: "+";
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	color: white;
+	font-size: 16px;
+}
+
+.collapsed:after {
+	content: "—";
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	color: white;
+	font-size: 16px;
+}
+
+.hide {
+	display: none;
+}
+
 .vars {
 	padding: 30px 0 0 10px;
 }
