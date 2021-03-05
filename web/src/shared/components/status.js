@@ -92,7 +92,7 @@ export const StatusText = ({ status, text }) => {
   return (
     <div
       className={classnames(style.label, style[status])}
-      style="text-transform: capitalize;padding: 5px 10px;"
+      style="padding: 5px 10px;"
     >
       <div>{text}</div>
     </div>

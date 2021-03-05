@@ -15,24 +15,47 @@ const renderEnviron = data => {
   );
 };
 
-const ProcListHolder = ({ vars, renderName, children }) => (
-  <div className={styles.list}>
-    {renderName && vars.name !== "drone" ? (
-      <div>
-        <StatusText status={vars.state} text={vars.name} />
+class ProcListHolder extends Component {
+  constructor(props, context) {
+    super(props, context);
+    this.state = { open: false };
+  }
+
+  toggleOpen = () => {
+    this.setState({ open: !this.state.open });
+  };
+
+  render() {
+    const { vars, renderName, children } = this.props;
+    const groupExpandStatus = this.state.open
+      ? styles.collapsed
+      : styles.expanded;
+    return (
+      <div className={styles.list}>
+        {renderName && vars.name !== "drone" ? (
+          <div
+            onClick={this.toggleOpen}
+            className={`${styles.group} ${groupExpandStatus}`}
+          >
+            <StatusText status={vars.state} text={vars.name} />
+          </div>
+        ) : null}
+        {vars.environ ? (
+          <div
+            onClick={this.toggleOpen}
+            className={`${styles.group} ${groupExpandStatus}`}
+          >
+            <StatusText
+              status={vars.state}
+              text={Object.entries(vars.environ).map(renderEnviron)}
+            />
+          </div>
+        ) : null}
+        <div className={!this.state.open ? styles.hide : ""}>{children}</div>
       </div>
-    ) : null}
-    {vars.environ ? (
-      <div>
-        <StatusText
-          status={vars.state}
-          text={Object.entries(vars.environ).map(renderEnviron)}
-        />
-      </div>
-    ) : null}
-    {children}
-  </div>
-);
+    );
+  }
+}
 
 export class ProcList extends Component {
   render() {
