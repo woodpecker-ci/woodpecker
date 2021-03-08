@@ -16,14 +16,14 @@ export default function() {
   );
 }
 
-const accountTitle = () => <Title render="Tokens | drone" />;
+const accountTitle = () => <Title render="Tokens | woodpecker" />;
 
-const accountRepos = () => <Title render="Repositories | drone" />;
+const accountRepos = () => <Title render="Repositories | woodpecker" />;
 
-const loginTitle = () => <Title render="Login | drone" />;
+const loginTitle = () => <Title render="Login | woodpecker" />;
 
 const repoTitle = ({ match }) => (
-  <Title render={`${match.params.owner}/${match.params.repo} | drone`} />
+  <Title render={`${match.params.owner}/${match.params.repo} | woodpecker`} />
 );
 
-const defautTitle = () => <Title render="Welcome | drone" />;
+const defautTitle = () => <Title render="Welcome | woodpecker" />;
