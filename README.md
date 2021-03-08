@@ -1,6 +1,6 @@
 # Woodpecker
 
-An opinionated fork of the Drone CI system.
+A fork of the Drone CI system.
 
 - Based on the v0.8 code tree
 - Fully Apache 2.0, no tiers
