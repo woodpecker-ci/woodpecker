@@ -200,7 +200,7 @@ export default class BuildLogs extends Component {
             <section className={styles.sticky}>
               {build.procs.map(function(rootProc) {
                 return (
-                  <div style="padding-bottom: 50px;" key={rootProc.pid}>
+                  <div style="padding-bottom: 20px;" key={rootProc.pid}>
                     <ProcList
                       key={rootProc.pid}
                       repo={repo}

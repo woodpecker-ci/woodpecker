@@ -51,7 +51,7 @@ func GetFeed(c *gin.Context) {
 			remote: remote.FromContext(c),
 			store:  store.FromContext(c),
 			perms:  store.FromContext(c),
-			match: NamespaceFilter(config.OwnersWhitelist),
+			match:  NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
@@ -96,9 +96,8 @@ func GetRepos(c *gin.Context) {
 			remote: remote.FromContext(c),
 			store:  store.FromContext(c),
 			perms:  store.FromContext(c),
-			match: NamespaceFilter(config.OwnersWhitelist),
+			match:  NamespaceFilter(config.OwnersWhitelist),
 		}
-
 
 		if err := sync.Sync(user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)

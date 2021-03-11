@@ -16,10 +16,10 @@ package model
 
 // Settings defines system configuration parameters.
 type Settings struct {
-	Open   bool            // Enables open registration
-	Secret string          // Secret token used to authenticate agents
-	Admins map[string]bool // Administrative users
-	Orgs   map[string]bool // Organization whitelist
+	Open            bool            // Enables open registration
+	Secret          string          // Secret token used to authenticate agents
+	Admins          map[string]bool // Administrative users
+	Orgs            map[string]bool // Organization whitelist
 	OwnersWhitelist map[string]bool // Owners whitelist
 }
 
