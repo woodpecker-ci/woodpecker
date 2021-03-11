@@ -25,7 +25,9 @@ const accountTitle = () => <Title render="Tokens | woodpecker" />;
 
 const accountRepos = () => <Title render="Repositories | woodpecker" />;
 
-const accountGlobalSecrets = () => <Title render="Global Secrets | woodpecker" />;
+const accountGlobalSecrets = () => (
+  <Title render="Global Secrets | woodpecker" />
+);
 
 const loginTitle = () => <Title render="Login | woodpecker" />;
 
