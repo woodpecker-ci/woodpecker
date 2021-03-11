@@ -35,7 +35,7 @@
   "author": "Brad Rydzewski",
   "license": "Apache-2.0",
   "dependencies": {
-    "ansi_up": "^2.0.2",
+    "ansi_up": "^5.0.0",
     "babel-polyfill": "^6.23.0",
     "baobab": "^2.4.3",
     "baobab-react": "^2.1.2",
