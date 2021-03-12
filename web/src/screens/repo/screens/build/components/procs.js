@@ -18,7 +18,7 @@ const renderEnviron = data => {
 class ProcListHolder extends Component {
   constructor(props, context) {
     super(props, context);
-    this.state = { open: !this.props.vars.environ };
+    this.state = { open: !this.props.renderName };
   }
 
   toggleOpen = () => {
@@ -26,17 +26,17 @@ class ProcListHolder extends Component {
   };
 
   render() {
-    const { vars, renderName, children } = this.props;
+    const { vars, children } = this.props;
     const groupExpandStatus = this.state.open
       ? styles.collapsed
       : styles.expanded;
 
-    let name = "default";
-    if (vars.environ) {
-      name = Object.entries(vars.environ).map(renderEnviron);
-    } else if (renderName && vars.name !== "woodpecker") {
-      name = vars.name;
-    }
+    let name = (
+      <div>
+        <div>{vars.name === "woodpecker" ? "default" : vars.name}</div>
+        {vars.environ ? Object.entries(vars.environ).map(renderEnviron) : ""}
+      </div>
+    );
 
     return (
       <div className={styles.list}>
