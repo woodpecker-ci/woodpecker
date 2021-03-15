@@ -26,26 +26,32 @@ class ProcListHolder extends Component {
   };
 
   render() {
-    const { vars, children } = this.props;
+    const { vars, renderName, children } = this.props;
     const groupExpandStatus = this.state.open
       ? styles.collapsed
       : styles.expanded;
 
-    let name = (
-      <div>
-        <div>{vars.name === "woodpecker" ? "default" : vars.name}</div>
-        {vars.environ ? Object.entries(vars.environ).map(renderEnviron) : ""}
-      </div>
-    );
-
     return (
       <div className={styles.list}>
-        <div
-          onClick={this.toggleOpen}
-          className={`${styles.group} ${groupExpandStatus}`}
-        >
-          <StatusText status={vars.state} text={name} />
-        </div>
+        {renderName && vars.name !== "drone" ? (
+          <div
+            onClick={this.toggleOpen}
+            className={`${styles.group} ${groupExpandStatus}`}
+          >
+            <StatusText status={vars.state} text={vars.name} />
+          </div>
+        ) : null}
+        {vars.environ ? (
+          <div
+            onClick={this.toggleOpen}
+            className={`${styles.group} ${groupExpandStatus}`}
+          >
+            <StatusText
+              status={vars.state}
+              text={Object.entries(vars.environ).map(renderEnviron)}
+            />
+          </div>
+        ) : null}
         <div className={!this.state.open ? styles.hide : ""}>{children}</div>
       </div>
     );
