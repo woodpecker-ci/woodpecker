@@ -61,6 +61,11 @@ var flags = []cli.Flag{
 		Usage:  "server fully qualified url (<scheme>://<host>)",
 	},
 	cli.StringFlag{
+		EnvVar: "WOODPECKER_HOST_INTERNAL",
+		Name:   "server-host-internal",
+		Usage:  "server internal fully qualified url (<scheme>://<host>)",
+	},
+	cli.StringFlag{
 		EnvVar: "DRONE_SERVER_ADDR,WOODPECKER_SERVER_ADDR",
 		Name:   "server-addr",
 		Usage:  "server address",
@@ -513,6 +518,16 @@ var flags = []cli.Flag{
 		Name:   "keepalive-min-time",
 		Usage:  "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
+	cli.BoolFlag{
+		EnvVar: "WOODPECKER_GITEA_REV_PROXY_AUTH",
+		Name:   "gitea-rev-proxy-auth",
+		Usage:  "enable gitea authentication using HTTP header specified in WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER",
+	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER",
+		Name:   "gitea-rev-proxy-auth-header",
+		Usage:  "HTTP header with gitea authenticated user login",
+	},
 }
 
 func server(c *cli.Context) error {
@@ -538,6 +553,18 @@ func server(c *cli.Context) error {
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		logrus.Fatalln(
 			"DRONE_HOST/DRONE_SERVER_HOST must not have trailing slash",
+		)
+	}
+
+	if c.String("server-host-internal") != "" && !strings.Contains(c.String("server-host-internal"), "://") {
+		logrus.Fatalln(
+			"WOODPECKER_HOST_INTERNAL must be <scheme>://<hostname> format",
+		)
+	}
+
+	if c.String("server-host-internal") != "" && strings.HasSuffix(c.String("server-host-internal"), "/") {
+		logrus.Fatalln(
+			"WOODPECKER_HOST_INTERNAL must not have trailing slash",
 		)
 	}
 
@@ -691,6 +718,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	droneserver.Config.Server.Key = c.String("server-key")
 	droneserver.Config.Server.Pass = c.String("agent-secret")
 	droneserver.Config.Server.Host = strings.TrimRight(c.String("server-host"), "/")
+	droneserver.Config.Server.HostInternal = strings.TrimRight(c.String("server-host-internal"), "/")
 	droneserver.Config.Server.Port = c.String("server-addr")
 	droneserver.Config.Server.RepoConfig = c.String("repo-config")
 	droneserver.Config.Server.SessionExpires = c.Duration("session-expires")

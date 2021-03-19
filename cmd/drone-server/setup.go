@@ -122,12 +122,14 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
 	return gitea.New(gitea.Opts{
-		URL:         c.String("gitea-server"),
-		Context:     c.String("gitea-context"),
-		Username:    c.String("gitea-git-username"),
-		Password:    c.String("gitea-git-password"),
-		PrivateMode: c.Bool("gitea-private-mode"),
-		SkipVerify:  c.Bool("gitea-skip-verify"),
+		URL:                c.String("gitea-server"),
+		Context:            c.String("gitea-context"),
+		Username:           c.String("gitea-git-username"),
+		Password:           c.String("gitea-git-password"),
+		PrivateMode:        c.Bool("gitea-private-mode"),
+		SkipVerify:         c.Bool("gitea-skip-verify"),
+		RevProxyAuth:       c.Bool("gitea-rev-proxy-auth"),
+		RevProxyAuthHeader: c.String("gitea-rev-proxy-auth-header"),
 	})
 }
 

@@ -73,9 +73,14 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	host := httputil.GetURL(c.Request)
+	if Config.Server.HostInternal != "" {
+		host = Config.Server.HostInternal
+	}
+
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		httputil.GetURL(c.Request),
+		host,
 		sig,
 	)
 
@@ -203,7 +208,12 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	remote.Deactivate(user, repo, httputil.GetURL(c.Request))
+	host := httputil.GetURL(c.Request)
+	if Config.Server.HostInternal != "" {
+		host = Config.Server.HostInternal
+	}
+
+	remote.Deactivate(user, repo, host)
 	c.JSON(200, repo)
 }
 
@@ -222,6 +232,10 @@ func RepairRepo(c *gin.Context) {
 
 	// reconstruct the link
 	host := httputil.GetURL(c.Request)
+	if Config.Server.HostInternal != "" {
+		host = Config.Server.HostInternal
+	}
+
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
@@ -308,6 +322,10 @@ func MoveRepo(c *gin.Context) {
 
 	// reconstruct the link
 	host := httputil.GetURL(c.Request)
+	if Config.Server.HostInternal != "" {
+		host = Config.Server.HostInternal
+	}
+
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,

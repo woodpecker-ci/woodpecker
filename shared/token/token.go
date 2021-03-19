@@ -53,12 +53,15 @@ func Parse(raw string, fn SecretFunc) (*Token, error) {
 func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 	var token = r.Header.Get("Authorization")
 
-	// first we attempt to get the token from the
+	// First we attempt to get the token from the
 	// authorization header.
 	if len(token) != 0 {
 		token = r.Header.Get("Authorization")
 		fmt.Sscanf(token, "Bearer %s", &token)
-		return Parse(token, fn)
+
+		if parsedToken, err := Parse(token, fn); err == nil {
+			return parsedToken, nil
+		}
 	}
 
 	// then we attempt to get the token from the
