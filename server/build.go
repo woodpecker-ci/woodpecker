@@ -326,7 +326,7 @@ func PostApproval(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(user, repo, build, uri, item.Proc)
 			} else {
@@ -367,7 +367,7 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+	uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 	err = remote_.Status(user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)

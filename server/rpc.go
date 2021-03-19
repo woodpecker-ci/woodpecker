@@ -465,7 +465,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *mod
 				s.store.UpdateUser(user)
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", s.host, repo.FullName, build.Number)
+		uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)

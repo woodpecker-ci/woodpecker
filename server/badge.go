@@ -21,7 +21,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/shared/httputil"
 	"github.com/laszlocph/woodpecker/store"
 )
 
@@ -92,7 +91,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, builds[0].Number)
+	url := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, builds[0].Number)
 	cc := model.NewCC(repo, builds[0], url)
 	c.XML(200, cc)
 }
