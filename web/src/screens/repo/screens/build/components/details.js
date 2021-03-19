@@ -16,7 +16,6 @@ export class Details extends Component {
 
         <section className={styles.message} style={{ whiteSpace: "pre-line" }}>
           {build.message}
-
         </section>
 
         <section>
