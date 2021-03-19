@@ -16,9 +16,15 @@ export class Details extends Component {
 
         <section className={styles.message} style={{ whiteSpace: "pre-line" }}>
           {build.message}
+
         </section>
 
         <section>
+          <div className={styles.author}>
+            <img src={build.author_avatar} />
+            <span>{build.author}</span>
+          </div>
+
           <BuildTime
             start={build.started_at || build.created_at}
             finish={build.finished_at}

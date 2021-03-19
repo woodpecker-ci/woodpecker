@@ -17,7 +17,7 @@ export class Item extends Component {
     return (
       <div className={styles.item}>
         <div className={styles.icon}>
-          <img src={build.author_avatar} />
+          <img src={build.author_avatar} title={build.author} />
         </div>
 
         <div className={styles.body}>
