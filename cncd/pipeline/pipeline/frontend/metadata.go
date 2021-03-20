@@ -54,12 +54,13 @@ type (
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha     string `json:"sha,omitempty"`
-		Ref     string `json:"ref,omitempty"`
-		Refspec string `json:"refspec,omitempty"`
-		Branch  string `json:"branch,omitempty"`
-		Message string `json:"message,omitempty"`
-		Author  Author `json:"author,omitempty"`
+		Sha          string   `json:"sha,omitempty"`
+		Ref          string   `json:"ref,omitempty"`
+		Refspec      string   `json:"refspec,omitempty"`
+		Branch       string   `json:"branch,omitempty"`
+		Message      string   `json:"message,omitempty"`
+		Author       Author   `json:"author,omitempty"`
+		ChangedFiles []string `json:"changed_files,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.

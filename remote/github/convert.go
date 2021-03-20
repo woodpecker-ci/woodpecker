@@ -195,18 +195,23 @@ func convertRepoHook(from *webhook) *model.Repo {
 // convertPushHook is a helper function used to extract the Build details
 // from a push webhook and convert to the common Drone Build structure.
 func convertPushHook(from *webhook) *model.Build {
+	var files []string
+	files = append(files, from.Head.Added...)
+	files = append(files, from.Head.Removed...)
+	files = append(files, from.Head.Modified...)
 	build := &model.Build{
-		Event:   model.EventPush,
-		Commit:  from.Head.ID,
-		Ref:     from.Ref,
-		Link:    from.Head.URL,
-		Branch:  strings.Replace(from.Ref, "refs/heads/", "", -1),
-		Message: from.Head.Message,
-		Email:   from.Head.Author.Email,
-		Avatar:  from.Sender.Avatar,
-		Author:  from.Sender.Login,
-		Remote:  from.Repo.CloneURL,
-		Sender:  from.Sender.Login,
+		Event:        model.EventPush,
+		Commit:       from.Head.ID,
+		Ref:          from.Ref,
+		Link:         from.Head.URL,
+		Branch:       strings.Replace(from.Ref, "refs/heads/", "", -1),
+		Message:      from.Head.Message,
+		Email:        from.Head.Author.Email,
+		Avatar:       from.Sender.Avatar,
+		Author:       from.Sender.Login,
+		Remote:       from.Repo.CloneURL,
+		Sender:       from.Sender.Login,
+		ChangedFiles: files,
 	}
 	if len(build.Author) == 0 {
 		build.Author = from.Head.Author.Username

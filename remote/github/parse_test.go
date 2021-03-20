@@ -60,6 +60,8 @@ func Test_parser(t *testing.T) {
 				g.Assert(r != nil).IsTrue()
 				g.Assert(b != nil).IsTrue()
 				g.Assert(b.Event).Equal(model.EventPush)
+				expectedFiles := []string{"CHANGELOG.md", "app/controller/application.rb"}
+				g.Assert(b.ChangedFiles).Equal(expectedFiles)
 			})
 		})
 

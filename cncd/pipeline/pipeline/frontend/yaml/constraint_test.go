@@ -150,6 +150,58 @@ func TestConstraint(t *testing.T) {
 	}
 }
 
+func TestConstraintList(t *testing.T) {
+	testdata := []struct {
+		conf string
+		with []string
+		want bool
+	}{
+		{
+			conf: "",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "CHANGELOG.md",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "'*.md'",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "['*.md']",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "{ include: [ README.md ] }",
+			with: []string{"CHANGELOG.md"},
+			want: false,
+		},
+		{
+			conf: "{ exclude: [ README.md ] }",
+			with: []string{"design.md"},
+			want: true,
+		},
+		// include and exclude blocks
+		{
+			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md"},
+			want: true,
+		},
+	}
+	for _, test := range testdata {
+		c := parseConstraintPath(test.conf)
+		got, want := c.Match(test.with), test.want
+		if got != want {
+			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
+		}
+	}
+}
+
 func TestConstraintMap(t *testing.T) {
 	testdata := []struct {
 		conf string
@@ -368,6 +420,12 @@ func parseConstraint(s string) *Constraint {
 
 func parseConstraintMap(s string) *ConstraintMap {
 	c := &ConstraintMap{}
+	yaml.Unmarshal([]byte(s), c)
+	return c
+}
+
+func parseConstraintPath(s string) *ConstraintPath {
+	c := &ConstraintPath{}
 	yaml.Unmarshal([]byte(s), c)
 	return c
 }
