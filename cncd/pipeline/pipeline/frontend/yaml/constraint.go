@@ -203,6 +203,11 @@ func (c *ConstraintPath) Match(v []string, message string) bool {
 	if strings.Contains(message, "[ALL]") {
 		return true
 	}
+	// always match if there are no commit files (empty commit)
+	if len(v) == 0 {
+		return true
+	}
+
 	if len(c.Exclude) > 0 && c.Excludes(v) {
 		return false
 	}

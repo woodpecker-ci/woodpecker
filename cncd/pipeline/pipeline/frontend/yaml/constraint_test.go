@@ -200,6 +200,12 @@ func TestConstraintList(t *testing.T) {
 			message: "[ALL]",
 			want:    true,
 		},
+		// empty commit
+		{
+			conf: "{ include: [ README.md ] }",
+			with: []string{},
+			want: true,
+		},
 	}
 	for _, test := range testdata {
 		c := parseConstraintPath(test.conf)
