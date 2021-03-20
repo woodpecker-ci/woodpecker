@@ -152,9 +152,10 @@ func TestConstraint(t *testing.T) {
 
 func TestConstraintList(t *testing.T) {
 	testdata := []struct {
-		conf string
-		with []string
-		want bool
+		conf    string
+		with    []string
+		message string
+		want    bool
 	}{
 		{
 			conf: "",
@@ -192,10 +193,17 @@ func TestConstraintList(t *testing.T) {
 			with: []string{"README.md"},
 			want: true,
 		},
+		// commit message ignore matches
+		{
+			conf:    "{ include: [ README.md ] }",
+			with:    []string{"CHANGELOG.md"},
+			message: "[ALL]",
+			want:    true,
+		},
 	}
 	for _, test := range testdata {
 		c := parseConstraintPath(test.conf)
-		got, want := c.Match(test.with), test.want
+		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
 		}

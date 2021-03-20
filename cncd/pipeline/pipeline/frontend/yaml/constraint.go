@@ -3,6 +3,7 @@ package yaml
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
@@ -55,7 +56,7 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
 		c.Instance.Match(metadata.Sys.Host) &&
 		c.Matrix.Match(metadata.Job.Matrix) &&
-		c.Path.Match(metadata.Curr.Commit.ChangedFiles)
+		c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 }
 
 // Match returns true if the string matches the include patterns and does not
@@ -197,7 +198,11 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func (c *ConstraintPath) Match(v []string) bool {
+func (c *ConstraintPath) Match(v []string, message string) bool {
+	// ignore file pattern matches if the commit message contains all
+	if strings.Contains(message, "[ALL]") {
+		return true
+	}
 	if len(c.Exclude) > 0 && c.Excludes(v) {
 		return false
 	}
@@ -207,7 +212,7 @@ func (c *ConstraintPath) Match(v []string) bool {
 	return true
 }
 
-// Includes returns true if the string matches the include patterns.
+// Includes returns true if the string matches any of the include patterns.
 func (c *ConstraintPath) Includes(v []string) bool {
 	for _, pattern := range c.Include {
 		for _, file := range v {
@@ -219,7 +224,7 @@ func (c *ConstraintPath) Includes(v []string) bool {
 	return false
 }
 
-// Excludes returns true if the string matches the exclude patterns.
+// Excludes returns true if the string matches any of the exclude patterns.
 func (c *ConstraintPath) Excludes(v []string) bool {
 	for _, pattern := range c.Exclude {
 		for _, file := range v {
