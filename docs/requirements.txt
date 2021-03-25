@@ -14,7 +14,7 @@ mkdocs-minify-plugin==0.2.1
 pep562==1.0
 Pygments==2.4.2
 pymdown-extensions==6.1
-PyYAML==5.1.2
+PyYAML==5.4
 singledispatch==3.4.0.3
 six==1.13.0
 tornado==5.1.1
