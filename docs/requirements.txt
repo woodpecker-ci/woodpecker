@@ -12,7 +12,7 @@ mkdocs-markdownextradata-plugin==0.1.1
 mkdocs-material==4.4.3
 mkdocs-minify-plugin==0.2.1
 pep562==1.0
-Pygments==2.4.2
+Pygments==2.7.4
 pymdown-extensions==6.1
 PyYAML==5.1.2
 singledispatch==3.4.0.3
