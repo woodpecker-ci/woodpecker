@@ -3,7 +3,7 @@ module github.com/laszlocph/woodpecker
 go 1.16
 
 require (
-	code.gitea.io/sdk/gitea v0.13.2
+	code.gitea.io/sdk/gitea v0.14.1-0.20210329222645-7187865c0dd6
 	docker.io/go-docker v1.0.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
