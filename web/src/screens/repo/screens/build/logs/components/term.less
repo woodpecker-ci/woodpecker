@@ -2,14 +2,14 @@
 @import '~shared/styles/ansi';
 
 .term {
-	background: @gray-light;
+	background: @gray-dark;
 	border-radius: 2px;
 	padding: 20px;
 
 	.exitcode {
 		-moz-user-select: none;
 		-webkit-user-select: none;
-		color: rgba(0, 0, 0, 0.3);
+		color: rgba(255, 255, 255, 0.6);
 		font-family: 'Roboto Mono', monospace;
 		font-size: 13px;
 		margin-top: 10px;
@@ -21,7 +21,7 @@
 
 
 .line {
-	color: @gray-dark;
+	color: @white;
 	display: flex;
 	line-height: 19px;
 	max-width: 100%;
@@ -35,12 +35,12 @@
 
 	a {
 		text-decoration: none;
-		color: rgba(0, 0, 0, 0.3);
+		color: rgba(255, 255, 255, 0.6);
 	}
 
 	div:first-child {
 		-webkit-user-select: none;
-		color: rgba(0, 0, 0, 0.3);
+		color: rgba(255, 255, 255, 0.6);
 		min-width: 20px;
 		padding-right: 20px;
 		user-select: none;
@@ -55,7 +55,7 @@
 
 	div:last-child {
 		-webkit-user-select: none;
-		color: rgba(0, 0, 0, 0.3);
+		color: rgba(255, 255, 255, 0.6);
 		padding-left: 20px;
 		user-select: none;
 	}
@@ -63,13 +63,15 @@
 
 .highlight {
 	.line;
+	color: @black;
 	background-color: @yellow;
 }
 
 // log loading message
 .loading {
-	background: @gray-light;
+	background: @gray-dark;
 	border-radius: 2px;
+	color: @white;
 	font-family: 'Roboto Mono', monospace;
 	font-size: 13px;
 	padding: 20px;
@@ -77,7 +79,7 @@
 
 // log error message
 .error {
-	background: @gray-light;
+	background: @gray-dark;
 	border-radius: 2px;
 	color: @red;
 	font-size: 14px;
