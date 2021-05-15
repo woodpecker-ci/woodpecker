@@ -1,0 +1,17 @@
+apiVersion: v2
+name: woodpecker-agent
+description: A Helm chart for Woodpecker a fork of the Drone CI system
+type: application
+version: 0.1.0
+appVersion: "v0.13.0-rc.3"
+keywords:
+- continuous-delivery
+- continuous-deployment
+- continuous-integration
+- docker
+- go
+sources:
+- https://github.com/laszlocph/woodpecker
+maintainers:
+- name: Laszlo Fogas
+  email: laszlo@laszlo.cloud
