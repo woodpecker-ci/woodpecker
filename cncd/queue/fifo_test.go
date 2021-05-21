@@ -318,7 +318,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				}
 			}
 
-		case <-time.After(3 * time.Second):
+		case <-time.After(5 * time.Second):
 			t.Errorf("test timed out")
 			return
 		}
