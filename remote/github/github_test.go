@@ -18,8 +18,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/github/fixtures"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/github/fixtures"
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"

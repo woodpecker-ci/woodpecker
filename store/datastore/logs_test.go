@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 )
 
 func TestLogCreateFind(t *testing.T) {

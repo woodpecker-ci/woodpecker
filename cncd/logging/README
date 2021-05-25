@@ -2,5 +2,5 @@ Go package provides a common interface for storing and streaming logs.
 
 Documentation:
 
-    http://godoc.org/github.com/laszlocph/woodpecker/cncd/logging
-    http://godoc.org/github.com/laszlocph/woodpecker/cncd/logging/gcp
+    http://godoc.org/github.com/woodpecker-ci/woodpecker/cncd/logging
+    http://godoc.org/github.com/woodpecker-ci/woodpecker/cncd/logging/gcp

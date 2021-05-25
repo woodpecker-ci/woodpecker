@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
 )
 
 func TestWithWorkspace(t *testing.T) {

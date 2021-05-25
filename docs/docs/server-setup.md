@@ -226,7 +226,7 @@ spec:
         prometheus.io/scrape: 'true'
     spec:
       containers:
-      - image: laszlocloud/woodpecker-server:v0.9.2
+      - image: laszlocloud/woodpecker-server:v0.13.0-rc.3
         imagePullPolicy: Always
         name: woodpecker
         env:
@@ -323,7 +323,7 @@ spec:
     spec:
       containers:
       - name: agent
-        image: laszlocloud/woodpecker-agent:v0.9.2
+        image: laszlocloud/woodpecker-agent:v0.13.0-rc.3
         imagePullPolicy: Always
         ports:
         - name: http
@@ -354,9 +354,9 @@ spec:
           privileged: true
         volumeMounts:
         - name: sock-dir
-          path: /var/run
+          mountPath: /var/run
       volumes:
-        name: sock-dir
+      - name: sock-dir
         emptyDir: {}
 ```
 

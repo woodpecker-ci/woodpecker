@@ -3,10 +3,10 @@ package user
 import (
 	"fmt"
 
-	"github.com/laszlocph/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
 	"github.com/urfave/cli"
 
-	"github.com/laszlocph/woodpecker/cli/drone/internal"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 )
 
 var userAddCmd = cli.Command{

@@ -17,7 +17,7 @@ package datastore
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 )
 
 func TestTaskList(t *testing.T) {

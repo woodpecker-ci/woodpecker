@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/gitlab/testdata"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/gitlab/testdata"
 )
 
 func Test_Gitlab(t *testing.T) {

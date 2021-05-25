@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/github"
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 
 	"github.com/franela/goblin"
 )

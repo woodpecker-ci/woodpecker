@@ -5,7 +5,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/laszlocph/woodpecker/cli/drone/internal"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 	"github.com/urfave/cli"
 )
 

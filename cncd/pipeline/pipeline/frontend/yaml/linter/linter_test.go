@@ -3,7 +3,7 @@ package linter
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 )
 
 func TestLint(t *testing.T) {

@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

@@ -96,7 +96,12 @@ func getUserRepos(c *gin.Context) {
 	case "token repos_not_found":
 		c.String(404, "")
 	default:
-		c.String(200, userRepoPayload)
+		page := c.Query("page")
+		if page != "" && page != "1" {
+			c.String(200, "[]")
+		} else {
+			c.String(200, userRepoPayload)
+		}
 	}
 }
 
