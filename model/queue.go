@@ -17,7 +17,7 @@ package model
 import (
 	"context"
 
-	"github.com/laszlocph/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/sirupsen/logrus"
 )
 

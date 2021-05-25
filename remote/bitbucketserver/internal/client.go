@@ -25,7 +25,7 @@ import (
 
 	"strings"
 
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/mrjones/oauth"
 	log "github.com/sirupsen/logrus"
 )

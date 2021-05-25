@@ -16,7 +16,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 // Remote is a middleware function that initializes the Remote and attaches to

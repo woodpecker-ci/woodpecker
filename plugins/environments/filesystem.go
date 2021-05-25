@@ -1,7 +1,7 @@
 package environments
 
 import (
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 	"strings"
 )
 

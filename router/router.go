@@ -20,13 +20,13 @@ import (
 	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 
-	"github.com/laszlocph/woodpecker/router/middleware/header"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
-	"github.com/laszlocph/woodpecker/router/middleware/token"
-	"github.com/laszlocph/woodpecker/server"
-	"github.com/laszlocph/woodpecker/server/debug"
-	"github.com/laszlocph/woodpecker/server/metrics"
-	"github.com/laszlocph/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/header"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/token"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/debug"
+	"github.com/woodpecker-ci/woodpecker/server/metrics"
+	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 // Load loads the router

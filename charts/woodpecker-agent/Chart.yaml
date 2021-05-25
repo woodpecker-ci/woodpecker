@@ -11,7 +11,7 @@ keywords:
 - docker
 - go
 sources:
-- https://github.com/laszlocph/woodpecker
+- https://github.com/woodpecker-ci/woodpecker
 maintainers:
 - name: Laszlo Fogas
   email: laszlo@laszlo.cloud

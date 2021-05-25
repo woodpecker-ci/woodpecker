@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/interrupt"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"

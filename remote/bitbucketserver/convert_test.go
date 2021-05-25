@@ -18,8 +18,8 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/bitbucketserver/internal"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucketserver/internal"
 	"github.com/mrjones/oauth"
 )
 

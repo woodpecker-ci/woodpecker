@@ -25,8 +25,8 @@ import (
 	"net/url"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 // Opts defines configuration options.

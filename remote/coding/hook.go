@@ -22,7 +22,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 )
 
 const (
