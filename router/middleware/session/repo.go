@@ -18,9 +18,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

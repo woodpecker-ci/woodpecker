@@ -19,7 +19,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/laszlocph/woodpecker/version"
+	"github.com/woodpecker-ci/woodpecker/version"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"

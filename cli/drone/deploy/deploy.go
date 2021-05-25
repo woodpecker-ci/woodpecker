@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/laszlocph/woodpecker/cli/drone/internal"
-	"github.com/laszlocph/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
+	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
 
 	"github.com/urfave/cli"
 )

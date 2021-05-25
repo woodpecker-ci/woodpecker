@@ -17,9 +17,9 @@ package session
 import (
 	"net/http"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/shared/token"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 )

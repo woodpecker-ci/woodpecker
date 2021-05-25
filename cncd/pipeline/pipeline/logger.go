@@ -1,8 +1,8 @@
 package pipeline
 
 import (
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
 )
 
 // Logger handles the process logging.

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 
 	libcompose "github.com/docker/libcompose/yaml"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
 	"gopkg.in/yaml.v3"
 )
 

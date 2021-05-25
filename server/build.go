@@ -25,14 +25,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/cncd/queue"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/shared/httputil"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/store"
 	"github.com/sirupsen/logrus"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
 )
 
 func GetBuilds(c *gin.Context) {

@@ -19,10 +19,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/remote/bitbucket/internal"
-	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 
 	"golang.org/x/oauth2"
 )

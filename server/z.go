@@ -16,8 +16,8 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/store"
-	"github.com/laszlocph/woodpecker/version"
+	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // Health endpoint returns a 500 if the server state is unhealthy.
@@ -32,7 +32,7 @@ func Health(c *gin.Context) {
 // Version endpoint returns the server version and build information.
 func Version(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"source":  "https://github.com/laszlocph/woodpecker",
+		"source":  "https://github.com/woodpecker-ci/woodpecker",
 		"version": version.String(),
 	})
 }
