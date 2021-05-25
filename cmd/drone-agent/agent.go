@@ -31,11 +31,11 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/docker"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
 	"github.com/drone/signal"
 	"github.com/rs/zerolog"

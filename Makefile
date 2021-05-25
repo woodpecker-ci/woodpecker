@@ -22,28 +22,28 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 test-agent:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-agent $(go list ./... | grep -v /vendor/)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-agent $(go list ./... | grep -v /vendor/)
 
 test-server:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/laszlocph/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
 test-frontend:
 		(cd web/; yarn run test)
 
 test-lib:
-	go get github.com/laszlocph/woodpecker/cncd/pipeline/pipec
-	go get github.com/laszlocph/woodpecker/remote/mock
-	go get github.com/laszlocph/woodpecker/cli/drone/internal
-	go get -t github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml
+	go get github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipec
+	go get github.com/woodpecker-ci/woodpecker/remote/mock
+	go get github.com/woodpecker-ci/woodpecker/cli/drone/internal
+	go get -t github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
 test: test-lib test-agent test-server
 
 build-agent:
-	$(DOCKER_RUN) go build -o build/drone-agent github.com/laszlocph/woodpecker/cmd/drone-agent
+	$(DOCKER_RUN) go build -o build/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
 
 build-server:
-	$(DOCKER_RUN) go build -o build/drone-server github.com/laszlocph/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go build -o build/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
 build-frontend:
 	(cd web/; yarn run build)
@@ -52,5 +52,5 @@ build-frontend:
 build: build-agent build-server
 
 install:
-	go install github.com/laszlocph/woodpecker/cmd/drone-agent
-	go install github.com/laszlocph/woodpecker/cmd/drone-server
+	go install github.com/woodpecker-ci/woodpecker/cmd/drone-agent
+	go install github.com/woodpecker-ci/woodpecker/cmd/drone-server

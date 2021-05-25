@@ -5,7 +5,7 @@ A fork of the Drone CI system.
 - Based on the v0.8 code tree
 - Fully Apache 2.0, no tiers
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/laszlocph/woodpecker)](https://goreportcard.com/report/github.com/laszlocph/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Go Report Card](https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker)](https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![https://discord.gg/fcMQqSMXJy](https://img.shields.io/discord/838698813463724034.svg)](https://discord.gg/fcMQqSMXJy)
 
 ![woodpecker](docs/docs/images/woodpecker.png)
 
@@ -95,7 +95,7 @@ https://woodpecker.laszlo.cloud
 
 Currently, I know of one organization using this fork. With 50+ users, 130+ repos and more than 1100 builds a week.
 
-Leave a note here if you are using it: https://github.com/laszlocph/woodpecker/issues/122
+Leave a note here if you are using it: https://github.com/woodpecker-ci/woodpecker/issues/122
 
 ## License
 

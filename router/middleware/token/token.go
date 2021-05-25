@@ -17,9 +17,9 @@ package token
 import (
 	"time"
 
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

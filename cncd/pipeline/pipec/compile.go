@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
 
 	"github.com/urfave/cli"
 )

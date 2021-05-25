@@ -20,9 +20,9 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/shared/httputil"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/store"
 )
 
 var (

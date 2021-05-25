@@ -6,7 +6,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/laszlocph/woodpecker/cli/drone/internal"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 )
 
 var userListCmd = cli.Command{

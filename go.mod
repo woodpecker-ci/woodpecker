@@ -1,9 +1,9 @@
-module github.com/laszlocph/woodpecker
+module github.com/woodpecker-ci/woodpecker
 
 go 1.16
 
 require (
-	code.gitea.io/sdk/gitea v0.13.2
+	code.gitea.io/sdk/gitea v0.14.1-0.20210329222645-7187865c0dd6
 	docker.io/go-docker v1.0.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
@@ -28,7 +28,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
 	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
@@ -56,12 +56,12 @@ require (
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/urfave/cli v1.22.4
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
-	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
+	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	google.golang.org/appengine v1.6.6 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/grpc v1.29.1
-	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86

@@ -24,11 +24,11 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/sirupsen/logrus"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
-	"github.com/laszlocph/woodpecker/shared/token"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/woodpecker-ci/woodpecker/store"
 )
 
 func GetSelf(c *gin.Context) {

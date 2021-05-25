@@ -26,7 +26,7 @@ pipeline:
       - DATABASE_DRIVER=postgres
       - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
 
   test-mysql:
     image: golang:1.16
@@ -35,7 +35,7 @@ pipeline:
       - DATABASE_DRIVER=mysql
       - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test -timeout 30s github.com/laszlocph/woodpecker/store/datastore
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
 
   build-frontend:
     image: node:10.17.0-stretch
@@ -45,7 +45,7 @@ pipeline:
   build:
     image: golang:1.16
     commands:
-      - go get github.com/laszlocph/togo
+      - go get github.com/woodpecker-ci/togo
       - (cd web/; go generate ./...)
       - ./.drone.sh
     when:
@@ -53,7 +53,7 @@ pipeline:
 
   # publish-server-alpine:
   #   image: plugins/docker
-  #   repo: laszlocloud/woodpecker-server
+  #   repo: woodpeckerci/woodpecker-server
   #   dockerfile: Dockerfile.alpine
   #   secrets: [ docker_username, docker_password ]
   #   tag: [ alpine ]
@@ -67,7 +67,7 @@ pipeline:
 
   publish-server:
     image: plugins/docker
-    repo: laszlocloud/woodpecker-server
+    repo: woodpeckerci/woodpecker-server
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
     when:
@@ -76,7 +76,7 @@ pipeline:
 
   publish-agent:
     image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
+    repo: woodpeckerci/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: [ latest ]
@@ -86,7 +86,7 @@ pipeline:
 
   # publish-agent-alpine:
   #   image: plugins/docker
-  #   repo: laszlocloud/woodpecker-agent
+  #   repo: woodpeckerci/woodpecker-agent
   #   dockerfile: Dockerfile.agent.alpine
   #   secrets: [ docker_username, docker_password ]
   #   tag: [ alpine ]
@@ -96,7 +96,7 @@ pipeline:
 
 #  release-server-alpine:
 #    image: plugins/docker
-#    repo: laszlocloud/woodpecker-server
+#    repo: woodpeckerci/woodpecker-server
 #    dockerfile: Dockerfile.alpine
 #    secrets: [ docker_username, docker_password ]
 #    tag: "${DRONE_TAG}-alpine"
@@ -105,7 +105,7 @@ pipeline:
 #
 #  release-agent-alpine:
 #    image: plugins/docker
-#    repo: laszlocloud/woodpecker-agent
+#    repo: woodpeckerci/woodpecker-agent
 #    dockerfile: Dockerfile.agent.alpine
 #    secrets: [ docker_username, docker_password ]
 #    tag: "${DRONE_TAG}-alpine"
@@ -114,7 +114,7 @@ pipeline:
 
   release-server:
     image: plugins/docker
-    repo: laszlocloud/woodpecker-server
+    repo: woodpeckerci/woodpecker-server
     secrets: [ docker_username, docker_password ]
     tag: ${DRONE_TAG}
     when:
@@ -122,7 +122,7 @@ pipeline:
 
   release-agent:
     image: plugins/docker
-    repo: laszlocloud/woodpecker-agent
+    repo: woodpeckerci/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [ docker_username, docker_password ]
     tag: ${DRONE_TAG}

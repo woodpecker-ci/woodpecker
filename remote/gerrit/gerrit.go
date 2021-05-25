@@ -20,8 +20,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 // IMPORTANT Gerrit support is not yet implemented. This file is a placeholder

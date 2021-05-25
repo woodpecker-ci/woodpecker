@@ -27,18 +27,18 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/laszlocph/woodpecker/cncd/logging"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/laszlocph/woodpecker/cncd/pubsub"
-	"github.com/laszlocph/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/cncd/logging"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/drone/expr"
 )
