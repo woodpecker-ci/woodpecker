@@ -203,7 +203,7 @@ func setupTree(c *cli.Context) *httptreemux.ContextMux {
 	web.New(
 		web.WithDir(c.String("www")),
 		web.WithSync(time.Hour*72),
-		web.WithDocs(c.String("docs"))
+		web.WithDocs(c.String("docs")),
 	).Register(tree)
 	return tree
 }
