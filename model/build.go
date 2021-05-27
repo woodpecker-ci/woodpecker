@@ -48,7 +48,7 @@ type Build struct {
 	Reviewed     int64    `json:"reviewed_at"   meddler:"build_reviewed"`
 	Procs        []*Proc  `json:"procs,omitempty" meddler:"-"`
 	Files        []*File  `json:"files,omitempty" meddler:"-"`
-	ChangedFiles []string `json:"changed_files,omitempty" meddler:"-"`
+	ChangedFiles []string `json:"changed_files,omitempty" meddler:"changed_files"`
 }
 
 // Trim trims string values that would otherwise exceed
