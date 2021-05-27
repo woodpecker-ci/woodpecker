@@ -28,6 +28,7 @@ export default class Main extends Component {
     super(props, context);
 
     this.fetchNextBuildPage = this.fetchNextBuildPage.bind(this);
+    this.selectBranch = this.selectBranch.bind(this)
   }
 
   componentWillMount() {
@@ -40,7 +41,8 @@ export default class Main extends Component {
       (nextProps.builds !== undefined &&
         this.props.builds !== nextProps.builds) ||
       this.props.error !== nextProps.error ||
-      this.props.loaded !== nextProps.loaded
+      this.props.loaded !== nextProps.loaded ||
+      this.state.branch !== nextState.branch
     );
   }
 
@@ -79,8 +81,15 @@ export default class Main extends Component {
     );
   }
 
+  selectBranch(branch) {
+    this.setState({
+      branch: branch,
+    });
+  }
+
   render() {
     const { repo, builds, loaded, error } = this.props;
+    const { branch } = this.state;
     const list = Object.values(builds || {});
 
     function renderBuild(build) {
@@ -89,6 +98,10 @@ export default class Main extends Component {
           <Item build={build} />
         </Link>
       );
+    }
+
+    const filterBranch = (build) => {
+      return !branch || build.branch === branch;
     }
 
     if (error) {
@@ -109,7 +122,13 @@ export default class Main extends Component {
 
     return (
       <div className={styles.root}>
-        <List>{list.sort(compareBuild).map(renderBuild)}</List>
+        <div className={styles.right}>
+          {!branch ?
+            <button onClick={() => this.selectBranch(repo.default_branch)}>Show {repo.default_branch} branch only</button> :
+            <button onClick={() => this.selectBranch(undefined)}>Show all branches</button>
+          }
+        </div>
+        <List>{list.sort(compareBuild).filter(filterBranch).map(renderBuild)}</List>
         {list.length < repo.last_build && (
           <button
             onClick={() => this.fetchNextBuildPage(list)}
