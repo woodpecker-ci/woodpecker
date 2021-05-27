@@ -9,7 +9,7 @@
     "lesshint": "lesshint --config .lesshintrc src/",
     "test": "jest",
     "start": "webpack-dev-server --progress --hot --inline",
-    "format": "prettier --use-tabs --trailing-comma all --write {src/*.js,src/**/*.js,src/**/*/*.js,src/*/*/*/*.js,src/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*/*.js}"
+    "format": "prettier --trailing-comma all --write {src/*.js,src/**/*.js,src/**/*/*.js,src/*/*/*/*.js,src/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*.js,src/*/*/*/*/*/*/*.js}"
   },
   "jest": {
     "moduleFileExtensions": [
