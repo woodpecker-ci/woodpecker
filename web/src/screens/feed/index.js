@@ -172,7 +172,7 @@ const LOGO = (
       <br />
       <span>
         <a
-          href="https://woodpecker.laszlo.cloud"
+          href={window.DRONE_DOCS}
           target="_blank"
           rel="noopener noreferrer"
         >
