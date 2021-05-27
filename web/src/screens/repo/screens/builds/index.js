@@ -100,7 +100,7 @@ export default class Main extends Component {
       );
     }
 
-    const filterBranch = (build) => {
+    const filterBranch = build => {
       return !branch || build.branch === branch;
     };
 
@@ -134,7 +134,10 @@ export default class Main extends Component {
           )}
         </div>
         <List>
-          {list.sort(compareBuild).filter(filterBranch).map(renderBuild)}
+          {list
+            .sort(compareBuild)
+            .filter(filterBranch)
+            .map(renderBuild)}
         </List>
         {list.length < repo.last_build && (
           <button
