@@ -74,10 +74,6 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
 
-func setupPubsub(c *cli.Context)        {}
-func setupStream(c *cli.Context)        {}
-func setupGatingService(c *cli.Context) {}
-
 // helper function to setup the remote from the CLI arguments.
 func SetupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
