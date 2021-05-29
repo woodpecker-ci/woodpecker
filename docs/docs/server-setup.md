@@ -18,12 +18,12 @@ services:
       - woodpecker-server-data:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 
   woodpecker-agent:
     image: laszlocloud/woodpecker-agent:v0.9.0
@@ -34,8 +34,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 
 volumes:
   woodpecker-server-data:
@@ -45,7 +45,7 @@ volumes:
 >
 > If you have 4 agents installed and connected to the Drone server, your system will process 4 builds in parallel.
 >
-> You can add more agents to increase the number of parallel builds or set the agent's `DRONE_MAX_PROCS=1` environment variable to increase the number of parallel builds for that agent.
+> You can add more agents to increase the number of parallel builds or set the agent's `WOODPECKER_MAX_PROCS=1` environment variable to increase the number of parallel builds for that agent.
 
 
 Woodpecker needs to know its own address.
@@ -57,12 +57,12 @@ services:
   woodpecker-server:
     image: laszlocloud/woodpecker-server:v0.9.0
     environment:
-      - DRONE_OPEN=true
-+     - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
++     - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 Agents require access to the host machine's Docker daemon.
@@ -90,8 +90,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-+     - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
++     - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 The server and agents use a shared secret to authenticate communication.
@@ -103,18 +103,18 @@ services:
   woodpecker-server:
     image: laszlocloud/woodpecker-server:v0.9.0
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-+     - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
++     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
   woodpecker-agent:
     image: laszlocloud/woodpecker-agent:v0.9.0
     environment:
-      - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_DEBUG=true
-+     - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_DEBUG=true
++     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 Registration is closed by default.
@@ -126,13 +126,13 @@ services:
   woodpecker-server:
     image: laszlocloud/woodpecker-server:v0.9.0
     environment:
-+     - DRONE_OPEN=true
-+     - DRONE_ORGS=dolores,dogpatch
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
++     - WOODPECKER_OPEN=true
++     - WOODPECKER_ORGS=dolores,dogpatch
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 Administrators should also be enumerated in your configuration.
@@ -142,14 +142,14 @@ services:
   woodpecker-server:
     image: laszlocloud/woodpecker-server:v0.9.0
     environment:
-      - DRONE_OPEN=true
-      - DRONE_ORGS=dolores,dogpatch
-+     - DRONE_ADMIN=johnsmith,janedoe
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ORGS=dolores,dogpatch
++     - WOODPECKER_ADMIN=johnsmith,janedoe
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 
@@ -230,17 +230,17 @@ spec:
         imagePullPolicy: Always
         name: woodpecker
         env:
-          - name: "DRONE_ADMIN"
+          - name: "WOODPECKER_ADMIN"
             value: "xxx"
-          - name: "DRONE_HOST"
+          - name: "WOODPECKER_HOST"
             value: "https://xxx"
-          - name: "DRONE_GITHUB"
+          - name: "WOODPECKER_GITHUB"
             value: "true"
-          - name: "DRONE_GITHUB_CLIENT"
+          - name: "WOODPECKER_GITHUB_CLIENT"
             value: "xxx"
-          - name: "DRONE_GITHUB_SECRET"
+          - name: "WOODPECKER_GITHUB_SECRET"
             value: "xxx"
-          - name: "DRONE_SECRET"
+          - name: "WOODPECKER_SECRET"
             value: "xxx"
         volumeMounts:
           - name: sqlite-volume
@@ -330,9 +330,9 @@ spec:
           containerPort: 3000
           protocol: TCP
         env:
-          - name: DRONE_SERVER
+          - name: WOODPECKER_SERVER
             value: woodpecker.tools.svc.cluster.local:9000
-          - name: DRONE_SECRET
+          - name: WOODPECKER_SECRET
             value: "xxx"
         resources:
           limits:
@@ -364,19 +364,19 @@ spec:
 
 Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of Github, you may end up syncing more repos into Woodpecker than preferred.
 
-Use the `DRONE_REPO_OWNERS` variable to filter which Github user's repos should be synced only. You typically want to put here your company's Github name.
+Use the `WOODPECKER_REPO_OWNERS` variable to filter which Github user's repos should be synced only. You typically want to put here your company's Github name.
 
 ```diff
 services:
   woodpecker-server:
     image: laszlocloud/woodpecker-server:v0.9.0
     environment:
-      - DRONE_OPEN=true
-      - DRONE_ORGS=dolores,dogpatch
-+     - DRONE_REPO_OWNERS=mycompany,mycompanyossgithubuser
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ORGS=dolores,dogpatch
++     - WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
