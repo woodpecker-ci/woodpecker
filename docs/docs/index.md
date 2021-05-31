@@ -11,7 +11,7 @@ Woodpecker is a simple CI engine with great extensibility.
 - Run any command in the commands section
 
 ```yaml
-# .woodpecker.yml
+# .drone.yml
 pipeline:
   build:
     image: debian
@@ -43,7 +43,7 @@ pipeline:
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
-# .woodpecker.yml
+# .drone.yml
 pipeline:
   build:
     image: debian
