@@ -92,13 +92,13 @@ var flags = []cli.Flag{
 		Value:  time.Second * 20,
 	},
 	cli.BoolFlag{
+		EnvVar: "WOODPECKER_GRPC_SECURE",
 		Name:   "secure-grpc",
 		Usage:  "should the connection to WOODPECKER_SERVER be made using a secure transport",
-		EnvVar: "WOODPECKER_GRPC_SECURE",
 	},
 	cli.BoolTFlag{
+		EnvVar: "WOODPECKER_GRPC_VERIFY",
 		Name:   "skip-insecure-grpc",
 		Usage:  "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		EnvVar: "WOODPECKER_GRPC_VERIFY",
 	},
 }
