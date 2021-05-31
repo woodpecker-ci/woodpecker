@@ -133,7 +133,7 @@ var flags = []cli.Flag{
 		Name:   "network",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_AGENT_SECRET,WOODPECKER_SECRET",
+		EnvVar: "WOODPECKER_AGENT_SECRET",
 		Name:   "agent-secret",
 		Usage:  "server-agent shared password",
 	},
