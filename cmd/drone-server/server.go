@@ -703,16 +703,12 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	droneserver.Config.Pipeline.Networks = c.StringSlice("network")
 	droneserver.Config.Pipeline.Volumes = c.StringSlice("volume")
 	droneserver.Config.Pipeline.Privileged = c.StringSlice("escalate")
-	// droneserver.Config.Server.Open = cli.Bool("open")
-	// droneserver.Config.Server.Orgs = sliceToMap(cli.StringSlice("orgs"))
-	// droneserver.Config.Server.Admins = sliceToMap(cli.StringSlice("admin"))
 
 	// prometheus
 	droneserver.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
 }
 
 type authorizer struct {
-	username string
 	password string
 }
 
