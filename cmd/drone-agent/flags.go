@@ -34,7 +34,7 @@ var flags = []cli.Flag{
 		Value:  "x-oauth-basic",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_PASSWORD,WOODPECKER_SECRET",
+		EnvVar: "WOODPECKER_AGENT_SECRET",
 		Name:   "password",
 		Usage:  "server-agent shared password",
 	},
