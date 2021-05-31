@@ -6,7 +6,7 @@ Woodpecker is a simple CI engine with great extensibility.
 
 ## .woodpecker.yml
 
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Place your pipeline in a file named `.drone.yml` in your repository
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
