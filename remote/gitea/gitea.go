@@ -139,13 +139,13 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	client, err := c.newClientToken("")
+	// Create Client with Basic Auth
+	client, err := c.newClientBasicAuth(username, password)
 	if err != nil {
 		return nil, err
 	}
 
 	// since api does not return token secret, if drone token exists create new one
-	client.SetBasicAuth(username, password)
 	resp, err := client.DeleteAccessToken("drone")
 	if err != nil && !(resp != nil && resp.StatusCode == 404) {
 		return nil, err
@@ -392,7 +392,7 @@ func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
-// helper function to return the Gitea client
+// helper function to return the Gitea client with Token
 func (c *client) newClientToken(token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
@@ -401,6 +401,17 @@ func (c *client) newClientToken(token string) (*gitea.Client, error) {
 		}
 	}
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
+}
+
+// helper function to return the Gitea client with Basic Auth
+func (c *client) newClientBasicAuth(username, password string) (*gitea.Client, error) {
+	httpClient := &http.Client{}
+	if c.SkipVerify {
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+	return gitea.NewClient(c.URL, gitea.SetBasicAuth(username, password), gitea.SetHTTPClient(httpClient))
 }
 
 // helper function to return matching hooks.
