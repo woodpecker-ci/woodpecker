@@ -166,7 +166,7 @@ func server(c *cli.Context) error {
 		return err
 	}
 
-	dir := cacheDir(c.String("lets-encrypt-path"))
+	dir := cacheDir()
 	os.MkdirAll(dir, 0700)
 
 	manager := &autocert.Manager{
@@ -276,10 +276,10 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
 }
 
-func cacheDir(path string) string {
+func cacheDir() string {
 	const base = "golang-autocert"
-	if path != "" {
-		return filepath.Join(path, base)
+	if xdg := os.Getenv("XDG_CACHE_HOME"); xdg != "" {
+		return filepath.Join(xdg, base)
 	}
 	return filepath.Join(os.Getenv("HOME"), ".cache", base)
 }
