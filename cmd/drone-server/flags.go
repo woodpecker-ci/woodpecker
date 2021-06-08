@@ -52,11 +52,6 @@ var flags = []cli.Flag{
 		Name:   "lets-encrypt",
 		Usage:  "enable let's encrypt",
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_LETS_ENCRYPT_PATH",
-		Name:   "lets-encrypt-path",
-		Usage:  "base path for Let's Encrypt certificates",
-	},
 	cli.BoolFlag{
 		EnvVar: "WOODPECKER_QUIC",
 		Name:   "quic",
