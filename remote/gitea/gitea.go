@@ -139,8 +139,8 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	// Create Client with Basic Auth
-	client, err := c.newClientBasicAuth(username, password)
+	// Create Client with Basic Auth or Token
+	client, err := c.newClient(username, password)
 	if err != nil {
 		return nil, err
 	}
@@ -403,8 +403,13 @@ func (c *client) newClientToken(token string) (*gitea.Client, error) {
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
 }
 
-// helper function to return the Gitea client with Basic Auth
-func (c *client) newClientBasicAuth(username, password string) (*gitea.Client, error) {
+// newClient is a helper function to return the Gitea client.
+// If username and password is set, Basic Auth is used.
+// If only username is set, it is used as token.
+func (c *client) newClient(username, password string) (*gitea.Client, error) {
+	if len(password) == 0 {
+		return c.newClientToken(username)
+	}
 	httpClient := &http.Client{}
 	if c.SkipVerify {
 		httpClient.Transport = &http.Transport{
