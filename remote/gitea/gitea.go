@@ -23,6 +23,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path"
+	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -295,7 +297,44 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 }
 
 func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	var errors string
+	var configs []*remote.FileMeta
+
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	// List files in repository. Path from root
+	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	if err != nil {
+		return nil, err
+	}
+
+	f = path.Clean(f) // We clean path and remove trailing slash
+	f += "/" + "*"    // construct pattern for match i.e. file in subdir
+	for _, e := range tree.Entries {
+		// Filter path matching pattern and type file (blob)
+		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
+			data, err := c.File(u, r, b, e.Path)
+			if err != nil {
+				errors += fmt.Sprintf("cannot get %s: %s", e.Path, err)
+			}
+
+			config := remote.FileMeta{
+				Name: e.Path,
+				Data: data,
+			}
+
+			configs = append(configs, &config)
+		}
+	}
+
+	if errors != "" {
+		return configs, fmt.Errorf("errors get multi-pipeline: %s", errors)
+	}
+
+	return configs, nil
 }
 
 // Status is supported by the Gitea driver.
