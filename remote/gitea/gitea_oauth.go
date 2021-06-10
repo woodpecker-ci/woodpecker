@@ -64,7 +64,7 @@ func NewOauth(opts Opts) (remote.Remote, error) {
 		URL:         opts.URL,
 		Context:     opts.Context,
 		Machine:     url.Host,
-		Client: 	 opts.Client,
+		Client:      opts.Client,
 		Secret:      opts.Secret,
 		Username:    opts.Username,
 		Password:    opts.Password,
