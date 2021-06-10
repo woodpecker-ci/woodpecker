@@ -321,12 +321,10 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 				errors += fmt.Sprintf("cannot get %s: %s", e.Path, err)
 			}
 
-			config := remote.FileMeta{
+			configs = append(configs, &remote.FileMeta{
 				Name: e.Path,
 				Data: data,
-			}
-
-			configs = append(configs, &config)
+			})
 		}
 	}
 
