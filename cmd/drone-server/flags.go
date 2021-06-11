@@ -307,6 +307,16 @@ var flags = []cli.Flag{
 		Value:  "https://try.gitea.io",
 	},
 	cli.StringFlag{
+		EnvVar: "DRONE_GITEA_CLIENT,WOODPECKER_GITEA_CLIENT",
+		Name:   "gitea-client",
+		Usage:  "gitea oauth2 client id",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_GITEA_SECRET,WOODPECKER_GITEA_SECRET",
+		Name:   "gitea-secret",
+		Usage:  "gitea oauth2 client secret",
+	},
+	cli.StringFlag{
 		EnvVar: "DRONE_GITEA_CONTEXT,WOODPECKER_GITEA_CONTEXT",
 		Name:   "gitea-context",
 		Usage:  "gitea status context",
