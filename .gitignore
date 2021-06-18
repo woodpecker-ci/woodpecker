@@ -1,4 +1,36 @@
-drone/drone
+### IDEs ###
+.idea/
+.vscode/
+!.vscode/launch.json
+
+### GO ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories
+# vendor/
+
+### Frontend ###
+web/node_modules
+web/dist/files
+web/*.log
+web/.env
+
+### Docker ###
+docker-compose.yml
+
+### Other ##
+# runetime build relicts
 *.sqlite
 *.out
 /.env
@@ -8,11 +40,5 @@ cli/release/
 
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
-.idea/
-
-web/node_modules
-web/dist/files
-web/*.log
-web/.env
 
 docs/venv

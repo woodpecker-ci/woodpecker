@@ -34,12 +34,12 @@ pipeline:
 - Install the needed tools in custom Docker images, use them as context
 
 ```diff
-pipeline:
-  build:
+ pipeline:
+   build:
 -    image: debian
-+   image: mycompany/image-with-awscli
-    commands:
-      - aws help
++    image: mycompany/image-with-awscli
+     commands:
+       - aws help
 ```
 
 ## File changes are incremental
