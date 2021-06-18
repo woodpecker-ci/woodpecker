@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make deps
       - make test
+      - make formatcheck
 
   test-frontend:
     image: node:10.17.0-stretch
