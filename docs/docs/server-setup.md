@@ -10,7 +10,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -26,7 +26,7 @@ services:
       - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     command: agent
     restart: always
     depends_on:
@@ -55,7 +55,7 @@ You must therefore provide the address in `<scheme>://<hostname>` format. Please
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
@@ -70,7 +70,7 @@ Agents require access to the host machine's Docker daemon.
 ```diff
 services:
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     command: agent
     restart: always
     depends_on: [ woodpecker-server ]
@@ -83,7 +83,7 @@ Agents require the server address for agent-to-server communication.
 ```diff
 services:
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     command: agent
     restart: always
     depends_on: [ woodpecker-server ]
@@ -101,7 +101,7 @@ This should be a random string of your choosing and should be kept private. You 
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_HOST=${WOODPECKER_HOST}
@@ -110,7 +110,7 @@ services:
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
 +     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
       - WOODPECKER_DEBUG=true
@@ -124,7 +124,7 @@ This example enables open registration for users that are members of approved Gi
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
 +     - WOODPECKER_OPEN=true
 +     - WOODPECKER_ORGS=dolores,dogpatch
@@ -140,7 +140,7 @@ Administrators should also be enumerated in your configuration.
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ORGS=dolores,dogpatch
@@ -168,7 +168,7 @@ See the [database settings](/administration/database) page to configure Postgres
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -226,7 +226,7 @@ spec:
         prometheus.io/scrape: 'true'
     spec:
       containers:
-      - image: laszlocloud/woodpecker-server:v0.13.0-rc.3
+      - image: woodpeckerci/woodpecker-server:latest
         imagePullPolicy: Always
         name: woodpecker
         env:
@@ -323,7 +323,7 @@ spec:
     spec:
       containers:
       - name: agent
-        image: laszlocloud/woodpecker-agent:v0.13.0-rc.3
+        image: woodpeckerci/woodpecker-agent:latest
         imagePullPolicy: Always
         ports:
         - name: http
@@ -369,7 +369,7 @@ Use the `WOODPECKER_REPO_OWNERS` variable to filter which Github user's repos sh
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ORGS=dolores,dogpatch

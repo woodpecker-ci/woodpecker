@@ -103,7 +103,7 @@ WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```.diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ORGS=dolores,dogpatch

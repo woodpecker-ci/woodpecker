@@ -1,4 +1,4 @@
-# docker build --rm -t drone/drone .
+# docker build --rm -t woodpeckerci/woodpecker-server .
 
 FROM drone/ca-certs
 EXPOSE 8000 9000 80 443
