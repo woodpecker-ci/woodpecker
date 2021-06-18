@@ -15,9 +15,9 @@
 package datastore
 
 import (
+	"github.com/russross/meddler"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
-	"github.com/russross/meddler"
 )
 
 func (db *datastore) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {

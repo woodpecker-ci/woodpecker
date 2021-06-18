@@ -110,15 +110,15 @@ func (t *InfoT) String() string {
 	var sb strings.Builder
 
 	for _, task := range t.Pending {
-		sb.WriteString("\t" +  task.String())
+		sb.WriteString("\t" + task.String())
 	}
 
 	for _, task := range t.Running {
-		sb.WriteString("\t" +  task.String())
+		sb.WriteString("\t" + task.String())
 	}
 
 	for _, task := range t.WaitingOnDeps {
-		sb.WriteString("\t" +  task.String())
+		sb.WriteString("\t" + task.String())
 	}
 
 	return sb.String()

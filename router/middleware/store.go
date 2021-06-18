@@ -15,8 +15,8 @@
 package middleware
 
 import (
-	"github.com/woodpecker-ci/woodpecker/store"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 )

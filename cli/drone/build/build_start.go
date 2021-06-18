@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 )
 
 var buildStartCmd = cli.Command{

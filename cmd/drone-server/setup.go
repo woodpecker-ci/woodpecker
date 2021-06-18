@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"github.com/dimfeld/httptreemux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/plugins/environments"
@@ -37,8 +39,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/web"
 	"github.com/woodpecker-ci/woodpecker/store"
 	"github.com/woodpecker-ci/woodpecker/store/datastore"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"

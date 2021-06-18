@@ -28,10 +28,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/mrjones/oauth"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/remote/bitbucketserver/internal"
-	"github.com/mrjones/oauth"
 )
 
 const (
