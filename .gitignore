@@ -30,12 +30,13 @@ web/.env
 docker-compose.yml
 
 ### Other ##
-# runetime build relicts
+# runetime or build relicts
 *.sqlite
 *.out
 /.env
 extras/
 release/
+build/
 cli/release/
 
 server/swagger/files/*.json
