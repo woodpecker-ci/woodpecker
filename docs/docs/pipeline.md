@@ -401,7 +401,7 @@ Execute a step only on commit excluding certain files added/removed/modified:
 ```diff
 when:
   path:
-    exclude: *.md
+    exclude: "*.md"
 ```
 
 > Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
