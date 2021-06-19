@@ -390,7 +390,7 @@ Execute a step only on commit with certain files added/removed/modified:
 
 ```diff
 when:
-  path: src/*
+  path: "src/*"
 ```
 
 Execute a step only on commit excluding certain files added/removed/modified:
