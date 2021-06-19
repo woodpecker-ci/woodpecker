@@ -200,6 +200,10 @@ var migrations = []struct {
 		name: "add-builds-changed_files-column",
 		stmt: addBuildsChangedfilesColumn,
 	},
+	{
+		name: "update-builds-set-changed_files",
+		stmt: updateBuildsSetChangedfiles,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -737,4 +741,8 @@ UPDATE repos SET repo_fallback='false'
 
 var addBuildsChangedfilesColumn = `
 ALTER TABLE builds ADD COLUMN changed_files TEXT
+`
+
+var updateBuildsSetChangedfiles = `
+UPDATE builds SET changed_files='[]'
 `
