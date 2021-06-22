@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make deps
       - make test
+      - make vet
       - make formatcheck
 
   test-frontend:
