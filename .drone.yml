@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make deps
       - make test
+      - make formatcheck
 
   test-frontend:
     image: node:10.17.0-stretch
@@ -49,7 +50,7 @@ pipeline:
       - (cd web/; go generate ./...)
       - ./.drone.sh
     when:
-      event: [ push, tag ]
+      event: [push, tag]
 
   # publish-server-alpine:
   #   image: plugins/docker
@@ -68,8 +69,8 @@ pipeline:
   publish-server:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
-    secrets: [ docker_username, docker_password ]
-    tag: [ latest ]
+    secrets: [docker_username, docker_password]
+    tag: [latest]
     when:
       branch: master
       event: push
@@ -78,8 +79,8 @@ pipeline:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: Dockerfile.agent
-    secrets: [ docker_username, docker_password ]
-    tag: [ latest ]
+    secrets: [docker_username, docker_password]
+    tag: [latest]
     when:
       branch: master
       event: push
@@ -94,28 +95,28 @@ pipeline:
   #     branch: master
   #     event: push
 
-#  release-server-alpine:
-#    image: plugins/docker
-#    repo: woodpeckerci/woodpecker-server
-#    dockerfile: Dockerfile.alpine
-#    secrets: [ docker_username, docker_password ]
-#    tag: "${DRONE_TAG}-alpine"
-#    when:
-#      event: tag
-#
-#  release-agent-alpine:
-#    image: plugins/docker
-#    repo: woodpeckerci/woodpecker-agent
-#    dockerfile: Dockerfile.agent.alpine
-#    secrets: [ docker_username, docker_password ]
-#    tag: "${DRONE_TAG}-alpine"
-#    when:
-#      event: tag
+  # release-server-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-server
+  #   dockerfile: Dockerfile.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: "${DRONE_TAG}-alpine"
+  #   when:
+  #     event: tag
+  #
+  # release-agent-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-agent
+  #   dockerfile: Dockerfile.agent.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: "${DRONE_TAG}-alpine"
+  #   when:
+  #     event: tag
 
   release-server:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     tag: ${DRONE_TAG}
     when:
       event: tag
@@ -124,7 +125,7 @@ pipeline:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: Dockerfile.agent
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     tag: ${DRONE_TAG}
     when:
       event: tag

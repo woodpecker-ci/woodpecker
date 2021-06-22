@@ -27,12 +27,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"

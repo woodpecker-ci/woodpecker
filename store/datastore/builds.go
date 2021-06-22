@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/russross/meddler"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
-	"github.com/russross/meddler"
 )
 
 func (db *datastore) GetBuild(id int64) (*model.Build, error) {

@@ -206,7 +206,7 @@ func TestFifoErrors2(t *testing.T) {
 	}
 
 	task2 := &Task{
-		ID:           "2",
+		ID: "2",
 	}
 
 	task3 := &Task{
@@ -220,7 +220,7 @@ func TestFifoErrors2(t *testing.T) {
 
 	for i := 0; i < 2; i++ {
 		got, _ := q.Poll(noContext, func(*Task) bool { return true })
-		if got != task1 && got != task2{
+		if got != task1 && got != task2 {
 			t.Errorf("expect task1 or task2 returned from queue as task3 depends on them")
 			return
 		}

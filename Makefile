@@ -1,9 +1,10 @@
-GO_VERSION=1.16
+DOCKER_RUN_GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
+GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 DOCKER_RUN?=
 _with-docker:
-	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(GO_VERSION))
+	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(DOCKER_RUN_GO_VERSION))
 
 all: deps build
 
@@ -16,13 +17,23 @@ deps:
 	go get -d github.com/jackspirou/syscerts
 
 formatcheck:
-	([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR))" ]) || (echo "Source is unformatted"; exit 1)
+	@([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR) | head)" ]) || (echo "Source is unformatted"; exit 1)
 
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
+.PHONY: clean
+clean:
+	go clean -i ./...
+	rm -rf build
+
+.PHONY: vet
+vet:
+	@echo "Running go vet..."
+	@go vet $(GO_PACKAGES)
+
 test-agent:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-agent $(go list ./... | grep -v /vendor/)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-agent $(GO_PACKAGES)
 
 test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-server
