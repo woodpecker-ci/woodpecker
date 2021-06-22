@@ -2,6 +2,17 @@ DOCKER_RUN_GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
+VERSION ?= ${DRONE_TAG}
+ifeq ($(VERSION),)
+	VERSION := $(shell echo ${DRONE_COMMIT_SHA} | head -c 8)
+endif
+
+LDFLAGS ?= -extldflags "-static"
+ifneq ($(VERSION),)
+	LDFLAGS := ${LDFLAGS} -X github.com/woodpecker-ci/woodpecker/version.Version=${VERSION}
+endif
+
+
 DOCKER_RUN?=
 _with-docker:
 	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(DOCKER_RUN_GO_VERSION))
@@ -61,6 +72,14 @@ build-frontend:
 
 
 build: build-agent build-server
+
+release-agent:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
+
+release-server:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+
+release: release-agent release-server
 
 install:
 	go install github.com/woodpecker-ci/woodpecker/cmd/drone-agent

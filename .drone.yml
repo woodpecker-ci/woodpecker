@@ -48,7 +48,7 @@ pipeline:
     commands:
       - go get github.com/woodpecker-ci/togo
       - (cd web/; go generate ./...)
-      - ./.drone.sh
+      - make release
     when:
       event: [push, tag]
 
