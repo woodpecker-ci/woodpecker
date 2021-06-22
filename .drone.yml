@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make deps
       - make test
+      - make vet
       - make formatcheck
 
   test-frontend:
@@ -64,7 +65,7 @@ pipeline:
 
   build-cli:
     image: golang:1.16
-    commands: sh .cli.sh
+    commands: make release-cli
 
   publish-server:
     image: plugins/docker
