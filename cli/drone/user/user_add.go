@@ -3,8 +3,8 @@ package user
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
 
 	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 )
