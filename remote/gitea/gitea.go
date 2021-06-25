@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package gitea
 
@@ -22,14 +25,16 @@ import (
 	"net/url"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 // Opts defines configuration options.
 type Opts struct {
 	URL         string // Gitea server url.
 	Context     string // Context to display in status check
+	Client      string // OAuth2 Client ID
+	Secret      string // OAuth2 Client Secret
 	Username    string // Optional machine account username.
 	Password    string // Optional machine account password.
 	PrivateMode bool   // Gitea is running in private mode.
@@ -136,13 +141,13 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	client, err := c.newClientToken("")
+	// Create Client with Basic Auth
+	client, err := c.newClientBasicAuth(username, password)
 	if err != nil {
 		return nil, err
 	}
 
 	// since api does not return token secret, if drone token exists create new one
-	client.SetBasicAuth(username, password)
 	resp, err := client.DeleteAccessToken("drone")
 	if err != nil && !(resp != nil && resp.StatusCode == 404) {
 		return nil, err
@@ -229,15 +234,41 @@ func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 		return nil, err
 	}
 
-	all, _, err := client.ListMyRepos(gitea.ListReposOptions{})
-	if err != nil {
-		return repos, err
+	// Gitea SDK forces us to read repo list paginated.
+	var page int = 1
+	for {
+		all, _, err := client.ListMyRepos(
+			gitea.ListReposOptions{
+				ListOptions: gitea.ListOptions{
+					Page:     page,
+					PageSize: 50, // Gitea SDK limit per page.
+				},
+			},
+		)
+
+		// Gitea SDK does not return error when asking for
+		// non existing repos page (empty list is returned)
+		// so this should be safe.
+		if err != nil {
+			return repos, err
+		}
+
+		for _, repo := range all {
+			repos = append(repos, toRepo(repo, c.PrivateMode))
+		}
+
+		// Check if no more repos are available; we don't test len(all) < 50
+		// because of Gitea SDK bug https://gitea.com/gitea/go-sdk/issues/507.
+		if len(all) == 0 {
+			// Empty page returned - finish loop.
+			break
+		} else {
+			// Last page was not empty so more repos may be available - continue loop.
+			page = page + 1
+		}
 	}
 
-	for _, repo := range all {
-		repos = append(repos, toRepo(repo, c.PrivateMode))
-	}
-	return repos, err
+	return repos, nil
 }
 
 // Perm returns the user permissions for the named Gitea repository.
@@ -363,7 +394,7 @@ func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
-// helper function to return the Gitea client
+// helper function to return the Gitea client with Token
 func (c *client) newClientToken(token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
@@ -372,6 +403,17 @@ func (c *client) newClientToken(token string) (*gitea.Client, error) {
 		}
 	}
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
+}
+
+// helper function to return the Gitea client with Basic Auth
+func (c *client) newClientBasicAuth(username, password string) (*gitea.Client, error) {
+	httpClient := &http.Client{}
+	if c.SkipVerify {
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+	return gitea.NewClient(c.URL, gitea.SetBasicAuth(username, password), gitea.SetHTTPClient(httpClient))
 }
 
 // helper function to return matching hooks.

@@ -7,7 +7,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -28,7 +28,7 @@ services:
 +     - /path/to/key.pem:/path/to/key.pem
 
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     restart: always
     depends_on:
       - woodpecker-server
@@ -62,7 +62,7 @@ version: '2'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
     - DRONE_OPEN=true
     - DRONE_HOST=${DRONE_HOST}
@@ -84,7 +84,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
     - DRONE_OPEN=true
     - DRONE_HOST=${DRONE_HOST}

@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/laszlocph/woodpecker/remote/bitbucket/fixtures"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucket/fixtures"
 
 	"github.com/franela/goblin"
 )

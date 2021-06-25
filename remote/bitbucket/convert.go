@@ -20,8 +20,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucket/internal"
 
 	"golang.org/x/oauth2"
 )

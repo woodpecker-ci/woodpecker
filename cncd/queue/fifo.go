@@ -356,8 +356,8 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 		}
 	}
 
-	var n *list.Element
-	for e := q.waitingOnDeps.Front(); e != nil; e = n {
+	next = nil
+	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
 		waiting, ok := e.Value.(*Task)
 		for _, dep := range waiting.Dependencies {

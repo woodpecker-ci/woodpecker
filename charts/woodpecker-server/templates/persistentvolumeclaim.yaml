@@ -1,0 +1,17 @@
+{{- if .Values.persistentVolume.enabled -}}
+{{- if not .Values.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "woodpecker-server.fullname" . }}
+  labels:
+  {{- include "woodpecker-server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+  resources:
+    requests:
+      storage: "{{ .Values.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}

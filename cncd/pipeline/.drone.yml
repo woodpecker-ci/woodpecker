@@ -1,15 +1,15 @@
 workspace:
   base: /go
-  path: src/github.com/laszlocph/woodpecker/cncd/pipeline
+  path: src/github.com/woodpecker-ci/woodpecker/cncd/pipeline
 
 pipeline:
   install:
     image: golang:1.8
     commands:
-      - go install github.com/laszlocph/woodpecker/cncd/pipeline/pipec
-      - go install github.com/laszlocph/woodpecker/cncd/pipeline/piped
+      - go install github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipec
+      - go install github.com/woodpecker-ci/woodpecker/cncd/pipeline/piped
 
   test:
     image: golang:1.8
     commands:
-      - go test -cover -timeout 30s github.com/laszlocph/woodpecker/cncd/pipeline/...
+      - go test -cover -timeout 30s github.com/woodpecker-ci/woodpecker/cncd/pipeline/...

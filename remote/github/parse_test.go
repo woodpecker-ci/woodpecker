@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/github/fixtures"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/github/fixtures"
 )
 
 func Test_parser(t *testing.T) {

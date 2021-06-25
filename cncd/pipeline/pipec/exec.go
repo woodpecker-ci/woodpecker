@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/docker"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/kubernetes"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/interrupt"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/kubernetes"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/interrupt"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
 )
 
 var executeCommand = cli.Command{

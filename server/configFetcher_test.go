@@ -3,8 +3,8 @@ package server
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/github"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/github"
 )
 
 func TestFetchGithub(t *testing.T) {

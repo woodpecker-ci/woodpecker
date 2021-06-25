@@ -16,7 +16,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/version"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // Version is a middleware function that appends the Drone version information
