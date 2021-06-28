@@ -19,12 +19,12 @@ import (
 	"time"
 
 	"github.com/dimfeld/httptreemux"
-	"github.com/laszlocph/woodpecker/plugins/globalsecrets"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/plugins/environments"
+	"github.com/woodpecker-ci/woodpecker/plugins/globalsecrets"
 	"github.com/woodpecker-ci/woodpecker/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/plugins/secrets"
 	"github.com/woodpecker-ci/woodpecker/remote"

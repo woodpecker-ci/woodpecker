@@ -1,7 +1,7 @@
 package globalsecrets
 
 import (
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 )
 
 type builtin struct {
