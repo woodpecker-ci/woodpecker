@@ -200,6 +200,145 @@ func TestFifoErrors(t *testing.T) {
 	}
 }
 
+func TestFifoErrors2(t *testing.T) {
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID: "2",
+	}
+
+	task3 := &Task{
+		ID:           "3",
+		Dependencies: []string{"1", "2"},
+		DepStatus:    make(map[string]string),
+	}
+
+	q := New().(*fifo)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+
+	for i := 0; i < 2; i++ {
+		got, _ := q.Poll(noContext, func(*Task) bool { return true })
+		if got != task1 && got != task2 {
+			t.Errorf("expect task1 or task2 returned from queue as task3 depends on them")
+			return
+		}
+
+		if got != task1 {
+			q.Done(noContext, got.ID, StatusSuccess)
+		}
+		if got != task2 {
+			q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+		}
+	}
+
+	got, _ := q.Poll(noContext, func(*Task) bool { return true })
+	if got != task3 {
+		t.Errorf("expect task3 returned from queue")
+		return
+	}
+
+	if got.ShouldRun() {
+		t.Errorf("expect task3 should not run, task1 succeeded but task2 failed")
+		return
+	}
+}
+
+func TestFifoErrorsMultiThread(t *testing.T) {
+	//logrus.SetLevel(logrus.DebugLevel)
+	task1 := &Task{
+		ID: "1",
+	}
+
+	task2 := &Task{
+		ID:           "2",
+		Dependencies: []string{"1"},
+		DepStatus:    make(map[string]string),
+	}
+
+	task3 := &Task{
+		ID:           "3",
+		Dependencies: []string{"1", "2"},
+		DepStatus:    make(map[string]string),
+	}
+
+	q := New().(*fifo)
+	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+
+	obtainedWorkCh := make(chan *Task)
+
+	for i := 0; i < 10; i++ {
+		go func(i int) {
+			for {
+				fmt.Printf("Worker %d started\n", i)
+				got, _ := q.Poll(noContext, func(*Task) bool { return true })
+				obtainedWorkCh <- got
+			}
+		}(i)
+	}
+
+	task1Processed := false
+	task2Processed := false
+
+	for {
+		select {
+		case got := <-obtainedWorkCh:
+			fmt.Println(got.ID)
+
+			if !task1Processed {
+				if got != task1 {
+					t.Errorf("expect task1 returned from queue as task2 and task3 depends on it")
+					return
+				} else {
+					task1Processed = true
+					q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+					go func() {
+						for {
+							fmt.Printf("Worker spawned\n")
+							got, _ := q.Poll(noContext, func(*Task) bool { return true })
+							obtainedWorkCh <- got
+						}
+					}()
+				}
+			} else if !task2Processed {
+				if got != task2 {
+					t.Errorf("expect task2 returned from queue")
+					return
+				} else {
+					task2Processed = true
+					q.Done(noContext, got.ID, StatusSuccess)
+					go func() {
+						for {
+							fmt.Printf("Worker spawned\n")
+							got, _ := q.Poll(noContext, func(*Task) bool { return true })
+							obtainedWorkCh <- got
+						}
+					}()
+				}
+			} else {
+				if got != task3 {
+					t.Errorf("expect task3 returned from queue")
+					return
+				}
+
+				if got.ShouldRun() {
+					t.Errorf("expect task3 should not run, task1 succeeded but task2 failed")
+					return
+				} else {
+					return
+				}
+			}
+
+		case <-time.After(5 * time.Second):
+			info := q.Info(noContext)
+			fmt.Println(info.String())
+			t.Errorf("test timed out")
+			return
+		}
+	}
+}
+
 func TestFifoTransitiveErrors(t *testing.T) {
 	task1 := &Task{
 		ID: "1",

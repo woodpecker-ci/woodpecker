@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 )
 
 type mockUpdateBuildStore struct {

@@ -5,7 +5,7 @@ Woodpecker supports ssl configuration by mounting certificates into your contain
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
 +     - 80:80
 +     - 443:443
@@ -25,7 +25,7 @@ Update your configuration to expose the following ports:
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
 +     - 80:80
 +     - 443:443
@@ -37,7 +37,7 @@ Update your configuration to mount your certificate and key:
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:80
       - 443:443
@@ -53,7 +53,7 @@ Update your configuration to provide the paths of your certificate and key:
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:80
       - 443:443

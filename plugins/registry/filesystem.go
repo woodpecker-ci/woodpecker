@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
-	"github.com/laszlocph/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/model"
 	"os"
 	"strings"
 )

@@ -4,14 +4,14 @@ Woodpecker is a simple CI engine with great extensibility.
 
 ![woodpecker](/images/woodpecker.png)
 
-## .woodpecker.yml
+## .drone.yml
 
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Place your pipeline in a file named `.drone.yml` in your repository
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
 ```yaml
-# .woodpecker.yml
+# .drone.yml
 pipeline:
   build:
     image: debian
@@ -43,7 +43,7 @@ pipeline:
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
-# .woodpecker.yml
+# .drone.yml
 pipeline:
   build:
     image: debian
@@ -75,7 +75,7 @@ kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
 ```yaml
-# .woodpecker.yml
+# .drone.yml
 pipeline:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin

@@ -20,8 +20,8 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/franela/goblin"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/gitea/fixtures"
 )
 
 func Test_parse(t *testing.T) {

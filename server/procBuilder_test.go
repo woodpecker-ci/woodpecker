@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 func TestMultilineEnvsubst(t *testing.T) {

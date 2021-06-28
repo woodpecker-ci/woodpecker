@@ -19,6 +19,11 @@ export class Details extends Component {
         </section>
 
         <section>
+          <div className={styles.author}>
+            <img src={build.author_avatar} />
+            <span>{build.author}</span>
+          </div>
+
           <BuildTime
             start={build.started_at || build.created_at}
             finish={build.finished_at}

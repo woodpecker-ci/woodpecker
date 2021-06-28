@@ -18,7 +18,7 @@ const renderEnviron = data => {
 class ProcListHolder extends Component {
   constructor(props, context) {
     super(props, context);
-    this.state = { open: false };
+    this.state = { open: !this.props.renderName };
   }
 
   toggleOpen = () => {
@@ -30,6 +30,7 @@ class ProcListHolder extends Component {
     const groupExpandStatus = this.state.open
       ? styles.collapsed
       : styles.expanded;
+
     return (
       <div className={styles.list}>
         {renderName && vars.name !== "drone" ? (

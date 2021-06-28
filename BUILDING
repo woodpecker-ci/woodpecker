@@ -14,7 +14,7 @@ curl -o swagger -L'#' "$download_url"
 chmod +x swagger
 sudo mv swagger /usr/local/bin
 
-go get github.com/laszlocph/togo
+go get github.com/woodpecker-ci/togo
 
 go generate
 

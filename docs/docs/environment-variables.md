@@ -94,26 +94,26 @@ This is the reference list of all environment variables available to your build 
 
 ## Global environment variables
 
-If you want specific environment variables to be available in all of your builds use the `DRONE_ENVIRONMENT` setting on the Woodpecker server.
+If you want specific environment variables to be available in all of your builds use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server.
 
 ```.env
-DRONE_ENVIRONMENT=first_var:value1,second_var:value2
+WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 ```.diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
-      - DRONE_OPEN=true
-      - DRONE_ORGS=dolores,dogpatch
-      - DRONE_ADMIN=johnsmith,janedoe
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
-+     - DRONE_ENVIRONMENT=first_var:value1,second_var:value2
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ORGS=dolores,dogpatch
+      - WOODPECKER_ADMIN=johnsmith,janedoe
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 ## String Substitution

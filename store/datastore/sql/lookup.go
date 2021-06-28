@@ -15,9 +15,9 @@
 package sql
 
 import (
-	"github.com/laszlocph/woodpecker/store/datastore/sql/mysql"
-	"github.com/laszlocph/woodpecker/store/datastore/sql/postgres"
-	"github.com/laszlocph/woodpecker/store/datastore/sql/sqlite"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/sql/mysql"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/sql/postgres"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/sql/sqlite"
 )
 
 // Supported database drivers
