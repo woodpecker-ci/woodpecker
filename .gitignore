@@ -18,7 +18,7 @@
 *.out
 
 # Dependency directories
-# vendor/
+vendor/
 
 ### Frontend ###
 web/node_modules
