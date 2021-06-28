@@ -299,7 +299,6 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 }
 
 func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	var errors string
 	var configs []*remote.FileMeta
 
 	client, err := c.newClientToken(u.Token)
@@ -320,7 +319,7 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
 			data, err := c.File(u, r, b, e.Path)
 			if err != nil {
-				errors += fmt.Sprintf("cannot get %s: %s", e.Path, err)
+				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
 			}
 
 			configs = append(configs, &remote.FileMeta{
@@ -328,10 +327,6 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 				Data: data,
 			})
 		}
-	}
-
-	if errors != "" {
-		return configs, fmt.Errorf("errors get multi-pipeline: %s", errors)
 	}
 
 	return configs, nil
