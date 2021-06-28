@@ -39,6 +39,7 @@ type (
 		Exclude map[string]string
 	}
 
+	// ConstraintPath defines a runtime constrain for paths
 	ConstraintPath struct {
 		Include       []string
 		Exclude       []string
@@ -201,6 +202,8 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// Match returns true if file paths in string slice matches the include and not exclude patterns
+//  or if commit message contains ignore message.
 func (c *ConstraintPath) Match(v []string, message string) bool {
 	// ignore file pattern matches if the commit message contains a pattern
 	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
