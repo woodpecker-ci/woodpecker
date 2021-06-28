@@ -48,8 +48,8 @@ github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/docker/libcompose v0.4.0 h1:zK7Ug0lCxPB8FDFNdCvR2ZjJjeJZ/607lfAYkp1hrtc=
 github.com/docker/libcompose v0.4.0/go.mod h1:EyqDS+Iyca0hS44T7qIMTeO1EOYWWWNOGpufHu9R8cs=
-github.com/drone/envsubst v1.0.2 h1:dpYLMAspQHW0a8dZpLRKe9jCNvIGZPhCPrycZzIHdqo=
-github.com/drone/envsubst v1.0.2/go.mod h1:bkZbnc/2vh1M12Ecn7EYScpI4YGYU0etwLJICOWi8Z0=
+github.com/drone/envsubst v1.0.3 h1:PCIBwNDYjs50AsLZPYdfhSATKaRg/FJmDc2D6+C2x8g=
+github.com/drone/envsubst v1.0.3/go.mod h1:N2jZmlMufstn1KEqvbHjw40h1KyTmnVzHcSc9bFiJ2g=
 github.com/drone/expr v0.0.0-20170909060652-c0e474cb2b07 h1:MulatomO8V30vVuzzUq6pDHImYZy5mjt0CrQwFB0Mlk=
 github.com/drone/expr v0.0.0-20170909060652-c0e474cb2b07/go.mod h1:ZTxWkAdswyXO7O1COlFOIg1VODCrbvhJIHO42DABVJU=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

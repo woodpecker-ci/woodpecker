@@ -17,7 +17,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/docker/libcompose v0.4.0
-	github.com/drone/envsubst v1.0.2
+	github.com/drone/envsubst v1.0.3
 	github.com/drone/expr v0.0.0-20170909060652-c0e474cb2b07
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
