@@ -18,7 +18,6 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/docker/libcompose v0.4.0
 	github.com/drone/envsubst v1.0.3
-	github.com/drone/expr v0.0.0-20170909060652-c0e474cb2b07
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
 	github.com/ghodss/yaml v1.0.0
@@ -34,7 +33,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
-	github.com/kr/pretty v0.2.0
+	github.com/kr/pretty v0.2.1
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.5.2
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -54,6 +53,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/urfave/cli v1.22.4
+	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
