@@ -189,9 +189,19 @@ func TestConstraintList(t *testing.T) {
 		},
 		// include and exclude blocks
 		{
-			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			conf: "{ include: [ '*.md', '*.ini' ], exclude: [ CHANGELOG.md ] }",
 			with: []string{"README.md"},
 			want: true,
+		},
+		{
+			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"CHANGELOG.md"},
+			want: false,
+		},
+		{
+			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md", "CHANGELOG.md"},
+			want: false,
 		},
 		// commit message ignore matches
 		{
