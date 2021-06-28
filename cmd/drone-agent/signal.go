@@ -1,6 +1,6 @@
 // Copyright 2017 Drone.IO Inc.
 //
-// This work is licensed under the terms of the MIT license.
+// This file is licensed under the terms of the MIT license.
 // For a copy, see https://opensource.org/licenses/MIT.
 
 package main
