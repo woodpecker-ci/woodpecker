@@ -195,9 +195,21 @@ func TestConstraintList(t *testing.T) {
 		},
 		// commit message ignore matches
 		{
-			conf:    "{ include: [ README.md ] }",
+			conf:    "{ include: [ README.md ], ignore_message: '[ALL]' }",
 			with:    []string{"CHANGELOG.md"},
-			message: "[ALL]",
+			message: "Build them [ALL]",
+			want:    true,
+		},
+		{
+			conf:    "{ exclude: [ '*.php' ], ignore_message: '[ALL]' }",
+			with:    []string{"myfile.php"},
+			message: "Build them [ALL]",
+			want:    true,
+		},
+		{
+			conf:    "{ ignore_message: '[ALL]' }",
+			with:    []string{},
+			message: "Build them [ALL]",
 			want:    true,
 		},
 		// empty commit

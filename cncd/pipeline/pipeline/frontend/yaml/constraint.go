@@ -40,8 +40,9 @@ type (
 	}
 
 	ConstraintPath struct {
-		Include []string
-		Exclude []string
+		Include       []string
+		Exclude       []string
+		IgnoreMessage string `yaml:"ignore_message,omitempty"`
 	}
 )
 
@@ -175,8 +176,9 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshals the constraint.
 func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	var out1 = struct {
-		Include libcompose.Stringorslice
-		Exclude libcompose.Stringorslice
+		Include       libcompose.Stringorslice `yaml:"include,omitempty"`
+		Exclude       libcompose.Stringorslice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                   `yaml:"ignore_message,omitempty"`
 	}{}
 
 	var out2 libcompose.Stringorslice
@@ -185,6 +187,7 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
+	c.IgnoreMessage = out1.IgnoreMessage
 	c.Include = append(
 		out1.Include,
 		out2...,
@@ -199,8 +202,8 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *ConstraintPath) Match(v []string, message string) bool {
-	// ignore file pattern matches if the commit message contains all
-	if strings.Contains(message, "[ALL]") {
+	// ignore file pattern matches if the commit message contains a pattern
+	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
 		return true
 	}
 	// always match if there are no commit files (empty commit)

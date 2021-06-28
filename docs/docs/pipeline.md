@@ -402,6 +402,7 @@ Execute a step only on commit excluding certain files added/removed/modified:
 when:
   path:
     exclude: "*.md"
+    ignore_message: "[ALL]"
 ```
 
 > Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
