@@ -136,7 +136,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -383,6 +383,29 @@ Execute a step only on a certain Woodpecker instance:
 when:
   instance: stage.drone.company.com
 ```
+
+Execute a step only on commit with certain files added/removed/modified:
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path: "src/*"
+```
+
+Execute a step only on commit excluding certain files added/removed/modified:
+
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path:
+    exclude: [ '*.md', '*.ini' ]
+    ignore_message: "[ALL]"
+```
+
+> Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
 
 #### Failure Execution
 

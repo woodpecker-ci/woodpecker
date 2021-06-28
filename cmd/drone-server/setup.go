@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"github.com/dimfeld/httptreemux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/plugins/environments"
@@ -37,8 +39,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/web"
 	"github.com/woodpecker-ci/woodpecker/store"
 	"github.com/woodpecker-ci/woodpecker/store/datastore"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"
@@ -117,11 +117,23 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
-	return gitea.New(gitea.Opts{
+	if !c.IsSet("gitea-client") {
+		return gitea.New(gitea.Opts{
+			URL:         c.String("gitea-server"),
+			Context:     c.String("gitea-context"),
+			Username:    c.String("gitea-git-username"),
+			Password:    c.String("gitea-git-password"),
+			PrivateMode: c.Bool("gitea-private-mode"),
+			SkipVerify:  c.Bool("gitea-skip-verify"),
+		})
+	}
+	return gitea.NewOauth(gitea.Opts{
 		URL:         c.String("gitea-server"),
 		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
 		Password:    c.String("gitea-git-password"),
+		Client:      c.String("gitea-client"),
+		Secret:      c.String("gitea-secret"),
 		PrivateMode: c.Bool("gitea-private-mode"),
 		SkipVerify:  c.Bool("gitea-skip-verify"),
 	})

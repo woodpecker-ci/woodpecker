@@ -7,6 +7,8 @@ require (
 	docker.io/go-docker v1.0.0
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
+	github.com/bmatcuk/doublestar v1.3.4 // indirect
+	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/dgrijalva/jwt-go v0.0.0-20150904212456-c1da56349675
 	github.com/dimfeld/httptreemux v5.0.1+incompatible
@@ -55,13 +57,16 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/urfave/cli v1.22.4
+	github.com/vektra/mockery v1.1.2 // indirect
+	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
-	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/grpc v1.29.1
+	google.golang.org/protobuf v1.27.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200506231410-2ff61e1afc86

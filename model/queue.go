@@ -17,8 +17,8 @@ package model
 import (
 	"context"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/sirupsen/logrus"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 )
 
 // Task defines scheduled pipeline Task.

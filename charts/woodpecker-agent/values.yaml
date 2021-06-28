@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   registry: docker.io
-  repository: laszlocloud/woodpecker-agent
+  repository: woodpeckerci/woodpecker-agent
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

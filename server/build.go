@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package server
 
@@ -25,11 +28,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
@@ -326,7 +329,7 @@ func PostApproval(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(user, repo, build, uri, item.Proc)
 			} else {
@@ -367,7 +370,7 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+	uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 	err = remote_.Status(user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)

@@ -7,7 +7,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -23,7 +23,7 @@ services:
       - DRONE_SECRET=${DRONE_SECRET}
 
   woodpecker-agent:
-    image: laszlocloud/woodpecker-agent:v0.9.0
+    image: woodpeckerci/woodpecker-agent:latest
     restart: always
     depends_on:
       - woodpecker-server
