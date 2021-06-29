@@ -384,6 +384,29 @@ when:
   instance: stage.drone.company.com
 ```
 
+Execute a step only on commit with certain files added/removed/modified:
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path: "src/*"
+```
+
+Execute a step only on commit excluding certain files added/removed/modified:
+
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path:
+    exclude: [ '*.md', '*.ini' ]
+    ignore_message: "[ALL]"
+```
+
+> Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
+
 #### Failure Execution
 
 Woodpecker uses the container exit code to determine the success or failure status of a build. Non-zero exit codes fail the build and cause the pipeline to immediately exit.

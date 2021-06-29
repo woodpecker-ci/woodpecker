@@ -334,6 +334,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  build.Email,
 					Avatar: build.Avatar,
 				},
+				ChangedFiles: build.ChangedFiles,
 			},
 		},
 		Prev: frontend.Build{
@@ -356,6 +357,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  last.Email,
 					Avatar: last.Avatar,
 				},
+				ChangedFiles: last.ChangedFiles,
 			},
 		},
 		Job: frontend.Job{

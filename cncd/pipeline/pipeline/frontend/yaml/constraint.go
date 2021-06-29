@@ -3,6 +3,7 @@ package yaml
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
@@ -23,6 +24,7 @@ type (
 		Status      Constraint
 		Matrix      ConstraintMap
 		Local       types.BoolTrue
+		Path        ConstraintPath
 	}
 
 	// Constraint defines a runtime constraint.
@@ -36,6 +38,13 @@ type (
 		Include map[string]string
 		Exclude map[string]string
 	}
+
+	// ConstraintPath defines a runtime constrain for paths
+	ConstraintPath struct {
+		Include       []string
+		Exclude       []string
+		IgnoreMessage string `yaml:"ignore_message,omitempty"`
+	}
 )
 
 // Match returns true if all constraints match the given input. If a single
@@ -48,7 +57,8 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
 		c.Instance.Match(metadata.Sys.Host) &&
-		c.Matrix.Match(metadata.Job.Matrix)
+		c.Matrix.Match(metadata.Job.Matrix) &&
+		c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 }
 
 // Match returns true if the string matches the include patterns and does not
@@ -162,4 +172,77 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		c.Include[k] = v
 	}
 	return nil
+}
+
+// UnmarshalYAML unmarshals the constraint.
+func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
+	var out1 = struct {
+		Include       libcompose.Stringorslice `yaml:"include,omitempty"`
+		Exclude       libcompose.Stringorslice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                   `yaml:"ignore_message,omitempty"`
+	}{}
+
+	var out2 libcompose.Stringorslice
+
+	err1 := value.Decode(&out1)
+	err2 := value.Decode(&out2)
+
+	c.Exclude = out1.Exclude
+	c.IgnoreMessage = out1.IgnoreMessage
+	c.Include = append(
+		out1.Include,
+		out2...,
+	)
+
+	if err1 != nil && err2 != nil {
+		y, _ := yaml.Marshal(value)
+		return fmt.Errorf("Could not parse condition: %s", y)
+	}
+
+	return nil
+}
+
+// Match returns true if file paths in string slice matches the include and not exclude patterns
+//  or if commit message contains ignore message.
+func (c *ConstraintPath) Match(v []string, message string) bool {
+	// ignore file pattern matches if the commit message contains a pattern
+	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
+		return true
+	}
+	// always match if there are no commit files (empty commit)
+	if len(v) == 0 {
+		return true
+	}
+
+	if len(c.Exclude) > 0 && c.Excludes(v) {
+		return false
+	}
+	if len(c.Include) > 0 && !c.Includes(v) {
+		return false
+	}
+	return true
+}
+
+// Includes returns true if the string matches any of the include patterns.
+func (c *ConstraintPath) Includes(v []string) bool {
+	for _, pattern := range c.Include {
+		for _, file := range v {
+			if ok, _ := filepath.Match(pattern, file); ok {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Excludes returns true if the string matches any of the exclude patterns.
+func (c *ConstraintPath) Excludes(v []string) bool {
+	for _, pattern := range c.Exclude {
+		for _, file := range v {
+			if ok, _ := filepath.Match(pattern, file); ok {
+				return true
+			}
+		}
+	}
+	return false
 }

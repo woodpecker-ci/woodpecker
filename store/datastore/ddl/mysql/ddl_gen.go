@@ -193,6 +193,14 @@ var migrations = []struct {
 		stmt: updateTableSetRepoFallbackAgain,
 	},
 	{
+		name: "add-builds-changed_files-column",
+		stmt: addBuildsChangedfilesColumn,
+	},
+	{
+		name: "update-builds-set-changed_files",
+		stmt: updateBuildsSetChangedfiles,
+	},
+	{
 		name: "create-table-global-secrets",
 		stmt: createTableGlobalSecrets,
 	},
@@ -732,6 +740,18 @@ UPDATE repos SET repo_fallback='false'
 
 var updateTableSetRepoFallbackAgain = `
 UPDATE repos SET repo_fallback='false'
+`
+
+//
+// 025_add_builds_changed_files_column.sql
+//
+
+var addBuildsChangedfilesColumn = `
+ALTER TABLE builds ADD COLUMN changed_files TEXT
+`
+
+var updateBuildsSetChangedfiles = `
+UPDATE builds SET changed_files='[]'
 `
 
 //

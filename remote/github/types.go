@@ -37,6 +37,10 @@ type webhook struct {
 			Email    string `json:"email"`
 			Username string `json:"username"`
 		} `json:"committer"`
+
+		Added    []string `json:"added"`
+		Removed  []string `json:"removed"`
+		Modified []string `json:"modified"`
 	} `json:"head_commit"`
 
 	Sender struct {

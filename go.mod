@@ -57,6 +57,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/urfave/cli v1.22.4
+	github.com/vektra/mockery v1.1.2 // indirect
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
