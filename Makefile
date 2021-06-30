@@ -77,7 +77,7 @@ release-agent:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
 
 release-server:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o release/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
 release-cli:
 	# disable CGO for cross-compiling
