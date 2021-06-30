@@ -43,7 +43,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/store"
 
-	"github.com/drone/expr"
+	"github.com/woodpecker-ci/expr"
 )
 
 var Config = struct {
