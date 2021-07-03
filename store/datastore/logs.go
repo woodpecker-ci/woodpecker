@@ -19,9 +19,9 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/store/datastore/sql"
 	"github.com/russross/meddler"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
 )
 
 func (db *datastore) LogFind(proc *model.Proc) (io.ReadCloser, error) {

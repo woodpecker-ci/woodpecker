@@ -17,8 +17,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
 
 	"github.com/gin-gonic/gin"
 )

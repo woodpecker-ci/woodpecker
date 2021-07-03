@@ -30,20 +30,20 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/laszlocph/woodpecker/cncd/logging"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/laszlocph/woodpecker/cncd/pubsub"
-	"github.com/laszlocph/woodpecker/cncd/queue"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
+	"github.com/woodpecker-ci/woodpecker/cncd/logging"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
+	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/store"
 
-	"github.com/drone/expr"
+	"github.com/woodpecker-ci/expr"
 )
 
 var Config = struct {
@@ -469,7 +469,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *mod
 				s.store.UpdateUser(user)
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", s.host, repo.FullName, build.Number)
+		uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)

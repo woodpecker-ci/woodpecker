@@ -5,8 +5,8 @@ import (
 	// "encoding/json"
 	"time"
 
-	// "github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc/proto"
+	// "github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -58,6 +58,4 @@ func (c *healthClient) Check(ctx context.Context) (bool, error) {
 		}
 		<-time.After(backoff)
 	}
-
-	return true, nil
 }

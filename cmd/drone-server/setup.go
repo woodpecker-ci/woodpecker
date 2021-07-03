@@ -22,26 +22,26 @@ import (
 	"time"
 
 	"github.com/dimfeld/httptreemux"
-	"github.com/laszlocph/woodpecker/cncd/queue"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/plugins/environments"
-	"github.com/laszlocph/woodpecker/plugins/registry"
-	"github.com/laszlocph/woodpecker/plugins/secrets"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/remote/bitbucket"
-	"github.com/laszlocph/woodpecker/remote/bitbucketserver"
-	"github.com/laszlocph/woodpecker/remote/coding"
-	"github.com/laszlocph/woodpecker/remote/gitea"
-	"github.com/laszlocph/woodpecker/remote/github"
-	"github.com/laszlocph/woodpecker/remote/gitlab"
-	"github.com/laszlocph/woodpecker/remote/gitlab3"
-	"github.com/laszlocph/woodpecker/remote/gogs"
-	droneserver "github.com/laszlocph/woodpecker/server"
-	"github.com/laszlocph/woodpecker/server/web"
-	"github.com/laszlocph/woodpecker/store"
-	"github.com/laszlocph/woodpecker/store/datastore"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/plugins/environments"
+	"github.com/woodpecker-ci/woodpecker/plugins/registry"
+	"github.com/woodpecker-ci/woodpecker/plugins/secrets"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucket"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucketserver"
+	"github.com/woodpecker-ci/woodpecker/remote/coding"
+	"github.com/woodpecker-ci/woodpecker/remote/gitea"
+	"github.com/woodpecker-ci/woodpecker/remote/github"
+	"github.com/woodpecker-ci/woodpecker/remote/gitlab"
+	"github.com/woodpecker-ci/woodpecker/remote/gitlab3"
+	"github.com/woodpecker-ci/woodpecker/remote/gogs"
+	droneserver "github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/store/datastore"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"
@@ -76,10 +76,6 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
-
-func setupPubsub(c *cli.Context)        {}
-func setupStream(c *cli.Context)        {}
-func setupGatingService(c *cli.Context) {}
 
 // helper function to setup the remote from the CLI arguments.
 func SetupRemote(c *cli.Context) (remote.Remote, error) {
@@ -124,15 +120,27 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
-	return gitea.New(gitea.Opts{
-		URL:                c.String("gitea-server"),
-		Context:            c.String("gitea-context"),
-		Username:           c.String("gitea-git-username"),
-		Password:           c.String("gitea-git-password"),
-		PrivateMode:        c.Bool("gitea-private-mode"),
-		SkipVerify:         c.Bool("gitea-skip-verify"),
-		RevProxyAuth:       c.Bool("gitea-rev-proxy-auth"),
-		RevProxyAuthHeader: c.String("gitea-rev-proxy-auth-header"),
+	if !c.IsSet("gitea-client") {
+		return gitea.New(gitea.Opts{
+			URL:                c.String("gitea-server"),
+			Context:            c.String("gitea-context"),
+			Username:           c.String("gitea-git-username"),
+			Password:           c.String("gitea-git-password"),
+			PrivateMode:        c.Bool("gitea-private-mode"),
+			SkipVerify:         c.Bool("gitea-skip-verify"),
+			RevProxyAuth:       c.Bool("gitea-rev-proxy-auth"),
+			RevProxyAuthHeader: c.String("gitea-rev-proxy-auth-header"),
+		})
+	}
+	return gitea.NewOauth(gitea.Opts{
+		URL:         c.String("gitea-server"),
+		Context:     c.String("gitea-context"),
+		Username:    c.String("gitea-git-username"),
+		Password:    c.String("gitea-git-password"),
+		Client:      c.String("gitea-client"),
+		Secret:      c.String("gitea-secret"),
+		PrivateMode: c.Bool("gitea-private-mode"),
+		SkipVerify:  c.Bool("gitea-skip-verify"),
 	})
 }
 
@@ -208,6 +216,7 @@ func setupTree(c *cli.Context) *httptreemux.ContextMux {
 	web.New(
 		web.WithDir(c.String("www")),
 		web.WithSync(time.Hour*72),
+		web.WithDocs(c.String("docs")),
 	).Register(tree)
 	return tree
 }

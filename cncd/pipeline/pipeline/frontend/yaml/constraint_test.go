@@ -3,7 +3,7 @@ package yaml
 import (
 	"testing"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
 
 	"gopkg.in/yaml.v3"
 )
@@ -144,6 +144,94 @@ func TestConstraint(t *testing.T) {
 	for _, test := range testdata {
 		c := parseConstraint(test.conf)
 		got, want := c.Match(test.with), test.want
+		if got != want {
+			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
+		}
+	}
+}
+
+func TestConstraintList(t *testing.T) {
+	testdata := []struct {
+		conf    string
+		with    []string
+		message string
+		want    bool
+	}{
+		{
+			conf: "",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "CHANGELOG.md",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "'*.md'",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "['*.md']",
+			with: []string{"CHANGELOG.md", "README.md"},
+			want: true,
+		},
+		{
+			conf: "{ include: [ README.md ] }",
+			with: []string{"CHANGELOG.md"},
+			want: false,
+		},
+		{
+			conf: "{ exclude: [ README.md ] }",
+			with: []string{"design.md"},
+			want: true,
+		},
+		// include and exclude blocks
+		{
+			conf: "{ include: [ '*.md', '*.ini' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md"},
+			want: true,
+		},
+		{
+			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"CHANGELOG.md"},
+			want: false,
+		},
+		{
+			conf: "{ include: [ '*.md' ], exclude: [ CHANGELOG.md ] }",
+			with: []string{"README.md", "CHANGELOG.md"},
+			want: false,
+		},
+		// commit message ignore matches
+		{
+			conf:    "{ include: [ README.md ], ignore_message: '[ALL]' }",
+			with:    []string{"CHANGELOG.md"},
+			message: "Build them [ALL]",
+			want:    true,
+		},
+		{
+			conf:    "{ exclude: [ '*.php' ], ignore_message: '[ALL]' }",
+			with:    []string{"myfile.php"},
+			message: "Build them [ALL]",
+			want:    true,
+		},
+		{
+			conf:    "{ ignore_message: '[ALL]' }",
+			with:    []string{},
+			message: "Build them [ALL]",
+			want:    true,
+		},
+		// empty commit
+		{
+			conf: "{ include: [ README.md ] }",
+			with: []string{},
+			want: true,
+		},
+	}
+	for _, test := range testdata {
+		c := parseConstraintPath(test.conf)
+		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
 		}
@@ -368,6 +456,12 @@ func parseConstraint(s string) *Constraint {
 
 func parseConstraintMap(s string) *ConstraintMap {
 	c := &ConstraintMap{}
+	yaml.Unmarshal([]byte(s), c)
+	return c
+}
+
+func parseConstraintPath(s string) *ConstraintPath {
+	c := &ConstraintPath{}
 	yaml.Unmarshal([]byte(s), c)
 	return c
 }

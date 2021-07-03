@@ -11,7 +11,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
 +     DRONE_DATABASE_DRIVER: mysql
 +     DRONE_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/drone?parseTime=true
@@ -26,7 +26,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     environment:
 +     DRONE_DATABASE_DRIVER: postgres
 +     DRONE_DATABASE_DATASOURCE: postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable

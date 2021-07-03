@@ -19,9 +19,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/laszlocph/woodpecker/store"
-	"github.com/laszlocph/woodpecker/store/datastore/ddl"
 	"github.com/russross/meddler"
+	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/ddl"
 
 	"github.com/sirupsen/logrus"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
 )
 
 type engine struct {

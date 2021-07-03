@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote/bitbucketserver/internal"
 	"github.com/mrjones/oauth"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/bitbucketserver/internal"
 )
 
 const (

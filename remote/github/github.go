@@ -24,9 +24,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
-	"github.com/laszlocph/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"

@@ -2,5 +2,5 @@ Go package provides a common interface for publish-subscriber messaging.
 
 Documentation:
 
-    http://godoc.org/github.com/laszlocph/woodpecker/cncd/pubsub
-    http://godoc.org/github.com/laszlocph/woodpecker/cncd/pubsub/gcp
+    http://godoc.org/github.com/woodpecker-ci/woodpecker/cncd/pubsub
+    http://godoc.org/github.com/woodpecker-ci/woodpecker/cncd/pubsub/gcp

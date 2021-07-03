@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: laszlocloud/woodpecker-server:local
+    image: woodpeckerci/woodpecker-server:local
     ports:
       - 8000:8000
     volumes:
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.agent
-    image: laszlocloud/woodpecker-agent:local
+    image: woodpeckerci/woodpecker-agent:local
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:

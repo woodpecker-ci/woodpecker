@@ -22,14 +22,14 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
 // Takes the hook data and the yaml and returns in internal data model
@@ -319,6 +319,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  build.Email,
 					Avatar: build.Avatar,
 				},
+				ChangedFiles: build.ChangedFiles,
 			},
 		},
 		Prev: frontend.Build{
@@ -341,6 +342,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  last.Email,
 					Avatar: last.Avatar,
 				},
+				ChangedFiles: last.ChangedFiles,
 			},
 		},
 		Job: frontend.Job{

@@ -3,6 +3,8 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 )
 
 var (
@@ -61,6 +63,12 @@ func (t *Task) ShouldRun() bool {
 	return false
 }
 
+func (t *Task) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%s (%s) - %s", t.ID, t.Dependencies, t.DepStatus))
+	return sb.String()
+}
+
 func runsOnFailure(runsOn []string) bool {
 	for _, status := range runsOn {
 		if status == "failure" {
@@ -96,6 +104,24 @@ type InfoT struct {
 		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool
+}
+
+func (t *InfoT) String() string {
+	var sb strings.Builder
+
+	for _, task := range t.Pending {
+		sb.WriteString("\t" + task.String())
+	}
+
+	for _, task := range t.Running {
+		sb.WriteString("\t" + task.String())
+	}
+
+	for _, task := range t.WaitingOnDeps {
+		sb.WriteString("\t" + task.String())
+	}
+
+	return sb.String()
 }
 
 // Filter filters tasks in the queue. If the Filter returns false,

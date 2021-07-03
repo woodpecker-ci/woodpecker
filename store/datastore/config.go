@@ -17,9 +17,9 @@ package datastore
 import (
 	gosql "database/sql"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/store/datastore/sql"
 	"github.com/russross/meddler"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
 )
 
 func (db *datastore) ConfigsForBuild(buildID int64) ([]*model.Config, error) {

@@ -4,8 +4,8 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/laszlocph/woodpecker/cli/drone/internal"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/cli/drone/internal"
 )
 
 var repoSyncCmd = cli.Command{

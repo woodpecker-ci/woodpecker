@@ -7,7 +7,7 @@ You can enable Let's Encrypt by making the following modifications to your serve
 ```diff
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
 +     - 80:80
 +     - 443:443

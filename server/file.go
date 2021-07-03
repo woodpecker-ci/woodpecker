@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/store"
 )
 
 // FileList gets a list file by build.

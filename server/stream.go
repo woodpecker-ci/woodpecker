@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/laszlocph/woodpecker/cncd/logging"
-	"github.com/laszlocph/woodpecker/cncd/pubsub"
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/router/middleware/session"
-	"github.com/laszlocph/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/cncd/logging"
+	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

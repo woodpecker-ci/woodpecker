@@ -18,7 +18,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	grpccredentials "google.golang.org/grpc/credentials"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -27,17 +26,18 @@ import (
 	"sync"
 	"time"
 
+	grpccredentials "google.golang.org/grpc/credentials"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/backend/docker"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/multipart"
-	"github.com/laszlocph/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
-	"github.com/drone/signal"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
@@ -116,7 +116,7 @@ func loop(c *cli.Context) error {
 		context.Background(),
 		metadata.Pairs("hostname", hostname),
 	)
-	ctx = signal.WithContextFunc(ctx, func() {
+	ctx = WithContextFunc(ctx, func() {
 		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})

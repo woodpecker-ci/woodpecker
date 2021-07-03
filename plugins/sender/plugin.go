@@ -3,8 +3,8 @@ package sender
 import (
 	"fmt"
 
-	"github.com/laszlocph/woodpecker/model"
-	"github.com/laszlocph/woodpecker/plugins/internal"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/plugins/internal"
 )
 
 type plugin struct {

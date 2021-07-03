@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/laszlocph/woodpecker/version"
+	"github.com/woodpecker-ci/woodpecker/version"
 
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"

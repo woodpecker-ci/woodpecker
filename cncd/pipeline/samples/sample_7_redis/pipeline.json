@@ -23,7 +23,7 @@
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
           },
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {
@@ -55,7 +55,7 @@
             "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
           },
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {
@@ -103,7 +103,7 @@
             "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
           ],
           "volumes": [
-            "/Users/bradrydzewski/code/src/github.com/laszlocph/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+            "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {

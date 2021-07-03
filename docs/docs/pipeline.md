@@ -127,7 +127,7 @@ Example registry hostname matching logic:
 
 #### Global registry setting
 
-If you want to make available a specific private registry to all pipelines, use the `DRONE_DOCKER_CONFIG` server configuration.
+If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
 Point it to your server's docker config.
 
 ```diff
@@ -136,7 +136,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: laszlocloud/woodpecker-server:v0.9.0
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 80:8000
       - 9000
@@ -144,13 +144,13 @@ services:
       - woodpecker-server-data:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
-+     - DRONE_DOCKER_CONFIG=/home/user/.docker/config.json
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json
 ```
 
 #### GCR Registry Support
@@ -383,6 +383,29 @@ Execute a step only on a certain Woodpecker instance:
 when:
   instance: stage.drone.company.com
 ```
+
+Execute a step only on commit with certain files added/removed/modified:
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path: "src/*"
+```
+
+Execute a step only on commit excluding certain files added/removed/modified:
+
+
+**NOTE: Feature is only available for Github repositories.**
+
+```diff
+when:
+  path:
+    exclude: [ '*.md', '*.ini' ]
+    ignore_message: "[ALL]"
+```
+
+> Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
 
 #### Failure Execution
 

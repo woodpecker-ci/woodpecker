@@ -37,12 +37,12 @@ List of prometheus metrics specific to Woodpecker:
 ```
 # HELP drone_build_count Build count.
 # TYPE drone_build_count counter
-drone_build_count{branch="master",pipeline="total",repo="laszlocph/woodpecker",status="success"} 3
-drone_build_count{branch="mkdocs",pipeline="total",repo="laszlocph/woodpecker",status="success"} 3
+drone_build_count{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
+drone_build_count{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
 # HELP drone_build_time Build time.
 # TYPE drone_build_time gauge
-drone_build_time{branch="master",pipeline="total",repo="laszlocph/woodpecker",status="success"} 116
-drone_build_time{branch="mkdocs",pipeline="total",repo="laszlocph/woodpecker",status="success"} 155
+drone_build_time{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
+drone_build_time{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 155
 # HELP drone_build_total_count Total number of builds.
 # TYPE drone_build_total_count gauge
 drone_build_total_count 1025
