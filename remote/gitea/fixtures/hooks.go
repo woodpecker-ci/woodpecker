@@ -30,7 +30,10 @@ const HookPush = `
         "name": "Gordon the Gopher",
         "email": "gordon@golang.org",
         "username": "gordon"
-      }
+      },
+      "added": ["CHANGELOG.md"],
+      "removed": [],
+      "modified": ["app/controller/application.rb"]
     }
   ],
   "repository": {

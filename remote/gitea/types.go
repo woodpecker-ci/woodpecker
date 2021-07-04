@@ -43,9 +43,12 @@ type pushHook struct {
 	} `json:"repository"`
 
 	Commits []struct {
-		ID      string `json:"id"`
-		Message string `json:"message"`
-		URL     string `json:"url"`
+		ID       string   `json:"id"`
+		Message  string   `json:"message"`
+		URL      string   `json:"url"`
+		Added    []string `json:"added"`
+		Removed  []string `json:"removed"`
+		Modified []string `json:"modified"`
 	} `json:"commits"`
 
 	Sender struct {

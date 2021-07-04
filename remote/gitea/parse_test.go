@@ -13,3 +13,43 @@
 // limitations under the License.
 
 package gitea
+
+import (
+	"bytes"
+	"net/http"
+	"testing"
+
+	"github.com/franela/goblin"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote/gitea/fixtures"
+)
+
+func Test_parser(t *testing.T) {
+	g := goblin.Goblin(t)
+	g.Describe("Gitea parser", func() {
+		g.It("should ignore unsupported hook events", func() {
+			buf := bytes.NewBufferString(fixtures.HookPullRequest)
+			req, _ := http.NewRequest("POST", "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, "issues")
+			r, b, err := parseHook(req)
+			g.Assert(r == nil).IsTrue()
+			g.Assert(b == nil).IsTrue()
+			g.Assert(err == nil).IsTrue()
+		})
+		g.Describe("given a push hook", func() {
+			g.It("should extract repository and build details", func() {
+				buf := bytes.NewBufferString(fixtures.HookPush)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPush)
+				r, b, err := parseHook(req)
+				g.Assert(err == nil).IsTrue()
+				g.Assert(r != nil).IsTrue()
+				g.Assert(b != nil).IsTrue()
+				g.Assert(b.Event).Equal(model.EventPush)
+				g.Assert(b.ChangedFiles).Equal([]string{"CHANGELOG.md", "app/controller/application.rb"})
+			})
+		})
+	})
+}
