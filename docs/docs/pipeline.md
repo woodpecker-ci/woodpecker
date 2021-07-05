@@ -386,7 +386,7 @@ when:
 
 Execute a step only on commit with certain files added/removed/modified:
 
-**NOTE: Feature is only available for Github repositories.**
+**NOTE: Feature is only available for Github and Gitea repositories.**
 
 ```diff
 when:
@@ -396,7 +396,7 @@ when:
 Execute a step only on commit excluding certain files added/removed/modified:
 
 
-**NOTE: Feature is only available for Github repositories.**
+**NOTE: Feature is only available for Github and Gitea repositories.**
 
 ```diff
 when:
