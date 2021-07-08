@@ -1,3 +1,5 @@
+# config for https://gitea.com/gitea/changelog to generate CHANGELOG.md
+
 # The full repository name
 repo: woodpecker-ci/woodpecker
 
