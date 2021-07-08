@@ -1,4 +1,4 @@
-## [0.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0) - 2021-07-08
+## [0.14.0-rc2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0-rc2) - 2021-07-08
 
 * FEATURES
   * Add OAuth2 Support for Gitea Remote (#226)
