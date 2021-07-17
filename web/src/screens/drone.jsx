@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 
 import { root } from "baobab-react/higher-order";
-import tree from "config/state";
-import client from "config/client";
-import { drone } from "config/client/inject";
-import { LoginForm, LoginError } from "screens/login/screens";
+import tree from "~/config/state";
+import client from "~/config/client";
+import { drone } from "~/config/client/inject";
+import { LoginForm, LoginError } from "~/screens/login/screens";
 import Title from "./titles";
 import Layout from "./layout";
 import RedirectRoot from "./redirect";
-import { fetchFeedOnce, subscribeToFeedOnce } from "shared/utils/feed";
+import { fetchFeedOnce, subscribeToFeedOnce } from "~/shared/utils/feed";
 
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
