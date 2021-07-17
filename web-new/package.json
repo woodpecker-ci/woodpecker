@@ -1,0 +1,24 @@
+{
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview",
+    "lint": "eslint src/",
+    "format": "prettier --write src/**/*.js"
+  },
+  "dependencies": {
+    "vue": "^3.0.5",
+    "vue-router": "4.0.10"
+  },
+  "devDependencies": {
+    "@types/node": "^16.3.3",
+    "@vitejs/plugin-vue": "^1.2.5",
+    "@vue/compiler-sfc": "^3.0.5",
+    "typescript": "^4.3.2",
+    "vite": "^2.4.2",
+    "vite-plugin-windicss": "^1.2.4",
+    "vue-tsc": "^0.0.24",
+    "windicss": "3.1.0"
+  }
+}

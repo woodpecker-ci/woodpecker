@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+pnpm-workspace.yaml
+dist
+coverage/
+storybook-static/
+.pnpm-store/
+.ci/charts/
