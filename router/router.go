@@ -188,6 +188,8 @@ func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handl
 		debugger.GET("/pprof/trace", debug.TraceHandler())
 	}
 
+	e.GET("/api/web-config.js", web.WebConfig)
+
 	monitor := e.Group("/metrics")
 	{
 		monitor.GET("", metrics.PromHandler())
