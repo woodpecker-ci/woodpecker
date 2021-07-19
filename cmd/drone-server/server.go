@@ -90,7 +90,6 @@ func server(c *cli.Context) error {
 
 	if proxyWebUI == "" {
 		// we are switching from gin to httpservermux|treemux,
-		// so if this code looks strange, that is why.
 		webUIServe = setupTree(c).ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
