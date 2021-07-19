@@ -1,29 +1,38 @@
 <template>
   <div class="flex bg-green">
-    <div class="flex p-4 w-full max-w-5xl m-auto text-white items-center">
-      <router-link :to="{ name: 'home' }" class="ml-8"><img class="w-8" src="../assets/logo.svg" /></router-link>
-      <router-link :to="{ name: 'projects' }" class="ml-8">Projects</router-link>
+    <div class="flex w-full max-w-5xl p-4 lg:px-0 m-auto text-white items-center">
+      <router-link :to="{ name: 'home' }"><img class="w-8" src="../assets/logo.svg" /></router-link>
+      <router-link :to="{ name: 'repos' }" class="ml-8">Projects</router-link>
       <a href="https://woodpecker.laszlo.cloud/" target="_blank" class="ml-8">Docs</a>
-      <img class="ml-auto w-8" src="https://avatars.githubusercontent.com/u/6918444?s=32&v=4" />
+      <div class="ml-auto">
+        <img v-if="user && user.avatar_url" class="ml-auto w-8" :src="`${user.avatar_url}&s=32`" />
+        <Button v-else text="Login" @click="doLogin" />
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 
-import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
+import Button from '~/components/atomic/Button.vue';
+import { authenticate } from '~/compositions/useAuthentication';
 
 export default defineComponent({
   name: 'NavBar',
 
-  setup() {
-    const apiClient = useApiClient();
+  components: { Button },
 
-    onMounted(async () => {
-      const user = await apiClient.getSelf();
-      console.log('huhu', user);
-    });
+  setup() {
+    const config = useConfig();
+    const user = config.user;
+
+    function doLogin() {
+      authenticate();
+    }
+
+    return { user, doLogin };
   },
 });
 </script>

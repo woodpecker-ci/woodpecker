@@ -4,8 +4,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import useConfig from '~/compositions/useConfig';
 
 export default defineComponent({
   name: 'Home',
+
+  setup() {
+    const user = useConfig().user;
+
+    return { user };
+  },
 });
 </script>

@@ -3,7 +3,7 @@ export type ApiError = {
   message: string;
 };
 
-export function encodeQueryString(params: Record<string, string | number | boolean>): string {
+export function encodeQueryString(params: Record<string, string | number | boolean> = {}): string {
   return params
     ? Object.keys(params)
         .sort()

@@ -18,6 +18,15 @@ export default defineComponent({
 });
 </script>
 
+<style>
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+}
+</style>
+
 <style scoped>
 .app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

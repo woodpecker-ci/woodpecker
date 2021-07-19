@@ -1,5 +1,6 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { isAuthenticated } from './compositions/useAuthentication';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -8,10 +9,23 @@ const routes: RouteRecordRaw[] = [
     component: (): Component => import('~/views/Home.vue'),
   },
   {
-    path: '/projects',
-    name: 'projects',
-    component: (): Component => import('~/views/Home.vue'),
+    path: '/repos',
+    name: 'repos',
+    component: (): Component => import('~/views/repos/Repos.vue'),
     meta: { authentication: 'required' },
+  },
+  {
+    path: '/repo/add',
+    name: 'repo-add',
+    component: (): Component => import('~/views/repos/RepoAdd.vue'),
+    meta: { authentication: 'required' },
+  },
+  {
+    path: '/repo/:repoOwner/:repoId',
+    name: 'repo',
+    component: (): Component => import('~/views/repos/Repo.vue'),
+    meta: { authentication: 'required' },
+    props: true,
   },
   {
     path: '/do-login/:origin?',
@@ -32,7 +46,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
-  if (to.meta.authentication === 'required') {
+  if (to.meta.authentication === 'required' && !isAuthenticated()) {
     next({ name: 'login', params: { origin: to.fullPath } });
     return;
   }

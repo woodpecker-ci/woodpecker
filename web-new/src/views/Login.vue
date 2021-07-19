@@ -1,27 +1,42 @@
 <template>
-  <div class="not-found">
-    <a :href="loginUrl" target="_self">Login</a>
+  <div class="flex m-auto">
+    <Button @click="doLogin">Login</Button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, onMounted, PropType } from 'vue';
+import Button from '~/components/atomic/Button.vue';
+import { authenticate, isAuthenticated } from '~/compositions/useAuthentication';
+import router from '~/router';
 
 export default defineComponent({
   name: 'Login',
 
+  components: {
+    Button,
+  },
+
   props: {
     origin: {
-      type: String as PropType<string | null>,
+      type: String as PropType<string | undefined>,
       default: null,
     },
   },
 
   setup(props) {
-    const loginUrl = `/login?url=${props.origin || ''}`;
+    function doLogin() {
+      authenticate(props.origin);
+    }
+
+    onMounted(async () => {
+      if (isAuthenticated()) {
+        await router.replace({ name: 'home' });
+      }
+    });
 
     return {
-      loginUrl,
+      doLogin,
     };
   },
 });

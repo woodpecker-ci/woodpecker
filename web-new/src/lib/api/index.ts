@@ -1,12 +1,17 @@
 import ApiClient, { encodeQueryString } from './client';
 import { Repo } from './types';
 
+type RepoListOptions = {
+  all?: boolean;
+  flush?: boolean;
+};
+
 export default class WoodpeckerClient extends ApiClient {
   constructor(server: string, token: string, csrf: string) {
     super(server, token, csrf);
   }
 
-  getRepoList(opts: Record<string, string | number | boolean>): Promise<Repo[]> {
+  getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     var query = encodeQueryString(opts);
     return this._get('/api/user/repos?' + query);
   }
@@ -19,7 +24,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/repos/' + owner + '/' + repo);
   }
 
-  updateRepo(owner: string, repo: string, data) {
+  updateRepo(owner: string, repo: string, data: Record<string, string | number | boolean>) {
     return this._patch('/api/repos/' + owner + '/' + repo, data);
   }
 
@@ -27,7 +32,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/repos/' + owner + '/' + repo);
   }
 
-  getBuildList(owner: string, repo: string, opts) {
+  getBuildList(owner: string, repo: string, opts: Record<string, string | number | boolean>) {
     var query = encodeQueryString(opts);
     return this._get('/api/repos/' + owner + '/' + repo + '/builds?' + query);
   }
@@ -36,7 +41,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get('/api/repos/' + owner + '/' + repo + '/builds/' + number);
   }
 
-  getBuildFeed(opts) {
+  getBuildFeed(opts: Record<string, string | number | boolean>) {
     var query = encodeQueryString(opts);
     return this._get('/api/user/feed?' + query);
   }
@@ -53,7 +58,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/repos/' + owner + '/' + repo + '/builds/' + build + '/decline');
   }
 
-  restartBuild(owner: string, repo: string, build: string, opts) {
+  restartBuild(owner: string, repo: string, build: string, opts: Record<string, string | number | boolean>) {
     var query = encodeQueryString(opts);
     return this._post('/api/repos/' + owner + '/' + repo + '/builds/' + build + '?' + query);
   }

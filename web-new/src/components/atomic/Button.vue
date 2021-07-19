@@ -1,0 +1,70 @@
+<template>
+  <button
+    type="button"
+    class="
+      bg-white
+      text-gray-800
+      font-semibold
+      py-2
+      px-4
+      border border-gray-400
+      rounded
+      shadow
+      cursor-pointer
+      focus:outline-transparent
+      hover:bg-gray-100
+      disabled:opacity-50 disabled:cursor-not-allowed
+    "
+    :disabled="disabled"
+    @click="doClick"
+  >
+    <slot>
+      {{ text }}
+    </slot>
+  </button>
+</template>
+
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import { RouteLocationRaw, useRouter } from 'vue-router';
+
+export default defineComponent({
+  name: 'Button',
+
+  props: {
+    text: {
+      type: String,
+      default: null,
+    },
+
+    disabled: {
+      type: Boolean,
+      required: false,
+    },
+
+    to: {
+      type: [String, Object] as PropType<RouteLocationRaw>,
+      required: false,
+    },
+  },
+
+  setup(props) {
+    const router = useRouter();
+
+    async function doClick() {
+      if (!props.to) {
+        return;
+      }
+
+      if (typeof props.to === 'string' && props.to.startsWith('http')) {
+        window.location.href = props.to;
+        return;
+      }
+
+      await router.push(props.to);
+    }
+
+    return { doClick };
+  },
+});
+</script>
