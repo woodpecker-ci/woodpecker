@@ -124,25 +124,7 @@ module.exports = {
             }
           })
         ]
-      : [
-          new webpack.DefinePlugin({
-            // drone server uses authorization cookies, but the client can
-            // optionally source the authorization token from the environment.
-            // this should be used for the test server only.
-            "window.DRONE_TOKEN": JSON.stringify(process.env.DRONE_TOKEN),
-            "window.DRONE_SERVER": JSON.stringify(process.env.DRONE_SERVER),
-
-            // drone server provides the currently authenticated user in the
-            // index.html file. For testing purposes we simulate this and provides
-            // a dummy user object.
-            "window.DRONE_USER": {
-              login: JSON.stringify("octocat"),
-              avatar_url: JSON.stringify(
-                "https://avatars3.githubusercontent.com/u/583231"
-              )
-            }
-          })
-        ]
+      : []
   ),
 
   devServer: {

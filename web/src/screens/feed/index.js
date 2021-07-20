@@ -168,10 +168,16 @@ const LOGO = (
   <div className={style.brand}>
     <DroneIcon />
     <p>
-      Woodpecker<span style="margin-left: 4px;">{window.DRONE_VERSION}</span>
+      Woodpecker<span style="margin-left: 4px;">
+        {window.WOODPECKER_VERSION}
+      </span>
       <br />
       <span>
-        <a href={window.DRONE_DOCS} target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://woodpecker.laszlo.cloud"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Docs
         </a>
       </span>
