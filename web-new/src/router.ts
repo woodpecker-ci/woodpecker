@@ -6,18 +6,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: (): Component => import('~/views/Home.vue'),
+    redirect: '/repos',
   },
   {
     path: '/repos',
     name: 'repos',
-    component: (): Component => import('~/views/repo/Repos.vue'),
+    component: (): Component => import('~/views/Repos.vue'),
     meta: { authentication: 'required' },
   },
   {
     path: '/repo/add',
     name: 'repo-add',
-    component: (): Component => import('~/views/repo/RepoAdd.vue'),
+    component: (): Component => import('~/views/RepoAdd.vue'),
     meta: { authentication: 'required' },
   },
   {

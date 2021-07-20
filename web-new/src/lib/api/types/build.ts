@@ -63,5 +63,16 @@ export type Build = {
   jobs: Job[];
 };
 
-export type BuildStatus = {};
+export type BuildStatus =
+  | 'blocked'
+  | 'declined'
+  | 'error'
+  | 'failure'
+  | 'killed'
+  | 'pending'
+  | 'running'
+  | 'skipped'
+  | 'started'
+  | 'success';
+
 export type Job = {};

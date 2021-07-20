@@ -2,11 +2,11 @@
   <div class="flex bg-green">
     <FluidContainer class="flex text-white items-center">
       <router-link :to="{ name: 'home' }" class="relative">
-        <img class="-mt-3 w-8" src="../../assets/logo.svg" />
+        <img class="-mt-3 w-8" src="../../../assets/logo.svg" />
         <span class="absolute -bottom-4 text-xs">{{ version }}</span>
       </router-link>
       <a :href="docsUrl" target="_blank" class="ml-8">Docs</a>
-      <router-link v-if="user && user.admin" :to="{ name: 'admin' }" class="ml-8">Administration</router-link>
+      <!-- <router-link v-if="user && user.admin" :to="{ name: 'admin' }" class="ml-8">Administration</router-link> -->
       <router-link :to="{ name: 'repos' }" class="ml-8">Repositories</router-link>
       <router-link
         v-if="$route.matched.some(({ name }) => name === 'repo-wrapper')"
@@ -14,8 +14,9 @@
         class="ml-8"
         >Repo-Settings</router-link
       >
-      <div class="ml-auto">
-        <img v-if="user && user.avatar_url" class="ml-auto w-8" :src="`${user.avatar_url}&s=32`" />
+      <div class="flex ml-auto items-center">
+        <ActiveBuilds />
+        <img v-if="user && user.avatar_url" class="ml-4 w-8" :src="`${user.avatar_url}&s=32`" />
         <Button v-else text="Login" @click="doLogin" />
       </div>
     </FluidContainer>
@@ -29,11 +30,12 @@ import useConfig from '~/compositions/useConfig';
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useAuthentication from '~/compositions/useAuthentication';
+import ActiveBuilds from './ActiveBuilds.vue';
 
 export default defineComponent({
   name: 'NavBar',
 
-  components: { Button, FluidContainer },
+  components: { Button, FluidContainer, ActiveBuilds },
 
   setup() {
     const config = useConfig();

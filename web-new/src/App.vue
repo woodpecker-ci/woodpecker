@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import Navbar from '~/components/layout/Navbar.vue';
+import Navbar from '~/components/layout/header/Navbar.vue';
 import FeedSidebar from './components/build-feed/FeedSidebar.vue';
 
 export default defineComponent({

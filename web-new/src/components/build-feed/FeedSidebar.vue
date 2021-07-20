@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col space-y-2">
+  <div v-if="isBuildFeedOpen" class="flex flex-col space-y-2">
     <router-link
       v-for="build in builds"
       :to="{ name: 'repo-build', params: { repoOwner: build.owner, repoId: build.name, buildId: build.number } }"
@@ -18,41 +18,21 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, toRef } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo, Build } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
-import { useRouter } from 'vue-router';
-import useNotifications from '~/compositions/useNotifications';
 import BuildItem from '~/components/repo/BuildItem.vue';
+import useBuildFeed from '~/compositions/useBuildFeed';
+import useUserConfig from '~/compositions/useUserConfig';
 
 export default defineComponent({
   name: 'FeedSidebar',
 
   components: { FluidContainer, Button, BuildItem },
 
-  setup(props) {
-    const apiClient = useApiClient();
-    const router = useRouter();
+  setup() {
+    const { builds, isBuildFeedOpen } = useBuildFeed();
 
-    const builds = ref<Build[] | undefined>();
-
-    /**
-     * Compare two feed items by name.
-     * @param {Object} a - A feed item.
-     * @param {Object} b - A feed item.
-     * @returns {number}
-     */
-    const compareFeedItem = (a: Build, b: Build) => {
-      return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
-    };
-
-    onMounted(async () => {
-      const b = await apiClient.getBuildFeed();
-      builds.value = b.sort(compareFeedItem);
-    });
-
-    return { builds };
+    return { builds, isBuildFeedOpen };
   },
 });
 </script>
