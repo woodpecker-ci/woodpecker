@@ -49,7 +49,7 @@ func WebConfig(c *gin.Context) {
 		"user":    user,
 		"csrf":    csrf,
 		"syncing": syncing,
-		"docs":    nil, // TODO
+		"docs":    "https://woodpecker.laszlo.cloud",
 		"version": version.String(),
 	}
 
