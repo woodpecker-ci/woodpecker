@@ -33,7 +33,7 @@ class ProcListHolder extends Component {
 
     return (
       <div className={styles.list}>
-        {renderName && vars.name !== "drone" ? (
+        {renderName ? (
           <div
             onClick={this.toggleOpen}
             className={`${styles.group} ${groupExpandStatus}`}
@@ -60,9 +60,9 @@ class ProcListHolder extends Component {
 
 export class ProcList extends Component {
   render() {
-    const { repo, build, rootProc, selectedProc, renderName } = this.props;
+    const { repo, build, rootProc, selectedProc } = this.props;
     return (
-      <ProcListHolder vars={rootProc} renderName={renderName}>
+      <ProcListHolder vars={rootProc} renderName={build.procs.length > 1}>
         {this.props.rootProc.children.map(function(child) {
           return (
             <Link
