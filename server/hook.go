@@ -33,7 +33,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
 
@@ -257,7 +256,7 @@ func PostHook(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  httputil.GetURL(c.Request),
+		Link:  Config.Server.Host,
 		Yamls: remoteYamlConfigs,
 	}
 	buildItems, err := b.Build()

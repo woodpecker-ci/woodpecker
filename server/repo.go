@@ -26,7 +26,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
@@ -75,7 +74,7 @@ func PostRepo(c *gin.Context) {
 
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		httputil.GetURL(c.Request),
+		Config.Server.Host,
 		sig,
 	)
 
@@ -203,7 +202,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	remote.Deactivate(user, repo, httputil.GetURL(c.Request))
+	remote.Deactivate(user, repo, Config.Server.Host)
 	c.JSON(200, repo)
 }
 
@@ -221,7 +220,7 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := httputil.GetURL(c.Request)
+	host := Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
@@ -307,7 +306,7 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := httputil.GetURL(c.Request)
+	host := Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,

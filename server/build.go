@@ -31,7 +31,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -309,7 +308,7 @@ func PostApproval(c *gin.Context) {
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,
-		Link:  httputil.GetURL(c.Request),
+		Link:  Config.Server.Host,
 		Yamls: yamls,
 		Envs:  envs,
 	}
@@ -518,7 +517,7 @@ func PostBuild(c *gin.Context) {
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,
-		Link:  httputil.GetURL(c.Request),
+		Link:  Config.Server.Host,
 		Yamls: yamls,
 		Envs:  buildParams,
 	}
