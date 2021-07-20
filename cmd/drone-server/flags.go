@@ -95,12 +95,6 @@ var flags = []cli.Flag{
 		Usage:  "file path for the drone config",
 		Value:  ".drone.yml",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
-		Name:   "docs",
-		Usage:  "link to user documentation",
-		Value:  "https://woodpecker.laszlo.cloud",
-	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",
 		Name:   "session-expires",
