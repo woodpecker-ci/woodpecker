@@ -1,5 +1,8 @@
 // A version control repository.
 export type Repo = {
+  active: boolean;
+  // Is the repo currently active or not
+
   id: number;
   // The unique identifier for the repository.
 

@@ -1,19 +1,27 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full">
+  <div class="app flex flex-col m-auto w-full h-full bg-gray-100">
     <Navbar />
-    <router-view />
+    <div class="flex min-h-0 h-full">
+      <div class="overflow-y-auto flex-grow">
+        <router-view />
+      </div>
+      <FeedSidebar class="shadow-md bg-white border-l w-full max-w-80 xl:max-w-96" />
+    </div>
+    <notifications position="bottom right" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import Navbar from './components/Navbar.vue';
+import { defineComponent, onMounted } from 'vue';
+import Navbar from '~/components/layout/Navbar.vue';
+import FeedSidebar from './components/build-feed/FeedSidebar.vue';
 
 export default defineComponent({
   name: 'App',
 
   components: {
     Navbar,
+    FeedSidebar,
   },
 });
 </script>
@@ -24,6 +32,10 @@ body,
 #app {
   width: 100%;
   height: 100%;
+}
+
+.vue-notification {
+  @apply rounded-lg p-2 text-lg;
 }
 </style>
 

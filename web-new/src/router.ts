@@ -1,6 +1,6 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import { isAuthenticated } from './compositions/useAuthentication';
+import useAuthentication from './compositions/useAuthentication';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -11,20 +11,48 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/repos',
     name: 'repos',
-    component: (): Component => import('~/views/repos/Repos.vue'),
+    component: (): Component => import('~/views/repo/Repos.vue'),
     meta: { authentication: 'required' },
   },
   {
     path: '/repo/add',
     name: 'repo-add',
-    component: (): Component => import('~/views/repos/RepoAdd.vue'),
+    component: (): Component => import('~/views/repo/RepoAdd.vue'),
     meta: { authentication: 'required' },
   },
   {
     path: '/repo/:repoOwner/:repoId',
-    name: 'repo',
-    component: (): Component => import('~/views/repos/Repo.vue'),
-    meta: { authentication: 'required' },
+    name: 'repo-wrapper',
+    component: (): Component => import('~/views/repo/RepoWrapper.vue'),
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'repo',
+        component: (): Component => import('~/views/repo/Repo.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+      {
+        path: 'build/:buildId',
+        name: 'repo-build',
+        component: (): Component => import('~/views/repo/build/Build.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+      {
+        path: 'settings',
+        name: 'repo-settings',
+        component: (): Component => import('~/views/repo/RepoSettings.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+    ],
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: (): Component => import('~/views/Admin.vue'),
     props: true,
   },
   {
@@ -46,7 +74,8 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
-  if (to.meta.authentication === 'required' && !isAuthenticated()) {
+  const authentication = useAuthentication();
+  if (to.meta.authentication === 'required' && !authentication.isAuthenticated) {
     next({ name: 'login', params: { origin: to.fullPath } });
     return;
   }

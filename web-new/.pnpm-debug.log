@@ -1,0 +1,20 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 error pnpm": {
+    "code": "ELIFECYCLE",
+    "errno": "ENOENT",
+    "syscall": "spawn",
+    "file": "sh",
+    "pkgid": "@0.0.0",
+    "stage": "start",
+    "script": "vite",
+    "err": {
+      "name": "Error",
+      "message": "@0.0.0 start: `vite`\nspawn ENOENT",
+      "code": "ELIFECYCLE",
+      "stack": "Error: @0.0.0 start: `vite`\nspawn ENOENT\n    at ChildProcess.<anonymous> (/home/anton/.nvm/versions/node/v14.15.4/pnpm-global/5/node_modules/.pnpm/pnpm@6.10.3/node_modules/pnpm/dist/pnpm.cjs:92970:22)\n    at ChildProcess.emit (events.js:315:20)\n    at maybeClose (internal/child_process.js:1048:16)\n    at Process.ChildProcess._handle.onexit (internal/child_process.js:288:5)"
+    }
+  }
+}

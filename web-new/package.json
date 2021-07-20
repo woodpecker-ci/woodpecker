@@ -8,10 +8,16 @@
     "format": "prettier --write src/**/*.js"
   },
   "dependencies": {
+    "@kyvg/vue3-notification": "^2.3.3",
+    "@meforma/vue-toaster": "^1.2.2",
+    "@types/javascript-time-ago": "^2.0.3",
+    "humanize-duration": "^3.27.0",
+    "javascript-time-ago": "^2.3.8",
     "vue": "^3.0.5",
     "vue-router": "4.0.10"
   },
   "devDependencies": {
+    "@types/humanize-duration": "^3.25.1",
     "@types/node": "^16.3.3",
     "@vitejs/plugin-vue": "^1.2.5",
     "@vue/compiler-sfc": "^3.0.5",
