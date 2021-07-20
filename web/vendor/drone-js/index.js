@@ -381,22 +381,12 @@
       ],
       [
         {
-          key: "fromEnviron",
-          value: function fromEnviron() {
-            return new DroneClient(
-              process && process.env && process.env.DRONE_SERVER,
-              process && process.env && process.env.DRONE_TOKEN,
-              process && process.env && process.env.DRONE_CSRF
-            );
-          }
-        },
-        {
           key: "fromWindow",
           value: function fromWindow() {
             return new DroneClient(
-              window && window.DRONE_SERVER,
-              window && window.DRONE_TOKEN,
-              window && window.DRONE_CSRF
+              window && window.WOODPECKER_SERVER,
+              window && window.WOODPECKER_TOKEN,
+              window && window.WOODPECKER_CSRF
             );
           }
         }

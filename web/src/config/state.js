@@ -1,7 +1,7 @@
 import Baobab from "baobab";
 
-const user = window.DRONE_USER;
-const sync = window.DRONE_SYNC;
+const user = window.WOODPECKER_USER;
+const sync = window.WOODPECKER_SYNC;
 
 const state = {
   follow: false,

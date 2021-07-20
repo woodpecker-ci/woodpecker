@@ -63,6 +63,12 @@ var flags = []cli.Flag{
 		Usage:  "serve the website from disk",
 		Hidden: true,
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_WWW_PROXY",
+		Name:   "www-proxy",
+		Usage:  "serve the website with a proxy",
+		Hidden: true,
+	},
 	cli.StringSliceFlag{
 		EnvVar: "DRONE_ADMIN,WOODPECKER_ADMIN",
 		Name:   "admin",
@@ -88,12 +94,6 @@ var flags = []cli.Flag{
 		Name:   "repo-config",
 		Usage:  "file path for the drone config",
 		Value:  ".drone.yml",
-	},
-	cli.StringFlag{
-		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
-		Name:   "docs",
-		Usage:  "link to user documentation",
-		Value:  "https://woodpecker.laszlo.cloud",
 	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",

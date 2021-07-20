@@ -41,11 +41,3 @@ func WithDir(s string) Option {
 		o.path = s
 	}
 }
-
-// WithDocs configures the website handler with the documentation
-// website address, which should be included in the user interface.
-func WithDocs(s string) Option {
-	return func(o *Options) {
-		o.docs = s
-	}
-}
