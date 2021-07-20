@@ -21,7 +21,7 @@
       <div class="flex items-center"><img class="w-8" :src="build.author_avatar" /></div>
 
       <div class="ml-4 flex items-center ml-4">
-        <span>{{ build.message }}</span>
+        <span>{{ convertEmojis(build.message) }}</span>
       </div>
 
       <div class="flex ml-auto text-gray-500">
@@ -55,6 +55,7 @@ import { computed, defineComponent, PropType, ref, toRef } from 'vue';
 import { Build } from '~/lib/api/types';
 import humanizeDuration from 'humanize-duration';
 import TimeAgo from 'javascript-time-ago';
+import { convertEmojis } from '~/utils/emoji';
 
 export default defineComponent({
   name: 'BuildItem',
@@ -97,7 +98,7 @@ export default defineComponent({
       return humanizeDuration(build.value.finished_at - build.value.started_at);
     });
 
-    return { since, duration };
+    return { since, duration, convertEmojis };
   },
 });
 </script>
