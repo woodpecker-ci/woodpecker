@@ -4,18 +4,23 @@
       <Breadcrumbs
         :paths="[
           repo.owner,
-          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoId: repo.name } } },
+          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } },
         ]"
       />
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
+      <a :href="repo.link_url" target="_blank" class="ml-auto">
+        <icon-github v-if="repo.link_url.startsWith('https://github.com/')" class="h-8 w-8" />
+        <icon-repo v-else />
+      </a>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-4">
         <img :src="badgeUrl" />
       </a>
     </FluidContainer>
-    <FluidContainer class="space-y-2">
+
+    <FluidContainer class="space-y-4">
       <router-link
         v-for="build in builds"
         :key="build.id"
-        :to="{ name: 'repo-build', params: { repoOwner: repo.owner, repoId: repo.name, buildId: build.id } }"
+        :to="{ name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId: build.number } }"
         class="flex"
       >
         <BuildItem :build="build" />
@@ -31,11 +36,13 @@ import { Repo, Build } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
+import IconGithub from 'virtual:vite-icons/mdi/github';
+import IconRepo from 'virtual:vite-icons/teenyicons/git-solid';
 
 export default defineComponent({
   name: 'Repo',
 
-  components: { FluidContainer, BuildItem, Breadcrumbs },
+  components: { FluidContainer, BuildItem, Breadcrumbs, IconGithub, IconRepo },
 
   setup() {
     const apiClient = useApiClient();

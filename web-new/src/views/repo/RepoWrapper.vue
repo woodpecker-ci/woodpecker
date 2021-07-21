@@ -21,7 +21,7 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    repoId: {
+    repoName: {
       type: String,
       required: true,
     },
@@ -31,20 +31,20 @@ export default defineComponent({
     const apiClient = useApiClient();
 
     const repoOwner = toRef(props, 'repoOwner');
-    const repoId = toRef(props, 'repoId');
+    const repoName = toRef(props, 'repoName');
 
     const repo = ref<Repo | undefined>();
     provide('repo', repo);
 
     async function loadRepo() {
-      repo.value = await apiClient.getRepo(repoOwner.value, repoId.value);
+      repo.value = await apiClient.getRepo(repoOwner.value, repoName.value);
     }
 
     onMounted(async () => {
       loadRepo();
     });
 
-    watch([repoOwner, repoId], () => {
+    watch([repoOwner, repoName], () => {
       loadRepo();
     });
 

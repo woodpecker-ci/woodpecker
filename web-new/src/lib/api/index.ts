@@ -37,7 +37,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get('/api/repos/' + owner + '/' + repo + '/builds?' + query);
   }
 
-  getBuild(owner: string, repo: string, number: number) {
+  getBuild(owner: string, repo: string, number: string | 'latest') {
     return this._get('/api/repos/' + owner + '/' + repo + '/builds/' + number);
   }
 
@@ -107,13 +107,13 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token');
   }
 
-  on(callback) {
+  on(callback: (data: string) => void) {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
     });
   }
 
-  stream(owner: string, repo: string, build: string, proc: string, callback) {
+  stream(owner: string, repo: string, build: string, proc: string, callback: (data: string) => void) {
     return this._subscribe('/stream/logs/' + owner + '/' + repo + '/' + build + '/' + proc, callback, {
       reconnect: false,
     });

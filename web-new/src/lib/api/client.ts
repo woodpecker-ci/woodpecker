@@ -92,7 +92,7 @@ export default class ApiClient {
     return this._request('DELETE', path, null);
   }
 
-  _subscribe(path: string, callback, opts) {
+  _subscribe(path: string, callback: (data: string) => void, opts = { reconnect: true }) {
     var query = encodeQueryString({
       access_token: this.token,
     });

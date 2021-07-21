@@ -10,6 +10,7 @@
   "dependencies": {
     "@kyvg/vue3-notification": "^2.3.3",
     "@meforma/vue-toaster": "^1.2.2",
+    "ansi_up": "^5.0.1",
     "humanize-duration": "^3.27.0",
     "javascript-time-ago": "^2.3.8",
     "node-emoji": "^1.10.0",
@@ -18,14 +19,17 @@
     "vue-router": "4.0.10"
   },
   "devDependencies": {
-    "@types/javascript-time-ago": "^2.0.3",
+    "@iconify/json": "^1.1.378",
     "@types/humanize-duration": "^3.25.1",
+    "@types/javascript-time-ago": "^2.0.3",
     "@types/node": "^16.3.3",
     "@types/node-emoji": "^1.8.1",
     "@vitejs/plugin-vue": "^1.2.5",
     "@vue/compiler-sfc": "^3.0.5",
+    "ansi-to-html": "^0.7.0",
     "typescript": "^4.3.2",
     "vite": "^2.4.2",
+    "vite-plugin-icons": "^0.6.5",
     "vite-plugin-windicss": "^1.2.4",
     "vue-tsc": "^0.0.24",
     "windicss": "3.1.0"

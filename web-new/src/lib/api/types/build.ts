@@ -6,8 +6,14 @@ export type Build = {
   // This number is specified within the context of the repository the build belongs to and is unique within that.
   number: number;
 
+  parent: number;
+
+  event: 'push' | 'tag';
+
   //  The current status of the build.
   status: BuildStatus;
+
+  error: string;
 
   // When the build request was received.
   created_at: number;
@@ -21,46 +27,60 @@ export type Build = {
   // When the build was finished.
   finished_at: number;
 
-  //  description: Where the deployment should go.
+  // Where the deployment should go.
   deploy_to: string;
 
-  // description: The commit for the build.
+  // The commit for the build.
   commit: string;
 
-  // description: The branch the commit was pushed to.
+  // The branch the commit was pushed to.
   branch: string;
 
-  // description: The commit message.
+  // The commit message.
   message: string;
 
-  // description: When the commit was created.
+  // When the commit was created.
   timestamp: number;
 
-  // description: The alias for the commit.
+  // The alias for the commit.
   ref: string;
 
-  // description: The mapping from the local repository to a branch in the remote.
+  // The mapping from the local repository to a branch in the remote.
   refspec: string;
 
-  // description: The remote repository.
+  // The remote repository.
   remote: string;
 
-  // description: The login for the author of the commit.
+  title: string;
+
+  sender: string;
+
+  // The login for the author of the commit.
   author: string;
 
-  // description: The avatar for the author of the commit.
+  // The avatar for the author of the commit.
   author_avatar: string;
 
-  // description: The email for the author of the commit.
+  //  email for the author of the commit.
   author_email: string;
 
-  //   The link to view the repository.
-  //   This link will point to the repository state associated with the build's commit.
+  // The link to view the repository.
+  // This link will point to the repository state associated with the build's commit.
   link_url: string;
+
+  signed: boolean;
+
+  verified: boolean;
+
+  reviewed_by: string;
+
+  reviewed_at: number;
 
   // The jobs associated with this build.
   // A build will have multiple jobs if a matrix build was used or if a rebuild was requested.
-  jobs: Job[];
+  procs: BuildJob[];
+
+  changed_files: string[];
 };
 
 export type BuildStatus =
@@ -75,4 +95,17 @@ export type BuildStatus =
   | 'started'
   | 'success';
 
-export type Job = {};
+export type BuildJob = {
+  id: number;
+  build_id: number;
+  pid: number;
+  ppid: number;
+  pgid: number;
+  name: string;
+  state: BuildStatus;
+  exit_code: number;
+  start_time: number;
+  end_time: number;
+  machine: string;
+  children?: BuildJob[];
+};

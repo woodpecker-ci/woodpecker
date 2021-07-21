@@ -4,7 +4,7 @@
 
     <FluidContainer>
       <div
-        @click="$router.push({ name: 'repo', params: { repoId: repo.name, repoOwner: repo.owner } })"
+        @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
         v-for="repo in repos"
       >
         {{ repo.full_name }}

@@ -2,7 +2,7 @@
   <div class="flex">
     <template v-for="(path, index) in paths">
       <span v-if="typeof path === 'string'">{{ path }}</span>
-      <router-link v-else :to="path.link" class="text-blue-400">{{ path.name }}</router-link>
+      <router-link v-else :to="path.link" class="text-link">{{ path.name }}</router-link>
       <span v-if="index !== Object.keys(paths).length - 1" class="mx-2"> / </span>
     </template>
   </div>

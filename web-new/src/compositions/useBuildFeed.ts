@@ -1,17 +1,9 @@
-import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
+import { computed } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Build } from '~/lib/api/types';
-import useUserConfig from './useUserConfig';
+import useUserConfig from '~/compositions/useUserConfig';
 
-let initilaized = false;
-const builds = ref<Build[] | undefined>();
-const activeBuilds = computed(() => {
-  if (!builds.value) {
-    return undefined;
-  }
-
-  return builds.value.filter((build) => ['pending', 'running', 'started'].includes(build.status));
-});
 const { userConfig, setUserConfig } = useUserConfig();
 const isBuildFeedOpen = computed(() => userConfig.value.isBuildFeedOpen);
 
@@ -25,28 +17,48 @@ function compareFeedItem(a: Build, b: Build) {
   return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
 }
 
-async function init() {
-  const apiClient = useApiClient();
+export default defineStore({
+  id: 'builds',
 
-  const b = await apiClient.getBuildFeed();
-  builds.value = b.sort(compareFeedItem);
+  state: () => ({
+    loaded: false,
+    builds: [] as Build[],
+  }),
 
-  // listen to build-feed changes
-}
+  getters: {
+    activeBuilds(state) {
+      if (!state.builds) {
+        return undefined;
+      }
 
-export default () => {
-  if (!initilaized) {
-    init();
-  }
+      return state.builds.filter((build) => ['pending', 'running', 'started'].includes(build.status));
+    },
+    isBuildFeedOpen() {
+      return isBuildFeedOpen.value;
+    },
+  },
 
-  function toggle() {
-    setUserConfig('isBuildFeedOpen', !userConfig.value.isBuildFeedOpen);
-  }
+  actions: {
+    async loadBuilds() {
+      if (this.loaded) {
+        return;
+      }
 
-  return {
-    toggle,
-    builds,
-    activeBuilds,
-    isBuildFeedOpen,
-  };
-};
+      this.loaded = true;
+
+      const apiClient = useApiClient();
+
+      const b = await apiClient.getBuildFeed();
+      this.builds = b.sort(compareFeedItem);
+
+      // listen to build-feed changes
+      apiClient.on((data: any) => {
+        console.log('on data', data);
+        const { repo, build } = data;
+      });
+    },
+    toggle() {
+      setUserConfig('isBuildFeedOpen', !userConfig.value.isBuildFeedOpen);
+    },
+  },
+});

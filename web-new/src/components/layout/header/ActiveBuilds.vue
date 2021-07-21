@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRef } from 'vue';
+import { computed, defineComponent, onMounted, ref, toRef } from 'vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
@@ -39,8 +39,8 @@ export default defineComponent({
   components: { FluidContainer, Button, BuildItem },
 
   setup() {
-    const { activeBuilds, toggle: toggleBuildFeed } = useBuildFeed();
-    return { activeBuilds, toggleBuildFeed };
+    const buildStore = useBuildFeed();
+    return { activeBuilds: computed(() => buildStore.activeBuilds), toggleBuildFeed: buildStore.toggle };
   },
 });
 </script>

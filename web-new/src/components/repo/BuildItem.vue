@@ -1,19 +1,14 @@
 <template>
   <div v-if="build" class="w-full flex border rounded-md bg-white overflow-hidden hover:shadow-sm hover:bg-light-200">
-    <div class="flex items-center">
-      <div
-        class="min-h-full w-3"
-        :class="{
-          'bg-gray-400': build.status === 'pending',
-          'bg-green': build.status === 'started',
-          'bg-green': build.status === 'success',
-          'bg-red-400': build.status === 'failure',
-          'bg-red-800': build.status === 'error',
-          'bg-green': build.status === 'none',
-        }"
-      />
-      <div class="w-6">
-        <img v-if="build.status === 'pending'" src="../../assets/pecking_woodpecker.gif" />
+    <div class="flex items-center mr-4">
+      <div class="min-h-full w-3" :class="[`bg-status-${build.status}`]" />
+      <div class="w-8">
+        <img
+          v-if="build.status === 'started' || build.status === 'running'"
+          class="w-6"
+          src="../../assets/pecking_woodpecker.gif"
+        />
+        <BuildStatusIcon class="mx-3" v-else :build="build" />
       </div>
     </div>
 
@@ -21,27 +16,27 @@
       <div class="flex items-center"><img class="w-8" :src="build.author_avatar" /></div>
 
       <div class="ml-4 flex items-center ml-4">
-        <span>{{ convertEmojis(build.message) }}</span>
+        <span>{{ message }}</span>
       </div>
 
-      <div class="flex ml-auto text-gray-500">
-        <div class="flex flex-col">
-          <div class="space-x-2">
-            <span>GH</span>
+      <div class="flex ml-auto text-gray-500 py-2">
+        <div class="flex flex-col space-y-2 w-42">
+          <div class="flex space-x-2 items-center">
+            <icon-commit />
             <a class="text-gray-400" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
           </div>
-          <div class="space-x-2">
-            <span>BR</span>
+          <div class="flex space-x-2 items-center">
+            <icon-branch />
             <span>{{ build.branch }}</span>
           </div>
         </div>
-        <div class="flex flex-col ml-4">
-          <div class="space-x-2">
-            <span>Duration</span>
+        <div class="flex flex-col ml-4 space-y-2 w-42">
+          <div class="flex space-x-2 items-center">
+            <icon-duration />
             <span>{{ duration }}</span>
           </div>
-          <div class="space-x-2">
-            <span>Since</span>
+          <div class="flex space-x-2 items-center">
+            <icon-since />
             <span>{{ since }}</span>
           </div>
         </div>
@@ -51,16 +46,19 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRef } from 'vue';
+import { defineComponent, PropType, ref, toRef } from 'vue';
+import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse';
+import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline';
+import IconBranch from 'virtual:vite-icons/mdi/source-branch';
+import IconCommit from 'virtual:vite-icons/mdi/source-commit';
 import { Build } from '~/lib/api/types';
-import humanizeDuration from 'humanize-duration';
-import TimeAgo from 'javascript-time-ago';
-import { convertEmojis } from '~/utils/emoji';
+import useBuild from '~/compositions/useBuild';
+import BuildStatusIcon from './BuildStatusIcon.vue';
 
 export default defineComponent({
   name: 'BuildItem',
 
-  components: {},
+  components: { IconDuration, IconSince, IconBranch, IconCommit, BuildStatusIcon },
 
   props: {
     build: {
@@ -70,35 +68,10 @@ export default defineComponent({
   },
 
   setup(props) {
-    const timeAgo = new TimeAgo('en-US');
-
     const build = toRef(props, 'build');
+    const { since, duration, message } = useBuild(build);
 
-    const since = computed(() => {
-      if (build.value.finished_at !== 0) {
-        return timeAgo.format(Date.now() - build.value.finished_at / 1000);
-      }
-
-      if (build.value.started_at !== 0) {
-        return timeAgo.format(Date.now() - build.value.started_at / 1000);
-      }
-
-      return timeAgo.format(Date.now() - build.value.enqueued_at / 1000);
-    });
-
-    const duration = computed(() => {
-      if (build.value.finished_at === 0 && build.value.finished_at === 0) {
-        return 'not started yet';
-      }
-
-      if (build.value.finished_at !== 0) {
-        return `${humanizeDuration(Date.now() - build.value.started_at)} ...`;
-      }
-
-      return humanizeDuration(build.value.finished_at - build.value.started_at);
-    });
-
-    return { since, duration, convertEmojis };
+    return { since, duration, message };
   },
 });
 </script>

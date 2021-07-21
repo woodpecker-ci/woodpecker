@@ -46,7 +46,7 @@ export default defineComponent({
     async function activateRepo(repo: Repo): Promise<void> {
       await apiClient.activateRepo(repo.owner, repo.name);
       notifications.notify({ title: 'Repository enabled', type: 'success' });
-      await router.push({ name: 'repo', params: { repoId: repo.name, repoOwner: repo.owner } });
+      await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     }
 
     return { repos, reloadRepos, activateRepo };

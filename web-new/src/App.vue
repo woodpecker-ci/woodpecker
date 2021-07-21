@@ -5,23 +5,23 @@
       <div class="overflow-y-auto flex-grow">
         <router-view />
       </div>
-      <FeedSidebar class="shadow-md bg-white border-l w-full max-w-80 xl:max-w-96" />
+      <BuildFeedSidebar class="shadow-md bg-white border-l w-full absolute right-0 lg:relative max-w-80 xl:max-w-96" />
     </div>
     <notifications position="bottom right" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent } from 'vue';
 import Navbar from '~/components/layout/header/Navbar.vue';
-import FeedSidebar from './components/build-feed/FeedSidebar.vue';
+import BuildFeedSidebar from './components/build-feed/BuildFeedSidebar.vue';
 
 export default defineComponent({
   name: 'App',
 
   components: {
     Navbar,
-    FeedSidebar,
+    BuildFeedSidebar,
   },
 });
 </script>

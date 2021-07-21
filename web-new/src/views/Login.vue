@@ -7,7 +7,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, PropType } from 'vue';
 import Button from '~/components/atomic/Button.vue';
-import { authenticate, isAuthenticated } from '~/compositions/useAuthentication';
+import useAuthentication from '~/compositions/useAuthentication';
 import router from '~/router';
 
 export default defineComponent({
@@ -25,12 +25,14 @@ export default defineComponent({
   },
 
   setup(props) {
+    const authentication = useAuthentication();
+
     function doLogin() {
-      authenticate(props.origin);
+      authentication.authenticate(props.origin);
     }
 
     onMounted(async () => {
-      if (isAuthenticated()) {
+      if (authentication.isAuthenticated) {
         await router.replace({ name: 'home' });
       }
     });

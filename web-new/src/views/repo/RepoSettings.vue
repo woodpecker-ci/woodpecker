@@ -4,8 +4,8 @@
       <Breadcrumbs
         :paths="[
           repo.owner,
-          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoId: repo.name } } },
-          { name: 'Settings', link: { name: 'repo-settings', params: { repoOwner: repo.owner, repoId: repo.name } } },
+          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } },
+          { name: 'Settings', link: { name: 'repo-settings', params: { repoOwner: repo.owner, repoName: repo.name } } },
         ]"
       />
     </FluidContainer>
