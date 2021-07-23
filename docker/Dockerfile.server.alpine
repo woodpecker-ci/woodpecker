@@ -8,6 +8,6 @@ ENV DATABASE_CONFIG=/var/lib/drone/drone.sqlite
 ENV GODEBUG=netdns=go
 ENV XDG_CACHE_HOME /var/lib/drone
 
-ADD release/drone-server /bin/
+ADD ./woodpecker-server /bin/
 
-ENTRYPOINT ["/bin/drone-server"]
+ENTRYPOINT ["/bin/woodpecker-server"]

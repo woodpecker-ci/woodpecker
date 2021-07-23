@@ -1,0 +1,92 @@
+before:
+  hooks:
+    - go mod tidy
+    - go get github.com/woodpecker-ci/togo
+#    - (cd web/; go generate ./...)
+builds:
+  - id: server
+    main: ./cmd/drone-server
+    binary: woodpecker-server
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      # - windows
+      # - darwin
+  - id: agent
+    main: ./cmd/drone-agent
+    binary: woodpecker-agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      # - windows
+      # - darwin
+  - id: cli
+    main: ./cmd/drone-agent
+    binary: woodpecker-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      # - windows
+      # - darwin
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  - builds:
+      - server
+      - agent
+      - cli
+    homepage: https://github.com/woodpecker-ci/woodpecker
+    license: Apache 2.0
+    formats:
+      - apk
+      - deb
+      - rpm
+    meta: true
+dockers:
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.server
+    image_templates:
+      - "woodpeckerci/woodpecker-server:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-server:latest"
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.server.alpine
+    image_templates:
+      - "woodpeckerci/woodpecker-server:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-server:latest-alpine"
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.agent
+    image_templates:
+      - "woodpeckerci/woodpecker-agent:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-agent:latest"
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.agent.alpine
+    image_templates:
+      - "woodpeckerci/woodpecker-agent:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-agent:latest-alpine"
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.cli
+    image_templates:
+      - "woodpeckerci/woodpecker-cli:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-cli:latest"
+  - goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.cli.alpine
+    image_templates:
+      - "woodpeckerci/woodpecker-cli:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-cli:latest-alpine"
