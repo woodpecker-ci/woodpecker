@@ -1,7 +1,15 @@
 <template>
   <div v-if="build" class="w-full flex border rounded-md bg-white overflow-hidden hover:shadow-sm hover:bg-light-200">
     <div class="flex items-center mr-4">
-      <div class="min-h-full w-3" :class="[`bg-status-${build.status}`]" />
+      <div
+        class="min-h-full w-3"
+        :class="{
+          'bg-status-red': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(build.status),
+          'bg-status-gray': ['started', 'running'].includes(build.status),
+          'bg-status-green': ['success'].includes(build.status),
+          'bg-status-blue': ['started', 'running'].includes(build.status),
+        }"
+      />
       <div class="w-8">
         <img
           v-if="build.status === 'started' || build.status === 'running'"

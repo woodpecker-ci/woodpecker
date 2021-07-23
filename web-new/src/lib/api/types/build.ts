@@ -78,7 +78,7 @@ export type Build = {
 
   // The jobs associated with this build.
   // A build will have multiple jobs if a matrix build was used or if a rebuild was requested.
-  procs: BuildJob[];
+  procs: BuildProc[];
 
   changed_files: string[];
 };
@@ -95,7 +95,7 @@ export type BuildStatus =
   | 'started'
   | 'success';
 
-export type BuildJob = {
+export type BuildProc = {
   id: number;
   build_id: number;
   pid: number;
@@ -107,5 +107,12 @@ export type BuildJob = {
   start_time: number;
   end_time: number;
   machine: string;
-  children?: BuildJob[];
+  children?: BuildProc[];
+};
+
+export type BuildLog = {
+  proc: string;
+  pos: number;
+  out: string;
+  time?: number;
 };

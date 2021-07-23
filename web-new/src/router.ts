@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
         props: true,
       },
       {
-        path: 'build/:buildId',
+        path: 'build/:buildId/:procId?',
         name: 'repo-build',
         component: (): Component => import('~/views/repo/build/Build.vue'),
         meta: { authentication: 'required' },

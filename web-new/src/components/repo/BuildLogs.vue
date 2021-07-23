@@ -1,19 +1,21 @@
 <template>
   <div v-if="build" class="bg-gray-700 p-4">
-    <div v-for="(logLine, key) in logLines" :key="logLine" class="flex items-center">
-      <div class="text-gray-500 text-sm w-4">{{ key + 1 }}</div>
-      <div class="ml-6" v-html="logLine" />
-      <div class="ml-auto text-gray-500 text-sm">{{ (key + 1) * 10 }}s</div>
+    <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
+      <div class="text-gray-500 text-sm w-4">{{ logLine.pos + 1 }}</div>
+      <div class="ml-6 text-gray-300" v-html="logLine.out" />
+      <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
     </div>
-    <div v-if="exitCode !== undefined" class="text-gray-500 text-sm mt-4 ml-10">Exit code {{ exitCode }}</div>
+    <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-10">
+      exit code {{ proc.exit_code }}
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, toRef } from 'vue';
-import { Build } from '~/lib/api/types';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
+import { Build, Repo } from '~/lib/api/types';
 import AnsiConvert from 'ansi-to-html';
-import useApiClient from '~/compositions/useApiClient';
+import useBuildProc, { findProc } from '~/compositions/useBuildProc';
 
 export default defineComponent({
   name: 'BuildLogs',
@@ -25,28 +27,44 @@ export default defineComponent({
       type: Object as PropType<Build>,
       required: true,
     },
+    procId: {
+      type: String,
+      required: true,
+    },
   },
 
   setup(props) {
     const build = toRef(props, 'build');
+    const procId = toRef(props, 'procId');
+    const repo = computed(() => inject<Ref<Repo>>('repo')?.value || null);
 
-    const apiClient = useApiClient();
+    const buildProc = useBuildProc();
 
     var ansiConvert = new AnsiConvert();
-    const logLinesAnsi = ref<string[] | undefined>();
-    const logLines = computed(() => logLinesAnsi.value?.map((logLine) => ansiConvert.toHtml(logLine)));
-    const exitCode = ref<number | undefined>(0);
+    const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
+    const proc = computed(() => build && findProc(build.value.procs, parseInt(procId.value)));
 
-    onMounted(async () => {
-      logLinesAnsi.value = [
-        '\x1b[30mblack\x1b[37mwhite1',
-        '\x1b[30mblack\x1b[37mwhite2',
-        '\x1b[30mblack\x1b[37mwhite3',
-        '\x1b[30mblack\x1b[37mwhite4',
-      ];
+    function loadBuildProc() {
+      if (!repo.value || !build.value || !proc.value) {
+        return;
+      }
+
+      buildProc.load(repo.value.owner, repo.value.name, build.value.number, proc.value);
+    }
+
+    onMounted(() => {
+      loadBuildProc();
     });
 
-    return { logLines, build, exitCode };
+    watch([repo, build, procId], () => {
+      loadBuildProc();
+    });
+
+    onBeforeUnmount(() => {
+      buildProc.unload();
+    });
+
+    return { logLines, build, proc };
   },
 });
 </script>

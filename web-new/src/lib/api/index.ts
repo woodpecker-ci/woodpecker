@@ -1,11 +1,10 @@
 import ApiClient, { encodeQueryString } from './client';
-import { Repo } from './types';
+import { Build, BuildProc, BuildLog, Repo } from './types';
 
 type RepoListOptions = {
   all?: boolean;
   flush?: boolean;
 };
-
 export default class WoodpeckerClient extends ApiClient {
   constructor(server: string, token: string, csrf: string) {
     super(server, token, csrf);
@@ -63,7 +62,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/repos/' + owner + '/' + repo + '/builds/' + build + '?' + query);
   }
 
-  getLogs(owner: string, repo: string, build: string, proc: string) {
+  getLogs(owner: string, repo: string, build: number, proc: number): Promise<BuildLog[]> {
     return this._get('/api/repos/' + owner + '/' + repo + '/logs/' + build + '/' + proc);
   }
 
@@ -107,15 +106,21 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token');
   }
 
-  on(callback: (data: string) => void) {
+  on(callback: (data: { build?: Build; repo?: Repo; proc?: BuildProc }) => void) {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
     });
   }
 
-  stream(owner: string, repo: string, build: string, proc: string, callback: (data: string) => void) {
+  streamLogs(
+    owner: string,
+    repo: string,
+    build: number,
+    proc: number,
+    callback: (data: BuildLog) => void,
+  ): EventSource {
     return this._subscribe('/stream/logs/' + owner + '/' + repo + '/' + build + '/' + proc, callback, {
-      reconnect: false,
+      reconnect: true,
     });
   }
 }
