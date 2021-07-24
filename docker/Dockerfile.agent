@@ -1,8 +1,11 @@
-FROM drone/ca-certs
-ENV GODEBUG=netdns=go
-ADD ./woodpecker-agent /bin/
+FROM golang:1.16
 
+FROM scratch
+ENV GODEBUG=netdns=go
 EXPOSE 3000
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+ADD ./woodpecker-agent /bin/
 
 ENTRYPOINT ["/bin/woodpecker-agent"]
