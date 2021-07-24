@@ -17,11 +17,15 @@ builds:
       - amd64
       # - arm
       # - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/woodpecker-ci/woodpecker/version.Version={{.Version}}
+      - -extldflags "-static"
   - id: agent
     main: ./cmd/drone-agent
     binary: woodpecker-agent
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     goos:
       - linux
       # - windows
@@ -30,8 +34,12 @@ builds:
       - amd64
       # - arm
       # - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/woodpecker-ci/woodpecker/version.Version={{.Version}}
+      - -extldflags "-static"
   - id: cli
-    main: ./cmd/drone-agent
+    dir: ./cli/drone
     binary: woodpecker-cli
     env:
       - CGO_ENABLED=0
@@ -43,6 +51,10 @@ builds:
       - amd64
       # - arm
       # - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -extldflags "-static"
 checksum:
   name_template: 'checksums.txt'
 snapshot:
