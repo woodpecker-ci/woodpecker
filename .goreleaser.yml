@@ -8,7 +8,7 @@ builds:
     main: ./cmd/drone-server
     binary: woodpecker-server
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=1
     goos:
       - linux
       # - windows
