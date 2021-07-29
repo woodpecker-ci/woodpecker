@@ -1,3 +1,4 @@
+import { computed, toRef, Ref, ref } from 'vue';
 import { defineStore } from 'pinia';
 import useApiClient from '~/compositions/useApiClient';
 import { repoSlug } from '~/compositions/useRepo';
@@ -15,43 +16,93 @@ function compareFeedItem(a: Build, b: Build) {
   return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
 }
 
+function isBuildActive(build: Build) {
+  return ['pending', 'running', 'started'].includes(build.status);
+}
+
 export default defineStore({
   id: 'builds',
 
   state: () => ({
     builds: {} as Record<string, Record<number, Build>>,
+    buildFeed: [] as Build[],
   }),
 
   getters: {
-    getActiveBuilds: (state) => (owner: string, repo: string) => {
-      return Object.values(state.builds[repoSlug(owner, repo)]).filter((build) =>
-        ['pending', 'running', 'started'].includes(build.status),
-      );
+    sortedBuildFeed(state) {
+      return state.buildFeed.sort(compareFeedItem);
     },
-    getBuild: (state) => (owner: string, repo: string, build: number) => state.builds[repoSlug(owner, repo)][build],
+    activeBuilds(state) {
+      return state.buildFeed.filter(isBuildActive);
+    },
   },
 
   actions: {
-    async setBuild(owner: string, repo: string, build: Build) {
+    // setters
+    setBuild(owner: string, repo: string, build: Build) {
       const _repoSlug = repoSlug(owner, repo);
       if (!this.builds[_repoSlug]) {
         this.builds[_repoSlug] = {};
       }
 
-      this.builds[_repoSlug][build.number] = build;
+      // const repoBuilds = [...this.builds[_repoSlug].filter((b) => b.id !== build.id), build];
+      const repoBuilds = this.builds[_repoSlug];
+      repoBuilds[build.number] = build;
+
+      this.builds = {
+        ...this.builds,
+        [_repoSlug]: repoBuilds,
+      };
     },
-    async setProc(owner: string, repo: string, build: number, proc: BuildProc) {
-      const _repoSlug = repoSlug(owner, repo);
-      if (!this.builds[_repoSlug] || !this.builds[_repoSlug][build]) {
+    setProc(owner: string, repo: string, buildNumber: number, proc: BuildProc) {
+      const build = this.getBuild(ref(owner), ref(repo), ref(buildNumber.toString())).value;
+      if (!build) {
         throw new Error("Can't find build");
       }
 
-      const procs = this.builds[_repoSlug][build].procs.filter((p) => p.pid !== proc.pid);
-      this.builds[_repoSlug][build].procs = [...procs, proc];
+      if (!build.procs) {
+        build.procs = [];
+      }
+
+      build.procs = [...build.procs.filter((p) => p.pid !== proc.pid), proc];
+      this.setBuild(owner, repo, build);
     },
+
+    // getters
+    getBuilds(owner: Ref<string>, repo: Ref<string>) {
+      return computed(() => {
+        const slug = repoSlug(owner.value, repo.value);
+        return toRef(this.builds, slug).value;
+      });
+    },
+    getSortedBuilds(owner: Ref<string>, repo: Ref<string>) {
+      return computed(() => Object.values(this.getBuilds(owner, repo).value || []).sort(compareFeedItem));
+    },
+    getActiveBuilds(owner: Ref<string>, repo: Ref<string>) {
+      const builds = this.getBuilds(owner, repo);
+      return computed(() => Object.values(builds.value).filter(isBuildActive));
+    },
+    getBuild(owner: Ref<string>, repo: Ref<string>, buildNumber: Ref<string>) {
+      const builds = this.getBuilds(owner, repo);
+      return computed(() => {
+        return (builds.value || {})[parseInt(buildNumber.value)];
+      });
+    },
+
+    // loading
     async loadBuilds(owner: string, repo: string) {
-      const b = await apiClient.getBuildList(owner, repo);
-      this.builds[repoSlug(owner, repo)] = b.sort(compareFeedItem);
+      const builds = await apiClient.getBuildList(owner, repo);
+      builds.forEach((build) => {
+        this.setBuild(owner, repo, build);
+      });
+    },
+    async loadBuild(owner: string, repo: string, buildNumber: number) {
+      const build = await apiClient.getBuild(owner, repo, buildNumber.toString());
+      this.setBuild(owner, repo, build);
+    },
+    async loadBuildFeed() {
+      const builds = await apiClient.getBuildFeed();
+      this.buildFeed = builds;
     },
   },
 });

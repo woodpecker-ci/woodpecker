@@ -2,17 +2,17 @@
   <div v-if="build" class="bg-gray-700 p-4">
     <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
       <div class="text-gray-500 text-sm w-4">{{ logLine.pos + 1 }}</div>
-      <div class="ml-6 text-gray-300" v-html="logLine.out" />
+      <div class="mx-4 text-gray-300" v-html="logLine.out" />
       <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
     </div>
-    <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-10">
+    <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
       exit code {{ proc.exit_code }}
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
 import { Build, Repo } from '~/lib/api/types';
 import AnsiConvert from 'ansi-to-html';
 import useBuildProc, { findProc } from '~/compositions/useBuildProc';
@@ -28,7 +28,7 @@ export default defineComponent({
       required: true,
     },
     procId: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -42,7 +42,7 @@ export default defineComponent({
 
     var ansiConvert = new AnsiConvert();
     const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
-    const proc = computed(() => build && findProc(build.value.procs, parseInt(procId.value)));
+    const proc = computed(() => build && findProc(build.value.procs, procId.value));
 
     function loadBuildProc() {
       if (!repo.value || !build.value || !proc.value) {

@@ -1,23 +1,27 @@
 <template>
-  <div v-if="build && repo">
+  <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-start items-center">
       <Breadcrumbs
         :paths="[
-          repo.owner,
-          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } },
+          { name: 'Repositories', link: { name: 'home' } },
+          {
+            name: `${repo.owner} / ${repo.name}`,
+            link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } },
+          },
           {
             name: `Build #${buildId}`,
             link: { name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId } },
           },
         ]"
       />
-      <span class="text-xl mx-auto">{{ message }}</span>
-      <BuildStatusIcon :build="build" class="ml-auto" />
+      <BuildStatusIcon :build="build" class="flex ml-auto" />
       <Button class="ml-4" text="Cancel" />
     </FluidContainer>
 
-    <FluidContainer>
-      <div class="flex justify-evenly text-gray-500">
+    <FluidContainer class="p-0 flex flex-col flex-grow">
+      <span class="text-xl mx-auto mb-4">{{ message }}</span>
+
+      <div class="flex mx-auto space-x-16 text-gray-500">
         <div class="flex space-x-2 items-center">
           <icon-commit />
           <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
@@ -36,42 +40,15 @@
         </div>
       </div>
 
-      <div class="flex mt-4 w-full bg-gray-600 min-h-0 rounded-md overflow-hidden">
-        <div class="flex flex-col w-3/12 text-white">
-          <div v-for="proc in build.procs" :key="proc.id">
-            <div class="p-2">{{ proc.name }}</div>
-            <div
-              v-for="job in proc.children"
-              :key="job.pid"
-              class="flex p-2 pl-6 cursor-pointer items-center"
-              :class="{ 'bg-gray-800': procId && parseInt(procId) === job.pid }"
-              @click="selectProc(job)"
-            >
-              <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-status-green rounded-full" />
-              <div v-if="['pending', 'skipped'].includes(job.state)" class="w-2 h-2 bg-status-gray rounded-full" />
-              <div
-                v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(job.state)"
-                class="w-2 h-2 bg-status-red rounded-full"
-              />
-              <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-status-blue rounded-full" />
-              <span class="ml-2">{{ job.name }}</span>
-              <span class="ml-auto text-gray-500 text-sm" v-if="job.start_time !== undefined">{{
-                jobDuration(job)
-              }}</span>
-            </div>
-          </div>
-        </div>
-
-        <BuildLogs v-if="procId" :build="build" :proc-id="procId" class="w-9/12 flex-grow" />
-      </div>
+      <BuildProcs :build="build" v-model:selected-proc-id="selectedProcId" />
     </FluidContainer>
-  </div>
+  </template>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref, toRef, watch } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo, Build, BuildProc } from '~/lib/api/types';
+import { computed, defineComponent, inject, onMounted, Ref, toRef, watch } from 'vue';
+import BuildStore from '~/store/builds';
+import { Repo } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
@@ -82,10 +59,9 @@ import IconBranch from 'virtual:vite-icons/mdi/source-branch';
 import IconGithub from 'virtual:vite-icons/mdi/github';
 import IconCommit from 'virtual:vite-icons/mdi/source-commit';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
-import BuildLogs from '~/components/repo/BuildLogs.vue';
 import useBuild from '~/compositions/useBuild';
-import { durationAsNumber } from '~/utils/duration';
 import { useRouter, useRoute } from 'vue-router';
+import BuildProcs from '~/components/repo/BuildProcs.vue';
 
 export default defineComponent({
   name: 'Build',
@@ -101,10 +77,18 @@ export default defineComponent({
     IconGithub,
     IconCommit,
     BuildStatusIcon,
-    BuildLogs,
+    BuildProcs,
   },
 
   props: {
+    repoOwner: {
+      type: String,
+      required: true,
+    },
+    repoName: {
+      type: String,
+      required: true,
+    },
     buildId: {
       type: String,
       required: true,
@@ -116,47 +100,54 @@ export default defineComponent({
   },
 
   setup(props) {
-    const apiClient = useApiClient();
     const router = useRouter();
     const route = useRoute();
 
+    const buildStore = BuildStore();
     const buildId = toRef(props, 'buildId');
-    const r = inject<Ref<Repo>>('repo');
-    const repo = computed(() => r?.value || null);
-    const build = ref<Build | undefined>();
+    const repoOwner = toRef(props, 'repoOwner');
+    const repoName = toRef(props, 'repoName');
+    const repo = inject<Ref<Repo>>('repo');
+    if (!repo) {
+      throw new Error('Unexpected: "repo" should be provided at this place');
+    }
+
+    const build = buildStore.getBuild(repoOwner, repoName, buildId);
     const { since, duration, message } = useBuild(build);
+    const procId = toRef(props, 'procId');
+    const selectedProcId = computed({
+      get() {
+        if (procId.value) {
+          return parseInt(procId.value);
+        }
+
+        if (!build.value || !build.value.procs || !build.value.procs[0].children) {
+          return null;
+        }
+
+        return build.value.procs[0].children[0].pid;
+      },
+      set(selectedProcId: number | null) {
+        if (!selectedProcId) {
+          return;
+        }
+
+        router.replace({ params: { ...route.params, procId: selectedProcId } });
+      },
+    });
 
     async function loadBuild(): Promise<void> {
-      if (!repo.value) {
+      if (!repo) {
         return;
       }
 
-      build.value = await apiClient.getBuild(repo.value.owner, repo.value.name, buildId.value);
-    }
-
-    function jobDuration(job: BuildProc): string {
-      const start = job.start_time || 0;
-      const end = job.end_time || 0;
-
-      if (end === 0 && start === 0) {
-        return '-';
-      }
-
-      if (end === 0) {
-        return durationAsNumber(Date.now() - start * 1000);
-      }
-
-      return durationAsNumber((end - start) * 1000);
+      await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value));
     }
 
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
 
-    async function selectProc(proc: BuildProc) {
-      await router.replace({ params: { ...route.params, procId: proc.pid } });
-    }
-
-    return { build, since, duration, repo, message, selectProc, jobDuration };
+    return { selectedProcId, build, since, duration, repo, message };
   },
 });
 </script>

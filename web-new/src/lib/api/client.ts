@@ -17,12 +17,12 @@ export function encodeQueryString(params: Record<string, string | number | boole
 
 export default class ApiClient {
   server: string;
-  token: string;
-  csrf: string;
+  token: string | null;
+  csrf: string | null;
   onerror: (err: ApiError) => void;
 
-  constructor(server: string, token: string, csrf: string) {
-    this.server = server || '';
+  constructor(server: string, token: string | null, csrf: string | null) {
+    this.server = server;
     this.token = token;
     this.csrf = csrf;
   }

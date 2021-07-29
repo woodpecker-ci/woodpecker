@@ -14,11 +14,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo } from '~/lib/api/types';
+import { defineComponent, onMounted } from 'vue';
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import RepoStore from '~/store/repos';
 
 export default defineComponent({
   name: 'Repos',
@@ -29,11 +28,11 @@ export default defineComponent({
   },
 
   setup() {
-    const apiClient = useApiClient();
-    const repos = ref<Repo[] | undefined>();
+    const repoStore = RepoStore();
+    const repos = repoStore.repos;
 
     onMounted(async () => {
-      repos.value = await apiClient.getRepoList();
+      await repoStore.loadRepos();
     });
 
     return { repos };

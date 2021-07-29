@@ -78,9 +78,9 @@ export type Build = {
 
   // The jobs associated with this build.
   // A build will have multiple jobs if a matrix build was used or if a rebuild was requested.
-  procs: BuildProc[];
+  procs?: BuildProc[];
 
-  changed_files: string[];
+  changed_files?: string[];
 };
 
 export type BuildStatus =

@@ -1,5 +1,5 @@
-import { computed, ref, Ref, watch } from 'vue';
-import { Build, BuildProc, BuildLog } from '~/lib/api/types';
+import { ref } from 'vue';
+import { BuildProc, BuildLog } from '~/lib/api/types';
 import useApiClient from './useApiClient';
 
 const apiClient = useApiClient();

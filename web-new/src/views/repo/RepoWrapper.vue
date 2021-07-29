@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import { defineComponent, provide, onMounted, ref, toRef, watch } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
+import RepoStore from '~/store/repos';
+import BuildStore from '~/store/builds';
 import { Repo } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
@@ -28,19 +29,22 @@ export default defineComponent({
   },
 
   setup(props) {
-    const apiClient = useApiClient();
-
     const repoOwner = toRef(props, 'repoOwner');
     const repoName = toRef(props, 'repoName');
+    const repoStore = RepoStore();
+    const buildStore = BuildStore();
 
-    const repo = ref<Repo | undefined>();
+    const repo = repoStore.getRepo(repoOwner, repoName);
+    const builds = buildStore.getSortedBuilds(repoOwner, repoName);
     provide('repo', repo);
+    provide('builds', builds);
 
     async function loadRepo() {
-      repo.value = await apiClient.getRepo(repoOwner.value, repoName.value);
+      await repoStore.loadRepo(repoOwner.value, repoName.value);
+      await buildStore.loadBuilds(repoOwner.value, repoName.value);
     }
 
-    onMounted(async () => {
+    onMounted(() => {
       loadRepo();
     });
 

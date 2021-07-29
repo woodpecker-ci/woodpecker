@@ -6,7 +6,7 @@ type RepoListOptions = {
   flush?: boolean;
 };
 export default class WoodpeckerClient extends ApiClient {
-  constructor(server: string, token: string, csrf: string) {
+  constructor(server: string, token: string | null, csrf: string | null) {
     super(server, token, csrf);
   }
 
@@ -31,7 +31,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/repos/' + owner + '/' + repo);
   }
 
-  getBuildList(owner: string, repo: string, opts?: Record<string, string | number | boolean>) {
+  getBuildList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Build[]> {
     var query = encodeQueryString(opts);
     return this._get('/api/repos/' + owner + '/' + repo + '/builds?' + query);
   }
@@ -40,7 +40,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get('/api/repos/' + owner + '/' + repo + '/builds/' + number);
   }
 
-  getBuildFeed(opts?: Record<string, string | number | boolean>) {
+  getBuildFeed(opts?: Record<string, string | number | boolean>): Promise<Build[]> {
     var query = encodeQueryString(opts);
     return this._get('/api/user/feed?' + query);
   }

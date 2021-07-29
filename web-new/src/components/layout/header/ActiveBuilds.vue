@@ -1,6 +1,6 @@
 <template>
   <div
-    @click="toggleBuildFeed"
+    @click="toggle"
     class="
       flex
       rounded-full
@@ -15,19 +15,19 @@
       text-white
     "
     :class="{
-      spinner: activeBuilds?.length !== 0,
+      spinner: activeBuilds.length !== 0,
     }"
   >
     <div class="spinner-ring ring1"></div>
     <div class="spinner-ring ring2"></div>
     <div class="spinner-ring ring3"></div>
     <div class="spinner-ring ring4"></div>
-    {{ activeBuilds?.length || 0 }}
+    {{ activeBuilds.length || 0 }}
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRef } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
@@ -39,8 +39,13 @@ export default defineComponent({
   components: { FluidContainer, Button, BuildItem },
 
   setup() {
-    const buildStore = useBuildFeed();
-    return { activeBuilds: computed(() => buildStore.activeBuilds), toggleBuildFeed: buildStore.toggle };
+    const buildFeed = useBuildFeed();
+
+    onMounted(() => {
+      buildFeed.load();
+    });
+
+    return buildFeed;
   },
 });
 </script>

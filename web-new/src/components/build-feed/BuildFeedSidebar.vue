@@ -1,7 +1,7 @@
 <template>
   <div v-if="isBuildFeedOpen" class="flex flex-col overflow-y-auto">
     <router-link
-      v-for="build in builds"
+      v-for="build in sortedBuildFeed"
       :to="{ name: 'repo-build', params: { repoOwner: build.owner, repoName: build.name, buildId: build.number } }"
       class="flex border-b py-4 px-2 hover:bg-light-300 hover:shadow-sm"
     >
@@ -25,15 +25,11 @@ export default defineComponent({
   components: { FluidContainer, Button, BuildItem, BuildFeedItem },
 
   setup() {
-    const buildStore = useBuildFeed();
-
-    onMounted(async () => {
-      await buildStore.loadBuilds();
-    });
+    const buildFeed = useBuildFeed();
 
     return {
-      builds: computed(() => buildStore.builds),
-      isBuildFeedOpen: computed(() => buildStore.isBuildFeedOpen),
+      isBuildFeedOpen: buildFeed.isOpen,
+      sortedBuildFeed: buildFeed.sortedBuilds,
       convertEmojis,
     };
   },

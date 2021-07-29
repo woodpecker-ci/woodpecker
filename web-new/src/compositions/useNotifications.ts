@@ -1,4 +1,4 @@
-import Notifications, { notify, NotificationsOptions } from '@kyvg/vue3-notification';
+import Notifications, { notify } from '@kyvg/vue3-notification';
 
 export const notifications = Notifications;
 

@@ -2,7 +2,7 @@
   <div class="app flex flex-col m-auto w-full h-full bg-gray-100">
     <Navbar />
     <div class="flex min-h-0 h-full">
-      <div class="overflow-y-auto flex-grow">
+      <div class="flex flex-col overflow-y-auto flex-grow">
         <router-view />
       </div>
       <BuildFeedSidebar class="shadow-md bg-white border-l w-full absolute right-0 lg:relative max-w-80 xl:max-w-96" />

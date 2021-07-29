@@ -15,7 +15,7 @@ specifiers:
   humanize-duration: ^3.27.0
   javascript-time-ago: ^2.3.8
   node-emoji: ^1.10.0
-  pinia: ^2.0.0-beta.5
+  pinia: ^2.0.0-rc.0
   typescript: ^4.3.2
   vite: ^2.4.2
   vite-plugin-icons: ^0.6.5
@@ -32,7 +32,7 @@ dependencies:
   humanize-duration: 3.27.0
   javascript-time-ago: 2.3.8
   node-emoji: 1.10.0
-  pinia: 2.0.0-beta.5_typescript@4.3.5
+  pinia: 2.0.0-rc.0_typescript@4.3.5+vue@3.1.5
   vue: 3.1.5
   vue-router: 4.0.10_vue@3.1.5
 
@@ -715,16 +715,18 @@ packages:
     engines: {node: '>=8.6'}
     dev: true
 
-  /pinia/2.0.0-beta.5_typescript@4.3.5:
-    resolution: {integrity: sha512-0XvufXNkEvl7Fk6wrg5DH/JYPihkoknet950SQNIlWxXpeI7omwR0H00QPIiEYkrdbsiHXJyvI2XndWGvD4v5A==}
+  /pinia/2.0.0-rc.0_typescript@4.3.5+vue@3.1.5:
+    resolution: {integrity: sha512-AaUMv6GPZjc+BDph3r2taL7BbGrvouW6YDC66k5giTZ01Mz0bslq7xwOn+rlAYAH2JPhVxYWRBTXHd5Lp/wK+Q==}
     peerDependencies:
       typescript: ^4.3.5
+      vue: ^3.2.0 || ^3.2.0-beta.4
     peerDependenciesMeta:
       typescript:
         optional: true
     dependencies:
       '@vue/devtools-api': 6.0.0-beta.15
       typescript: 4.3.5
+      vue: 3.1.5
     dev: false
 
   /postcss-modules-extract-imports/3.0.0_postcss@8.3.5:

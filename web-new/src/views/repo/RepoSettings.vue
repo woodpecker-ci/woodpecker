@@ -3,8 +3,11 @@
     <FluidContainer class="flex border-b mb-4 items-start items-center">
       <Breadcrumbs
         :paths="[
-          repo.owner,
-          { name: repo.name, link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } },
+          { name: 'Repositories', link: { name: 'home' } },
+          {
+            name: `${repo.owner} / ${repo.name}`,
+            link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } },
+          },
           { name: 'Settings', link: { name: 'repo-settings', params: { repoOwner: repo.owner, repoName: repo.name } } },
         ]"
       />

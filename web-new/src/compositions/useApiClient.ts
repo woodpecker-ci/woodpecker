@@ -7,12 +7,8 @@ export default (): WoodpeckerClient => {
   if (!apiClient) {
     const config = useConfig();
     const server = 'http://localhost:8000';
-    const token = '';
-    const csrf = config.csrf;
-
-    if (!csrf) {
-      throw new Error('CSRF unknown');
-    }
+    const token = null;
+    const csrf = config.csrf || null;
 
     apiClient = new WoodpeckerClient(server, token, csrf);
   }
