@@ -56,6 +56,12 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    path: '/user',
+    name: 'user',
+    component: (): Component => import('~/views/User.vue'),
+    props: true,
+  },
+  {
     path: '/do-login/:origin?',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),

@@ -102,7 +102,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get('/api/user');
   }
 
-  getToken() {
+  getToken(): Promise<string> {
     return this._post('/api/user/token');
   }
 
