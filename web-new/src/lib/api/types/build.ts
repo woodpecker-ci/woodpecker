@@ -116,3 +116,9 @@ export type BuildLog = {
   out: string;
   time?: number;
 };
+
+export type BuildFeed = Build & {
+  owner: string;
+  name: string;
+  full_name: string;
+};

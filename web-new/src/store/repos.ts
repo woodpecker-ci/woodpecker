@@ -1,7 +1,7 @@
 import { toRef, Ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import useApiClient from '~/compositions/useApiClient';
-import { repoSlug } from '~/utils/repo';
+import { repoSlug } from '~/utils/helpers';
 import { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();

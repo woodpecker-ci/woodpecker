@@ -55,10 +55,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, toRef } from 'vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit';
+import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
+import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
+import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
+import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
 import { Build } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
 import BuildStatusIcon from './BuildStatusIcon.vue';

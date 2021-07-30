@@ -5,7 +5,7 @@
         :paths="[
           { name: 'Repositories', link: { name: 'home' } },
           {
-            name: `${repo.owner} / ${repo.name}`,
+            name: repo.full_name,
             link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } },
           },
           {
@@ -59,17 +59,17 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch';
-import IconGithub from 'virtual:vite-icons/mdi/github';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit';
+import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
+import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
+import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
+import IconGithub from 'virtual:vite-icons/mdi/github.vue';
+import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { useRouter, useRoute } from 'vue-router';
 import BuildProcs from '~/components/repo/BuildProcs.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { findProc } from '~/utils/proc';
+import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'Build',

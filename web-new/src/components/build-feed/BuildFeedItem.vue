@@ -19,13 +19,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, toRef } from 'vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit';
+import { defineComponent, PropType, toRef } from 'vue';
+import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
+import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
+import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
+import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
-import { Build } from '~/lib/api/types';
+import { BuildFeed } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
 
 export default defineComponent({
@@ -35,7 +35,7 @@ export default defineComponent({
 
   props: {
     build: {
-      type: Object as PropType<Build>,
+      type: Object as PropType<BuildFeed>,
       required: true,
     },
   },

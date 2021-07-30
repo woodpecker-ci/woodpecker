@@ -38,8 +38,8 @@ import { Repo, Build } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
-import IconGithub from 'virtual:vite-icons/mdi/github';
-import IconRepo from 'virtual:vite-icons/teenyicons/git-solid';
+import IconGithub from 'virtual:vite-icons/mdi/github.vue';
+import IconRepo from 'virtual:vite-icons/teenyicons/git-solid.vue';
 
 export default defineComponent({
   name: 'Repo',

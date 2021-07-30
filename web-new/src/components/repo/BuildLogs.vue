@@ -16,7 +16,7 @@ import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType
 import { Build, Repo } from '~/lib/api/types';
 import AnsiConvert from 'ansi-to-html';
 import useBuildProc from '~/compositions/useBuildProc';
-import { findProc } from '~/utils/proc';
+import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'BuildLogs',

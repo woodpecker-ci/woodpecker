@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { BuildProc, BuildLog } from '~/lib/api/types';
-import { isProcRunning } from '~/utils/proc';
+import { isProcFinished, isProcRunning } from '~/utils/helpers';
 import useApiClient from './useApiClient';
 
 const apiClient = useApiClient();
@@ -20,11 +20,15 @@ export default () => {
     unload();
 
     proc.value = _proc;
+    logs.value = [];
 
-    try {
+    // we do not have logs for skipped jobs
+    if (_proc.state === 'skipped') {
+      return;
+    }
+
+    if (isProcFinished(_proc)) {
       logs.value = await apiClient.getLogs(owner, repo, build, _proc.pid);
-    } catch (err) {
-      logs.value = [];
     }
 
     if (isProcRunning(_proc)) {

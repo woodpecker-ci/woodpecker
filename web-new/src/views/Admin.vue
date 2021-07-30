@@ -10,7 +10,7 @@ import router from '~/router';
 export default defineComponent({
   name: 'Admin',
 
-  setup(props) {
+  setup() {
     const authentication = useAuthentication();
 
     onMounted(async () => {

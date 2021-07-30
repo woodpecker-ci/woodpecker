@@ -1,36 +1,22 @@
 import { computed, toRef, Ref, ref } from 'vue';
 import { defineStore } from 'pinia';
 import useApiClient from '~/compositions/useApiClient';
-import { repoSlug } from '~/utils/repo';
-import { Build, BuildProc } from '~/lib/api/types';
+import { repoSlug, compareBuilds, isBuildActive } from '~/utils/helpers';
+import { Build, BuildFeed, BuildProc } from '~/lib/api/types';
 
 const apiClient = useApiClient();
-
-/**
- * Compare two feed items by name.
- * @param {Object} a - A feed item.
- * @param {Object} b - A feed item.
- * @returns {number}
- */
-function compareFeedItem(a: Build, b: Build) {
-  return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
-}
-
-function isBuildActive(build: Build) {
-  return ['pending', 'running', 'started'].includes(build.status);
-}
 
 export default defineStore({
   id: 'builds',
 
   state: () => ({
     builds: {} as Record<string, Record<number, Build>>,
-    buildFeed: [] as Build[],
+    buildFeed: [] as BuildFeed[],
   }),
 
   getters: {
     sortedBuildFeed(state) {
-      return state.buildFeed.sort(compareFeedItem);
+      return state.buildFeed.sort(compareBuilds);
     },
     activeBuilds(state) {
       return state.buildFeed.filter(isBuildActive);
@@ -45,9 +31,10 @@ export default defineStore({
         this.builds[_repoSlug] = {};
       }
 
-      // const repoBuilds = [...this.builds[_repoSlug].filter((b) => b.id !== build.id), build];
       const repoBuilds = this.builds[_repoSlug];
-      repoBuilds[build.number] = build;
+
+      // merge with available data
+      repoBuilds[build.number] = { ...(repoBuilds[build.number] || {}), ...build };
 
       this.builds = {
         ...this.builds,
@@ -67,6 +54,10 @@ export default defineStore({
       build.procs = [...build.procs.filter((p) => p.pid !== proc.pid), proc];
       this.setBuild(owner, repo, build);
     },
+    setBuildFeedItem(build: BuildFeed) {
+      const buildFeed = this.buildFeed.filter((b) => b.id !== build.id);
+      this.buildFeed = [...buildFeed, build];
+    },
 
     // getters
     getBuilds(owner: Ref<string>, repo: Ref<string>) {
@@ -76,7 +67,7 @@ export default defineStore({
       });
     },
     getSortedBuilds(owner: Ref<string>, repo: Ref<string>) {
-      return computed(() => Object.values(this.getBuilds(owner, repo).value || []).sort(compareFeedItem));
+      return computed(() => Object.values(this.getBuilds(owner, repo).value || []).sort(compareBuilds));
     },
     getActiveBuilds(owner: Ref<string>, repo: Ref<string>) {
       const builds = this.getBuilds(owner, repo);
