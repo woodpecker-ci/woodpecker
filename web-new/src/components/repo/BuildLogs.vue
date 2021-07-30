@@ -15,7 +15,8 @@
 import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
 import { Build, Repo } from '~/lib/api/types';
 import AnsiConvert from 'ansi-to-html';
-import useBuildProc, { findProc } from '~/compositions/useBuildProc';
+import useBuildProc from '~/compositions/useBuildProc';
+import { findProc } from '~/utils/proc';
 
 export default defineComponent({
   name: 'BuildLogs',
@@ -36,15 +37,18 @@ export default defineComponent({
   setup(props) {
     const build = toRef(props, 'build');
     const procId = toRef(props, 'procId');
-    const repo = computed(() => inject<Ref<Repo>>('repo')?.value || null);
-
+    const repo = inject<Ref<Repo>>('repo');
     const buildProc = useBuildProc();
 
     var ansiConvert = new AnsiConvert();
     const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
-    const proc = computed(() => build && findProc(build.value.procs, procId.value));
+    const proc = computed(() => build && findProc(build.value.procs || [], procId.value));
 
     function loadBuildProc() {
+      if (!repo) {
+        throw new Error('Unexpected: "repo" should be provided at this place');
+      }
+
       if (!repo.value || !build.value || !proc.value) {
         return;
       }

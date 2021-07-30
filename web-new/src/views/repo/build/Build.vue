@@ -15,7 +15,13 @@
         ]"
       />
       <BuildStatusIcon :build="build" class="flex ml-auto" />
-      <Button class="ml-4" text="Cancel" />
+      <Button
+        v-if="build.status === 'pending' || build.status === 'running'"
+        class="ml-4"
+        text="Cancel"
+        @click="cancelBuild"
+      />
+      <Button v-else class="ml-4" text="Restart" @click="restartBuild" />
     </FluidContainer>
 
     <FluidContainer class="p-0 flex flex-col flex-grow">
@@ -62,6 +68,8 @@ import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { useRouter, useRoute } from 'vue-router';
 import BuildProcs from '~/components/repo/BuildProcs.vue';
+import useApiClient from '~/compositions/useApiClient';
+import { findProc } from '~/utils/proc';
 
 export default defineComponent({
   name: 'Build',
@@ -100,6 +108,7 @@ export default defineComponent({
   },
 
   setup(props) {
+    const apiClient = useApiClient();
     const router = useRouter();
     const route = useRoute();
 
@@ -144,10 +153,42 @@ export default defineComponent({
       await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value));
     }
 
+    async function cancelBuild() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo is undefined');
+      }
+
+      if (!build.value.procs) {
+        throw new Error('Unexpected: Build procs not loaded');
+      }
+
+      // TODO: is selectedProcId right?
+      const proc = findProc(build.value.procs, selectedProcId.value || 2);
+
+      if (!proc) {
+        throw new Error('Unexpected: Proc not found');
+      }
+
+      await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value), proc.ppid);
+    }
+
+    // apiClient.approveBuild;
+    // apiClient.declineBuild;
+
+    async function restartBuild() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo is undefined');
+      }
+
+      await apiClient.restartBuild(repo.value.owner, repo.value.name, buildId.value, { fork: true });
+      // TODO: directly send to newest build?
+      await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
+    }
+
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
 
-    return { selectedProcId, build, since, duration, repo, message };
+    return { selectedProcId, build, since, duration, repo, message, cancelBuild, restartBuild };
   },
 });
 </script>

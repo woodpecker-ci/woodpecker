@@ -45,7 +45,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const badgeUrl = computed(() => {
       if (!repo) {
-        return null;
+        throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
       return `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`;
