@@ -1,6 +1,5 @@
 <template>
-  <!-- <div class="w-full max-w-5xl p-4 lg:px-0 m-auto"> -->
-  <div class="w-full p-4 m-auto">
+  <div class="w-full max-w-5xl p-4 lg:px-0 mx-auto">
     <slot />
   </div>
 </template>

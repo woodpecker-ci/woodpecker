@@ -1,6 +1,6 @@
 <template>
   <div class="flex bg-green">
-    <FluidContainer class="flex text-white items-center">
+    <div class="flex text-white items-center p-4 m-auto w-full">
       <router-link :to="{ name: 'home' }" class="relative">
         <img class="-mt-3 w-8" src="../../../assets/logo.svg" />
         <span class="absolute -bottom-4 text-xs">{{ version }}</span>
@@ -21,7 +21,7 @@
         </router-link>
         <Button v-else text="Login" @click="doLogin" />
       </div>
-    </FluidContainer>
+    </div>
   </div>
 </template>
 

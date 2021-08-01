@@ -1,15 +1,24 @@
 <template>
-  <div class="max-w-5xl w-full h-full m-auto">
-    <div class="flex w-full border-b mb-4 py-2">
-      <Button class="ml-auto" @click="reloadRepos" text="Reload Repos" />
+  <FluidContainer class="flex flex-col">
+    <div class="flex flex-row border-b mb-4 py-4 items-center">
+      <h1 class="text-xl">Enable repository</h1>
+      <Button class="ml-auto" @click="reloadRepos" text="Reload Repositories" />
     </div>
-    <FluidContainer>
-      <div v-for="repo in repos" :key="repo.id" class="flex mb-4">
+
+    <div class="space-y-4">
+      <ListItem
+        v-for="repo in repos"
+        :key="repo.id"
+        class="items-center"
+        :clickable="repo.active"
+        @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
+      >
         <span>{{ repo.owner }} / {{ repo.name }}</span>
+        <span v-if="repo.active" class="ml-auto">Already enabled</span>
         <Button v-if="!repo.active" class="ml-auto" @click="activateRepo(repo)" text="Activate" />
-      </div>
-    </FluidContainer>
-  </div>
+      </ListItem>
+    </div>
+  </FluidContainer>
 </template>
 
 <script lang="ts">
@@ -20,6 +29,7 @@ import { Repo } from '~/lib/api/types';
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import router from '~/router';
+import ListItem from '~/components/atomic/ListItem.vue';
 
 export default defineComponent({
   name: 'RepoAdd',
@@ -27,6 +37,7 @@ export default defineComponent({
   components: {
     Button,
     FluidContainer,
+    ListItem,
   },
 
   setup() {

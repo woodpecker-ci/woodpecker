@@ -1,6 +1,6 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex border-b mb-4 items-start items-center">
+    <FluidContainer class="flex border-b mb-4 items-center">
       <Breadcrumbs
         :paths="[
           { name: 'Repositories', link: { name: 'home' } },
@@ -24,7 +24,7 @@
       <Button v-else class="ml-4" text="Restart" @click="restartBuild" />
     </FluidContainer>
 
-    <FluidContainer class="p-0 flex flex-col flex-grow">
+    <div class="p-0 flex flex-col flex-grow">
       <span class="text-xl mx-auto mb-4">{{ message }}</span>
 
       <div class="flex mx-auto space-x-16 text-gray-500">
@@ -47,7 +47,7 @@
       </div>
 
       <BuildProcs :build="build" v-model:selected-proc-id="selectedProcId" />
-    </FluidContainer>
+    </div>
   </template>
 </template>
 

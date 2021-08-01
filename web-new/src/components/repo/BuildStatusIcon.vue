@@ -1,13 +1,13 @@
 <template>
-  <div v-if="build">
-    <icon-status-blocked v-if="build.status === 'blocked'" class="w-6 h-6 stroke-status-red" />
-    <icon-status-declined v-if="build.status === 'declined'" class="w-6 h-6 stroke-status-red" />
-    <icon-status-error v-if="build.status === 'error'" class="w-6 h-6 stroke-status-red" />
-    <icon-status-failure v-if="build.status === 'failure'" class="w-6 h-6 text-status-red" />
-    <icon-status-killed v-if="build.status === 'killed'" class="w-6 h-6 stroke-status-red" />
-    <icon-status-pending v-if="build.status === 'pending'" class="w-6 h-6 text-status-gray" />
+  <div v-if="build" class="flex items-center justify-center">
+    <icon-status-blocked v-if="build.status === 'blocked'" class="w-6 h-6 text-status-red" />
+    <icon-status-declined v-if="build.status === 'declined'" class="w-6 h-6 text-status-red" />
+    <icon-status-error v-if="build.status === 'error'" class="w-8 h-8 text-status-red" />
+    <icon-status-failure v-if="build.status === 'failure'" class="w-7 h-7 text-status-red" />
+    <icon-status-killed v-if="build.status === 'killed'" class="w-8 h-8 text-status-red" />
+    <icon-status-pending v-if="build.status === 'pending'" class="w-7 h-7 text-status-gray" />
     <icon-status-running v-if="build.status === 'running'" class="w-8 h-8 text-status-blue animate-spin animate-slow" />
-    <icon-status-skipped v-if="build.status === 'skipped'" class="w-8 h-8 stroke-status-gray" />
+    <icon-status-skipped v-if="build.status === 'skipped'" class="w-8 h-8 text-status-gray" />
     <icon-status-started v-if="build.status === 'started'" class="w-8 h-8 text-status-blue animate-spin animate-slow" />
     <icon-status-success v-if="build.status === 'success'" class="w-8 h-8 text-status-green" />
   </div>

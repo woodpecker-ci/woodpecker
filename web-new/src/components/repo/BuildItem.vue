@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="w-full flex border rounded-md bg-white overflow-hidden hover:shadow-sm hover:bg-light-200">
+  <ListItem v-if="build" clickable class="p-0">
     <div class="flex items-center mr-4">
       <div
         class="min-h-full w-3"
@@ -10,7 +10,7 @@
           'bg-status-blue': ['started', 'running'].includes(build.status),
         }"
       />
-      <div class="w-8">
+      <div class="w-8 flex">
         <img
           v-if="build.status === 'started' || build.status === 'running'"
           class="w-6"
@@ -50,7 +50,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </ListItem>
 </template>
 
 <script lang="ts">
@@ -61,12 +61,13 @@ import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
 import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
 import { Build } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
-import BuildStatusIcon from './BuildStatusIcon.vue';
+import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
 
 export default defineComponent({
   name: 'BuildItem',
 
-  components: { IconDuration, IconSince, IconBranch, IconCommit, BuildStatusIcon },
+  components: { IconDuration, IconSince, IconBranch, IconCommit, BuildStatusIcon, ListItem },
 
   props: {
     build: {

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <FluidContainer class="flex border-b items-start items-center">
+  <FluidContainer>
+    <div class="flex border-b items-center pb-4 mb-4">
       <Breadcrumbs
         :paths="[
           { name: 'Repositories', link: { name: 'home' } },
@@ -17,9 +17,9 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-4">
         <img :src="badgeUrl" />
       </a>
-    </FluidContainer>
+    </div>
 
-    <FluidContainer v-if="builds" class="space-y-4">
+    <div v-if="builds" class="space-y-4">
       <router-link
         v-for="build in builds"
         :key="build.id"
@@ -28,8 +28,8 @@
       >
         <BuildItem :build="build" />
       </router-link>
-    </FluidContainer>
-  </div>
+    </div>
+  </FluidContainer>
 </template>
 
 <script lang="ts">

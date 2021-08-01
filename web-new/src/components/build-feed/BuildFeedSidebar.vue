@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRef } from 'vue';
+import { defineComponent } from 'vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
