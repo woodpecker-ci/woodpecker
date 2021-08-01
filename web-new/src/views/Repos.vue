@@ -1,8 +1,8 @@
 <template>
   <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b mb-4 items-center">
+    <div class="flex flex-row border-b pb-4 mb-4 items-center">
       <h1 class="text-xl">Repositories</h1>
-      <Button class="ml-auto mb-4" :to="{ name: 'repo-add' }" text="Add Repo" />
+      <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add Repo" />
     </div>
 
     <div class="space-y-4">

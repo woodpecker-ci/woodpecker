@@ -1,7 +1,7 @@
 <template>
   <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-center">
-      <Breadcrumbs
+      <!-- <Breadcrumbs
         :paths="[
           { name: 'Repositories', link: { name: 'home' } },
           {
@@ -13,7 +13,11 @@
             link: { name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId } },
           },
         ]"
-      />
+      /> -->
+      <IconButton :to="{ name: 'repo' }">
+        <IconBack class="w-8 h-8" />
+      </IconButton>
+      <h1 class="text-xl ml-2">Build #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
       <Button
         v-if="build.status === 'pending' || build.status === 'running'"
@@ -25,7 +29,7 @@
     </FluidContainer>
 
     <div class="p-0 flex flex-col flex-grow">
-      <span class="text-xl mx-auto mb-4">{{ message }}</span>
+      <!-- <span class="text-xl mx-auto mb-4">{{ message }}</span> -->
 
       <div class="flex mx-auto space-x-16 text-gray-500">
         <div class="flex space-x-2 items-center">
@@ -70,6 +74,8 @@ import { useRouter, useRoute } from 'vue-router';
 import BuildProcs from '~/components/repo/BuildProcs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { findProc } from '~/utils/helpers';
+import IconButton from '~/components/atomic/IconButton.vue';
+import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
 
 export default defineComponent({
   name: 'Build',
@@ -86,6 +92,8 @@ export default defineComponent({
     IconCommit,
     BuildStatusIcon,
     BuildProcs,
+    IconButton,
+    IconBack,
   },
 
   props: {

@@ -1,7 +1,7 @@
 <template>
-  <div v-if="repo">
-    <FluidContainer class="flex border-b mb-4 items-start items-center">
-      <Breadcrumbs
+  <FluidContainer v-if="repo">
+    <div class="flex border-b items-center pb-4 mb-4">
+      <!-- <Breadcrumbs
         :paths="[
           { name: 'Repositories', link: { name: 'home' } },
           {
@@ -10,16 +10,15 @@
           },
           { name: 'Settings', link: { name: 'repo-settings', params: { repoOwner: repo.owner, repoName: repo.name } } },
         ]"
-      />
-    </FluidContainer>
-    <FluidContainer class="space-y-2">
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
-        <img :src="badgeUrl" />
-      </a>
+      /> -->
+      <IconButton :to="{ name: 'repo' }">
+        <IconBack class="w-8 h-8" />
+      </IconButton>
+      <h1 class="text-xl ml-2">Settings</h1>
+    </div>
 
-      <Button class="ml-4" text="Deactivate repository" @click="disableRepo" />
-    </FluidContainer>
-  </div>
+    <div>TODO</div>
+  </FluidContainer>
 </template>
 
 <script lang="ts">
@@ -31,13 +30,15 @@ import Button from '~/components/atomic/Button.vue';
 import { useRouter } from 'vue-router';
 import useNotifications from '~/compositions/useNotifications';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
 
 export default defineComponent({
   name: 'RepoSettings',
 
-  components: { FluidContainer, Button, Breadcrumbs },
+  components: { FluidContainer, Button, Breadcrumbs, IconButton, IconBack },
 
-  setup(props) {
+  setup() {
     const apiClient = useApiClient();
     const router = useRouter();
     const notifications = useNotifications();

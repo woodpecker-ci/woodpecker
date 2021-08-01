@@ -1,7 +1,10 @@
 <template>
   <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b mb-4 py-4 items-center">
-      <h1 class="text-xl">Enable repository</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center">
+      <IconButton :to="{ name: 'repos' }">
+        <IconBack class="w-8 h-8" />
+      </IconButton>
+      <h1 class="text-xl ml-2">Enable repository</h1>
       <Button class="ml-auto" @click="reloadRepos" text="Reload Repositories" />
     </div>
 
@@ -13,7 +16,7 @@
         :clickable="repo.active"
         @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
       >
-        <span>{{ repo.owner }} / {{ repo.name }}</span>
+        <span>{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto">Already enabled</span>
         <Button v-if="!repo.active" class="ml-auto" @click="activateRepo(repo)" text="Activate" />
       </ListItem>
@@ -30,6 +33,8 @@ import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import router from '~/router';
 import ListItem from '~/components/atomic/ListItem.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
 
 export default defineComponent({
   name: 'RepoAdd',
@@ -38,6 +43,8 @@ export default defineComponent({
     Button,
     FluidContainer,
     ListItem,
+    IconButton,
+    IconBack,
   },
 
   setup() {
