@@ -4,10 +4,10 @@ clone:
 
 pipeline:
   release:
-    image: golang:1.16
+    image: ghcr.io/goreleaser/goreleaser:v0.174.1
     secrets: [github_token, docker_username, docker_password]
     commands:
-      curl -sL https://git.io/goreleaser | bash
+      - release
     when:
       event: tag
 
