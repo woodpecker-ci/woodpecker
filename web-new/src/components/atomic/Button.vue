@@ -4,15 +4,14 @@
     class="
       bg-white
       text-gray-800
-      font-semibold
-      py-2
+      py-1
       px-4
-      border border-gray-400
+      border border-gray-200
       rounded
-      shadow
+      shadow-sm
       cursor-pointer
       focus:outline-transparent
-      hover:bg-gray-100
+      hover:bg-light-300
       disabled:opacity-50 disabled:cursor-not-allowed
     "
     :disabled="disabled"
