@@ -27,7 +27,7 @@ export default (build: Ref<Build | undefined>) => {
     const start = build.value.started_at || 0;
     const end = build.value.finished_at || 0;
 
-    if (start === 0 && end == 0) {
+    if (start === 0) {
       return 'not started yet';
     }
 
