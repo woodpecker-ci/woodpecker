@@ -35,7 +35,7 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-lg p-2 text-lg;
+  @apply rounded-md p-2 text-lg border-l-10;
 }
 </style>
 

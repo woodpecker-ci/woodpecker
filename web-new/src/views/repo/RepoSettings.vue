@@ -12,12 +12,22 @@
         ]"
       /> -->
       <IconButton :to="{ name: 'repo' }">
-        <IconBack class="w-8 h-8" />
+        <Icon name="back" class="w-8 h-8" />
       </IconButton>
       <h1 class="text-xl ml-2">Settings</h1>
     </div>
 
-    <div>TODO</div>
+    <Tabs>
+      <Tab title="General">
+        <Panel> General </Panel>
+      </Tab>
+      <Tab title="Secrets">
+        <Panel> Secrets </Panel>
+      </Tab>
+      <Tab title="Registries">
+        <Panel> Registries </Panel>
+      </Tab>
+    </Tabs>
   </FluidContainer>
 </template>
 
@@ -31,12 +41,15 @@ import { useRouter } from 'vue-router';
 import useNotifications from '~/compositions/useNotifications';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
+import Icon from '~/components/atomic/Icon.vue';
+import Tabs from '~/components/atomic/tabs/Tabs.vue';
+import Tab from '~/components/atomic/tabs/Tab.vue';
+import Panel from '~/components/layout/Panel.vue';
 
 export default defineComponent({
   name: 'RepoSettings',
 
-  components: { FluidContainer, Button, Breadcrumbs, IconButton, IconBack },
+  components: { FluidContainer, Button, Breadcrumbs, IconButton, Icon, Tabs, Tab, Panel },
 
   setup() {
     const apiClient = useApiClient();

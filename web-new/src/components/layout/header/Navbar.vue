@@ -8,12 +8,12 @@
       <a :href="docsUrl" target="_blank" class="ml-8">Docs</a>
       <!-- <router-link v-if="user && user.admin" :to="{ name: 'admin' }" class="ml-8">Administration</router-link> -->
       <router-link :to="{ name: 'repos' }" class="ml-8">Repositories</router-link>
-      <router-link
+      <!-- <router-link
         v-if="$route.matched.some(({ name }) => name === 'repo-wrapper')"
         :to="{ name: 'repo-settings' }"
         class="ml-8"
         >Repo-Settings</router-link
-      >
+      > -->
       <div class="flex ml-auto items-center">
         <ActiveBuilds />
         <router-link v-if="user" :to="{ name: 'user' }" class="ml-4">
