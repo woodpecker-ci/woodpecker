@@ -23,6 +23,7 @@ specifiers:
   vue: ^v3.2.0-beta.7
   vue-router: 4.0.10
   vue-tsc: ^0.0.24
+  vue3-tabs-component: ^1.0.3
   windicss: 3.1.0
 
 dependencies:
@@ -35,6 +36,7 @@ dependencies:
   pinia: 2.0.0-rc.0_9df8c015c0d4f19e887a01e4cac529d3
   vue: 3.2.0-beta.7
   vue-router: 4.0.10_vue@3.2.0-beta.7
+  vue3-tabs-component: 1.0.3_vue@3.2.0-beta.7
 
 devDependencies:
   '@iconify/json': 1.1.378
@@ -1104,6 +1106,14 @@ packages:
       '@vue/compiler-dom': 3.2.0-beta.7
       '@vue/runtime-dom': 3.2.0-beta.7
       '@vue/shared': 3.2.0-beta.7
+    dev: false
+
+  /vue3-tabs-component/1.0.3_vue@3.2.0-beta.7:
+    resolution: {integrity: sha512-bOqpDGj8clofiABN7nxpwKvrq0gbowK+WhUfP2wrGBk03nSavjC1m8lI4T3139yU6acET+L4OqvHFZF9Odxm2A==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      vue: 3.2.0-beta.7
     dev: false
 
   /when/3.6.4:
