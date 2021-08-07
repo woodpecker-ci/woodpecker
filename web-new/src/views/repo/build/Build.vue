@@ -15,7 +15,7 @@
         ]"
       /> -->
       <IconButton :to="{ name: 'repo' }">
-        <IconBack class="w-8 h-8" />
+        <Icon name="back" class="w-8 h-8" />
       </IconButton>
       <h1 class="text-xl ml-2">Build #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
@@ -31,24 +31,24 @@
     <div class="p-0 flex flex-col flex-grow">
       <!-- <span class="text-xl mx-auto mb-4">{{ message }}</span> -->
 
-      <div class="flex mx-auto space-x-16 text-gray-500">
+      <FluidContainer class="flex text-gray-500 justify-between py-0">
         <div class="flex space-x-2 items-center">
-          <icon-commit />
+          <Icon name="commit" />
           <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
         </div>
         <div class="flex space-x-2 items-center">
-          <icon-branch />
+          <Icon name="branch" />
           <span>{{ build.branch }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <icon-since />
+          <Icon name="since" />
           <span>{{ since }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <icon-duration />
+          <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
-      </div>
+      </FluidContainer>
 
       <BuildProcs :build="build" v-model:selected-proc-id="selectedProcId" />
     </div>
@@ -63,11 +63,6 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
-import IconGithub from 'virtual:vite-icons/mdi/github.vue';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { useRouter, useRoute } from 'vue-router';
@@ -75,7 +70,8 @@ import BuildProcs from '~/components/repo/BuildProcs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { findProc } from '~/utils/helpers';
 import IconButton from '~/components/atomic/IconButton.vue';
-import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
+import Icon from '~/components/atomic/Icon.vue';
+import useNotifications from '~/compositions/useNotifications';
 
 export default defineComponent({
   name: 'Build',
@@ -85,15 +81,10 @@ export default defineComponent({
     Button,
     BuildItem,
     Breadcrumbs,
-    IconDuration,
-    IconSince,
-    IconBranch,
-    IconGithub,
-    IconCommit,
     BuildStatusIcon,
     BuildProcs,
     IconButton,
-    IconBack,
+    Icon,
   },
 
   props: {
@@ -119,6 +110,7 @@ export default defineComponent({
     const apiClient = useApiClient();
     const router = useRouter();
     const route = useRoute();
+    const notifications = useNotifications();
 
     const buildStore = BuildStore();
     const buildId = toRef(props, 'buildId');
@@ -178,6 +170,7 @@ export default defineComponent({
       }
 
       await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value), proc.ppid);
+      notifications.notify({ title: 'Build canceled', type: 'success' });
     }
 
     // apiClient.approveBuild;
@@ -189,6 +182,7 @@ export default defineComponent({
       }
 
       await apiClient.restartBuild(repo.value.owner, repo.value.name, buildId.value, { fork: true });
+      notifications.notify({ title: 'Build restarted', type: 'success' });
       // TODO: directly send to newest build?
       await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
     }

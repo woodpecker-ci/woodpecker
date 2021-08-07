@@ -2,7 +2,7 @@
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <IconButton :to="{ name: 'repos' }">
-        <IconBack class="w-8 h-8" />
+        <Icon name="back" class="w-8 h-8" />
       </IconButton>
       <h1 class="text-xl ml-2">Enable repository</h1>
       <Button class="ml-auto" @click="reloadRepos" text="Reload Repositories" />
@@ -34,7 +34,7 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import router from '~/router';
 import ListItem from '~/components/atomic/ListItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import IconBack from 'virtual:vite-icons/iconoir/arrow-left.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 export default defineComponent({
   name: 'RepoAdd',
@@ -44,7 +44,7 @@ export default defineComponent({
     FluidContainer,
     ListItem,
     IconButton,
-    IconBack,
+    Icon,
   },
 
   setup() {

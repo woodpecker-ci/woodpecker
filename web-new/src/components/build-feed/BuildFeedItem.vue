@@ -6,11 +6,11 @@
       <span>{{ message }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
-          <icon-since />
+          <Icon name="since" />
           <span>{{ since }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <icon-duration />
+          <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
       </div>
@@ -20,10 +20,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, toRef } from 'vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import { BuildFeed } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
@@ -31,7 +28,7 @@ import useBuild from '~/compositions/useBuild';
 export default defineComponent({
   name: 'BuildFeedItem',
 
-  components: { BuildStatusIcon, IconDuration, IconSince, IconBranch, IconCommit },
+  components: { BuildStatusIcon, Icon },
 
   props: {
     build: {

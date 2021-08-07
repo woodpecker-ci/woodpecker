@@ -15,11 +15,11 @@
         <img :src="badgeUrl" />
       </a>
       <a :href="repo.link_url" target="_blank" class="flex ml-4 text-gray-400 hover:text-gray-500">
-        <icon-github v-if="repo.link_url.startsWith('https://github.com/')" class="h-8 w-8" />
-        <icon-repo v-else />
+        <Icon name="github" v-if="repo.link_url.startsWith('https://github.com/')" class="h-8 w-8" />
+        <Icon name="repo" v-else />
       </a>
       <IconButton class="ml-2" :to="{ name: 'repo-settings' }">
-        <IconSettings class="w-8 h-8" />
+        <Icon name="settings" class="w-8 h-8" />
       </IconButton>
     </div>
 
@@ -43,14 +43,12 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import IconGithub from 'virtual:vite-icons/mdi/github.vue';
-import IconRepo from 'virtual:vite-icons/teenyicons/git-solid.vue';
-import IconSettings from 'virtual:vite-icons/clarity/settings-solid.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 export default defineComponent({
   name: 'Repo',
 
-  components: { FluidContainer, BuildItem, Breadcrumbs, IconButton, IconGithub, IconRepo, IconSettings },
+  components: { FluidContainer, BuildItem, Breadcrumbs, IconButton, Icon },
 
   setup() {
     const repo = inject<Ref<Repo>>('repo');

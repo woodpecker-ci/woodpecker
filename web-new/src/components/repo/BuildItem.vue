@@ -5,7 +5,7 @@
         class="min-h-full w-3"
         :class="{
           'bg-status-red': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(build.status),
-          'bg-status-gray': ['started', 'running'].includes(build.status),
+          'bg-status-gray': ['pending', 'skipped'].includes(build.status),
           'bg-status-green': ['success'].includes(build.status),
           'bg-status-blue': ['started', 'running'].includes(build.status),
         }"
@@ -30,21 +30,21 @@
       <div class="flex ml-auto text-gray-500 py-2">
         <div class="flex flex-col space-y-2 w-42">
           <div class="flex space-x-2 items-center">
-            <icon-commit />
+            <Icon name="commit" />
             <a class="text-gray-400" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
           </div>
           <div class="flex space-x-2 items-center">
-            <icon-branch />
+            <Icon name="branch" />
             <span>{{ build.branch }}</span>
           </div>
         </div>
         <div class="flex flex-col ml-4 space-y-2 w-42">
           <div class="flex space-x-2 items-center">
-            <icon-duration />
+            <Icon name="duration" />
             <span>{{ duration }}</span>
           </div>
           <div class="flex space-x-2 items-center">
-            <icon-since />
+            <Icon name="since" />
             <span>{{ since }}</span>
           </div>
         </div>
@@ -54,20 +54,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, toRef } from 'vue';
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse.vue';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline.vue';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch.vue';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit.vue';
+import { defineComponent, PropType, toRef } from 'vue';
 import { Build } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 export default defineComponent({
   name: 'BuildItem',
 
-  components: { IconDuration, IconSince, IconBranch, IconCommit, BuildStatusIcon, ListItem },
+  components: { Icon, BuildStatusIcon, ListItem },
 
   props: {
     build: {
