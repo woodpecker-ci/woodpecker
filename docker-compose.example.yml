@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  drone-server:
+  woodpecker-server:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,14 +11,14 @@ services:
     volumes:
       - /var/lib/drone:/var/lib/drone/
     environment:
-      - DRONE_OPEN=true
-      - DRONE_ADMIN=laszlocph
-      - DRONE_HOST=${HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
-  drone-agent:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ADMIN=laszlocph
+      - WOODPECKER_HOST=${HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+  woodpecker-agent:
     build:
       context: .
       dockerfile: Dockerfile.agent
@@ -26,6 +26,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=drone-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
-      - DRONE_MAX_PROCS=2
+      - WOODPECKER_SERVER=drone-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_MAX_PROCS=2
