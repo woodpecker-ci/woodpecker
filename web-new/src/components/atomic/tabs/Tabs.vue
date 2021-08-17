@@ -20,18 +20,22 @@
 
 <script lang="ts">
 import { defineComponent, provide, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Tab } from '~/components/atomic/tabs/types';
 
 export default defineComponent({
   name: 'Tabs',
 
   setup() {
+    const router = useRouter();
+    const route = useRoute();
+
     const tabs = ref<Tab[]>([]);
-    const activeTab = ref(0);
+    const activeTab = ref(parseInt(route.hash.replace(/^#tab-/, '') || '0'));
     provide('tabs', tabs);
     provide('active-tab', activeTab);
 
-    function selectTab(tab: Tab) {
+    async function selectTab(tab: Tab) {
       if (tab.id === undefined) {
         return;
       }
@@ -41,6 +45,8 @@ export default defineComponent({
       }
 
       activeTab.value = tab.id;
+
+      await router.push({ name: 'repo-settings', params: route.params, hash: `#tab-${tab.id}` });
     }
 
     return { tabs, activeTab, selectTab };
