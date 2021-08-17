@@ -4,13 +4,15 @@
       <IconButton :to="{ name: 'repo' }" icon="back" />
       <h1 class="text-xl ml-2">Build #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
-      <Button
-        v-if="build.status === 'pending' || build.status === 'running'"
-        class="ml-4"
-        text="Cancel"
-        @click="cancelBuild"
-      />
-      <Button v-else class="ml-4" text="Restart" @click="restartBuild" />
+      <template v-if="isAuthenticated">
+        <Button
+          v-if="build.status === 'pending' || build.status === 'running'"
+          class="ml-4"
+          text="Cancel"
+          @click="cancelBuild"
+        />
+        <Button v-else class="ml-4" text="Restart" @click="restartBuild" />
+      </template>
     </FluidContainer>
 
     <div class="p-0 flex flex-col flex-grow">
@@ -58,6 +60,7 @@ import { findProc } from '~/utils/helpers';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import useNotifications from '~/compositions/useNotifications';
+import useAuthentication from '~/compositions/useAuthentication';
 
 export default defineComponent({
   name: 'Build',
@@ -92,6 +95,7 @@ export default defineComponent({
   },
 
   setup(props) {
+    const { isAuthenticated } = useAuthentication();
     const apiClient = useApiClient();
     const router = useRouter();
     const route = useRoute();
@@ -175,7 +179,7 @@ export default defineComponent({
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
 
-    return { selectedProcId, build, since, duration, repo, message, cancelBuild, restartBuild };
+    return { isAuthenticated, selectedProcId, build, since, duration, repo, message, cancelBuild, restartBuild };
   },
 });
 </script>

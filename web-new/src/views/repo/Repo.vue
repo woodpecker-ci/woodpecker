@@ -9,7 +9,7 @@
         <Icon name="github" v-if="repo.link_url.startsWith('https://github.com/')" />
         <Icon name="repo" v-else />
       </a>
-      <IconButton class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
 
     <div v-if="builds" class="space-y-4">
@@ -34,6 +34,7 @@ import BuildItem from '~/components/repo/BuildItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
+import useAuthentication from '~/compositions/useAuthentication';
 
 export default defineComponent({
   name: 'Repo',
@@ -41,6 +42,7 @@ export default defineComponent({
   components: { FluidContainer, BuildItem, IconButton, Icon, Panel },
 
   setup() {
+    const { isAuthenticated } = useAuthentication();
     const repo = inject<Ref<Repo>>('repo');
     if (!repo) {
       throw new Error('Unexpected: "repo" should be provided at this place');
@@ -49,7 +51,7 @@ export default defineComponent({
     const badgeUrl = computed(() => `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
     const builds = inject<Ref<Build[]>>('builds');
 
-    return { repo, builds, badgeUrl };
+    return { isAuthenticated, repo, builds, badgeUrl };
   },
 });
 </script>

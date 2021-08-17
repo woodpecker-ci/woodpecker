@@ -30,14 +30,12 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'repo',
         component: (): Component => import('~/views/repo/Repo.vue'),
-        meta: { authentication: 'required' },
         props: true,
       },
       {
         path: 'build/:buildId/:procId?',
         name: 'repo-build',
         component: (): Component => import('~/views/repo/build/Build.vue'),
-        meta: { authentication: 'required' },
         props: true,
       },
       {
@@ -53,18 +51,21 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     name: 'admin',
     component: (): Component => import('~/views/Admin.vue'),
+    meta: { authentication: 'required' },
     props: true,
   },
   {
     path: '/user',
     name: 'user',
     component: (): Component => import('~/views/User.vue'),
+    meta: { authentication: 'required' },
     props: true,
   },
   {
     path: '/do-login/:origin?',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
+    meta: { blank: true },
     props: true,
   },
   {

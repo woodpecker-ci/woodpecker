@@ -1,18 +1,24 @@
 <template>
   <div class="app flex flex-col m-auto w-full h-full bg-gray-100">
-    <Navbar />
-    <div class="flex min-h-0 h-full">
-      <div class="flex flex-col overflow-y-auto flex-grow">
-        <router-view />
+    <router-view v-if="blank" />
+    <template v-else>
+      <Navbar />
+      <div class="flex min-h-0 h-full">
+        <div class="flex flex-col overflow-y-auto flex-grow">
+          <router-view />
+        </div>
+        <BuildFeedSidebar
+          class="shadow-md bg-white border-l w-full absolute right-0 lg:relative max-w-80 xl:max-w-96"
+        />
       </div>
-      <BuildFeedSidebar class="shadow-md bg-white border-l w-full absolute right-0 lg:relative max-w-80 xl:max-w-96" />
-    </div>
+    </template>
     <notifications position="bottom right" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { computed, defineComponent, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import Navbar from '~/components/layout/header/Navbar.vue';
 import BuildFeedSidebar from './components/build-feed/BuildFeedSidebar.vue';
 
@@ -22,6 +28,12 @@ export default defineComponent({
   components: {
     Navbar,
     BuildFeedSidebar,
+  },
+
+  setup() {
+    const route = useRoute();
+    const blank = computed(() => route.meta.blank);
+    return { blank };
   },
 });
 </script>
