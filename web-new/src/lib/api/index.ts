@@ -1,5 +1,5 @@
 import ApiClient, { encodeQueryString } from './client';
-import { Build, BuildProc, BuildLog, Repo, BuildFeed } from './types';
+import { Build, BuildProc, BuildLog, Repo, BuildFeed, Secret } from './types';
 
 type RepoListOptions = {
   all?: boolean;
@@ -79,16 +79,16 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get('/api/repos/' + owner + '/' + repo + '/files/' + build);
   }
 
-  getSecretList(owner: string, repo: string): Promise<unknown> {
+  getSecretList(owner: string, repo: string): Promise<Secret[]> {
     return this._get('/api/repos/' + owner + '/' + repo + '/secrets');
   }
 
-  createSecret(owner: string, repo: string, secret: string): Promise<unknown> {
+  createSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
     return this._post('/api/repos/' + owner + '/' + repo + '/secrets', secret);
   }
 
-  deleteSecret(owner: string, repo: string, secret: string): Promise<unknown> {
-    return this._delete('/api/repos/' + owner + '/' + repo + '/secrets/' + secret);
+  deleteSecret(owner: string, repo: string, secretName: string): Promise<unknown> {
+    return this._delete('/api/repos/' + owner + '/' + repo + '/secrets/' + secretName);
   }
 
   getRegistryList(owner: string, repo: string): Promise<unknown> {

@@ -1,54 +1,27 @@
 <template>
-  <FluidContainer v-if="repo">
-    <div class="flex border-b items-center pb-4 mb-4">
-      <IconButton :to="{ name: 'repo' }" icon="back" />
-      <h1 class="text-xl ml-2">Settings</h1>
-    </div>
+  <Panel>
+    <span class="text-lg border-b-2 w-full">General</span>
+    <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
+      <img :src="badgeUrl" />
+    </a>
 
-    <Tabs>
-      <Tab title="General">
-        <GeneralTab />
-      </Tab>
-      <Tab title="Secrets">
-        <SecretsTab />
-      </Tab>
-      <Tab title="Registries">
-        <RegistriesTab />
-      </Tab>
-    </Tabs>
-  </FluidContainer>
+    <Button class="ml-4" text="Deactivate repository" @click="disableRepo" />
+  </Panel>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, inject, Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import { useRouter } from 'vue-router';
 import useNotifications from '~/compositions/useNotifications';
-import IconButton from '~/components/atomic/IconButton.vue';
-import Icon from '~/components/atomic/Icon.vue';
-import Tabs from '~/components/atomic/tabs/Tabs.vue';
-import Tab from '~/components/atomic/tabs/Tab.vue';
-import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
-import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
-import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
+import Panel from '~/components/layout/Panel.vue';
 
 export default defineComponent({
-  name: 'RepoSettings',
+  name: 'GeneralTab',
 
-  components: {
-    FluidContainer,
-    Button,
-    IconButton,
-    Icon,
-    Tabs,
-    Tab,
-    GeneralTab,
-    SecretsTab,
-    RegistriesTab,
-  },
+  components: { Button, Panel },
 
   setup() {
     const apiClient = useApiClient();
