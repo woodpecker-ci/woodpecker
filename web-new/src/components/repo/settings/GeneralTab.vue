@@ -2,19 +2,18 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <h1 class="text-xl ml-2">General</h1>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
-        <img :src="badgeUrl" />
-      </a>
     </div>
 
-    <div class="flex">
+    <div class="flex flex-col">
+      <pre>{{ repo }}</pre>
+
       <Button class="mx-auto bg-red-500 hover:bg-red-400 text-white" text="Delete repository" @click="deleteRepo" />
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, Ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
 import Button from '~/components/atomic/Button.vue';
@@ -55,7 +54,7 @@ export default defineComponent({
       await router.replace({ name: 'repos' });
     }
 
-    return { deleteRepo, badgeUrl };
+    return { deleteRepo, repo, badgeUrl };
   },
 });
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <FluidContainer v-if="repo">
+  <FluidContainer>
     <div class="flex border-b items-center pb-4 mb-4">
       <IconButton :to="{ name: 'repo' }" icon="back" />
       <h1 class="text-xl ml-2">Settings</h1>
@@ -15,25 +15,25 @@
       <Tab title="Registries">
         <RegistriesTab />
       </Tab>
+      <Tab title="Badge">
+        <BadgeTab />
+      </Tab>
     </Tabs>
   </FluidContainer>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, Ref } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo } from '~/lib/api/types';
+import { defineComponent } from 'vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
-import { useRouter } from 'vue-router';
-import useNotifications from '~/compositions/useNotifications';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import Tabs from '~/components/atomic/tabs/Tabs.vue';
-import Tab from '~/components/atomic/tabs/Tab.vue';
+import Tabs from '~/components/tabs/Tabs.vue';
+import Tab from '~/components/tabs/Tab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
+import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
 
 export default defineComponent({
   name: 'RepoSettings',
@@ -48,33 +48,7 @@ export default defineComponent({
     GeneralTab,
     SecretsTab,
     RegistriesTab,
-  },
-
-  setup() {
-    const apiClient = useApiClient();
-    const router = useRouter();
-    const notifications = useNotifications();
-
-    const repo = inject<Ref<Repo>>('repo');
-    const badgeUrl = computed(() => {
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
-      }
-
-      return `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`;
-    });
-
-    async function disableRepo() {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: 'Repository deleted', type: 'success' });
-      await router.replace({ name: 'repos' });
-    }
-
-    return { repo, disableRepo, badgeUrl };
+    BadgeTab,
   },
 });
 </script>

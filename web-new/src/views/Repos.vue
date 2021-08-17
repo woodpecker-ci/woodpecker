@@ -2,7 +2,7 @@
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b pb-4 mb-4 items-center">
       <h1 class="text-xl">Repositories</h1>
-      <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add Repo" />
+      <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add repository" />
     </div>
 
     <div class="space-y-4">

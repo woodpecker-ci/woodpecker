@@ -21,6 +21,7 @@
       >
         <BuildItem :build="build" />
       </router-link>
+      <Panel v-if="builds.length === 0">There are no builds yet.</Panel>
     </div>
   </FluidContainer>
 </template>
@@ -32,11 +33,12 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import Panel from '~/components/layout/Panel.vue';
 
 export default defineComponent({
   name: 'Repo',
 
-  components: { FluidContainer, BuildItem, IconButton, Icon },
+  components: { FluidContainer, BuildItem, IconButton, Icon, Panel },
 
   setup() {
     const repo = inject<Ref<Repo>>('repo');

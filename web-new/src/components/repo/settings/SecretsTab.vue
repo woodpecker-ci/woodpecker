@@ -10,12 +10,17 @@
       <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
         <span>{{ secret.name }}</span>
         <div class="ml-auto">
-          <span v-for="event in secret.event" :key="event" class="bg-gray-400 text-white rounded-md mx-1 px-1 py-0.5">{{
-            event
-          }}</span>
+          <span
+            v-for="event in secret.event"
+            :key="event"
+            class="bg-gray-400 text-white rounded-md mx-1 py-1 px-2 text-sm"
+            >{{ event }}</span
+          >
         </div>
-        <IconButton icon="trash" @click="deleteSecret(secret)" />
+        <IconButton icon="trash" class="ml-2 w-6 h-6 hover:text-red-400" @click="deleteSecret(secret)" />
       </ListItem>
+
+      <div v-if="secrets?.length === 0">There are no secrets yet.</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -71,7 +76,7 @@ export default defineComponent({
 
   setup() {
     const apiClient = useApiClient();
-    const { notify } = useNotifications();
+    const notifications = useNotifications();
 
     const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>();
@@ -92,7 +97,7 @@ export default defineComponent({
       }
 
       await apiClient.createSecret(repo.value.owner, repo.value.name, secret.value);
-      notify({ title: 'Secret created', type: 'success' });
+      notifications.notify({ title: 'Secret created', type: 'success' });
       showAddSecret.value = false;
       secret.value = { ...emptySecret };
       await loadSecrets();
@@ -116,7 +121,7 @@ export default defineComponent({
       }
 
       await apiClient.deleteSecret(repo.value.owner, repo.value.name, secret.name);
-      notify({ title: 'Secret deleted', type: 'success' });
+      notifications.notify({ title: 'Secret deleted', type: 'success' });
       await loadSecrets();
     }
 

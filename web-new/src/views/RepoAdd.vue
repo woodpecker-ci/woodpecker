@@ -2,8 +2,8 @@
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <IconButton :to="{ name: 'repos' }" icon="back" />
-      <h1 class="text-xl ml-2">Enable repository</h1>
-      <Button class="ml-auto" @click="reloadRepos" text="Reload Repositories" />
+      <h1 class="text-xl ml-2">Add repository</h1>
+      <Button class="ml-auto" @click="reloadRepos" text="Reload repositories" />
     </div>
 
     <div class="space-y-4">
@@ -16,7 +16,7 @@
       >
         <span>{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto">Already enabled</span>
-        <Button v-if="!repo.active" class="ml-auto" @click="activateRepo(repo)" text="Activate" />
+        <Button v-if="!repo.active" class="ml-auto" @click="activateRepo(repo)" text="Enable" />
       </ListItem>
     </div>
   </FluidContainer>

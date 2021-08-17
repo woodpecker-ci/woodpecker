@@ -9,8 +9,10 @@
     <div v-if="!showAddRegistry" class="space-y-4">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
-        <IconButton class="ml-auto" icon="trash" @click="deleteRegistry(registry)" />
+        <IconButton icon="trash" class="ml-auto w-6 h-6 hover:text-red-400" @click="deleteRegistry(registry)" />
       </ListItem>
+
+      <div v-if="registries?.length === 0">There are no registries yet.</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -50,7 +52,7 @@ export default defineComponent({
 
   setup() {
     const apiClient = useApiClient();
-    const { notify } = useNotifications();
+    const notifications = useNotifications();
 
     const repo = inject<Ref<Repo>>('repo');
     const registries = ref<Registry[]>();
@@ -71,7 +73,7 @@ export default defineComponent({
       }
 
       await apiClient.createRegistry(repo.value.owner, repo.value.name, registry.value);
-      notify({ title: 'Registry created', type: 'success' });
+      notifications.notify({ title: 'Registry created', type: 'success' });
       showAddRegistry.value = false;
       registry.value = {};
       await loadRegistries();
@@ -83,7 +85,7 @@ export default defineComponent({
       }
 
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registry.address);
-      notify({ title: 'Registry deleted', type: 'success' });
+      notifications.notify({ title: 'Registry deleted', type: 'success' });
       await loadRegistries();
     }
 

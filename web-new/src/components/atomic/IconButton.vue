@@ -2,7 +2,18 @@
   <Button
     :disabled="disabled"
     :to="to"
-    class="flex text-gray-400 px-0 py-0 hover:bg-transparent hover:text-gray-500 shadow-none bg-transparent border-none"
+    class="
+      flex
+      items-center
+      justify-center
+      text-gray-400
+      px-0
+      py-0
+      hover:bg-transparent hover:text-gray-500
+      shadow-none
+      bg-transparent
+      border-none
+    "
   >
     <Icon :name="icon" />
   </Button>

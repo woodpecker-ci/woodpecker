@@ -132,7 +132,7 @@ export default defineComponent({
 
     async function loadBuild(): Promise<void> {
       if (!repo) {
-        return;
+        throw new Error('Unexpected: Repo is undefined');
       }
 
       await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value));
