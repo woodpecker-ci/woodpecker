@@ -2,7 +2,8 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <h1 class="text-xl ml-2">Secrets</h1>
-      <Button class="ml-auto" @click="showAddSecret = !showAddSecret" text="Add Secret" />
+      <Button v-if="showAddSecret" class="ml-auto" @click="showAddSecret = false" text="Show secrets" />
+      <Button v-else class="ml-auto" @click="showAddSecret = true" text="Add secret" />
     </div>
 
     <div v-if="!showAddSecret" class="space-y-4">
@@ -19,8 +20,8 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
-        <input v-model="secret.name" type="text" placeholder="Name" />
-        <input v-model="secret.value" type="text" placeholder="Value" />
+        <input v-model="secret.name" type="text" placeholder="Name" required />
+        <input v-model="secret.value" type="text" placeholder="Value" required />
 
         <div v-for="secretEvent in SecretEvents" :key="secretEvent">
           <input
@@ -43,7 +44,6 @@
 import { ref, defineComponent, inject, onMounted, Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo, Secret, SecretEvents } from '~/lib/api/types';
-import { useRouter } from 'vue-router';
 import useNotifications from '~/compositions/useNotifications';
 import Panel from '~/components/layout/Panel.vue';
 import Button from '~/components/atomic/Button.vue';
@@ -76,7 +76,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>();
     const showAddSecret = ref(false);
-    const secret = ref<Partial<Secret>>(emptySecret);
+    const secret = ref<Partial<Secret>>({ ...emptySecret });
 
     async function loadSecrets() {
       if (!repo?.value) {
@@ -94,7 +94,7 @@ export default defineComponent({
       await apiClient.createSecret(repo.value.owner, repo.value.name, secret.value);
       notify({ title: 'Secret created', type: 'success' });
       showAddSecret.value = false;
-      secret.value = emptySecret;
+      secret.value = { ...emptySecret };
       await loadSecrets();
     }
 
