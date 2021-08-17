@@ -1,5 +1,8 @@
 <template>
-  <div class="flex w-full h-full justify-center items-center">
+  <div class="flex flex-col w-full h-full justify-center items-center">
+    <div v-if="errorMessage" class="bg-red-400 text-white p-4 rounded-md text-lg">
+      {{ errorMessage }}
+    </div>
     <Panel class="flex flex-col m-8 md:flex-row md:w-3xl md:h-sm p-0 overflow-hidden">
       <div class="flex bg-green md:w-3/5 justify-center items-center">
         <img class="w-48 h-48" src="../assets/logo.svg" />
@@ -13,11 +16,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 import Button from '~/components/atomic/Button.vue';
 import useAuthentication from '~/compositions/useAuthentication';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Panel from '~/components/layout/Panel.vue';
+
+const authErrorMessages = {
+  oauth_error: 'Error while authenticating against OAuth provider',
+  internal_error: 'Some internal error occured',
+  access_denied: 'You are not allowed to login',
+};
 
 export default defineComponent({
   name: 'Login',
@@ -35,8 +44,10 @@ export default defineComponent({
   },
 
   setup(props) {
+    const route = useRoute();
     const router = useRouter();
     const authentication = useAuthentication();
+    const errorMessage = ref<string>();
 
     function doLogin() {
       authentication.authenticate(props.origin);
@@ -45,11 +56,18 @@ export default defineComponent({
     onMounted(async () => {
       if (authentication.isAuthenticated) {
         await router.replace({ name: 'home' });
+        return;
+      }
+
+      if (route.query.code) {
+        const code = route.query.code as keyof typeof authErrorMessages;
+        errorMessage.value = authErrorMessages[code];
       }
     });
 
     return {
       doLogin,
+      errorMessage,
     };
   },
 });

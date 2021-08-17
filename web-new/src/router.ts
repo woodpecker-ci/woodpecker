@@ -62,6 +62,13 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    path: '/login/error',
+    name: 'login-error',
+    component: (): Component => import('~/views/Login.vue'),
+    meta: { blank: true },
+    props: true,
+  },
+  {
     path: '/do-login/:origin?',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
