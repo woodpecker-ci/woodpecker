@@ -8,6 +8,11 @@
     <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
       exit code {{ proc.exit_code }}
     </div>
+    <template v-if="!proc?.start_time"> </template>
+    <div class="text-gray-300 mx-auto">
+      <span v-if="!build.finished_at">This step hasn't started yet.</span>
+      <span v-else>This step has been cancled.</span>
+    </div>
   </div>
 </template>
 
