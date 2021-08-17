@@ -1,11 +1,15 @@
 <template>
   <Panel>
-    <span class="text-lg border-b-2 w-full">General</span>
-    <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
-      <img :src="badgeUrl" />
-    </a>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center">
+      <h1 class="text-xl ml-2">General</h1>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
+        <img :src="badgeUrl" />
+      </a>
+    </div>
 
-    <Button class="ml-4" text="Deactivate repository" @click="disableRepo" />
+    <div class="flex">
+      <Button class="mx-auto bg-red-500 hover:bg-red-400 text-white" text="Delete repository" @click="deleteRepo" />
+    </div>
   </Panel>
 </template>
 
@@ -37,9 +41,13 @@ export default defineComponent({
       return `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`;
     });
 
-    async function disableRepo() {
+    async function deleteRepo() {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
+      }
+
+      if (!confirm('All data will be lost after this action!!!\n\nDo you really want to procceed?')) {
+        return;
       }
 
       await apiClient.deleteRepo(repo.value.owner, repo.value.name);
@@ -47,7 +55,7 @@ export default defineComponent({
       await router.replace({ name: 'repos' });
     }
 
-    return { repo, disableRepo, badgeUrl };
+    return { deleteRepo, badgeUrl };
   },
 });
 </script>
