@@ -55,4 +55,14 @@ export type Repo = {
 
   allow_tags: boolean;
   // Whether tags should trigger a build.
+
+  config_file: string;
+
+  fallback: boolean;
+
+  visibility: 'public' | 'private' | 'internal';
+
+  last_build: number;
+
+  gated: boolean;
 };

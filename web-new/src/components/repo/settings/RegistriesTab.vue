@@ -17,9 +17,17 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <input v-model="registry.address" type="text" placeholder="Address" required />
-        <input v-model="registry.username" type="text" placeholder="Username" required />
-        <input v-model="registry.password" type="text" placeholder="Password" required />
+        <InputField label="Address">
+          <TextField v-model="registry.address" placeholder="Registry Address (e.g. docker.io)" required />
+        </InputField>
+
+        <InputField label="Username">
+          <TextField v-model="registry.username" placeholder="Username" required />
+        </InputField>
+
+        <InputField label="Password">
+          <TextField v-model="registry.password" placeholder="Password" required />
+        </InputField>
 
         <Button type="submit" text="Add registry" />
       </form>
@@ -38,6 +46,8 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import { Registry } from '~/lib/api/types/registry';
+import InputField from '~/components/form/InputField.vue';
+import TextField from '~/components/form/TextField.vue';
 
 export default defineComponent({
   name: 'RegistriesTab',
@@ -48,6 +58,8 @@ export default defineComponent({
     ListItem,
     IconButton,
     Icon,
+    InputField,
+    TextField,
   },
 
   setup() {

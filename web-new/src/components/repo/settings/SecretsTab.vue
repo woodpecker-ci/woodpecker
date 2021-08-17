@@ -25,19 +25,17 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
-        <input v-model="secret.name" type="text" placeholder="Name" required />
-        <input v-model="secret.value" type="text" placeholder="Value" required />
+        <InputField label="Name">
+          <TextField v-model="secret.name" placeholder="Name" required />
+        </InputField>
 
-        <div v-for="secretEvent in SecretEvents" :key="secretEvent">
-          <input
-            type="checkbox"
-            @click="clickSecretEvent(secretEvent)"
-            :id="`event-${secretEvent}`"
-            :value="secretEvent"
-            :checked="secret.event?.includes(secretEvent)"
-          />
-          <label :for="`event-${secretEvent}`">{{ secretEvent }}</label>
-        </div>
+        <InputField label="Value">
+          <TextField v-model="secret.value" placeholder="Value" required />
+        </InputField>
+
+        <InputField label="Available at following events">
+          <CheckboxesField :options="secretEventsOptions" v-model="secret.event" />
+        </InputField>
 
         <Button type="submit" text="Add secret" />
       </form>
@@ -55,6 +53,10 @@ import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import InputField from '~/components/form/InputField.vue';
+import TextField from '~/components/form/TextField.vue';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
+import { CheckboxOption } from '~/components/form/form.types';
 
 const emptySecret = {
   name: '',
@@ -62,6 +64,13 @@ const emptySecret = {
   image: [],
   event: [SecretEvents.Push],
 };
+
+const secretEventsOptions: CheckboxOption[] = [
+  { value: SecretEvents.Push, text: 'Push' },
+  { value: SecretEvents.Tag, text: 'Tag' },
+  { value: SecretEvents.PullRequest, text: 'Pull Request' },
+  { value: SecretEvents.Deploy, text: 'Deploy' },
+];
 
 export default defineComponent({
   name: 'SecretsTab',
@@ -72,6 +81,9 @@ export default defineComponent({
     ListItem,
     IconButton,
     Icon,
+    InputField,
+    TextField,
+    CheckboxesField,
   },
 
   setup() {
@@ -103,18 +115,6 @@ export default defineComponent({
       await loadSecrets();
     }
 
-    function clickSecretEvent(secretEvent: SecretEvents) {
-      let events = secret.value.event || [];
-
-      if (events.includes(secretEvent)) {
-        events = events.filter((s) => s !== secretEvent);
-      } else {
-        events.push(secretEvent);
-      }
-
-      secret.value = { ...secret.value, event: events };
-    }
-
     async function deleteSecret(secret: Secret) {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
@@ -129,7 +129,7 @@ export default defineComponent({
       await loadSecrets();
     });
 
-    return { SecretEvents, secret, secrets, showAddSecret, createSecret, clickSecretEvent, deleteSecret };
+    return { secretEventsOptions, secret, secrets, showAddSecret, createSecret, deleteSecret };
   },
 });
 </script>
