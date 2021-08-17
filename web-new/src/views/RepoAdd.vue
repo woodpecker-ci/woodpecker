@@ -1,9 +1,7 @@
 <template>
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
-      <IconButton :to="{ name: 'repos' }">
-        <Icon name="back" class="w-8 h-8" />
-      </IconButton>
+      <IconButton :to="{ name: 'repos' }" icon="back" />
       <h1 class="text-xl ml-2">Enable repository</h1>
       <Button class="ml-auto" @click="reloadRepos" text="Reload Repositories" />
     </div>
@@ -31,10 +29,10 @@ import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
-import router from '~/router';
 import ListItem from '~/components/atomic/ListItem.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'RepoAdd',
@@ -48,6 +46,7 @@ export default defineComponent({
   },
 
   setup() {
+    const router = useRouter();
     const apiClient = useApiClient();
     const notifications = useNotifications();
     const repos = ref<Repo[] | undefined>();

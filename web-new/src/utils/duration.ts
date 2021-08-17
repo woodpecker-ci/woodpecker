@@ -1,6 +1,8 @@
 import humanizeDuration from 'humanize-duration';
 
 const en_short = {
+  w: (count?: number) => 'w',
+  d: (count?: number) => 'd',
   h: (count?: number) => 'h',
   m: (count?: number) => 'min',
   s: (count?: number) => 'sec',

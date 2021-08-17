@@ -1,22 +1,23 @@
 <template>
-  <IconDuration v-if="name === 'duration'" />
-  <IconSince v-else-if="name === 'since'" />
-  <IconBranch v-else-if="name === 'branch'" />
-  <IconCommit v-else-if="name === 'commit'" />
-  <IconBack v-else-if="name === 'back'" />
-  <IconGithub v-else-if="name === 'github'" />
-  <IconRepo v-else-if="name === 'repo'" />
-  <IconSettings v-else-if="name === 'settings'" />
-  <IconStatusBlocked v-else-if="name === 'status-blocked'" />
-  <IconStatusDeclined v-else-if="name === 'status-declined'" />
-  <IconStatusError v-else-if="name === 'status-error'" />
-  <IconStatusFailure v-else-if="name === 'status-failure'" />
-  <IconStatusKilled v-else-if="name === 'status-killed'" />
-  <IconStatusPending v-else-if="name === 'status-pending'" />
-  <IconStatusRunning v-else-if="name === 'status-running'" />
-  <IconStatusSkipped v-else-if="name === 'status-skipped'" />
-  <IconStatusStarted v-else-if="name === 'status-started'" />
-  <IconStatusSuccess v-else-if="name === 'status-success'" />
+  <IconDuration v-if="name === 'duration'" class="h-6 w-6" />
+  <IconSince v-else-if="name === 'since'" class="h-6 w-6" />
+  <IconBranch v-else-if="name === 'branch'" class="h-6 w-6" />
+  <IconCommit v-else-if="name === 'commit'" class="h-6 w-6" />
+  <IconBack v-else-if="name === 'back'" class="w-8 h-8" />
+  <IconGithub v-else-if="name === 'github'" class="h-8 w-8" />
+  <IconRepo v-else-if="name === 'repo'" class="h-8 w-8" />
+  <IconSettings v-else-if="name === 'settings'" class="w-8 h-8" />
+  <IconTrash v-else-if="name === 'trash'" class="h-8 w-8" />
+  <IconStatusBlocked v-else-if="name === 'status-blocked'" class="h-6 w-6" />
+  <IconStatusDeclined v-else-if="name === 'status-declined'" class="h-6 w-6" />
+  <IconStatusError v-else-if="name === 'status-error'" class="h-8 w-8" />
+  <IconStatusFailure v-else-if="name === 'status-failure'" class="h-8 w-8" />
+  <IconStatusKilled v-else-if="name === 'status-killed'" class="h-7 w-7" />
+  <IconStatusPending v-else-if="name === 'status-pending'" class="h-7 w-7" />
+  <IconStatusRunning v-else-if="name === 'status-running'" class="h-8 w-8" />
+  <IconStatusSkipped v-else-if="name === 'status-skipped'" class="h-8 w-8" />
+  <IconStatusStarted v-else-if="name === 'status-started'" class="h-8 w-8" />
+  <IconStatusSuccess v-else-if="name === 'status-success'" class="h-8 w-8" />
 </template>
 
 <script lang="ts">
@@ -32,14 +33,15 @@ import IconRepo from 'virtual:vite-icons/teenyicons/git-solid';
 import IconSettings from 'virtual:vite-icons/clarity/settings-solid';
 import IconStatusBlocked from 'virtual:vite-icons/ph/hand';
 import IconStatusDeclined from 'virtual:vite-icons/ph/hand';
-import IconStatusError from 'virtual:vite-icons/ph/x-circle';
-import IconStatusFailure from 'virtual:vite-icons/ph/warning';
-import IconStatusKilled from 'virtual:vite-icons/ph/x-circle';
+import IconStatusError from 'virtual:vite-icons/ph/warning';
+import IconStatusFailure from 'virtual:vite-icons/ph/x-circle';
+import IconStatusKilled from 'virtual:vite-icons/octicon/skip-24';
 import IconStatusPending from 'virtual:vite-icons/ph/hourglass';
 import IconStatusRunning from 'virtual:vite-icons/entypo/dots-two-vertical';
 import IconStatusSkipped from 'virtual:vite-icons/ph/prohibit';
 import IconStatusStarted from 'virtual:vite-icons/entypo/dots-two-vertical';
 import IconStatusSuccess from 'virtual:vite-icons/ph/check-circle';
+import IconTrash from 'virtual:vite-icons/gg/trash';
 
 type IconNames =
   | 'duration'
@@ -50,6 +52,7 @@ type IconNames =
   | 'github'
   | 'repo'
   | 'settings'
+  | 'trash'
   | 'status-blocked'
   | 'status-declined'
   | 'status-error'
@@ -73,6 +76,7 @@ export default defineComponent({
     IconGithub,
     IconRepo,
     IconSettings,
+    IconTrash,
     IconStatusBlocked,
     IconStatusDeclined,
     IconStatusError,

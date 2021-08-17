@@ -4,10 +4,11 @@
       <div
         class="min-h-full w-3"
         :class="{
-          'bg-status-red': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(build.status),
-          'bg-status-gray': ['pending', 'skipped'].includes(build.status),
-          'bg-status-green': ['success'].includes(build.status),
-          'bg-status-blue': ['started', 'running'].includes(build.status),
+          'bg-yellow-400': build.status === 'pending',
+          'bg-status-red': buildStatusColors[build.status] === 'red',
+          'bg-status-gray': buildStatusColors[build.status] === 'gray',
+          'bg-status-green': buildStatusColors[build.status] === 'green',
+          'bg-status-blue': buildStatusColors[build.status] === 'blue',
         }"
       />
       <div class="w-8 flex">
@@ -31,7 +32,7 @@
         <div class="flex flex-col space-y-2 w-42">
           <div class="flex space-x-2 items-center">
             <Icon name="commit" />
-            <a class="text-gray-400" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
+            <span>{{ build.commit.slice(0, 10) }}</span>
           </div>
           <div class="flex space-x-2 items-center">
             <Icon name="branch" />
@@ -60,6 +61,7 @@ import useBuild from '~/compositions/useBuild';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import { buildStatusColors } from './build-status';
 
 export default defineComponent({
   name: 'BuildItem',
@@ -77,7 +79,7 @@ export default defineComponent({
     const build = toRef(props, 'build');
     const { since, duration, message } = useBuild(build);
 
-    return { since, duration, message };
+    return { since, duration, message, buildStatusColors };
   },
 });
 </script>

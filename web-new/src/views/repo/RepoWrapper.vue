@@ -3,19 +3,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, onMounted, ref, toRef, watch } from 'vue';
+import { defineComponent, provide, onMounted, toRef, watch } from 'vue';
 import RepoStore from '~/store/repos';
 import BuildStore from '~/store/builds';
-import { Repo } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
-import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
 
 export default defineComponent({
   name: 'RepoWrapper',
 
-  components: { FluidContainer, Button, BuildItem, Breadcrumbs },
+  components: { FluidContainer, Button, BuildItem },
 
   props: {
     repoOwner: {

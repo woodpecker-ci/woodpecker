@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import Navbar from '~/components/layout/header/Navbar.vue';
 import BuildFeedSidebar from './components/build-feed/BuildFeedSidebar.vue';
 
@@ -35,7 +35,11 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md p-2 text-lg border-l-10;
+  @apply rounded-md text-lg border-l-10;
+}
+
+.vue-notification .notification-title {
+  @apply font-normal;
 }
 </style>
 

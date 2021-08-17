@@ -12,7 +12,7 @@
         clickable
         @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
       >
-        {{ repo.full_name }}
+        {{ `${repo.owner} / ${repo.name}` }}
       </ListItem>
     </div>
   </FluidContainer>

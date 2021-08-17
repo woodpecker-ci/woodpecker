@@ -1,22 +1,7 @@
 <template>
   <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-center">
-      <!-- <Breadcrumbs
-        :paths="[
-          { name: 'Repositories', link: { name: 'home' } },
-          {
-            name: repo.full_name,
-            link: { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } },
-          },
-          {
-            name: `Build #${buildId}`,
-            link: { name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId } },
-          },
-        ]"
-      /> -->
-      <IconButton :to="{ name: 'repo' }">
-        <Icon name="back" class="w-8 h-8" />
-      </IconButton>
+      <IconButton :to="{ name: 'repo' }" icon="back" />
       <h1 class="text-xl ml-2">Build #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
       <Button
@@ -29,9 +14,11 @@
     </FluidContainer>
 
     <div class="p-0 flex flex-col flex-grow">
-      <!-- <span class="text-xl mx-auto mb-4">{{ message }}</span> -->
-
       <FluidContainer class="flex text-gray-500 justify-between py-0">
+        <div class="flex space-x-2 items-center">
+          <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
+          <span>{{ build.author }}</span>
+        </div>
         <div class="flex space-x-2 items-center">
           <Icon name="commit" />
           <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
@@ -62,7 +49,6 @@ import { Repo } from '~/lib/api/types';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Button from '~/components/atomic/Button.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
-import Breadcrumbs from '~/components/layout/Breadcrumbs.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { useRouter, useRoute } from 'vue-router';
@@ -80,7 +66,6 @@ export default defineComponent({
     FluidContainer,
     Button,
     BuildItem,
-    Breadcrumbs,
     BuildStatusIcon,
     BuildProcs,
     IconButton,
