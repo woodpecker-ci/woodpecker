@@ -14,6 +14,11 @@
       </div>
 
       <div>
+        <h2 class="text-lg">Url for specific branch</h2>
+        <pre class="box">{{ baseUrl }}{{ badgeUrl }}?branch=<span class="font-bold">&lt;branch&gt;</span></pre>
+      </div>
+
+      <div>
         <h2 class="text-lg">Markdown</h2>
         <pre class="box">![status-badge]({{ baseUrl }}{{ badgeUrl }})</pre>
       </div>
