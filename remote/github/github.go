@@ -26,7 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
@@ -340,9 +340,9 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 
 	intendedURL := req.URL.Query()["url"]
 	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", httputil.GetURL(req), intendedURL[0])
+		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.Host, intendedURL[0])
 	} else {
-		redirect = fmt.Sprintf("%s/authorize", httputil.GetURL(req))
+		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.Host)
 	}
 
 	return &oauth2.Config{
