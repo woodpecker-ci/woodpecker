@@ -60,9 +60,29 @@ export type Repo = {
 
   fallback: boolean;
 
-  visibility: 'public' | 'private' | 'internal';
+  visibility: RepoVisibility;
 
   last_build: number;
 
   gated: boolean;
 };
+
+export enum RepoVisibility {
+  Public = 'public',
+  Private = 'private',
+  Internal = 'internal',
+}
+
+export type RepoSettings = Pick<
+  Repo,
+  | 'config_file'
+  | 'fallback'
+  | 'timeout'
+  | 'visibility'
+  | 'trusted'
+  | 'gated'
+  | 'allow_pr'
+  | 'allow_push'
+  | 'allow_tags'
+  | 'allow_deploys'
+>;

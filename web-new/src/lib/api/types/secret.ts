@@ -1,14 +1,9 @@
-export enum SecretEvents {
-  Push = 'push',
-  Tag = 'tag',
-  PullRequest = 'pull-request',
-  Deploy = 'deploy',
-}
+import { WebhookEvents } from './webhook_events';
 
 export type Secret = {
   id: string;
   name: string;
   value: string;
-  event: SecretEvents[];
+  event: WebhookEvents[];
   image: string[];
 };

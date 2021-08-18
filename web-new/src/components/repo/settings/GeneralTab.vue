@@ -4,41 +4,52 @@
       <h1 class="text-xl ml-2">General</h1>
     </div>
 
-    <div class="flex flex-col">
+    <div v-if="repoSettings" class="flex flex-col">
       <InputField label="Pipeline path">
-        <TextField v-model="settings.config_file" />
+        <TextField v-model="repoSettings.config_file" class="max-w-124" />
       </InputField>
 
       <InputField label="Repository hooks">
-        <CheckboxesField v-model="settings.repository_hooks" :options="repositoryHooksOptions" />
+        <Checkbox v-model="repoSettings.allow_push" label="Push" />
+        <Checkbox v-model="repoSettings.allow_pr" label="Pull Request" />
+        <Checkbox v-model="repoSettings.allow_tags" label="Tag" />
+        <Checkbox v-model="repoSettings.allow_deploys" label="Deploy" />
       </InputField>
 
       <InputField label="Project settings">
-        <CheckboxesField v-model="settings.repository_hooks" :options="projectSettingsOptions" />
+        <Checkbox v-model="repoSettings.gated" label="Protected" />
+        <Checkbox v-model="repoSettings.trusted" label="Trusted" />
       </InputField>
 
       <InputField label="Project visibility">
-        <RadioField v-model="settings.visibility" :options="projectVisibilityOptions" />
+        <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
       <InputField label="Timeout">
-        <TextField v-model="settings.timeout" />
-        <span>minutes</span>
+        <div class="flex items-center">
+          <NumberField v-model="repoSettings.timeout" class="w-24" />
+          <span class="ml-4">minutes</span>
+        </div>
       </InputField>
 
-      <Button class="mx-auto bg-green hover:bg-lime-600 text-white" text="Save settings" @click="deleteRepo" />
+      <Button class="mr-auto bg-green hover:bg-lime-600 text-white" text="Save settings" @click="saveRepoSettings" />
     </div>
 
-    <div class="flex mt-8 pt-4 border-t-1">
-      <Button class="mx-auto bg-red-500 hover:bg-red-400 text-white" text="Delete repository" @click="deleteRepo" />
+    <div class="flex flex-col mt-8 pt-4 border-t-1">
+      <span class="text-xl">Actions</span>
+      <Button
+        class="mr-auto mt-4 bg-red-500 hover:bg-red-400 text-white"
+        text="Delete repository"
+        @click="deleteRepo"
+      />
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref, Ref } from 'vue';
+import { defineComponent, inject, onMounted, ref, Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
-import { Repo, SecretEvents } from '~/lib/api/types';
+import { Repo, RepoVisibility, RepoSettings } from '~/lib/api/types';
 import Button from '~/components/atomic/Button.vue';
 import { useRouter } from 'vue-router';
 import useNotifications from '~/compositions/useNotifications';
@@ -46,44 +57,59 @@ import Panel from '~/components/layout/Panel.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import RadioField from '~/components/form/RadioField.vue';
-import { CheckboxOption, RadioOption } from '~/components/form/form.types';
+import { RadioOption } from '~/components/form/form.types';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
-
-const repositoryHooksOptions: CheckboxOption[] = [
-  { value: SecretEvents.Push, text: 'Push' },
-  { value: SecretEvents.Tag, text: 'Tag' },
-  { value: SecretEvents.PullRequest, text: 'Pull Request' },
-  { value: SecretEvents.Deploy, text: 'Deploy' },
-];
-
-const projectSettingsOptions: CheckboxOption[] = [
-  { value: 'protected', text: 'Protected' },
-  { value: 'trusted', text: 'Trusted' },
-];
+import NumberField from '~/components/form/NumberField.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
+import RepoStore from '~/store/repos';
 
 const projectVisibilityOptions: RadioOption[] = [
-  { value: 'public', text: 'Public' },
-  { value: 'private', text: 'Private' },
-  { value: 'internal', text: 'Internal' },
+  { value: RepoVisibility.Public, text: 'Public' },
+  { value: RepoVisibility.Private, text: 'Private' },
+  { value: RepoVisibility.Internal, text: 'Internal' },
 ];
 
 export default defineComponent({
   name: 'GeneralTab',
 
-  components: { Button, Panel, InputField, TextField, RadioField, CheckboxesField },
+  components: { Button, Panel, InputField, TextField, RadioField, CheckboxesField, NumberField, Checkbox },
 
   setup() {
     const apiClient = useApiClient();
     const router = useRouter();
     const notifications = useNotifications();
+    const repoStore = RepoStore();
 
     const repo = inject<Ref<Repo>>('repo');
-    const settings = ref({
-      config_file: repo?.value.config_file,
-      timeout: repo?.value.timeout,
-      visibility: repo?.value.visibility,
-      repository_hooks: [],
-    });
+    const repoSettings = ref<RepoSettings>();
+
+    async function loadRepo() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      await repoStore.loadRepo(repo.value.owner, repo.value.name);
+      loadRepoSettings();
+    }
+
+    function loadRepoSettings() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      repoSettings.value = {
+        config_file: repo.value.config_file,
+        fallback: repo.value.fallback,
+        timeout: repo.value.timeout,
+        visibility: repo.value.visibility,
+        gated: repo.value.gated,
+        trusted: repo.value.trusted,
+        allow_push: repo.value.allow_push,
+        allow_pr: repo.value.allow_pr,
+        allow_tags: repo.value.allow_tags,
+        allow_deploys: repo.value.allow_deploys,
+      };
+    }
 
     async function deleteRepo() {
       if (!repo) {
@@ -99,7 +125,30 @@ export default defineComponent({
       await router.replace({ name: 'repos' });
     }
 
-    return { deleteRepo, repo, settings, projectVisibilityOptions, projectSettingsOptions, repositoryHooksOptions };
+    async function saveRepoSettings() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      if (!repoSettings.value) {
+        throw new Error('Unexpected: Repo-Settings should be set');
+      }
+
+      await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
+      await loadRepo();
+      notifications.notify({ title: 'Repository settings updated', type: 'success' });
+    }
+
+    onMounted(() => {
+      loadRepoSettings();
+    });
+
+    return {
+      deleteRepo,
+      repoSettings,
+      saveRepoSettings,
+      projectVisibilityOptions,
+    };
   },
 });
 </script>

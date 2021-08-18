@@ -32,7 +32,7 @@ import { Repo } from '~/lib/api/types';
 import Panel from '~/components/layout/Panel.vue';
 
 export default defineComponent({
-  name: 'GeneralTab',
+  name: 'BadgeTab',
 
   components: { Panel },
 

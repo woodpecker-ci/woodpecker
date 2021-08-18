@@ -46,7 +46,7 @@
 <script lang="ts">
 import { ref, defineComponent, inject, onMounted, Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
-import { Repo, Secret, SecretEvents } from '~/lib/api/types';
+import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
 import useNotifications from '~/compositions/useNotifications';
 import Panel from '~/components/layout/Panel.vue';
 import Button from '~/components/atomic/Button.vue';
@@ -62,14 +62,14 @@ const emptySecret = {
   name: '',
   value: '',
   image: [],
-  event: [SecretEvents.Push],
+  event: [WebhookEvents.Push],
 };
 
 const secretEventsOptions: CheckboxOption[] = [
-  { value: SecretEvents.Push, text: 'Push' },
-  { value: SecretEvents.Tag, text: 'Tag' },
-  { value: SecretEvents.PullRequest, text: 'Pull Request' },
-  { value: SecretEvents.Deploy, text: 'Deploy' },
+  { value: WebhookEvents.Push, text: 'Push' },
+  { value: WebhookEvents.Tag, text: 'Tag' },
+  { value: WebhookEvents.PullRequest, text: 'Pull Request' },
+  { value: WebhookEvents.Deploy, text: 'Deploy' },
 ];
 
 export default defineComponent({
