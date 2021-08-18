@@ -103,8 +103,8 @@ type RepoPatch struct {
 	Visibility   *string `json:"visibility,omitempty"`
 	AllowPull    *bool   `json:"allow_pr,omitempty"`
 	AllowPush    *bool   `json:"allow_push,omitempty"`
-	AllowDeploy  *bool   `json:"allow_deploy,omitempty"`
-	AllowTag     *bool   `json:"allow_tag,omitempty"`
+	AllowDeploy  *bool   `json:"allow_deploys,omitempty"`
+	AllowTag     *bool   `json:"allow_tags,omitempty"`
 	BuildCounter *int    `json:"build_counter,omitempty"`
 	Fallback     *bool   `json:"fallback,omitempty"`
 }

@@ -204,11 +204,11 @@ export default class Settings extends Component {
   }
 
   handleTagChange(e) {
-    this.handleChange("allow_tag", e.target.checked);
+    this.handleChange("allow_tags", e.target.checked);
   }
 
   handleDeployChange(e) {
-    this.handleChange("allow_deploy", e.target.checked);
+    this.handleChange("allow_deploys", e.target.checked);
   }
 
   handleTrustedChange(e) {
