@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, toRef } from 'vue';
 
 import { SelectOption } from './form.types';
 
@@ -45,8 +45,9 @@ export default defineComponent({
   },
 
   setup: (props, ctx) => {
+    const modelValue = toRef(props, 'modelValue');
     const innerValue = computed({
-      get: () => props.modelValue,
+      get: () => modelValue.value,
       set: (selectedValue) => {
         ctx.emit('update:modelValue', selectedValue);
       },

@@ -1,25 +1,19 @@
 <template>
-  <div class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white hover:border-gray-300">
-    <input
-      v-model="innerValue"
-      class="w-full text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-400"
-      :type="type"
-      :placeholder="placeholder"
-    />
-  </div>
+  <TextField v-model="innerValue" :placeholder="placeholder" type="number" />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, toRef } from 'vue';
+import TextField from '~/components/form/TextField.vue';
 
 export default defineComponent({
-  name: 'TextField',
+  name: 'NumberField',
 
-  components: {},
+  components: { TextField },
 
   props: {
     modelValue: {
-      type: String,
+      type: Number,
       default: '',
     },
 
@@ -27,24 +21,19 @@ export default defineComponent({
       type: String,
       default: '',
     },
-
-    type: {
-      type: String,
-      default: 'text',
-    },
   },
 
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: string): boolean => true,
+    'update:modelValue': (_value: number): boolean => true,
   },
 
   setup: (props, ctx) => {
     const modelValue = toRef(props, 'modelValue');
     const innerValue = computed({
-      get: () => modelValue.value,
+      get: () => modelValue.value.toString(),
       set: (value) => {
-        ctx.emit('update:modelValue', value);
+        ctx.emit('update:modelValue', parseFloat(value));
       },
     });
 
