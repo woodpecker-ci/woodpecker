@@ -17,10 +17,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import Navbar from '~/components/layout/header/Navbar.vue';
-import BuildFeedSidebar from './components/build-feed/BuildFeedSidebar.vue';
+import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
+import useApiClient from '~/compositions/useApiClient';
+import useNotifications from '~/compositions/useNotifications';
 
 export default defineComponent({
   name: 'App',
@@ -32,7 +34,14 @@ export default defineComponent({
 
   setup() {
     const route = useRoute();
+    const apiClient = useApiClient();
+    const notifications = useNotifications();
+    apiClient.setErrorHandler((err) => {
+      notifications.notify({ title: err.message, type: 'error' });
+    });
+
     const blank = computed(() => route.meta.blank);
+
     return { blank };
   },
 });

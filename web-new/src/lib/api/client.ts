@@ -3,7 +3,16 @@ export type ApiError = {
   message: string;
 };
 
-export function encodeQueryString(params: Record<string, string | number | boolean> = {}): string {
+export function encodeQueryString(_params: Record<string, string | number | boolean | undefined> = {}): string {
+  const params: Record<string, string | number | boolean> = {};
+
+  Object.keys(_params).forEach((key) => {
+    const val = params[key];
+    if (val !== undefined) {
+      params[key] = val;
+    }
+  });
+
   return params
     ? Object.keys(params)
         .sort()
@@ -19,7 +28,7 @@ export default class ApiClient {
   server: string;
   token: string | null;
   csrf: string | null;
-  onerror: (err: ApiError) => void;
+  onerror: ((err: ApiError) => void) | undefined;
 
   constructor(server: string, token: string | null, csrf: string | null) {
     this.server = server;
@@ -113,5 +122,9 @@ export default class ApiClient {
       };
     }
     return events;
+  }
+
+  setErrorHandler(onerror: (err: ApiError) => void) {
+    this.onerror = onerror;
   }
 }
