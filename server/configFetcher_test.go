@@ -1,10 +1,11 @@
-package server
+package server_test
 
 import (
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote/github"
+	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 func TestFetchGithub(t *testing.T) {
@@ -14,11 +15,11 @@ func TestFetchGithub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	configFetcher := &configFetcher{
-		remote_: github,
-		user:    &model.User{Token: "xxx"},
-		repo:    &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: ".drone"},
-		build:   &model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-	}
+	configFetcher := server.NewConfigFetcher(
+		github,
+		&model.User{Token: "xxx"},
+		&model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: ".drone"},
+		&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+	)
 	configFetcher.Fetch()
 }
