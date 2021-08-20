@@ -26,7 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/remote/gitlab3/client"
@@ -121,7 +121,7 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		Scope:        DefaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", httputil.GetURL(req)),
+		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
 	}
 
 	trans_ := &http.Transport{
@@ -631,7 +631,7 @@ func (g *Gitlab) Oauth2Transport(r *http.Request) *oauth2.Transport {
 			Scope:        DefaultScope,
 			AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 			TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-			RedirectURL:  fmt.Sprintf("%s/authorize", httputil.GetURL(r)),
+			RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
 			//settings.Server.Scheme, settings.Server.Hostname),
 		},
 		Transport: &http.Transport{
