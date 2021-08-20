@@ -3,7 +3,7 @@ clone:
     image: plugins/git:next
 
 pipeline:
-  git:
+  fetch:
     image: docker:git
     commands:
       - git fetch --tags
