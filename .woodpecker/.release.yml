@@ -1,7 +1,7 @@
 clone:
   git:
     image: plugins/git:next
-    depth: 0
+    tags: true
 
 pipeline:
   release:
@@ -20,7 +20,6 @@ pipeline:
     when:
       event: push
       # branch: master
-
 
 depends_on:
   - "woodpecker/.test"
