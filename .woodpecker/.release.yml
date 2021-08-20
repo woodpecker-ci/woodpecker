@@ -14,6 +14,8 @@ pipeline:
     secrets: [github_token, docker_username, docker_password]
     commands:
       - goreleaser release
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
       event: tag
 
@@ -28,14 +30,11 @@ pipeline:
       # - docker push woodpeckerci/woodpecker-server:latest
       # docker tag woodpeckerci/woodpecker-agent:... woodpeckerci/woodpecker-agent:latest
       # - docker push woodpeckerci/woodpecker-agent:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
       event: push
       branch: master
-
-volumes:
-  - name: docker_sock
-    host:
-      path: /var/run/docker.sock
 
 # depends_on:
 #   - "woodpecker/.test"
