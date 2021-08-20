@@ -24,12 +24,13 @@ pipeline:
     secrets: [github_token, docker_username, docker_password]
     commands:
       - goreleaser release --snapshot
-      # docker tag woodpeckerci/woodpecker-cli:... woodpeckerci/woodpecker-cli:latest
-      # - docker push woodpeckerci/woodpecker-cli:latest
-      # docker tag woodpeckerci/woodpecker-server:... woodpeckerci/woodpecker-server:latest
-      # - docker push woodpeckerci/woodpecker-server:latest
-      # docker tag woodpeckerci/woodpecker-agent:... woodpeckerci/woodpecker-agent:latest
-      # - docker push woodpeckerci/woodpecker-agent:latest
+      - docker image ls
+      - docker tag woodpeckerci/woodpecker-cli:latest woodpeckerci/woodpecker-cli:next
+      - docker push woodpeckerci/woodpecker-cli:next
+      - docker tag woodpeckerci/woodpecker-server:latest woodpeckerci/woodpecker-server:next
+      - docker push woodpeckerci/woodpecker-server:next
+      - docker tag woodpeckerci/woodpecker-agent:latest woodpeckerci/woodpecker-agent:next
+      - docker push woodpeckerci/woodpecker-agent:next
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     when:
