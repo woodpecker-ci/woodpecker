@@ -1,6 +1,6 @@
 clone:
   git:
-    image: plugins/git:next
+    image: plugins/git
     tags: true
 
 pipeline:
