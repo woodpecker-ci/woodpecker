@@ -24,7 +24,7 @@ pipeline:
       - goreleaser release
     when:
       event: push
-      # branch: master
+      branch: master
 
 # depends_on:
 #   - "woodpecker/.test"
