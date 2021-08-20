@@ -10,7 +10,7 @@ pipeline:
       - release
     when:
       event: [tag, push]
-      branch: master
+      # branch: master
 
 depends_on:
   - test
