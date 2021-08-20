@@ -8,36 +8,36 @@ pipeline:
     group: test
     commands:
       - make deps
-      - make test
-      - make vet
+      # - make test
+      # - make vet
       - make formatcheck
 
-  test-frontend:
-    image: node:10.17.0-stretch
-    group: test
-    commands:
-      - (cd web/; yarn install)
-      - (cd web/; yarn run lesshint)
-      - (cd web/; yarn run lint --quiet)
-      - make test-frontend
+  # test-frontend:
+  #   image: node:10.17.0-stretch
+  #   group: test
+  #   commands:
+  #     - (cd web/; yarn install)
+  #     - (cd web/; yarn run lesshint)
+  #     - (cd web/; yarn run lint --quiet)
+  #     - make test-frontend
 
-  test-postgres:
-    image: golang:1.16
-    group: db-test
-    environment:
-      - DATABASE_DRIVER=postgres
-      - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
-    commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
+  # test-postgres:
+  #   image: golang:1.16
+  #   group: db-test
+  #   environment:
+  #     - DATABASE_DRIVER=postgres
+  #     - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+  #   commands:
+  #     - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
 
-  test-mysql:
-    image: golang:1.16
-    group: db-test
-    environment:
-      - DATABASE_DRIVER=mysql
-      - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
-    commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
+  # test-mysql:
+  #   image: golang:1.16
+  #   group: db-test
+  #   environment:
+  #     - DATABASE_DRIVER=mysql
+  #     - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+  #   commands:
+  #     - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
 
 services:
   postgres:
