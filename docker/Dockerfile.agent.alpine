@@ -1,0 +1,12 @@
+FROM alpine:3.14.1
+
+RUN apk add -U --no-cache ca-certificates
+
+ENV GODEBUG=netdns=go
+ADD ./woodpecker-agent /bin/
+
+EXPOSE 3000
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+
+ENTRYPOINT ["/bin/woodpecker-agent"]
+

@@ -1,0 +1,30 @@
+clone:
+  git:
+    image: plugins/git:next
+
+pipeline:
+  fetch:
+    image: docker:git
+    commands:
+      - git fetch --tags
+      - git status
+
+  release:
+    image: ghcr.io/goreleaser/goreleaser:v0.174.1
+    secrets: [github_token, docker_username, docker_password]
+    commands:
+      - goreleaser release
+    when:
+      event: tag
+
+  release-snapshot:
+    image: ghcr.io/goreleaser/goreleaser:v0.174.1
+    secrets: [github_token, docker_username, docker_password]
+    commands:
+      - goreleaser release
+    when:
+      event: push
+      # branch: master
+
+# depends_on:
+#   - "woodpecker/.test"
