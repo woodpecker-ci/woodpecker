@@ -13,4 +13,4 @@ pipeline:
       # branch: master
 
 depends_on:
-  - test
+  - "woodpecker/.test"
