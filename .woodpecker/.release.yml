@@ -1,6 +1,7 @@
 clone:
   git:
     image: plugins/git:next
+    depth: 0
 
 pipeline:
   release:
@@ -9,8 +10,17 @@ pipeline:
     commands:
       - goreleaser release
     when:
-      event: [tag, push]
+      event: tag
+
+  release-snapshot:
+    image: ghcr.io/goreleaser/goreleaser:v0.174.1
+    secrets: [github_token, docker_username, docker_password]
+    commands:
+      - goreleaser release
+    when:
+      event: push
       # branch: master
+
 
 depends_on:
   - "woodpecker/.test"
