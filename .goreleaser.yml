@@ -107,37 +107,37 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.server
     image_templates:
-      - "woodpeckerci/woodpecker-server:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-server:{{ .Version }}"
       - "woodpeckerci/woodpecker-server:latest"
   - goos: linux
     goarch: amd64
     dockerfile: docker/Dockerfile.server.alpine
     image_templates:
-      - "woodpeckerci/woodpecker-server:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-server:{{ .Version }}-alpine"
       - "woodpeckerci/woodpecker-server:latest-alpine"
   - goos: linux
     goarch: amd64
     dockerfile: docker/Dockerfile.agent
     image_templates:
-      - "woodpeckerci/woodpecker-agent:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-agent:{{ .Version }}"
       - "woodpeckerci/woodpecker-agent:latest"
   - goos: linux
     goarch: amd64
     dockerfile: docker/Dockerfile.agent.alpine
     image_templates:
-      - "woodpeckerci/woodpecker-agent:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-agent:{{ .Version }}-alpine"
       - "woodpeckerci/woodpecker-agent:latest-alpine"
   - goos: linux
     goarch: amd64
     dockerfile: docker/Dockerfile.cli
     image_templates:
-      - "woodpeckerci/woodpecker-cli:{{ .Tag }}"
+      - "woodpeckerci/woodpecker-cli:{{ .Version }}"
       - "woodpeckerci/woodpecker-cli:latest"
   - goos: linux
     goarch: amd64
     dockerfile: docker/Dockerfile.cli.alpine
     image_templates:
-      - "woodpeckerci/woodpecker-cli:{{ .Tag }}-alpine"
+      - "woodpeckerci/woodpecker-cli:{{ .Version }}-alpine"
       - "woodpeckerci/woodpecker-cli:latest-alpine"
 archives:
   - id: server
