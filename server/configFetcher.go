@@ -15,6 +15,15 @@ type configFetcher struct {
 	build   *model.Build
 }
 
+func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *configFetcher {
+	return &configFetcher{
+		remote_: remote,
+		user:    user,
+		repo:    repo,
+		build:   build,
+	}
+}
+
 func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 	for i := 0; i < 5; i++ {
 		select {
@@ -22,7 +31,7 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 			// either a file
 			file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
 			if fileerr == nil {
-				return []*remote.FileMeta{&remote.FileMeta{
+				return []*remote.FileMeta{{
 					Name: cf.repo.Config,
 					Data: file,
 				}}, nil
@@ -43,7 +52,7 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 				return nil, fileerr
 			}
 
-			return []*remote.FileMeta{&remote.FileMeta{
+			return []*remote.FileMeta{{
 				Name: cf.repo.Config,
 				Data: file,
 			}}, nil
