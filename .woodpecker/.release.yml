@@ -54,6 +54,7 @@ pipeline:
     image: node:14-alpine
     secrets: [github_token]
     commands:
+      - apk add git
       - npx semantic-release
     when:
       event: [push, tag]
