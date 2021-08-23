@@ -1,0 +1,20 @@
+{
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": "dist/checksums.txt", "label": "CSS distribution" },
+          { "path": "dist/*.apk", "label": "JS distribution" },
+          { "path": "dist/*.deb", "label": "JS distribution" },
+          { "path": "dist/*.rpm", "label": "JS distribution" },
+          { "path": "dist/*.tar.gz", "label": "JS distribution" },
+          { "path": "dist/*.zip", "label": "JS distribution" }
+        ]
+      }
+    ]
+  ],
+  "branches": ["main", "master", "release-2"]
+}

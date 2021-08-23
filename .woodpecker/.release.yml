@@ -9,33 +9,69 @@ pipeline:
       - git fetch --tags
       - git status
 
-  release:
+  build:
     image: ghcr.io/goreleaser/goreleaser:v0.174.1
-    secrets: [github_token, docker_username, docker_password]
     commands:
-      - goreleaser release
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - export GORELEASER_CURRENT_TAG=$DRONE_TAG
+      - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
       event: tag
 
-  release-snapshot:
-    image: ghcr.io/goreleaser/goreleaser:v0.174.1
-    secrets: [github_token, docker_username, docker_password]
+  build-docker-server:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=server
     commands:
-      - goreleaser release --snapshot
-      - docker image ls
-      - docker tag woodpeckerci/woodpecker-cli:latest woodpeckerci/woodpecker-cli:next
-      - docker push woodpeckerci/woodpecker-cli:next
-      - docker tag woodpeckerci/woodpecker-server:latest woodpeckerci/woodpecker-server:next
-      - docker push woodpeckerci/woodpecker-server:next
-      - docker tag woodpeckerci/woodpecker-agent:latest woodpeckerci/woodpecker-agent:next
-      - docker push woodpeckerci/woodpecker-agent:next
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: tag
+
+  build-docker-agent:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=agent
+    commands:
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: tag
+
+  build-docker-cli:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=cli
+    commands:
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: tag
+
+  release:
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [github_token]
+    commands:
+      - npx semantic-release
     when:
       event: push
-      branch: master
+
+  # release-github:
+  #   image: plugins/github-release
+  #   secrets: [github_token]
+  #   api_key: $GITHUB_TOKEN
+  #   files:
+  #     - dist/checksums.txt
+  #     - dist/*.apk
+  #     - dist/*.deb
+  #     - dist/*.rpm
+  #     - dist/*.tar.gz
+  #   title: $DRONE_TAG
+  #   note: CHANGELOG.md
+  #   when:
+  #     event: tag
 
 # depends_on:
 #   - "woodpecker/.test"

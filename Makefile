@@ -62,16 +62,18 @@ test-lib:
 test: test-lib test-agent test-server
 
 build-agent:
-	$(DOCKER_RUN) go build -o build/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
-
-build-server:
-	$(DOCKER_RUN) go build -o build/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
 
 build-frontend:
 	(cd web/; yarn run build)
 
+build-server: build-frontend
+	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
-build: build-agent build-server
+build-cli:
+	$(DOCKER_RUN) go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/drone-server
+
+build: build-agent build-server build-cli
 
 .PHONY: release
 release:
