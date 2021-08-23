@@ -17,46 +17,46 @@ pipeline:
     when:
       event: tag
 
-  build-docker-server:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=server
-    commands:
-      - .woodpecker/scripts/build-docker-image.sh
-    when:
-      event: tag
+  # build-docker-server:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=server
+  #   commands:
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: tag
 
-  build-docker-agent:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=agent
-    commands:
-      - .woodpecker/scripts/build-docker-image.sh
-    when:
-      event: tag
+  # build-docker-agent:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=agent
+  #   commands:
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: tag
 
-  build-docker-cli:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=cli
-    commands:
-      - .woodpecker/scripts/build-docker-image.sh
-    when:
-      event: tag
+  # build-docker-cli:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=cli
+  #   commands:
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: tag
 
   release:
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    image: node:14-alpine
     secrets: [github_token]
     commands:
       - npx semantic-release
     when:
-      event: push
+      event: [push, tag]
 
   # release-github:
   #   image: plugins/github-release
