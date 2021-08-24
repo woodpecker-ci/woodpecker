@@ -8,9 +8,9 @@ pipeline:
     commands:
       - git fetch --tags
       - git status
-  when:
-      event: push
-      branch: master
+    when:
+        event: push
+        branch: master
 
   prepare-release:
     image: node:14-alpine
