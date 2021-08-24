@@ -18,7 +18,7 @@ pipeline:
     commands:
       - apk add git
       - npm i semantic-release @semantic-release/exec
-      - npx semantic-release --plugins @semantic-release/commit-analyzer,@semantic-release/exec
+      - npx semantic-release --dry-run
     when:
       event: push
       branch: master
@@ -27,7 +27,7 @@ pipeline:
     image: ghcr.io/goreleaser/goreleaser:v0.174.1
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - export GORELEASER_CURRENT_TAG=$WOODPECKER_VERSION
       - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
@@ -40,10 +40,9 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=server
-    entrypoint: ''
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
@@ -55,10 +54,9 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=agent
-    entrypoint: ['']
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
@@ -70,9 +68,9 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=cli
-    entrypoint:
+    commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push

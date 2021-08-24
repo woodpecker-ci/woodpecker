@@ -18,7 +18,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "echo ${nextRelease.version} > ./woodpecker-version"
+        "verifyReleaseCmd": "echo ${nextRelease.version} > ./woodpecker-version"
       }
     ]
   ]
