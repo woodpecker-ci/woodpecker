@@ -40,7 +40,7 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=server
-    commands:
+    entrypoint:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
@@ -54,7 +54,7 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=agent
-    commands:
+    entrypoint:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
@@ -68,7 +68,7 @@ pipeline:
     secrets: [docker_username, docker_password]
     environment:
       - IMAGE_TYPE=cli
-    commands:
+    entrypoint:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
       - .woodpecker/scripts/build-docker-image.sh
