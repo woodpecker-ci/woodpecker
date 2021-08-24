@@ -8,71 +8,84 @@ pipeline:
     commands:
       - git fetch --tags
       - git status
+  when:
+      event: push
+      branch: master
+
+  prepare-release:
+    image: node:14-alpine
+    secrets: [github_token]
+    commands:
+      - apk add git
+      - npm i semantic-release @semantic-release/exec
+      - npx semantic-release --plugins @semantic-release/commit-analyzer,@semantic-release/exec
+    when:
+      event: push
+      branch: master
 
   build:
     image: ghcr.io/goreleaser/goreleaser:v0.174.1
     commands:
-      - export GORELEASER_CURRENT_TAG=$DRONE_TAG
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - export GORELEASER_CURRENT_TAG=$WOODPECKER_VERSION
       - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
-      event: tag
+      event: push
+      branch: master
 
-  # build-docker-server:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=server
-  #   commands:
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: tag
+  build-docker-server:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=server
+    commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: push
+      branch: master
 
-  # build-docker-agent:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=agent
-  #   commands:
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: tag
+  build-docker-agent:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=agent
+    commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: push
+      branch: master
 
-  # build-docker-cli:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=cli
-  #   commands:
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: tag
+  build-docker-cli:
+    group: build-docker
+    image: gcr.io/kaniko-project/executor:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=cli
+    commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if not version is found
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: push
+      branch: master
 
   release:
     image: node:14-alpine
     secrets: [github_token]
     commands:
       - apk add git
+      - npm i semantic-release @semantic-release/exec # should already be installed by prepare-release
       - npx semantic-release
     when:
-      event: [push, tag]
-
-  # release-github:
-  #   image: plugins/github-release
-  #   secrets: [github_token]
-  #   api_key: $GITHUB_TOKEN
-  #   files:
-  #     - dist/checksums.txt
-  #     - dist/*.apk
-  #     - dist/*.deb
-  #     - dist/*.rpm
-  #     - dist/*.tar.gz
-  #   title: $DRONE_TAG
-  #   note: CHANGELOG.md
-  #   when:
-  #     event: tag
+      event: push
+      branch: master
 
 # depends_on:
 #   - "woodpecker/.test"
