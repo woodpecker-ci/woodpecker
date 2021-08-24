@@ -24,12 +24,12 @@ echo "Building image ..."
 /kaniko/executor \
   --context $PATH_CONTEXT/ \
   --destination $IMAGE:latest \
-  --destination $IMAGE:$DRONE_TAG \
+  --destination $IMAGE:$WOODPECKER_VERSION \
 
 echo "Building alpine image ..."
 /kaniko/executor \
   --context $PATH_CONTEXT-alpine/ \
   --destination $IMAGE:latest-alpine \
-  --destination $IMAGE:$DRONE_TAG-alpine \
+  --destination $IMAGE:$WOODPECKER_VERSION-alpine \
 
 echo "Done"
