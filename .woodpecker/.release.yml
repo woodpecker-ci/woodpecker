@@ -26,9 +26,10 @@ pipeline:
   build:
     image: ghcr.io/goreleaser/goreleaser:v0.174.1
     commands:
-      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-      - export GORELEASER_CURRENT_TAG=$WOODPECKER_VERSION
+      - export WOODPECKER_VERSION=$$(cat ./woodpecker-version)
+      - echo "Version: $$WOODPECKER_VERSION"
+      - test "$$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - export GORELEASER_CURRENT_TAG="$$WOODPECKER_VERSION"
       - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
       event: push
@@ -38,6 +39,7 @@ pipeline:
     image: alpine:3.14.1
     commands:
       - echo "Preparing build context ..."
+      - ls ./dist
       # server
       - mkdir -p ./dist/docker-woodpecker-server/
       - cp ./dist/server_linux_amd64/woodpecker-server ./dist/docker-woodpecker-server/
