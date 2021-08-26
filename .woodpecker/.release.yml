@@ -28,7 +28,8 @@ pipeline:
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - echo "Version $WOODPECKER_VERSION"
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      # skip if no version is found
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0
       - export GORELEASER_CURRENT_TAG="$WOODPECKER_VERSION"
       - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
