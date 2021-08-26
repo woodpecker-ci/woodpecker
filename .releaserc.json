@@ -6,12 +6,12 @@
       "@semantic-release/github",
       {
         "assets": [
-          { "path": "dist/checksums.txt", "label": "Checksums" },
-          { "path": "dist/*.apk", "label": "APK packages" },
-          { "path": "dist/*.deb", "label": "DEB packages" },
-          { "path": "dist/*.rpm", "label": "RPM packages" },
-          { "path": "dist/*.tar.gz", "label": "Archives" },
-          { "path": "dist/*.zip", "label": "Archives" }
+          { "path": "dist/checksums.txt" },
+          { "path": "dist/*.apk" },
+          { "path": "dist/*.deb" },
+          { "path": "dist/*.rpm" },
+          { "path": "dist/*.tar.gz" },
+          { "path": "dist/*.zip" }
         ]
       }
     ],
