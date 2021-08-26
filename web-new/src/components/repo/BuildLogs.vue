@@ -10,8 +10,8 @@
     </div>
     <template v-if="!proc?.start_time"> </template>
     <div class="text-gray-300 mx-auto">
-      <span v-if="!build.finished_at">This step hasn't started yet.</span>
-      <span v-else>This step has been cancled.</span>
+      <span v-if="proc?.state === 'skipped'" class="text-orange-300">This step has been cancled.</span>
+      <span v-else-if="!proc?.start_time">This step hasn't started yet.</span>
     </div>
   </div>
 </template>

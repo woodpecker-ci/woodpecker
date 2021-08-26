@@ -1,5 +1,10 @@
 <template>
   <div class="flex mt-4 w-full bg-gray-600 min-h-0 flex-grow">
+    <div v-if="build.error" class="flex flex-col p-4">
+      <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
+      <span class="text-red-400">{{ build.error }}</span>
+    </div>
+
     <div class="flex flex-col w-3/12 text-white">
       <div v-for="proc in build.procs" :key="proc.id">
         <div class="p-4 pb-1">{{ proc.name }}</div>
