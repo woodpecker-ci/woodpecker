@@ -34,47 +34,79 @@ pipeline:
       event: push
       branch: master
 
-  build-docker-server:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=server
-    entrypoint:
-      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-      - .woodpecker/scripts/build-docker-image.sh
+  prepare-docker:
+    image: alpine:3.14.1
+    commands:
+      - echo "Preparing build context ..."
+      # server
+      - mkdir -p ./dist/docker-woodpecker-server/
+      - cp ./dist/server_linux_amd64/woodpecker-server ./dist/docker-woodpecker-server/
+      - cp ./docker/Dockerfile.server ./dist/docker-woodpecker-server/Dockerfile
+      # server alpine
+      - mkdir -p ./dist/docker-woodpecker-server-alpine/
+      - cp ./dist/server_linux_amd64/woodpecker-server ./dist/docker-woodpecker-server-alpine/
+      - cp ./docker/Dockerfile.server.alpine ./dist/docker-woodpecker-server-alpine/Dockerfile
+      # agent
+      - mkdir -p ./dist/docker-woodpecker-agent/
+      - cp ./dist/agent_linux_amd64/woodpecker-agent ./dist/docker-woodpecker-agent/
+      - cp ./docker/Dockerfile.agent ./dist/docker-woodpecker-agent/Dockerfile
+      # agent alpine
+      - mkdir -p ./dist/docker-woodpecker-agent-alpine/
+      - cp ./dist/agent_linux_amd64/woodpecker-agent ./dist/docker-woodpecker-agent-alpine/
+      - cp ./docker/Dockerfile.agent.alpine ./dist/docker-woodpecker-agent-alpine/Dockerfile
+      # cli
+      - mkdir -p ./dist/docker-woodpecker-cli/
+      - cp ./dist/cli_linux_amd64/woodpecker-cli ./dist/docker-woodpecker-cli/
+      - cp ./docker/Dockerfile.cli ./dist/docker-woodpecker-cli/Dockerfile
+      # cli alpine
+      - mkdir -p ./dist/docker-woodpecker-cli-alpine/
+      - cp ./dist/cli_linux_amd64/woodpecker-cli ./dist/docker-woodpecker-cli-alpine/
+      - cp ./docker/Dockerfile.cli.alpine ./dist/docker-woodpecker-cli-alpine/Dockerfile
     when:
       event: push
       branch: master
 
-  build-docker-agent:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=agent
-    entrypoint:
-      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-      - .woodpecker/scripts/build-docker-image.sh
-    when:
-      event: push
-      branch: master
+  # build-docker-server:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=server
+  #   entrypoint:
+  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: push
+  #     branch: master
 
-  build-docker-cli:
-    group: build-docker
-    image: gcr.io/kaniko-project/executor:v1.6.0-debug
-    secrets: [docker_username, docker_password]
-    environment:
-      - IMAGE_TYPE=cli
-    entrypoint:
-      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-      - .woodpecker/scripts/build-docker-image.sh
-    when:
-      event: push
-      branch: master
+  # build-docker-agent:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=agent
+  #   entrypoint:
+  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: push
+  #     branch: master
+
+  # build-docker-cli:
+  #   group: build-docker
+  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
+  #   secrets: [docker_username, docker_password]
+  #   environment:
+  #     - IMAGE_TYPE=cli
+  #   entrypoint:
+  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+  #     - .woodpecker/scripts/build-docker-image.sh
+  #   when:
+  #     event: push
+  #     branch: master
 
   release:
     image: node:14-alpine
