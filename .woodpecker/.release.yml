@@ -117,6 +117,8 @@ pipeline:
     image: node:14-alpine
     secrets: [github_token]
     commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - echo "Version $WOODPECKER_VERSION"
       - apk add git
       - npm i semantic-release @semantic-release/exec # should already be installed by prepare-release
       - npx semantic-release
