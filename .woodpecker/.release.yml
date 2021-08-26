@@ -39,6 +39,8 @@ pipeline:
   prepare-docker:
     image: alpine:3.14.1
     commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
       - echo "Preparing build context ..."
       - ls ./dist
       # server
