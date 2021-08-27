@@ -1,0 +1,5 @@
+# docker/: docker build -t anbraten/kaniko:v1.6.0-debug -f Dockerfile.kaniko-builder .
+
+FROM gcr.io/kaniko-project/executor:v1.6.0-debug
+RUN ["/busybox/mkdir", "-p", "/bin/sh"]
+RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]

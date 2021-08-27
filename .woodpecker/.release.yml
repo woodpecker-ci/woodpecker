@@ -37,123 +37,77 @@ pipeline:
       branch: master
 
   build:
-    image: golang:1.16
-    commands:
-      - export WOODPECKER_VERSION=$(cat ./woodpecker-version || echo '')
-      - echo "Version $WOODPECKER_VERSION"
-      - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
-      # server
-      - export CGO_ENABLED=1
-      - export LD_FLAGS="-s -w -X github.com/woodpecker-ci/woodpecker/version.Version=$WOODPECKER_VERSION -extldflags \"-static\""
-      - go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/drone-server -ldflags="$LD_FLAGS"
-      # agent
-      - export CGO_ENABLED=0
-      - export LD_FLAGS="-s -w -X github.com/woodpecker-ci/woodpecker/version.Version=$WOODPECKER_VERSION -extldflags \"-static\""
-      - go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/drone-server
-      # cli
-      - export CGO_ENABLED=0
-      - export LD_FLAGS="-s -w -X main.version=$WOODPECKER_VERSION -extldflags \"-static\""
-      - go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/drone-server
-    when:
-      event: push
-      branch: master
-
-  build-packages:
-    image: golang:1.16
+    image: ghcr.io/goreleaser/goreleaser:v0.174.1
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
-      - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-      - nfpm package --config ./nfpm.yml --target ./dist
+      - export GORELEASER_CURRENT_TAG="$WOODPECKER_VERSION"
+      - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
       event: push
       branch: master
 
-  build-archives:
-    image: alpine:3.14.1
-    commands:
-      # TODO
-      - echo "Do some building ..."
-    when:
-      event: push
-      branch: master
+  # build-packages:
+  #   image: golang:1.16
+  #   commands:
+  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+  #     - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
+  #     - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+  #     - nfpm package --config ./nfpm.yml --target ./dist
+  #   when:
+  #     event: push
+  #     branch: master
 
-  prepare-docker:
-    image: alpine:3.14.1
-    commands:
+  # build-archives:
+  #   image: alpine:3.14.1
+  #   commands:
+  #     # TODO
+  #     - echo "Do some building ..."
+  #   when:
+  #     event: push
+  #     branch: master
+
+  build-docker-server:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=server
+    entrypoint:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
-      - echo "Preparing build context ..."
-      - ls ./dist
-      # server
-      - mkdir -p ./dist/docker-woodpecker-server/
-      - cp ./dist/woodpecker-server ./dist/docker-woodpecker-server/
-      - cp ./docker/Dockerfile.server ./dist/docker-woodpecker-server/Dockerfile
-      # server alpine
-      - mkdir -p ./dist/docker-woodpecker-server-alpine/
-      - cp ./dist/woodpecker-server ./dist/docker-woodpecker-server-alpine/
-      - cp ./docker/Dockerfile.server.alpine ./dist/docker-woodpecker-server-alpine/Dockerfile
-      # agent
-      - mkdir -p ./dist/docker-woodpecker-agent/
-      - cp ./dist/woodpecker-agent ./dist/docker-woodpecker-agent/
-      - cp ./docker/Dockerfile.agent ./dist/docker-woodpecker-agent/Dockerfile
-      # agent alpine
-      - mkdir -p ./dist/docker-woodpecker-agent-alpine/
-      - cp ./dist/woodpecker-agent ./dist/docker-woodpecker-agent-alpine/
-      - cp ./docker/Dockerfile.agent.alpine ./dist/docker-woodpecker-agent-alpine/Dockerfile
-      # cli
-      - mkdir -p ./dist/docker-woodpecker-cli/
-      - cp ./dist/woodpecker-cli ./dist/docker-woodpecker-cli/
-      - cp ./docker/Dockerfile.cli ./dist/docker-woodpecker-cli/Dockerfile
-      # cli alpine
-      - mkdir -p ./dist/docker-woodpecker-cli-alpine/
-      - cp ./dist/woodpecker-cli ./dist/docker-woodpecker-cli-alpine/
-      - cp ./docker/Dockerfile.cli.alpine ./dist/docker-woodpecker-cli-alpine/Dockerfile
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
       branch: master
 
-  # build-docker-server:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=server
-  #   entrypoint:
-  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: push
-  #     branch: master
+  build-docker-agent:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=agent
+    entrypoint:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: push
+      branch: master
 
-  # build-docker-agent:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=agent
-  #   entrypoint:
-  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: push
-  #     branch: master
-
-  # build-docker-cli:
-  #   group: build-docker
-  #   image: gcr.io/kaniko-project/executor:v1.6.0-debug
-  #   secrets: [docker_username, docker_password]
-  #   environment:
-  #     - IMAGE_TYPE=cli
-  #   entrypoint:
-  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-  #     - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
-  #     - .woodpecker/scripts/build-docker-image.sh
-  #   when:
-  #     event: push
-  #     branch: master
+  build-docker-cli:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=cli
+    entrypoint:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: push
+      branch: master
 
   release:
     image: node:14-alpine
