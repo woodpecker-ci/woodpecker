@@ -9,8 +9,8 @@ pipeline:
       - git fetch --tags
       - git status
     when:
-        event: push
-        branch: master
+      event: push
+      branch: master
 
   prepare-release:
     image: node:14-alpine
@@ -23,15 +23,57 @@ pipeline:
       event: push
       branch: master
 
-  build:
-    image: ghcr.io/goreleaser/goreleaser:v0.174.1
+  prepare-build:
+    image: golang:1.16
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - echo "Version $WOODPECKER_VERSION"
-      # skip if no version is found
+      - go mod tidy
+      - go get github.com/woodpecker-ci/togo
+      - cd web/
+      - go generate ./...
+    when:
+      event: push
+      branch: master
+
+  build:
+    image: golang:1.16
+    commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version || echo '')
+      - echo "Version $WOODPECKER_VERSION"
       - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
-      - export GORELEASER_CURRENT_TAG="$WOODPECKER_VERSION"
-      - goreleaser release --skip-validate --rm-dist --skip-publish
+      # server
+      - export CGO_ENABLED=1
+      - export LD_FLAGS="-s -w -X github.com/woodpecker-ci/woodpecker/version.Version=$WOODPECKER_VERSION -extldflags \"-static\""
+      - go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/drone-server -ldflags="$LD_FLAGS"
+      # agent
+      - export CGO_ENABLED=0
+      - export LD_FLAGS="-s -w -X github.com/woodpecker-ci/woodpecker/version.Version=$WOODPECKER_VERSION -extldflags \"-static\""
+      - go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/drone-server
+      # cli
+      - export CGO_ENABLED=0
+      - export LD_FLAGS="-s -w -X main.version=$WOODPECKER_VERSION -extldflags \"-static\""
+      - go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/drone-server
+    when:
+      event: push
+      branch: master
+
+  build-packages:
+    image: golang:1.16
+    commands:
+      - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
+      - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
+      - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+      - nfpm package --config ./nfpm.yml --target ./dist
+    when:
+      event: push
+      branch: master
+
+  build-archives:
+    image: alpine:3.14.1
+    commands:
+      # TODO
+      - echo "Do some building ..."
     when:
       event: push
       branch: master
@@ -45,27 +87,27 @@ pipeline:
       - ls ./dist
       # server
       - mkdir -p ./dist/docker-woodpecker-server/
-      - cp ./dist/server_linux_amd64/woodpecker-server ./dist/docker-woodpecker-server/
+      - cp ./dist/woodpecker-server ./dist/docker-woodpecker-server/
       - cp ./docker/Dockerfile.server ./dist/docker-woodpecker-server/Dockerfile
       # server alpine
       - mkdir -p ./dist/docker-woodpecker-server-alpine/
-      - cp ./dist/server_linux_amd64/woodpecker-server ./dist/docker-woodpecker-server-alpine/
+      - cp ./dist/woodpecker-server ./dist/docker-woodpecker-server-alpine/
       - cp ./docker/Dockerfile.server.alpine ./dist/docker-woodpecker-server-alpine/Dockerfile
       # agent
       - mkdir -p ./dist/docker-woodpecker-agent/
-      - cp ./dist/agent_linux_amd64/woodpecker-agent ./dist/docker-woodpecker-agent/
+      - cp ./dist/woodpecker-agent ./dist/docker-woodpecker-agent/
       - cp ./docker/Dockerfile.agent ./dist/docker-woodpecker-agent/Dockerfile
       # agent alpine
       - mkdir -p ./dist/docker-woodpecker-agent-alpine/
-      - cp ./dist/agent_linux_amd64/woodpecker-agent ./dist/docker-woodpecker-agent-alpine/
+      - cp ./dist/woodpecker-agent ./dist/docker-woodpecker-agent-alpine/
       - cp ./docker/Dockerfile.agent.alpine ./dist/docker-woodpecker-agent-alpine/Dockerfile
       # cli
       - mkdir -p ./dist/docker-woodpecker-cli/
-      - cp ./dist/cli_linux_amd64/woodpecker-cli ./dist/docker-woodpecker-cli/
+      - cp ./dist/woodpecker-cli ./dist/docker-woodpecker-cli/
       - cp ./docker/Dockerfile.cli ./dist/docker-woodpecker-cli/Dockerfile
       # cli alpine
       - mkdir -p ./dist/docker-woodpecker-cli-alpine/
-      - cp ./dist/cli_linux_amd64/woodpecker-cli ./dist/docker-woodpecker-cli-alpine/
+      - cp ./dist/woodpecker-cli ./dist/docker-woodpecker-cli-alpine/
       - cp ./docker/Dockerfile.cli.alpine ./dist/docker-woodpecker-cli-alpine/Dockerfile
     when:
       event: push
@@ -120,7 +162,8 @@ pipeline:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - echo "Version $WOODPECKER_VERSION"
       - apk add git
-      - npm i semantic-release @semantic-release/exec # should already be installed by prepare-release
+      # should already be installed by prepare-release
+      - npm i semantic-release @semantic-release/exec
       - npx semantic-release
     when:
       event: push
