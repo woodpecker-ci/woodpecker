@@ -2,7 +2,7 @@
 
 ## Supported features
 
-| Feature | Github | Gitea | Gitlab | Bitbucket | Bitbucket Server | Gogs | Coding | Gerrit |
+| Feature | [Github](github/) | [Gitea](gitea/) | [Gitlab](gitlab/) | [Bitbucket](bitbucket/) | [Bitbucket Server](bitbucket_server/) | Gogs | Coding | Gerrit |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | Event: Push | :white_check_mark: | :white_check_mark: |
 | Event: Tag | :white_check_mark: | :white_check_mark: |
