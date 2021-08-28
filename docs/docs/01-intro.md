@@ -1,72 +1,85 @@
-# Getting started
+# Welcome to Woodpecker
 
-## Repository Activation
+Woodpecker is a simple CI engine with great extensibility.
 
-To activate your project navigate to your account settings. You will see a list of repositories which can be activated with a simple toggle. When you activate your repository, Woodpecker automatically adds webhooks to your version control system (e.g. GitHub).
+![woodpecker](/img/woodpecker.png)
 
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
+## .woodpecker.yml
 
-![repository list](/img/repo_list.png)
-
-> Required Permissions
->
->The user who enables a repo in Woodpecker must have `Admin` rights on that repo, so that Woodpecker can add the webhook.
->
-> Note that manually creating webhooks yourself is not possible. This is because webhooks are signed using a per-repository secret key which is not exposed to end users.
-
-# Webhooks
-
-When you activate your repository Woodpecker automatically add webhooks to your version control system (e.g. GitHub). There is no manual configuration required.
-
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
-
-
-
-## Configuration
-
-To configure you pipeline you should place a `.woodpecker.yml` file in the root of your repository. The .woodpecker.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
-
-Example pipeline configuration:
+- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Pipeline steps can be named as you like
+- Run any command in the commands section
 
 ```yaml
+# .woodpecker.yml
 pipeline:
   build:
-    image: golang
+    image: debian
     commands:
-      - go get
-      - go build
-      - go test
-
-services:
-  postgres:
-    image: postgres:9.4.5
-    environment:
-      - POSTGRES_USER=myapp
+      - echo "This is the build step"
+  a-test-step:
+    image: debian
+    commands:
+      - echo "Testing.."
 ```
 
-Example pipeline configuration with multiple, serial steps:
+### Build steps are containers
+
+- Define any Docker image as context
+- Install the needed tools in custom Docker images, use them as context
+
+```diff
+pipeline:
+  build:
+-    image: debian
++   image: mycompany/image-with-awscli
+    commands:
+      - aws help
+```
+
+### File changes are incremental
+
+- Woodpecker clones the source code in the beginning pipeline
+- Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
+# .woodpecker.yml
 pipeline:
-  backend:
-    image: golang
+  build:
+    image: debian
     commands:
-      - go get
-      - go build
-      - go test
-
-  frontend:
-    image: node:6
+      - touch myfile
+  a-test-step:
+    image: debian
     commands:
-      - npm install
-      - npm test
-
-  notify:
-    image: plugins/slack
-    channel: developers
-    username: drone
+      - cat myfile
 ```
 
-## Execution
+## Plugins are straighforward
 
-To trigger your first pipeline execution you can push code to your repository, open a pull request, or push a tag. Any of these events triggers a webhook from your version control system and execute your pipeline.
+- If you copy the same shell script from project to project
+- Pack it into a plugin instead
+- And make the yaml declarative
+- Plugins are Docker images with your script as an entrypoint
+
+```Dockerfile
+# Dockerfile
+FROM laszlocloud/kubectl
+COPY deploy /usr/local/deploy
+ENTRYPOINT ["/usr/local/deploy"]
+```
+
+```bash
+# deploy
+kubectl apply -f $PLUGIN_TEMPLATE
+```
+
+```yaml
+# .woodpecker.yml
+pipeline:
+  deploy-to-k8s:
+    image: laszlocloud/my-k8s-plugin
+    template: config/k8s/service.yml
+```
+
+See a [plugin docs](/docs/usage/plugins/plugins).
