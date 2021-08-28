@@ -28,6 +28,7 @@ pipeline:
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
       - echo "Version $WOODPECKER_VERSION"
+      - test "v-$WOODPECKER_VERSION" != "v-" || exit 0
       - go mod tidy
       - go get github.com/woodpecker-ci/togo
       - cd web/
@@ -40,7 +41,7 @@ pipeline:
     image: ghcr.io/goreleaser/goreleaser:v0.174.1
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
+      - test "v-$WOODPECKER_VERSION" != "v-" || exit 0
       - export GORELEASER_CURRENT_TAG="$WOODPECKER_VERSION"
       - goreleaser release --skip-validate --rm-dist --skip-publish
     when:
@@ -75,7 +76,7 @@ pipeline:
       - IMAGE_TYPE=server
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - test "v-$WOODPECKER_VERSION" != "v-" || exit 0
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
@@ -89,7 +90,7 @@ pipeline:
       - IMAGE_TYPE=agent
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - test "v-$WOODPECKER_VERSION" != "v-" || exit 0
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
@@ -103,7 +104,7 @@ pipeline:
       - IMAGE_TYPE=cli
     commands:
       - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-      - test "$WOODPECKER_VERSION" -ne "" || exit 0 # skip if no version is found
+      - test "v-$WOODPECKER_VERSION" != "v-" || exit 0
       - .woodpecker/scripts/build-docker-image.sh
     when:
       event: push
