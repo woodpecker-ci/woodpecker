@@ -1,4 +1,4 @@
-# Writing a plugin
+# Example plugin
 
 This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make an http requests during the build pipeline.
 

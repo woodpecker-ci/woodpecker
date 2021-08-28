@@ -24,7 +24,7 @@ Webhooks are used to trigger pipeline executions. When you push code to your rep
 
 ## Configuration
 
-To configure you pipeline you should place a `.drone.yml` file in the root of your repository. The .drone.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
+To configure you pipeline you should place a `.woodpecker.yml` file in the root of your repository. The .woodpecker.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
 
 Example pipeline configuration:
 

@@ -1,11 +1,11 @@
 
 # Multi-pipeline builds
 
-**NOTE: Feature is only available for Github repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.**
+> NOTE: This Feature is only available for Github & Gitea repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
 
-By default, Woodpecker looks for the pipeline definition in `.drone.yml` in the project root.
+By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
 
-The Multi-Pipeline feature allows the pipeline to be splitted to several files and placed in the `.drone/` folder
+The Multi-Pipeline feature allows the pipeline to be splitted to several files and placed in the `.woodpecker/` folder
 
 ## Rational
 
@@ -16,14 +16,14 @@ The Multi-Pipeline feature allows the pipeline to be splitted to several files a
 ## Example multi-pipeline definition
 
 ```bash
-.drone
+.woodpecker/
 ├── .build.yml
 ├── .deploy.yml
 ├── .lint.yml
 └── .test.yml
 ```
 
-.drone/.build.yml
+.woodpecker/.build.yml
 
 ```yaml
 pipeline:
@@ -34,7 +34,7 @@ pipeline:
       - sleep 5
 ```
 
-.drone/.deploy.yml
+.woodpecker/.deploy.yml
 
 ```yaml
 pipeline:
@@ -49,7 +49,7 @@ depends_on:
   - test
 ```
 
-.drone/.test.yml
+.woodpecker/.test.yml
 
 ```yaml
 pipeline:
@@ -63,7 +63,7 @@ depends_on:
   - build
 ```
 
-.drone/.lint.yml
+.woodpecker/.lint.yml
 
 ```yaml
 pipeline:
@@ -77,7 +77,6 @@ pipeline:
 ## Status lines
 
 Each pipeline has its own status line on Github.
-
 
 ## Flow control
 

@@ -28,4 +28,4 @@ Plugins are executed in Docker containers and are isolated from the other steps 
 
 ## Creating a plugin
 
-See a [detailed plugin example](/usage/bash-plugin).
+See a [detailed plugin example](/docs/usage/plugins/bash-plugin).
