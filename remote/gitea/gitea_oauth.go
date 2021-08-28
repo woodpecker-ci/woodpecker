@@ -29,7 +29,7 @@ import (
 	"code.gitea.io/sdk/gitea"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"golang.org/x/oauth2"
 )
@@ -78,7 +78,6 @@ func NewOauth(opts Opts) (remote.Remote, error) {
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *oauthclient) Login(w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	redirect := httputil.GetURL(req)
 	config := &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -86,7 +85,7 @@ func (c *oauthclient) Login(w http.ResponseWriter, req *http.Request) (*model.Us
 			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
 			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.Host),
 	}
 
 	// get the OAuth errors
