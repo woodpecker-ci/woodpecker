@@ -1,4 +1,6 @@
-#! /busybox/sh
+#! /bin/sh
+
+set -e
 
 REGISTRY="docker.io"
 IMAGE="woodpeckerci/woodpecker-$IMAGE_TYPE"
