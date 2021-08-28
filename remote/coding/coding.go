@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/remote/coding/internal"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -62,8 +62,6 @@ func New(opts Opts) (remote.Remote, error) {
 		remote.URL = strings.TrimSuffix(opts.URL, "/")
 	}
 
-	// Hack to enable oauth2 access in coding's implementation
-	oauth2.RegisterBrokenAuthHeaderProvider(remote.URL)
 	return remote, nil
 }
 
@@ -81,7 +79,7 @@ type Coding struct {
 // Login authenticates the session and returns the
 // remote user details.
 func (c *Coding) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(httputil.GetURL(req))
+	config := c.newConfig(server.Config.Server.Host)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
