@@ -38,25 +38,36 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 			}
 
 			// or a folder
-			dir, direrr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
-
-			if direrr == nil {
-				return dir, nil
-			} else if !cf.repo.Fallback {
-				return nil, direrr
-			}
+			dir, fileerr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+			if fileerr == nil {
+				return filterPipelineFiles(dir), nil
+			} else
 
 			// or fallback
-			file, fileerr = cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
-			if fileerr != nil {
-				return nil, fileerr
+			if cf.repo.Fallback {
+				file, fileerr = cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
+				if fileerr == nil {
+					return []*remote.FileMeta{{
+						Name: cf.repo.Config,
+						Data: file,
+					}}, nil
+				}
 			}
 
-			return []*remote.FileMeta{{
-				Name: cf.repo.Config,
-				Data: file,
-			}}, nil
+			return nil, fileerr
 		}
 	}
 	return []*remote.FileMeta{}, nil
+}
+
+func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
+	var res []*remote.FileMeta
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
+			res = append(res, file)
+		}
+	}
+
+	return res
 }
