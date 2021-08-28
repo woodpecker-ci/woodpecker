@@ -26,12 +26,12 @@ module.exports = {
           position: 'left',
           label: 'Docs',
         },
-        // {
-        //   type: 'doc',
-        //   docId: 'server',
-        //   position: 'left',
-        //   label: 'Docs',
-        // },
+        {
+          type: 'doc',
+          docId: 'faq',
+          position: 'left',
+          label: 'FAQ',
+        },
         // {
         //   type: 'doc',
         //   docId: 'pipeline',
@@ -59,8 +59,16 @@ module.exports = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs',
+              label: 'Usage',
+              to: '/docs/usage/intro',
+            },
+            {
+              label: 'Server setup',
+              to: '/docs/administration/server-setup',
+            },
+            {
+              label: 'FAQ',
+              to: '/docs/faq',
             },
           ],
         },
