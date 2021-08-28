@@ -38,9 +38,9 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 			}
 
 			// or a folder
-			dir, fileerr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+			files, fileerr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
 			if fileerr == nil {
-				return filterPipelineFiles(dir), nil
+				return filterPipelineFiles(files), nil
 			} else
 
 			// or fallback
@@ -57,6 +57,7 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 			return nil, fileerr
 		}
 	}
+
 	return []*remote.FileMeta{}, nil
 }
 
