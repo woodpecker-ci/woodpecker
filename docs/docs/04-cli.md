@@ -1,3 +1,3 @@
-# FAQ
+# CLI
 
 TODO
