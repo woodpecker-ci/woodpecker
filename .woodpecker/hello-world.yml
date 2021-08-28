@@ -1,6 +1,0 @@
-pipeline:
-  build:
-    image: alpine:3.14.1
-    pull: true
-    commands:
-      - echo "HALLO WELT, KANNST DU MICH HOEREN"
