@@ -2,6 +2,8 @@ clone:
   git:
     image: plugins/git:next
 
+branches: master
+
 pipeline:
   fetch:
     image: docker:git
@@ -47,26 +49,6 @@ pipeline:
     when:
       event: push
       branch: master
-
-  # build-packages:
-  #   image: golang:1.16
-  #   commands:
-  #     - export WOODPECKER_VERSION=$(cat ./woodpecker-version)
-  #     - test "version-$WOODPECKER_VERSION" != "version-" || exit 0
-  #     - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-  #     - nfpm package --config ./nfpm.yml --target ./dist
-  #   when:
-  #     event: push
-  #     branch: master
-
-  # build-archives:
-  #   image: alpine:3.14.1
-  #   commands:
-  #     # TODO
-  #     - echo "Do some building ..."
-  #   when:
-  #     event: push
-  #     branch: master
 
   build-docker-server:
     group: build-docker
@@ -124,5 +106,6 @@ pipeline:
       event: push
       branch: master
 
+# TODO
 # depends_on:
 #   - "woodpecker/.test"
