@@ -2,9 +2,9 @@
 
 REGISTRY="docker.io"
 IMAGE="woodpeckerci/woodpecker-$IMAGE_TYPE"
-PATH_BINARY="./dist/cli_linux_amd64/woodpecker-$IMAGE_TYPE"
+PATH_BINARY="./dist/$IMAGE_TYPE_linux_amd64/woodpecker-$IMAGE_TYPE"
 PATH_CONTEXT="./dist/docker-woodpecker-$IMAGE_TYPE"
-PATH_DOCKERFILE="./docker/Dockerfile.cli"
+PATH_DOCKERFILE="./docker/Dockerfile.$IMAGE_TYPE"
 
 mkdir -p /kaniko/.docker
 echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\"}}}" \
