@@ -1,3 +1,5 @@
+# Server Setup
+
 ## Installation
 
 The below [docker-compose](https://docs.docker.com/compose/) configuration can be used to start Woodpecker with a single agent.

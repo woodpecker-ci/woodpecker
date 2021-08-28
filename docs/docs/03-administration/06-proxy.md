@@ -1,3 +1,5 @@
+# Proxy
+
 ## Apache
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 webserver. This is an example configuration:
 
