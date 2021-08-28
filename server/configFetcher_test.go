@@ -1,66 +1,181 @@
 package server_test
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/remote/github"
 	"github.com/woodpecker-ci/woodpecker/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
-func TestFetchGithub(t *testing.T) {
+func TestFetch(t *testing.T) {
 	t.Parallel()
 
-	github, err := github.New(github.Opts{URL: "https://github.com"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	configFetcher := server.NewConfigFetcher(
-		github,
-		&model.User{Token: "xxx"},
-		&model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: ".drone"},
-		&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-	)
-	configFetcher.Fetch()
-}
-
-func TestFilterPipelineFiles(t *testing.T) {
-	t.Parallel()
-
-	user := &model.User{Token: "xxx"}
-	repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: ".woodpecker/"}
-	build := &model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"}
-
-	r := new(mocks.Remote)
-	r.On("File", user, repo, build, ".woodpecker/").Return(nil, nil)
-	r.On("Dir", user, repo, build, ".woodpecker/").Return([]*remote.FileMeta{
+	testTable := []struct {
+		name         string
+		repoConfig   string
+		repoFallback bool
+		fileMocks    []struct {
+			file []byte
+			err  error
+		}
+		dirMock struct {
+			files []*remote.FileMeta
+			err   error
+		}
+		expectedFileNames []string
+	}{
 		{
-			Name: ".woodpecker/test.yml",
-			Data: []byte{},
-		}, {
-			Name: ".woodpecker/text.txt",
-			Data: []byte{},
+			name:         "Single .woodpecker.yml file",
+			repoConfig:   ".woodpecker.yml",
+			repoFallback: false,
+			fileMocks: []struct {
+				file []byte
+				err  error
+			}{
+				{
+					file: []byte{},
+					err:  nil,
+				},
+			},
+			expectedFileNames: []string{
+				".woodpecker.yml",
+			},
 		},
 		{
-			Name: ".woodpecker/image.png",
-			Data: []byte{},
+			name:         "Folder .woodpecker/",
+			repoConfig:   ".woodpecker/",
+			repoFallback: false,
+			dirMock: struct {
+				files []*remote.FileMeta
+				err   error
+			}{
+				files: []*remote.FileMeta{
+					{
+						Name: ".woodpecker/text.txt",
+						Data: []byte{},
+					},
+					{
+						Name: ".woodpecker/release.yml",
+						Data: []byte{},
+					},
+					{
+						Name: ".woodpecker/image.png",
+						Data: []byte{},
+					},
+				},
+				err: nil,
+			},
+			expectedFileNames: []string{
+				".woodpecker/release.yml",
+			},
 		},
-	}, nil)
-
-	configFetcher := server.NewConfigFetcher(
-		r,
-		user,
-		repo,
-		build,
-	)
-	files, err := configFetcher.Fetch()
-	if err != nil {
-		t.Fatal("uff", err)
+		{
+			name:         "Requesting woodpecker-file but using fallback",
+			repoConfig:   ".woodpecker.yml",
+			repoFallback: true,
+			fileMocks: []struct {
+				file []byte
+				err  error
+			}{
+				// first call requesting regular woodpecker.yml
+				{
+					file: nil,
+					err:  errors.New("File not found"),
+				},
+				// fallback file call
+				{
+					file: []byte{},
+					err:  nil,
+				},
+			},
+			expectedFileNames: []string{
+				".drone.yml",
+			},
+		},
+		{
+			name:         "Requesting folder but using fallback",
+			repoConfig:   ".woodpecker/",
+			repoFallback: true,
+			fileMocks: []struct {
+				file []byte
+				err  error
+			}{
+				{
+					file: []byte{},
+					err:  nil,
+				},
+			},
+			dirMock: struct {
+				files []*remote.FileMeta
+				err   error
+			}{
+				files: []*remote.FileMeta{},
+				err:   errors.New("Dir not found"),
+			},
+			expectedFileNames: []string{
+				".drone.yml",
+			},
+		},
+		{
+			name:         "Not found and disabled fallback",
+			repoConfig:   ".woodpecker.yml",
+			repoFallback: false,
+			fileMocks: []struct {
+				file []byte
+				err  error
+			}{
+				// first call requesting regular woodpecker.yml
+				{
+					file: nil,
+					err:  errors.New("File not found"),
+				},
+				// fallback file call
+				{
+					file: []byte{},
+					err:  errors.New("File not found"),
+				},
+			},
+			expectedFileNames: []string{},
+		},
 	}
 
-	if len(files) != 1 {
-		t.Fatal()
+	for _, tt := range testTable {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig, Fallback: tt.repoFallback}
+
+			r := new(mocks.Remote)
+			for _, fileMock := range tt.fileMocks {
+				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fileMock.file, fileMock.err).Once()
+			}
+			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tt.dirMock.files, tt.dirMock.err)
+
+			configFetcher := server.NewConfigFetcher(
+				r,
+				&model.User{Token: "xxx"},
+				repo,
+				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+			)
+			files, err := configFetcher.Fetch()
+			if err != nil {
+				t.Fatal("error fetching config", err)
+			}
+
+			matchingFiles := 0
+			for _, expectedFileName := range tt.expectedFileNames {
+				for _, file := range files {
+					if file.Name == expectedFileName {
+						matchingFiles += 1
+					}
+				}
+			}
+
+			if matchingFiles != len(tt.expectedFileNames) {
+				t.Fatal("expected some other pipeline files", tt.expectedFileNames, files)
+			}
+		})
 	}
 }
