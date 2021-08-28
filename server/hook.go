@@ -134,19 +134,6 @@ func PostHook(c *gin.Context) {
 		c.Writer.WriteHeader(204)
 		return
 	}
-	var skipped = true
-	if (build.Event == model.EventPush && repo.AllowPush) ||
-		(build.Event == model.EventPull && repo.AllowPull) ||
-		(build.Event == model.EventDeploy && repo.AllowDeploy) ||
-		(build.Event == model.EventTag && repo.AllowTag) {
-		skipped = false
-	}
-
-	if skipped {
-		logrus.Infof("ignoring hook. repo %s is disabled for %s events.", repo.FullName, build.Event)
-		c.Writer.WriteHeader(204)
-		return
-	}
 
 	user, err := store.GetUser(c, repo.UserID)
 	if err != nil {
