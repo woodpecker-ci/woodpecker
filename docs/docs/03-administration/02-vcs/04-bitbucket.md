@@ -15,12 +15,12 @@ services:
       - /var/lib/drone:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-+     - DRONE_BITBUCKET=true
-+     - DRONE_BITBUCKET_CLIENT=95c0282573633eb25e82
-+     - DRONE_BITBUCKET_SECRET=30f5064039e6b359e075
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
++     - WOODPECKER_BITBUCKET=true
++     - WOODPECKER_BITBUCKET_CLIENT=95c0282573633eb25e82
++     - WOODPECKER_BITBUCKET_SECRET=30f5064039e6b359e075
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
@@ -30,21 +30,21 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 ## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-DRONE_BITBUCKET=true
+WOODPECKER_BITBUCKET=true
 : Set to true to enable the Bitbucket driver.
 
-DRONE_BITBUCKET_CLIENT
+WOODPECKER_BITBUCKET_CLIENT
 : Bitbucket oauth2 client id
 
-DRONE_BITBUCKET_SECRET
+WOODPECKER_BITBUCKET_SECRET
 : Bitbucket oauth2 client secret
 
 ## Registration

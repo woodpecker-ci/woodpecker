@@ -16,16 +16,16 @@ services:
       - /var/lib/drone:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-      - DRONE_GITHUB=true
-      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
-+     - DRONE_LETS_ENCRYPT=true
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_LETS_ENCRYPT=true
 ```
 
-Note that Woodpecker uses the hostname from the `DRONE_HOST` environment variable when requesting certificates. For example, if `DRONE_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
 
 >Once enabled you can visit your website at both the http and the https address
 

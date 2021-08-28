@@ -15,12 +15,12 @@ services:
       - /var/lib/drone:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-+     - DRONE_GITHUB=true
-+     - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
-+     - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
++     - WOODPECKER_GITHUB=true
++     - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
++     - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
@@ -30,8 +30,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 ## Registration
@@ -46,35 +46,35 @@ Please use this screenshot for reference:
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-DRONE_GITHUB=true
+WOODPECKER_GITHUB=true
 : Set to true to enable the GitHub driver.
 
-DRONE_GITHUB_URL=`https://github.com`
+WOODPECKER_GITHUB_URL=`https://github.com`
 : GitHub server address.
 
-DRONE_GITHUB_CLIENT
+WOODPECKER_GITHUB_CLIENT
 : Github oauth2 client id.
 
-DRONE_GITHUB_SECRET
+WOODPECKER_GITHUB_SECRET
 : Github oauth2 client secret.
 
-DRONE_GITHUB_SCOPE=repo,repo:status,user:email,read:org
+WOODPECKER_GITHUB_SCOPE=repo,repo:status,user:email,read:org
 : Comma-separated Github oauth scope.
 
-DRONE_GITHUB_GIT_USERNAME
+WOODPECKER_GITHUB_GIT_USERNAME
 : Optional. Use a single machine account username to clone all repositories.
 
-DRONE_GITHUB_GIT_PASSWORD
+WOODPECKER_GITHUB_GIT_PASSWORD
 : Optional. Use a single machine account password to clone all repositories.
 
-DRONE_GITHUB_PRIVATE_MODE=false
+WOODPECKER_GITHUB_PRIVATE_MODE=false
 : Set to true if Github is running in private mode.
 
-DRONE_GITHUB_MERGE_REF=true
+WOODPECKER_GITHUB_MERGE_REF=true
 : Set to true to use the `refs/pulls/%d/merge` vs `refs/pulls/%d/head`
 
-DRONE_GITHUB_CONTEXT=continuous-integration/drone
+WOODPECKER_GITHUB_CONTEXT=continuous-integration/drone
 : Customize the GitHub status message context
 
-DRONE_GITHUB_SKIP_VERIFY=false
+WOODPECKER_GITHUB_SKIP_VERIFY=false
 : Set to true to disable SSL verification.

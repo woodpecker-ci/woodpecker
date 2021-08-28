@@ -13,8 +13,8 @@ services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:latest
     environment:
-+     DRONE_DATABASE_DRIVER: mysql
-+     DRONE_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/drone?parseTime=true
++     WOODPECKER_DATABASE_DRIVER: mysql
++     WOODPECKER_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/drone?parseTime=true
 ```
 
 ## Configure Postgres
@@ -28,8 +28,8 @@ services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:latest
     environment:
-+     DRONE_DATABASE_DRIVER: postgres
-+     DRONE_DATABASE_DATASOURCE: postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
++     WOODPECKER_DATABASE_DRIVER: postgres
++     WOODPECKER_DATABASE_DATASOURCE: postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
 ```
 
 ## Database Creation

@@ -15,15 +15,15 @@ services:
       - /var/lib/drone:/var/lib/drone/
     restart: always
     environment:
-      - DRONE_OPEN=true
-      - DRONE_HOST=${DRONE_HOST}
-+     - DRONE_STASH=true
-+     - DRONE_STASH_GIT_USERNAME=foo
-+     - DRONE_STASH_GIT_PASSWORD=bar
-+     - DRONE_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - DRONE_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
-+     - DRONE_STASH_URL=http://stash.mycompany.com
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
++     - WOODPECKER_STASH=true
++     - WOODPECKER_STASH_GIT_USERNAME=foo
++     - WOODPECKER_STASH_GIT_PASSWORD=bar
++     - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
++     - WOODPECKER_STASH_URL=http://stash.mycompany.com
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
     volumes:
 +     - /path/to/key.pem:/path/to/key.pem
 
@@ -35,8 +35,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DRONE_SERVER=woodpecker-server:9000
-      - DRONE_SECRET=${DRONE_SECRET}
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 ## Private Key File
@@ -64,15 +64,15 @@ services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:latest
     environment:
-    - DRONE_OPEN=true
-    - DRONE_HOST=${DRONE_HOST}
-      - DRONE_STASH=true
-      - DRONE_STASH_GIT_USERNAME=foo
-      - DRONE_STASH_GIT_PASSWORD=bar
-      - DRONE_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - DRONE_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
-      - DRONE_STASH_URL=http://stash.mycompany.com
-      - DRONE_SECRET=${DRONE_SECRET}
+    - WOODPECKER_OPEN=true
+    - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_STASH=true
+      - WOODPECKER_STASH_GIT_USERNAME=foo
+      - WOODPECKER_STASH_GIT_PASSWORD=bar
+      - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
+      - WOODPECKER_STASH_URL=http://stash.mycompany.com
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 +  volumes:
 +     - /etc/bitbucket/key.pem:/etc/bitbucket/key.pem
 ```
@@ -86,15 +86,15 @@ services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:latest
     environment:
-    - DRONE_OPEN=true
-    - DRONE_HOST=${DRONE_HOST}
-      - DRONE_STASH=true
-      - DRONE_STASH_GIT_USERNAME=foo
-      - DRONE_STASH_GIT_PASSWORD=bar
-      - DRONE_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - DRONE_STASH_CONSUMER_RSA_STRING=contentOfPemKeyAsString
-      - DRONE_STASH_URL=http://stash.mycompany.com
-      - DRONE_SECRET=${DRONE_SECRET}
+    - WOODPECKER_OPEN=true
+    - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_STASH=true
+      - WOODPECKER_STASH_GIT_USERNAME=foo
+      - WOODPECKER_STASH_GIT_PASSWORD=bar
+      - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_STASH_CONSUMER_RSA_STRING=contentOfPemKeyAsString
+      - WOODPECKER_STASH_URL=http://stash.mycompany.com
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 ## Service Account
@@ -113,23 +113,23 @@ Please use http://drone.mycompany.com/authorize as the Authorization callback UR
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 
-DRONE_STASH=true
+WOODPECKER_STASH=true
 : Set to true to enable the Bitbucket Server (Stash) driver.
 
-DRONE_STASH_URL
+WOODPECKER_STASH_URL
 : Bitbucket Server address.
 
-DRONE_STASH_CONSUMER_KEY
+WOODPECKER_STASH_CONSUMER_KEY
 : Bitbucket Server oauth1 consumer key
 
-DRONE_STASH_CONSUMER_RSA
+WOODPECKER_STASH_CONSUMER_RSA
 : Bitbucket Server oauth1 private key file
 
-DRONE_STASH_CONSUMER_RSA_STRING
+WOODPECKER_STASH_CONSUMER_RSA_STRING
 : Bibucket Server oauth1 private key as a string
 
-DRONE_STASH_GIT_USERNAME
+WOODPECKER_STASH_GIT_USERNAME
 : Machine account username used to clone repositories.
 
-DRONE_STASH_GIT_PASSWORD
+WOODPECKER_STASH_GIT_PASSWORD
 : Machine account password used to clone repositories.

@@ -1,5 +1,4 @@
-
-# Multi-pipeline builds
+# Multi pipelines
 
 > NOTE: This Feature is only available for Github & Gitea repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
 

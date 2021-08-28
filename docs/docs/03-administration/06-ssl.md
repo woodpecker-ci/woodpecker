@@ -16,8 +16,8 @@ services:
 +     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
     restart: always
     environment:
-+     - DRONE_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - DRONE_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
 ```
 
 Update your configuration to expose the following ports:
@@ -64,8 +64,8 @@ services:
       - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
     restart: always
     environment:
-+     - DRONE_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - DRONE_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
 ```
 
 ## Certificate Chain
