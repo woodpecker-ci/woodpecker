@@ -2,8 +2,7 @@
 
 ## Executables
 
-TODO: add links to latest github releases
-
+[Latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
 ## Docker images
 
 ``` bash

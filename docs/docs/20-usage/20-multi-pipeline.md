@@ -4,7 +4,7 @@
 
 By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
 
-The Multi-Pipeline feature allows the pipeline to be splitted to several files and placed in the `.woodpecker/` folder
+The Multi-Pipeline feature allows the pipeline to be split to several files and placed in the `.woodpecker/` folder. Only `.yml` will we used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored.
 
 ## Rational
 
@@ -79,9 +79,11 @@ Each pipeline has its own status line on Github.
 
 ## Flow control
 
-The pipelines run in parallel on a separate agents and share nothing.
+The pipelines run in parallel on separate agents and share nothing.
 
-Dependencies between pipelines can be set with the `depends_on` element. A pipeline doesn't execute until its dependencies did not complete succesfully.
+Dependencies between pipelines can be set with the `depends_on` element. A pipeline doesn't execute until its dependencies did not complete successfully.
+
+The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml`. If the project config for example uses `.woodpecker/` as path for ci files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
 pipeline:

@@ -60,3 +60,31 @@ services:
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
       - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
+
+## Global registry setting
+
+If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
+Point it to your server's docker config.
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:latest
+    ports:
+      - 80:8000
+      - 9000
+    volumes:
+      - woodpecker-server-data:/var/lib/drone/
+    restart: always
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json
+```
