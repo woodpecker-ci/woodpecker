@@ -54,7 +54,7 @@ You must register your application with Bitbucket in order to generate a client 
 Please use the Authorization callback URL:
 
 ```nohighlight
-http://drone.mycompany.com/authorize
+http://woodpecker.mycompany.com/authorize
 ```
 
 Please also be sure to check the following permissions:
@@ -69,4 +69,4 @@ Webhooks:Read and Write
 
 ## Missing Features
 
-Merge requests are not currently supported. We are interested in patches to include this functionality. If you are interested in contributing to Woodpecker and submitting a patch please [contact us](https://discourse.drone.io).
+Merge requests are not currently supported. We are interested in patches to include this functionality. If you are interested in contributing to Woodpecker and submitting a patch please [contact us](https://discord.gg/fcMQqSMXJy).

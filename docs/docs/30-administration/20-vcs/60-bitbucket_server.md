@@ -105,7 +105,7 @@ Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server doe
 
 You must register your application with Bitbucket Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
 
-Please use http://drone.mycompany.com/authorize as the Authorization callback URL.
+Please use http://woodpecker.mycompany.com/authorize as the Authorization callback URL.
 
 
 ## Configuration

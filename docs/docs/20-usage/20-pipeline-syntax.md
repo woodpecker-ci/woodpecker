@@ -304,11 +304,11 @@ when:
 
 ### `instance`
 
-Execute a step only on a certain Woodpecker instance:
+Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
 ```diff
 when:
-  instance: stage.drone.company.com
+  instance: stage.woodpecker.company.com
 ```
 
 ### `path`
@@ -565,7 +565,7 @@ To use the credentials that cloned the repository to clone it's submodules, upda
 +	url = https://github.com/octocat/my-module.git
 ```
 
-To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use the https url in drone, add `submodule_override`:
+To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use the https url in Woodpecker, add `submodule_override`:
 
 ```diff
 clone:

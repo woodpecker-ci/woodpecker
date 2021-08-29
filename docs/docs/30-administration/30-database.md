@@ -14,7 +14,7 @@ services:
     image: woodpeckerci/woodpecker-server:latest
     environment:
 +     WOODPECKER_DATABASE_DRIVER: mysql
-+     WOODPECKER_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/drone?parseTime=true
++     WOODPECKER_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
 ```
 
 ## Configure Postgres

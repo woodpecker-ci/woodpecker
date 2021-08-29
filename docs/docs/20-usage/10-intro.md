@@ -64,7 +64,7 @@ pipeline:
   notify:
     image: plugins/slack
     channel: developers
-    username: drone
+    username: woodpecker
 ```
 
 ## Execution
