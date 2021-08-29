@@ -207,7 +207,7 @@ func PostHook(c *gin.Context) {
 
 	// persist the build config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(build, remoteYamlConfig)
+		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
 			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
 			c.AbortWithError(500, err)
@@ -329,7 +329,7 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	return false
 }
 
-func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
 	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
@@ -337,7 +337,7 @@ func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.Fi
 			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
-			Name:   sanitizePath(remoteYamlConfig.Name),
+			Name:   sanitizePath(remoteYamlConfig.Name, repo.Config),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
