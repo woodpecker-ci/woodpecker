@@ -23,7 +23,8 @@ In the above example we define two pipeline steps, `frontend` and `backend`. The
 
 ## Steps
 
-Every step of your pipeline executes arbitrary commands inside the specified docker container. The commands are executed using the workspace as the working directory.
+Every step of your pipeline executes arbitrary commands inside a specified docker container. The defined commands are executed serially.
+The associated commit of a current pipeline run is checked out with git to a workspace which is mounted to every step of the pipeline as the working directory.
 
 ```diff
 pipeline:
@@ -33,24 +34,6 @@ pipeline:
 +     - go build
 +     - go test
 ```
-
-There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
-
-```diff
-#!/bin/sh
-set -e
-
-go build
-go test
-```
-
-The above shell script is then executed as the docker entrypoint. The below docker command is an (incomplete) example of how the script is executed:
-
-```
-docker run --entrypoint=build.sh golang
-```
-
-> Please note that only build steps can define commands. You cannot use commands with plugins or services.
 
 ## Step `image`
 
