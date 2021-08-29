@@ -4,32 +4,32 @@ import styles from './HomepageFeatures.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'OpenSource and free',
     Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Woodpecker is and will be totally free for ever. As Woodpeckers <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">source code</a> is
+        OpenSource you can contribute to help evolving the project.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Based on docker containers',
     Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Woodpecker uses docker containers to execute pipeline steps. If you need more than a normal docker image, you
+        can create plugins to extend the pipeline features. <a href="/docs/usage/plugins/plugins">How do plugins work?</a>
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Multi pipeline',
     Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Woodpecker allows you to easily create multiple pipelines for your project. They can even depend on each other.
+        Check out the <a href="/docs/usage/multi-pipeline">docs</a>
       </>
     ),
   },
