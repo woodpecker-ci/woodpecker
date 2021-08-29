@@ -53,10 +53,6 @@ test-frontend:
 		(cd web/; yarn run test)
 
 test-lib:
-	go get github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipec
-	go get github.com/woodpecker-ci/woodpecker/remote/mock
-	go get github.com/woodpecker-ci/woodpecker/cli/drone/internal
-	go get -t github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
 test: test-lib test-agent test-server
