@@ -1,4 +1,3 @@
-
 # Services
 
 Woodpecker provides a services section in the Yaml file used for defining service containers. The below configuration composes database and cache containers.

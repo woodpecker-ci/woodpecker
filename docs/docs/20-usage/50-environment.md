@@ -1,4 +1,3 @@
-
 # Environment variables
 
 Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:

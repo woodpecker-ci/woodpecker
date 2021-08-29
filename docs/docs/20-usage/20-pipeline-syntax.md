@@ -597,7 +597,7 @@ git commit -m "updated README [CI SKIP]"
 
 Woodpecker gives the ability to configure privileged mode in the Yaml. You can use this parameter to launch containers with escalated capabilities.
 
-> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments.
+> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
 
 ```diff
 pipeline:

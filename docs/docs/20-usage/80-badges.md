@@ -1,4 +1,4 @@
-# Badges
+# Status Badges
 
 Woodpecker has integrated support for repository status badges. These badges can be added to your website or project readme file to display the status of your code.
 
