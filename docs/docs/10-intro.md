@@ -31,7 +31,7 @@ pipeline:
 ```diff
 pipeline:
   build:
--    image: debian
+-   image: debian
 +   image: mycompany/image-with-awscli
     commands:
       - aws help
