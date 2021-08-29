@@ -1,7 +1,6 @@
-
 # Secrets
 
-Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. Individual steps in the yaml can request access to these named parameters at runtime.
+Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
@@ -12,7 +11,7 @@ pipeline:
     commands:
 +     - echo $DOCKER_USERNAME
 +     - echo $DOCKER_PASSWORD
-    secrets: [ docker_username, docker_password ]
++   secrets: [ docker_username, docker_password ]
 ```
 
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.

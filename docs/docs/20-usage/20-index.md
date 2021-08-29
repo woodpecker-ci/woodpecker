@@ -133,6 +133,49 @@ To make a private registry globally available check the [server configuration do
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
 
+## Step `commands`
+
+Commands of every pipeline step are executed serially as if you would enter them into your local shell.
+
+```diff
+pipeline:
+  backend:
+    image: golang
+    commands:
++     - go build
++     - go test
+```
+
+There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
+
+```diff
+#!/bin/sh
+set -e
+
+go build
+go test
+```
+
+The above shell script is then executed as the docker entrypoint. The below docker command is an (incomplete) example of how the script is executed:
+
+```
+docker run --entrypoint=build.sh golang
+```
+
+> Please note that only build steps can define commands. You cannot use commands with plugins or services.
+
+## Step `environment`
+
+Woodpecker provides the ability to pass environment variables to individual pipeline steps.
+
+For more details check the [environment docs](/docs/usage/environment/).
+
+## Step `secrets`
+
+Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+
+For more details check the [secrets docs](/docs/usage/secrets/).
+
 ## Step `when` - Conditional Execution
 
 Woodpecker supports defining conditional pipeline steps in the `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
@@ -338,6 +381,12 @@ pipeline:
 
 In the above example, the `frontend` and `backend` steps are executed in parallel. The pipeline runner will not execute the `publish` step until the group completes.
 
+## Step `volumes`
+
+Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
+
+For more details check the [volumes docs](/docs/usage/volumes/).
+
 ## `branches`
 
 Woodpecker gives the ability to skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
@@ -473,6 +522,12 @@ git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
 
+## `matrix`
+
+Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
+
+For more details check the [matrix build docs](/docs/usage/matrix-builds/).
+
 ## `clone`
 
 Woodpecker automatically configures a default clone step if not explicitly defined. You can manually configure the clone step in your pipeline for customization:
@@ -540,6 +595,12 @@ clone:
 pipeline:
   ...
 ```
+
+## `services`
+
+Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
+
+For more details check the [services docs](/docs/usage/services/).
 
 ## Skip Commits
 

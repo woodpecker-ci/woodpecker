@@ -1,7 +1,7 @@
 
 # Environment variables
 
-Woodpecker provides the ability to define environment variables scoped to individual build steps. Example pipeline step with custom environment variables:
+Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:
 
 ```diff
 pipeline:
@@ -30,7 +30,7 @@ pipeline:
       - go test
 ```
 
-Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
+> Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 
 ```diff
 pipeline:
