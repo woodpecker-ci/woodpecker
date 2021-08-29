@@ -1,8 +1,8 @@
 # FAQ
 
-## What's different to Drone?
+## What are the differences to Drone?
 
 TODO
-## Why fork of Drone version 0.8?
+## Why is Woodpecker a fork of Drone version 0.8?
 
 TODO
