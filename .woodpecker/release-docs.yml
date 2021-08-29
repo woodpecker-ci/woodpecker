@@ -5,16 +5,7 @@ clone:
 branches: master
 
 pipeline:
-  fetch:
-    image: docker:git
-    commands:
-      - git fetch --tags
-      - git status
-    when:
-      event: push
-      branch: master
-
-  build:
+  deploy-docs:
     image: node:14-alpine
     secrets:
       - GITHUB_PRIVATE_KEY
@@ -33,3 +24,16 @@ pipeline:
     when:
       event: push
       branch: master
+      path: "docs/*"
+
+  deploy-docs-review:
+    image: node:14-alpine
+    commands:
+      - cd docs/
+      - yarn install --frozen-lockfile
+      - yarn global add surge
+      - yarn build
+      - surge build/
+    when:
+      event: [pull_request]
+      path: "docs/*"
