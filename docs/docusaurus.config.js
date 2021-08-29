@@ -10,8 +10,9 @@ module.exports = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-  organizationName: 'woodpecker-ci', // Usually your GitHub org/user name.
-  projectName: 'woodpecker', // Usually your repo name.
+  organizationName: 'woodpecker-ci',
+  projectName: 'woodpecker-ci.github.io',
+  trailingSlash: false,
   themeConfig: {
     navbar: {
       title: 'Woodpecker',
@@ -32,18 +33,6 @@ module.exports = {
           position: 'left',
           label: 'FAQ',
         },
-        // {
-        //   type: 'doc',
-        //   docId: 'pipeline',
-        //   position: 'left',
-        //   label: 'Tutorial',
-        // },
-        // {
-        //   type: 'doc',
-        //   docId: 'faq',
-        //   position: 'left',
-        //   label: 'FAQ',
-        // },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',

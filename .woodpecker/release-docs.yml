@@ -1,0 +1,35 @@
+clone:
+  git:
+    image: plugins/git:next
+
+branches: master
+
+pipeline:
+  fetch:
+    image: docker:git
+    commands:
+      - git fetch --tags
+      - git status
+    when:
+      event: push
+      branch: master
+
+  build:
+    image: node:14-alpine
+    secrets:
+      - GITHUB_PRIVATE_KEY
+    environment:
+      - USE_SSH=true
+      - GIT_USER=woodpecker-bot
+      - DEPLOYMENT_BRANCH=master
+    commands:
+      - mkdir -p $HOME/.ssh
+      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+      - echo "$GITHUB_PRIVATE_KEY > $HOME/.ssh/id_rsa"
+      - chmod 0600 $HOME/.ssh/id_rsa
+      - cd docs/
+      - yarn install --frozen-lockfile
+      - yarn deploy
+    when:
+      event: push
+      branch: master
