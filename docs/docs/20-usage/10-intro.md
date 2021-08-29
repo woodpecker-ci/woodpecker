@@ -6,7 +6,7 @@ To activate your project navigate to your account settings. You will see a list 
 
 Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
 
-![repository list](/img/repo_list.png)
+![repository list](repo-list.png)
 
 > Required Permissions
 >

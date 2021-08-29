@@ -10,4 +10,4 @@
 | Event: Deploy | :white_check_mark: | :white_check_mark: |
 | OAuth | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | [Multi pipeline](/docs/usage/multi-pipeline) | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
-| [when-path filter](docs/usage/pipeline-syntax#path) | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
+| [when-path filter](/docs/usage/pipeline-syntax#path) | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |

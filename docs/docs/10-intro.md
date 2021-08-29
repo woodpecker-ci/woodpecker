@@ -2,7 +2,7 @@
 
 Woodpecker is a simple CI engine with great extensibility.
 
-![woodpecker](/img/woodpecker.png)
+![woodpecker](woodpecker.png)
 
 ## .woodpecker.yml
 
@@ -82,4 +82,4 @@ pipeline:
     template: config/k8s/service.yml
 ```
 
-See a [plugin docs](/docs/usage/plugins/plugins).
+See [plugin docs](/docs/usage/plugins/plugins).
