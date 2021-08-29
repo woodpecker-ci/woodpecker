@@ -18,6 +18,8 @@ Your Version-Control-System will notify Woodpecker about some events via webhook
 
 ### Protected
 
+Every build initiated by a user (not including the project owner) needs to be approved by the owner before being executed. This can be used if your repository is public to protect the pipeline configuration from running unauthorized changes on third-party pull requests.
+
 ### Trusted
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.

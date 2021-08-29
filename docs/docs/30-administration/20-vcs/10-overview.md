@@ -6,7 +6,7 @@
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | Event: Push | :white_check_mark: | :white_check_mark: |
 | Event: Tag | :white_check_mark: | :white_check_mark: |
-| Event: Merge-Request | :white_check_mark: | :white_check_mark: |
+| Event: Pull-Request | :white_check_mark: | :white_check_mark: |
 | Event: Deploy | :white_check_mark: | :white_check_mark: |
 | OAuth | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | [Multi pipeline](/docs/usage/multi-pipeline) | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
