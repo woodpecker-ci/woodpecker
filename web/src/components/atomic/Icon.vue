@@ -23,25 +23,25 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import IconDuration from 'virtual:vite-icons/ic/sharp-timelapse';
-import IconSince from 'virtual:vite-icons/mdi/clock-time-eight-outline';
-import IconBranch from 'virtual:vite-icons/mdi/source-branch';
-import IconCommit from 'virtual:vite-icons/mdi/source-commit';
-import IconBack from 'virtual:vite-icons/iconoir/arrow-left';
-import IconGithub from 'virtual:vite-icons/mdi/github';
-import IconRepo from 'virtual:vite-icons/teenyicons/git-solid';
-import IconSettings from 'virtual:vite-icons/clarity/settings-solid';
-import IconStatusBlocked from 'virtual:vite-icons/ph/hand';
-import IconStatusDeclined from 'virtual:vite-icons/ph/hand';
-import IconStatusError from 'virtual:vite-icons/ph/warning';
-import IconStatusFailure from 'virtual:vite-icons/ph/x-circle';
-import IconStatusKilled from 'virtual:vite-icons/octicon/skip-24';
-import IconStatusPending from 'virtual:vite-icons/ph/hourglass';
-import IconStatusRunning from 'virtual:vite-icons/entypo/dots-two-vertical';
-import IconStatusSkipped from 'virtual:vite-icons/ph/prohibit';
-import IconStatusStarted from 'virtual:vite-icons/entypo/dots-two-vertical';
-import IconStatusSuccess from 'virtual:vite-icons/ph/check-circle';
-import IconTrash from 'virtual:vite-icons/gg/trash';
+import IconDuration from '~icons/ic/sharp-timelapse';
+import IconSince from '~icons/mdi/clock-time-eight-outline';
+import IconBranch from '~icons/mdi/source-branch';
+import IconCommit from '~icons/mdi/source-commit';
+import IconBack from '~icons/iconoir/arrow-left';
+import IconGithub from '~icons/mdi/github';
+import IconRepo from '~icons/teenyicons/git-solid';
+import IconSettings from '~icons/clarity/settings-solid';
+import IconStatusBlocked from '~icons/ph/hand';
+import IconStatusDeclined from '~icons/ph/hand';
+import IconStatusError from '~icons/ph/warning';
+import IconStatusFailure from '~icons/ph/x-circle';
+import IconStatusKilled from '~icons/octicon/skip-24';
+import IconStatusPending from '~icons/ph/hourglass';
+import IconStatusRunning from '~icons/entypo/dots-two-vertical';
+import IconStatusSkipped from '~icons/ph/prohibit';
+import IconStatusStarted from '~icons/entypo/dots-two-vertical';
+import IconStatusSuccess from '~icons/ph/check-circle';
+import IconTrash from '~icons/gg/trash';
 
 type IconNames =
   | 'duration'
