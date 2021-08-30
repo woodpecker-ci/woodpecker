@@ -7,9 +7,7 @@ pipeline:
     image: node:14-alpine
     commands:
       - cd web/
-      - curl -f https://get.pnpm.io/v6.js | node - add --global pnpm@6
-      - pnpm config set store-dir .pnpm-store
-      - pnpm install
+      - yarn install --frozen-lockfile
     when:
       path: "web/*"
 
@@ -18,7 +16,7 @@ pipeline:
     image: node:14-alpine
     commands:
       - cd web/
-      - pnpm lint
+      - yarn lint
     when:
       path: "web/*"
 
@@ -27,7 +25,7 @@ pipeline:
     image: node:14-alpine
     commands:
       - cd web/
-      - pnpm formatcheck
+      - yarn formatcheck
     when:
       path: "web/*"
 
@@ -36,13 +34,13 @@ pipeline:
     image: node:14-alpine
     commands:
       - cd web/
-      - pnpm typecheck
+      - yarn typecheck
     when:
       path: "web/*"
 
   build:
     image: node:14-alpine
     commands:
-      - pnpm build
+      - yarn build
     when:
       path: "web/*"
