@@ -4,7 +4,7 @@
 
 By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
 
-The Multi-Pipeline feature allows the pipeline to be split to several files and placed in the `.woodpecker/` folder. Only `.yml` will we used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored.
+The Multi-Pipeline feature allows the pipeline to be split into several files and placed in the `.woodpecker/` folder. Only `.yml` files will we used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](/docs/usage/project-settings). 
 
 ## Rational
 
