@@ -8,7 +8,7 @@ pipeline:
   deploy-docs:
     image: node:14-alpine
     secrets:
-      - GITHUB_PRIVATE_KEY
+      - BOT_PRIVATE_KEY
     environment:
       - USE_SSH=true
       - GIT_USER=woodpecker-bot
@@ -16,7 +16,7 @@ pipeline:
     commands:
       - mkdir -p $HOME/.ssh
       - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
-      - echo "$GITHUB_PRIVATE_KEY > $HOME/.ssh/id_rsa"
+      - echo "$BOT_PRIVATE_KEY > $HOME/.ssh/id_rsa"
       - chmod 0600 $HOME/.ssh/id_rsa
       - cd docs/
       - yarn install --frozen-lockfile
@@ -26,14 +26,12 @@ pipeline:
       branch: master
       path: "docs/*"
 
-  deploy-docs-review:
+  build-docs-pr:
     image: node:14-alpine
     commands:
       - cd docs/
       - yarn install --frozen-lockfile
-      - yarn global add surge
       - yarn build
-      - surge build/
     when:
       event: [pull_request]
       path: "docs/*"
