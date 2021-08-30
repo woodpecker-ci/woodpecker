@@ -11,15 +11,6 @@ pipeline:
       - make vet
       - make formatcheck
 
-  test-frontend:
-    image: node:10.17.0-stretch
-    group: test
-    commands:
-      - (cd web/; yarn install)
-      - (cd web/; yarn run lesshint)
-      - (cd web/; yarn run lint --quiet)
-      - make test-frontend
-
   test-postgres:
     image: golang:1.16
     group: db-test
@@ -39,9 +30,13 @@ pipeline:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/store/datastore
 
   build-frontend:
-    image: node:10.17.0-stretch
+    image: node:14-alpine
     commands:
-      - make build-frontend
+      - cd web/
+      - curl -f https://get.pnpm.io/v6.js | node - add --global pnpm@6
+      - pnpm config set store-dir .pnpm-store
+      - pnpm install
+      - pnpm build
 
   build:
     image: golang:1.16
@@ -154,3 +149,6 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+
+depends_on:
+  - web

@@ -1,11 +1,18 @@
 {
+  "name": "woodpecker-ci",
+  "author": "Woodpecker CI",
   "version": "0.0.0",
+  "engines": {
+    "node": "14",
+    "pnpm": "6"
+  },
   "scripts": {
     "start": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",
-    "lint": "eslint src/",
-    "format": "prettier --write src/**/*.js"
+    "lint": "eslint --max-warnings 0 --ext .js,.ts,.vue,.json .",
+    "formatcheck": "prettier -c .",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@kyvg/vue3-notification": "^2.3.3",
@@ -27,11 +34,12 @@
     "@vitejs/plugin-vue": "^1.3.0",
     "@vue/compiler-sfc": "^3.1.5",
     "ansi-to-html": "^0.7.1",
+    "prettier": "^2.3.2",
     "typescript": "^4.3.5",
-    "vite": "^2.4.2",
     "unplugin-icons": "^0.7.0",
+    "vite": "^2.4.2",
     "vite-plugin-windicss": "^1.2.7",
-    "vue-tsc": "^0.2.2",
+    "vue-tsc": "^0.2.3",
     "windicss": "3.1.6"
   }
 }

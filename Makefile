@@ -45,9 +45,6 @@ test-agent:
 test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
-test-frontend:
-	(cd web/; yarn run test)
-
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
@@ -58,9 +55,6 @@ build-agent:
 
 build-server:
 	$(DOCKER_RUN) go build -o build/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
-
-build-frontend:
-	(cd web/; yarn run build)
 
 build: build-agent build-server
 
