@@ -19,13 +19,7 @@ _with-docker:
 
 all: deps build
 
-deps:
-	go get -u golang.org/x/net/context
-	go get -u golang.org/x/net/context/ctxhttp
-	go get -u github.com/golang/protobuf/proto
-	go get -d github.com/golang/protobuf/protoc-gen-go
-	go get -d docker.io/go-docker
-	go get -d github.com/jackspirou/syscerts
+vendor:
 	go mod tidy
 	go mod vendor
 
