@@ -30,6 +30,13 @@ github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
+# github.com/bmatcuk/doublestar v1.3.4
+## explicit
+github.com/bmatcuk/doublestar
+# github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74
+## explicit
+github.com/bradrydzewski/togo/parser
+github.com/bradrydzewski/togo/template
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
 # github.com/cpuguy83/go-md2man/v2 v2.0.0
@@ -249,6 +256,9 @@ github.com/urfave/cli
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
+# github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+## explicit
+github.com/woodpecker-ci/togo
 # golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 ## explicit
 golang.org/x/crypto/acme

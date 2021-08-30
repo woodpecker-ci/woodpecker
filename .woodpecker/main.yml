@@ -49,8 +49,6 @@ pipeline:
       - go get github.com/woodpecker-ci/togo
       - (cd web/; go generate ./...)
       - make release
-    when:
-      event: [push, tag]
 
   # publish-server-alpine:
   #   image: plugins/docker
