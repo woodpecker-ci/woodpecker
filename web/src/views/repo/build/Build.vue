@@ -22,12 +22,13 @@
           <span>{{ build.author }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <Icon name="commit" />
-          <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
+          <Icon v-if="build.event === 'push'" name="branch" />
+          <Icon v-if="build.event === 'tag'" name="tag" />
+          <span>{{ build.branch }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <Icon name="branch" />
-          <span>{{ build.branch }}</span>
+          <Icon name="commit" />
+          <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="since" />

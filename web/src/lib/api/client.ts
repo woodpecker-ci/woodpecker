@@ -7,7 +7,7 @@ export function encodeQueryString(_params: Record<string, string | number | bool
   const params: Record<string, string | number | boolean> = {};
 
   Object.keys(_params).forEach((key) => {
-    const val = params[key];
+    const val = _params[key];
     if (val !== undefined) {
       params[key] = val;
     }

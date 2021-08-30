@@ -58,6 +58,7 @@ export default defineComponent({
     async function reloadRepos(): Promise<void> {
       repos.value = undefined;
       repos.value = await apiClient.getRepoList({ all: true, flush: true });
+      notifications.notify({ title: 'Repository list reloaded', type: 'success' });
     }
 
     async function activateRepo(repo: Repo): Promise<void> {

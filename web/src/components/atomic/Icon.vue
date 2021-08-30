@@ -3,6 +3,7 @@
   <IconSince v-else-if="name === 'since'" class="h-6 w-6" />
   <IconBranch v-else-if="name === 'branch'" class="h-6 w-6" />
   <IconCommit v-else-if="name === 'commit'" class="h-6 w-6" />
+  <IconTag v-else-if="name === 'tag'" class="h-6 w-6" />
   <IconBack v-else-if="name === 'back'" class="w-8 h-8" />
   <IconGithub v-else-if="name === 'github'" class="h-8 w-8" />
   <IconRepo v-else-if="name === 'repo'" class="h-8 w-8" />
@@ -18,6 +19,7 @@
   <IconStatusSkipped v-else-if="name === 'status-skipped'" class="h-8 w-8" />
   <IconStatusStarted v-else-if="name === 'status-started'" class="h-8 w-8" />
   <IconStatusSuccess v-else-if="name === 'status-success'" class="h-8 w-8" />
+  <IconGitea v-else-if="name === 'gitea'" class="h-8 w-8" />
 </template>
 
 <script lang="ts">
@@ -27,6 +29,7 @@ import IconDuration from '~icons/ic/sharp-timelapse';
 import IconSince from '~icons/mdi/clock-time-eight-outline';
 import IconBranch from '~icons/mdi/source-branch';
 import IconCommit from '~icons/mdi/source-commit';
+import IconTag from '~icons/mdi/tag-outline';
 import IconBack from '~icons/iconoir/arrow-left';
 import IconGithub from '~icons/mdi/github';
 import IconRepo from '~icons/teenyicons/git-solid';
@@ -42,12 +45,14 @@ import IconStatusSkipped from '~icons/ph/prohibit';
 import IconStatusStarted from '~icons/entypo/dots-two-vertical';
 import IconStatusSuccess from '~icons/ph/check-circle';
 import IconTrash from '~icons/gg/trash';
+import IconGitea from '~icons/cib/gitea';
 
 type IconNames =
   | 'duration'
   | 'since'
   | 'branch'
   | 'commit'
+  | 'tag'
   | 'back'
   | 'github'
   | 'repo'
@@ -62,7 +67,8 @@ type IconNames =
   | 'status-running'
   | 'status-skipped'
   | 'status-started'
-  | 'status-success';
+  | 'status-success'
+  | 'gitea';
 
 export default defineComponent({
   name: 'Icon',
@@ -72,6 +78,7 @@ export default defineComponent({
     IconSince,
     IconBranch,
     IconCommit,
+    IconTag,
     IconBack,
     IconGithub,
     IconRepo,
@@ -87,6 +94,7 @@ export default defineComponent({
     IconStatusSkipped,
     IconStatusStarted,
     IconStatusSuccess,
+    IconGitea,
   },
 
   props: {

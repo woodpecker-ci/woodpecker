@@ -24,19 +24,20 @@
     <div class="flex w-full py-2 px-4">
       <div class="flex items-center"><img class="w-8" :src="build.author_avatar" /></div>
 
-      <div class="ml-4 flex items-center ml-4">
+      <div class="ml-4 flex items-center mx-4">
         <span>{{ message }}</span>
       </div>
 
       <div class="flex ml-auto text-gray-500 py-2">
         <div class="flex flex-col space-y-2 w-42">
           <div class="flex space-x-2 items-center">
-            <Icon name="commit" />
-            <span>{{ build.commit.slice(0, 10) }}</span>
+            <Icon v-if="build.event === 'push'" name="branch" />
+            <Icon v-if="build.event === 'tag'" name="tag" />
+            <span class="truncate">{{ build.branch }}</span>
           </div>
           <div class="flex space-x-2 items-center">
-            <Icon name="branch" />
-            <span>{{ build.branch }}</span>
+            <Icon name="commit" />
+            <span>{{ build.commit.slice(0, 10) }}</span>
           </div>
         </div>
         <div class="flex flex-col ml-4 space-y-2 w-42">

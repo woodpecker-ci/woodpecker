@@ -7,6 +7,7 @@
       </a>
       <a :href="repo.link_url" target="_blank" class="flex ml-4 text-gray-400 hover:text-gray-500">
         <Icon name="github" v-if="repo.link_url.startsWith('https://github.com/')" />
+        <Icon name="gitea" v-if="repo.link_url.startsWith('https://github.com/')" />
         <Icon name="repo" v-else />
       </a>
       <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />

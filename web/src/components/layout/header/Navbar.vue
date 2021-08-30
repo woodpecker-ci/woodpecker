@@ -10,7 +10,7 @@
       <div class="flex ml-auto items-center">
         <ActiveBuilds v-if="user" />
         <router-link v-if="user" :to="{ name: 'user' }" class="ml-4">
-          <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}&s=32`" />
+          <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
         </router-link>
         <Button v-else text="Login" @click="doLogin" />
       </div>
