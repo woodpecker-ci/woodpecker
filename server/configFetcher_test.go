@@ -27,6 +27,7 @@ func TestFetch(t *testing.T) {
 			err   error
 		}
 		expectedFileNames []string
+		expectedError     bool
 	}{
 		{
 			name:         "Single .woodpecker.yml file",
@@ -44,6 +45,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker.yml",
 			},
+			expectedError: false,
 		},
 		{
 			name:         "Folder .woodpecker/",
@@ -72,6 +74,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker/release.yml",
 			},
+			expectedError: false,
 		},
 		{
 			name:         "Requesting woodpecker-file but using fallback",
@@ -95,6 +98,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".drone.yml",
 			},
+			expectedError: false,
 		},
 		{
 			name:         "Requesting folder but using fallback",
@@ -119,6 +123,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".drone.yml",
 			},
+			expectedError: false,
 		},
 		{
 			name:         "Not found and disabled fallback",
@@ -140,6 +145,7 @@ func TestFetch(t *testing.T) {
 				},
 			},
 			expectedFileNames: []string{},
+			expectedError:     true,
 		},
 	}
 
@@ -160,8 +166,10 @@ func TestFetch(t *testing.T) {
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
 			files, err := configFetcher.Fetch()
-			if err != nil {
-				t.Fatal("error fetching config", err)
+			if tt.expectedError && err == nil {
+				t.Fatal("expected an error")
+			} else if !tt.expectedError && err != nil {
+				t.Fatal("error fetching config:", err)
 			}
 
 			matchingFiles := 0
