@@ -24,16 +24,17 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 	}
 }
 
-func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
+func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
+	var file []byte
+
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
-			var fileerr error
 
 			// either a file
 			if !strings.HasSuffix(cf.repo.Config, "/") {
-				file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
-				if fileerr == nil {
+				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
+				if err == nil {
 					return []*remote.FileMeta{{
 						Name: cf.repo.Config,
 						Data: file,
@@ -43,16 +44,16 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 
 			// or a folder
 			if strings.HasSuffix(cf.repo.Config, "/") {
-				files, fileerr := cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
-				if fileerr == nil {
+				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+				if err == nil {
 					return filterPipelineFiles(files), nil
 				}
 			}
 
 			// or fallback
 			if cf.repo.Fallback {
-				file, fileerr := cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
-				if fileerr == nil {
+				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
+				if err == nil {
 					return []*remote.FileMeta{{
 						Name: ".drone.yml",
 						Data: file,
@@ -60,7 +61,7 @@ func (cf *configFetcher) Fetch() ([]*remote.FileMeta, error) {
 				}
 			}
 
-			return nil, fileerr
+			return nil, err
 		}
 	}
 
