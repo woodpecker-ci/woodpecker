@@ -42,9 +42,9 @@ services:
 
 ## Filtering repositories
 
-Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of Github, you may end up syncing more repos into Woodpecker than preferred.
+Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of GitHub, you may end up syncing more repos into Woodpecker than preferred.
 
-Use the `WOODPECKER_REPO_OWNERS` variable to filter which Github user's repos should be synced only. You typically want to put here your company's Github name.
+Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
 ```diff
 services:

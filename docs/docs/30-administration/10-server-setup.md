@@ -121,7 +121,7 @@ services:
 
 Authentication is done using OAuth and is delegated to one of multiple version control providers, configured using environment variables. The example above demonstrates basic GitHub integration.
 
-See the complete reference for [Github](/docs/administration/vcs/github), [Bitbucket Cloud](/docs/administration/vcs/bitbucket), [Bitbucket Server](/docs/administration/vcs/bitbucket_server) and [Gitlab](/docs/administration/vcs/gitlab).
+See the complete reference for [GitHub](/docs/administration/vcs/github), [Bitbucket Cloud](/docs/administration/vcs/bitbucket), [Bitbucket Server](/docs/administration/vcs/bitbucket_server) and [Gitlab](/docs/administration/vcs/gitlab).
 
 ## Database
 
