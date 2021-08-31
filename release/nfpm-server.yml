@@ -1,0 +1,19 @@
+name: woodpecker-server
+arch: amd64
+platform: linux
+version: v${WOODPECKER_VERSION}
+description: Woodpecker Server
+homepage: https://github.com/woodpecker-ci/woodpecker
+license: Apache 2.0
+contents:
+- src: ./dist/server/linux_amd64/woodpecker-server
+  dst: /usr/local/bin/woodpecker-server
+# overrides:
+#   rpm:
+#     scripts:
+#       preinstall: ./scripts/preinstall.sh
+#       postremove: ./scripts/postremove.sh
+#   deb:
+#     scripts:
+#       postinstall: ./scripts/postinstall.sh
+#       preremove: ./scripts/preremove.sh

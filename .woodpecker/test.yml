@@ -7,7 +7,6 @@ pipeline:
     image: golang:1.16
     group: test
     commands:
-      - make deps
       - make test
       - make vet
       - make formatcheck

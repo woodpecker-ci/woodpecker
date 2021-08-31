@@ -2,16 +2,18 @@ DOCKER_RUN_GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
-VERSION ?= ${DRONE_TAG}
-ifeq ($(VERSION),)
-	VERSION := $(shell echo ${DRONE_COMMIT_SHA} | head -c 8)
+VERSION ?= next
+ifneq ($(DRONE_TAG),)
+	VERSION := $(DRONE_TAG:v%=%)
 endif
 
-LDFLAGS ?= -extldflags "-static"
-ifneq ($(VERSION),)
-	LDFLAGS := ${LDFLAGS} -X github.com/woodpecker-ci/woodpecker/version.Version=${VERSION}
+BUILD_VERSION := $(VERSION)
+ifeq ($(BUILD_VERSION),next)
+	BUILD_VERSION := $(shell echo "next-$(shell echo ${DRONE_COMMIT_SHA} | head -c 8)")
 endif
 
+LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+LDFLAGS_CLI := -s -w -extldflags "-static" -X main.version=${BUILD_VERSION}
 
 DOCKER_RUN?=
 _with-docker:
@@ -57,7 +59,7 @@ build-agent:
 	$(DOCKER_RUN) go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
 
 build-frontend:
-	(cd web/; yarn run build)
+	(cd web/; yarn install; yarn run build)
 
 build-server: build-frontend
 	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
@@ -67,9 +69,46 @@ build-cli:
 
 build: build-agent build-server build-cli
 
-.PHONY: release
-release:
-	goreleaser release
+release-frontend: build-frontend
+	(cd web/; go generate ./...)
+
+release-server: release-frontend
+	# compile
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	# tar binary files
+	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
+
+release-agent:
+	# compile
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_amd64/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
+	# tar binary files
+	tar -cvzf dist/woodpecker-agent_linux_amd64.tar.gz   -C dist/agent/linux_amd64 woodpecker-agent
+
+release-cli:
+	# compile
+	GOOS=linux   GOARCH=amd64 go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/linux_amd64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=linux   GOARCH=arm64 go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/linux_arm64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=linux   GOARCH=arm   go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/linux_arm/woodpecker-cli     github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=windows GOARCH=amd64 go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/windows_amd64/woodpecker-cli github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=darwin  GOARCH=amd64 go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/darwin_amd64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=darwin  GOARCH=arm64 go build -ldflags '${LDFLAGS_CLI}' -o dist/cli/darwin_arm64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cli/drone
+	# tar binary files
+	tar -cvzf dist/woodpecker-cli_linux_amd64.tar.gz   -C dist/cli/linux_amd64   woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_linux_arm64.tar.gz   -C dist/cli/linux_arm64   woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_linux_arm.tar.gz     -C dist/cli/linux_arm     woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_windows_amd64.tar.gz -C dist/cli/windows_amd64 woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
+
+release-checksums:
+	# generate shas for tar files
+	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
+
+release: release-server release-agent release-cli release-checksums
+
+.PHONY: version
+version:
+	@echo ${VERSION}
 
 install:
 	go install github.com/woodpecker-ci/woodpecker/cmd/drone-agent

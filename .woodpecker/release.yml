@@ -1,0 +1,112 @@
+clone:
+  git:
+    image: plugins/git:next
+
+pipeline:
+  build:
+    image: golang:1.16
+    commands:
+      - go mod tidy
+      - make release
+    when:
+      event: [push, tag]
+      branch: master
+
+  build-docker-server:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=server
+    commands:
+      - export WOODPECKER_VERSION=$(make version)
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: [push, tag]
+      branch: master
+
+  build-docker-agent:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=agent
+    commands:
+      - export WOODPECKER_VERSION=$(make version)
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: [push, tag]
+      branch: master
+
+  build-docker-cli:
+    group: build-docker
+    image: anbraten/kaniko:v1.6.0-debug
+    secrets: [docker_username, docker_password]
+    environment:
+      - IMAGE_TYPE=cli
+    commands:
+      - export WOODPECKER_VERSION=$(make version)
+      - .woodpecker/scripts/build-docker-image.sh
+    when:
+      event: [push, tag]
+      branch: master
+
+  build-adk-deb-rpm:
+    group: build-docker
+    image: golang:1.16
+    commands:
+      - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3
+      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager apk
+      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager deb
+      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager rpm
+      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager apk
+      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager deb
+      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager rpm
+      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager apk
+      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager deb
+      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager rpm
+    when:
+      event: [push, tag]
+      branch: master
+
+  changelog:
+    image: alpine:3.14.1
+    commands:
+      - apk add make
+      - curl -L https://dl.gitea.io/changelog-tool/master/changelog-master-linux-amd64 > changelog
+      - chmod +x ./changelog
+      - ./changelog -m=$(make version) generate > CHANGELOG-latest.md
+      - ./changelog -m=$(make version) contributors >> CHANGELOG-latest.md
+      - echo -e "$(cat CHANGELOG-latest.md)\n$(cat CHANGELOG.md)" > CHANGELOG.md
+      # TODO push changed CHANGELOG.md with woodpecker-bot
+    when:
+      event: tag
+
+  checksums:
+    image: golang:1.16
+    commands:
+      - make release-checksums
+    when:
+      event: tag
+
+  # TODO: upload build artifacts for pushes to master
+
+  release:
+    image: plugins/github-release
+    files:
+      - dist/*.tar.gz
+      - dist/*.apk
+      - dist/*.deb
+      - dist/*.rpm
+      - dist/checksums.txt
+    title: ${DRONE_TAG##v}
+    note: CHANGELOG-latest.md
+    secrets:
+      - source: github_token
+        target: github_release_api_key
+    when:
+      event: tag
+
+# TODO
+# depends_on:
+#   - test
