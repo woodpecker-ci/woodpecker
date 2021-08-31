@@ -5,20 +5,21 @@ clone:
 pipeline:
   release:
     image: quay.io/helmpack/chart-releaser:v1.2.1
-    environment:
-      - CR_OWNER=myaccount
-      - CR_GIT_REPO=helm-charts
-      - CR_PACKAGE_PATH=.deploy
-      - CR_TOKEN="123456789"
+    secrets:
+      - source: github_token
+        target: CR_TOKEN
     commands:
       - sed -i "s/<version>/${DRONE_TAG##v}/g" charts/woodpecker-agent/Chart.yaml
       - sed -i "s/<version>/${DRONE_TAG##v}/g" charts/woodpecker-server/Chart.yaml
       - cat charts/woodpecker-agent/Chart.yaml
       - cat charts/woodpecker-server/Chart.yaml
-      - cr upload --owner woodpecker-bot --git-repo helm-charts --package-path .deploy --token 123456789
+      - mkdir -p .cr-index
+      - cr package charts/woodpecker-server
+      - cr package charts/woodpecker-agent
+      - cr upload --owner woodpecker-ci --git-repo woodpecker-ci.github.io --release-name-template "helm-{{ .Name }}-{{ .Version }}"
+      - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
 
-# TODO
-# depends_on:
-#   - release
+depends_on:
+  - release
