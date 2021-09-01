@@ -107,6 +107,5 @@ pipeline:
     when:
       event: tag
 
-# TODO
-# depends_on:
-#   - test
+depends_on:
+  - test
