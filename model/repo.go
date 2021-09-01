@@ -95,6 +95,7 @@ func (r *Repo) Update(from *Repo) {
 }
 
 // RepoPatch represents a repository patch object.
+// swagger:model repoPatch
 type RepoPatch struct {
 	Config       *string `json:"config_file,omitempty"`
 	IsTrusted    *bool   `json:"trusted,omitempty"`

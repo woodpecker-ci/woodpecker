@@ -93,3 +93,14 @@ release: release-agent release-server
 install:
 	go install github.com/woodpecker-ci/woodpecker/cmd/drone-agent
 	go install github.com/woodpecker-ci/woodpecker/cmd/drone-server
+
+swagger-check:
+	which swagger || (GO111MODULE=off go get -u github.com/go-swagger/go-swagger/cmd/swagger)
+
+swagger: swagger-check
+	# GO111MODULE=on go mod vendor
+	# GO111MODULE=off swagger generate spec -w ./cmd/drone-server/ -o ./server/swagger/files/swagger.yml --scan-models
+	swagger generate spec -w ./cmd/drone-server/ -o ./server/swagger/swagger.yml --scan-models
+
+swagger-serve: swagger
+	swagger serve -F=swagger ./server/swagger/swagger.yml

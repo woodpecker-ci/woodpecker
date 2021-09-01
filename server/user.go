@@ -31,10 +31,24 @@ import (
 	"github.com/woodpecker-ci/woodpecker/store"
 )
 
+// swagger:route GET /user user getCurrentUser
+//
+// Get the currently authenticated user.
+//
+//     Responses:
+//       200: user
+//
 func GetSelf(c *gin.Context) {
 	c.JSON(200, session.User(c))
 }
 
+// swagger:route GET /user/feed user getUserFeed
+//
+// Get the currently authenticated user's build feed.
+//
+//     Responses:
+//       200: feed
+//
 func GetFeed(c *gin.Context) {
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -78,6 +92,13 @@ func GetFeed(c *gin.Context) {
 	c.JSON(200, feed)
 }
 
+// swagger:route GET /user/repos user getUserRepos
+//
+// Get the currently authenticated user's active repository list.
+//
+//     Responses:
+//       200: repos
+//
 func GetRepos(c *gin.Context) {
 	var (
 		user     = session.User(c)
@@ -155,4 +176,28 @@ func DeleteToken(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusOK, tokenstr)
+}
+
+// swagger:response user
+type userResp struct {
+	// in: body
+	Body model.User
+}
+
+// swagger:response users
+type usersResp struct {
+	// in: body
+	Body []model.User
+}
+
+// swagger:response feed
+type feedResp struct {
+	// in: body
+	Body []model.Feed
+}
+
+// swagger:response repos
+type reposResp struct {
+	// in: body
+	Body []model.Repo
 }

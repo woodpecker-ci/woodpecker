@@ -24,6 +24,7 @@ type PermStore interface {
 }
 
 // Perm defines a repository permission for an individual user.
+// swagger:model perm
 type Perm struct {
 	UserID int64  `json:"-"      meddler:"perm_user_id"`
 	RepoID int64  `json:"-"      meddler:"perm_repo_id"`

@@ -44,7 +44,7 @@ type SecretStore interface {
 }
 
 // Secret represents a secret variable, such as a password or token.
-// swagger:model registry
+// swagger:model secret
 type Secret struct {
 	ID         int64    `json:"id"              meddler:"secret_id,pk"`
 	RepoID     int64    `json:"-"               meddler:"secret_repo_id"`

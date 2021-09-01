@@ -30,6 +30,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// swagger:route GET /login auth login
+//
+// Login a user.
+//
+//     Responses:
+//       303:
+//
 func HandleLogin(c *gin.Context) {
 	var (
 		w = c.Writer
@@ -150,6 +157,13 @@ func HandleAuth(c *gin.Context) {
 	}
 }
 
+// swagger:route GET /logout auth logout
+//
+// Logout the currently authenticated user.
+//
+//     Responses:
+//       303:
+//
 func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
 	httputil.DelCookie(c.Writer, c.Request, "user_last")

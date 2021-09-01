@@ -25,6 +25,7 @@ type FileStore interface {
 }
 
 // File represents a pipeline artifact.
+// swagger:model file
 type File struct {
 	ID      int64  `json:"id"      meddler:"file_id,pk"`
 	BuildID int64  `json:"-"       meddler:"file_build_id"`

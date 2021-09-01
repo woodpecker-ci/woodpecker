@@ -30,6 +30,8 @@ type SenderStore interface {
 	SenderDelete(*Sender) error
 }
 
+// Sender of a build job.
+// swagger:model sender
 type Sender struct {
 	ID     int64    `json:"-"      meddler:"sender_id,pk"`
 	RepoID int64    `json:"-"      meddler:"sender_repo_id"`

@@ -23,6 +23,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
+	_ "github.com/woodpecker-ci/woodpecker/server/swagger" // This line is necessary for go-swagger to find your docs!
 )
 
 func main() {

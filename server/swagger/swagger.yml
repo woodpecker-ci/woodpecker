@@ -1,0 +1,664 @@
+basePath: /api
+consumes:
+- application/json
+definitions:
+  build:
+    properties:
+      author:
+        type: string
+        x-go-name: Author
+      author_avatar:
+        type: string
+        x-go-name: Avatar
+      author_email:
+        type: string
+        x-go-name: Email
+      branch:
+        type: string
+        x-go-name: Branch
+      changed_files:
+        items:
+          type: string
+        type: array
+        x-go-name: ChangedFiles
+      commit:
+        type: string
+        x-go-name: Commit
+      created_at:
+        format: int64
+        type: integer
+        x-go-name: Created
+      deploy_to:
+        type: string
+        x-go-name: Deploy
+      enqueued_at:
+        format: int64
+        type: integer
+        x-go-name: Enqueued
+      error:
+        type: string
+        x-go-name: Error
+      event:
+        type: string
+        x-go-name: Event
+      files:
+        items:
+          $ref: '#/definitions/file'
+        type: array
+        x-go-name: Files
+      finished_at:
+        format: int64
+        type: integer
+        x-go-name: Finished
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      link_url:
+        type: string
+        x-go-name: Link
+      message:
+        type: string
+        x-go-name: Message
+      number:
+        format: int64
+        type: integer
+        x-go-name: Number
+      parent:
+        format: int64
+        type: integer
+        x-go-name: Parent
+      procs:
+        items:
+          $ref: '#/definitions/proc'
+        type: array
+        x-go-name: Procs
+      ref:
+        type: string
+        x-go-name: Ref
+      refspec:
+        type: string
+        x-go-name: Refspec
+      remote:
+        type: string
+        x-go-name: Remote
+      reviewed_at:
+        format: int64
+        type: integer
+        x-go-name: Reviewed
+      reviewed_by:
+        type: string
+        x-go-name: Reviewer
+      sender:
+        type: string
+        x-go-name: Sender
+      signed:
+        type: boolean
+        x-go-name: Signed
+      started_at:
+        format: int64
+        type: integer
+        x-go-name: Started
+      status:
+        type: string
+        x-go-name: Status
+      timestamp:
+        format: int64
+        type: integer
+        x-go-name: Timestamp
+      title:
+        type: string
+        x-go-name: Title
+      verified:
+        type: boolean
+        x-go-name: Verified
+    title: Build job triggered by some event of the used VCS.
+    type: object
+    x-go-name: Build
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  environ:
+    properties:
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      name:
+        type: string
+        x-go-name: Name
+      value:
+        type: string
+        x-go-name: Value
+    title: Environ represents an environment variable.
+    type: object
+    x-go-name: Environ
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  feed:
+    properties:
+      author:
+        type: string
+        x-go-name: Author
+      author_avatar:
+        type: string
+        x-go-name: Avatar
+      author_email:
+        type: string
+        x-go-name: Email
+      branch:
+        type: string
+        x-go-name: Branch
+      commit:
+        type: string
+        x-go-name: Commit
+      created_at:
+        format: int64
+        type: integer
+        x-go-name: Created
+      event:
+        type: string
+        x-go-name: Event
+      finished_at:
+        format: int64
+        type: integer
+        x-go-name: Finished
+      full_name:
+        type: string
+        x-go-name: FullName
+      message:
+        type: string
+        x-go-name: Message
+      name:
+        type: string
+        x-go-name: Name
+      number:
+        format: int64
+        type: integer
+        x-go-name: Number
+      owner:
+        type: string
+        x-go-name: Owner
+      ref:
+        type: string
+        x-go-name: Ref
+      refspec:
+        type: string
+        x-go-name: Refspec
+      remote:
+        type: string
+        x-go-name: Remote
+      started_at:
+        format: int64
+        type: integer
+        x-go-name: Started
+      status:
+        type: string
+        x-go-name: Status
+      title:
+        type: string
+        x-go-name: Title
+    title: Feed represents an item in the user's feed or timeline.
+    type: object
+    x-go-name: Feed
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  file:
+    properties:
+      failed:
+        format: int64
+        type: integer
+        x-go-name: Failed
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      mime:
+        type: string
+        x-go-name: Mime
+      name:
+        type: string
+        x-go-name: Name
+      passed:
+        format: int64
+        type: integer
+        x-go-name: Passed
+      pid:
+        format: int64
+        type: integer
+        x-go-name: PID
+      proc_id:
+        format: int64
+        type: integer
+        x-go-name: ProcID
+      size:
+        format: int64
+        type: integer
+        x-go-name: Size
+      skipped:
+        format: int64
+        type: integer
+        x-go-name: Skipped
+      time:
+        format: int64
+        type: integer
+        x-go-name: Time
+    title: File represents a pipeline artifact.
+    type: object
+    x-go-name: File
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  perm:
+    properties:
+      admin:
+        type: boolean
+        x-go-name: Admin
+      pull:
+        type: boolean
+        x-go-name: Pull
+      push:
+        type: boolean
+        x-go-name: Push
+      synced:
+        format: int64
+        type: integer
+        x-go-name: Synced
+    title: Perm defines a repository permission for an individual user.
+    type: object
+    x-go-name: Perm
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  proc:
+    properties:
+      build_id:
+        format: int64
+        type: integer
+        x-go-name: BuildID
+      children:
+        items:
+          $ref: '#/definitions/proc'
+        type: array
+        x-go-name: Children
+      end_time:
+        format: int64
+        type: integer
+        x-go-name: Stopped
+      environ:
+        additionalProperties:
+          type: string
+        type: object
+        x-go-name: Environ
+      error:
+        type: string
+        x-go-name: Error
+      exit_code:
+        format: int64
+        type: integer
+        x-go-name: ExitCode
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      machine:
+        type: string
+        x-go-name: Machine
+      name:
+        type: string
+        x-go-name: Name
+      pgid:
+        format: int64
+        type: integer
+        x-go-name: PGID
+      pid:
+        format: int64
+        type: integer
+        x-go-name: PID
+      platform:
+        type: string
+        x-go-name: Platform
+      ppid:
+        format: int64
+        type: integer
+        x-go-name: PPID
+      start_time:
+        format: int64
+        type: integer
+        x-go-name: Started
+      state:
+        type: string
+        x-go-name: State
+    title: Proc represents a process in the build pipeline.
+    type: object
+    x-go-name: Proc
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  registry:
+    properties:
+      address:
+        type: string
+        x-go-name: Address
+      email:
+        type: string
+        x-go-name: Email
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      password:
+        type: string
+        x-go-name: Password
+      token:
+        type: string
+        x-go-name: Token
+      username:
+        type: string
+        x-go-name: Username
+    title: Registry represents a docker registry with credentials.
+    type: object
+    x-go-name: Registry
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  repo:
+    properties:
+      active:
+        type: boolean
+        x-go-name: IsActive
+      allow_deploys:
+        type: boolean
+        x-go-name: AllowDeploy
+      allow_pr:
+        type: boolean
+        x-go-name: AllowPull
+      allow_push:
+        type: boolean
+        x-go-name: AllowPush
+      allow_tags:
+        type: boolean
+        x-go-name: AllowTag
+      avatar_url:
+        type: string
+        x-go-name: Avatar
+      clone_url:
+        type: string
+        x-go-name: Clone
+      config_file:
+        type: string
+        x-go-name: Config
+      default_branch:
+        type: string
+        x-go-name: Branch
+      fallback:
+        type: boolean
+        x-go-name: Fallback
+      full_name:
+        type: string
+        x-go-name: FullName
+      gated:
+        type: boolean
+        x-go-name: IsGated
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      last_build:
+        format: int64
+        type: integer
+        x-go-name: Counter
+      link_url:
+        type: string
+        x-go-name: Link
+      name:
+        type: string
+        x-go-name: Name
+      owner:
+        type: string
+        x-go-name: Owner
+      private:
+        type: boolean
+        x-go-name: IsPrivate
+      scm:
+        type: string
+        x-go-name: Kind
+      starred:
+        type: boolean
+        x-go-name: IsStarred
+      timeout:
+        format: int64
+        type: integer
+        x-go-name: Timeout
+      trusted:
+        type: boolean
+        x-go-name: IsTrusted
+      visibility:
+        type: string
+        x-go-name: Visibility
+    title: Repo represents a repository.
+    type: object
+    x-go-name: Repo
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  repoPatch:
+    properties:
+      allow_deploy:
+        type: boolean
+        x-go-name: AllowDeploy
+      allow_pr:
+        type: boolean
+        x-go-name: AllowPull
+      allow_push:
+        type: boolean
+        x-go-name: AllowPush
+      allow_tag:
+        type: boolean
+        x-go-name: AllowTag
+      build_counter:
+        format: int64
+        type: integer
+        x-go-name: BuildCounter
+      config_file:
+        type: string
+        x-go-name: Config
+      fallback:
+        type: boolean
+        x-go-name: Fallback
+      gated:
+        type: boolean
+        x-go-name: IsGated
+      timeout:
+        format: int64
+        type: integer
+        x-go-name: Timeout
+      trusted:
+        type: boolean
+        x-go-name: IsTrusted
+      visibility:
+        type: string
+        x-go-name: Visibility
+    title: RepoPatch represents a repository patch object.
+    type: object
+    x-go-name: RepoPatch
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  secret:
+    properties:
+      event:
+        items:
+          type: string
+        type: array
+        x-go-name: Events
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      image:
+        items:
+          type: string
+        type: array
+        x-go-name: Images
+      name:
+        type: string
+        x-go-name: Name
+      value:
+        type: string
+        x-go-name: Value
+    title: Secret represents a secret variable, such as a password or token.
+    type: object
+    x-go-name: Secret
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  sender:
+    properties:
+      allow:
+        type: boolean
+        x-go-name: Allow
+      block:
+        type: boolean
+        x-go-name: Block
+      branch:
+        items:
+          type: string
+        type: array
+        x-go-name: Branch
+      deploy:
+        items:
+          type: string
+        type: array
+        x-go-name: Deploy
+      event:
+        items:
+          type: string
+        type: array
+        x-go-name: Event
+      login:
+        type: string
+        x-go-name: Login
+    title: Sender of a build job.
+    type: object
+    x-go-name: Sender
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  team:
+    properties:
+      avatar_url:
+        description: the avatar url for this team.
+        type: string
+        x-go-name: Avatar
+      login:
+        description: Login is the username for this team.
+        type: string
+        x-go-name: Login
+    title: Team represents a team or organization in the remote version control system.
+    type: object
+    x-go-name: Team
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+  user:
+    properties:
+      active:
+        description: Activate indicates the user is active in the system.
+        type: boolean
+        x-go-name: Active
+      admin:
+        description: |-
+          Admin indicates the user is a system administrator.
+
+          NOTE: This is sourced from the DRONE_ADMINS environment variable and is no
+          longer persisted in the database.
+        type: boolean
+        x-go-name: Admin
+      avatar_url:
+        description: the avatar url for this user.
+        type: string
+        x-go-name: Avatar
+      email:
+        description: Email is the email address for this user.
+        type: string
+        x-go-name: Email
+      id:
+        description: the id for this user.
+        format: int64
+        type: integer
+        x-go-name: ID
+      login:
+        description: Login is the username for this user.
+        type: string
+        x-go-name: Login
+      synced:
+        description: Synced is the timestamp when the user was synced with the remote
+          system.
+        format: int64
+        type: integer
+        x-go-name: Synced
+    required:
+    - id
+    - login
+    - email
+    title: User represents a registered user.
+    type: object
+    x-go-name: User
+    x-go-package: github.com/woodpecker-ci/woodpecker/model
+info:
+  title: Drone API.
+  version: 1.0.0
+paths:
+  /login:
+    get:
+      operationId: login
+      responses:
+        "303":
+          description: ""
+      summary: Login a user.
+      tags:
+      - auth
+  /logout:
+    get:
+      operationId: logout
+      responses:
+        "303":
+          description: ""
+      summary: Logout the currently authenticated user.
+      tags:
+      - auth
+  /user:
+    get:
+      operationId: getCurrentUser
+      responses:
+        "200":
+          $ref: '#/responses/user'
+      summary: Get the currently authenticated user.
+      tags:
+      - user
+  /user/feed:
+    get:
+      operationId: getUserFeed
+      responses:
+        "200":
+          $ref: '#/responses/feed'
+      summary: Get the currently authenticated user's build feed.
+      tags:
+      - user
+  /user/repos:
+    get:
+      operationId: getUserRepos
+      responses:
+        "200":
+          $ref: '#/responses/repos'
+      summary: Get the currently authenticated user's active repository list.
+      tags:
+      - user
+produces:
+- application/json
+responses:
+  feed:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/feed'
+      type: array
+  repos:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/repo'
+      type: array
+  user:
+    description: ""
+    schema:
+      $ref: '#/definitions/user'
+  users:
+    description: ""
+    schema:
+      items:
+        $ref: '#/definitions/user'
+      type: array
+schemes:
+- http
+- https
+swagger: "2.0"

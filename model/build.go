@@ -14,6 +14,7 @@
 
 package model
 
+// Build job triggered by some event of the used VCS.
 // swagger:model build
 type Build struct {
 	ID           int64    `json:"id"            meddler:"build_id,pk"`
