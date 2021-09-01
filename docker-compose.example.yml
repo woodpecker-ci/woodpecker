@@ -2,7 +2,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:next
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 8000:8000
     volumes:
@@ -16,7 +16,7 @@ services:
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
       - WOODPECKER_SECRET=${WOODPECKER_SECRET}
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:next
+    image: woodpeckerci/woodpecker-agent:latest
     depends_on:
       - woodpecker-server
     volumes:

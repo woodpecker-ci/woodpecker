@@ -8,12 +8,3 @@ license: Apache 2.0
 contents:
 - src: ./dist/cli/linux_amd64/woodpecker-cli
   dst: /usr/local/bin/woodpecker
-# overrides:
-#   rpm:
-#     scripts:
-#       preinstall: ./scripts/preinstall.sh
-#       postremove: ./scripts/postremove.sh
-#   deb:
-#     scripts:
-#       postinstall: ./scripts/postinstall.sh
-#       preremove: ./scripts/preremove.sh
