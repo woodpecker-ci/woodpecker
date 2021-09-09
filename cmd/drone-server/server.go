@@ -108,7 +108,7 @@ func server(c *cli.Context) error {
 	// start the grpc server
 	g.Go(func() error {
 
-		lis, err := net.Listen("tcp", ":9000")
+		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
 			logrus.Error(err)
 			return err
