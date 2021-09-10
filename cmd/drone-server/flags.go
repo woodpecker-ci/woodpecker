@@ -47,6 +47,12 @@ var flags = []cli.Flag{
 		Name:   "server-key",
 		Usage:  "server ssl key path",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_GRPC_ADDR",
+		Name:   "grpc-addr",
+		Usage:  "grpc address",
+		Value:  ":9000",
+	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_LETS_ENCRYPT,WOODPECKER_LETS_ENCRYPT",
 		Name:   "lets-encrypt",
