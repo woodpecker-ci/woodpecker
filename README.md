@@ -11,7 +11,7 @@ Woodpecker is a Community fork of the Drone CI system.
 ## Maintainers
 
 To make sure every PR is checked, we have **team maintainers**.
-Every PR **MUST** be reviewed by at least one maintainer (or owner) before it can get merged.
+Every PR **MUST** be reviewed by at least **one** maintainer (or owner) before it can get merged.
 A maintainer should be a contributor and contributed at least 4 accepted PRs.
 A contributor should apply as a maintainer in the [Discord](https://discord.gg/fcMQqSMXJy) #develop channel.
 The owners or the team maintainers may invite the contributor.
@@ -28,7 +28,7 @@ https://help.github.com/articles/signing-commits-with-gpg/
 
 ## Owners
 
-Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect three owners every year.
+Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners every year.
 All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
 If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
 For security reasons. Owners must use 2FA. https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
