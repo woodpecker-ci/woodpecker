@@ -11,32 +11,9 @@ Woodpecker is a community fork of the Drone CI system.
 
 ![woodpecker](docs/docs/images/woodpecker.png)
 
-# Contribution
+## Contribution
 
-## Maintainers
-
-To make sure every PR is checked, we have **team maintainers**.
-Every PR **MUST** be reviewed by at least **one** maintainer (or owner) before it can get merged.
-A maintainer should be a contributor and contributed at least 4 accepted PRs.
-A contributor should apply as a maintainer in the [Discord](https://discord.gg/fcMQqSMXJy) #develop channel.
-The owners or the team maintainers may invite the contributor.
-A maintainer should spend some time on code reviews.
-If a maintainer has no time to do that, they should apply to leave the maintainers team and
-we will give them the honor of being a member of the [advisors
-team](https://github.com/orgs/woodpecker-ci/teams/advisors/members).
-Of course, if an advisor has time to code review, we will gladly welcome them back to the maintainers team.
-If a maintainer is inactive for more than 3 months and forgets to leave the maintainers team,
-the owners may move him or her from the maintainers team to the advisors team.
-For security reasons, Maintainers should use 2FA for their accounts and if possible provide gpg signed commits.
-https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
-https://help.github.com/articles/signing-commits-with-gpg/
-
-## Owners
-
-Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners every year.
-All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
-If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
-For security reasons. Owners must use 2FA. https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
+see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Usage
 
@@ -59,7 +36,7 @@ pipeline:
       - echo "Testing.."
 ```
 
-## Build steps are containers
+### Build steps are containers
 
 - Define any Docker image as context
 - Install the needed tools in custom Docker images, use them as context
@@ -73,7 +50,7 @@ pipeline:
        - aws help
 ```
 
-## File changes are incremental
+### File changes are incremental
 
 - Woodpecker clones the source code in the beginning pipeline
 - Changes to files are persisted through steps as the same volume is mounted to all steps
@@ -91,7 +68,7 @@ pipeline:
       - cat myfile
 ```
 
-## Plugins are straightforward
+### Plugins are straightforward
 
 - If you copy the same shell script from project to project
 - Pack it into a plugin instead
@@ -118,17 +95,17 @@ pipeline:
     template: config/k8s/service.yml
 ```
 
-# Documentation
+## Documentation
 
 https://woodpecker.laszlo.cloud
 
-## Who uses Woodpecker
+### Who uses Woodpecker
 
 Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it. 
 
-## License
+### License
 
 Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
