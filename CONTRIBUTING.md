@@ -20,7 +20,11 @@ https://help.github.com/articles/signing-commits-with-gpg/
 
 ## Owners
 
-Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners every year.
-All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
+Since Woodpecker is a pure community organization without any company support,
+to keep the development healthy we will elect two owners every year.  
+This can allso happen when a owner propose a vote or the majoirty of the maintainers do so.  
+All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.  
 If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
-For security reasons. Owners must use 2FA. https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
+
+For security reasons, Owners must use 2FA.
+(https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa)
