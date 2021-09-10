@@ -60,7 +60,7 @@ pipeline:
       - cat myfile
 ```
 
-## Plugins are straighforward
+## Plugins are straightforward
 
 - If you copy the same shell script from project to project
 - Pack it into a plugin instead
@@ -93,12 +93,12 @@ https://woodpecker.laszlo.cloud
 
 ## Who uses Woodpecker
 
-Currently, I know of one organization using this fork. With 50+ users, 130+ repos and more than 1100 builds a week.
+Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
 
-Leave a note here if you are using it: https://github.com/woodpecker-ci/woodpecker/issues/122
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it. 
 
 ## License
 
-woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
+Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
 Files under the `docs/` folder is licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License. It is a derivative work of the https://github.com/drone/docs git repository.

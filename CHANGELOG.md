@@ -1,9 +1,10 @@
-## [0.14.0-rc.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0-rc.2) - 2021-07-08
+## [0.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0) - 2021-08-01
 
 * FEATURES
   * Add OAuth2 Support for Gitea Remote (#226)
   * Add support for path-prefix condition (#174)
 * BUGFIXES
+  * Allow multi pipeline file to be named .drone.yml (#250)
   * Fix release-server make target by build server with correct option (#237)
   * Fix Gitea unable to login on 0.12.0+ with error "cannot authenticate user. 403 Forbidden" (#221)
 * ENHANCEMENTS

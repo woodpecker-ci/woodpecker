@@ -5,11 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Woodpecker",
+      "name": "Woodpecker server",
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/cmd/drone-server/main.go",
+      "program": "${workspaceFolder}/cmd/drone-server/",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Woodpecker agent",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/drone-agent/",
       "cwd": "${workspaceFolder}"
     }
   ]
