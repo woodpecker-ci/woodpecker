@@ -1,6 +1,5 @@
 1. Install go 1.9 or later
-2. Execute `make deps` to download dependencies
-3. Execute `make install` to compile project and install binaries to `GOPATH`
+2. Execute `make install` to compile project and install binaries to `GOPATH`
 
 ---
 
