@@ -17,7 +17,7 @@ DOCKER_RUN?=
 _with-docker:
 	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(DOCKER_RUN_GO_VERSION))
 
-all: deps build
+all: build
 
 vendor:
 	go mod tidy
