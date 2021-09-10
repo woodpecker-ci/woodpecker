@@ -2,19 +2,19 @@
 
 ## Maintainers
 
-To make sure every PR is checked, we have **team maintainers**.
-Every PR **MUST** be reviewed by at least **one** maintainer (or owner) before it can get merged.
+To make sure every PR is checked, we have **team maintainers**.  
+Every PR **MUST** be reviewed by at least **one** maintainer (or owner) before it can get merged.  
 A maintainer should be a contributor and contributed at least 4 accepted PRs.
-A contributor should apply as a maintainer in the [Discord](https://discord.gg/fcMQqSMXJy) #develop channel.
+A contributor should apply as a maintainer in the [Discord #develop](https://discord.gg/fcMQqSMXJy) channel.
 The owners or the team maintainers may invite the contributor.
 A maintainer should spend some time on code reviews.
-If a maintainer has no time to do that, they should apply to leave the maintainers team and
-we will give them the honor of being a member of the [advisors
+
+If a maintainer has no time to do that, they should apply to leave the maintainers team and we will give them the honor of being a member of the [advisors
 team](https://github.com/orgs/woodpecker-ci/teams/advisors/members).
 Of course, if an advisor has time to code review, we will gladly welcome them back to the maintainers team.
-If a maintainer is inactive for more than 3 months and forgets to leave the maintainers team,
-the owners may move him or her from the maintainers team to the advisors team.
-For security reasons, Maintainers should use 2FA for their accounts and if possible provide gpg signed commits.
+If a maintainer is inactive for more than 3 months and forgets to leave the maintainers team, the owners may move him or her from the maintainers team to the advisors team.
+
+For security reasons, Maintainers should use 2FA for their accounts and if possible provide gpg signed commits.  
 https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
 https://help.github.com/articles/signing-commits-with-gpg/
 
