@@ -99,13 +99,13 @@ pipeline:
 
 https://woodpecker.laszlo.cloud
 
-### Who uses Woodpecker
+## Who uses Woodpecker
 
 Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it. 
 
-### License
+## License
 
 Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
