@@ -9,14 +9,14 @@ A fork of the Drone CI system.
 
 ![woodpecker](docs/docs/images/woodpecker.png)
 
-## .drone.yml
+## .woodpecker.yml
 
-- Place your pipeline in a file named `.drone.yml` in your repository
+- Place your pipeline in a file named `.woodpecker.yml` in your repository
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
 ```yaml
-# .drone.yml
+# .woodpecker.yml
 pipeline:
   build:
     image: debian
@@ -48,7 +48,7 @@ pipeline:
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
-# .drone.yml
+# .woodpecker.yml
 pipeline:
   build:
     image: debian
@@ -80,7 +80,7 @@ kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
 ```yaml
-# .drone.yml
+# .woodpecker.yml
 pipeline:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin
@@ -101,4 +101,4 @@ Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you
 
 Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
-Files under the `docs/` folder is licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License. It is a derivative work of the https://github.com/drone/docs git repository.
+Files under the `docs/` folder is licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License.
