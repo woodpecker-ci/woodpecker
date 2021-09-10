@@ -1,12 +1,17 @@
+/* eslint-env node */
+
 module.exports = {
+  parserOptions: {
+    project: ['./tsconfig.eslint.json'],
+    tsconfigRootDir: __dirname,
+  },
+
   extends: [
     "standard",
     "plugin:jest/recommended",
-    "plugin:react/recommended",
     "prettier",
-    "prettier/react"
   ],
-  plugins: ["react", "jest", "prettier"],
+  plugins: ["jest", "prettier"],
   parser: "babel-eslint",
   parserOptions: {
     ecmaVersion: 2016,
@@ -22,7 +27,6 @@ module.exports = {
     "jest/globals": true
   },
   rules: {
-    "react/prop-types": 1,
     "prettier/prettier": [
       "error",
       {
