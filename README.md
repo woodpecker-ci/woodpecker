@@ -1,8 +1,13 @@
 # Woodpecker
 
-Woodpecker is a Community fork of the Drone CI system.
+Woodpecker is a community fork of the Drone CI system.
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker)](https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![https://discord.gg/fcMQqSMXJy](https://img.shields.io/discord/838698813463724034.svg)](https://discord.gg/fcMQqSMXJy)
+[![Go Report Card](https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker)](https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker) 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
+[![Discord users](https://img.shields.io/discord/838698813463724034.svg)](https://discord.gg/fcMQqSMXJy) 
+[![Latest release](https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver)](https://github.com/woodpecker-ci/woodpecker/releases/latest/) 
+[![Docker Pulls](https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server)](https://hub.docker.com/r/woodpeckerci/woodpecker-server)
+[![CI Status](https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg)](https://wp.laszlo.cloud/woodpecker-ci/woodpecker)
 
 ![woodpecker](docs/docs/images/woodpecker.png)
 
@@ -33,9 +38,9 @@ All maintainers may vote to elect up to two candidates. When the new owners have
 If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
 For security reasons. Owners must use 2FA. https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
 
-# Usage
+## Usage
 
-## .woodpecker.yml
+### .woodpecker.yml
 
 - Place your pipeline in a file named `.woodpecker.yml` in your repository
 - Pipeline steps can be named as you like
@@ -127,4 +132,4 @@ Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you
 
 Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
 
-Files under the `docs/` folder is licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License.
+Files under the `docs/` folder are licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License.
