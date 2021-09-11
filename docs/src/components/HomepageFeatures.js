@@ -5,7 +5,7 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'OpenSource and free',
-    Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('../../static/img/feat-opensource.svg').default,
     description: (
       <>
         Woodpecker is and will be totally free for ever. As Woodpeckers <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">source code</a> is
@@ -15,7 +15,7 @@ const FeatureList = [
   },
   {
     title: 'Based on docker containers',
-    Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('../../static/img/feat-docker.svg').default,
     description: (
       <>
         Woodpecker uses docker containers to execute pipeline steps. If you need more than a normal docker image, you
@@ -24,8 +24,8 @@ const FeatureList = [
     ),
   },
   {
-    title: 'Multi pipeline',
-    Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
+    title: 'Multi pipelines',
+    Svg: require('../../static/img/feat-multipipelines.svg').default,
     description: (
       <>
         Woodpecker allows you to easily create multiple pipelines for your project. They can even depend on each other.
