@@ -1,7 +1,7 @@
 # Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml
 name: "\U0001F41E Bug report"
 description: Report an issue with Woodpecker
-labels: ["pending triage"]
+labels: ["pending:bug"]
 body:
   - type: markdown
     attributes:
@@ -63,7 +63,7 @@ body:
           required: true
         - label: Read the [docs](https://woodpecker-ci.github.io/docs/intro).
           required: true
-        - label: Check that there isn't [already an issue](https://github.com/woodpecker-ci/woodpecker/issues?q=is%3Aopen+is%3Aissue+label%3Abug) that reports the same bug to avoid creating a duplicate.
+        - label: Check that there isn't [already an issue](https://github.com/woodpecker-ci/woodpecker/issues) that reports the same bug to avoid creating a duplicate.
           required: true
         - label: Check that this is a concrete bug. For Q&A join our [Discord Chat Server](https://discord.gg/fcMQqSMXJy).
           required: true

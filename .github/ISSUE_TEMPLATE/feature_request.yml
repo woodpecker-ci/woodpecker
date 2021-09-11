@@ -1,7 +1,7 @@
 # Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/feature_request.yml
 name: "\U0001F680 New feature proposal"
 description: Propose a new feature to be added to Woodpecker
-labels: ["enhancement: pending triage"]
+labels: ["pending:feature"]
 body:
   - type: markdown
     attributes:
@@ -43,5 +43,5 @@ body:
           required: true
         - label: Read the [docs](https://woodpecker-ci.github.io/docs/intro).
           required: true
-        - label: Check that there isn't already an [issue](https://github.com/woodpecker-ci/woodpecker/issues?q=is%3Aopen++label%3Afeature%2Cenhancement+) that request the same feature to avoid creating a duplicate.
+        - label: Check that there isn't already an [issue](https://github.com/woodpecker-ci/woodpecker/issues) that request the same feature to avoid creating a duplicate.
           required: true
