@@ -1,19 +1,39 @@
+<p align="center">
+  <a href="https://github.com/woodpecker-ci/woodpecker/">
+    <img alt="Woodpecker" src="https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/docs/static/img/logo.svg" width="220"/>
+  </a>
+</p>
+<br/>
+<p align="center">
+  <a href="https://wp.laszlo.cloud/woodpecker-ci/woodpecker" title="Build Status">
+    <img src="https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg">
+  </a>
+  <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
+    <img src="https://img.shields.io/discord/838698813463724034.svg">
+  </a>
+  <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
+    <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
+  </a>
+  <a href="https://godoc.org/github.com/woodpecker-ci/woodpecker" title="GoDoc">
+    <img src="https://godoc.org/github.com/woodpecker-ci/woodpecker?status.svg">
+  </a>
+  <a href="https://github.com/woodpecker-ci/woodpecker/releases/latest" title="GitHub release">
+    <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver">
+  </a>
+  <a href="https://hub.docker.com/r/woodpeckerci/woodpecker-server" title="Docker pulls">
+    <img src="https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server">
+  </a>
+  <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+  </a>
+</p>
+<br/>
+
 # Woodpecker
 
-Woodpecker is a community fork of the Drone CI system.
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker)](https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker) 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) 
-[![Discord users](https://img.shields.io/discord/838698813463724034.svg)](https://discord.gg/fcMQqSMXJy) 
-[![Latest release](https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver)](https://github.com/woodpecker-ci/woodpecker/releases/latest/) 
-[![Docker Pulls](https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server)](https://hub.docker.com/r/woodpeckerci/woodpecker-server)
-[![CI Status](https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg)](https://wp.laszlo.cloud/woodpecker-ci/woodpecker)
+> Woodpecker is a community fork of the Drone CI system.
 
 ![woodpecker](docs/docs/woodpecker.png)
-
-## Contribution
-
-see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Usage
 
@@ -99,11 +119,15 @@ pipeline:
 
 https://woodpecker-ci.github.io/
 
-## Who uses Woodpecker
+## Who uses Woodpecker?
 
 Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it. 
+
+## Contribution
+
+See [Contributing Guide](CONTRIBUTING.md)
 
 ## License
 
