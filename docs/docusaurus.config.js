@@ -19,6 +19,7 @@ module.exports = {
       logo: {
         alt: 'Woodpecker Logo',
         src: 'img/logo.svg',
+        srcDark: 'img/logo-darkmode.svg',
       },
       items: [
         {
