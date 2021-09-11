@@ -89,7 +89,7 @@ pipeline:
 
 ## Documentation
 
-https://woodpecker.laszlo.cloud
+https://woodpecker-ci.github.io/
 
 ## Who uses Woodpecker
 
