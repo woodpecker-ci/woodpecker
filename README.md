@@ -9,7 +9,7 @@ Woodpecker is a community fork of the Drone CI system.
 [![Docker Pulls](https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server)](https://hub.docker.com/r/woodpeckerci/woodpecker-server)
 [![CI Status](https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg)](https://wp.laszlo.cloud/woodpecker-ci/woodpecker)
 
-![woodpecker](docs/docs/images/woodpecker.png)
+![woodpecker](docs/docs/woodpecker.png)
 
 ## Contribution
 
@@ -97,7 +97,7 @@ pipeline:
 
 ## Documentation
 
-https://woodpecker.laszlo.cloud
+https://woodpecker-ci.github.io/
 
 ## Who uses Woodpecker
 
