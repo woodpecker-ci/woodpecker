@@ -1,6 +1,6 @@
 # Woodpecker
 
-[Woodpecker](https://woodpecker.laszlo.cloud/) is a fork of the Drone CI system version 0.8, right before the 1.0 release and license changes
+[Woodpecker](https://woodpecker-ci.github.io/) is a fork of the Drone CI system version 0.8, right before the 1.0 release and license changes
 
 ## Installing Woodpecker server
 
@@ -12,7 +12,7 @@ kubectl create secret generic drone-secret \
   --from-literal=DRONE_SECRET=$(openssl rand -hex 32)
 ```
 
-[GitHub](https://woodpecker.laszlo.cloud/administration/github/)
+[GitHub](https://woodpecker-ci.github.io/docs/administration)
 
 ```
 kubectl create secret generic drone-github-client \
