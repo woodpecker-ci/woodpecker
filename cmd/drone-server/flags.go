@@ -93,7 +93,7 @@ var flags = []cli.Flag{
 		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",
-		Value:  "https://woodpecker.laszlo.cloud",
+		Value:  "https://woodpecker-ci.github.io/",
 	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",
