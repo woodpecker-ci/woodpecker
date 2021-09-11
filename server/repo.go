@@ -146,9 +146,6 @@ func PatchRepo(c *gin.Context) {
 	if in.BuildCounter != nil {
 		repo.Counter = *in.BuildCounter
 	}
-	if in.Fallback != nil {
-		repo.Fallback = *in.Fallback
-	}
 
 	err := store.UpdateRepo(c, repo)
 	if err != nil {
