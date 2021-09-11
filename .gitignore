@@ -40,3 +40,6 @@ server/swagger/files/*.json
 server/swagger/swagger_gen.go
 
 docs/venv
+
+dist/
+node_modules/
