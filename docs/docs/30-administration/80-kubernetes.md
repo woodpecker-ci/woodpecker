@@ -4,7 +4,45 @@ Woodpecker does not support Kubernetes natively, but being a container first CI 
 
 ## Deploy with HELM
 
-TODO
+### Preparation
+
+```shell
+# create secrets
+kubectl create secret generic drone-secret \
+  --namespace sre \
+  --from-literal=DRONE_SECRET=$(openssl rand -hex 32)
+
+kubectl create secret generic drone-github-client \
+  --namespace <namespace> \
+  --from-literal=DRONE_GITHUB_CLIENT=xxxxxxxx
+
+kubectl create secret generic drone-github-secret \
+  --namespace <namespace> \
+  --from-literal=DRONE_GITHUB_SECRET=xxxxxxxx
+
+# add helm repo
+helm repo add woodpecker https://woodpecker-ci.github.io/
+```
+
+### Woodpecker server
+
+```shell
+# Install
+helm upgrade --install woodpecker-server --namespace <namespace> woodpecker/woodpecker-server
+
+# Uninstall
+helm delete woodpecker-server
+```
+
+## Woodpecker agent
+
+```shell
+# Install
+helm upgrade --install woodpecker-agent --namespace <namespace> woodpecker/woodpecker-agent
+
+# Uninstall
+helm delete woodpecker-agent
+```
 
 ## Deploy with kubectl
 
