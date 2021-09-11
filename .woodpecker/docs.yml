@@ -14,9 +14,10 @@ pipeline:
       - GIT_USER=woodpecker-bot
       - DEPLOYMENT_BRANCH=master
     commands:
+      - apk add openssh-client git
       - mkdir -p $HOME/.ssh
       - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
-      - echo "$BOT_PRIVATE_KEY > $HOME/.ssh/id_rsa"
+      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
       - chmod 0600 $HOME/.ssh/id_rsa
       - cd docs/
       - yarn install --frozen-lockfile
