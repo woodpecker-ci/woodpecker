@@ -15,31 +15,41 @@ func TestFetch(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
-		name         string
-		repoConfig   string
-		repoFallback bool
-		fileMocks    []struct {
-			file []byte
-			err  error
-		}
-		dirMock struct {
-			files []*remote.FileMeta
-			err   error
-		}
+		name              string
+		repoConfig        string
+		files             []*remote.FileMeta
 		expectedFileNames []string
 		expectedError     bool
 	}{
 		{
-			name:         "Single .woodpecker.yml file",
-			repoConfig:   ".woodpecker.yml",
-			repoFallback: false,
-			fileMocks: []struct {
-				file []byte
-				err  error
-			}{
+			name:       "No special config with .woodpecker/ folder",
+			repoConfig: "",
+			files: []*remote.FileMeta{
 				{
-					file: []byte{},
-					err:  nil,
+					Name: ".woodpecker/text.txt",
+					Data: []byte{},
+				},
+				{
+					Name: ".woodpecker/release.yml",
+					Data: []byte{},
+				},
+				{
+					Name: ".woodpecker/image.png",
+					Data: []byte{},
+				},
+			},
+			expectedFileNames: []string{
+				".woodpecker/release.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "No special config with .woodpecker.yml file",
+			repoConfig: "",
+			files: []*remote.FileMeta{
+				{
+					Name: ".woodpecker.yml",
+					Data: []byte{},
 				},
 			},
 			expectedFileNames: []string{
@@ -48,51 +58,12 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:         "Folder .woodpecker/",
-			repoConfig:   ".woodpecker/",
-			repoFallback: false,
-			dirMock: struct {
-				files []*remote.FileMeta
-				err   error
-			}{
-				files: []*remote.FileMeta{
-					{
-						Name: ".woodpecker/text.txt",
-						Data: []byte{},
-					},
-					{
-						Name: ".woodpecker/release.yml",
-						Data: []byte{},
-					},
-					{
-						Name: ".woodpecker/image.png",
-						Data: []byte{},
-					},
-				},
-				err: nil,
-			},
-			expectedFileNames: []string{
-				".woodpecker/release.yml",
-			},
-			expectedError: false,
-		},
-		{
-			name:         "Requesting woodpecker-file but using fallback",
-			repoConfig:   ".woodpecker.yml",
-			repoFallback: true,
-			fileMocks: []struct {
-				file []byte
-				err  error
-			}{
-				// first call requesting regular woodpecker.yml
+			name:       "No special config with .drone.yml file",
+			repoConfig: "",
+			files: []*remote.FileMeta{
 				{
-					file: nil,
-					err:  errors.New("File not found"),
-				},
-				// fallback file call
-				{
-					file: []byte{},
-					err:  nil,
+					Name: ".drone.yml",
+					Data: []byte{},
 				},
 			},
 			expectedFileNames: []string{
@@ -101,24 +72,20 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:         "Requesting folder but using fallback",
-			repoConfig:   ".woodpecker/",
-			repoFallback: true,
-			fileMocks: []struct {
-				file []byte
-				err  error
-			}{
+			name:              "No special config without files and folder",
+			repoConfig:        "",
+			files:             []*remote.FileMeta{},
+			expectedFileNames: []string{},
+			expectedError:     true,
+		},
+		{
+			name:       "Special folder",
+			repoConfig: ".my-ci-folder/",
+			files: []*remote.FileMeta{
 				{
-					file: []byte{},
-					err:  nil,
+					Name: ".my-ci-folder/test.yml",
+					Data: []byte{},
 				},
-			},
-			dirMock: struct {
-				files []*remote.FileMeta
-				err   error
-			}{
-				files: []*remote.FileMeta{},
-				err:   errors.New("Dir not found"),
 			},
 			expectedFileNames: []string{
 				".drone.yml",
@@ -126,9 +93,62 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:         "Not found and disabled fallback",
-			repoConfig:   ".woodpecker.yml",
-			repoFallback: false,
+			name:       "Special subfolder",
+			repoConfig: ".my-ci-folder/my-config/",
+			files: []*remote.FileMeta{
+				{
+					Name: ".my-ci-folder/my-config/test.yml",
+					Data: []byte{},
+				},
+			},
+			expectedFileNames: []string{
+				".drone.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Special file",
+			repoConfig: ".config.yml",
+			files: []*remote.FileMeta{
+				{
+					Name: ".my-ci-folder/my-config/test.yml",
+					Data: []byte{},
+				},
+			},
+			expectedFileNames: []string{
+				".drone.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Special file inside subfolder",
+			repoConfig: ".my-ci-folder/sub-folder/config.yml",
+			files: []*remote.FileMeta{
+				{
+					Name: ".woodpecker.yml",
+					Data: []byte{},
+				},
+				{
+					Name: ".woodpecker/test.yml",
+					Data: []byte{},
+				},
+				{
+					Name: ".my-ci-folder/sub-folder/test.yml",
+					Data: []byte{},
+				},
+				{
+					Name: ".my-ci-folder/sub-folder/config.yml",
+					Data: []byte{},
+				},
+			},
+			expectedFileNames: []string{
+				".my-ci-folder/sub-folder/config.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Special file which does not exists",
+			repoConfig: ".config.yml",
 			fileMocks: []struct {
 				file []byte
 				err  error
@@ -151,13 +171,16 @@ func TestFetch(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig, Fallback: tt.repoFallback}
+			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
-			for _, fileMock := range tt.fileMocks {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fileMock.file, fileMock.err).Once()
+			for _, fileMock := range tt.files {
+				r.On("File", mock.Anything, mock.Anything, mock.Anything, fileMock.Name).Return(fileMock.Data, nil)
+				// r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tt.dirMock.files, tt.dirMock.err)
 			}
-			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tt.dirMock.files, tt.dirMock.err)
+
+			// File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error)
+			// Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*FileMeta, error)
 
 			configFetcher := server.NewConfigFetcher(
 				r,
