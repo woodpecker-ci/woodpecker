@@ -3,16 +3,32 @@ clone:
     image: plugins/git:next
 
 pipeline:
+  set-version:
+    image: alpine/helm:3.5.3
+    commands:
+      # use drone tag or 0.0.0 if not running on a tag
+      - export CHART_VERSION=${${DRONE_TAG##v}=0.0.0}
+      - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-agent/Chart.yaml
+      - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-server/Chart.yaml
+      - cat charts/woodpecker-agent/Chart.yaml
+      - cat charts/woodpecker-server/Chart.yaml
+    when:
+      path: "charts/*"
+
+  lint:
+    image: alpine/helm:3.5.3
+    commands:
+      - helm lint charts/woodpecker-agent/
+      - helm lint charts/woodpecker-server/
+    when:
+      path: "charts/*"
+
   release:
     image: quay.io/helmpack/chart-releaser:v1.2.1
     secrets:
       - source: github_token
         target: CR_TOKEN
     commands:
-      - sed -i "s/<version>/${DRONE_TAG##v}/g" charts/woodpecker-agent/Chart.yaml
-      - sed -i "s/<version>/${DRONE_TAG##v}/g" charts/woodpecker-server/Chart.yaml
-      - cat charts/woodpecker-agent/Chart.yaml
-      - cat charts/woodpecker-server/Chart.yaml
       - mkdir -p .cr-index
       - cr package charts/woodpecker-server
       - cr package charts/woodpecker-agent
@@ -20,17 +36,7 @@ pipeline:
       - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
-
-  lint:
-    image: alpine/helm:3.5.3
-    commands:
-      # set some dummy versions so we can lint the helm-charts
-      - sed -i "s/<version>/0.0.0/g" charts/woodpecker-agent/Chart.yaml
-      - sed -i "s/<version>/0.0.0/g" charts/woodpecker-server/Chart.yaml
-      - helm lint charts/woodpecker-agent/
-      - helm lint charts/woodpecker-server/
-    when:
-      event: tag
+      path: "charts/*"
 
 depends_on:
   - release
