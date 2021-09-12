@@ -8,17 +8,17 @@ Woodpecker does not support Kubernetes natively, but being a container first CI 
 
 ```shell
 # create secrets
-kubectl create secret generic drone-secret \
-  --namespace sre \
-  --from-literal=DRONE_SECRET=$(openssl rand -hex 32)
-
-kubectl create secret generic drone-github-client \
+kubectl create secret generic woodpecker-secret \
   --namespace <namespace> \
-  --from-literal=DRONE_GITHUB_CLIENT=xxxxxxxx
+  --from-literal=WOODPECKER_SECRET=$(openssl rand -hex 32)
 
-kubectl create secret generic drone-github-secret \
+kubectl create secret generic woodpecker-github-client \
   --namespace <namespace> \
-  --from-literal=DRONE_GITHUB_SECRET=xxxxxxxx
+  --from-literal=WOODPECKER_GITHUB_CLIENT=xxxxxxxx
+
+kubectl create secret generic woodpecker-github-secret \
+  --namespace <namespace> \
+  --from-literal=WOODPECKER_GITHUB_SECRET=xxxxxxxx
 
 # add helm repo
 helm repo add woodpecker https://woodpecker-ci.github.io/
