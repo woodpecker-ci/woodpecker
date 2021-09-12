@@ -1,0 +1,11 @@
+clone:
+  git:
+    image: plugins/git:next
+
+pipeline:
+  test-schema:
+    image: node:14-alpine
+    commands:
+      - apk add openssh-client git
+    when:
+      path: "docs/pipeline-schema/*"

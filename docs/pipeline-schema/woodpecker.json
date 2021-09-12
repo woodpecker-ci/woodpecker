@@ -1,0 +1,210 @@
+{
+  "title": "Woodpecker CI configuration file",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://woodpecker-ci.github.io/schema/woodpecker.json",
+  "description": "TODO https://woodpecker-ci.github.io/docs/usage/pipeline-syntax",
+  "type": "object",
+  "required": ["pipeline"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "clone": { "$ref": "#/definitions/clone" },
+    "pipeline": { "$ref": "#/definitions/pipeline" },
+    "services": { "$ref": "#/definitions/services" },
+    "workspace": { "$ref": "#/definitions/workspace" },
+    "matrix": { "$ref": "#/definitions/matrix" }
+  },
+  "definitions": {
+    "clone": {
+      "type": "object",
+      "description": "TODO",
+      "properties": {
+        "git": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "pipeline": {
+      "type": "object",
+      "description": "The pipeline section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax",
+      "additionalProperties": {
+        "$ref": "#/definitions/step"
+      },
+      "minProperties": 1
+    },
+    "step": {
+      "type": "object",
+      "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#steps",
+      "additionalProperties": true,
+      "TODO": "handle plugins",
+      "required": ["image", "commands"],
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-image"
+        },
+        "pull": {
+          "type": "boolean",
+          "description": "Always pull the latest image on pipeline execution Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-image"
+        },
+        "commands": {
+          "type": "array",
+          "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-commands",
+          "items": { "type": "string" }
+        },
+        "environment": {
+          "type": "array",
+          "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.github.io/docs/usage/environment",
+          "items": { "type": "string" }
+        },
+        "secrets": {
+          "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.github.io/docs/usage/secrets",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["source", "target"],
+                "properties": {
+                  "source": { "type": "string" },
+                  "target": { "type": "string" }
+                }
+              }
+            ]
+          }
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "group": {
+          "type": "string",
+          "description": "Execute multiple steps with the same group key in parallel. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-group---parallel-execution"
+        },
+        "volumes": {
+          "type": "string",
+          "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.github.io/docs/usage/volumes"
+        }
+      }
+    },
+    "step_when": {
+      "type": "object",
+      "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-when---conditional-execution",
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "type": "string",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#branch"
+        },
+        "event": {
+          "type": "array",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#event",
+          "items": {
+            "enum": ["push", "pull_request", "tag", "deployment"]
+          }
+        },
+        "tag": {
+          "type": "string",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#tag"
+        },
+        "status": {
+          "type": "array",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#status",
+          "items": {
+            "enum": ["changed", "success", "failure"]
+          }
+        },
+        "plattform": {
+          "type": "array",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#plattform",
+          "items": {
+            "type": "string"
+          }
+        },
+        "environment": {
+          "type": "string",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#environment"
+        },
+        "matrix": {
+          "type": "object",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#matrix",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "instance": {
+          "type": "string",
+          "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#instance"
+        },
+        "path": {
+          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#environment",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ignore_message": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "services": {
+      "type": "object",
+      "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/services",
+      "additionalProperties": true
+    },
+    "workspace": {
+      "type": "object",
+      "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#workspace",
+      "additionalProperties": true
+    },
+    "matrix": {
+      "type": "object",
+      "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/matrix-builds",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string" },
+            { "type": "integer" },
+            { "type": "number" }
+          ]
+        }
+      }
+    }
+  }
+}
