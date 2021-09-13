@@ -17,7 +17,7 @@ module.exports = {
     extraFileExtensions: ['.vue'],
   },
 
-  // plugins: ['@typescript-eslint', 'import', 'simple-import-sort'],
+  plugins: ['@typescript-eslint', 'import', 'simple-import-sort'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -54,6 +54,9 @@ module.exports = {
     'import/no-relative-parent-imports': 'error',
     'import/no-duplicates': 'error',
     'import/no-extraneous-dependencies': 'error',
+
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
 
     'promise/prefer-await-to-then': 'error',
     'promise/prefer-await-to-callbacks': 'error',
