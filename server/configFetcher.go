@@ -50,7 +50,7 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 					}
 				}
 			} else {
-				// no user defined config so try .woodpecker/ => .woodpecker.yml => .drone.yml
+				// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
 
 				// test .woodpecker/ folder
 				// if folder is not supported we will get a "Not implemented" error and continue
