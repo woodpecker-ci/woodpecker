@@ -83,6 +83,7 @@ func (db *datastore) RepoBatch(repos []*model.Repo) error {
 			repo.IsPrivate,
 			repo.IsTrusted,
 			repo.IsActive,
+			repo.AllowPull,
 			repo.Hash,
 			repo.Kind,
 			repo.Config,

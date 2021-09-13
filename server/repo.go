@@ -42,6 +42,9 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
+	if !repo.AllowPull {
+		repo.AllowPull = true
+	}
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
 		if repo.IsPrivate {
@@ -109,6 +112,9 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
+	if in.AllowPull != nil {
+		repo.AllowPull = *in.AllowPull
+	}
 	if in.IsGated != nil {
 		repo.IsGated = *in.IsGated
 	}

@@ -135,6 +135,12 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
+	if build.Event == model.EventPull && !repo.AllowPull {
+		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName, build.Event)
+		c.Writer.WriteHeader(204)
+		return
+	}
+
 	user, err := store.GetUser(c, repo.UserID)
 	if err != nil {
 		logrus.Errorf("failure to find repo owner %s. %s", repo.FullName, err)

@@ -47,6 +47,7 @@ type Repo struct {
 	IsStarred  bool   `json:"starred,omitempty"        meddler:"-"`
 	IsGated    bool   `json:"gated"                    meddler:"repo_gated"`
 	IsActive   bool   `json:"active"                   meddler:"repo_active"`
+	AllowPull  bool   `json:"allow_pr"                 meddler:"repo_allow_pr"`
 	Counter    int    `json:"last_build"               meddler:"repo_counter"`
 	Config     string `json:"config_file"              meddler:"repo_config_path"`
 	Hash       string `json:"-"                        meddler:"repo_hash"`
@@ -97,6 +98,7 @@ type RepoPatch struct {
 	IsGated      *bool   `json:"gated,omitempty"`
 	Timeout      *int64  `json:"timeout,omitempty"`
 	Visibility   *string `json:"visibility,omitempty"`
+	AllowPull    *bool   `json:"allow_pr,omitempty"`
 	BuildCounter *int    `json:"build_counter,omitempty"`
 	Fallback     *bool   `json:"fallback,omitempty"`
 }
