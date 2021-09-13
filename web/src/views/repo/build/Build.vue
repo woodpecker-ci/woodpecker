@@ -40,28 +40,28 @@
         </div>
       </FluidContainer>
 
-      <BuildProcs :build="build" v-model:selected-proc-id="selectedProcId" />
+      <BuildProcs v-model:selected-proc-id="selectedProcId" :build="build" />
     </div>
   </template>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, toRef, watch } from 'vue';
-import BuildStore from '~/store/builds';
-import { Repo } from '~/lib/api/types';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import { computed, defineComponent, inject, onMounted, PropType, Ref, toRef, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import Button from '~/components/atomic/Button.vue';
-import BuildItem from '~/components/repo/BuildItem.vue';
-import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
-import useBuild from '~/compositions/useBuild';
-import { useRouter, useRoute } from 'vue-router';
-import BuildProcs from '~/components/repo/BuildProcs.vue';
-import useApiClient from '~/compositions/useApiClient';
-import { findProc } from '~/utils/helpers';
-import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import useNotifications from '~/compositions/useNotifications';
+import IconButton from '~/components/atomic/IconButton.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
+import BuildProcs from '~/components/repo/BuildProcs.vue';
+import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
+import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import useBuild from '~/compositions/useBuild';
+import useNotifications from '~/compositions/useNotifications';
+import { Repo } from '~/lib/api/types';
+import BuildStore from '~/store/builds';
+import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'Build',
@@ -69,7 +69,6 @@ export default defineComponent({
   components: {
     FluidContainer,
     Button,
-    BuildItem,
     BuildStatusIcon,
     BuildProcs,
     IconButton,
@@ -77,21 +76,30 @@ export default defineComponent({
   },
 
   props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     repoOwner: {
       type: String,
       required: true,
     },
+
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     repoName: {
       type: String,
       required: true,
     },
+
     buildId: {
       type: String,
       required: true,
     },
+
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     procId: {
-      type: String,
-      required: false,
+      type: String as PropType<string | null>,
+      default: null,
     },
   },
 
@@ -117,7 +125,7 @@ export default defineComponent({
     const selectedProcId = computed({
       get() {
         if (procId.value) {
-          return parseInt(procId.value);
+          return parseInt(procId.value, 10);
         }
 
         if (!build.value || !build.value.procs || !build.value.procs[0].children) {
@@ -126,12 +134,12 @@ export default defineComponent({
 
         return build.value.procs[0].children[0].pid;
       },
-      set(selectedProcId: number | null) {
-        if (!selectedProcId) {
+      set(_selectedProcId: number | null) {
+        if (!_selectedProcId) {
           return;
         }
 
-        router.replace({ params: { ...route.params, procId: selectedProcId } });
+        router.replace({ params: { ...route.params, procId: `${selectedProcId.value}` } });
       },
     });
 
@@ -140,7 +148,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value));
+      await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10));
     }
 
     async function cancelBuild() {
@@ -159,7 +167,7 @@ export default defineComponent({
         throw new Error('Unexpected: Proc not found');
       }
 
-      await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value), proc.ppid);
+      await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), proc.ppid);
       notifications.notify({ title: 'Build canceled', type: 'success' });
     }
 

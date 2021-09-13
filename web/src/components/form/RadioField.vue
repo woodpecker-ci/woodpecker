@@ -1,6 +1,7 @@
 <template>
   <div v-for="option in options" :key="option.value" class="flex items-center mb-2">
     <input
+      :id="`radio-${id}-${option.value}`"
       type="radio"
       class="
         radio
@@ -12,10 +13,9 @@
         h-5
         checked:bg-green checked:border-green checked:text-white
       "
-      @click="innerValue = option.value"
-      :id="`radio-${id}-${option.value}`"
       :value="option.value"
       :checked="innerValue.includes(option.value)"
+      @click="innerValue = option.value"
     />
     <label class="ml-4 cursor-pointer" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
   </div>

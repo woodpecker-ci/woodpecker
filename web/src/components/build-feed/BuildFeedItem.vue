@@ -20,10 +20,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType, toRef } from 'vue';
+
 import Icon from '~/components/atomic/Icon.vue';
 import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
-import { BuildFeed } from '~/lib/api/types';
 import useBuild from '~/compositions/useBuild';
+import { BuildFeed } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'BuildFeedItem',

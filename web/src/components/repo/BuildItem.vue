@@ -17,7 +17,7 @@
           class="w-6"
           src="../../assets/pecking_woodpecker.gif"
         />
-        <BuildStatusIcon class="mx-3" v-else :build="build" />
+        <BuildStatusIcon v-else class="mx-3" :build="build" />
       </div>
     </div>
 
@@ -57,11 +57,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType, toRef } from 'vue';
-import { Build } from '~/lib/api/types';
-import useBuild from '~/compositions/useBuild';
-import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
+
 import Icon from '~/components/atomic/Icon.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
+import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
+import useBuild from '~/compositions/useBuild';
+import { Build } from '~/lib/api/types';
+
 import { buildStatusColors } from './build-status';
 
 export default defineComponent({

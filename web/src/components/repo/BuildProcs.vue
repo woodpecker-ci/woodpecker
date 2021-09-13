@@ -23,7 +23,7 @@
           />
           <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-status-blue rounded-full" />
           <span class="ml-2">{{ job.name }}</span>
-          <span class="ml-auto text-gray-500 text-sm" v-if="job.start_time !== undefined">{{ jobDuration(job) }}</span>
+          <span v-if="job.start_time !== undefined" class="ml-auto text-gray-500 text-sm">{{ jobDuration(job) }}</span>
         </div>
       </div>
     </div>
@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+
 import BuildLogs from '~/components/repo/BuildLogs.vue';
 import { Build, BuildProc } from '~/lib/api/types';
 import { durationAsNumber } from '~/utils/duration';
@@ -50,6 +51,7 @@ export default defineComponent({
       type: Object as PropType<Build>,
       required: true,
     },
+
     selectedProcId: {
       type: Number as PropType<number | null>,
       required: false,

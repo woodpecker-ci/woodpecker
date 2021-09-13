@@ -1,8 +1,9 @@
 import { computed, Ref } from 'vue';
+
 import { Build } from '~/lib/api/types';
-import timeAgo from '~/utils/timeAgo';
-import { convertEmojis } from '~/utils/emoji';
 import { prettyDuration } from '~/utils/duration';
+import { convertEmojis } from '~/utils/emoji';
+import timeAgo from '~/utils/timeAgo';
 
 export default (build: Ref<Build | undefined>) => {
   const since = computed(() => {

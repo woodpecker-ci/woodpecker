@@ -25,27 +25,27 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
+import IconGitea from '~icons/cib/gitea';
+import IconSettings from '~icons/clarity/settings-solid';
+import IconStatusRunning from '~icons/entypo/dots-two-vertical';
+import IconStatusStarted from '~icons/entypo/dots-two-vertical';
+import IconTrash from '~icons/gg/trash';
 import IconDuration from '~icons/ic/sharp-timelapse';
+import IconBack from '~icons/iconoir/arrow-left';
 import IconSince from '~icons/mdi/clock-time-eight-outline';
+import IconGithub from '~icons/mdi/github';
 import IconBranch from '~icons/mdi/source-branch';
 import IconCommit from '~icons/mdi/source-commit';
 import IconTag from '~icons/mdi/tag-outline';
-import IconBack from '~icons/iconoir/arrow-left';
-import IconGithub from '~icons/mdi/github';
-import IconRepo from '~icons/teenyicons/git-solid';
-import IconSettings from '~icons/clarity/settings-solid';
+import IconStatusKilled from '~icons/octicon/skip-24';
+import IconStatusSuccess from '~icons/ph/check-circle';
 import IconStatusBlocked from '~icons/ph/hand';
 import IconStatusDeclined from '~icons/ph/hand';
+import IconStatusPending from '~icons/ph/hourglass';
+import IconStatusSkipped from '~icons/ph/prohibit';
 import IconStatusError from '~icons/ph/warning';
 import IconStatusFailure from '~icons/ph/x-circle';
-import IconStatusKilled from '~icons/octicon/skip-24';
-import IconStatusPending from '~icons/ph/hourglass';
-import IconStatusRunning from '~icons/entypo/dots-two-vertical';
-import IconStatusSkipped from '~icons/ph/prohibit';
-import IconStatusStarted from '~icons/entypo/dots-two-vertical';
-import IconStatusSuccess from '~icons/ph/check-circle';
-import IconTrash from '~icons/gg/trash';
-import IconGitea from '~icons/cib/gitea';
+import IconRepo from '~icons/teenyicons/git-solid';
 
 type IconNames =
   | 'duration'

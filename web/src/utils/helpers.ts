@@ -42,11 +42,11 @@ export function isProcRunning(proc: BuildProc): boolean {
  * @param {Object} b - A build.
  * @returns {number}
  */
-export function compareBuilds(a: Build, b: Build) {
+export function compareBuilds(a: Build, b: Build): number {
   return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
 }
 
-export function isBuildActive(build: Build) {
+export function isBuildActive(build: Build): boolean {
   return ['pending', 'running', 'started'].includes(build.status);
 }
 

@@ -5,7 +5,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, ref, Ref, toRef } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref, ref, toRef } from 'vue';
+
 import { Tab } from '~/components/atomic/tabs/types';
 
 export default defineComponent({
@@ -39,9 +40,7 @@ export default defineComponent({
       tabs.value.push(tab.value);
     });
 
-    const isActive = computed(() => {
-      return tab && tab.value.id === activeTab.value;
-    });
+    const isActive = computed(() => tab.value && tab.value.id === activeTab.value);
 
     return { isActive };
   },

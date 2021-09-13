@@ -12,12 +12,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+
 import Button from '~/components/atomic/Button.vue';
+import BuildFeedItem from '~/components/build-feed/BuildFeedItem.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import useBuildFeed from '~/compositions/useBuildFeed';
 import { convertEmojis } from '~/utils/emoji';
-import BuildFeedItem from '~/components/build-feed/BuildFeedItem.vue';
 
 export default defineComponent({
   name: 'BuildFeedSidebar',

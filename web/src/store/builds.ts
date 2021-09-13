@@ -1,8 +1,9 @@
-import { computed, toRef, Ref, ref } from 'vue';
 import { defineStore } from 'pinia';
+import { computed, Ref, ref, toRef } from 'vue';
+
 import useApiClient from '~/compositions/useApiClient';
-import { repoSlug, compareBuilds, isBuildActive } from '~/utils/helpers';
 import { Build, BuildFeed, BuildProc } from '~/lib/api/types';
+import { compareBuilds, isBuildActive, repoSlug } from '~/utils/helpers';
 
 const apiClient = useApiClient();
 
@@ -26,6 +27,7 @@ export default defineStore({
   actions: {
     // setters
     setBuild(owner: string, repo: string, build: Build) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const _repoSlug = repoSlug(owner, repo);
       if (!this.builds[_repoSlug]) {
         this.builds[_repoSlug] = {};
@@ -75,9 +77,7 @@ export default defineStore({
     },
     getBuild(owner: Ref<string>, repo: Ref<string>, buildNumber: Ref<string>) {
       const builds = this.getBuilds(owner, repo);
-      return computed(() => {
-        return (builds.value || {})[parseInt(buildNumber.value)];
-      });
+      return computed(() => (builds.value || {})[parseInt(buildNumber.value, 10)]);
     },
 
     // loading

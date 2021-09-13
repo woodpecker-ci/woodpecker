@@ -8,7 +8,7 @@
     <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
       exit code {{ proc.exit_code }}
     </div>
-    <template v-if="!proc?.start_time"> </template>
+    <template v-if="!proc?.start_time" />
     <div class="text-gray-300 mx-auto">
       <span v-if="proc?.state === 'skipped'" class="text-orange-300">This step has been cancled.</span>
       <span v-else-if="!proc?.start_time">This step hasn't started yet.</span>
@@ -17,10 +17,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
-import { Build, Repo } from '~/lib/api/types';
 import AnsiConvert from 'ansi-to-html';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
+
 import useBuildProc from '~/compositions/useBuildProc';
+import { Build, Repo } from '~/lib/api/types';
 import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
@@ -33,6 +34,7 @@ export default defineComponent({
       type: Object as PropType<Build>,
       required: true,
     },
+
     procId: {
       type: Number,
       required: true,
@@ -45,9 +47,9 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const buildProc = useBuildProc();
 
-    var ansiConvert = new AnsiConvert();
+    const ansiConvert = new AnsiConvert();
     const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
-    const proc = computed(() => build && findProc(build.value.procs || [], procId.value));
+    const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
 
     function loadBuildProc() {
       if (!repo) {

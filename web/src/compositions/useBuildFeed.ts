@@ -1,6 +1,7 @@
 import { computed, toRef } from 'vue';
-import BuildStore from '~/store/builds';
+
 import useUserConfig from '~/compositions/useUserConfig';
+import BuildStore from '~/store/builds';
 
 const { userConfig, setUserConfig } = useUserConfig();
 const isOpen = computed(() => userConfig.value.isBuildFeedOpen);

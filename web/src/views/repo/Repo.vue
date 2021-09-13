@@ -6,9 +6,9 @@
         <img :src="badgeUrl" />
       </a>
       <a :href="repo.link_url" target="_blank" class="flex ml-4 text-gray-400 hover:text-gray-500">
-        <Icon name="github" v-if="repo.link_url.startsWith('https://github.com/')" />
-        <Icon name="gitea" v-if="repo.link_url.startsWith('https://github.com/')" />
-        <Icon name="repo" v-else />
+        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
+        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="gitea" />
+        <Icon v-else name="repo" />
       </a>
       <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
@@ -29,13 +29,14 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, Ref } from 'vue';
-import { Repo, Build } from '~/lib/api/types';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import BuildItem from '~/components/repo/BuildItem.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
+
 import Icon from '~/components/atomic/Icon.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Panel from '~/components/layout/Panel.vue';
+import BuildItem from '~/components/repo/BuildItem.vue';
 import useAuthentication from '~/compositions/useAuthentication';
+import { Build, Repo } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'Repo',

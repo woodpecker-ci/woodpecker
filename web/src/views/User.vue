@@ -29,8 +29,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+
 import Button from '~/components/atomic/Button.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
 
 export default defineComponent({
@@ -49,6 +50,7 @@ export default defineComponent({
       token.value = await apiClient.getToken();
     });
 
+    // eslint-disable-next-line no-restricted-globals
     const address = `${location.protocol}//${location.host}`;
 
     const usageWithShell = computed(() => {
@@ -58,6 +60,7 @@ export default defineComponent({
     });
 
     const usageWithCurl =
+      // eslint-disable-next-line no-template-curly-in-string
       '# do shell setup steps before\ncurl -i ${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer ${WOODPECKER_SERVER}"';
 
     const usageWithCli = '# do shell setup steps before\nwoodpecker info';

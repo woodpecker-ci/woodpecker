@@ -18,7 +18,7 @@ export function encodeQueryString(_params: Record<string, string | number | bool
         .sort()
         .map((key) => {
           const val = params[key];
-          return encodeURIComponent(key) + '=' + encodeURIComponent(val);
+          return `${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
         })
         .join('&')
     : '';
@@ -26,8 +26,11 @@ export function encodeQueryString(_params: Record<string, string | number | bool
 
 export default class ApiClient {
   server: string;
+
   token: string | null;
+
   csrf: string | null;
+
   onerror: ((err: ApiError) => void) | undefined;
 
   constructor(server: string, token: string | null, csrf: string | null) {
@@ -37,12 +40,12 @@ export default class ApiClient {
   }
 
   private _request(method: string, path: string, data: unknown): Promise<any> {
-    var endpoint = `${this.server}${path}`;
-    var xhr = new XMLHttpRequest();
+    const endpoint = `${this.server}${path}`;
+    const xhr = new XMLHttpRequest();
     xhr.open(method, endpoint, true);
 
     if (this.token) {
-      xhr.setRequestHeader('Authorization', 'Bearer ' + this.token);
+      xhr.setRequestHeader('Authorization', `Bearer ${this.token}`);
     }
 
     if (method !== 'GET' && this.csrf) {
@@ -102,15 +105,15 @@ export default class ApiClient {
   }
 
   _subscribe(path: string, callback: (data: any) => void, opts = { reconnect: true }) {
-    var query = encodeQueryString({
+    const query = encodeQueryString({
       access_token: this.token,
     });
     path = this.server ? this.server + path : path;
-    path = this.token ? path + '?' + query : path;
+    path = this.token ? `${path}?${query}` : path;
 
-    var events = new EventSource(path);
+    const events = new EventSource(path);
     events.onmessage = (event) => {
-      var data = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
       callback(data);
     };
 

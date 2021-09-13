@@ -22,6 +22,7 @@
 <script lang="ts">
 import { defineComponent, ExtractDefaultPropTypes, PropType } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
+
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 

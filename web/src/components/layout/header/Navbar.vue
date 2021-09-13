@@ -21,10 +21,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import useConfig from '~/compositions/useConfig';
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
+
 import ActiveBuilds from './ActiveBuilds.vue';
 
 export default defineComponent({

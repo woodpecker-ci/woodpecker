@@ -3,7 +3,7 @@
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <IconButton :to="{ name: 'repos' }" icon="back" />
       <h1 class="text-xl ml-2">Add repository</h1>
-      <Button class="ml-auto" @click="reloadRepos" text="Reload repositories" />
+      <Button class="ml-auto" text="Reload repositories" @click="reloadRepos" />
     </div>
 
     <div class="space-y-4">
@@ -16,7 +16,7 @@
       >
         <span>{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto">Already enabled</span>
-        <Button v-if="!repo.active" class="ml-auto" @click="activateRepo(repo)" text="Enable" />
+        <Button v-if="!repo.active" class="ml-auto" text="Enable" @click="activateRepo(repo)" />
       </ListItem>
     </div>
   </FluidContainer>
@@ -24,15 +24,15 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import Button from '~/components/atomic/Button.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
-import Button from '~/components/atomic/Button.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import Icon from '~/components/atomic/Icon.vue';
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'RepoAdd',
@@ -42,7 +42,6 @@ export default defineComponent({
     FluidContainer,
     ListItem,
     IconButton,
-    Icon,
   },
 
   setup() {

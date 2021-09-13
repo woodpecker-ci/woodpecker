@@ -3,23 +3,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, onMounted, toRef, watch } from 'vue';
-import RepoStore from '~/store/repos';
+import { defineComponent, onMounted, provide, toRef, watch } from 'vue';
+
 import BuildStore from '~/store/builds';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import Button from '~/components/atomic/Button.vue';
-import BuildItem from '~/components/repo/BuildItem.vue';
+import RepoStore from '~/store/repos';
 
 export default defineComponent({
   name: 'RepoWrapper',
 
-  components: { FluidContainer, Button, BuildItem },
-
   props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     repoOwner: {
       type: String,
       required: true,
     },
+
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     repoName: {
       type: String,
       required: true,

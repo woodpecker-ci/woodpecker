@@ -1,6 +1,5 @@
 <template>
   <div
-    @click="toggle"
     class="
       flex
       rounded-full
@@ -17,19 +16,21 @@
     :class="{
       spinner: activeBuilds.length !== 0,
     }"
+    @click="toggle"
   >
-    <div class="spinner-ring ring1"></div>
-    <div class="spinner-ring ring2"></div>
-    <div class="spinner-ring ring3"></div>
-    <div class="spinner-ring ring4"></div>
+    <div class="spinner-ring ring1" />
+    <div class="spinner-ring ring2" />
+    <div class="spinner-ring ring3" />
+    <div class="spinner-ring ring4" />
     {{ activeBuilds.length || 0 }}
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+
 import Button from '~/components/atomic/Button.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
 import useBuildFeed from '~/compositions/useBuildFeed';
 

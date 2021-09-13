@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
-import path from 'path';
 import vue from '@vitejs/plugin-vue';
-import WindiCSS from 'vite-plugin-windicss';
+import path from 'path';
 import Icons from 'unplugin-icons/vite';
+import { defineConfig } from 'vite';
+import WindiCSS from 'vite-plugin-windicss';
 
 // https://vitejs.dev/config/
 export default defineConfig({

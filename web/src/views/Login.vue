@@ -17,10 +17,11 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, PropType, ref } from 'vue';
-import Button from '~/components/atomic/Button.vue';
-import useAuthentication from '~/compositions/useAuthentication';
 import { useRoute, useRouter } from 'vue-router';
+
+import Button from '~/components/atomic/Button.vue';
 import Panel from '~/components/layout/Panel.vue';
+import useAuthentication from '~/compositions/useAuthentication';
 
 const authErrorMessages = {
   oauth_error: 'Error while authenticating against OAuth provider',

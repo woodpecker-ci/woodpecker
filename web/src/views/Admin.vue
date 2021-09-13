@@ -4,6 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
+
 import useAuthentication from '~/compositions/useAuthentication';
 import router from '~/router';
 

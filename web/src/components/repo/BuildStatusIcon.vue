@@ -16,9 +16,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Build } from '~/lib/api/types';
+
 import Icon from '~/components/atomic/Icon.vue';
-import { buildStatusColors, buildStatusAnimations } from './build-status';
+import { Build } from '~/lib/api/types';
+
+import { buildStatusAnimations, buildStatusColors } from './build-status';
 
 export default defineComponent({
   name: 'BuildStatusIcon',

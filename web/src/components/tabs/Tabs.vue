@@ -21,6 +21,7 @@
 <script lang="ts">
 import { defineComponent, provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
 import { Tab } from '~/components/atomic/tabs/types';
 
 export default defineComponent({
@@ -40,7 +41,7 @@ export default defineComponent({
         return;
       }
 
-      if (activeTab === undefined) {
+      if (activeTab.value === undefined) {
         throw new Error('Please wrap this "Tab"-component inside a "Tabs" list.');
       }
 

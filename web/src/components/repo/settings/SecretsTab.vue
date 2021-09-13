@@ -2,8 +2,8 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <h1 class="text-xl ml-2">Secrets</h1>
-      <Button v-if="showAddSecret" class="ml-auto" @click="showAddSecret = false" text="Show secrets" />
-      <Button v-else class="ml-auto" @click="showAddSecret = true" text="Add secret" />
+      <Button v-if="showAddSecret" class="ml-auto" text="Show secrets" @click="showAddSecret = false" />
+      <Button v-else class="ml-auto" text="Add secret" @click="showAddSecret = true" />
     </div>
 
     <div v-if="!showAddSecret" class="space-y-4">
@@ -34,7 +34,7 @@
         </InputField>
 
         <InputField label="Available at following events">
-          <CheckboxesField :options="secretEventsOptions" v-model="secret.event" />
+          <CheckboxesField v-model="secret.event" :options="secretEventsOptions" />
         </InputField>
 
         <Button type="submit" text="Add secret" />
@@ -44,19 +44,20 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, inject, onMounted, Ref } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
-import useNotifications from '~/compositions/useNotifications';
-import Panel from '~/components/layout/Panel.vue';
+import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+
 import Button from '~/components/atomic/Button.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import InputField from '~/components/form/InputField.vue';
-import TextField from '~/components/form/TextField.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import { CheckboxOption } from '~/components/form/form.types';
+import InputField from '~/components/form/InputField.vue';
+import TextField from '~/components/form/TextField.vue';
+import Panel from '~/components/layout/Panel.vue';
+import useApiClient from '~/compositions/useApiClient';
+import useNotifications from '~/compositions/useNotifications';
+import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
   name: '',

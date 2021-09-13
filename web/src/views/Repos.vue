@@ -20,10 +20,11 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
+
 import Button from '~/components/atomic/Button.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import RepoStore from '~/store/repos';
-import ListItem from '~/components/atomic/ListItem.vue';
 
 export default defineComponent({
   name: 'Repos',
@@ -36,7 +37,7 @@ export default defineComponent({
 
   setup() {
     const repoStore = RepoStore();
-    const repos = repoStore.repos;
+    const { repos } = repoStore;
 
     onMounted(async () => {
       await repoStore.loadRepos();

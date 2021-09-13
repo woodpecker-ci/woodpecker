@@ -1,25 +1,27 @@
 import humanizeDuration from 'humanize-duration';
 
-const en_short = {
-  w: (count?: number) => 'w',
-  d: (count?: number) => 'd',
-  h: (count?: number) => 'h',
-  m: (count?: number) => 'min',
-  s: (count?: number) => 'sec',
+const enShort = {
+  w: () => 'w',
+  d: () => 'd',
+  h: () => 'h',
+  m: () => 'min',
+  s: () => 'sec',
 };
 const durationOptions: humanizeDuration.HumanizerOptions = {
   round: true,
-  languages: { en_short },
+  languages: { en_short: enShort },
   language: 'en_short',
 };
 
-export function prettyDuration(durationMs: number) {
+export function prettyDuration(durationMs: number): string {
   return humanizeDuration(durationMs, durationOptions);
 }
 
 function leadingZeros(n: number, length: number): string {
   let res = n.toString();
-  while (res.length < length) res = '0' + res;
+  while (res.length < length) {
+    res = `0${res}`;
+  }
   return res;
 }
 

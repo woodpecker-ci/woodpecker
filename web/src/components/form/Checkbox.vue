@@ -1,6 +1,7 @@
 <template>
   <div class="flex items-center mb-2">
     <input
+      :id="`checkbox-${id}`"
       type="checkbox"
       class="
         checkbox
@@ -12,9 +13,8 @@
         h-5
         checked:bg-green checked:border-green checked:text-white
       "
-      @click="innerValue = !innerValue"
-      :id="`checkbox-${id}`"
       :checked="innerValue"
+      @click="innerValue = !innerValue"
     />
     <label v-if="label" class="ml-4 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
   </div>

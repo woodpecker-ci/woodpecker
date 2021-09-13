@@ -54,6 +54,8 @@ module.exports = {
     'import/no-relative-parent-imports': 'error',
     'import/no-duplicates': 'error',
     'import/no-extraneous-dependencies': 'error',
+    'import/extensions': 'off',
+    'import/prefer-default-export': 'off',
 
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
@@ -61,6 +63,7 @@ module.exports = {
     'promise/prefer-await-to-then': 'error',
     'promise/prefer-await-to-callbacks': 'error',
 
+    'no-underscore-dangle': 'off',
     'no-else-return': ['error', { allowElseIf: false }],
     'no-return-assign': ['error', 'always'],
     'no-return-await': 'error',

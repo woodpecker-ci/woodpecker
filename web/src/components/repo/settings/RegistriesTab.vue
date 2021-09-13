@@ -2,8 +2,8 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
       <h1 class="text-xl ml-2">Registries</h1>
-      <Button v-if="showAddRegistry" class="ml-auto" @click="showAddRegistry = false" text="Show registries" />
-      <Button v-else class="ml-auto" @click="showAddRegistry = true" text="Add registry" />
+      <Button v-if="showAddRegistry" class="ml-auto" text="Show registries" @click="showAddRegistry = false" />
+      <Button v-else class="ml-auto" text="Add registry" @click="showAddRegistry = true" />
     </div>
 
     <div v-if="!showAddRegistry" class="space-y-4">
@@ -36,18 +36,19 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, inject, onMounted, Ref } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo } from '~/lib/api/types';
-import useNotifications from '~/compositions/useNotifications';
-import Panel from '~/components/layout/Panel.vue';
+import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+
 import Button from '~/components/atomic/Button.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import { Registry } from '~/lib/api/types/registry';
+import IconButton from '~/components/atomic/IconButton.vue';
+import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
+import Panel from '~/components/layout/Panel.vue';
+import useApiClient from '~/compositions/useApiClient';
+import useNotifications from '~/compositions/useNotifications';
+import { Repo } from '~/lib/api/types';
+import { Registry } from '~/lib/api/types/registry';
 
 export default defineComponent({
   name: 'RegistriesTab',

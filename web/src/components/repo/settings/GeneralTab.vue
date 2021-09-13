@@ -47,20 +47,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref, Ref } from 'vue';
-import useApiClient from '~/compositions/useApiClient';
-import { Repo, RepoVisibility, RepoSettings } from '~/lib/api/types';
-import Button from '~/components/atomic/Button.vue';
+import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import useNotifications from '~/compositions/useNotifications';
-import Panel from '~/components/layout/Panel.vue';
-import InputField from '~/components/form/InputField.vue';
-import TextField from '~/components/form/TextField.vue';
-import RadioField from '~/components/form/RadioField.vue';
-import { RadioOption } from '~/components/form/form.types';
-import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import NumberField from '~/components/form/NumberField.vue';
+
+import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
+import { RadioOption } from '~/components/form/form.types';
+import InputField from '~/components/form/InputField.vue';
+import NumberField from '~/components/form/NumberField.vue';
+import RadioField from '~/components/form/RadioField.vue';
+import TextField from '~/components/form/TextField.vue';
+import Panel from '~/components/layout/Panel.vue';
+import useApiClient from '~/compositions/useApiClient';
+import useNotifications from '~/compositions/useNotifications';
+import { Repo, RepoSettings, RepoVisibility } from '~/lib/api/types';
 import RepoStore from '~/store/repos';
 
 const projectVisibilityOptions: RadioOption[] = [

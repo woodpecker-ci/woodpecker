@@ -19,8 +19,9 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
-import Navbar from '~/components/layout/header/Navbar.vue';
+
 import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
+import Navbar from '~/components/layout/header/Navbar.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 

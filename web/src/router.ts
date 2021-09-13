@@ -1,5 +1,6 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+
 import useAuthentication from './compositions/useAuthentication';
 
 const routes: RouteRecordRaw[] = [

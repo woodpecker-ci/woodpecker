@@ -28,8 +28,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, onMounted, Ref } from 'vue';
-import { Repo } from '~/lib/api/types';
+
 import Panel from '~/components/layout/Panel.vue';
+import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'BadgeTab',

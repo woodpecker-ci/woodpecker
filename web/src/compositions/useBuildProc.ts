@@ -1,6 +1,8 @@
 import { ref } from 'vue';
-import { BuildProc, BuildLog } from '~/lib/api/types';
+
+import { BuildLog, BuildProc } from '~/lib/api/types';
 import { isProcFinished, isProcRunning } from '~/utils/helpers';
+
 import useApiClient from './useApiClient';
 
 const apiClient = useApiClient();

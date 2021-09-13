@@ -1,7 +1,8 @@
-import useApiClient from './useApiClient';
-import RepoStore from '~/store/repos';
 import BuildStore from '~/store/builds';
+import RepoStore from '~/store/repos';
 import { repoSlug } from '~/utils/helpers';
+
+import useApiClient from './useApiClient';
 
 const apiClient = useApiClient();
 let initialized = false;

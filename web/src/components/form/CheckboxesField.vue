@@ -4,16 +4,16 @@
     :key="option.value"
     :model-value="innerValue.includes(option.value)"
     :label="option.text"
-    @update:model-value="clickOption(option)"
     class="mb-2"
+    @update:model-value="clickOption(option)"
   />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRef } from 'vue';
 
-import { CheckboxOption } from './form.types';
 import Checkbox from './Checkbox.vue';
+import { CheckboxOption } from './form.types';
 
 export default defineComponent({
   name: 'CheckboxField',
