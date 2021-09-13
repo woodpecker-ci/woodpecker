@@ -47,6 +47,12 @@ var flags = []cli.Flag{
 		Name:   "server-key",
 		Usage:  "server ssl key path",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_GRPC_ADDR",
+		Name:   "grpc-addr",
+		Usage:  "grpc address",
+		Value:  ":9000",
+	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_LETS_ENCRYPT,WOODPECKER_LETS_ENCRYPT",
 		Name:   "lets-encrypt",
@@ -93,7 +99,7 @@ var flags = []cli.Flag{
 		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",
-		Value:  "https://woodpecker.laszlo.cloud",
+		Value:  "https://woodpecker-ci.github.io/",
 	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",

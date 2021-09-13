@@ -17,9 +17,6 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories
-vendor/
-
 ### Frontend ###
 web/node_modules
 web/dist/files
@@ -43,3 +40,6 @@ server/swagger/files/*.json
 server/swagger/swagger_gen.go
 
 docs/venv
+
+dist/
+node_modules/
