@@ -101,4 +101,9 @@ var flags = []cli.Flag{
 		Usage:  "should the grpc server certificate be verified, only valid when DRONE_GRPC_SECURE is true",
 		EnvVar: "DRONE_GRPC_VERIFY,WOODPECKER_GRPC_VERIFY",
 	},
+	cli.BoolTFlag{
+		Name:   "use-podman",
+		Usage:  "use podman as backend instead of docker",
+		EnvVar: "WOODPECKER_AGENT_PODMAN",
+	},
 }

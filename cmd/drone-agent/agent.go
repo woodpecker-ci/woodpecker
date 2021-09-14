@@ -35,6 +35,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/podman"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
@@ -137,7 +138,7 @@ func loop(c *cli.Context) error {
 					filter:   filter,
 					hostname: hostname,
 				}
-				if err := r.run(ctx); err != nil {
+				if err := r.run(ctx, c.BoolT("use-podman")); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
@@ -163,7 +164,7 @@ type runner struct {
 	hostname string
 }
 
-func (r *runner) run(ctx context.Context) error {
+func (r *runner) run(ctx context.Context, usePodman bool) error {
 	log.Debug().
 		Msg("request next execution")
 
@@ -201,14 +202,19 @@ func (r *runner) run(ctx context.Context) error {
 	logger.Debug().
 		Msg("received execution")
 
-	// new docker engine
-	engine, err := docker.NewEnv()
-	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("cannot create docker client")
+	var engine backend.Engine
+	if usePodman == true {
+		engine = podman.New()
+	} else {
+		// new docker engine
+		engine, err = docker.NewEnv()
+		if err != nil {
+			logger.Error().
+				Err(err).
+				Msg("cannot create docker client")
 
-		return err
+			return err
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
