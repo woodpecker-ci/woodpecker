@@ -54,11 +54,12 @@ export default defineComponent({
 
     selectedProcId: {
       type: Number as PropType<number | null>,
-      required: false,
+      default: null,
     },
   },
 
   emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     'update:selected-proc-id': (selectedProcId: number) => true,
   },
 

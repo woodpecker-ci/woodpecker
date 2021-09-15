@@ -139,7 +139,7 @@ export default defineComponent({
           return;
         }
 
-        router.replace({ params: { ...route.params, procId: `${selectedProcId.value}` } });
+        router.replace({ params: { ...route.params, procId: `${_selectedProcId}` } });
       },
     });
 

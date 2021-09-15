@@ -1,6 +1,7 @@
 import colors from 'windicss/colors';
-import { defineConfig } from 'windicss/helpers';
+import { defineConfig, transform } from 'windicss/helpers';
 import typography from 'windicss/plugin/typography';
+import daisyColors from 'daisyui/colors/index.js';
 
 export default defineConfig({
   darkMode: 'class',
@@ -15,10 +16,12 @@ export default defineConfig({
         'status-gray': colors.gray[400],
         'status-blue': colors.blue[400],
         'status-green': '#4caf50',
+
+        ...daisyColors,
       },
       stroke: (theme) => theme('colors'),
       fill: (theme) => theme('colors'),
     },
   },
-  plugins: [typography],
+  plugins: [typography, transform('daisyui')],
 });

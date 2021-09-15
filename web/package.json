@@ -2,6 +2,7 @@
   "name": "woodpecker-ci",
   "author": "Woodpecker CI",
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "engines": {
     "node": "14"
   },
@@ -15,28 +16,29 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@kyvg/vue3-notification": "2.3.3",
+    "@kyvg/vue3-notification": "2.3.4",
     "@meforma/vue-toaster": "1.2.2",
     "ansi_up": "5.0.1",
+    "daisyui": "^1.14.0",
     "humanize-duration": "3.27.0",
     "javascript-time-ago": "2.3.8",
-    "node-emoji": "1.10.0",
+    "node-emoji": "1.11.0",
     "pinia": "2.0.0-rc.0",
     "vue": "v3.2.0-beta.7",
     "vue-router": "4.0.10"
   },
   "devDependencies": {
-    "@iconify/json": "1.1.382",
+    "@iconify/json": "1.1.401",
     "@types/humanize-duration": "3.25.1",
     "@types/javascript-time-ago": "2.0.3",
-    "@types/node": "16.4.10",
+    "@types/node": "16.9.1",
     "@types/node-emoji": "1.8.1",
     "@typescript-eslint/eslint-plugin": "4.31.1",
     "@typescript-eslint/parser": "4.31.1",
-    "@vitejs/plugin-vue": "1.3.0",
-    "@vue/compiler-sfc": "3.1.5",
+    "@vitejs/plugin-vue": "1.6.2",
+    "@vue/compiler-sfc": "3.2.11",
     "ansi-to-html": "0.7.1",
-    "eslint": "7.28.0",
+    "eslint": "7.32.0",
     "eslint-config-airbnb-base-ts": "14.1.1",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "4.0.0",
@@ -44,12 +46,12 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-vue": "7.17.0",
     "eslint-plugin-vue-scoped-css": "1.3.0",
-    "prettier": "2.3.2",
-    "typescript": "4.2.4",
-    "unplugin-icons": "0.7.0",
-    "vite": "2.4.2",
-    "vite-plugin-windicss": "1.2.7",
-    "vue-tsc": "0.2.3",
-    "windicss": "3.1.6"
+    "prettier": "2.4.0",
+    "typescript": "4.4.3",
+    "unplugin-icons": "0.11.1",
+    "vite": "2.5.7",
+    "vite-plugin-windicss": "1.4.3",
+    "vue-tsc": "0.3.0",
+    "windicss": "3.1.7"
   }
 }
