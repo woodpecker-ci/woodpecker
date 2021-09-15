@@ -48,7 +48,6 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 				session.User(c),
 			),
 		)
-
 		serveHTTP(c.Writer, req)
 	})
 
