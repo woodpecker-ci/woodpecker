@@ -1,6 +1,22 @@
 # Databases
 
-This guide provides instructions for using alternate storage engines. Please note this is optional. The default storage engine is an embedded SQLite database which requires zero installation or configuration.
+The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL or Postgres database.
+
+## Configure sqlite
+
+By default Woodpecker uses a sqlite database stored under `/var/lib/drone/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the sqlite database.
+
+```diff
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:latest
+    ports:
+      - 80:8000
+      - 9000
++   volumes:
++     - woodpecker-server-data:/var/lib/drone/
+    restart: always
+```
 
 ## Configure MySQL
 
