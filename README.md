@@ -37,7 +37,7 @@
 
 ## Support
 
-Please considder to download to your opencollective 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+Please consider to donate to your open-collective 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
 ## Usage
