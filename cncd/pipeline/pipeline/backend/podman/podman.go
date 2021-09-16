@@ -132,7 +132,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		return err
 	}
 	containers.Start(e.conn, specGenerator.Name, &startOpts)
-	containers.Kill(e.conn, specGenerator.Name, &killOpts)
+	containers.Wait(e.conn, specGenerator.Name, &containers.WaitOptions{})
 	containers.Remove(e.conn, specGenerator.Name, &removeOpts)
 
 	// normal start here
