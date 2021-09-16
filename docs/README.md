@@ -28,7 +28,7 @@ This command generates static content into the `build` directory and can be serv
 
 Deployment happen via [CI](https://github.com/woodpecker-ci/woodpecker/blob/d59fdb4602bfdd0d00078716ba61b05c02cbd1af/.woodpecker/docs.yml#L8-L30) to [woodpecker-ci.github.io](https://woodpecker-ci.github.io).
 
-To manually build the website and push it.
+To manually build the website and push it exec:
 
 ```sh
 GIT_USER=woodpecker-bot USE_SSH=true DEPLOYMENT_BRANCH=master yarn deploy
