@@ -26,8 +26,10 @@ This command generates static content into the `build` directory and can be serv
 
 ### Deployment
 
-```
-$ GIT_USER=<Your GitHub username> USE_SSH=true yarn deploy
-```
+Deployment happen via [CI](https://github.com/woodpecker-ci/woodpecker/blob/d59fdb4602bfdd0d00078716ba61b05c02cbd1af/.woodpecker/docs.yml#L8-L30) to [woodpecker-ci.github.io](https://woodpecker-ci.github.io).
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+To manually build the website and push it exec:
+
+```sh
+GIT_USER=woodpecker-bot USE_SSH=true DEPLOYMENT_BRANCH=master yarn deploy
+```
