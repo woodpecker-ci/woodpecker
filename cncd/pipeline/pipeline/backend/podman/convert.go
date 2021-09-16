@@ -1,14 +1,8 @@
 package podman
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net"
-	"regexp"
-	"strings"
-
-	"docker.io/go-docker/api/types/container"
 
 	"github.com/containers/podman/v3/pkg/specgen"
 
