@@ -12,7 +12,7 @@ A Woodpecker deployment consists of two parts:
 
 ## Installation
 
-You can install Woodpecker on multiple ways:
+You can install Woodpecker [images](/docs/downloads#docker-images) on multiple ways:
 - Using [docker-compose](https://docs.docker.com/compose/)
 - By deploying to a [Kubernetes](/docs/administration/kubernetes) with manifests or a Helm charts
 - Using [binaries](/docs/downloads)
