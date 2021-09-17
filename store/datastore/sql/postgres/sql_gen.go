@@ -442,9 +442,6 @@ SELECT
 ,repo_trusted
 ,repo_active
 ,repo_allow_pr
-,repo_allow_push
-,repo_allow_deploys
-,repo_allow_tags
 ,repo_hash
 ,repo_scm
 ,repo_config_path
@@ -473,9 +470,6 @@ INSERT INTO repos (
 ,repo_trusted
 ,repo_active
 ,repo_allow_pr
-,repo_allow_push
-,repo_allow_deploys
-,repo_allow_tags
 ,repo_hash
 ,repo_scm
 ,repo_config_path
@@ -483,7 +477,7 @@ INSERT INTO repos (
 ,repo_visibility
 ,repo_counter
 ,repo_fallback
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
 ON CONFLICT (repo_full_name) DO NOTHING
 `
 

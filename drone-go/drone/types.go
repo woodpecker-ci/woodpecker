@@ -13,26 +13,23 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID          int64  `json:"id,omitempty"`
-		Owner       string `json:"owner"`
-		Name        string `json:"name"`
-		FullName    string `json:"full_name"`
-		Avatar      string `json:"avatar_url,omitempty"`
-		Link        string `json:"link_url,omitempty"`
-		Kind        string `json:"scm,omitempty"`
-		Clone       string `json:"clone_url,omitempty"`
-		Branch      string `json:"default_branch,omitempty"`
-		Timeout     int64  `json:"timeout,omitempty"`
-		Visibility  string `json:"visibility"`
-		IsPrivate   bool   `json:"private,omitempty"`
-		IsTrusted   bool   `json:"trusted"`
-		IsStarred   bool   `json:"starred,omitempty"`
-		IsGated     bool   `json:"gated"`
-		AllowPull   bool   `json:"allow_pr"`
-		AllowPush   bool   `json:"allow_push"`
-		AllowDeploy bool   `json:"allow_deploys"`
-		AllowTag    bool   `json:"allow_tags"`
-		Config      string `json:"config_file"`
+		ID         int64  `json:"id,omitempty"`
+		Owner      string `json:"owner"`
+		Name       string `json:"name"`
+		FullName   string `json:"full_name"`
+		Avatar     string `json:"avatar_url,omitempty"`
+		Link       string `json:"link_url,omitempty"`
+		Kind       string `json:"scm,omitempty"`
+		Clone      string `json:"clone_url,omitempty"`
+		Branch     string `json:"default_branch,omitempty"`
+		Timeout    int64  `json:"timeout,omitempty"`
+		Visibility string `json:"visibility"`
+		IsPrivate  bool   `json:"private,omitempty"`
+		IsTrusted  bool   `json:"trusted"`
+		IsStarred  bool   `json:"starred,omitempty"`
+		IsGated    bool   `json:"gated"`
+		AllowPull  bool   `json:"allow_pr"`
+		Config     string `json:"config_file"`
 	}
 
 	// RepoPatch defines a repository patch request.
@@ -43,9 +40,6 @@ type (
 		Timeout      *int64  `json:"timeout,omitempty"`
 		Visibility   *string `json:"visibility"`
 		AllowPull    *bool   `json:"allow_pr,omitempty"`
-		AllowPush    *bool   `json:"allow_push,omitempty"`
-		AllowDeploy  *bool   `json:"allow_deploy,omitempty"`
-		AllowTag     *bool   `json:"allow_tag,omitempty"`
 		BuildCounter *int    `json:"build_counter,omitempty"`
 	}
 

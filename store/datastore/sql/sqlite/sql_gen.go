@@ -439,9 +439,6 @@ SELECT
 ,repo_trusted
 ,repo_active
 ,repo_allow_pr
-,repo_allow_push
-,repo_allow_deploys
-,repo_allow_tags
 ,repo_hash
 ,repo_scm
 ,repo_config_path
@@ -470,9 +467,6 @@ INSERT OR IGNORE INTO repos (
 ,repo_trusted
 ,repo_active
 ,repo_allow_pr
-,repo_allow_push
-,repo_allow_deploys
-,repo_allow_tags
 ,repo_hash
 ,repo_scm
 ,repo_config_path
@@ -480,7 +474,7 @@ INSERT OR IGNORE INTO repos (
 ,repo_visibility
 ,repo_counter
 ,repo_fallback
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 var repoDelete = `
