@@ -90,7 +90,6 @@ func (db *datastore) RepoBatch(repos []*model.Repo) error {
 			repo.IsGated,
 			repo.Visibility,
 			repo.Counter,
-			repo.Fallback,
 		)
 		if err != nil {
 			return err

@@ -27,7 +27,6 @@ SELECT
 ,repo_gated
 ,repo_visibility
 ,repo_counter
-,repo_fallback
 FROM repos
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = $1
@@ -55,8 +54,7 @@ INSERT INTO repos (
 ,repo_gated
 ,repo_visibility
 ,repo_counter
-,repo_fallback
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
 ON CONFLICT (repo_full_name) DO NOTHING
 
 -- name: repo-delete

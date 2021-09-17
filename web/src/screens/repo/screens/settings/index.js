@@ -38,7 +38,6 @@ export default class Settings extends Component {
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
     this.handleTimeoutChange = this.handleTimeoutChange.bind(this);
     this.handlePathChange = this.handlePathChange.bind(this);
-    this.handleFallbackChange = this.handleFallbackChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -71,14 +70,6 @@ export default class Settings extends Component {
               value={repo.config_file}
               onBlur={this.handlePathChange}
             />
-            <label>
-              <input
-                type="checkbox"
-                checked={repo.fallback}
-                onChange={this.handleFallbackChange}
-              />
-              <span>Fallback to .drone.yml if path not exists</span>
-            </label>
           </div>
         </section>
         <section>
@@ -190,10 +181,6 @@ export default class Settings extends Component {
 
   handlePathChange(e) {
     this.handleChange("config_file", e.target.value);
-  }
-
-  handleFallbackChange(e) {
-    this.handleChange("fallback", e.target.checked);
   }
 
   handleChange(prop, value) {

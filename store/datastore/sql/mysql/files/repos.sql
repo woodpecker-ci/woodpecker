@@ -27,7 +27,6 @@ SELECT
 ,repo_gated
 ,repo_visibility
 ,repo_counter
-,repo_fallback
 FROM repos
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = ?
@@ -55,8 +54,7 @@ INSERT IGNORE INTO repos (
 ,repo_gated
 ,repo_visibility
 ,repo_counter
-,repo_fallback
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 
 -- name: repo-delete
 

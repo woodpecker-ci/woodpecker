@@ -30,28 +30,43 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
-
-			// either a file
-			if !strings.HasSuffix(cf.repo.Config, "/") {
-				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
-				if err == nil {
-					return []*remote.FileMeta{{
-						Name: cf.repo.Config,
-						Data: file,
-					}}, nil
+			if len(cf.repo.Config) > 0 {
+				// either a file
+				if !strings.HasSuffix(cf.repo.Config, "/") {
+					file, err = cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
+					if err == nil {
+						return []*remote.FileMeta{{
+							Name: cf.repo.Config,
+							Data: file,
+						}}, nil
+					}
 				}
-			}
 
-			// or a folder
-			if strings.HasSuffix(cf.repo.Config, "/") {
-				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+				// or a folder
+				if strings.HasSuffix(cf.repo.Config, "/") {
+					files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+					if err == nil {
+						return filterPipelineFiles(files), nil
+					}
+				}
+			} else {
+				// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
+
+				// test .woodpecker/ folder
+				// if folder is not supported we will get a "Not implemented" error and continue
+				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, ".woodpecker")
 				if err == nil {
 					return filterPipelineFiles(files), nil
 				}
-			}
 
-			// or fallback
-			if cf.repo.Fallback {
+				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".woodpecker.yml")
+				if err == nil {
+					return []*remote.FileMeta{{
+						Name: ".woodpecker.yml",
+						Data: file,
+					}}, nil
+				}
+
 				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
 				if err == nil {
 					return []*remote.FileMeta{{
