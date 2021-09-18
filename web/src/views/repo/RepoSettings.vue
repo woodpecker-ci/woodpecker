@@ -18,6 +18,9 @@
       <Tab title="Badge">
         <BadgeTab />
       </Tab>
+      <Tab title="Actions">
+        <ActionsTab />
+      </Tab>
     </Tabs>
   </FluidContainer>
 </template>
@@ -27,6 +30,7 @@ import { defineComponent } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
 import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
@@ -45,6 +49,7 @@ export default defineComponent({
     GeneralTab,
     SecretsTab,
     RegistriesTab,
+    ActionsTab,
     BadgeTab,
   },
 });

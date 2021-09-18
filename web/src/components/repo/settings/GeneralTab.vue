@@ -6,17 +6,24 @@
 
     <div v-if="repoSettings" class="flex flex-col">
       <InputField label="Pipeline path">
-        <TextField v-model="repoSettings.config_file" class="max-w-124" />
-      </InputField>
-
-      <InputField label="Repository hooks">
-        <Checkbox v-model="repoSettings.allow_push" label="Push" />
-        <Checkbox v-model="repoSettings.allow_pr" label="Pull Request" />
-        <Checkbox v-model="repoSettings.allow_tags" label="Tag" />
-        <Checkbox v-model="repoSettings.allow_deploys" label="Deploy" />
+        <TextField
+          v-model="repoSettings.config_file"
+          class="max-w-124"
+          placeholder="By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+        />
+        <template #description>
+          <p class="text-sm text-gray-600">
+            Path to your pipeline config (for example <span class="bg-gray-300 rounded-md px-1 py-0.5">my/path/</span>).
+            Folders should end with a <span class="bg-gray-300 rounded-md px-1 py-0.5">/</span>.
+            <a :href="`${docsUrl}docs/usage/project-settings#pipeline-path`" target="_blank" class="text-blue-500"
+              >(i)</a
+            >
+          </p>
+        </template>
       </InputField>
 
       <InputField label="Project settings">
+        <Checkbox v-model="repoSettings.allow_pr" label="Allow Pull Request" />
         <Checkbox v-model="repoSettings.gated" label="Protected" />
         <Checkbox v-model="repoSettings.trusted" label="Trusted" />
       </InputField>
@@ -28,27 +35,17 @@
       <InputField label="Timeout">
         <div class="flex items-center">
           <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4">minutes</span>
+          <span class="ml-4 text-gray-600">minutes</span>
         </div>
       </InputField>
 
       <Button class="mr-auto bg-green hover:bg-lime-600 text-white" text="Save settings" @click="saveRepoSettings" />
-    </div>
-
-    <div class="flex flex-col mt-8 pt-4 border-t-1">
-      <span class="text-xl">Actions</span>
-      <Button
-        class="mr-auto mt-4 bg-red-500 hover:bg-red-400 text-white"
-        text="Delete repository"
-        @click="deleteRepo"
-      />
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -76,12 +73,12 @@ export default defineComponent({
 
   setup() {
     const apiClient = useApiClient();
-    const router = useRouter();
     const notifications = useNotifications();
     const repoStore = RepoStore();
 
     const repo = inject<Ref<Repo>>('repo');
     const repoSettings = ref<RepoSettings>();
+    const docsUrl = window.WOODPECKER_DOCS;
 
     function loadRepoSettings() {
       if (!repo) {
@@ -95,10 +92,7 @@ export default defineComponent({
         visibility: repo.value.visibility,
         gated: repo.value.gated,
         trusted: repo.value.trusted,
-        allow_push: repo.value.allow_push,
         allow_pr: repo.value.allow_pr,
-        allow_tags: repo.value.allow_tags,
-        allow_deploys: repo.value.allow_deploys,
       };
     }
 
@@ -109,22 +103,6 @@ export default defineComponent({
 
       await repoStore.loadRepo(repo.value.owner, repo.value.name);
       loadRepoSettings();
-    }
-
-    async function deleteRepo() {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      // TODO use proper dialog
-      // eslint-disable-next-line no-alert, no-restricted-globals
-      if (!confirm('All data will be lost after this action!!!\n\nDo you really want to procceed?')) {
-        return;
-      }
-
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: 'Repository deleted', type: 'success' });
-      await router.replace({ name: 'repos' });
     }
 
     async function saveRepoSettings() {
@@ -146,7 +124,7 @@ export default defineComponent({
     });
 
     return {
-      deleteRepo,
+      docsUrl,
       repoSettings,
       saveRepoSettings,
       projectVisibilityOptions,

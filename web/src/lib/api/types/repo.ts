@@ -47,18 +47,7 @@ export type Repo = {
   allow_pr: boolean;
   // Whether pull requests should trigger a build.
 
-  allow_push: boolean;
-  // Whether push events should trigger a build.
-
-  allow_deploys: boolean;
-  // Whether deployment events should trigger a build.
-
-  allow_tags: boolean;
-  // Whether tags should trigger a build.
-
   config_file: string;
-
-  fallback: boolean;
 
   visibility: RepoVisibility;
 
@@ -73,16 +62,4 @@ export enum RepoVisibility {
   Internal = 'internal',
 }
 
-export type RepoSettings = Pick<
-  Repo,
-  | 'config_file'
-  | 'fallback'
-  | 'timeout'
-  | 'visibility'
-  | 'trusted'
-  | 'gated'
-  | 'allow_pr'
-  | 'allow_push'
-  | 'allow_tags'
-  | 'allow_deploys'
->;
+export type RepoSettings = Pick<Repo, 'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr'>;
