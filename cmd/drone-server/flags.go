@@ -64,15 +64,9 @@ var flags = []cli.Flag{
 		Usage:  "enable quic",
 	},
 	cli.StringFlag{
-		EnvVar: "DRONE_WWW,WOODPECKER_WWW",
-		Name:   "www",
-		Usage:  "serve the website from disk",
-		Hidden: true,
-	},
-	cli.StringFlag{
 		EnvVar: "WOODPECKER_WWW_PROXY",
 		Name:   "www-proxy",
-		Usage:  "serve the website with a proxy",
+		Usage:  "serve the website by using a proxy (used for development)",
 		Hidden: true,
 	},
 	cli.StringSliceFlag{
