@@ -55,7 +55,6 @@ type Repo struct {
 	Config      string `json:"config_file"              meddler:"repo_config_path"`
 	Hash        string `json:"-"                        meddler:"repo_hash"`
 	Perm        *Perm  `json:"-"                        meddler:"-"`
-	Fallback    bool   `json:"fallback"                 meddler:"repo_fallback"`
 }
 
 func (r *Repo) ResetVisibility() {
@@ -106,5 +105,4 @@ type RepoPatch struct {
 	AllowDeploy  *bool   `json:"allow_deploy,omitempty"`
 	AllowTag     *bool   `json:"allow_tag,omitempty"`
 	BuildCounter *int    `json:"build_counter,omitempty"`
-	Fallback     *bool   `json:"fallback,omitempty"`
 }
