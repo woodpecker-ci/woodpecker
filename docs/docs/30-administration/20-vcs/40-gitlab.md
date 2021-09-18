@@ -37,28 +37,28 @@ services:
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-WOODPECKER_GITLAB=true
+`WOODPECKER_GITLAB=true`
 : Set to true to enable the GitLab driver.
 
-WOODPECKER_GITLAB_URL=`https://gitlab.com`
+`WOODPECKER_GITLAB_URL=https://gitlab.com`
 : GitLab Server address.
 
-WOODPECKER_GITLAB_CLIENT
+`WOODPECKER_GITLAB_CLIENT`
 : GitLab oauth2 client id.
 
-WOODPECKER_GITLAB_SECRET
+`WOODPECKER_GITLAB_SECRET`
 : GitLab oauth2 client secret.
 
-WOODPECKER_GITLAB_GIT_USERNAME
+`WOODPECKER_GITLAB_GIT_USERNAME`
 : Optional. Use a single machine account username to clone all repositories.
 
-WOODPECKER_GITLAB_GIT_PASSWORD
+`WOODPECKER_GITLAB_GIT_PASSWORD`
 : Optional. Use a single machine account password to clone all repositories.
 
-WOODPECKER_GITLAB_SKIP_VERIFY=false
+`WOODPECKER_GITLAB_SKIP_VERIFY=false`
 : Set to true to disable SSL verification.
 
-WOODPECKER_GITLAB_PRIVATE_MODE=false
+`WOODPECKER_GITLAB_PRIVATE_MODE=false`
 : Set to true if GitLab is running in private mode.
 
 ## Registration

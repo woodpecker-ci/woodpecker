@@ -95,12 +95,6 @@ var flags = []cli.Flag{
 		Name:   "open",
 		Usage:  "enable open user registration",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_REPO_CONFIG,WOODPECKER_REPO_CONFIG",
-		Name:   "repo-config",
-		Usage:  "file path for the drone config",
-		Value:  ".drone.yml",
-	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",
 		Name:   "session-expires",
