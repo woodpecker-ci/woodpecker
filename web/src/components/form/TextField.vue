@@ -2,7 +2,7 @@
   <div class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white hover:border-gray-300">
     <input
       v-model="innerValue"
-      class="w-full text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-400"
+      class="w-full text-gray-600 placeholder-gray-400 focus:outline-none focus:border-blue-400"
       :type="type"
       :placeholder="placeholder"
     />

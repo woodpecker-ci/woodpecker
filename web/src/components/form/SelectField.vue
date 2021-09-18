@@ -8,7 +8,7 @@
     }"
   >
     <option v-if="placeholder" value="" class="hidden">{{ placeholder }}</option>
-    <option v-for="option in options" :key="option.value" :value="option.value" class="text-gray-900">
+    <option v-for="option in options" :key="option.value" :value="option.value" class="text-gray-600">
       {{ option.text }}
     </option>
   </select>

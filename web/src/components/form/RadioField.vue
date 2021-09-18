@@ -17,7 +17,7 @@
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
     />
-    <label class="ml-4 cursor-pointer" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+    <label class="ml-4 cursor-pointer text-gray-600" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
   </div>
 </template>
 

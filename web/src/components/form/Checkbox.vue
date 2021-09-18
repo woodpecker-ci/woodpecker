@@ -16,7 +16,7 @@
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
-    <label v-if="label" class="ml-4 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
+    <label v-if="label" class="ml-4 cursor-pointer text-gray-600" :for="`checkbox-${id}`">{{ label }}</label>
   </div>
 </template>
 
