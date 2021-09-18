@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import daisyColors from 'daisyui/colors/index.js';
 import colors from 'windicss/colors';
-import { defineConfig, transform } from 'windicss/helpers';
+import { defineConfig } from 'windicss/helpers';
 import typography from 'windicss/plugin/typography';
 
 export default defineConfig({
@@ -24,5 +24,5 @@ export default defineConfig({
       fill: (theme) => theme('colors'),
     },
   },
-  plugins: [typography, transform('daisyui')],
+  plugins: [typography],
 });

@@ -19,7 +19,6 @@
     "@kyvg/vue3-notification": "2.3.4",
     "@meforma/vue-toaster": "1.2.2",
     "ansi-to-html": "0.7.1",
-    "daisyui": "1.14.0",
     "humanize-duration": "3.27.0",
     "javascript-time-ago": "2.3.8",
     "node-emoji": "1.11.0",
