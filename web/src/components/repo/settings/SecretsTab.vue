@@ -26,15 +26,15 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
         <InputField label="Name">
-          <TextField v-model="secret.name" placeholder="Name" required />
+          <TextField v-model="selectedSecret.name" placeholder="Name" required />
         </InputField>
 
         <InputField label="Value">
-          <TextField v-model="secret.value" placeholder="Value" required />
+          <TextField v-model="selectedSecret.value" placeholder="Value" required />
         </InputField>
 
         <InputField label="Available at following events">
-          <CheckboxesField v-model="secret.event" :options="secretEventsOptions" />
+          <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
 
         <Button type="submit" text="Add secret" />
@@ -92,7 +92,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>();
     const showAddSecret = ref(false);
-    const secret = ref<Partial<Secret>>({ ...emptySecret });
+    const selectedSecret = ref<Partial<Secret>>({ ...emptySecret });
 
     async function loadSecrets() {
       if (!repo?.value) {
@@ -107,10 +107,10 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.createSecret(repo.value.owner, repo.value.name, secret.value);
+      await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
       notifications.notify({ title: 'Secret created', type: 'success' });
       showAddSecret.value = false;
-      secret.value = { ...emptySecret };
+      selectedSecret.value = { ...emptySecret };
       await loadSecrets();
     }
 
@@ -128,7 +128,7 @@ export default defineComponent({
       await loadSecrets();
     });
 
-    return { secretEventsOptions, secret, secrets, showAddSecret, createSecret, deleteSecret };
+    return { secretEventsOptions, selectedSecret, secrets, showAddSecret, createSecret, deleteSecret };
   },
 });
 </script>

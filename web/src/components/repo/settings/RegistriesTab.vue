@@ -18,15 +18,15 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
         <InputField label="Address">
-          <TextField v-model="registry.address" placeholder="Registry Address (e.g. docker.io)" required />
+          <TextField v-model="selectedRegistry.address" placeholder="Registry Address (e.g. docker.io)" required />
         </InputField>
 
         <InputField label="Username">
-          <TextField v-model="registry.username" placeholder="Username" required />
+          <TextField v-model="selectedRegistry.username" placeholder="Username" required />
         </InputField>
 
         <InputField label="Password">
-          <TextField v-model="registry.password" placeholder="Password" required />
+          <TextField v-model="selectedRegistry.password" placeholder="Password" required />
         </InputField>
 
         <Button type="submit" text="Add registry" />
@@ -68,7 +68,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const registries = ref<Registry[]>();
     const showAddRegistry = ref(false);
-    const registry = ref<Partial<Registry>>({});
+    const selectedRegistry = ref<Partial<Registry>>({});
 
     async function loadRegistries() {
       if (!repo?.value) {
@@ -83,10 +83,10 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.createRegistry(repo.value.owner, repo.value.name, registry.value);
+      await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
       notifications.notify({ title: 'Registry created', type: 'success' });
       showAddRegistry.value = false;
-      registry.value = {};
+      selectedRegistry.value = {};
       await loadRegistries();
     }
 
@@ -104,7 +104,7 @@ export default defineComponent({
       await loadRegistries();
     });
 
-    return { registry, registries, showAddRegistry, createRegistry, deleteRegistry };
+    return { selectedRegistry, registries, showAddRegistry, createRegistry, deleteRegistry };
   },
 });
 </script>

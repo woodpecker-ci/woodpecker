@@ -1,19 +1,20 @@
 import { Build, BuildProc, Repo } from '~/lib/api/types';
 
-export function findProc(procs: BuildProc[], pid: number): BuildProc | null {
-  for (const proc of procs) {
+export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined {
+  return procs.find((proc) => {
     if (proc.pid === pid) {
       return proc;
     }
+
     if (proc.children) {
       const result = findProc(proc.children, pid);
       if (result) {
         return result;
       }
     }
-  }
 
-  return null;
+    return undefined;
+  });
 }
 
 /**
