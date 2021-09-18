@@ -27,6 +27,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}`);
   }
 
+  repairRepo(owner: string, repo: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/repair`);
+  }
+
   getBuildList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Build[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${owner}/${repo}/builds?${query}`) as Promise<Build[]>;

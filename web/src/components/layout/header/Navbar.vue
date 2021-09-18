@@ -1,14 +1,16 @@
 <template>
-  <div class="flex mb-2 shadow-lg bg-green text-neutral-content px-8 py-4">
+  <div class="flex mb-2 shadow-lg bg-gray-700 text-neutral-content px-8 py-3">
     <div class="flex text-white items-center">
       <router-link :to="{ name: 'home' }" class="relative">
         <img class="-mt-3 w-8" src="../../../assets/logo.svg" />
         <span class="absolute -bottom-4 text-xs">{{ version }}</span>
       </router-link>
-      <router-link v-if="user" :to="{ name: 'repos' }" class="mx-4">Repositories</router-link>
+      <router-link v-if="user" :to="{ name: 'repos' }" class="mx-4 hover:bg-gray-600 px-1 py-0.5 rounded-md"
+        >Repositories</router-link
+      >
     </div>
     <div class="flex ml-auto items-center space-x-4 text-white">
-      <a :href="docsUrl" target="_blank" class="mx-4">Docs</a>
+      <a :href="docsUrl" target="_blank" class="mx-4 hover:bg-gray-600 px-1 py-0.5 rounded-md">Docs</a>
       <router-link v-if="user" :to="{ name: 'user' }">
         <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
       </router-link>

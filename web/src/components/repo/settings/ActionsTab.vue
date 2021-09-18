@@ -4,7 +4,11 @@
       <h1 class="text-xl ml-2">Actions</h1>
     </div>
 
-    <Button class="mr-auto mt-4 bg-red-500 hover:bg-red-400 text-white" text="Delete repository" @click="deleteRepo" />
+    <div class="flex flex-col">
+      <Button class="mr-auto mt-4" color="blue" text="Repair repository" @click="repairRepo" />
+
+      <Button class="mr-auto mt-4" color="red" text="Delete repository" @click="deleteRepo" />
+    </div>
   </Panel>
 </template>
 
@@ -30,6 +34,15 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
 
+    async function repairRepo() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      await apiClient.repairRepo(repo.value.owner, repo.value.name);
+      notifications.notify({ title: 'Repository repaired', type: 'success' });
+    }
+
     async function deleteRepo() {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
@@ -48,6 +61,7 @@ export default defineComponent({
 
     return {
       deleteRepo,
+      repairRepo,
     };
   },
 });

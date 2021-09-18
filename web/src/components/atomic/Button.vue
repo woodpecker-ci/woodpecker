@@ -2,18 +2,24 @@
   <button
     type="button"
     class="
-      bg-white
-      text-gray-800
       py-1
       px-4
-      border border-gray-200
       rounded
+      border
       shadow-sm
       cursor-pointer
-      focus:outline-transparent
-      hover:bg-light-300
+      font-bold
+      transition-colors
+      duration-150
+      focus:outline-none
       disabled:opacity-50 disabled:cursor-not-allowed
     "
+    :class="{
+      'bg-white hover:bg-gray-200 border-gray-300 text-gray-700': color === 'gray',
+      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white': color === 'green',
+      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white': color === 'blue',
+      'bg-red-500 hover:bg-red-600 border-red-700 text-white': color === 'red',
+    }"
     :disabled="disabled"
     @click="doClick"
   >
@@ -44,6 +50,11 @@ export default defineComponent({
     to: {
       type: [String, Object, null] as PropType<RouteLocationRaw | null>,
       default: null,
+    },
+
+    color: {
+      type: String as PropType<'blue' | 'green' | 'red' | 'gray'>,
+      default: 'gray',
     },
   },
 

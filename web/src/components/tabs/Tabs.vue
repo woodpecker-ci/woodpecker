@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex space-x-8 w-full pt-4 mb-4">
+    <div class="flex w-full pt-4 mb-4">
       <div
         v-for="tab in tabs"
         :key="tab.id"
@@ -47,7 +47,7 @@ export default defineComponent({
 
       activeTab.value = tab.id;
 
-      await router.push({ name: 'repo-settings', params: route.params, hash: `#tab-${tab.id}` });
+      await router.push({ params: route.params, hash: `#tab-${tab.id}` });
     }
 
     return { tabs, activeTab, selectTab };

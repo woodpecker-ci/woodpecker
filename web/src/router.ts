@@ -22,7 +22,7 @@ const routes: RouteRecordRaw[] = [
     meta: { authentication: 'required' },
   },
   {
-    path: '/repo/:repoOwner/:repoName',
+    path: '/:repoOwner/:repoName',
     name: 'repo-wrapper',
     component: (): Component => import('~/views/repo/RepoWrapper.vue'),
     props: true,

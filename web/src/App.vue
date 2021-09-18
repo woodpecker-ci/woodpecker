@@ -59,11 +59,19 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-lg border-l-10;
+  @apply rounded-md text-base border-l-6;
 }
 
 .vue-notification .notification-title {
   @apply font-normal;
+}
+
+.vue-notification.success {
+  @apply bg-lime-600 border-l-lime-700;
+}
+
+.vue-notification.error {
+  @apply bg-red-600 border-l-red-700;
 }
 </style>
 

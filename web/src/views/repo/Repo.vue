@@ -5,7 +5,11 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
       </a>
-      <a :href="repo.link_url" target="_blank" class="flex ml-4 text-gray-400 hover:text-gray-500">
+      <a
+        :href="repo.link_url"
+        target="_blank"
+        class="flex ml-4 p-1 rounded-full text-gray-600 hover:bg-gray-200 hover:text-gray-700"
+      >
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="gitea" />
         <Icon v-else name="repo" />
@@ -13,17 +17,22 @@
       <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
 
-    <div v-if="builds" class="space-y-4">
-      <router-link
-        v-for="build in builds"
-        :key="build.id"
-        :to="{ name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId: build.number } }"
-        class="flex"
-      >
-        <BuildItem :build="build" />
-      </router-link>
-      <Panel v-if="builds.length === 0">There are no builds yet.</Panel>
-    </div>
+    <Tabs>
+      <Tab title="Activity">
+        <div v-if="builds" class="space-y-4">
+          <router-link
+            v-for="build in builds"
+            :key="build.id"
+            :to="{ name: 'repo-build', params: { repoOwner: repo.owner, repoName: repo.name, buildId: build.number } }"
+            class="flex"
+          >
+            <BuildItem :build="build" />
+          </router-link>
+          <Panel v-if="builds.length === 0">There are no builds yet.</Panel>
+        </div>
+      </Tab>
+      <Tab title="Branches"> TODO </Tab>
+    </Tabs>
   </FluidContainer>
 </template>
 
@@ -35,13 +44,15 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Panel from '~/components/layout/Panel.vue';
 import BuildItem from '~/components/repo/BuildItem.vue';
+import Tab from '~/components/tabs/Tab.vue';
+import Tabs from '~/components/tabs/Tabs.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import { Build, Repo } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'Repo',
 
-  components: { FluidContainer, BuildItem, IconButton, Icon, Panel },
+  components: { FluidContainer, BuildItem, IconButton, Icon, Panel, Tabs, Tab },
 
   setup() {
     const { isAuthenticated } = useAuthentication();

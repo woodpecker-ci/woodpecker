@@ -11,7 +11,7 @@
         rounded-full
         w-5
         h-5
-        checked:bg-green checked:border-green checked:text-white
+        checked:bg-lime-600 checked:border-lime-600 checked:text-white
       "
       :value="option.value"
       :checked="innerValue.includes(option.value)"

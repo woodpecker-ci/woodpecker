@@ -6,10 +6,11 @@
       flex
       items-center
       justify-center
-      text-gray-400
-      px-0
-      py-0
-      hover:bg-transparent hover:text-gray-500
+      text-gray-600
+      px-1
+      py-1
+      rounded-full
+      hover:bg-gray-200 hover:text-gray-700
       shadow-none
       bg-transparent
       border-none

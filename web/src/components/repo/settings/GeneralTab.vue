@@ -13,8 +13,8 @@
         />
         <template #description>
           <p class="text-sm text-gray-600">
-            Path to your pipeline config (for example <span class="bg-gray-300 rounded-md px-1 py-0.5">my/path/</span>).
-            Folders should end with a <span class="bg-gray-300 rounded-md px-1 py-0.5">/</span>.
+            Path to your pipeline config (for example <span class="bg-gray-300 rounded-md px-1">my/path/</span>).
+            Folders should end with a <span class="bg-gray-300 rounded-md px-1">/</span>.
             <a :href="`${docsUrl}docs/usage/project-settings#pipeline-path`" target="_blank" class="text-blue-500"
               >(i)</a
             >
@@ -39,7 +39,7 @@
         </div>
       </InputField>
 
-      <Button class="mr-auto bg-green hover:bg-lime-600 text-white" text="Save settings" @click="saveRepoSettings" />
+      <Button class="mr-auto" color="green" text="Save settings" @click="saveRepoSettings" />
     </div>
   </Panel>
 </template>
@@ -87,7 +87,6 @@ export default defineComponent({
 
       repoSettings.value = {
         config_file: repo.value.config_file,
-        fallback: repo.value.fallback,
         timeout: repo.value.timeout,
         visibility: repo.value.visibility,
         gated: repo.value.gated,

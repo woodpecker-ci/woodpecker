@@ -2,7 +2,7 @@
   <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-center">
       <IconButton :to="{ name: 'repo' }" icon="back" />
-      <h1 class="text-xl ml-2">Build #{{ buildId }} - {{ message }}</h1>
+      <h1 class="text-xl ml-2">Pipeline #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
       <template v-if="isAuthenticated">
         <Button
@@ -11,7 +11,12 @@
           text="Cancel"
           @click="cancelBuild"
         />
-        <Button v-else class="ml-4" text="Restart" @click="restartBuild" />
+        <Button
+          v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
+          class="ml-4"
+          text="Restart"
+          @click="restartBuild"
+        />
       </template>
     </FluidContainer>
 
@@ -22,8 +27,10 @@
           <span>{{ build.author }}</span>
         </div>
         <div class="flex space-x-2 items-center">
-          <Icon v-if="build.event === 'push'" name="branch" />
-          <Icon v-if="build.event === 'tag'" name="tag" />
+          <Icon v-if="build.event === 'pull_request'" name="pull_request" />
+          <Icon v-else-if="build.event === 'deployment'" name="deployment" />
+          <Icon v-else-if="build.event === 'tag'" name="tag" />
+          <Icon v-else name="push" />
           <span>{{ build.branch }}</span>
         </div>
         <div class="flex space-x-2 items-center">
@@ -40,7 +47,19 @@
         </div>
       </FluidContainer>
 
-      <BuildProcs v-model:selected-proc-id="selectedProcId" :build="build" />
+      <div v-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
+        <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
+        <p class="text-xl text-gray-500">This pipeline is awaiting approval by some maintainer!</p>
+        <div v-if="isAuthenticated" class="flex mt-2 space-x-4">
+          <Button color="green" text="Approve" @click="approveBuild" />
+          <Button color="red" text="Decline" @click="declineBuild" />
+        </div>
+      </div>
+      <div v-else-if="build.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
+        <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
+        <p class="text-xl text-gray-500">This pipeline has been declined!</p>
+      </div>
+      <BuildProcs v-else v-model:selected-proc-id="selectedProcId" :build="build" />
     </div>
   </template>
 </template>
@@ -168,11 +187,26 @@ export default defineComponent({
       }
 
       await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), proc.ppid);
-      notifications.notify({ title: 'Build canceled', type: 'success' });
+      notifications.notify({ title: 'Pipeline canceled', type: 'success' });
     }
 
-    // apiClient.approveBuild;
-    // apiClient.declineBuild;
+    async function approveBuild() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo is undefined');
+      }
+
+      await apiClient.approveBuild(repo.value.owner, repo.value.name, buildId.value);
+      notifications.notify({ title: 'Pipeline approved', type: 'success' });
+    }
+
+    async function declineBuild() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo is undefined');
+      }
+
+      await apiClient.declineBuild(repo.value.owner, repo.value.name, buildId.value);
+      notifications.notify({ title: 'Pipeline declined', type: 'success' });
+    }
 
     async function restartBuild() {
       if (!repo) {
@@ -180,7 +214,7 @@ export default defineComponent({
       }
 
       await apiClient.restartBuild(repo.value.owner, repo.value.name, buildId.value, { fork: true });
-      notifications.notify({ title: 'Build restarted', type: 'success' });
+      notifications.notify({ title: 'Pipeline restarted', type: 'success' });
       // TODO: directly send to newest build?
       await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
     }
@@ -188,7 +222,19 @@ export default defineComponent({
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
 
-    return { isAuthenticated, selectedProcId, build, since, duration, repo, message, cancelBuild, restartBuild };
+    return {
+      isAuthenticated,
+      selectedProcId,
+      build,
+      since,
+      duration,
+      repo,
+      message,
+      cancelBuild,
+      restartBuild,
+      approveBuild,
+      declineBuild,
+    };
   },
 });
 </script>

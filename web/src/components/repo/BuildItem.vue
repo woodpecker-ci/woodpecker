@@ -31,8 +31,10 @@
       <div class="flex ml-auto text-gray-500 py-2">
         <div class="flex flex-col space-y-2 w-42">
           <div class="flex space-x-2 items-center">
-            <Icon v-if="build.event === 'push'" name="branch" />
-            <Icon v-if="build.event === 'tag'" name="tag" />
+            <Icon v-if="build.event === 'pull_request'" name="pull_request" />
+            <Icon v-else-if="build.event === 'deployment'" name="deployment" />
+            <Icon v-else-if="build.event === 'tag'" name="tag" />
+            <Icon v-else name="push" />
             <span class="truncate">{{ build.branch }}</span>
           </div>
           <div class="flex space-x-2 items-center">

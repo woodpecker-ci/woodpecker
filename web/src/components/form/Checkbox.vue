@@ -9,9 +9,11 @@
         border border-gray-400
         cursor-pointer
         rounded-md
+        transition-colors
+        duration-150
         w-5
         h-5
-        checked:bg-green checked:border-green checked:text-white
+        checked:bg-lime-600 checked:border-lime-600 checked:text-white
       "
       :checked="innerValue"
       @click="innerValue = !innerValue"

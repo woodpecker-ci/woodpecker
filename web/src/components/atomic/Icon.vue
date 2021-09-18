@@ -1,9 +1,11 @@
 <template>
   <IconDuration v-if="name === 'duration'" class="h-6 w-6" />
   <IconSince v-else-if="name === 'since'" class="h-6 w-6" />
-  <IconBranch v-else-if="name === 'branch'" class="h-6 w-6" />
-  <IconCommit v-else-if="name === 'commit'" class="h-6 w-6" />
+  <IconPush v-else-if="name === 'push'" class="h-6 w-6" />
+  <IconPullRequest v-else-if="name === 'pull_request'" class="h-6 w-6" />
   <IconTag v-else-if="name === 'tag'" class="h-6 w-6" />
+  <IconDeployment v-else-if="name === 'deployment'" class="h-6 w-6" />
+  <IconCommit v-else-if="name === 'commit'" class="h-6 w-6" />
   <IconBack v-else-if="name === 'back'" class="w-8 h-8" />
   <IconGithub v-else-if="name === 'github'" class="h-8 w-8" />
   <IconRepo v-else-if="name === 'repo'" class="h-8 w-8" />
@@ -26,6 +28,7 @@
 import { defineComponent, PropType } from 'vue';
 
 import IconGitea from '~icons/cib/gitea';
+import IconDeployment from '~icons/clarity/deploy-line';
 import IconSettings from '~icons/clarity/settings-solid';
 import IconStatusRunning from '~icons/entypo/dots-two-vertical';
 import IconStatusStarted from '~icons/entypo/dots-two-vertical';
@@ -34,8 +37,9 @@ import IconDuration from '~icons/ic/sharp-timelapse';
 import IconBack from '~icons/iconoir/arrow-left';
 import IconSince from '~icons/mdi/clock-time-eight-outline';
 import IconGithub from '~icons/mdi/github';
-import IconBranch from '~icons/mdi/source-branch';
+import IconPush from '~icons/mdi/source-branch';
 import IconCommit from '~icons/mdi/source-commit';
+import IconPullRequest from '~icons/mdi/source-pull';
 import IconTag from '~icons/mdi/tag-outline';
 import IconStatusKilled from '~icons/octicon/skip-24';
 import IconStatusSuccess from '~icons/ph/check-circle';
@@ -50,9 +54,11 @@ import IconRepo from '~icons/teenyicons/git-solid';
 type IconNames =
   | 'duration'
   | 'since'
-  | 'branch'
-  | 'commit'
+  | 'push'
+  | 'pull_request'
   | 'tag'
+  | 'deployment'
+  | 'commit'
   | 'back'
   | 'github'
   | 'repo'
@@ -76,9 +82,11 @@ export default defineComponent({
   components: {
     IconDuration,
     IconSince,
-    IconBranch,
-    IconCommit,
+    IconPush,
+    IconPullRequest,
+    IconDeployment,
     IconTag,
+    IconCommit,
     IconBack,
     IconGithub,
     IconRepo,
