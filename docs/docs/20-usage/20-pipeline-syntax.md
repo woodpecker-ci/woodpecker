@@ -243,7 +243,7 @@ when:
 
 ### `status`
 
-There are use cases for executing pipeline steps on failure, such as sending notifications for failed builds. Use the status constraint to override the default behavior and execute steps even when the build fails:
+There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
 
 ```diff
 pipeline:
