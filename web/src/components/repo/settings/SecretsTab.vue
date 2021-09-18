@@ -1,7 +1,13 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
-      <h1 class="text-xl ml-2">Secrets</h1>
+      <div class="ml-2">
+        <h1 class="text-xl">Secrets</h1>
+        <p class="text-sm text-gray-600">
+          Secrets can be passed to individual pipeline steps at runtime as environmental variables.
+          <DocsLink url="docs/usage/secrets" />
+        </p>
+      </div>
       <Button v-if="showAddSecret" class="ml-auto" text="Show secrets" @click="showAddSecret = false" />
       <Button v-else class="ml-auto" text="Add secret" @click="showAddSecret = true" />
     </div>
@@ -20,7 +26,7 @@
         <IconButton icon="trash" class="ml-2 w-6 h-6 hover:text-red-400" @click="deleteSecret(secret)" />
       </ListItem>
 
-      <div v-if="secrets?.length === 0">There are no secrets yet.</div>
+      <div v-if="secrets?.length === 0" class="ml-2">There are no secrets yet.</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -47,6 +53,7 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
+import DocsLink from '~/components/atomic/DocsLink.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
@@ -82,6 +89,7 @@ export default defineComponent({
     IconButton,
     InputField,
     TextField,
+    DocsLink,
     CheckboxesField,
   },
 

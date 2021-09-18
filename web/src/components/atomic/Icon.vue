@@ -22,6 +22,7 @@
   <IconStatusStarted v-else-if="name === 'status-started'" class="h-8 w-8" />
   <IconStatusSuccess v-else-if="name === 'status-success'" class="h-8 w-8" />
   <IconGitea v-else-if="name === 'gitea'" class="h-8 w-8" />
+  <IconQuestion v-else-if="name === 'question'" class="h-6 w-6" />
 </template>
 
 <script lang="ts">
@@ -50,6 +51,7 @@ import IconStatusSkipped from '~icons/ph/prohibit';
 import IconStatusError from '~icons/ph/warning';
 import IconStatusFailure from '~icons/ph/x-circle';
 import IconRepo from '~icons/teenyicons/git-solid';
+import IconQuestion from '~icons/vaadin/question-circle-o';
 
 type IconNames =
   | 'duration'
@@ -74,7 +76,8 @@ type IconNames =
   | 'status-skipped'
   | 'status-started'
   | 'status-success'
-  | 'gitea';
+  | 'gitea'
+  | 'question';
 
 export default defineComponent({
   name: 'Icon',
@@ -103,6 +106,7 @@ export default defineComponent({
     IconStatusStarted,
     IconStatusSuccess,
     IconGitea,
+    IconQuestion,
   },
 
   props: {

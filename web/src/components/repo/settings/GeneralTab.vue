@@ -15,9 +15,7 @@
           <p class="text-sm text-gray-600">
             Path to your pipeline config (for example <span class="bg-gray-300 rounded-md px-1">my/path/</span>).
             Folders should end with a <span class="bg-gray-300 rounded-md px-1">/</span>.
-            <a :href="`${docsUrl}docs/usage/project-settings#pipeline-path`" target="_blank" class="text-blue-500"
-              >(i)</a
-            >
+            <DocsLink url="docs/usage/project-settings#pipeline-path" />
           </p>
         </template>
       </InputField>
@@ -48,6 +46,7 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
+import DocsLink from '~/components/atomic/DocsLink.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import { RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
@@ -69,7 +68,7 @@ const projectVisibilityOptions: RadioOption[] = [
 export default defineComponent({
   name: 'GeneralTab',
 
-  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox },
+  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox, DocsLink },
 
   setup() {
     const apiClient = useApiClient();
@@ -78,7 +77,6 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
     const repoSettings = ref<RepoSettings>();
-    const docsUrl = window.WOODPECKER_DOCS;
 
     function loadRepoSettings() {
       if (!repo) {
@@ -123,7 +121,6 @@ export default defineComponent({
     });
 
     return {
-      docsUrl,
       repoSettings,
       saveRepoSettings,
       projectVisibilityOptions,

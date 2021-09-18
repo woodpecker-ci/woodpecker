@@ -1,7 +1,13 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center">
-      <h1 class="text-xl ml-2">Registries</h1>
+      <div class="ml-2">
+        <h1 class="text-xl">Registry credentials</h1>
+        <p class="text-sm text-gray-600">
+          Registries credentials can be added to use private images for your pipeline.
+          <DocsLink url="docs/usage/registry" />
+        </p>
+      </div>
       <Button v-if="showAddRegistry" class="ml-auto" text="Show registries" @click="showAddRegistry = false" />
       <Button v-else class="ml-auto" text="Add registry" @click="showAddRegistry = true" />
     </div>
@@ -12,7 +18,7 @@
         <IconButton icon="trash" class="ml-auto w-6 h-6 hover:text-red-400" @click="deleteRegistry(registry)" />
       </ListItem>
 
-      <div v-if="registries?.length === 0">There are no registries yet.</div>
+      <div v-if="registries?.length === 0" class="ml-2">There are no registry credentials yet.</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -39,6 +45,7 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
+import DocsLink from '~/components/atomic/DocsLink.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -59,6 +66,7 @@ export default defineComponent({
     IconButton,
     InputField,
     TextField,
+    DocsLink,
   },
 
   setup() {
@@ -84,7 +92,7 @@ export default defineComponent({
       }
 
       await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
-      notifications.notify({ title: 'Registry created', type: 'success' });
+      notifications.notify({ title: 'Registry credentials created', type: 'success' });
       showAddRegistry.value = false;
       selectedRegistry.value = {};
       await loadRegistries();
@@ -96,7 +104,7 @@ export default defineComponent({
       }
 
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, _registry.address);
-      notifications.notify({ title: 'Registry deleted', type: 'success' });
+      notifications.notify({ title: 'Registry credentials deleted', type: 'success' });
       await loadRegistries();
     }
 
