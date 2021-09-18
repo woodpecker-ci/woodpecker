@@ -96,12 +96,6 @@ var flags = []cli.Flag{
 		Usage:  "enable open user registration",
 	},
 	cli.StringFlag{
-		EnvVar: "DRONE_REPO_CONFIG,WOODPECKER_REPO_CONFIG",
-		Name:   "repo-config",
-		Usage:  "file path for the drone config",
-		Value:  ".drone.yml",
-	},
-	cli.StringFlag{
 		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",

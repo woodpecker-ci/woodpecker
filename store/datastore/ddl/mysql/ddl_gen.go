@@ -200,6 +200,10 @@ var migrations = []struct {
 		name: "update-builds-set-changed_files",
 		stmt: updateBuildsSetChangedfiles,
 	},
+	{
+		name: "alter-table-drop-repo-fallback",
+		stmt: alterTableDropRepoFallback,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -744,4 +748,12 @@ ALTER TABLE builds ADD COLUMN changed_files TEXT
 
 var updateBuildsSetChangedfiles = `
 UPDATE builds SET changed_files='[]'
+`
+
+//
+// 026_drop_repo_fallback_column.sql
+//
+
+var alterTableDropRepoFallback = `
+ALTER TABLE repos DROP COLUMN repo_fallback
 `
