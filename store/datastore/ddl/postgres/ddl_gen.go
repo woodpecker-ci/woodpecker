@@ -769,5 +769,5 @@ ALTER TABLE repos DROP COLUMN repo_fallback
 //
 
 var dropAllowPushTagsDeploysColumns = `
-ALTER TABLE repo DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, DROP COLUMN repo_allow_tags
+ALTER TABLE repos DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, DROP COLUMN repo_allow_tags
 `
