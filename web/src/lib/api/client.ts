@@ -39,7 +39,7 @@ export default class ApiClient {
     this.csrf = csrf;
   }
 
-  private _request(method: string, path: string, data: unknown): Promise<any> {
+  private _request(method: string, path: string, data: unknown): Promise<unknown> {
     const endpoint = `${this.server}${path}`;
     const xhr = new XMLHttpRequest();
     xhr.open(method, endpoint, true);
@@ -104,22 +104,25 @@ export default class ApiClient {
     return this._request('DELETE', path, null);
   }
 
-  _subscribe(path: string, callback: (data: any) => void, opts = { reconnect: true }) {
+  _subscribe<T>(path: string, callback: (data: T) => void, opts = { reconnect: true }) {
     const query = encodeQueryString({
-      access_token: this.token,
+      access_token: this.token || undefined,
     });
-    path = this.server ? this.server + path : path;
-    path = this.token ? `${path}?${query}` : path;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    let _path = this.server ? this.server + path : path;
+    _path = this.token ? `${path}?${query}` : path;
 
-    const events = new EventSource(path);
+    const events = new EventSource(_path);
     events.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data) as T;
+      // eslint-disable-next-line promise/prefer-await-to-callbacks
       callback(data);
     };
 
     if (!opts.reconnect) {
       events.onerror = (err) => {
-        if (err.data === 'eof') {
+        // TODO check if such events really have a data property
+        if ((err as Event & { data: string }).data === 'eof') {
           events.close();
         }
       };

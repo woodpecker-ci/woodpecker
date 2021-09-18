@@ -43,8 +43,8 @@ export default defineComponent({
     },
 
     to: {
-      type: [String, Object] as PropType<RouteLocationRaw>,
-      required: false,
+      type: [String, Object, null] as PropType<RouteLocationRaw | null>,
+      default: null,
     },
   },
 });

@@ -1,7 +1,8 @@
+/* eslint-disable import/no-extraneous-dependencies */
+import daisyColors from 'daisyui/colors/index.js';
 import colors from 'windicss/colors';
 import { defineConfig, transform } from 'windicss/helpers';
 import typography from 'windicss/plugin/typography';
-import daisyColors from 'daisyui/colors/index.js';
 
 export default defineConfig({
   darkMode: 'class',

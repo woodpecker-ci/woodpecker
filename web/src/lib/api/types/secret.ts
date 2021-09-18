@@ -1,4 +1,4 @@
-import { WebhookEvents } from './webhook_events';
+import { WebhookEvents } from './webhook';
 
 export type Secret = {
   id: string;

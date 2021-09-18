@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref } from 'vue';
+import { computed, defineComponent, inject, Ref } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
 import { Repo } from '~/lib/api/types';

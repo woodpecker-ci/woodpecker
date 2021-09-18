@@ -22,7 +22,7 @@
 import { defineComponent, provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { Tab } from '~/components/atomic/tabs/types';
+import { Tab } from './types';
 
 export default defineComponent({
   name: 'Tabs',
@@ -32,7 +32,7 @@ export default defineComponent({
     const route = useRoute();
 
     const tabs = ref<Tab[]>([]);
-    const activeTab = ref(parseInt(route.hash.replace(/^#tab-/, '') || '0'));
+    const activeTab = ref(parseInt(route.hash.replace(/^#tab-/, '') || '0', 10));
     provide('tabs', tabs);
     provide('active-tab', activeTab);
 

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import Icons from 'unplugin-icons/vite';

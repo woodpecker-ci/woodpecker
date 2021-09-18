@@ -42,7 +42,7 @@ export default defineComponent({
     const build = toRef(props, 'build');
     const { since, duration, message } = useBuild(build);
 
-    return { build, since, duration, message };
+    return { since, duration, message };
   },
 });
 </script>

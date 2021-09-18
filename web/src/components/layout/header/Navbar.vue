@@ -26,16 +26,15 @@
 import { defineComponent } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 
 import ActiveBuilds from './ActiveBuilds.vue';
 
 export default defineComponent({
-  name: 'NavBar',
+  name: 'Navbar',
 
-  components: { Button, FluidContainer, ActiveBuilds },
+  components: { Button, ActiveBuilds },
 
   setup() {
     const config = useConfig();

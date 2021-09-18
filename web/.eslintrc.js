@@ -11,6 +11,7 @@ module.exports = {
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
     tsconfigRootDir: __dirname,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore see https://github.com/vuejs/vue-eslint-parser#parseroptionsparser
     parser: '@typescript-eslint/parser',
     sourceType: 'module',
@@ -44,7 +45,7 @@ module.exports = {
 
     // make typescript eslint rules even more strict
     '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/explicit-module-boundary-types': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'error',
 
     'import/no-unresolved': 'off', // disable as this is handled by tsc itself

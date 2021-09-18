@@ -18,6 +18,12 @@ export default () => {
     }
   }
 
+  function unload() {
+    if (stream) {
+      stream.close();
+    }
+  }
+
   async function load(owner: string, repo: string, build: number, _proc: BuildProc) {
     unload();
 
@@ -35,12 +41,6 @@ export default () => {
 
     if (isProcRunning(_proc)) {
       stream = apiClient.streamLogs(owner, repo, build, _proc.ppid, onLogsUpdate);
-    }
-  }
-
-  function unload() {
-    if (stream) {
-      stream.close();
     }
   }
 

@@ -11,6 +11,8 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'InputField',
 
+  inheritAttrs: false,
+
   props: {
     label: {
       type: String,

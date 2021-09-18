@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref, toRef } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
-import { Tab } from '~/components/atomic/tabs/types';
+import { Tab } from './types';
 
 export default defineComponent({
   name: 'Tab',

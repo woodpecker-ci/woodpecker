@@ -29,15 +29,10 @@
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 
-import Button from '~/components/atomic/Button.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import BuildItem from '~/components/repo/BuildItem.vue';
 import useBuildFeed from '~/compositions/useBuildFeed';
 
 export default defineComponent({
   name: 'ActiveBuilds',
-
-  components: { FluidContainer, Button, BuildItem },
 
   setup() {
     const buildFeed = useBuildFeed();

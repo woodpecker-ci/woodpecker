@@ -37,6 +37,7 @@ export default defineComponent({
     const route = useRoute();
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    // eslint-disable-next-line promise/prefer-await-to-callbacks
     apiClient.setErrorHandler((err) => {
       notifications.notify({ title: err.message, type: 'error' });
     });
@@ -48,6 +49,7 @@ export default defineComponent({
 });
 </script>
 
+<!-- eslint-disable-next-line vue-scoped-css/require-scoped -->
 <style>
 html,
 body,

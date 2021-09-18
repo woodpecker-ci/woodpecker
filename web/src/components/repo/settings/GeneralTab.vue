@@ -52,7 +52,6 @@ import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
-import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import { RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
@@ -73,7 +72,7 @@ const projectVisibilityOptions: RadioOption[] = [
 export default defineComponent({
   name: 'GeneralTab',
 
-  components: { Button, Panel, InputField, TextField, RadioField, CheckboxesField, NumberField, Checkbox },
+  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox },
 
   setup() {
     const apiClient = useApiClient();
@@ -83,15 +82,6 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
     const repoSettings = ref<RepoSettings>();
-
-    async function loadRepo() {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      await repoStore.loadRepo(repo.value.owner, repo.value.name);
-      loadRepoSettings();
-    }
 
     function loadRepoSettings() {
       if (!repo) {
@@ -112,11 +102,22 @@ export default defineComponent({
       };
     }
 
+    async function loadRepo() {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      await repoStore.loadRepo(repo.value.owner, repo.value.name);
+      loadRepoSettings();
+    }
+
     async function deleteRepo() {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
       }
 
+      // TODO use proper dialog
+      // eslint-disable-next-line no-alert, no-restricted-globals
       if (!confirm('All data will be lost after this action!!!\n\nDo you really want to procceed?')) {
         return;
       }

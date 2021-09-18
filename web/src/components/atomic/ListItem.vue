@@ -16,7 +16,6 @@ export default defineComponent({
   props: {
     clickable: {
       type: Boolean,
-      default: false,
     },
   },
 });

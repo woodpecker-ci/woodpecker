@@ -13,7 +13,7 @@ export type User = {
   // The url for the avatar image.
 
   admin: boolean;
-  // Whether the account has administrative priviledges.
+  // Whether the account has administrative privileges.
 
   active: boolean;
   // Whether the account is currently active.

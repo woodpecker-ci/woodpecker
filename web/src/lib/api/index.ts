@@ -6,17 +6,13 @@ type RepoListOptions = {
   flush?: boolean;
 };
 export default class WoodpeckerClient extends ApiClient {
-  constructor(server: string, token: string | null, csrf: string | null) {
-    super(server, token, csrf);
-  }
-
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/user/repos?${query}`);
+    return this._get(`/api/user/repos?${query}`) as Promise<Repo[]>;
   }
 
   getRepo(owner: string, repo: string): Promise<Repo> {
-    return this._get(`/api/repos/${owner}/${repo}`);
+    return this._get(`/api/repos/${owner}/${repo}`) as Promise<Repo>;
   }
 
   activateRepo(owner: string, repo: string): Promise<unknown> {
@@ -33,16 +29,16 @@ export default class WoodpeckerClient extends ApiClient {
 
   getBuildList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Build[]> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/repos/${owner}/${repo}/builds?${query}`);
+    return this._get(`/api/repos/${owner}/${repo}/builds?${query}`) as Promise<Build[]>;
   }
 
   getBuild(owner: string, repo: string, number: string | 'latest'): Promise<Build> {
-    return this._get(`/api/repos/${owner}/${repo}/builds/${number}`);
+    return this._get(`/api/repos/${owner}/${repo}/builds/${number}`) as Promise<Build>;
   }
 
   getBuildFeed(opts?: Record<string, string | number | boolean>): Promise<BuildFeed[]> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/user/feed?${query}`);
+    return this._get(`/api/user/feed?${query}`) as Promise<BuildFeed[]>;
   }
 
   cancelBuild(owner: string, repo: string, number: number, ppid: number): Promise<unknown> {
@@ -68,7 +64,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   getLogs(owner: string, repo: string, build: number, proc: number): Promise<BuildLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${build}/${proc}`);
+    return this._get(`/api/repos/${owner}/${repo}/logs/${build}/${proc}`) as Promise<BuildLog[]>;
   }
 
   getArtifact(owner: string, repo: string, build: string, proc: string, file: string): Promise<unknown> {
@@ -80,7 +76,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   getSecretList(owner: string, repo: string): Promise<Secret[]> {
-    return this._get(`/api/repos/${owner}/${repo}/secrets`);
+    return this._get(`/api/repos/${owner}/${repo}/secrets`) as Promise<Secret[]>;
   }
 
   createSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
@@ -92,7 +88,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   getRegistryList(owner: string, repo: string): Promise<Registry[]> {
-    return this._get(`/api/repos/${owner}/${repo}/registry`);
+    return this._get(`/api/repos/${owner}/${repo}/registry`) as Promise<Registry[]>;
   }
 
   createRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
@@ -108,9 +104,10 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   getToken(): Promise<string> {
-    return this._post('/api/user/token');
+    return this._post('/api/user/token') as Promise<string>;
   }
 
+  // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { build?: Build; repo?: Repo; proc?: BuildProc }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
@@ -122,6 +119,7 @@ export default class WoodpeckerClient extends ApiClient {
     repo: string,
     build: number,
     proc: number,
+    // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: BuildLog) => void,
   ): EventSource {
     return this._subscribe(`/stream/logs/${owner}/${repo}/${build}/${proc}`, callback, {

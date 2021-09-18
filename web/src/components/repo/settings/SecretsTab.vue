@@ -47,7 +47,6 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
@@ -81,7 +80,6 @@ export default defineComponent({
     Panel,
     ListItem,
     IconButton,
-    Icon,
     InputField,
     TextField,
     CheckboxesField,
@@ -116,12 +114,12 @@ export default defineComponent({
       await loadSecrets();
     }
 
-    async function deleteSecret(secret: Secret) {
+    async function deleteSecret(_secret: Secret) {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, secret.name);
+      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
       notifications.notify({ title: 'Secret deleted', type: 'success' });
       await loadSecrets();
     }

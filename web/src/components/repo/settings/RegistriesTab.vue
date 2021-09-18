@@ -39,7 +39,6 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -58,7 +57,6 @@ export default defineComponent({
     Panel,
     ListItem,
     IconButton,
-    Icon,
     InputField,
     TextField,
   },
@@ -92,12 +90,12 @@ export default defineComponent({
       await loadRegistries();
     }
 
-    async function deleteRegistry(registry: Registry) {
+    async function deleteRegistry(_registry: Registry) {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registry.address);
+      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, _registry.address);
       notifications.notify({ title: 'Registry deleted', type: 'success' });
       await loadRegistries();
     }

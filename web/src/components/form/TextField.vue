@@ -18,9 +18,11 @@ export default defineComponent({
   components: {},
 
   props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
-      default: '',
+      required: true,
     },
 
     placeholder: {
@@ -54,16 +56,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style>
-.form-control:focus {
-  color: #495057;
-  background-color: #fff;
-  border-color: #1991eb;
-  outline: 0;
-  box-shadow: 0 0 0 2px rgb(70 127 207 / 25%);
-}
-.form-control {
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-</style>

@@ -16,14 +16,16 @@ import Checkbox from './Checkbox.vue';
 import { CheckboxOption } from './form.types';
 
 export default defineComponent({
-  name: 'CheckboxField',
+  name: 'CheckboxesField',
 
   components: { Checkbox },
 
   props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: Array as PropType<CheckboxOption['value'][]>,
-      default: [],
+      required: true,
     },
 
     options: {
