@@ -93,10 +93,7 @@ paths:
                 "timeout": 60,
                 "private": false,
                 "trusted": false,
-                "allow_pr": true,
-                "allow_push": true,
-                "allow_deploys": false,
-                "allow_tags": false
+                "allow_pr": true
               }
           required: true
       tags:
@@ -655,10 +652,7 @@ definitions:
           "timeout": 60,
           "private": false,
           "trusted": false,
-          "allow_pr": true,
-          "allow_push": true,
-          "allow_deploys": false,
-          "allow_tags": false
+          "allow_pr": true
         }
     properties:
       id:
@@ -711,15 +705,6 @@ definitions:
         x-dart-type: Duration
       allow_pr:
         description: Whether pull requests should trigger a build.
-        type: boolean
-      allow_push:
-        description: Whether push events should trigger a build.
-        type: boolean
-      allow_deploys:
-        description: Whether deployment events should trigger a build.
-        type: boolean
-      allow_tags:
-        description: Whether tags should trigger a build.
         type: boolean
 
   Build:
