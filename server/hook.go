@@ -136,7 +136,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	if build.Event == model.EventPull && !repo.AllowPull {
-		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName, build.Event)
+		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
 		c.Writer.WriteHeader(204)
 		return
 	}
