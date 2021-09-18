@@ -254,7 +254,7 @@ pipeline:
 +     status: [ success, failure ]
 ```
 
-### `plattform`
+### `platform`
 
 Execute a step for a specific platform:
 
