@@ -42,18 +42,19 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
-	if !repo.AllowPull {
-		repo.AllowPull = true
-	}
+	repo.AllowPull = false
+
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
 		if repo.IsPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
 	}
+
 	if repo.Timeout == 0 {
 		repo.Timeout = 60 // 1 hour default build time
 	}
+
 	if repo.Hash == "" {
 		repo.Hash = base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
