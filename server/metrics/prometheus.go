@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 var (

@@ -78,7 +78,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
-				Name:    sanitizePath(y.Name),
+				Name:    sanitizePath(y.Name, b.Repo.Config),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -319,6 +319,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  build.Email,
 					Avatar: build.Avatar,
 				},
+				ChangedFiles: build.ChangedFiles,
 			},
 		},
 		Prev: frontend.Build{
@@ -341,6 +342,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 					Email:  last.Email,
 					Avatar: last.Avatar,
 				},
+				ChangedFiles: last.ChangedFiles,
 			},
 		},
 		Job: frontend.Job{
@@ -356,9 +358,9 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
-func sanitizePath(path string) string {
+func sanitizePath(path string, configFolder string) string {
 	path = strings.TrimSuffix(path, ".yml")
-	path = strings.TrimPrefix(path, ".drone/")
+	path = strings.TrimPrefix(path, configFolder)
 	path = strings.TrimPrefix(path, ".")
 	return path
 }

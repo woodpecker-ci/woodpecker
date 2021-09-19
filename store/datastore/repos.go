@@ -15,9 +15,9 @@
 package datastore
 
 import (
+	"github.com/russross/meddler"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
-	"github.com/russross/meddler"
 )
 
 func (db *datastore) GetRepo(id int64) (*model.Repo, error) {
@@ -84,16 +84,12 @@ func (db *datastore) RepoBatch(repos []*model.Repo) error {
 			repo.IsTrusted,
 			repo.IsActive,
 			repo.AllowPull,
-			repo.AllowPush,
-			repo.AllowDeploy,
-			repo.AllowTag,
 			repo.Hash,
 			repo.Kind,
 			repo.Config,
 			repo.IsGated,
 			repo.Visibility,
 			repo.Counter,
-			repo.Fallback,
 		)
 		if err != nil {
 			return err

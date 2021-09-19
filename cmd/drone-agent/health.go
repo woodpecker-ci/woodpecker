@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // the file implements some basic healthcheck logic based on the

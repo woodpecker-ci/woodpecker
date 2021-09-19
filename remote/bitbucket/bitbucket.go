@@ -22,7 +22,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/remote/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"golang.org/x/oauth2"
 )
@@ -54,8 +54,7 @@ func New(client, secret string) remote.Remote {
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	redirect := httputil.GetURL(req)
-	config := c.newConfig(redirect)
+	config := c.newConfig(server.Config.Server.Host)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {

@@ -207,7 +207,6 @@ export default class BuildLogs extends Component {
                       build={build}
                       rootProc={rootProc}
                       selectedProc={selectedProc}
-                      renderName={build.procs.length > 1}
                     />
                   </div>
                 );

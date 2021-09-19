@@ -26,7 +26,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
@@ -43,22 +42,18 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
-	if !repo.AllowPush && !repo.AllowPull && !repo.AllowDeploy && !repo.AllowTag {
-		repo.AllowPush = true
-		repo.AllowPull = true
-	}
+
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
 		if repo.IsPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
 	}
-	if repo.Config == "" {
-		repo.Config = Config.Server.RepoConfig
-	}
+
 	if repo.Timeout == 0 {
 		repo.Timeout = 60 // 1 hour default build time
 	}
+
 	if repo.Hash == "" {
 		repo.Hash = base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
@@ -75,7 +70,7 @@ func PostRepo(c *gin.Context) {
 
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		httputil.GetURL(c.Request),
+		Config.Server.Host,
 		sig,
 	)
 
@@ -114,17 +109,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.AllowPush != nil {
-		repo.AllowPush = *in.AllowPush
-	}
 	if in.AllowPull != nil {
 		repo.AllowPull = *in.AllowPull
-	}
-	if in.AllowDeploy != nil {
-		repo.AllowDeploy = *in.AllowDeploy
-	}
-	if in.AllowTag != nil {
-		repo.AllowTag = *in.AllowTag
 	}
 	if in.IsGated != nil {
 		repo.IsGated = *in.IsGated
@@ -149,9 +135,6 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.BuildCounter != nil {
 		repo.Counter = *in.BuildCounter
-	}
-	if in.Fallback != nil {
-		repo.Fallback = *in.Fallback
 	}
 
 	err := store.UpdateRepo(c, repo)
@@ -203,7 +186,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	remote.Deactivate(user, repo, httputil.GetURL(c.Request))
+	remote.Deactivate(user, repo, Config.Server.Host)
 	c.JSON(200, repo)
 }
 
@@ -221,7 +204,7 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := httputil.GetURL(c.Request)
+	host := Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
@@ -307,7 +290,7 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := httputil.GetURL(c.Request)
+	host := Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,

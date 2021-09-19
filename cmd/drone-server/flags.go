@@ -47,6 +47,12 @@ var flags = []cli.Flag{
 		Name:   "server-key",
 		Usage:  "server ssl key path",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_GRPC_ADDR",
+		Name:   "grpc-addr",
+		Usage:  "grpc address",
+		Value:  ":9000",
+	},
 	cli.BoolFlag{
 		EnvVar: "WOODPECKER_LETS_ENCRYPT",
 		Name:   "lets-encrypt",
@@ -84,16 +90,10 @@ var flags = []cli.Flag{
 		Usage:  "enable open user registration",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_REPO_CONFIG",
-		Name:   "repo-config",
-		Usage:  "file path for the drone config",
-		Value:  ".drone.yml",
-	},
-	cli.StringFlag{
 		EnvVar: "WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",
-		Value:  "https://woodpecker.laszlo.cloud",
+		Value:  "https://woodpecker-ci.github.io/",
 	},
 	cli.DurationFlag{
 		EnvVar: "WOODPECKER_SESSION_EXPIRES",
@@ -305,6 +305,16 @@ var flags = []cli.Flag{
 		Name:   "gitea-server",
 		Usage:  "gitea server address",
 		Value:  "https://try.gitea.io",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_GITEA_CLIENT,WOODPECKER_GITEA_CLIENT",
+		Name:   "gitea-client",
+		Usage:  "gitea oauth2 client id",
+	},
+	cli.StringFlag{
+		EnvVar: "DRONE_GITEA_SECRET,WOODPECKER_GITEA_SECRET",
+		Name:   "gitea-secret",
+		Usage:  "gitea oauth2 client secret",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_GITEA_CONTEXT",

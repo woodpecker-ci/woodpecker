@@ -23,6 +23,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path"
+	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -33,6 +35,8 @@ import (
 type Opts struct {
 	URL         string // Gitea server url.
 	Context     string // Context to display in status check
+	Client      string // OAuth2 Client ID
+	Secret      string // OAuth2 Client Secret
 	Username    string // Optional machine account username.
 	Password    string // Optional machine account password.
 	PrivateMode bool   // Gitea is running in private mode.
@@ -139,13 +143,13 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	client, err := c.newClientToken("")
+	// Create Client with Basic Auth
+	client, err := c.newClientBasicAuth(username, password)
 	if err != nil {
 		return nil, err
 	}
 
 	// since api does not return token secret, if drone token exists create new one
-	client.SetBasicAuth(username, password)
 	resp, err := client.DeleteAccessToken("drone")
 	if err != nil && !(resp != nil && resp.StatusCode == 404) {
 		return nil, err
@@ -295,7 +299,37 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 }
 
 func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	var configs []*remote.FileMeta
+
+	client, err := c.newClientToken(u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	// List files in repository. Path from root
+	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	if err != nil {
+		return nil, err
+	}
+
+	f = path.Clean(f) // We clean path and remove trailing slash
+	f += "/" + "*"    // construct pattern for match i.e. file in subdir
+	for _, e := range tree.Entries {
+		// Filter path matching pattern and type file (blob)
+		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
+			data, err := c.File(u, r, b, e.Path)
+			if err != nil {
+				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
+			}
+
+			configs = append(configs, &remote.FileMeta{
+				Name: e.Path,
+				Data: data,
+			})
+		}
+	}
+
+	return configs, nil
 }
 
 // Status is supported by the Gitea driver.
@@ -392,7 +426,7 @@ func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
-// helper function to return the Gitea client
+// helper function to return the Gitea client with Token
 func (c *client) newClientToken(token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
@@ -401,6 +435,17 @@ func (c *client) newClientToken(token string) (*gitea.Client, error) {
 		}
 	}
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
+}
+
+// helper function to return the Gitea client with Basic Auth
+func (c *client) newClientBasicAuth(username, password string) (*gitea.Client, error) {
+	httpClient := &http.Client{}
+	if c.SkipVerify {
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+	return gitea.NewClient(c.URL, gitea.SetBasicAuth(username, password), gitea.SetHTTPClient(httpClient))
 }
 
 // helper function to return matching hooks.

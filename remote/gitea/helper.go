@@ -88,18 +88,33 @@ func buildFromPush(hook *pushHook) *model.Build {
 	}
 
 	return &model.Build{
-		Event:     model.EventPush,
-		Commit:    hook.After,
-		Ref:       hook.Ref,
-		Link:      hook.Compare,
-		Branch:    strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Message:   message,
-		Avatar:    avatar,
-		Author:    author,
-		Email:     hook.Sender.Email,
-		Timestamp: time.Now().UTC().Unix(),
-		Sender:    sender,
+		Event:        model.EventPush,
+		Commit:       hook.After,
+		Ref:          hook.Ref,
+		Link:         hook.Compare,
+		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
+		Message:      message,
+		Avatar:       avatar,
+		Author:       author,
+		Email:        hook.Sender.Email,
+		Timestamp:    time.Now().UTC().Unix(),
+		Sender:       sender,
+		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
+}
+
+func getChangedFilesFromPushHook(hook *pushHook) []string {
+	files := make([]string, 0)
+
+	if len(hook.Commits) == 0 {
+		return files
+	}
+
+	files = append(files, hook.Commits[0].Added...)
+	files = append(files, hook.Commits[0].Removed...)
+	files = append(files, hook.Commits[0].Modified...)
+
+	return files
 }
 
 // helper function that extracts the Build data from a Gitea tag hook

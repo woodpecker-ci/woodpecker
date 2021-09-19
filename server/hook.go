@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package server
 
@@ -27,12 +30,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
@@ -132,16 +134,9 @@ func PostHook(c *gin.Context) {
 		c.Writer.WriteHeader(204)
 		return
 	}
-	var skipped = true
-	if (build.Event == model.EventPush && repo.AllowPush) ||
-		(build.Event == model.EventPull && repo.AllowPull) ||
-		(build.Event == model.EventDeploy && repo.AllowDeploy) ||
-		(build.Event == model.EventTag && repo.AllowTag) {
-		skipped = false
-	}
 
-	if skipped {
-		logrus.Infof("ignoring hook. repo %s is disabled for %s events.", repo.FullName, build.Event)
+	if build.Event == model.EventPull && !repo.AllowPull {
+		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
 		c.Writer.WriteHeader(204)
 		return
 	}
@@ -205,7 +200,7 @@ func PostHook(c *gin.Context) {
 
 	// persist the build config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(build, remoteYamlConfig)
+		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
 			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
 			c.AbortWithError(500, err)
@@ -254,7 +249,7 @@ func PostHook(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  httputil.GetURL(c.Request),
+		Link:  Config.Server.Host,
 		Yamls: remoteYamlConfigs,
 	}
 	buildItems, err := b.Build()
@@ -273,7 +268,7 @@ func PostHook(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", httputil.GetURL(c.Request), repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(user, repo, build, uri, item.Proc)
 			} else {
@@ -327,7 +322,7 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	return false
 }
 
-func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
 	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
@@ -335,7 +330,7 @@ func findOrPersistPipelineConfig(build *model.Build, remoteYamlConfig *remote.Fi
 			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
-			Name:   sanitizePath(remoteYamlConfig.Name),
+			Name:   sanitizePath(remoteYamlConfig.Name, repo.Config),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {

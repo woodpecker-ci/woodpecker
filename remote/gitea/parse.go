@@ -17,6 +17,7 @@ package gitea
 import (
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 )
@@ -52,15 +53,15 @@ func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
 
 // parsePushHook parses a push hook and returns the Repo and Build details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (*model.Repo, *model.Build, error) {
-	var (
-		repo  *model.Repo
-		build *model.Build
-	)
-
+func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// ignore push events for tags
+	if strings.HasPrefix(push.Ref, "refs/tags/") {
+		return nil, nil, nil
 	}
 
 	// is this even needed?
@@ -75,12 +76,7 @@ func parsePushHook(payload io.Reader) (*model.Repo, *model.Build, error) {
 
 // parseCreatedHook parses a push hook and returns the Repo and Build details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (*model.Repo, *model.Build, error) {
-	var (
-		repo  *model.Repo
-		build *model.Build
-	)
-
+func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -92,7 +88,7 @@ func parseCreatedHook(payload io.Reader) (*model.Repo, *model.Build, error) {
 
 	repo = repoFromPush(push)
 	build = buildFromTag(push)
-	return repo, build, err
+	return repo, build, nil
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.

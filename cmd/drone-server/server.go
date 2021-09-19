@@ -69,6 +69,12 @@ func server(c *cli.Context) error {
 		)
 	}
 
+	if strings.Contains(c.String("server-host"), "://localhost") {
+		logrus.Warningln(
+			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+		)
+	}
+
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		logrus.Fatalln(
 			"WOODPECKER_SERVER_HOST must not have trailing slash",
@@ -102,7 +108,7 @@ func server(c *cli.Context) error {
 	// start the grpc server
 	g.Go(func() error {
 
-		lis, err := net.Listen("tcp", ":9000")
+		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
 			logrus.Error(err)
 			return err
@@ -224,7 +230,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	droneserver.Config.Server.Cert = c.String("server-cert")
 	droneserver.Config.Server.Key = c.String("server-key")
 	droneserver.Config.Server.Pass = c.String("agent-secret")
-	droneserver.Config.Server.Host = strings.TrimRight(c.String("server-host"), "/")
+	droneserver.Config.Server.Host = c.String("server-host")
 	droneserver.Config.Server.Port = c.String("server-addr")
 	droneserver.Config.Server.RepoConfig = c.String("repo-config")
 	droneserver.Config.Server.SessionExpires = c.Duration("session-expires")

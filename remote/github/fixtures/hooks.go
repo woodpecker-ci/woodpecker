@@ -35,7 +35,10 @@ const HookPush = `
       "name": "baxterthehacker",
       "email": "baxterthehacker@users.noreply.github.com",
       "username": "baxterthehacker"
-    }
+    },
+    "added": ["CHANGELOG.md"],
+    "removed": [],
+    "modified": ["app/controller/application.rb"]
   },
   "repository": {
     "id": 35129377,

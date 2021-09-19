@@ -145,9 +145,9 @@ func Test_parse(t *testing.T) {
 
 		g.It("Should return a Perm struct from a Gogs Perm", func() {
 			perms := []gogs.Permission{
-				{true, true, true},
-				{true, true, false},
-				{true, false, false},
+				{Admin: true, Pull: true, Push: true},
+				{Admin: true, Pull: true, Push: false},
+				{Admin: true, Push: false, Pull: false},
 			}
 			for _, from := range perms {
 				perm := toPerm(from)
