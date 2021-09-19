@@ -25,7 +25,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: Array as PropType<CheckboxOption['value'][]>,
-      required: true,
+      default: () => [],
     },
 
     options: {

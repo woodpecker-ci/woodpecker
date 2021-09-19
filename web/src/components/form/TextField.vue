@@ -22,7 +22,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
-      required: true,
+      default: '',
     },
 
     placeholder: {
