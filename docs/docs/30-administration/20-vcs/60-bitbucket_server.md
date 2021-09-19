@@ -113,23 +113,23 @@ Please use http://woodpecker.mycompany.com/authorize as the Authorization callba
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 
-WOODPECKER_STASH=true
+`WOODPECKER_STASH=true`
 : Set to true to enable the Bitbucket Server (Stash) driver.
 
-WOODPECKER_STASH_URL
+`WOODPECKER_STASH_URL`
 : Bitbucket Server address.
 
-WOODPECKER_STASH_CONSUMER_KEY
+`WOODPECKER_STASH_CONSUMER_KEY`
 : Bitbucket Server oauth1 consumer key
 
-WOODPECKER_STASH_CONSUMER_RSA
+`WOODPECKER_STASH_CONSUMER_RSA`
 : Bitbucket Server oauth1 private key file
 
-WOODPECKER_STASH_CONSUMER_RSA_STRING
+`WOODPECKER_STASH_CONSUMER_RSA_STRING`
 : Bibucket Server oauth1 private key as a string
 
-WOODPECKER_STASH_GIT_USERNAME
+`WOODPECKER_STASH_GIT_USERNAME`
 : Machine account username used to clone repositories.
 
-WOODPECKER_STASH_GIT_PASSWORD
+`WOODPECKER_STASH_GIT_PASSWORD`
 : Machine account password used to clone repositories.

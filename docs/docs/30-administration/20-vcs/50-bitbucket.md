@@ -38,13 +38,13 @@ services:
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-WOODPECKER_BITBUCKET=true
+`WOODPECKER_BITBUCKET=true`
 : Set to true to enable the Bitbucket driver.
 
-WOODPECKER_BITBUCKET_CLIENT
+`WOODPECKER_BITBUCKET_CLIENT`
 : Bitbucket oauth2 client id
 
-WOODPECKER_BITBUCKET_SECRET
+`WOODPECKER_BITBUCKET_SECRET`
 : Bitbucket oauth2 client secret
 
 ## Registration
