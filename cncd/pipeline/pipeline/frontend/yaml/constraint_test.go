@@ -253,7 +253,7 @@ func TestConstraintList(t *testing.T) {
 		c := parseConstraintPath(test.conf)
 		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
-			t.Errorf("Expect %q matches %q is %v got %v", test.with, test.conf, want, got)
+			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
 		}
 	}
 }
