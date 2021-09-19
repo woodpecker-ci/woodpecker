@@ -208,6 +208,10 @@ var migrations = []struct {
 		name: "drop-allow-push-tags-deploys-columns",
 		stmt: dropAllowPushTagsDeploysColumns,
 	},
+	{
+		name: "update-table-set-users-token-and-secret-length",
+		stmt: updateTableSetUsersTokenAndSecretLength,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -768,4 +772,14 @@ ALTER TABLE repos DROP COLUMN repo_fallback
 
 var dropAllowPushTagsDeploysColumns = `
 ALTER TABLE repos DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, DROP COLUMN repo_allow_tags
+`
+
+
+//
+// 028_update_table_set_users_token_and_secret_length.sql
+//
+
+var updateTableSetUsersTokenAndSecretLength = `
+ALTER TABLE users MODIFY user_token varchar(1000);
+ALTER TABLE users MODIFY user_secret varchar(1000);
 `
