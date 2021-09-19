@@ -243,18 +243,7 @@ when:
 
 ### `status`
 
-Execute a step when the build status changes:
-
-```diff
-when:
-  status: changed
-```
-
-Woodpecker uses the container exit code to determine the success or failure status of a build. Non-zero exit codes fail the build and cause the pipeline to immediately exit.
-
-There are use cases for executing pipeline steps on failure, such as sending notifications for failed builds. Use the status constraint to override the default behavior and execute steps even when the build status is failure:
-
-Execute a step when the build is passing or failing:
+There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
 
 ```diff
 pipeline:
