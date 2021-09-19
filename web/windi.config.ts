@@ -8,6 +8,7 @@ export default defineConfig({
   theme: {
     extend: {
       colors: {
+        greenish: '#4caf50',
         link: colors.blue[400],
 
         // status colors
