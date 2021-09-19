@@ -2,39 +2,65 @@
   <button
     type="button"
     class="
+      relative
+      flex
+      items-center
       py-1
       px-4
-      rounded
+      rounded-md
       border
       shadow-sm
       cursor-pointer
       font-bold
-      transition-colors
+      transition-all
       duration-150
       focus:outline-none
+      overflow-hidden
       disabled:opacity-50 disabled:cursor-not-allowed
     "
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-gray-700': color === 'gray',
+      'bg-white hover:bg-gray-200 border-gray-300 text-gray-600': color === 'gray',
       'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white': color === 'green',
       'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white': color === 'blue',
       'bg-red-500 hover:bg-red-600 border-red-700 text-white': color === 'red',
+      ...passedClasses,
     }"
     :disabled="disabled"
     @click="doClick"
   >
     <slot>
-      {{ text }}
+      <Icon v-if="startIcon" :name="startIcon" class="mr-2" :class="{ invisible: isLoading }" />
+      <span :class="{ invisible: isLoading }">{{ text }}</span>
+      <Icon v-if="endIcon" :name="endIcon" class="ml-2" :class="{ invisible: isLoading }" />
+      <div
+        class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
+        :class="{
+          'opacity-100': isLoading,
+          'opacity-0': !isLoading,
+          'bg-white': color === 'gray',
+          'bg-lime-700': color === 'green',
+          'bg-cyan-700': color === 'blue',
+          'bg-red-600': color === 'red',
+        }"
+      >
+        <Icon name="loading" class="animate-spin" />
+      </div>
     </slot>
   </button>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+
+import Icon, { IconNames } from '~/components/atomic/Icon.vue';
 
 export default defineComponent({
   name: 'Button',
+
+  components: { Icon },
+
+  inheritAttrs: false,
 
   props: {
     text: {
@@ -56,12 +82,30 @@ export default defineComponent({
       type: String as PropType<'blue' | 'green' | 'red' | 'gray'>,
       default: 'gray',
     },
+
+    startIcon: {
+      type: String as PropType<IconNames | null>,
+      default: null,
+    },
+
+    endIcon: {
+      type: String as PropType<IconNames | null>,
+      default: null,
+    },
   },
 
-  setup(props) {
+  setup(props, { attrs }) {
     const router = useRouter();
+    const isLoading = ref(false);
 
-    async function doClick() {
+    async function doClick(event: MouseEvent) {
+      if (attrs.onClick && !isLoading.value) {
+        const onClick = attrs.onClick as (event: MouseEvent) => Promise<void>;
+        isLoading.value = true;
+        await onClick(event);
+        isLoading.value = false;
+      }
+
       if (!props.to) {
         return;
       }
@@ -74,7 +118,16 @@ export default defineComponent({
       await router.push(props.to);
     }
 
-    return { doClick };
+    const passedClasses = computed(() => {
+      const classes: Record<string, boolean> = {};
+      const origClass = (attrs.class as string) || '';
+      origClass.split(' ').forEach((c) => {
+        classes[c] = true;
+      });
+      return classes;
+    });
+
+    return { doClick, passedClasses, isLoading };
   },
 });
 </script>

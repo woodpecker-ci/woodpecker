@@ -8,8 +8,14 @@
           <DocsLink url="docs/usage/secrets" />
         </p>
       </div>
-      <Button v-if="showAddSecret" class="ml-auto" text="Show secrets" @click="showAddSecret = false" />
-      <Button v-else class="ml-auto" text="Add secret" @click="showAddSecret = true" />
+      <Button
+        v-if="showAddSecret"
+        class="ml-auto"
+        text="Show secrets"
+        start-icon="list"
+        @click="showAddSecret = false"
+      />
+      <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret = true" />
     </div>
 
     <div v-if="!showAddSecret" class="space-y-4">
@@ -23,7 +29,7 @@
             >{{ event }}</span
           >
         </div>
-        <IconButton icon="trash" class="ml-2 w-6 h-6 hover:text-red-400" @click="deleteSecret(secret)" />
+        <IconButton icon="trash" class="ml-2 w-8 h-8 hover:text-red-400" @click="deleteSecret(secret)" />
       </ListItem>
 
       <div v-if="secrets?.length === 0" class="ml-2">There are no secrets yet.</div>

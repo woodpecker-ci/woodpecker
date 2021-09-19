@@ -31,7 +31,7 @@ export default () => {
     logs.value = [];
 
     // we do not have logs for skipped jobs
-    if (_proc.state === 'skipped') {
+    if (_proc.state === 'skipped' || _proc.state === 'killed') {
       return;
     }
 

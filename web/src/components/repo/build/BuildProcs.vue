@@ -35,7 +35,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import BuildLogs from '~/components/repo/BuildLogs.vue';
+import BuildLogs from '~/components/repo/build/BuildLogs.vue';
 import { Build, BuildProc } from '~/lib/api/types';
 import { durationAsNumber } from '~/utils/duration';
 

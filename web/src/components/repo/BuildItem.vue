@@ -62,11 +62,11 @@ import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import BuildStatusIcon from '~/components/repo/BuildStatusIcon.vue';
+import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { Build } from '~/lib/api/types';
 
-import { buildStatusColors } from './build-status';
+import { buildStatusColors } from './build/build-status';
 
 export default defineComponent({
   name: 'BuildItem',

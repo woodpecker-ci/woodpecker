@@ -4,8 +4,11 @@
       <div
         v-for="tab in tabs"
         :key="tab.id"
-        class="flex cursor-pointer pb-2 px-8 text-gray-700"
-        :class="{ 'border-b-2 border-green text-gray-900': activeTab === tab.id }"
+        class="flex cursor-pointer pb-2 px-8 text-gray-700 border-b-2"
+        :class="{
+          'border-gray-600 text-gray-900': activeTab === tab.id,
+          'border-transparent': activeTab !== tab.id,
+        }"
         @click="selectTab(tab)"
       >
         <span>{{ tab.title }}</span>
