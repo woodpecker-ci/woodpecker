@@ -1,8 +1,8 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <div class="ml-2">
-        <h1 class="text-xl">Registry credentials</h1>
+        <h1 class="text-xl text-gray-500">Registry credentials</h1>
         <p class="text-sm text-gray-600">
           Registries credentials can be added to use private images for your pipeline.
           <DocsLink url="docs/usage/registry" />
@@ -12,7 +12,7 @@
       <Button v-else class="ml-auto" text="Add registry" @click="showAddRegistry = true" />
     </div>
 
-    <div v-if="!showAddRegistry" class="space-y-4">
+    <div v-if="!showAddRegistry" class="space-y-4 text-gray-500">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
         <IconButton icon="trash" class="ml-auto w-6 h-6 hover:text-red-400" @click="deleteRegistry(registry)" />

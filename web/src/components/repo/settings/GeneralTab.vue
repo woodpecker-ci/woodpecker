@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center">
-      <h1 class="text-xl ml-2">General</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
+      <h1 class="text-xl ml-2 text-gray-500">General</h1>
     </div>
 
     <div v-if="repoSettings" class="flex flex-col">
@@ -13,8 +13,9 @@
         />
         <template #description>
           <p class="text-sm text-gray-600">
-            Path to your pipeline config (for example <span class="bg-gray-300 rounded-md px-1">my/path/</span>).
-            Folders should end with a <span class="bg-gray-300 rounded-md px-1">/</span>.
+            Path to your pipeline config (for example
+            <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">my/path/</span>). Folders should end with a
+            <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">/</span>.
             <DocsLink url="docs/usage/project-settings#pipeline-path" />
           </p>
         </template>

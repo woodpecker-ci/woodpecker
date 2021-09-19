@@ -4,7 +4,7 @@
       v-for="build in sortedBuildFeed"
       :key="build.id"
       :to="{ name: 'repo-build', params: { repoOwner: build.owner, repoName: build.name, buildId: build.number } }"
-      class="flex border-b py-4 px-2 hover:bg-light-300 hover:shadow-sm"
+      class="flex border-b py-4 px-2 hover:bg-light-300 dark:hover:bg-dark-400 dark:border-dark-300 hover:shadow-sm"
     >
       <BuildFeedItem :build="build" />
     </router-link>

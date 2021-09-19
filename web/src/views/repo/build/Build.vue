@@ -2,7 +2,7 @@
   <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-center">
       <IconButton :to="{ name: 'repo' }" icon="back" />
-      <h1 class="text-xl ml-2">Pipeline #{{ buildId }} - {{ message }}</h1>
+      <h1 class="text-xl ml-2 text-gray-500">Pipeline #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
       <template v-if="isAuthenticated">
         <Button

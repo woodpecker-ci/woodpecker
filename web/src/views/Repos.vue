@@ -1,7 +1,7 @@
 <template>
   <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b pb-4 mb-4 items-center">
-      <h1 class="text-xl">Repositories</h1>
+    <div class="flex flex-row border-b pb-4 mb-4 items-center dark:border-dark-200">
+      <h1 class="text-xl text-gray-500">Repositories</h1>
       <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add repository" />
     </div>
 
@@ -12,7 +12,7 @@
         clickable
         @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
       >
-        {{ `${repo.owner} / ${repo.name}` }}
+        <span class="text-gray-500">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
     </div>
   </FluidContainer>

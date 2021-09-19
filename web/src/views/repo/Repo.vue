@@ -1,14 +1,14 @@
 <template>
   <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4">
-      <h1 class="text-xl">{{ `${repo.owner} / ${repo.name}` }}</h1>
+    <div class="flex border-b dark:border-b-gray-600 items-center pb-4 mb-4">
+      <h1 class="text-xl text-gray-500">{{ `${repo.owner} / ${repo.name}` }}</h1>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
       </a>
       <a
         :href="repo.link_url"
         target="_blank"
-        class="flex ml-4 p-1 rounded-full text-gray-600 hover:bg-gray-200 hover:text-gray-700"
+        class="flex ml-4 p-1 rounded-full text-gray-600 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="gitea" />
@@ -28,7 +28,9 @@
           >
             <BuildItem :build="build" />
           </router-link>
-          <Panel v-if="builds.length === 0">There are no builds yet.</Panel>
+          <Panel v-if="builds.length === 0">
+            <span class="text-gray-500">There are no builds yet.</span>
+          </Panel>
         </div>
       </Tab>
       <Tab title="Branches"> TODO </Tab>
@@ -43,7 +45,7 @@ import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Panel from '~/components/layout/Panel.vue';
-import BuildItem from '~/components/repo/BuildItem.vue';
+import BuildItem from '~/components/repo/build/BuildItem.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useAuthentication from '~/compositions/useAuthentication';

@@ -4,11 +4,11 @@
       <div
         class="min-h-full w-3"
         :class="{
-          'bg-yellow-400': build.status === 'pending',
-          'bg-status-red': buildStatusColors[build.status] === 'red',
-          'bg-status-gray': buildStatusColors[build.status] === 'gray',
-          'bg-status-green': buildStatusColors[build.status] === 'green',
-          'bg-status-blue': buildStatusColors[build.status] === 'blue',
+          'bg-yellow-400 dark:bg-dark-200': build.status === 'pending',
+          'bg-red-400 dark:bg-red-800': buildStatusColors[build.status] === 'red',
+          'bg-gray-400 dark:bg-dark-200': buildStatusColors[build.status] === 'gray',
+          'bg-lime-400 dark:bg-lime-900': buildStatusColors[build.status] === 'green',
+          'bg-blue-400 dark:bg-blue-900': buildStatusColors[build.status] === 'blue',
         }"
       />
       <div class="w-8 flex">
@@ -25,7 +25,7 @@
       <div class="flex items-center"><img class="w-8" :src="build.author_avatar" /></div>
 
       <div class="ml-4 flex items-center mx-4">
-        <span>{{ message }}</span>
+        <span class="text-gray-600 dark:text-gray-500">{{ message }}</span>
       </div>
 
       <div class="flex ml-auto text-gray-500 py-2">
@@ -62,11 +62,10 @@ import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import { buildStatusColors } from '~/components/repo/build/build-status';
 import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { Build } from '~/lib/api/types';
-
-import { buildStatusColors } from './build/build-status';
 
 export default defineComponent({
   name: 'BuildItem',

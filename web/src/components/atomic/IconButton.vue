@@ -11,6 +11,7 @@
       py-1
       rounded-full
       hover:bg-gray-200 hover:text-gray-700
+      dark:hover:bg-gray-600 dark:bg-transparent
       shadow-none
       bg-transparent
       border-none
@@ -21,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ExtractDefaultPropTypes, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
+import Icon, { IconNames } from '~/components/atomic/Icon.vue';
 
 export default defineComponent({
   name: 'IconButton',
@@ -34,7 +35,7 @@ export default defineComponent({
 
   props: {
     icon: {
-      type: String as ExtractDefaultPropTypes<typeof Icon>['name'], // TODO
+      type: String as PropType<IconNames>,
       required: true,
     },
 

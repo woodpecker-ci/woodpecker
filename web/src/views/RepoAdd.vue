@@ -1,8 +1,8 @@
 <template>
   <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b mb-4 pb-4 items-center">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <IconButton :to="{ name: 'repos' }" icon="back" />
-      <h1 class="text-xl ml-2">Add repository</h1>
+      <h1 class="text-xl ml-2 text-gray-500">Add repository</h1>
       <Button class="ml-auto" text="Reload repositories" @click="reloadRepos" />
     </div>
 
@@ -14,8 +14,8 @@
         :clickable="repo.active"
         @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
       >
-        <span>{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto">Already enabled</span>
+        <span class="text-gray-500">{{ repo.full_name }}</span>
+        <span v-if="repo.active" class="ml-auto text-gray-500">Already enabled</span>
         <Button v-if="!repo.active" class="ml-auto" text="Enable" @click="activateRepo(repo)" />
       </ListItem>
     </div>

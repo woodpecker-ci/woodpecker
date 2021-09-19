@@ -26,6 +26,8 @@
   <i-ic-twotone-add v-else-if="name === 'plus'" class="h-6 w-6" />
   <i-mdi-format-list-bulleted v-else-if="name === 'list'" class="h-6 w-6" />
   <i-mdi-loading v-else-if="name === 'loading'" class="h-6 w-6" />
+  <i-ic-baseline-dark-mode v-else-if="name === 'dark'" class="h-6 w-6" />
+  <i-ic-round-light-mode v-else-if="name === 'light'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -60,7 +62,9 @@ export type IconNames =
   | 'list'
   | 'loading'
   | 'plus'
-  | 'blank';
+  | 'blank'
+  | 'dark'
+  | 'light';
 
 export default defineComponent({
   name: 'Icon',

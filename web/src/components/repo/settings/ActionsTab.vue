@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center">
-      <h1 class="text-xl ml-2">Actions</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
+      <h1 class="text-xl ml-2 text-gray-500">Actions</h1>
     </div>
 
     <div class="flex flex-col">

@@ -1,8 +1,8 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <div class="ml-2">
-        <h1 class="text-xl">Secrets</h1>
+        <h1 class="text-xl text-gray-500">Secrets</h1>
         <p class="text-sm text-gray-600">
           Secrets can be passed to individual pipeline steps at runtime as environmental variables.
           <DocsLink url="docs/usage/secrets" />
@@ -18,14 +18,14 @@
       <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret = true" />
     </div>
 
-    <div v-if="!showAddSecret" class="space-y-4">
+    <div v-if="!showAddSecret" class="space-y-4 text-gray-500">
       <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
         <span>{{ secret.name }}</span>
         <div class="ml-auto">
           <span
             v-for="event in secret.event"
             :key="event"
-            class="bg-gray-400 text-white rounded-md mx-1 py-1 px-2 text-sm"
+            class="bg-gray-400 dark:bg-dark-200 dark:text-gray-500 text-white rounded-md mx-1 py-1 px-2 text-sm"
             >{{ event }}</span
           >
         </div>

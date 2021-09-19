@@ -1,7 +1,17 @@
 <template>
   <div
-    class="w-full flex border rounded-md bg-white overflow-hidden p-4 border-gray-300"
-    :class="{ 'cursor-pointer hover:shadow-md hover:bg-gray-200': clickable }"
+    class="
+      w-full
+      flex
+      border
+      rounded-md
+      bg-white
+      overflow-hidden
+      p-4
+      border-gray-300
+      dark:bg-dark-500 dark:border-dark-400
+    "
+    :class="{ 'cursor-pointer hover:shadow-md hover:bg-gray-200 dark:hover:bg-dark-400': clickable }"
   >
     <slot />
   </div>

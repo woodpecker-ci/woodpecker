@@ -1,5 +1,5 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full bg-gray-100">
+  <div class="app flex flex-col m-auto w-full h-full bg-gray-100 dark:bg-dark-600">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
@@ -8,7 +8,18 @@
           <router-view />
         </div>
         <BuildFeedSidebar
-          class="shadow-md bg-white border-l w-full absolute right-0 lg:relative max-w-80 xl:max-w-96"
+          class="
+            shadow-md
+            bg-white
+            border-l
+            dark:bg-dark-500 dark:border-dark-500
+            w-full
+            absolute
+            right-0
+            lg:relative
+            max-w-80
+            xl:max-w-96
+          "
         />
       </div>
     </template>
@@ -72,6 +83,28 @@ body,
 
 .vue-notification.error {
   @apply bg-red-600 border-l-red-700;
+}
+
+*::-webkit-scrollbar {
+  @apply bg-transparent w-12px h-12px;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar-thumb {
+  transition: background 0.2s ease-in-out;
+  border: 3px solid transparent;
+  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  @apply bg-cool-gray-300 dark:bg-dark-100;
+}
+
+*::-webkit-scrollbar-corner {
+  @apply bg-transparent;
 }
 </style>
 

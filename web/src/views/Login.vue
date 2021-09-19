@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-col w-full h-full justify-center items-center">
-    <div v-if="errorMessage" class="bg-red-400 text-white p-4 rounded-md text-lg">
+    <div v-if="errorMessage" class="bg-red-400 text-white dark:text-gray-500 p-4 rounded-md text-lg">
       {{ errorMessage }}
     </div>
     <Panel class="flex flex-col m-8 md:flex-row md:w-3xl md:h-sm p-0 overflow-hidden">
-      <div class="flex bg-green md:w-3/5 justify-center items-center">
+      <div class="flex bg-lime-500 dark:bg-lime-900 md:w-3/5 justify-center items-center">
         <img class="w-48 h-48" src="../assets/logo.svg" />
       </div>
       <div class="flex flex-col md:w-2/5 my-8 p-4 items-center justify-center">
-        <h1 class="text-xl">Welcome to Woodpecker</h1>
+        <h1 class="text-xl text-gray-600 dark:text-gray-500">Welcome to Woodpecker</h1>
         <Button class="mt-4" @click="doLogin">Login with SSO</Button>
       </div>
     </Panel>

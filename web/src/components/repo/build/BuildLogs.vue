@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="bg-gray-700 p-4">
+  <div v-if="build" class="bg-gray-700 dark:bg-dark-500 p-4">
     <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
       <div class="text-gray-500 text-sm w-4">{{ logLine.pos + 1 }}</div>
       <!-- eslint-disable-next-line vue/no-v-html -->
@@ -11,8 +11,10 @@
     </div>
     <template v-if="!proc?.start_time" />
     <div class="text-gray-300 mx-auto">
-      <span v-if="proc?.state === 'skipped'" class="text-orange-300">This step has been cancled.</span>
-      <span v-else-if="!proc?.start_time">This step hasn't started yet.</span>
+      <span v-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
+        >This step has been cancled.</span
+      >
+      <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
     </div>
   </div>
 </template>

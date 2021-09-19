@@ -1,8 +1,25 @@
 <template>
-  <div class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white hover:border-gray-300">
+  <div
+    class="
+      w-full
+      border border-gray-200
+      py-1
+      px-2
+      rounded-md
+      bg-white
+      hover:border-gray-300
+      dark:bg-dark-200 dark:border-dark-500
+    "
+  >
     <input
       v-model="innerValue"
-      class="w-full text-gray-600 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+      class="
+        w-full
+        text-gray-600
+        placeholder-gray-400
+        focus:outline-none focus:border-blue-400
+        dark:placeholder-dark-100 dark:bg-dark-200 dark:text-gray-500
+      "
       :type="type"
       :placeholder="placeholder"
     />

@@ -4,10 +4,11 @@
       <div
         v-for="tab in tabs"
         :key="tab.id"
-        class="flex cursor-pointer pb-2 px-8 text-gray-700 border-b-2"
+        class="flex cursor-pointer pb-2 px-8 text-gray-600 border-b-2"
         :class="{
-          'border-gray-600 text-gray-900': activeTab === tab.id,
-          'border-transparent': activeTab !== tab.id,
+          'border-gray-500 text-gray-600 hover:border-gray-600 dark:border-gray-600 dark:hover:border-gray-500':
+            activeTab === tab.id,
+          'border-transparent hover:border-gray-300 dark:hover:border-gray-700': activeTab !== tab.id,
         }"
         @click="selectTab(tab)"
       >

@@ -4,10 +4,10 @@
       :name="`status-${build.status}`"
       :class="{
         'text-yellow-400': build.status === 'pending',
-        'text-status-red': buildStatusColors[build.status] === 'red',
-        'text-status-gray': buildStatusColors[build.status] === 'gray',
-        'text-status-green': buildStatusColors[build.status] === 'green',
-        'text-status-blue': buildStatusColors[build.status] === 'blue',
+        'text-red-400': buildStatusColors[build.status] === 'red',
+        'text-gray-400': buildStatusColors[build.status] === 'gray',
+        'text-lime-400': buildStatusColors[build.status] === 'green',
+        'text-blue-400': buildStatusColors[build.status] === 'blue',
         [buildStatusAnimations[build.status]]: true,
       }"
     />

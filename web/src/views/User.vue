@@ -3,23 +3,23 @@
     <Button class="ml-auto" text="Logout" :to="`${address}/logout`" />
 
     <div>
-      <h2 class="text-lg">Your Personal Token</h2>
+      <h2 class="text-lg text-gray-500">Your Personal Token</h2>
       <pre class="cli-box">{{ token }}</pre>
     </div>
 
     <div>
-      <h2 class="text-lg">Shell setup</h2>
+      <h2 class="text-lg text-gray-500">Shell setup</h2>
       <pre class="cli-box">{{ usageWithShell }}</pre>
     </div>
 
     <div>
-      <h2 class="text-lg">Example API Usage</h2>
+      <h2 class="text-lg text-gray-500">Example API Usage</h2>
       <pre class="cli-box">{{ usageWithCurl }}</pre>
     </div>
 
     <div>
       <div class="flex items-center">
-        <h2 class="text-lg">Example CLI Usage</h2>
+        <h2 class="text-lg text-gray-500">Example CLI Usage</h2>
         <a :href="cliDownload" target="_blank" class="ml-4 text-link">Download CLI</a>
       </div>
       <pre class="cli-box">{{ usageWithCli }}</pre>
@@ -74,7 +74,7 @@ export default defineComponent({
 
 <style scoped>
 .cli-box {
-  @apply bg-gray-400 p-2 rounded-md text-white break-words;
+  @apply bg-gray-400 p-2 rounded-md text-white break-words dark:bg-dark-300 dark:text-gray-500;
   white-space: pre-wrap;
 }
 </style>
