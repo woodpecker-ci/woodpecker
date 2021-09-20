@@ -74,11 +74,11 @@ release-cli:
 	# disable CGO for cross-compiling
 	export CGO_ENABLED=0
 	# compile for all architectures
-	GOOS=linux   GOARCH=amd64 go build -ldflags "-X main.version=${DRONE_TAG##v}" -o cli/release/linux/amd64/woodpecker   github.com/woodpecker-ci/woodpecker/cli/drone
-	GOOS=linux   GOARCH=arm64 go build -ldflags "-X main.version=${DRONE_TAG##v}" -o cli/release/linux/arm64/woodpecker   github.com/woodpecker-ci/woodpecker/cli/drone
-	GOOS=linux   GOARCH=arm   go build -ldflags "-X main.version=${DRONE_TAG##v}" -o cli/release/linux/arm/woodpecker     github.com/woodpecker-ci/woodpecker/cli/drone
-	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${DRONE_TAG##v}" -o cli/release/windows/amd64/woodpecker github.com/woodpecker-ci/woodpecker/cli/drone
-	GOOS=darwin  GOARCH=amd64 go build -ldflags "-X main.version=${DRONE_TAG##v}" -o cli/release/darwin/amd64/woodpecker  github.com/woodpecker-ci/woodpecker/cli/drone
+	GOOS=linux   GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/linux/amd64/woodpecker   github.com/woodpecker-ci/woodpecker/cmd/woodpecker-cli
+	GOOS=linux   GOARCH=arm64 go build -ldflags '${LDFLAGS}' -o cli/release/linux/arm64/woodpecker   github.com/woodpecker-ci/woodpecker/cmd/woodpecker-cli
+	GOOS=linux   GOARCH=arm   go build -ldflags '${LDFLAGS}' -o cli/release/linux/arm/woodpecker     github.com/woodpecker-ci/woodpecker/cmd/woodpecker-cli
+	GOOS=windows GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/windows/amd64/woodpecker github.com/woodpecker-ci/woodpecker/cmd/woodpecker-cli
+	GOOS=darwin  GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/darwin/amd64/woodpecker  github.com/woodpecker-ci/woodpecker/cmd/woodpecker-cli
 	# tar binary files prior to upload
 	tar -cvzf cli/release/woodpecker_linux_amd64.tar.gz   -C cli/release/linux/amd64   woodpecker
 	tar -cvzf cli/release/woodpecker_linux_arm64.tar.gz   -C cli/release/linux/arm64   woodpecker
