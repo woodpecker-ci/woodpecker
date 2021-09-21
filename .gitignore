@@ -32,7 +32,7 @@ docker-compose.yml
 *.out
 /.env
 extras/
-build/
+/build/
 
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
