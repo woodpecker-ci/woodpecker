@@ -27,7 +27,7 @@ import (
 
 	oldcontext "golang.org/x/net/context"
 
-	"google.golang.org/grpc/metadata"
+	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -58,7 +58,7 @@ type RPC struct {
 
 // Next implements the rpc.Next function
 func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) {
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
@@ -123,7 +123,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
@@ -243,7 +243,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		log.Printf("error: cannot find proc with id %d: %s", procID, err)
 		return err
 	}
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
