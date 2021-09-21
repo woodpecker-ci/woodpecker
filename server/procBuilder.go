@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -78,7 +79,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
-				Name:    sanitizePath(y.Name, b.Repo.Config),
+				Name:    sanitizePath(y.Name),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -358,9 +359,9 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
-func sanitizePath(path string, configFolder string) string {
+func sanitizePath(path string) string {
+	path = filepath.Base(path)
 	path = strings.TrimSuffix(path, ".yml")
-	path = strings.TrimPrefix(path, configFolder)
 	path = strings.TrimPrefix(path, ".")
 	return path
 }
