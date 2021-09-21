@@ -779,6 +779,5 @@ ALTER TABLE repos DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, D
 //
 
 var updateTableSetUsersTokenAndSecretLength = `
-ALTER TABLE users MODIFY user_token varchar(1000);
-ALTER TABLE users MODIFY user_secret varchar(1000);
+ALTER TABLE users MODIFY user_token varchar(1000), MODIFY user_secret varchar(1000);
 `
