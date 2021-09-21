@@ -11,7 +11,7 @@ pipeline:
       - yarn build
     when:
       event: [push, pull_request]
-      path: "docs/*"
+      path: "docs/**"
 
   deploy:
     image: alpine:3.14.2
@@ -37,5 +37,5 @@ pipeline:
     when:
       event: push
       branch: master
-      path: "docs/*"
+      path: "docs/**"
 
