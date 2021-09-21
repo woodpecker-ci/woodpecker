@@ -106,16 +106,25 @@ func (t *Token) Sign(secret string) (string, error) {
 // with an expiration date.
 func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["type"] = t.Kind
-	token.Claims["text"] = t.Text
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", fmt.Errorf("token claim is not a MapClaims")
+	}
+	claims["type"] = t.Kind
+	claims["text"] = t.Text
 	if exp > 0 {
-		token.Claims["exp"] = float64(exp)
+		claims["exp"] = float64(exp)
 	}
 	return token.SignedString([]byte(secret))
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 	return func(t *jwt.Token) (interface{}, error) {
+		claims, ok := t.Claims.(jwt.MapClaims)
+		if !ok {
+			return nil, fmt.Errorf("token claim is not a MapClaims")
+		}
+
 		// validate the correct algorithm is being used
 		if t.Method.Alg() != SignerAlgo {
 			return nil, jwt.ErrSignatureInvalid
@@ -123,7 +132,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 
 		// extract the token kind and cast to
 		// the expected type.
-		kindv, ok := t.Claims["type"]
+		kindv, ok := claims["type"]
 		if !ok {
 			return nil, jwt.ValidationError{}
 		}
@@ -131,7 +140,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 
 		// extract the token value and cast to
 		// exepected type.
-		textv, ok := t.Claims["text"]
+		textv, ok := claims["text"]
 		if !ok {
 			return nil, jwt.ValidationError{}
 		}
