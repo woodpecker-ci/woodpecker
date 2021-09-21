@@ -35,7 +35,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote/gitlab"
 	"github.com/woodpecker-ci/woodpecker/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/remote/gogs"
-	droneserver "github.com/woodpecker-ci/woodpecker/server"
+	woodpecker "github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 	"github.com/woodpecker-ci/woodpecker/store"
 	"github.com/woodpecker-ci/woodpecker/store/datastore"
@@ -257,7 +257,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := droneserver.Config.Services.Queue.Info(nil)
+			stats := woodpecker.Config.Services.Queue.Info(nil)
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))

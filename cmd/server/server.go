@@ -40,7 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router"
 	"github.com/woodpecker-ci/woodpecker/router/middleware"
-	droneserver "github.com/woodpecker-ci/woodpecker/server"
+	woodpecker "github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/store"
 
@@ -124,7 +124,7 @@ func server(c *cli.Context) error {
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := woodpeckerGrpcServer.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
+		droneServer := woodpeckerGrpcServer.NewDroneServer(remote_, woodpecker.Config.Services.Queue, woodpecker.Config.Services.Logs, woodpecker.Config.Services.Pubsub, store_, woodpecker.Config.Server.Host)
 		proto.RegisterDroneServer(grpcServer, droneServer)
 
 		err = grpcServer.Serve(lis)
@@ -202,45 +202,45 @@ func server(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// storage
-	droneserver.Config.Storage.Files = v
-	droneserver.Config.Storage.Config = v
+	woodpecker.Config.Storage.Files = v
+	woodpecker.Config.Storage.Config = v
 
 	// services
-	droneserver.Config.Services.Queue = setupQueue(c, v)
-	droneserver.Config.Services.Logs = logging.New()
-	droneserver.Config.Services.Pubsub = pubsub.New()
-	droneserver.Config.Services.Pubsub.Create(context.Background(), "topic/events")
-	droneserver.Config.Services.Registries = setupRegistryService(c, v)
-	droneserver.Config.Services.Secrets = setupSecretService(c, v)
-	droneserver.Config.Services.Senders = sender.New(v, v)
-	droneserver.Config.Services.Environ = setupEnvironService(c, v)
+	woodpecker.Config.Services.Queue = setupQueue(c, v)
+	woodpecker.Config.Services.Logs = logging.New()
+	woodpecker.Config.Services.Pubsub = pubsub.New()
+	woodpecker.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	woodpecker.Config.Services.Registries = setupRegistryService(c, v)
+	woodpecker.Config.Services.Secrets = setupSecretService(c, v)
+	woodpecker.Config.Services.Senders = sender.New(v, v)
+	woodpecker.Config.Services.Environ = setupEnvironService(c, v)
 
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		droneserver.Config.Services.Senders = sender.NewRemote(endpoint)
+		woodpecker.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
 	// limits
-	droneserver.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	droneserver.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	droneserver.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	droneserver.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	droneserver.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
-	droneserver.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
+	woodpecker.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
+	woodpecker.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
+	woodpecker.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
+	woodpecker.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
+	woodpecker.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	woodpecker.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// server configuration
-	droneserver.Config.Server.Cert = c.String("server-cert")
-	droneserver.Config.Server.Key = c.String("server-key")
-	droneserver.Config.Server.Pass = c.String("agent-secret")
-	droneserver.Config.Server.Host = c.String("server-host")
-	droneserver.Config.Server.Port = c.String("server-addr")
-	droneserver.Config.Server.RepoConfig = c.String("repo-config")
-	droneserver.Config.Server.SessionExpires = c.Duration("session-expires")
-	droneserver.Config.Pipeline.Networks = c.StringSlice("network")
-	droneserver.Config.Pipeline.Volumes = c.StringSlice("volume")
-	droneserver.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	woodpecker.Config.Server.Cert = c.String("server-cert")
+	woodpecker.Config.Server.Key = c.String("server-key")
+	woodpecker.Config.Server.Pass = c.String("agent-secret")
+	woodpecker.Config.Server.Host = c.String("server-host")
+	woodpecker.Config.Server.Port = c.String("server-addr")
+	woodpecker.Config.Server.RepoConfig = c.String("repo-config")
+	woodpecker.Config.Server.SessionExpires = c.Duration("session-expires")
+	woodpecker.Config.Pipeline.Networks = c.StringSlice("network")
+	woodpecker.Config.Pipeline.Volumes = c.StringSlice("volume")
+	woodpecker.Config.Pipeline.Privileged = c.StringSlice("escalate")
 
 	// prometheus
-	droneserver.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+	woodpecker.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
 }
 
 type authorizer struct {
@@ -272,7 +272,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = droneserver.Config.Server.Host
+	var serverHost string = woodpecker.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"
