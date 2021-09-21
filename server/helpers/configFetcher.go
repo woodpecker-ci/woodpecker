@@ -1,4 +1,4 @@
-package server
+package helpers
 
 import (
 	"strings"

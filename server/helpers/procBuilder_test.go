@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package helpers
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo: &model.Repo{},
 		Curr: &model.Build{
 			Message: `aaa
@@ -61,7 +61,7 @@ pipeline:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
 		Last:  &model.Build{},
@@ -95,7 +95,7 @@ pipeline:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
 		Last:  &model.Build{},
@@ -141,7 +141,7 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{},
 		Last:  &model.Build{},
@@ -177,7 +177,7 @@ runs_on:
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Build{Branch: "dev"},
 		Last:  &model.Build{},
@@ -225,7 +225,7 @@ func TestZeroSteps(t *testing.T) {
 
 	build := &model.Build{Branch: "dev"}
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -259,7 +259,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 
 	build := &model.Build{Branch: "dev"}
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -307,7 +307,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 
 	build := &model.Build{Branch: "dev"}
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -361,7 +361,7 @@ func TestTree(t *testing.T) {
 
 	build := &model.Build{}
 
-	b := procBuilder{
+	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -378,7 +378,7 @@ pipeline:
 	}
 
 	buildItems, err := b.Build()
-	build = setBuildStepsOnBuild(build, buildItems)
+	build = SetBuildStepsOnBuild(build, buildItems)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -415,7 +415,7 @@ func TestSanitizePath(t *testing.T) {
 	}
 
 	for _, test := range testTable {
-		if test.sanitizedPath != sanitizePath(test.path) {
+		if test.sanitizedPath != SanitizePath(test.path) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}

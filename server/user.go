@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/helpers"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
@@ -47,11 +48,11 @@ func GetFeed(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := syncer{
-			remote: remote.FromContext(c),
-			store:  store.FromContext(c),
-			perms:  store.FromContext(c),
-			match:  NamespaceFilter(config.OwnersWhitelist),
+		sync := helpers.Syncer{
+			Remote: remote.FromContext(c),
+			Store:  store.FromContext(c),
+			Perms:  store.FromContext(c),
+			Match:  helpers.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
@@ -92,11 +93,11 @@ func GetRepos(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := syncer{
-			remote: remote.FromContext(c),
-			store:  store.FromContext(c),
-			perms:  store.FromContext(c),
-			match:  NamespaceFilter(config.OwnersWhitelist),
+		sync := helpers.Syncer{
+			Remote: remote.FromContext(c),
+			Store:  store.FromContext(c),
+			Perms:  store.FromContext(c),
+			Match:  helpers.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(user); err != nil {

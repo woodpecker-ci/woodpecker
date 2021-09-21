@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package helpers
 
 import (
 	"fmt"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"math/rand"
 	"net/url"
 	"path/filepath"
@@ -33,8 +34,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote"
 )
 
-// Takes the hook data and the yaml and returns in internal data model
-type procBuilder struct {
+// ProcBuilder Takes the hook data and the yaml and returns in helpers data model
+type ProcBuilder struct {
 	Repo  *model.Repo
 	Curr  *model.Build
 	Last  *model.Build
@@ -46,7 +47,7 @@ type procBuilder struct {
 	Envs  map[string]string
 }
 
-type buildItem struct {
+type BuildItem struct {
 	Proc      *model.Proc
 	Platform  string
 	Labels    map[string]string
@@ -55,8 +56,8 @@ type buildItem struct {
 	Config    *backend.Config
 }
 
-func (b *procBuilder) Build() ([]*buildItem, error) {
-	var items []*buildItem
+func (b *ProcBuilder) Build() ([]*BuildItem, error) {
+	var items []*BuildItem
 
 	sort.Sort(remote.ByName(b.Yamls))
 
@@ -79,7 +80,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
-				Name:    sanitizePath(y.Name),
+				Name:    SanitizePath(y.Name),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -117,7 +118,7 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 				continue
 			}
 
-			item := &buildItem{
+			item := &BuildItem{
 				Proc:      proc,
 				Config:    ir,
 				Labels:    parsed.Labels,
@@ -139,8 +140,8 @@ func (b *procBuilder) Build() ([]*buildItem, error) {
 	return items, nil
 }
 
-func filterItemsWithMissingDependencies(items []*buildItem) []*buildItem {
-	itemsToRemove := make([]*buildItem, 0)
+func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
+	itemsToRemove := make([]*BuildItem, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
@@ -151,7 +152,7 @@ func filterItemsWithMissingDependencies(items []*buildItem) []*buildItem {
 	}
 
 	if len(itemsToRemove) > 0 {
-		filtered := make([]*buildItem, 0)
+		filtered := make([]*BuildItem, 0)
 		for _, item := range items {
 			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
 				filtered = append(filtered, item)
@@ -164,7 +165,7 @@ func filterItemsWithMissingDependencies(items []*buildItem) []*buildItem {
 	return items
 }
 
-func containsItemWithName(name string, items []*buildItem) bool {
+func containsItemWithName(name string, items []*BuildItem) bool {
 	for _, item := range items {
 		if name == item.Proc.Name {
 			return true
@@ -173,7 +174,7 @@ func containsItemWithName(name string, items []*buildItem) bool {
 	return false
 }
 
-func (b *procBuilder) envsubst_(y string, environ map[string]string) (string, error) {
+func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -183,7 +184,7 @@ func (b *procBuilder) envsubst_(y string, environ map[string]string) (string, er
 	})
 }
 
-func (b *procBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
@@ -194,7 +195,7 @@ func (b *procBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -220,10 +221,10 @@ func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	return compiler.New(
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
-		compiler.WithEscalated(Config.Pipeline.Privileged...),
-		compiler.WithResourceLimit(Config.Pipeline.Limits.MemSwapLimit, Config.Pipeline.Limits.MemLimit, Config.Pipeline.Limits.ShmSize, Config.Pipeline.Limits.CPUQuota, Config.Pipeline.Limits.CPUShares, Config.Pipeline.Limits.CPUSet),
-		compiler.WithVolumes(Config.Pipeline.Volumes...),
-		compiler.WithNetworks(Config.Pipeline.Networks...),
+		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
+		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
+		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+		compiler.WithNetworks(server.Config.Pipeline.Networks...),
 		compiler.WithLocal(false),
 		compiler.WithOption(
 			compiler.WithNetrc(
@@ -248,7 +249,7 @@ func (b *procBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func setBuildStepsOnBuild(build *model.Build, buildItems []*buildItem) *model.Build {
+func SetBuildStepsOnBuild(build *model.Build, buildItems []*BuildItem) *model.Build {
 	var pidSequence int
 	for _, item := range buildItems {
 		build.Procs = append(build.Procs, item.Proc)
@@ -359,7 +360,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
-func sanitizePath(path string) string {
+func SanitizePath(path string) string {
 	path = filepath.Base(path)
 	path = strings.TrimSuffix(path, ".yml")
 	path = strings.TrimPrefix(path, ".")

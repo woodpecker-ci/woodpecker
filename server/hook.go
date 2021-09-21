@@ -40,6 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/server/helpers"
 )
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -159,7 +160,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := &configFetcher{remote_: remote_, user: user, repo: repo, build: build}
+	configFetcher := helpers.NewConfigFetcher(remote_, user, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch()
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
@@ -241,7 +242,7 @@ func PostHook(c *gin.Context) {
 	// get the previous build so that we can send status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 
-	b := procBuilder{
+	b := helpers.ProcBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -254,12 +255,12 @@ func PostHook(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+		if _, err = helpers.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
 			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
-	build = setBuildStepsOnBuild(b.Curr, buildItems)
+	build = helpers.SetBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -300,7 +301,7 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 }
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := procBuilder{
+	b := helpers.ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -330,7 +331,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
-			Name:   sanitizePath(remoteYamlConfig.Name),
+			Name:   helpers.SanitizePath(remoteYamlConfig.Name),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
@@ -372,7 +373,7 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 	Config.Services.Pubsub.Publish(c, "topic/events", message)
 }
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
+func queueBuild(build *model.Build, repo *model.Repo, buildItems []*helpers.BuildItem) {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
 		if item.Proc.State == model.StatusSkipped {
@@ -402,7 +403,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 	Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*buildItem) []string {
+func taskIds(dependsOn []string, buildItems []*helpers.BuildItem) []string {
 	taskIds := []string{}
 	for _, dep := range dependsOn {
 		for _, buildItem := range buildItems {

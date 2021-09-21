@@ -1,4 +1,4 @@
-package server_test
+package helpers_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/remote/mocks"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/helpers"
 )
 
 func TestFetch(t *testing.T) {
@@ -179,7 +179,7 @@ func TestFetch(t *testing.T) {
 			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := server.NewConfigFetcher(
+			configFetcher := helpers.NewConfigFetcher(
 				r,
 				&model.User{Token: "xxx"},
 				repo,
