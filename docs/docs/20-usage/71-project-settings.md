@@ -6,9 +6,7 @@ As the owner of a project in Woodpecker you can change some project related sett
 
 ## Pipeline path
 
-The path to the pipeline file or folder. By default it point `.woodpecker.yml`. To use a [multi pipeline](/docs/usage/multi-pipeline) you have to change it to a folder path ending with `/` like `.woodpecker/`.
-
-If you enable the fallback check, Woodpecker will first try to load the configuration from the defined path and if it fails to find that file it will try to use `.drone.yml`.
+The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution `.woodpecker/*.yml` -> `.woodpecker.yml` -> `.drone.yml`. If you set a custom path Woodpecker tries to load your configuration or fails if no configuration could be found at the specified location. To use a [multi pipeline](/docs/usage/multi-pipeline) you have to change it to a folder path ending with a `/` like `.woodpecker/`.
 
 ## Repository hooks
 

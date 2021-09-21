@@ -1,6 +1,8 @@
 # Plugins
 
-Plugins are Docker containers that perform pre-defined tasks and are configured as steps in your pipeline. Plugins can be used to deploy code, publish artifacts, send notification, and more.
+Plugins are pipeline steps that perform pre-defined tasks and are configured as steps in your pipeline. Plugins can be used to deploy code, publish artifacts, send notification, and more.
+
+They are automatically pulled from [plugins.drone.io](http://plugins.drone.io).
 
 Example pipeline using the Docker and Slack plugins:
 
@@ -24,7 +26,7 @@ pipeline:
 
 ## Plugin Isolation
 
-Plugins are executed in Docker containers and are isolated from the other steps in your build pipeline. Plugins do share the build workspace, mounted as a volume, and therefore have access to your source tree.
+Plugins are just pipeline steps. They share the build workspace, mounted as a volume, and therefore have access to your source tree.
 
 ## Creating a plugin
 

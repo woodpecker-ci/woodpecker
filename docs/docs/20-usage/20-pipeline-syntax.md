@@ -243,18 +243,7 @@ when:
 
 ### `status`
 
-Execute a step when the build status changes:
-
-```diff
-when:
-  status: changed
-```
-
-Woodpecker uses the container exit code to determine the success or failure status of a build. Non-zero exit codes fail the build and cause the pipeline to immediately exit.
-
-There are use cases for executing pipeline steps on failure, such as sending notifications for failed builds. Use the status constraint to override the default behavior and execute steps even when the build status is failure:
-
-Execute a step when the build is passing or failing:
+There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
 
 ```diff
 pipeline:
@@ -265,7 +254,7 @@ pipeline:
 +     status: [ success, failure ]
 ```
 
-### `plattform`
+### `platform`
 
 Execute a step for a specific platform:
 
@@ -313,28 +302,26 @@ when:
 
 ### `path`
 
-Execute a step only on commit with certain files added/removed/modified:
+> NOTE: This feature is currently only available for GitHub and Gitea repositories.
 
-> NOTE: Feature is only available for GitHub and Gitea repositories.
+Execute a step only on a pipeline with certain files being changed:
 
 ```diff
 when:
   path: "src/*"
 ```
 
-Execute a step only on commit excluding certain files added/removed/modified:
-
-
-> NOTE: Feature is only available for GitHub and Gitea repositories.
+You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
 ```diff
 when:
   path:
-    exclude: [ '*.md', '*.ini' ]
+    include: [ '.woodpecker/*.yml', '*.ini' ]
+    exclude: [ '*.md', 'docs/**' ]
     ignore_message: "[ALL]"
 ```
 
-** Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions. **
+** Hint: ** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 ## Step `group` - Parallel execution
 
