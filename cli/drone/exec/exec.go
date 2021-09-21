@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -318,7 +317,7 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		file = ".drone.yml"
 	}
 
-	metadata := metadataFromContext(c)
+	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	secrets := []compiler.Secret{}
 	for k, v := range metadata.EnvironDrone() {
@@ -330,12 +329,6 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 			Name:  key,
 			Value: val,
 		})
-	}
-
-	if len(axis) != 0 {
-		for k, v := range axis {
-			environ[k] = v
-		}
 	}
 
 	droneEnv := make(map[string]string)
@@ -434,7 +427,7 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 }
 
 // return the metadata from the cli context.
-func metadataFromContext(c *cli.Context) frontend.Metadata {
+func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 	return frontend.Metadata{
 		Repo: frontend.Repo{
 			Name:    c.String("repo-name"),
@@ -488,7 +481,7 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 		},
 		Job: frontend.Job{
 			Number: c.Int("job-number"),
-			Matrix: availableEnvironment(),
+			Matrix: axis,
 		},
 		Sys: frontend.System{
 			Name: c.String("system-name"),
@@ -496,17 +489,6 @@ func metadataFromContext(c *cli.Context) frontend.Metadata {
 			Arch: c.String("system-arch"),
 		},
 	}
-}
-
-func availableEnvironment() map[string]string {
-	result := make(map[string]string, 0)
-
-	for _, env := range os.Environ() {
-		pair := strings.SplitN(env, "=", 2)
-		result[pair[0]] = pair[1]
-	}
-
-	return result
 }
 
 func convertPathForWindows(path string) string {
