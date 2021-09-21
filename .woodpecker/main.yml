@@ -7,10 +7,9 @@ pipeline:
     image: golang:1.16
     group: test
     commands:
-      - make deps
       - make test
-      - make vet
-      - make formatcheck
+#     - make vet
+#     - make formatcheck
 
   test-frontend:
     image: node:10.17.0-stretch
@@ -50,8 +49,6 @@ pipeline:
       - go get github.com/woodpecker-ci/togo
       - (cd web/; go generate ./...)
       - make release
-    when:
-      event: [push, tag]
 
   # publish-server-alpine:
   #   image: plugins/docker
@@ -71,9 +68,9 @@ pipeline:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     secrets: [docker_username, docker_password]
-    tag: [latest]
+    tag: [v0.14]
     when:
-      branch: master
+      branch: release/v0.14
       event: push
 
   publish-agent:
@@ -81,9 +78,9 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: [latest]
+    tag: [v0.14]
     when:
-      branch: master
+      branch: release/v0.14
       event: push
 
   # publish-agent-alpine:
