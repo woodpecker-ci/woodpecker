@@ -774,7 +774,6 @@ var dropAllowPushTagsDeploysColumns = `
 ALTER TABLE repos DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, DROP COLUMN repo_allow_tags
 `
 
-
 //
 // 028_update_table_set_users_token_and_secret_length.sql
 //
