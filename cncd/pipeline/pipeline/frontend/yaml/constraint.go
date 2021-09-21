@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	doublestar "github.com/bmatcuk/doublestar/v4"
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
@@ -227,7 +228,7 @@ func (c *ConstraintPath) Match(v []string, message string) bool {
 func (c *ConstraintPath) Includes(v []string) bool {
 	for _, pattern := range c.Include {
 		for _, file := range v {
-			if ok, _ := filepath.Match(pattern, file); ok {
+			if ok, _ := doublestar.Match(pattern, file); ok {
 				return true
 			}
 		}
@@ -239,7 +240,7 @@ func (c *ConstraintPath) Includes(v []string) bool {
 func (c *ConstraintPath) Excludes(v []string) bool {
 	for _, pattern := range c.Exclude {
 		for _, file := range v {
-			if ok, _ := filepath.Match(pattern, file); ok {
+			if ok, _ := doublestar.Match(pattern, file); ok {
 				return true
 			}
 		}

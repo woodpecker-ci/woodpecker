@@ -178,6 +178,26 @@ func TestConstraintList(t *testing.T) {
 			want: true,
 		},
 		{
+			conf: "'docs/*'",
+			with: []string{"docs/README.md"},
+			want: true,
+		},
+		{
+			conf: "'docs/*'",
+			with: []string{"docs/sub/README.md"},
+			want: false,
+		},
+		{
+			conf: "'docs/**'",
+			with: []string{"docs/README.md", "docs/sub/README.md", "docs/sub-sub/README.md"},
+			want: true,
+		},
+		{
+			conf: "'docs/**'",
+			with: []string{"README.md"},
+			want: false,
+		},
+		{
 			conf: "{ include: [ README.md ] }",
 			with: []string{"CHANGELOG.md"},
 			want: false,
@@ -233,7 +253,7 @@ func TestConstraintList(t *testing.T) {
 		c := parseConstraintPath(test.conf)
 		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
-			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
+			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
 		}
 	}
 }
