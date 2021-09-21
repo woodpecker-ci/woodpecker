@@ -21,7 +21,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "woodpecker"
+	app.Name = "woodpecker-cli"
 	app.Version = version.String()
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
