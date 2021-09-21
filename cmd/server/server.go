@@ -124,7 +124,14 @@ func server(c *cli.Context) error {
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := woodpeckerGrpcServer.NewDroneServer(remote_, woodpecker.Config.Services.Queue, woodpecker.Config.Services.Logs, woodpecker.Config.Services.Pubsub, store_, woodpecker.Config.Server.Host)
+		droneServer := woodpeckerGrpcServer.NewDroneServer(
+			remote_,
+			woodpecker.Config.Services.Queue,
+			woodpecker.Config.Services.Logs,
+			woodpecker.Config.Services.Pubsub,
+			store_,
+			woodpecker.Config.Server.Host,
+		)
 		proto.RegisterDroneServer(grpcServer, droneServer)
 
 		err = grpcServer.Serve(lis)
