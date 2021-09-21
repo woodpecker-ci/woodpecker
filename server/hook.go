@@ -330,7 +330,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
-			Name:   sanitizePath(remoteYamlConfig.Name, repo.Config),
+			Name:   sanitizePath(remoteYamlConfig.Name),
 		}
 		err = Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
