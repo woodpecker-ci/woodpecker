@@ -20,20 +20,24 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/version"
 
-	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
 )
 
 func main() {
-	godotenv.Load(".env")
 	app := cli.NewApp()
-	app.Name = "drone-server"
+	app.Name = "woodpecker-agent"
 	app.Version = version.String()
-	app.Usage = "drone server"
-	app.Action = server
+	app.Usage = "woodpecker agent"
+	app.Action = loop
+	app.Commands = []cli.Command{
+		{
+			Name:   "ping",
+			Usage:  "ping the agent",
+			Action: pinger,
+		},
+	}
 	app.Flags = flags
-	app.Before = before
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)

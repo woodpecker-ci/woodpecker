@@ -8,6 +8,6 @@ ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/drone/drone.sqlite
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3
 ENV XDG_CACHE_HOME=/var/lib/drone
 
-ADD release/drone-server /bin/
+ADD release/woodpecker-server /bin/
 
-ENTRYPOINT ["/bin/drone-server"]
+ENTRYPOINT ["/bin/woodpecker-server"]
