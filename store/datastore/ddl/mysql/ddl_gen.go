@@ -200,6 +200,10 @@ var migrations = []struct {
 		name: "update-builds-set-changed_files",
 		stmt: updateBuildsSetChangedfiles,
 	},
+	{
+		name: "update-table-set-users-token-and-secret-length",
+		stmt: updateTableSetUsersTokenAndSecretLength,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -744,4 +748,12 @@ ALTER TABLE builds ADD COLUMN changed_files TEXT
 
 var updateBuildsSetChangedfiles = `
 UPDATE builds SET changed_files='[]'
+`
+
+//
+// 028_update_table_set_users_token_and_secret_length.sql
+//
+
+var updateTableSetUsersTokenAndSecretLength = `
+ALTER TABLE users MODIFY user_token varchar(1000), MODIFY user_secret varchar(1000);
 `
