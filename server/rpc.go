@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	oldcontext "golang.org/x/net/context"
 
@@ -45,50 +44,6 @@ import (
 
 	"github.com/woodpecker-ci/expr"
 )
-
-var Config = struct {
-	Services struct {
-		Pubsub     pubsub.Publisher
-		Queue      queue.Queue
-		Logs       logging.Log
-		Senders    model.SenderService
-		Secrets    model.SecretService
-		Registries model.RegistryService
-		Environ    model.EnvironService
-	}
-	Storage struct {
-		// Users  model.UserStore
-		// Repos  model.RepoStore
-		// Builds model.BuildStore
-		// Logs   model.LogStore
-		Config model.ConfigStore
-		Files  model.FileStore
-		Procs  model.ProcStore
-		// Registries model.RegistryStore
-		// Secrets model.SecretStore
-	}
-	Server struct {
-		Key            string
-		Cert           string
-		Host           string
-		Port           string
-		Pass           string
-		RepoConfig     string
-		SessionExpires time.Duration
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
-	}
-	Prometheus struct {
-		AuthToken string
-	}
-	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
-	}
-}{}
 
 type RPC struct {
 	remote     remote.Remote
