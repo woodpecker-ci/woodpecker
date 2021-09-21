@@ -42,19 +42,18 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
-	if !repo.AllowPush && !repo.AllowPull && !repo.AllowDeploy && !repo.AllowTag {
-		repo.AllowPush = true
-		repo.AllowPull = true
-	}
+
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
 		if repo.IsPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
 	}
+
 	if repo.Timeout == 0 {
 		repo.Timeout = 60 // 1 hour default build time
 	}
+
 	if repo.Hash == "" {
 		repo.Hash = base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
@@ -110,17 +109,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.AllowPush != nil {
-		repo.AllowPush = *in.AllowPush
-	}
 	if in.AllowPull != nil {
 		repo.AllowPull = *in.AllowPull
-	}
-	if in.AllowDeploy != nil {
-		repo.AllowDeploy = *in.AllowDeploy
-	}
-	if in.AllowTag != nil {
-		repo.AllowTag = *in.AllowTag
 	}
 	if in.IsGated != nil {
 		repo.IsGated = *in.IsGated
