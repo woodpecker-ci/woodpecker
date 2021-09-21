@@ -71,7 +71,7 @@ func server(c *cli.Context) error {
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		logrus.Warningln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+			"WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
