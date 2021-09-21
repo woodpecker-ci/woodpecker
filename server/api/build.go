@@ -15,7 +15,7 @@
 //
 // This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
-package server
+package api
 
 import (
 	"bytes"
@@ -35,6 +35,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/helpers"
 )
 
@@ -196,9 +197,9 @@ func DeleteBuild(c *gin.Context) {
 			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
 		}
 	}
-	Config.Services.Queue.EvictAtOnce(context.Background(), procToEvict)
-	Config.Services.Queue.ErrorAtOnce(context.Background(), procToEvict, queue.ErrCancel)
-	Config.Services.Queue.ErrorAtOnce(context.Background(), procToCancel, queue.ErrCancel)
+	server.Config.Services.Queue.EvictAtOnce(context.Background(), procToEvict)
+	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToEvict, queue.ErrCancel)
+	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToCancel, queue.ErrCancel)
 
 	// Then update the DB status for pending builds
 	// Running ones will be set when the agents stop on the cancel signal
@@ -258,7 +259,7 @@ func PostApproval(c *gin.Context) {
 	}
 
 	// fetch the build file from the database
-	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
+	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -281,17 +282,17 @@ func PostApproval(c *gin.Context) {
 	// get the previous build so that we can send
 	// on status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
-	secs, err := Config.Services.Secrets.SecretListBuild(repo, build)
+	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
-	regs, err := Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
 		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 	envs := map[string]string{}
-	if Config.Services.Environ != nil {
-		globals, _ := Config.Services.Environ.EnvironList(repo)
+	if server.Config.Services.Environ != nil {
+		globals, _ := server.Config.Services.Environ.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
@@ -309,7 +310,7 @@ func PostApproval(c *gin.Context) {
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,
-		Link:  Config.Server.Host,
+		Link:  server.Config.Server.Host,
 		Yamls: yamls,
 		Envs:  envs,
 	}
@@ -329,7 +330,7 @@ func PostApproval(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(user, repo, build, uri, item.Proc)
 			} else {
@@ -370,7 +371,7 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
+	uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 	err = remote_.Status(user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
@@ -431,7 +432,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the pipeline config from database
-	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
+	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
@@ -491,16 +492,16 @@ func PostBuild(c *gin.Context) {
 	// get the previous build so that we can send
 	// on status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
-	secs, err := Config.Services.Secrets.SecretListBuild(repo, build)
+	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
-	regs, err := Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
 		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
-	if Config.Services.Environ != nil {
-		globals, _ := Config.Services.Environ.EnvironList(repo)
+	if server.Config.Services.Environ != nil {
+		globals, _ := server.Config.Services.Environ.EnvironList(repo)
 		for _, global := range globals {
 			buildParams[global.Name] = global.Value
 		}
@@ -518,7 +519,7 @@ func PostBuild(c *gin.Context) {
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,
-		Link:  Config.Server.Host,
+		Link:  server.Config.Server.Host,
 		Yamls: yamls,
 		Envs:  buildParams,
 	}
@@ -594,7 +595,7 @@ func persistBuildConfigs(configs []*model.Config, buildID int64) error {
 			ConfigID: conf.ID,
 			BuildID:  buildID,
 		}
-		err := Config.Storage.Config.BuildConfigCreate(buildConfig)
+		err := server.Config.Storage.Config.BuildConfigCreate(buildConfig)
 		if err != nil {
 			return err
 		}

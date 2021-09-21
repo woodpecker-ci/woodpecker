@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,7 @@ func GetSecret(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("secret")
 	)
-	secret, err := Config.Services.Secrets.SecretFind(repo, name)
+	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
 		c.String(404, "Error getting secret %q. %s", name, err)
 		return
@@ -58,7 +59,7 @@ func PostSecret(c *gin.Context) {
 		c.String(400, "Error inserting secret. %s", err)
 		return
 	}
-	if err := Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
+	if err := server.Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
 		c.String(500, "Error inserting secret %q. %s", in.Name, err)
 		return
 	}
@@ -79,7 +80,7 @@ func PatchSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := Config.Services.Secrets.SecretFind(repo, name)
+	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
 		c.String(404, "Error getting secret %q. %s", name, err)
 		return
@@ -98,7 +99,7 @@ func PatchSecret(c *gin.Context) {
 		c.String(400, "Error updating secret. %s", err)
 		return
 	}
-	if err := Config.Services.Secrets.SecretUpdate(repo, secret); err != nil {
+	if err := server.Config.Services.Secrets.SecretUpdate(repo, secret); err != nil {
 		c.String(500, "Error updating secret %q. %s", in.Name, err)
 		return
 	}
@@ -109,7 +110,7 @@ func PatchSecret(c *gin.Context) {
 // to the response in json format.
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := Config.Services.Secrets.SecretList(repo)
+	list, err := server.Config.Services.Secrets.SecretList(repo)
 	if err != nil {
 		c.String(500, "Error getting secret list. %s", err)
 		return
@@ -128,7 +129,7 @@ func DeleteSecret(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("secret")
 	)
-	if err := Config.Services.Secrets.SecretDelete(repo, name); err != nil {
+	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
 		c.String(500, "Error deleting secret %q. %s", name, err)
 		return
 	}

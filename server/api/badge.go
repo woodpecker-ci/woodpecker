@@ -15,7 +15,7 @@
 //
 // This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
-package server
+package api
 
 import (
 	"fmt"
@@ -24,6 +24,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
 
@@ -94,7 +95,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, builds[0].Number)
+	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, builds[0].Number)
 	cc := model.NewCC(repo, builds[0], url)
 	c.XML(200, cc)
 }
