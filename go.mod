@@ -33,7 +33,6 @@ require (
 	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
-	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
@@ -52,7 +51,6 @@ require (
 	github.com/rs/zerolog v1.18.0
 	github.com/russross/meddler v1.0.0
 	github.com/sirupsen/logrus v1.6.0
-	github.com/sourcegraph/jsonrpc2 v0.0.0-20200429184054-15c2290dcb37
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5

@@ -244,36 +244,6 @@ paths:
           description: |
             Unable to find the Repository in the database
 
-  /repos/{owner}/{name}/builds/{number}:
-    get:
-      parameters:
-        - name: owner
-          in: path
-          type: string
-          description: owner of the repository
-        - name: name
-          in: path
-          type: string
-          description: name of the repository
-        - name: number
-          in: path
-          type: integer
-          description: sequential build number
-      tags:
-        - Builds
-      summary: Get a build
-      description: Returns the repository build by number.
-      security:
-        - accessToken: []
-      responses:
-        200:
-          description: The build.
-          schema:
-            $ref: "#/definitions/Build"
-        404:
-          description: |
-            Unable to find the Repository or Build
-
 
   /repos/{owner}/{name}/builds/{number}:
     get:
