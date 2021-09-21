@@ -28,9 +28,9 @@ import (
 func main() {
 	godotenv.Load(".env")
 	app := cli.NewApp()
-	app.Name = "drone-server"
+	app.Name = "woodpecker-server"
 	app.Version = version.String()
-	app.Usage = "drone server"
+	app.Usage = "woodpecker server"
 	app.Action = server
 	app.Flags = flags
 	app.Before = before
