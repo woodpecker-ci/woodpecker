@@ -27,7 +27,7 @@ pipeline:
     when:
       event: push
       branch: master
-      path: "docs/*"
+      path: "docs/**"
 
   build-docs-pr:
     image: node:14-alpine
@@ -37,4 +37,4 @@ pipeline:
       - yarn build
     when:
       event: [pull_request]
-      path: "docs/*"
+      path: "docs/**"
