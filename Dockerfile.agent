@@ -2,9 +2,9 @@
 
 FROM drone/ca-certs
 ENV GODEBUG=netdns=go
-ADD release/drone-agent /bin/
+ADD release/woodpecker-agent /bin/
 
 EXPOSE 3000
-HEALTHCHECK CMD ["/bin/drone-agent", "ping"]
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 
-ENTRYPOINT ["/bin/drone-agent"]
+ENTRYPOINT ["/bin/woodpecker-agent"]

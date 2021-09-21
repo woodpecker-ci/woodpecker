@@ -40,10 +40,10 @@ vet:
 	@go vet $(GO_PACKAGES)
 
 test-agent:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-agent $(GO_PACKAGES)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
 
 test-server:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
 
 test-frontend:
 	(cd web/; yarn run test)
@@ -54,10 +54,10 @@ test-lib:
 test: test-lib test-agent test-server
 
 build-agent:
-	$(DOCKER_RUN) go build -o build/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
+	$(DOCKER_RUN) go build -o build/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
 
 build-server:
-	$(DOCKER_RUN) go build -o build/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	$(DOCKER_RUN) go build -o build/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-frontend:
 	(cd web/; yarn run build)
@@ -65,10 +65,10 @@ build-frontend:
 build: build-agent build-server
 
 release-agent:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/drone-agent github.com/woodpecker-ci/woodpecker/cmd/drone-agent
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
 
 release-server:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o release/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o release/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 release-cli:
 	# disable CGO for cross-compiling
@@ -89,7 +89,3 @@ release-cli:
 	sha256sum cli/release/*.tar.gz > cli/release/woodpecker_checksums.txt
 
 release: release-agent release-server
-
-install:
-	go install github.com/woodpecker-ci/woodpecker/cmd/drone-agent
-	go install github.com/woodpecker-ci/woodpecker/cmd/drone-server
