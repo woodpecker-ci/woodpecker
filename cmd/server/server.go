@@ -41,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/router"
 	"github.com/woodpecker-ci/woodpecker/router/middleware"
 	droneserver "github.com/woodpecker-ci/woodpecker/server"
+	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/contrib/ginrus"
@@ -123,7 +124,7 @@ func server(c *cli.Context) error {
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := droneserver.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
+		droneServer := woodpeckerGrpcServer.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
 		proto.RegisterDroneServer(grpcServer, droneServer)
 
 		err = grpcServer.Serve(lis)

@@ -15,7 +15,7 @@
 //
 // This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
-package server
+package grpc
 
 import (
 	"bytes"
@@ -37,6 +37,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/helpers"
 
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -226,7 +227,7 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		}
 	}
 
-	return Config.Storage.Files.FileCreate(
+	return server.Config.Storage.Files.FileCreate(
 		report,
 		bytes.NewBuffer(file.Data),
 	)
@@ -424,7 +425,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *mod
 				s.store.UpdateUser(user)
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
+		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
