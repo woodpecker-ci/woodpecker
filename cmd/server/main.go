@@ -31,7 +31,7 @@ func main() {
 	app.Name = "woodpecker-server"
 	app.Version = version.String()
 	app.Usage = "woodpecker server"
-	app.Action = server
+	app.Action = loop
 	app.Flags = flags
 	app.Before = before
 

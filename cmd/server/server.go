@@ -50,7 +50,7 @@ import (
 	oldcontext "golang.org/x/net/context"
 )
 
-func server(c *cli.Context) error {
+func loop(c *cli.Context) error {
 
 	// debug level if requested by user
 	if c.Bool("debug") {
