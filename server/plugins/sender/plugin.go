@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/plugins/internal"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/internal"
 )
 
 type plugin struct {
