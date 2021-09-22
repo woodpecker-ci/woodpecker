@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"encoding/base32"
@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
@@ -70,7 +71,7 @@ func PostRepo(c *gin.Context) {
 
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		Config.Server.Host,
+		server.Config.Server.Host,
 		sig,
 	)
 
@@ -186,7 +187,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	remote.Deactivate(user, repo, Config.Server.Host)
+	remote.Deactivate(user, repo, server.Config.Server.Host)
 	c.JSON(200, repo)
 }
 
@@ -204,7 +205,7 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := Config.Server.Host
+	host := server.Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
@@ -290,7 +291,7 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := Config.Server.Host
+	host := server.Config.Server.Host
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,

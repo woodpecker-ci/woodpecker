@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"encoding/base32"
@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/store"
@@ -131,7 +132,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	exp := time.Now().Add(Config.Server.SessionExpires).Unix()
+	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	token := token.New(token.SessToken, u.Login)
 	tokenstr, err := token.SignExpires(u.Hash, exp)
 	if err != nil {
@@ -176,7 +177,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	exp := time.Now().Add(Config.Server.SessionExpires).Unix()
+	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	token := token.New(token.SessToken, user.Login)
 	tokenstr, err := token.SignExpires(user.Hash, exp)
 	if err != nil {

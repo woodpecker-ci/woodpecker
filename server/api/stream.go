@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"context"
@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
@@ -77,7 +78,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
+		server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
 			defer func() {
 				recover() // fix #2480
 			}()
@@ -189,7 +190,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		// TODO remove global variable
-		Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
+		server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
 			defer func() {
 				recover() // fix #2480
 			}()
