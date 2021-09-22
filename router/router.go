@@ -24,8 +24,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/token"
 	"github.com/woodpecker-ci/woodpecker/server/api"
-	"github.com/woodpecker-ci/woodpecker/server/debug"
-	"github.com/woodpecker-ci/woodpecker/server/metrics"
+	"github.com/woodpecker-ci/woodpecker/server/api/debug"
+	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
