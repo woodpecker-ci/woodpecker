@@ -71,9 +71,10 @@ func (s *State) Healthy() bool {
 	return true
 }
 
-func (s *State) WriteTo(w io.Writer) (int, error) {
+func (s *State) WriteTo(w io.Writer) (int64, error) {
 	s.Lock()
 	out, _ := json.Marshal(s)
 	s.Unlock()
-	return w.Write(out)
+	ret, err := w.Write(out)
+	return int64(ret), err
 }
