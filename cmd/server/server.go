@@ -40,7 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/router"
 	"github.com/woodpecker-ci/woodpecker/router/middleware"
-	woodpecker "github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/store"
 
@@ -126,11 +126,11 @@ func server(c *cli.Context) error {
 		)
 		droneServer := woodpeckerGrpcServer.NewDroneServer(
 			remote_,
-			woodpecker.Config.Services.Queue,
-			woodpecker.Config.Services.Logs,
-			woodpecker.Config.Services.Pubsub,
+			server.Config.Services.Queue,
+			server.Config.Services.Logs,
+			server.Config.Services.Pubsub,
 			store_,
-			woodpecker.Config.Server.Host,
+			server.Config.Server.Host,
 		)
 		proto.RegisterDroneServer(grpcServer, droneServer)
 
@@ -209,45 +209,45 @@ func server(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// storage
-	woodpecker.Config.Storage.Files = v
-	woodpecker.Config.Storage.Config = v
+	server.Config.Storage.Files = v
+	server.Config.Storage.Config = v
 
 	// services
-	woodpecker.Config.Services.Queue = setupQueue(c, v)
-	woodpecker.Config.Services.Logs = logging.New()
-	woodpecker.Config.Services.Pubsub = pubsub.New()
-	woodpecker.Config.Services.Pubsub.Create(context.Background(), "topic/events")
-	woodpecker.Config.Services.Registries = setupRegistryService(c, v)
-	woodpecker.Config.Services.Secrets = setupSecretService(c, v)
-	woodpecker.Config.Services.Senders = sender.New(v, v)
-	woodpecker.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Logs = logging.New()
+	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	server.Config.Services.Registries = setupRegistryService(c, v)
+	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Senders = sender.New(v, v)
+	server.Config.Services.Environ = setupEnvironService(c, v)
 
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		woodpecker.Config.Services.Senders = sender.NewRemote(endpoint)
+		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
 	// limits
-	woodpecker.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	woodpecker.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	woodpecker.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	woodpecker.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	woodpecker.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
-	woodpecker.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// server configuration
-	woodpecker.Config.Server.Cert = c.String("server-cert")
-	woodpecker.Config.Server.Key = c.String("server-key")
-	woodpecker.Config.Server.Pass = c.String("agent-secret")
-	woodpecker.Config.Server.Host = c.String("server-host")
-	woodpecker.Config.Server.Port = c.String("server-addr")
-	woodpecker.Config.Server.RepoConfig = c.String("repo-config")
-	woodpecker.Config.Server.SessionExpires = c.Duration("session-expires")
-	woodpecker.Config.Pipeline.Networks = c.StringSlice("network")
-	woodpecker.Config.Pipeline.Volumes = c.StringSlice("volume")
-	woodpecker.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Server.Cert = c.String("server-cert")
+	server.Config.Server.Key = c.String("server-key")
+	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.Host = c.String("server-host")
+	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.RepoConfig = c.String("repo-config")
+	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Pipeline.Networks = c.StringSlice("network")
+	server.Config.Pipeline.Volumes = c.StringSlice("volume")
+	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 
 	// prometheus
-	woodpecker.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
 }
 
 type authorizer struct {
@@ -279,7 +279,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = woodpecker.Config.Server.Host
+	var serverHost string = server.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"
