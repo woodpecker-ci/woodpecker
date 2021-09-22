@@ -16,7 +16,6 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"math/rand"
 	"net/url"
 	"path/filepath"
@@ -32,6 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
+	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 // ProcBuilder Takes the hook data and the yaml and returns in helpers data model
