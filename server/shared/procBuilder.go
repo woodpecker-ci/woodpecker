@@ -30,8 +30,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
