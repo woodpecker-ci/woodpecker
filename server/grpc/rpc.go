@@ -38,7 +38,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/helpers"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
@@ -139,7 +139,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = helpers.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
+	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Printf("error: rpc.update: cannot update proc: %s", err)
 	}
 
@@ -266,7 +266,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	if build.Status == model.StatusPending {
-		if build, err = helpers.UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
+		if build, err = shared.UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
 			log.Printf("error: init: cannot update build_id %d state: %s", build.ID, err)
 		}
 	}
@@ -286,7 +286,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		s.pubsub.Publish(c, "topic/events", message)
 	}()
 
-	_, err = helpers.UpdateProcToStatusStarted(s.store, *proc, state)
+	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
 	return err
 }
 
@@ -315,7 +315,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = helpers.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
+	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
 
@@ -333,7 +333,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !isThereRunningStage(procs) {
-		if build, err = helpers.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
+		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
 			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
@@ -384,7 +384,7 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
-			if _, err := helpers.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
+			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
 				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
 			}
 		}

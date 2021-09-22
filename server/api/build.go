@@ -36,7 +36,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/helpers"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
 func GetBuilds(c *gin.Context) {
@@ -206,18 +206,18 @@ func DeleteBuild(c *gin.Context) {
 	for _, proc := range procs {
 		if proc.State == model.StatusPending {
 			if proc.PPID != 0 {
-				if _, err = helpers.UpdateProcToStatusSkipped(store.FromContext(c), *proc, 0); err != nil {
+				if _, err = shared.UpdateProcToStatusSkipped(store.FromContext(c), *proc, 0); err != nil {
 					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			} else {
-				if _, err = helpers.UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
+				if _, err = shared.UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
 					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := helpers.UpdateToStatusKilled(store.FromContext(c), *build)
+	killedBuild, err := shared.UpdateToStatusKilled(store.FromContext(c), *build)
 	if err != nil {
 		c.AbortWithError(500, err)
 		return
@@ -272,7 +272,7 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	if build, err = helpers.UpdateToStatusPending(store.FromContext(c), *build, user.Login); err != nil {
+	if build, err = shared.UpdateToStatusPending(store.FromContext(c), *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
@@ -303,7 +303,7 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
 	}
 
-	b := helpers.ProcBuilder{
+	b := shared.ProcBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -316,12 +316,12 @@ func PostApproval(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = helpers.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+		if _, err = shared.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
 			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
-	build = helpers.SetBuildStepsOnBuild(b.Curr, buildItems)
+	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -366,7 +366,7 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	if _, err = helpers.UpdateToStatusDeclined(store.FromContext(c), *build, user.Login); err != nil {
+	if _, err = shared.UpdateToStatusDeclined(store.FromContext(c), *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
@@ -512,7 +512,7 @@ func PostBuild(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
 	}
 
-	b := helpers.ProcBuilder{
+	b := shared.ProcBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -532,7 +532,7 @@ func PostBuild(c *gin.Context) {
 		c.JSON(500, build)
 		return
 	}
-	build = helpers.SetBuildStepsOnBuild(b.Curr, buildItems)
+	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
