@@ -32,6 +32,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
+	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
@@ -132,11 +133,7 @@ func loop(c *cli.Context) error {
 				if sigterm.IsSet() {
 					return
 				}
-				r := runner{
-					client:   client,
-					filter:   filter,
-					hostname: hostname,
-				}
+				r := NewRunner(client, filter, hostname, counter)
 				if err := r.run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
@@ -157,13 +154,23 @@ const (
 	maxFileUpload = 1000000
 )
 
-type runner struct {
+type Runner struct {
 	client   rpc.Peer
 	filter   rpc.Filter
 	hostname string
+	counter  *agent.State
 }
 
-func (r *runner) run(ctx context.Context) error {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *agent.State) Runner {
+	return Runner{
+		client:   workEngine,
+		filter:   f,
+		hostname: h,
+		counter:  state,
+	}
+}
+
+func (r *Runner) run(ctx context.Context) error {
 	log.Debug().
 		Msg("request next execution")
 
@@ -184,13 +191,13 @@ func (r *runner) run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	counter.Add(
+	r.counter.Add(
 		work.ID,
 		timeout,
 		extractRepositoryName(work.Config), // hack
 		extractBuildNumber(work.Config),    // hack
 	)
-	defer counter.Done(work.ID)
+	defer r.counter.Done(work.ID)
 
 	logger := log.With().
 		Str("repo", extractRepositoryName(work.Config)). // hack
