@@ -20,12 +20,12 @@ import (
 	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/router/middleware/header"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/token"
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 

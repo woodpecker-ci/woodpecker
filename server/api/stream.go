@@ -25,8 +25,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/logging"
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
