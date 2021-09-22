@@ -4,7 +4,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 
 	libcompose "github.com/docker/libcompose/yaml"
 )

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 )
 
 // Option configures a compiler option.

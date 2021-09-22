@@ -3,9 +3,9 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML

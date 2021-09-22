@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
 type UpdateProcStore interface {
