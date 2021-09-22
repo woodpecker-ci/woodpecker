@@ -34,7 +34,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
-// ProcBuilder Takes the hook data and the yaml and returns in helpers data model
+// ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo  *model.Repo
 	Curr  *model.Build
