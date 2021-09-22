@@ -3,7 +3,7 @@ package yaml
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend"
 
 	"gopkg.in/yaml.v3"
 )

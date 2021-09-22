@@ -5,8 +5,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/frontend/yaml"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {

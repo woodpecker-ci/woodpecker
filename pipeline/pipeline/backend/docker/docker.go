@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend"
 
 	"docker.io/go-docker"
 	"docker.io/go-docker/api/types"

@@ -25,10 +25,10 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/rpc"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"

@@ -28,8 +28,8 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/rpc"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/pipeline/backend"
 )
 
 // returns a container configuration.
