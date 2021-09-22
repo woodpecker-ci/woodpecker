@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
 

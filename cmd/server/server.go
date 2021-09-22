@@ -38,10 +38,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/router"
-	"github.com/woodpecker-ci/woodpecker/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
+	"github.com/woodpecker-ci/woodpecker/server/router"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/contrib/ginrus"
