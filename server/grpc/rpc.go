@@ -42,7 +42,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/woodpecker-ci/expr"
 )

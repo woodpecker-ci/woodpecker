@@ -21,7 +21,7 @@ import (
 
 	"github.com/russross/meddler"
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/store/datastore/sql"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
 func (db *datastore) LogFind(proc *model.Proc) (io.ReadCloser, error) {

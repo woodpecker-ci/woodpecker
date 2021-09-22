@@ -42,7 +42,7 @@ import (
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/sirupsen/logrus"
