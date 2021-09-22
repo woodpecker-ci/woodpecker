@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package shared
 
 import (
 	"time"
@@ -22,16 +22,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/store"
 )
 
-// Syncer synces the user repository and permissions.
-type Syncer interface {
+// UserSyncer syncs the user repository and permissions.
+type UserSyncer interface {
 	Sync(user *model.User) error
 }
 
-type syncer struct {
-	remote remote.Remote
-	store  store.Store
-	perms  model.PermStore
-	match  FilterFunc
+type Syncer struct {
+	Remote remote.Remote
+	Store  store.Store
+	Perms  model.PermStore
+	Match  FilterFunc
 }
 
 // FilterFunc can be used to filter which repositories are
@@ -58,13 +58,13 @@ func noopFilter(*model.Repo) bool {
 }
 
 // SetFilter sets the filter function.
-func (s *syncer) SetFilter(fn FilterFunc) {
-	s.match = fn
+func (s *Syncer) SetFilter(fn FilterFunc) {
+	s.Match = fn
 }
 
-func (s *syncer) Sync(user *model.User) error {
+func (s *Syncer) Sync(user *model.User) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
-	repos, err := s.remote.Repos(user)
+	repos, err := s.Remote.Repos(user)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (s *syncer) Sync(user *model.User) error {
 	var perms []*model.Perm
 
 	for _, repo := range repos {
-		if s.match(repo) {
+		if s.Match(repo) {
 			remote = append(remote, repo)
 			perm := model.Perm{
 				UserID: user.ID,
@@ -89,12 +89,12 @@ func (s *syncer) Sync(user *model.User) error {
 		}
 	}
 
-	err = s.store.RepoBatch(remote)
+	err = s.Store.RepoBatch(remote)
 	if err != nil {
 		return err
 	}
 
-	err = s.store.PermBatch(perms)
+	err = s.Store.PermBatch(perms)
 	if err != nil {
 		return err
 	}
@@ -110,5 +110,5 @@ func (s *syncer) Sync(user *model.User) error {
 		return nil
 	}
 
-	return s.perms.PermFlush(user, unix)
+	return s.Perms.PermFlush(user, unix)
 }

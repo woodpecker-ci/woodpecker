@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"io"
@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/store"
 )
 

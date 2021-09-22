@@ -15,7 +15,7 @@
 //
 // This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
-package server
+package grpc
 
 import (
 	"bytes"
@@ -24,11 +24,10 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	oldcontext "golang.org/x/net/context"
 
-	"google.golang.org/grpc/metadata"
+	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -38,6 +37,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
@@ -45,50 +46,6 @@ import (
 
 	"github.com/woodpecker-ci/expr"
 )
-
-var Config = struct {
-	Services struct {
-		Pubsub     pubsub.Publisher
-		Queue      queue.Queue
-		Logs       logging.Log
-		Senders    model.SenderService
-		Secrets    model.SecretService
-		Registries model.RegistryService
-		Environ    model.EnvironService
-	}
-	Storage struct {
-		// Users  model.UserStore
-		// Repos  model.RepoStore
-		// Builds model.BuildStore
-		// Logs   model.LogStore
-		Config model.ConfigStore
-		Files  model.FileStore
-		Procs  model.ProcStore
-		// Registries model.RegistryStore
-		// Secrets model.SecretStore
-	}
-	Server struct {
-		Key            string
-		Cert           string
-		Host           string
-		Port           string
-		Pass           string
-		RepoConfig     string
-		SessionExpires time.Duration
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
-	}
-	Prometheus struct {
-		AuthToken string
-	}
-	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
-	}
-}{}
 
 type RPC struct {
 	remote     remote.Remote
@@ -103,7 +60,7 @@ type RPC struct {
 
 // Next implements the rpc.Next function
 func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) {
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
@@ -168,7 +125,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
@@ -182,7 +139,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
+	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Printf("error: rpc.update: cannot update proc: %s", err)
 	}
 
@@ -270,7 +227,7 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		}
 	}
 
-	return Config.Storage.Files.FileCreate(
+	return server.Config.Storage.Files.FileCreate(
 		report,
 		bytes.NewBuffer(file.Data),
 	)
@@ -288,7 +245,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		log.Printf("error: cannot find proc with id %d: %s", procID, err)
 		return err
 	}
-	metadata, ok := metadata.FromIncomingContext(c)
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
@@ -309,7 +266,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	if build.Status == model.StatusPending {
-		if build, err = UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
+		if build, err = shared.UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
 			log.Printf("error: init: cannot update build_id %d state: %s", build.ID, err)
 		}
 	}
@@ -329,7 +286,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		s.pubsub.Publish(c, "topic/events", message)
 	}()
 
-	_, err = UpdateProcToStatusStarted(s.store, *proc, state)
+	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
 	return err
 }
 
@@ -358,7 +315,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = UpdateProcStatusToDone(s.store, *proc, state); err != nil {
+	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
 
@@ -376,7 +333,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !isThereRunningStage(procs) {
-		if build, err = UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
+		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
 			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
@@ -427,7 +384,7 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
-			if _, err := UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
+			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
 				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
 			}
 		}
@@ -468,7 +425,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *mod
 				s.store.UpdateUser(user)
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
+		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
