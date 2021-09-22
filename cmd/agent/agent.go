@@ -28,6 +28,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
+	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
 	"github.com/rs/zerolog"
@@ -124,7 +125,15 @@ func loop(c *cli.Context) error {
 				if sigterm.IsSet() {
 					return
 				}
-				r := agent.NewRunner(client, filter, hostname, counter)
+
+				// new docker engine
+				engine, err := docker.NewEnv()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot create docker client")
+					return
+				}
+
+				r := agent.NewRunner(client, filter, hostname, counter, &engine)
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return

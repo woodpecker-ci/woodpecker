@@ -27,7 +27,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 
@@ -48,14 +47,16 @@ type Runner struct {
 	filter   rpc.Filter
 	hostname string
 	counter  *State
+	engine   *backend.Engine
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Engine) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
 		counter:  state,
+		engine:   backend,
 	}
 }
 
@@ -96,16 +97,6 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().
 		Msg("received execution")
-
-	// new docker engine
-	engine, err := docker.NewEnv()
-	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("cannot create docker client")
-
-		return err
-	}
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
@@ -313,7 +304,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithContext(ctx),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
-		pipeline.WithEngine(engine),
+		pipeline.WithEngine(*r.engine),
 	).Run()
 
 	state.Finished = time.Now().Unix()
