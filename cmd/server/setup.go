@@ -36,9 +36,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/woodpecker-ci/woodpecker/store/datastore"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"
