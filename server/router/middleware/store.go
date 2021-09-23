@@ -12,31 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package middleware
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/woodpecker-ci/woodpecker/version"
-
-	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	godotenv.Load(".env")
-	app := cli.NewApp()
-	app.Name = "woodpecker-server"
-	app.Version = version.String()
-	app.Usage = "woodpecker server"
-	app.Action = loop
-	app.Flags = flags
-	app.Before = before
-
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+// Store is a middleware function that initializes the Datastore and attaches to
+// the context of every http.Request.
+func Store(cli *cli.Context, v store.Store) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		store.ToContext(c, v)
+		c.Next()
 	}
 }
