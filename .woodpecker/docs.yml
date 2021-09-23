@@ -27,11 +27,9 @@ pipeline:
     when:
       event: push
       branch: master
-      path:
-        include: ["docs/**"]
-        exclude: ["docs/pipeline-schema/**"]
+      path: "docs/**"
 
-  test-docs:
+  build-docs-pr:
     image: node:14-alpine
     commands:
       - cd docs/
@@ -39,6 +37,4 @@ pipeline:
       - yarn build
     when:
       event: [pull_request]
-      path:
-        include: ["docs/**"]
-        exclude: ["docs/pipeline-schema/**"]
+      path: "docs/**"
