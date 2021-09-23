@@ -13,7 +13,7 @@ pipeline:
       - cat charts/woodpecker-agent/Chart.yaml
       - cat charts/woodpecker-server/Chart.yaml
     when:
-      path: "charts/*"
+      path: "charts/**"
 
   lint:
     image: alpine/helm:3.5.3
@@ -21,7 +21,7 @@ pipeline:
       - helm lint charts/woodpecker-agent/
       - helm lint charts/woodpecker-server/
     when:
-      path: "charts/*"
+      path: "charts/**"
 
   release:
     image: quay.io/helmpack/chart-releaser:v1.2.1
@@ -36,7 +36,7 @@ pipeline:
       - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
-      path: "charts/*"
+      path: "charts/**"
 
 depends_on:
   - release
