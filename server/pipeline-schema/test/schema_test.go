@@ -71,7 +71,7 @@ func loadYmlAsJson(path string) ([]byte, error) {
 	return j, nil
 }
 
-func TestClone(t *testing.T) {
+func TestSchema(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
