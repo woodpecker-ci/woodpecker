@@ -6,7 +6,7 @@ pipeline:
   set-version:
     image: alpine/helm:3.5.3
     commands:
-      # use drone tag or 0.0.0 if not running on a tag
+      # use tag name or 0.0.0 if not running on a tag
       - export CHART_VERSION=${${DRONE_TAG##v}=0.0.0}
       - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-agent/Chart.yaml
       - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-server/Chart.yaml
