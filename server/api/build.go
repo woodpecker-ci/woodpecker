@@ -30,13 +30,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
-	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/store"
-
 	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func GetBuilds(c *gin.Context) {

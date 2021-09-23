@@ -23,9 +23,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/remote"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

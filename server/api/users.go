@@ -22,7 +22,7 @@ import (
 	"github.com/gorilla/securecookie"
 
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func GetUsers(c *gin.Context) {

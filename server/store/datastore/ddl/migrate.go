@@ -18,9 +18,9 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/woodpecker-ci/woodpecker/store/datastore/ddl/mysql"
-	"github.com/woodpecker-ci/woodpecker/store/datastore/ddl/postgres"
-	"github.com/woodpecker-ci/woodpecker/store/datastore/ddl/sqlite"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/ddl/mysql"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/ddl/postgres"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/ddl/sqlite"
 )
 
 // Supported database drivers

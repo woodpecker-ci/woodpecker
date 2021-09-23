@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/russross/meddler"
-	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/woodpecker-ci/woodpecker/store/datastore/ddl"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/ddl"
 
 	"github.com/sirupsen/logrus"
 )
