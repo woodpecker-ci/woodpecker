@@ -12,31 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package datastore
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/woodpecker-ci/woodpecker/version"
-
-	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli"
+	"github.com/russross/meddler"
+	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func main() {
-	godotenv.Load(".env")
-	app := cli.NewApp()
-	app.Name = "woodpecker-server"
-	app.Version = version.String()
-	app.Usage = "woodpecker server"
-	app.Action = loop
-	app.Flags = flags
-	app.Before = before
+func (db *datastore) TaskList() ([]*model.Task, error) {
+	stmt := sql.Lookup(db.driver, "task-list")
+	data := []*model.Task{}
+	err := meddler.QueryAll(db, &data, stmt)
+	return data, err
+}
 
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func (db *datastore) TaskInsert(task *model.Task) error {
+	return meddler.Insert(db, "tasks", task)
+}
+
+func (db *datastore) TaskDelete(id string) error {
+	stmt := sql.Lookup(db.driver, "task-delete")
+	_, err := db.Exec(stmt, id)
+	return err
 }

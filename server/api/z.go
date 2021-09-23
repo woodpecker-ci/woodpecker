@@ -12,31 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package api
 
 import (
-	"fmt"
-	"os"
-
+	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/version"
-
-	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli"
 )
 
-func main() {
-	godotenv.Load(".env")
-	app := cli.NewApp()
-	app.Name = "woodpecker-server"
-	app.Version = version.String()
-	app.Usage = "woodpecker server"
-	app.Action = loop
-	app.Flags = flags
-	app.Before = before
-
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+// Health endpoint returns a 500 if the server state is unhealthy.
+func Health(c *gin.Context) {
+	if err := store.FromContext(c).Ping(); err != nil {
+		c.String(500, err.Error())
+		return
 	}
+	c.String(200, "")
+}
+
+// Version endpoint returns the server version and build information.
+func Version(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"source":  "https://github.com/woodpecker-ci/woodpecker",
+		"version": version.String(),
+	})
 }
