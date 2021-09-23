@@ -174,8 +174,6 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v2.0.3+incompatible
 ## explicit
 github.com/mattn/go-sqlite3
-# github.com/mattn/go-zglob v0.0.3
-## explicit
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
@@ -257,6 +255,13 @@ github.com/woodpecker-ci/expr/parse
 # github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
 ## explicit
 github.com/woodpecker-ci/togo
+# github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
+github.com/xeipuuv/gojsonpointer
+# github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415
+github.com/xeipuuv/gojsonreference
+# github.com/xeipuuv/gojsonschema v1.2.0
+## explicit
+github.com/xeipuuv/gojsonschema
 # golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 ## explicit
 golang.org/x/crypto/acme

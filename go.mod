@@ -57,6 +57,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
