@@ -15,28 +15,28 @@ pipeline:
     when:
       path: "charts/**"
 
-  lint:
-    image: alpine/helm:3.5.3
-    commands:
-      - helm lint charts/woodpecker-agent/
-      - helm lint charts/woodpecker-server/
-    when:
-      path: "charts/**"
+  # lint:
+  #   image: alpine/helm:3.5.3
+  #   commands:
+  #     - helm lint charts/woodpecker-agent/
+  #     - helm lint charts/woodpecker-server/
+  #   when:
+  #     path: "charts/**"
 
-  release:
-    image: quay.io/helmpack/chart-releaser:v1.2.1
-    secrets:
-      - source: github_token
-        target: CR_TOKEN
-    commands:
-      - mkdir -p .cr-index
-      - cr package charts/woodpecker-server
-      - cr package charts/woodpecker-agent
-      - cr upload --owner woodpecker-ci --git-repo woodpecker-ci.github.io --release-name-template "helm-{{ .Name }}-{{ .Version }}"
-      - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
-    when:
-      event: tag
-      path: "charts/**"
+  # release:
+  #   image: quay.io/helmpack/chart-releaser:v1.2.1
+  #   secrets:
+  #     - source: github_token
+  #       target: CR_TOKEN
+  #   commands:
+  #     - mkdir -p .cr-index
+  #     - cr package charts/woodpecker-server
+  #     - cr package charts/woodpecker-agent
+  #     - cr upload --owner woodpecker-ci --git-repo woodpecker-ci.github.io --release-name-template "helm-{{ .Name }}-{{ .Version }}"
+  #     - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
+  #   when:
+  #     event: tag
+  #     path: "charts/**"
 
 depends_on:
   - release
