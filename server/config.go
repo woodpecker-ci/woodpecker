@@ -20,10 +20,10 @@ package server
 import (
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/logging"
-	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
-	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/pubsub"
+	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
 var Config = struct {
