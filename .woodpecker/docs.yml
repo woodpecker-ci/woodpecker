@@ -28,8 +28,8 @@ pipeline:
       event: push
       branch: master
       path:
-        include: ["docs/*"]
-        exclude: ["docs/pipeline-schema/*"]
+        include: ["docs/**"]
+        exclude: ["docs/pipeline-schema/**"]
 
   test-docs:
     image: node:14-alpine
@@ -40,5 +40,5 @@ pipeline:
     when:
       event: [pull_request]
       path:
-        include: ["docs/*"]
-        exclude: ["docs/pipeline-schema/*"]
+        include: ["docs/**"]
+        exclude: ["docs/pipeline-schema/**"]

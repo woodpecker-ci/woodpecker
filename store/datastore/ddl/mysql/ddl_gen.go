@@ -200,6 +200,18 @@ var migrations = []struct {
 		name: "update-builds-set-changed_files",
 		stmt: updateBuildsSetChangedfiles,
 	},
+	{
+		name: "alter-table-drop-repo-fallback",
+		stmt: alterTableDropRepoFallback,
+	},
+	{
+		name: "drop-allow-push-tags-deploys-columns",
+		stmt: dropAllowPushTagsDeploysColumns,
+	},
+	{
+		name: "update-table-set-users-token-and-secret-length",
+		stmt: updateTableSetUsersTokenAndSecretLength,
+	},
 }
 
 // Migrate performs the database migration. If the migration fails
@@ -744,4 +756,28 @@ ALTER TABLE builds ADD COLUMN changed_files TEXT
 
 var updateBuildsSetChangedfiles = `
 UPDATE builds SET changed_files='[]'
+`
+
+//
+// 026_drop_repo_fallback_column.sql
+//
+
+var alterTableDropRepoFallback = `
+ALTER TABLE repos DROP COLUMN repo_fallback
+`
+
+//
+// 027_drop_allow_push_tags_deployments_columns.sql
+//
+
+var dropAllowPushTagsDeploysColumns = `
+ALTER TABLE repos DROP COLUMN repo_allow_push, DROP COLUMN repo_allow_deploys, DROP COLUMN repo_allow_tags
+`
+
+//
+// 028_update_table_set_users_token_and_secret_length.sql
+//
+
+var updateTableSetUsersTokenAndSecretLength = `
+ALTER TABLE users MODIFY user_token varchar(1000), MODIFY user_secret varchar(1000);
 `

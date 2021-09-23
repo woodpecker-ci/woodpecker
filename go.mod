@@ -8,9 +8,9 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
 	github.com/bmatcuk/doublestar v1.3.4
+	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
-	github.com/dgrijalva/jwt-go v0.0.0-20150904212456-c1da56349675
 	github.com/dimfeld/httptreemux v5.0.1+incompatible
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 	github.com/docker/distribution v2.7.1+incompatible
@@ -28,11 +28,11 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
 	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
-	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
@@ -51,7 +51,6 @@ require (
 	github.com/rs/zerolog v1.18.0
 	github.com/russross/meddler v1.0.0
 	github.com/sirupsen/logrus v1.6.0
-	github.com/sourcegraph/jsonrpc2 v0.0.0-20200429184054-15c2290dcb37
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5

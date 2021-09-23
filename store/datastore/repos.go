@@ -84,16 +84,12 @@ func (db *datastore) RepoBatch(repos []*model.Repo) error {
 			repo.IsTrusted,
 			repo.IsActive,
 			repo.AllowPull,
-			repo.AllowPush,
-			repo.AllowDeploy,
-			repo.AllowTag,
 			repo.Hash,
 			repo.Kind,
 			repo.Config,
 			repo.IsGated,
 			repo.Visibility,
 			repo.Counter,
-			repo.Fallback,
 		)
 		if err != nil {
 			return err

@@ -4,11 +4,14 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## 0.15.0
 
-- Default pipeline path changed to `.woodpecker/`
+- Default value for custom pipeline path is now empty / un-set which results in following resolution:
 
-  **Solution:** Set configuration location via [project settings](/docs/usage/project-settings#pipeline-path).
-  
-  There is still a default fallback mechanism in following order: `.woodpecker/*.yml` -> `.woodpecker.yml` -> `.drone.yml`
+  `.woodpecker/*.yml` -> `.woodpecker.yml` -> `.drone.yml`
+
+  Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
+
+  Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
+
 - ...
 
 ## 0.14.0

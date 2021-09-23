@@ -54,7 +54,7 @@ module.exports = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/server-setup',
+              to: '/docs/administration/setup',
             },
             {
               label: 'FAQ',

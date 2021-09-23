@@ -153,7 +153,7 @@ func (c *client) RepoChown(owner string, name string) (*Repo, error) {
 	return out, err
 }
 
-// RepoRepair repais the repository hooks.
+// RepoRepair repairs the repository hooks.
 func (c *client) RepoRepair(owner string, name string) error {
 	uri := fmt.Sprintf(pathRepair, c.addr, owner, name)
 	return c.post(uri, nil, nil)

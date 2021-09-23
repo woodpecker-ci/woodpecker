@@ -429,7 +429,7 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	// fetch the .drone.yml file from the database
+	// fetch the pipeline config from database
 	configs, err := Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
