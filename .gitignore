@@ -18,7 +18,7 @@
 *.out
 
 ### Frontend ###
-node_modules
+web/node_modules
 web/dist/files
 web/*.log
 web/.env
