@@ -15,7 +15,7 @@
 //
 // This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
-package server
+package api
 
 import (
 	"context"
@@ -40,6 +40,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
 	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -50,23 +52,23 @@ func init() {
 
 func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(200,
-		Config.Services.Queue.Info(c),
+		server.Config.Services.Queue.Info(c),
 	)
 }
 
 func PauseQueue(c *gin.Context) {
-	Config.Services.Queue.Pause()
+	server.Config.Services.Queue.Pause()
 	c.Status(http.StatusOK)
 }
 
 func ResumeQueue(c *gin.Context) {
-	Config.Services.Queue.Resume()
+	server.Config.Services.Queue.Resume()
 	c.Status(http.StatusOK)
 }
 
 func BlockTilQueueHasRunningItem(c *gin.Context) {
 	for {
-		info := Config.Services.Queue.Info(c)
+		info := server.Config.Services.Queue.Info(c)
 		if info.Stats.Running == 0 {
 			break
 		}
@@ -159,7 +161,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := &configFetcher{remote_: remote_, user: user, repo: repo, build: build}
+	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch()
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
@@ -221,19 +223,19 @@ func PostHook(c *gin.Context) {
 	}
 
 	envs := map[string]string{}
-	if Config.Services.Environ != nil {
-		globals, _ := Config.Services.Environ.EnvironList(repo)
+	if server.Config.Services.Environ != nil {
+		globals, _ := server.Config.Services.Environ.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
 	}
 
-	secs, err := Config.Services.Secrets.SecretListBuild(repo, build)
+	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 
-	regs, err := Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
 		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
@@ -241,7 +243,7 @@ func PostHook(c *gin.Context) {
 	// get the previous build so that we can send status change notifications
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 
-	b := procBuilder{
+	b := shared.ProcBuilder{
 		Repo:  repo,
 		Curr:  build,
 		Last:  last,
@@ -249,17 +251,17 @@ func PostHook(c *gin.Context) {
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  Config.Server.Host,
+		Link:  server.Config.Server.Host,
 		Yamls: remoteYamlConfigs,
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+		if _, err = shared.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
 			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
-	build = setBuildStepsOnBuild(b.Curr, buildItems)
+	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
@@ -268,7 +270,7 @@ func PostHook(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", Config.Server.Host, repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(user, repo, build, uri, item.Proc)
 			} else {
@@ -300,7 +302,7 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 }
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := procBuilder{
+	b := shared.ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
 		Last:  &model.Build{},
@@ -324,18 +326,18 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 
 func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
-	conf, err := Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+	conf, err := server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
 			RepoID: build.RepoID,
 			Data:   string(remoteYamlConfig.Data),
 			Hash:   sha,
-			Name:   sanitizePath(remoteYamlConfig.Name),
+			Name:   shared.SanitizePath(remoteYamlConfig.Name),
 		}
-		err = Config.Storage.Config.ConfigCreate(conf)
+		err = server.Config.Storage.Config.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+			conf, err = server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
@@ -346,7 +348,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 		ConfigID: conf.ID,
 		BuildID:  build.ID,
 	}
-	err = Config.Storage.Config.BuildConfigCreate(buildConfig)
+	err = server.Config.Storage.Config.BuildConfigCreate(buildConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -369,10 +371,10 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 		Repo:  *repo,
 		Build: buildCopy,
 	})
-	Config.Services.Pubsub.Publish(c, "topic/events", message)
+	server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
+func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
 		if item.Proc.State == model.StatusSkipped {
@@ -396,13 +398,13 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*buildItem) {
 			Timeout: repo.Timeout,
 		})
 
-		Config.Services.Logs.Open(context.Background(), task.ID)
+		server.Config.Services.Logs.Open(context.Background(), task.ID)
 		tasks = append(tasks, task)
 	}
-	Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*buildItem) []string {
+func taskIds(dependsOn []string, buildItems []*shared.BuildItem) []string {
 	taskIds := []string{}
 	for _, dep := range dependsOn {
 		for _, buildItem := range buildItems {

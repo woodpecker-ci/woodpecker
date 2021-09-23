@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package api
 
 import (
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,7 @@ func GetRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	registry, err := Config.Services.Registries.RegistryFind(repo, name)
+	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
 		c.String(404, "Error getting registry %q. %s", name, err)
 		return
@@ -59,7 +60,7 @@ func PostRegistry(c *gin.Context) {
 		c.String(400, "Error inserting registry. %s", err)
 		return
 	}
-	if err := Config.Services.Registries.RegistryCreate(repo, registry); err != nil {
+	if err := server.Config.Services.Registries.RegistryCreate(repo, registry); err != nil {
 		c.String(500, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
@@ -80,7 +81,7 @@ func PatchRegistry(c *gin.Context) {
 		return
 	}
 
-	registry, err := Config.Services.Registries.RegistryFind(repo, name)
+	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
 		c.String(404, "Error getting registry %q. %s", name, err)
 		return
@@ -102,7 +103,7 @@ func PatchRegistry(c *gin.Context) {
 		c.String(400, "Error updating registry. %s", err)
 		return
 	}
-	if err := Config.Services.Registries.RegistryUpdate(repo, registry); err != nil {
+	if err := server.Config.Services.Registries.RegistryUpdate(repo, registry); err != nil {
 		c.String(500, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
@@ -113,7 +114,7 @@ func PatchRegistry(c *gin.Context) {
 // to the response in json format.
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := Config.Services.Registries.RegistryList(repo)
+	list, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
 		c.String(500, "Error getting registry list. %s", err)
 		return
@@ -132,7 +133,7 @@ func DeleteRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	if err := Config.Services.Registries.RegistryDelete(repo, name); err != nil {
+	if err := server.Config.Services.Registries.RegistryDelete(repo, name); err != nil {
 		c.String(500, "Error deleting registry %q. %s", name, err)
 		return
 	}
