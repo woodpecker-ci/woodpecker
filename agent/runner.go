@@ -34,9 +34,9 @@ import (
 	"github.com/tevino/abool"
 )
 
-// NOTE we need to limit the size of the logs and files that we upload.
-// The maximum grpc payload size is 4194304. So until we implement streaming
-// for uploads, we need to set these limits below the maximum.
+// TODO: Implement log streaming.
+// Until now we need to limit the size of the logs and files that we upload.
+// The maximum grpc payload size is 4194304. So we need to set these limits below the maximum.
 const (
 	maxLogsUpload = 2000000 // this is per step
 	maxFileUpload = 1000000
