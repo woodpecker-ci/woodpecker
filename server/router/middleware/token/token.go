@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/store"
 
 	"github.com/gin-gonic/gin"
