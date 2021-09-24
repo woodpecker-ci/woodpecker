@@ -13,16 +13,16 @@ import (
 	"time"
 
 	"github.com/drone/envsubst"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/linter"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/interrupt"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
+	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
+	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 
 	"github.com/urfave/cli"
 )
@@ -319,7 +319,7 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
-	secrets := []compiler.Secret{}
+	var secrets []compiler.Secret
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
 	}

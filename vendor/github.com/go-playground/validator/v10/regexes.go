@@ -9,8 +9,8 @@ const (
 	alphaUnicodeNumericRegexString   = "^[\\p{L}\\p{N}]+$"
 	numericRegexString               = "^[-+]?[0-9]+(?:\\.[0-9]+)?$"
 	numberRegexString                = "^[0-9]+$"
-	hexadecimalRegexString           = "^[0-9a-fA-F]+$"
-	hexcolorRegexString              = "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+	hexadecimalRegexString           = "^(0[xX])?[0-9a-fA-F]+$"
+	hexColorRegexString              = "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
 	rgbRegexString                   = "^rgb\\(\\s*(?:(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])|(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%)\\s*\\)$"
 	rgbaRegexString                  = "^rgba\\(\\s*(?:(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])|(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%\\s*,\\s*(?:0|[1-9]\\d?|1\\d\\d?|2[0-4]\\d|25[0-5])%)\\s*,\\s*(?:(?:0.[1-9]*)|[01])\\s*\\)$"
 	hslRegexString                   = "^hsl\\(\\s*(?:0|[1-9]\\d?|[12]\\d\\d|3[0-5]\\d|360)\\s*,\\s*(?:(?:0|[1-9]\\d?|100)%)\\s*,\\s*(?:(?:0|[1-9]\\d?|100)%)\\s*\\)$"
@@ -36,18 +36,21 @@ const (
 	latitudeRegexString              = "^[-+]?([1-8]?\\d(\\.\\d+)?|90(\\.0+)?)$"
 	longitudeRegexString             = "^[-+]?(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$"
 	sSNRegexString                   = `^[0-9]{3}[ -]?(0[1-9]|[1-9][0-9])[ -]?([1-9][0-9]{3}|[0-9][1-9][0-9]{2}|[0-9]{2}[1-9][0-9]|[0-9]{3}[1-9])$`
-	hostnameRegexStringRFC952        = `^[a-zA-Z][a-zA-Z0-9\-\.]+[a-zA-Z0-9]$`                                            // https://tools.ietf.org/html/rfc952
-	hostnameRegexStringRFC1123       = `^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?$` // accepts hostname starting with a digit https://tools.ietf.org/html/rfc1123
-	btcAddressRegexString            = `^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$`                                                // bitcoin address
-	btcAddressUpperRegexStringBech32 = `^BC1[02-9AC-HJ-NP-Z]{7,76}$`                                                      // bitcoin bech32 address https://en.bitcoin.it/wiki/Bech32
-	btcAddressLowerRegexStringBech32 = `^bc1[02-9ac-hj-np-z]{7,76}$`                                                      // bitcoin bech32 address https://en.bitcoin.it/wiki/Bech32
+	hostnameRegexStringRFC952        = `^[a-zA-Z]([a-zA-Z0-9\-]+[\.]?)*[a-zA-Z0-9]$`                                                                      // https://tools.ietf.org/html/rfc952
+	hostnameRegexStringRFC1123       = `^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62}){1}(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?$`                                 // accepts hostname starting with a digit https://tools.ietf.org/html/rfc1123
+	fqdnRegexStringRFC1123           = `^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62})(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?(\.[a-zA-Z]{1}[a-zA-Z0-9]{0,62})\.?$` // same as hostnameRegexStringRFC1123 but must contain a non numerical TLD (possibly ending with '.')
+	btcAddressRegexString            = `^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$`                                                                                // bitcoin address
+	btcAddressUpperRegexStringBech32 = `^BC1[02-9AC-HJ-NP-Z]{7,76}$`                                                                                      // bitcoin bech32 address https://en.bitcoin.it/wiki/Bech32
+	btcAddressLowerRegexStringBech32 = `^bc1[02-9ac-hj-np-z]{7,76}$`                                                                                      // bitcoin bech32 address https://en.bitcoin.it/wiki/Bech32
 	ethAddressRegexString            = `^0x[0-9a-fA-F]{40}$`
 	ethAddressUpperRegexString       = `^0x[0-9A-F]{40}$`
 	ethAddressLowerRegexString       = `^0x[0-9a-f]{40}$`
-	uRLEncodedRegexString            = `(%[A-Fa-f0-9]{2})`
+	uRLEncodedRegexString            = `^(?:[^%]|%[0-9A-Fa-f]{2})*$`
 	hTMLEncodedRegexString           = `&#[x]?([0-9a-fA-F]{2})|(&gt)|(&lt)|(&quot)|(&amp)+[;]?`
 	hTMLRegexString                  = `<[/]?([a-zA-Z]+).*?>`
+	jWTRegexString                   = "^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$"
 	splitParamsRegexString           = `'[^']*'|\S+`
+	bicRegexString                   = `^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$`
 )
 
 var (
@@ -58,7 +61,7 @@ var (
 	numericRegex               = regexp.MustCompile(numericRegexString)
 	numberRegex                = regexp.MustCompile(numberRegexString)
 	hexadecimalRegex           = regexp.MustCompile(hexadecimalRegexString)
-	hexcolorRegex              = regexp.MustCompile(hexcolorRegexString)
+	hexColorRegex              = regexp.MustCompile(hexColorRegexString)
 	rgbRegex                   = regexp.MustCompile(rgbRegexString)
 	rgbaRegex                  = regexp.MustCompile(rgbaRegexString)
 	hslRegex                   = regexp.MustCompile(hslRegexString)
@@ -86,14 +89,17 @@ var (
 	sSNRegex                   = regexp.MustCompile(sSNRegexString)
 	hostnameRegexRFC952        = regexp.MustCompile(hostnameRegexStringRFC952)
 	hostnameRegexRFC1123       = regexp.MustCompile(hostnameRegexStringRFC1123)
+	fqdnRegexRFC1123           = regexp.MustCompile(fqdnRegexStringRFC1123)
 	btcAddressRegex            = regexp.MustCompile(btcAddressRegexString)
 	btcUpperAddressRegexBech32 = regexp.MustCompile(btcAddressUpperRegexStringBech32)
 	btcLowerAddressRegexBech32 = regexp.MustCompile(btcAddressLowerRegexStringBech32)
 	ethAddressRegex            = regexp.MustCompile(ethAddressRegexString)
-	ethaddressRegexUpper       = regexp.MustCompile(ethAddressUpperRegexString)
+	ethAddressRegexUpper       = regexp.MustCompile(ethAddressUpperRegexString)
 	ethAddressRegexLower       = regexp.MustCompile(ethAddressLowerRegexString)
 	uRLEncodedRegex            = regexp.MustCompile(uRLEncodedRegexString)
 	hTMLEncodedRegex           = regexp.MustCompile(hTMLEncodedRegexString)
 	hTMLRegex                  = regexp.MustCompile(hTMLRegexString)
+	jWTRegex                   = regexp.MustCompile(jWTRegexString)
 	splitParamsRegex           = regexp.MustCompile(splitParamsRegexString)
+	bicRegex                   = regexp.MustCompile(bicRegexString)
 )

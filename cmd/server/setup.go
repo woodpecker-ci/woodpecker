@@ -21,24 +21,24 @@ import (
 	"github.com/dimfeld/httptreemux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/woodpecker-ci/woodpecker/cncd/queue"
 	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/plugins/environments"
-	"github.com/woodpecker-ci/woodpecker/plugins/registry"
-	"github.com/woodpecker-ci/woodpecker/plugins/secrets"
-	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/remote/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/remote/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/remote/coding"
-	"github.com/woodpecker-ci/woodpecker/remote/gitea"
-	"github.com/woodpecker-ci/woodpecker/remote/github"
-	"github.com/woodpecker-ci/woodpecker/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/remote/gitlab3"
-	"github.com/woodpecker-ci/woodpecker/remote/gogs"
-	droneserver "github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
+	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket"
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver"
+	"github.com/woodpecker-ci/woodpecker/server/remote/coding"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
+	"github.com/woodpecker-ci/woodpecker/server/remote/github"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-	"github.com/woodpecker-ci/woodpecker/store"
-	"github.com/woodpecker-ci/woodpecker/store/datastore"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/urfave/cli"
@@ -257,7 +257,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := droneserver.Config.Services.Queue.Info(nil)
+			stats := server.Config.Services.Queue.Info(nil)
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))

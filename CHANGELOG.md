@@ -1,3 +1,13 @@
+## [0.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.1) - 2021-09-21
+
+* SECURITY
+  * Migrate jwt token lib (#332)
+* BUGFIXES
+  * Increase allowed length for user token in db (#328)
+  * Fix cli matrix filter (#311)
+  * Fix ignore pushes to tags for gitea (#289)
+  * Fix use custom config path to sanitize build names (#280)
+
 ## [0.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0) - 2021-08-01
 
 * FEATURES

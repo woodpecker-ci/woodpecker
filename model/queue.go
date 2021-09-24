@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"github.com/woodpecker-ci/woodpecker/cncd/queue"
+	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
 // Task defines scheduled pipeline Task.
@@ -41,7 +41,7 @@ type TaskStore interface {
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(q queue.Queue, s TaskStore) queue.Queue {
 	tasks, _ := s.TaskList()
-	toEnqueue := []*queue.Task{}
+	var toEnqueue []*queue.Task
 	for _, task := range tasks {
 		toEnqueue = append(toEnqueue, &queue.Task{
 			ID:           task.ID,

@@ -33,15 +33,16 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/logging"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/cncd/pubsub"
-	"github.com/woodpecker-ci/woodpecker/plugins/sender"
-	"github.com/woodpecker-ci/woodpecker/remote"
-	"github.com/woodpecker-ci/woodpecker/router"
-	"github.com/woodpecker-ci/woodpecker/router/middleware"
-	droneserver "github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/store"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	"github.com/woodpecker-ci/woodpecker/server"
+	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
+	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
+	"github.com/woodpecker-ci/woodpecker/server/pubsub"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/router"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/sirupsen/logrus"
@@ -49,7 +50,7 @@ import (
 	oldcontext "golang.org/x/net/context"
 )
 
-func server(c *cli.Context) error {
+func loop(c *cli.Context) error {
 
 	// debug level if requested by user
 	if c.Bool("debug") {
@@ -123,7 +124,14 @@ func server(c *cli.Context) error {
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := droneserver.NewDroneServer(remote_, droneserver.Config.Services.Queue, droneserver.Config.Services.Logs, droneserver.Config.Services.Pubsub, store_, droneserver.Config.Server.Host)
+		droneServer := woodpeckerGrpcServer.NewDroneServer(
+			remote_,
+			server.Config.Services.Queue,
+			server.Config.Services.Logs,
+			server.Config.Services.Pubsub,
+			store_,
+			server.Config.Server.Host,
+		)
 		proto.RegisterDroneServer(grpcServer, droneServer)
 
 		err = grpcServer.Serve(lis)
@@ -201,45 +209,45 @@ func server(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// storage
-	droneserver.Config.Storage.Files = v
-	droneserver.Config.Storage.Config = v
+	server.Config.Storage.Files = v
+	server.Config.Storage.Config = v
 
 	// services
-	droneserver.Config.Services.Queue = setupQueue(c, v)
-	droneserver.Config.Services.Logs = logging.New()
-	droneserver.Config.Services.Pubsub = pubsub.New()
-	droneserver.Config.Services.Pubsub.Create(context.Background(), "topic/events")
-	droneserver.Config.Services.Registries = setupRegistryService(c, v)
-	droneserver.Config.Services.Secrets = setupSecretService(c, v)
-	droneserver.Config.Services.Senders = sender.New(v, v)
-	droneserver.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Logs = logging.New()
+	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	server.Config.Services.Registries = setupRegistryService(c, v)
+	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Senders = sender.New(v, v)
+	server.Config.Services.Environ = setupEnvironService(c, v)
 
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		droneserver.Config.Services.Senders = sender.NewRemote(endpoint)
+		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
 	// limits
-	droneserver.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	droneserver.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	droneserver.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	droneserver.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	droneserver.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
-	droneserver.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// server configuration
-	droneserver.Config.Server.Cert = c.String("server-cert")
-	droneserver.Config.Server.Key = c.String("server-key")
-	droneserver.Config.Server.Pass = c.String("agent-secret")
-	droneserver.Config.Server.Host = c.String("server-host")
-	droneserver.Config.Server.Port = c.String("server-addr")
-	droneserver.Config.Server.RepoConfig = c.String("repo-config")
-	droneserver.Config.Server.SessionExpires = c.Duration("session-expires")
-	droneserver.Config.Pipeline.Networks = c.StringSlice("network")
-	droneserver.Config.Pipeline.Volumes = c.StringSlice("volume")
-	droneserver.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Server.Cert = c.String("server-cert")
+	server.Config.Server.Key = c.String("server-key")
+	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.Host = c.String("server-host")
+	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.RepoConfig = c.String("repo-config")
+	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Pipeline.Networks = c.StringSlice("network")
+	server.Config.Pipeline.Volumes = c.StringSlice("volume")
+	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 
 	// prometheus
-	droneserver.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
 }
 
 type authorizer struct {
@@ -271,7 +279,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = droneserver.Config.Server.Host
+	serverHost := server.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"
