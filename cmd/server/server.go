@@ -59,7 +59,6 @@ func loop(c *cli.Context) error {
 		logrus.SetLevel(logrus.WarnLevel)
 	}
 
-	// must configure the drone_host variable
 	if c.String("server-host") == "" {
 		logrus.Fatalln("WOODPECKER_SERVER_HOST is not properly configured")
 	}

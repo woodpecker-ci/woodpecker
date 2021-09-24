@@ -9,7 +9,7 @@ image:
 
 env:
   WOODPECKER_ADMIN: "xxxx"
-  WOODPECKER_HOST: https://"xxxxxxx"
+  WOODPECKER_SERVER_HOST: https://"xxxxxxx"
   WOODPECKER_GITHUB: true
 
 extraSecretNamesForEnvFrom:
