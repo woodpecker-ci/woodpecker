@@ -8,7 +8,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-//go:embed woodpecker.json
+//go:embed schema.json
 var schemaDefinition []byte
 
 func Lint(file string) (error, []gojsonschema.ResultError) {
