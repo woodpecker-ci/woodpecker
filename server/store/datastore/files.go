@@ -25,15 +25,17 @@ import (
 	"github.com/russross/meddler"
 )
 
-func (db *datastore) FileList(build *model.Build) (list []*model.File, err error) {
+func (db *datastore) FileList(build *model.Build) ([]*model.File, error) {
 	stmt := sql.Lookup(db.driver, "files-find-build")
-	err = meddler.QueryAll(db, &list, stmt, build.ID)
+	list := []*model.File{}
+	err := meddler.QueryAll(db, &list, stmt, build.ID)
 	return list, err
 }
 
-func (db *datastore) FileFind(proc *model.Proc, name string) (file *model.File, err error) {
+func (db *datastore) FileFind(proc *model.Proc, name string) (*model.File, error) {
 	stmt := sql.Lookup(db.driver, "files-find-proc-name")
-	err = meddler.QueryRow(db, file, stmt, proc.ID, name)
+	file := new(model.File)
+	err := meddler.QueryRow(db, file, stmt, proc.ID, name)
 	return file, err
 }
 

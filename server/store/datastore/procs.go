@@ -41,9 +41,10 @@ func (db *datastore) ProcChild(build *model.Build, pid int, child string) (*mode
 	return proc, err
 }
 
-func (db *datastore) ProcList(build *model.Build) (list []*model.Proc, err error) {
+func (db *datastore) ProcList(build *model.Build) ([]*model.Proc, error) {
 	stmt := sql.Lookup(db.driver, "procs-find-build")
-	err = meddler.QueryAll(db, &list, stmt, build.ID)
+	list := []*model.Proc{}
+	err := meddler.QueryAll(db, &list, stmt, build.ID)
 	return list, err
 }
 

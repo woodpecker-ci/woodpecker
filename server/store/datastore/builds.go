@@ -23,43 +23,51 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) GetBuild(id int64) (build *model.Build, err error) {
-	err = meddler.Load(db, buildTable, build, id)
+func (db *datastore) GetBuild(id int64) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.Load(db, buildTable, build, id)
 	return build, err
 }
 
-func (db *datastore) GetBuildNumber(repo *model.Repo, num int) (build *model.Build, err error) {
-	err = meddler.QueryRow(db, build, rebind(buildNumberQuery), repo.ID, num)
+func (db *datastore) GetBuildNumber(repo *model.Repo, num int) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.QueryRow(db, build, rebind(buildNumberQuery), repo.ID, num)
 	return build, err
 }
 
-func (db *datastore) GetBuildRef(repo *model.Repo, ref string) (build *model.Build, err error) {
-	err = meddler.QueryRow(db, build, rebind(buildRefQuery), repo.ID, ref)
+func (db *datastore) GetBuildRef(repo *model.Repo, ref string) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.QueryRow(db, build, rebind(buildRefQuery), repo.ID, ref)
 	return build, err
 }
 
-func (db *datastore) GetBuildCommit(repo *model.Repo, sha, branch string) (build *model.Build, err error) {
-	err = meddler.QueryRow(db, build, rebind(buildCommitQuery), repo.ID, sha, branch)
+func (db *datastore) GetBuildCommit(repo *model.Repo, sha, branch string) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.QueryRow(db, build, rebind(buildCommitQuery), repo.ID, sha, branch)
 	return build, err
 }
 
-func (db *datastore) GetBuildLast(repo *model.Repo, branch string) (build *model.Build, err error) {
-	err = meddler.QueryRow(db, build, rebind(buildLastQuery), repo.ID, branch)
+func (db *datastore) GetBuildLast(repo *model.Repo, branch string) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.QueryRow(db, build, rebind(buildLastQuery), repo.ID, branch)
 	return build, err
 }
 
-func (db *datastore) GetBuildLastBefore(repo *model.Repo, branch string, num int64) (build *model.Build, err error) {
-	err = meddler.QueryRow(db, build, rebind(buildLastBeforeQuery), repo.ID, branch, num)
+func (db *datastore) GetBuildLastBefore(repo *model.Repo, branch string, num int64) (*model.Build, error) {
+	var build = new(model.Build)
+	var err = meddler.QueryRow(db, build, rebind(buildLastBeforeQuery), repo.ID, branch, num)
 	return build, err
 }
 
-func (db *datastore) GetBuildList(repo *model.Repo, page int) (builds []*model.Build, err error) {
-	err = meddler.QueryAll(db, &builds, rebind(buildListQuery), repo.ID, 50*(page-1))
+func (db *datastore) GetBuildList(repo *model.Repo, page int) ([]*model.Build, error) {
+	var builds = []*model.Build{}
+	var err = meddler.QueryAll(db, &builds, rebind(buildListQuery), repo.ID, 50*(page-1))
 	return builds, err
 }
 
-func (db *datastore) GetBuildQueue() (feed []*model.Feed, err error) {
-	err = meddler.QueryAll(db, &feed, buildQueueList)
+func (db *datastore) GetBuildQueue() ([]*model.Feed, error) {
+	feed := []*model.Feed{}
+	err := meddler.QueryAll(db, &feed, buildQueueList)
 	return feed, err
 }
 

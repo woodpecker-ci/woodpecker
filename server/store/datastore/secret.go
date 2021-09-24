@@ -27,9 +27,10 @@ func (db *datastore) SecretFind(repo *model.Repo, name string) (*model.Secret, e
 	return data, err
 }
 
-func (db *datastore) SecretList(repo *model.Repo) (data []*model.Secret, err error) {
+func (db *datastore) SecretList(repo *model.Repo) ([]*model.Secret, error) {
 	stmt := sql.Lookup(db.driver, "secret-find-repo")
-	err = meddler.QueryAll(db, &data, stmt, repo.ID)
+	data := []*model.Secret{}
+	err := meddler.QueryAll(db, &data, stmt, repo.ID)
 	return data, err
 }
 
