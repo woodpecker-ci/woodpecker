@@ -50,8 +50,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 		}
 	}
 
-	auths := []*model.Registry{}
-
+	var auths []*model.Registry
 	for key, auth := range configFile.AuthConfigs {
 		auths = append(auths, &model.Registry{
 			Address:  key,

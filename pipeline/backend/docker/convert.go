@@ -165,7 +165,7 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 	}
 	if r.MatchString(volumeParts) {
 		results := r.FindStringSubmatch(volumeParts)[1:]
-		cleanResults := []string{}
+		var cleanResults []string
 		for _, item := range results {
 			if item != "" {
 				cleanResults = append(cleanResults, item)

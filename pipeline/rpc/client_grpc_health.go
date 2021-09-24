@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // generate protobuffs
@@ -45,7 +46,7 @@ func (c *healthClient) Check(ctx context.Context) (bool, error) {
 			}
 			return false, nil
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
