@@ -26,7 +26,7 @@ services:
 +     - WOODPECKER_LETS_ENCRYPT=true
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_SERVER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_SERVER_HOST=https://foo.com` the certificate is requested for `foo.com`.
 
 >Once enabled you can visit your website at both the http and the https address
 

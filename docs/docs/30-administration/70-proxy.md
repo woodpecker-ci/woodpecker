@@ -141,4 +141,4 @@ After installing [ngrok](https://ngrok.com/), open a new console and run:
 ngrok http 80
 ```
 
-Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok url (usually xxx.ngrok.io) and start the server.
+Set `WOODPECKER_SERVER_HOST` (for example in `docker-compose.yml`) to the ngrok url (usually xxx.ngrok.io) and start the server.
