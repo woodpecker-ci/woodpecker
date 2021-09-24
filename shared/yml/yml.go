@@ -1,12 +1,10 @@
-package test
+package yml
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"testing"
 
-	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
 )
 
@@ -51,7 +49,7 @@ func convertMapI2MapS(v interface{}) interface{} {
 	return v
 }
 
-func loadYmlAsJson(path string) ([]byte, error) {
+func LoadYmlFileAsJson(path string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -69,63 +67,4 @@ func loadYmlAsJson(path string) ([]byte, error) {
 	}
 
 	return j, nil
-}
-
-func TestSchema(t *testing.T) {
-	t.Parallel()
-
-	testTable := []struct {
-		name     string
-		testFile string
-	}{
-		{
-			name:     "Clone",
-			testFile: "./test-clone.yml",
-		},
-		{
-			name:     "Matrix",
-			testFile: "./test-matrix.yml",
-		},
-		{
-			name:     "Plugin",
-			testFile: "./test-plugin.yml",
-		},
-		{
-			name:     "Service",
-			testFile: "./test-service.yml",
-		},
-		{
-			name:     "Step",
-			testFile: "./test-step.yml",
-		},
-		{
-			name:     "When",
-			testFile: "./test-when.yml",
-		},
-		{
-			name:     "Workspace",
-			testFile: "./test-workspace.yml",
-		},
-	}
-
-	schemaLoader := gojsonschema.NewReferenceLoader("file://../woodpecker.json")
-
-	for _, tt := range testTable {
-		t.Run(tt.name, func(t *testing.T) {
-			j, err := loadYmlAsJson(tt.testFile)
-			if err != nil {
-				t.Error("Failed loading yml file", err)
-			}
-
-			documentLoader := gojsonschema.NewBytesLoader(j)
-			result, err := gojsonschema.Validate(schemaLoader, documentLoader)
-			if err != nil {
-				t.Error("Validation failed", err)
-			}
-
-			if !result.Valid() {
-				t.Error("Validation failed", result.Errors())
-			}
-		})
-	}
 }
