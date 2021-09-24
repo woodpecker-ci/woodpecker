@@ -129,6 +129,8 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// TODO: dont create a new client for each func
+
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {

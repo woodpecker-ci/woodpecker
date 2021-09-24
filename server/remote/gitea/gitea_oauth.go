@@ -51,6 +51,8 @@ type oauthclient struct {
 	SkipVerify  bool
 }
 
+// TODO: merge with gitea.go (or drop basic auth)
+
 // New returns a Remote implementation that integrates with Gitea, an open
 // source Git service written in Go. See https://gitea.io/
 func NewOauth(opts Opts) (remote.Remote, error) {
