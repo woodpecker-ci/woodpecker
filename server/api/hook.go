@@ -34,8 +34,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"

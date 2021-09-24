@@ -18,8 +18,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
 type mockUpdateProcStore struct {

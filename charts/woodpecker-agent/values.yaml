@@ -8,10 +8,10 @@ image:
   tag: ""
 
 env:
-  DRONE_SERVER: "woodpecker-server.<namespace>.svc.cluster.local:9000"
+  WOODPECKER_SERVER: "woodpecker-server.<namespace>.svc.cluster.local:9000"
 
 extraSecretNamesForEnvFrom:
-- drone-secret
+- woodpecker-secret
 
 imagePullSecrets: []
 nameOverride: ""

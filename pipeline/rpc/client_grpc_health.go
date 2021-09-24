@@ -5,8 +5,8 @@ import (
 	// "encoding/json"
 	"time"
 
-	// "github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/rpc/proto"
+	// "github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
