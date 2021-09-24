@@ -202,7 +202,7 @@ func TestFetch(t *testing.T) {
 			}
 
 			if matchingFiles != len(tt.expectedFileNames) {
-				receivedFileNames := []string{}
+				var receivedFileNames []string
 				for _, file := range files {
 					receivedFileNames = append(receivedFileNames, file.Name)
 				}

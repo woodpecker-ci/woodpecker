@@ -228,9 +228,7 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
-func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
-	repos := []*model.Repo{}
-
+func (c *client) Repos(u *model.User) (repos []*model.Repo, err error) {
 	client, err := c.newClientToken(u.Token)
 	if err != nil {
 		return nil, err

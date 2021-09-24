@@ -33,10 +33,9 @@ func (db *datastore) GetUserLogin(login string) (*model.User, error) {
 	return data, err
 }
 
-func (db *datastore) GetUserList() ([]*model.User, error) {
+func (db *datastore) GetUserList() (data []*model.User, err error) {
 	stmt := sql.Lookup(db.driver, "user-find")
-	data := []*model.User{}
-	err := meddler.QueryAll(db, &data, stmt)
+	err = meddler.QueryAll(db, &data, stmt)
 	return data, err
 }
 
@@ -61,9 +60,8 @@ func (db *datastore) DeleteUser(user *model.User) error {
 	return err
 }
 
-func (db *datastore) UserFeed(user *model.User) ([]*model.Feed, error) {
+func (db *datastore) UserFeed(user *model.User) (data []*model.Feed, err error) {
 	stmt := sql.Lookup(db.driver, "feed")
-	data := []*model.Feed{}
-	err := meddler.QueryAll(db, &data, stmt, user.ID)
+	err = meddler.QueryAll(db, &data, stmt, user.ID)
 	return data, err
 }

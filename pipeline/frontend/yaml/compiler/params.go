@@ -47,7 +47,7 @@ func paramsToEnv(from map[string]interface{}, to map[string]string) error {
 				return err
 			}
 
-			in := []string{}
+			var in []string
 			err = yaml.Unmarshal(out, &in)
 			if err == nil {
 				to[k] = strings.Join(in, ",")

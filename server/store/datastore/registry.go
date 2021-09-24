@@ -27,10 +27,9 @@ func (db *datastore) RegistryFind(repo *model.Repo, addr string) (*model.Registr
 	return data, err
 }
 
-func (db *datastore) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+func (db *datastore) RegistryList(repo *model.Repo) (data []*model.Registry, err error) {
 	stmt := sql.Lookup(db.driver, "registry-find-repo")
-	data := []*model.Registry{}
-	err := meddler.QueryAll(db, &data, stmt, repo.ID)
+	err = meddler.QueryAll(db, &data, stmt, repo.ID)
 	return data, err
 }
 

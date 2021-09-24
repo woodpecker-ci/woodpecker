@@ -22,17 +22,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
+func (db *datastore) ConfigsForBuild(buildID int64) (configs []*model.Config, err error) {
 	stmt := sql.Lookup(db.driver, "config-find-id")
-	var configs = []*model.Config{}
-	err := meddler.QueryAll(db, &configs, stmt, buildID)
+	err = meddler.QueryAll(db, &configs, stmt, buildID)
 	return configs, err
 }
 
-func (db *datastore) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
+func (db *datastore) ConfigFindIdentical(repoID int64, hash string) (conf *model.Config, err error) {
 	stmt := sql.Lookup(db.driver, "config-find-repo-hash")
-	conf := new(model.Config)
-	err := meddler.QueryRow(db, conf, stmt, repoID, hash)
+	err = meddler.QueryRow(db, conf, stmt, repoID, hash)
 	return conf, err
 }
 

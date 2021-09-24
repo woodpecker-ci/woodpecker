@@ -183,8 +183,10 @@ func DeleteBuild(c *gin.Context) {
 	}
 
 	// First cancel/evict procs in the queue in one go
-	procToCancel := []string{}
-	procToEvict := []string{}
+	var (
+		procToCancel []string
+		procToEvict  []string
+	)
 	for _, proc := range procs {
 		if proc.PPID != 0 {
 			continue

@@ -27,10 +27,9 @@ func (db *datastore) SenderFind(repo *model.Repo, login string) (*model.Sender, 
 	return data, err
 }
 
-func (db *datastore) SenderList(repo *model.Repo) ([]*model.Sender, error) {
+func (db *datastore) SenderList(repo *model.Repo) (data []*model.Sender, err error) {
 	stmt := sql.Lookup(db.driver, "sender-find-repo")
-	data := []*model.Sender{}
-	err := meddler.QueryAll(db, &data, stmt, repo.ID)
+	err = meddler.QueryAll(db, &data, stmt, repo.ID)
 	return data, err
 }
 

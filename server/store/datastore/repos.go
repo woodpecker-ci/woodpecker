@@ -53,17 +53,15 @@ func (db *datastore) DeleteRepo(repo *model.Repo) error {
 	return err
 }
 
-func (db *datastore) RepoList(user *model.User) ([]*model.Repo, error) {
+func (db *datastore) RepoList(user *model.User) (data []*model.Repo, err error) {
 	stmt := sql.Lookup(db.driver, "repo-find-user")
-	data := []*model.Repo{}
-	err := meddler.QueryAll(db, &data, stmt, user.ID)
+	err = meddler.QueryAll(db, &data, stmt, user.ID)
 	return data, err
 }
 
-func (db *datastore) RepoListLatest(user *model.User) ([]*model.Feed, error) {
+func (db *datastore) RepoListLatest(user *model.User) (data []*model.Feed, err error) {
 	stmt := sql.Lookup(db.driver, "feed-latest-build")
-	data := []*model.Feed{}
-	err := meddler.QueryAll(db, &data, stmt, user.ID)
+	err = meddler.QueryAll(db, &data, stmt, user.ID)
 	return data, err
 }
 

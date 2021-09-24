@@ -20,10 +20,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) TaskList() ([]*model.Task, error) {
+func (db *datastore) TaskList() (data []*model.Task, err error) {
 	stmt := sql.Lookup(db.driver, "task-list")
-	data := []*model.Task{}
-	err := meddler.QueryAll(db, &data, stmt)
+	err = meddler.QueryAll(db, &data, stmt)
 	return data, err
 }
 

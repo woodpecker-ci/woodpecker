@@ -267,7 +267,7 @@ func (q *fifo) filterWaiting() {
 
 	// rebuild waitingDeps
 	q.waitingOnDeps = list.New()
-	filtered := []*list.Element{}
+	var filtered []*list.Element
 	var nextPending *list.Element
 	for e := q.pending.Front(); e != nil; e = nextPending {
 		nextPending = e.Next()
