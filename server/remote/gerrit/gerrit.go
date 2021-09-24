@@ -48,17 +48,17 @@ type client struct {
 // New returns a Remote implementation that integrates with Getter, an open
 // source Git hosting service and code review system.
 func New(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
 	return &client{
 		URL:         opts.URL,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,

@@ -53,21 +53,21 @@ type oauthclient struct {
 
 // TODO: merge with gitea.go (or drop basic auth)
 
-// New returns a Remote implementation that integrates with Gitea, an open
+// NewOauth returns a Remote implementation that integrates with Gitea, an open
 // source Git service written in Go. See https://gitea.io/
 func NewOauth(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
 	return &oauthclient{
 		URL:         opts.URL,
 		Context:     opts.Context,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Client:      opts.Client,
 		Secret:      opts.Secret,
 		Username:    opts.Username,

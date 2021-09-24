@@ -49,10 +49,10 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 			return err
 		}
 	}
-	for _, network := range conf.Networks {
-		_, err := e.client.NetworkCreate(noContext, network.Name, types.NetworkCreate{
-			Driver:  network.Driver,
-			Options: network.DriverOpts,
+	for _, n := range conf.Networks {
+		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
+			Driver:  n.Driver,
+			Options: n.DriverOpts,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -178,11 +178,11 @@ func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 			e.client.ContainerRemove(noContext, step.Name, removeOpts)
 		}
 	}
-	for _, volume := range conf.Volumes {
-		e.client.VolumeRemove(noContext, volume.Name, true)
+	for _, v := range conf.Volumes {
+		e.client.VolumeRemove(noContext, v.Name, true)
 	}
-	for _, network := range conf.Networks {
-		e.client.NetworkRemove(noContext, network.Name)
+	for _, n := range conf.Networks {
+		e.client.NetworkRemove(noContext, n.Name)
 	}
 	return nil
 }
