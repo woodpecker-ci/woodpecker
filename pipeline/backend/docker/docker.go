@@ -2,9 +2,6 @@ package docker
 
 import (
 	"context"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/pkg/term"
 	"io"
 	"os"
 
@@ -14,6 +11,9 @@ import (
 	"docker.io/go-docker/api/types"
 	"docker.io/go-docker/api/types/network"
 	"docker.io/go-docker/api/types/volume"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/pkg/term"
 )
 
 type engine struct {
@@ -89,7 +89,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	}
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
-	if docker.IsErrImageNotFound(err) {
+	if docker.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
