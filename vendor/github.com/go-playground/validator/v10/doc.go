@@ -7,6 +7,14 @@ and has the ability to dive into arrays and maps of any type.
 
 see more examples https://github.com/go-playground/validator/tree/master/_examples
 
+Singleton
+
+Validator is designed to be thread-safe and used as a singleton instance.
+It caches information about your struct and validations,
+in essence only parsing your validation tags once per struct type.
+Using multiple instances neglects the benefit of caching.
+The not thread-safe functions are explicitly marked as such in the documentation.
+
 Validation Functions Return Type error
 
 Doing things this way is actually the way the standard library does, see the
@@ -245,6 +253,40 @@ ensures the value is not nil.
 
 	Usage: required
 
+Required If
+
+The field under validation must be present and not empty only if all
+the other specified fields are equal to the value following the specified
+field. For strings ensures value is not "". For slices, maps, pointers,
+interfaces, channels and functions ensures the value is not nil.
+
+	Usage: required_if
+
+Examples:
+
+	// require the field if the Field1 is equal to the parameter given:
+	Usage: required_if=Field1 foobar
+
+	// require the field if the Field1 and Field2 is equal to the value respectively:
+	Usage: required_if=Field1 foo Field2 bar
+
+Required Unless
+
+The field under validation must be present and not empty unless all
+the other specified fields are equal to the value following the specified
+field. For strings ensures value is not "". For slices, maps, pointers,
+interfaces, channels and functions ensures the value is not nil.
+
+	Usage: required_unless
+
+Examples:
+
+	// require the field unless the Field1 is equal to the parameter given:
+	Usage: required_unless=Field1 foobar
+
+	// require the field unless the Field1 and Field2 is equal to the value respectively:
+	Usage: required_unless=Field1 foo Field2 bar
+
 Required With
 
 The field under validation must be present and not empty only if any
@@ -321,7 +363,16 @@ equal to the parameter given. For strings, it checks that
 the string length is exactly that number of characters. For slices,
 arrays, and maps, validates the number of items.
 
+Example #1
+
 	Usage: len=10
+
+Example #2 (time.Duration)
+
+For time.Duration, len will ensure that the value is equal to the duration given
+in the parameter.
+
+	Usage: len=1h30m
 
 Maximum
 
@@ -330,7 +381,16 @@ less than or equal to the parameter given. For strings, it checks
 that the string length is at most that number of characters. For
 slices, arrays, and maps, validates the number of items.
 
+Example #1
+
 	Usage: max=10
+
+Example #2 (time.Duration)
+
+For time.Duration, max will ensure that the value is less than or equal to the
+duration given in the parameter.
+
+	Usage: max=1h30m
 
 Minimum
 
@@ -339,7 +399,16 @@ greater or equal to the parameter given. For strings, it checks that
 the string length is at least that number of characters. For slices,
 arrays, and maps, validates the number of items.
 
+Example #1
+
 	Usage: min=10
+
+Example #2 (time.Duration)
+
+For time.Duration, min will ensure that the value is greater than or equal to
+the duration given in the parameter.
+
+	Usage: min=1h30m
 
 Equals
 
@@ -347,7 +416,16 @@ For strings & numbers, eq will ensure that the value is
 equal to the parameter given. For slices, arrays, and maps,
 validates the number of items.
 
+Example #1
+
 	Usage: eq=10
+
+Example #2 (time.Duration)
+
+For time.Duration, eq will ensure that the value is equal to the duration given
+in the parameter.
+
+	Usage: eq=1h30m
 
 Not Equal
 
@@ -355,7 +433,16 @@ For strings & numbers, ne will ensure that the value is not
 equal to the parameter given. For slices, arrays, and maps,
 validates the number of items.
 
+Example #1
+
 	Usage: ne=10
+
+Example #2 (time.Duration)
+
+For time.Duration, ne will ensure that the value is not equal to the duration
+given in the parameter.
+
+	Usage: ne=1h30m
 
 One Of
 
@@ -386,10 +473,16 @@ For time.Time ensures the time value is greater than time.Now.UTC().
 
 	Usage: gt
 
+Example #3 (time.Duration)
+
+For time.Duration, gt will ensure that the value is greater than the duration
+given in the parameter.
+
+	Usage: gt=1h30m
+
 Greater Than or Equal
 
 Same as 'min' above. Kept both to make terminology with 'len' easier.
-
 
 Example #1
 
@@ -400,6 +493,13 @@ Example #2 (time.Time)
 For time.Time ensures the time value is greater than or equal to time.Now.UTC().
 
 	Usage: gte
+
+Example #3 (time.Duration)
+
+For time.Duration, gte will ensure that the value is greater than or equal to
+the duration given in the parameter.
+
+	Usage: gte=1h30m
 
 Less Than
 
@@ -412,9 +512,17 @@ Example #1
 	Usage: lt=10
 
 Example #2 (time.Time)
+
 For time.Time ensures the time value is less than time.Now.UTC().
 
 	Usage: lt
+
+Example #3 (time.Duration)
+
+For time.Duration, lt will ensure that the value is less than the duration given
+in the parameter.
+
+	Usage: lt=1h30m
 
 Less Than or Equal
 
@@ -429,6 +537,13 @@ Example #2 (time.Time)
 For time.Time ensures the time value is less than or equal to time.Now.UTC().
 
 	Usage: lte
+
+Example #3 (time.Duration)
+
+For time.Duration, lte will ensure that the value is less than or equal to the
+duration given in the parameter.
+
+	Usage: lte=1h30m
 
 Field Equals Another Field
 
@@ -476,9 +591,9 @@ relative to the top level struct.
 
 Field Greater Than Another Field
 
-Only valid for Numbers and time.Time types, this will validate the field value
-against another fields value either within a struct or passed in field.
-usage examples are for validation of a Start and End date:
+Only valid for Numbers, time.Duration and time.Time types, this will validate
+the field value against another fields value either within a struct or passed in
+field. usage examples are for validation of a Start and End date:
 
 Example #1:
 
@@ -490,7 +605,6 @@ Example #2:
 	// Validating by field:
 	validate.VarWithValue(start, end, "gtfield")
 
-
 Field Greater Than Another Relative Field
 
 This does the same as gtfield except that it validates the field provided
@@ -500,9 +614,9 @@ relative to the top level struct.
 
 Field Greater Than or Equal To Another Field
 
-Only valid for Numbers and time.Time types, this will validate the field value
-against another fields value either within a struct or passed in field.
-usage examples are for validation of a Start and End date:
+Only valid for Numbers, time.Duration and time.Time types, this will validate
+the field value against another fields value either within a struct or passed in
+field. usage examples are for validation of a Start and End date:
 
 Example #1:
 
@@ -523,9 +637,9 @@ to the top level struct.
 
 Less Than Another Field
 
-Only valid for Numbers and time.Time types, this will validate the field value
-against another fields value either within a struct or passed in field.
-usage examples are for validation of a Start and End date:
+Only valid for Numbers, time.Duration and time.Time types, this will validate
+the field value against another fields value either within a struct or passed in
+field. usage examples are for validation of a Start and End date:
 
 Example #1:
 
@@ -546,9 +660,9 @@ to the top level struct.
 
 Less Than or Equal To Another Field
 
-Only valid for Numbers and time.Time types, this will validate the field value
-against another fields value either within a struct or passed in field.
-usage examples are for validation of a Start and End date:
+Only valid for Numbers, time.Duration and time.Time types, this will validate
+the field value against another fields value either within a struct or passed in
+field. usage examples are for validation of a Start and End date:
 
 Example #1:
 
@@ -620,6 +734,19 @@ This validates that a string value contains unicode alphanumeric characters only
 
 	Usage: alphanumunicode
 
+Boolean
+
+This validates that a string value can successfully be parsed into a boolean with strconv.ParseBool
+
+	Usage: boolean
+
+Number
+
+This validates that a string value contains number values only.
+For integers or float it returns true.
+
+	Usage: number
+
 Numeric
 
 This validates that a string value contains a basic numeric value.
@@ -677,6 +804,13 @@ This validates that a string value contains a valid hsla color
 
 	Usage: hsla
 
+E.164 Phone Number String
+
+This validates that a string value contains a valid E.164 Phone number
+https://en.wikipedia.org/wiki/E.164 (ex. +1123456789)
+
+	Usage: e164
+
 E-mail String
 
 This validates that a string value contains a valid email
@@ -690,6 +824,12 @@ JSON String
 This validates that a string value is valid JSON
 
 	Usage: json
+
+JWT String
+
+This validates that a string value is a valid JWT
+
+	Usage: jwt
 
 File path
 
@@ -759,8 +899,7 @@ Special thanks to Pieter Wuille for providng reference implementations.
 Ethereum Address
 
 This validates that a string value contains a valid ethereum address.
-The format of the string is checked to ensure it matches the standard Ethereum address format
-Full validation is blocked by https://github.com/golang/crypto/pull/28
+The format of the string is checked to ensure it matches the standard Ethereum address format.
 
 	Usage: eth_addr
 
@@ -813,6 +952,18 @@ Ends With
 This validates that a string value ends with the supplied string value
 
 	Usage: endswith=goodbye
+
+Does Not Start With
+
+This validates that a string value does not start with the supplied string value
+
+	Usage: startsnotwith=hello
+
+Does Not End With
+
+This validates that a string value does not end with the supplied string value
+
+	Usage: endsnotwith=goodbye
 
 International Standard Book Number
 
@@ -1069,6 +1220,50 @@ Supplied format must match the official Go time format layout as documented in h
 
 	Usage: datetime=2006-01-02
 
+Iso3166-1 alpha-2
+
+This validates that a string value is a valid country code based on iso3166-1 alpha-2 standard.
+see: https://www.iso.org/iso-3166-country-codes.html
+
+	Usage: iso3166_1_alpha2
+
+Iso3166-1 alpha-3
+
+This validates that a string value is a valid country code based on iso3166-1 alpha-3 standard.
+see: https://www.iso.org/iso-3166-country-codes.html
+
+	Usage: iso3166_1_alpha3
+
+Iso3166-1 alpha-numeric
+
+This validates that a string value is a valid country code based on iso3166-1 alpha-numeric standard.
+see: https://www.iso.org/iso-3166-country-codes.html
+
+	Usage: iso3166_1_alpha3
+
+BCP 47 Language Tag
+
+This validates that a string value is a valid BCP 47 language tag, as parsed by language.Parse.
+More information on https://pkg.go.dev/golang.org/x/text/language
+
+	Usage: bcp47_language_tag
+
+BIC (SWIFT code)
+
+This validates that a string value is a valid Business Identifier Code (SWIFT code), defined in ISO 9362.
+More information on https://www.iso.org/standard/60390.html
+
+	Usage: bic
+
+TimeZone
+
+This validates that a string value is a valid time zone based on the time zone database present on the system.
+Although empty value and Local value are allowed by time.LoadLocation golang function, they are not allowed by this validator.
+More information on https://golang.org/pkg/time/#LoadLocation
+
+	Usage: timezone
+
+
 Alias Validators and Tags
 
 NOTE: When returning an error, the tag returned in "FieldError" will be
@@ -1080,6 +1275,8 @@ Here is a list of the current built in alias tags:
 
 	"iscolor"
 		alias is "hexcolor|rgb|rgba|hsl|hsla" (Usage: iscolor)
+	"country_code"
+		alias is "iso3166_1_alpha2|iso3166_1_alpha3|iso3166_1_alpha_numeric" (Usage: country_code)
 
 Validator notes:
 

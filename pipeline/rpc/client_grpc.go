@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // generate protobuffs
@@ -48,9 +49,9 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: done(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: done(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -88,9 +89,9 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: wait(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: wait(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -122,9 +123,9 @@ func (c *client) Init(ctx context.Context, id string, state State) (err error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: init(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: init(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -156,9 +157,9 @@ func (c *client) Done(ctx context.Context, id string, state State) (err error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: done(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: done(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -183,9 +184,9 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: extend(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: extend(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -217,9 +218,9 @@ func (c *client) Update(ctx context.Context, id string, state State) (err error)
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: update(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: update(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -252,9 +253,9 @@ func (c *client) Upload(ctx context.Context, id string, file *File) (err error) 
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: upload(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: upload(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -284,9 +285,9 @@ func (c *client) Log(ctx context.Context, id string, line *Line) (err error) {
 		if err == nil {
 			break
 		} else {
-			log.Printf("grpc error: log(): code: %v: %s", grpc.Code(err), err)
+			log.Printf("grpc error: log(): code: %v: %s", status.Code(err), err)
 		}
-		switch grpc.Code(err) {
+		switch status.Code(err) {
 		case
 			codes.Aborted,
 			codes.DataLoss,
