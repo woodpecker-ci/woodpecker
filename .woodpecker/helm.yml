@@ -39,6 +39,3 @@ pipeline:
     when:
       event: tag
       path: "charts/**"
-
-depends_on:
-  - release
