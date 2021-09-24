@@ -51,7 +51,7 @@ require (
 	github.com/rs/zerolog v1.25.0
 	github.com/russross/meddler v1.0.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/ugorji/go v1.2.6 // indirect
