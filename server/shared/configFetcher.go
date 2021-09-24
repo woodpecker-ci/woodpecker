@@ -26,7 +26,6 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 
 func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 	var file []byte
-	cf.repo.Config = strings.TrimSpace(cf.repo.Config)
 
 	for i := 0; i < 5; i++ {
 		select {
@@ -44,9 +43,11 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				}
 
 				// or a folder
-				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
-				if err == nil {
-					return filterPipelineFiles(files), nil
+				if strings.HasSuffix(cf.repo.Config, "/") {
+					files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
+					if err == nil {
+						return filterPipelineFiles(files), nil
+					}
 				}
 			} else {
 				// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
