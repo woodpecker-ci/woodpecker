@@ -115,7 +115,7 @@ github.com/go-playground/universal-translator
 # github.com/go-playground/validator/v10 v10.9.0
 ## explicit
 github.com/go-playground/validator/v10
-# github.com/go-sql-driver/mysql v1.5.0
+# github.com/go-sql-driver/mysql v1.6.0
 ## explicit
 github.com/go-sql-driver/mysql
 # github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
