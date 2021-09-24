@@ -48,7 +48,7 @@ type Opts struct {
 // New returns a Remote implementation that integrates with a Coding Platform or
 // Coding Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
-	remote := &Coding{
+	r := &Coding{
 		URL:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
@@ -59,10 +59,10 @@ func New(opts Opts) (remote.Remote, error) {
 		SkipVerify: opts.SkipVerify,
 	}
 	if opts.URL != defaultURL {
-		remote.URL = strings.TrimSuffix(opts.URL, "/")
+		r.URL = strings.TrimSuffix(opts.URL, "/")
 	}
 
-	return remote, nil
+	return r, nil
 }
 
 type Coding struct {

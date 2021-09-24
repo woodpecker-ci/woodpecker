@@ -66,7 +66,7 @@ func calc(matrix Matrix) []Axis {
 	}
 
 	// structure to hold the transformed result set
-	axisList := []Axis{}
+	var axisList []Axis
 
 	// for each axis calculate the uniqe set of values that should be used.
 	for p := 0; p < perm; p++ {

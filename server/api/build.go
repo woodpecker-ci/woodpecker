@@ -167,13 +167,13 @@ func DeleteBuild(c *gin.Context) {
 
 	build, err := store.GetBuildNumber(c, repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	procs, err := store.FromContext(c).ProcList(build)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
@@ -183,8 +183,10 @@ func DeleteBuild(c *gin.Context) {
 	}
 
 	// First cancel/evict procs in the queue in one go
-	procToCancel := []string{}
-	procToEvict := []string{}
+	var (
+		procToCancel []string
+		procToEvict  []string
+	)
 	for _, proc := range procs {
 		if proc.PPID != 0 {
 			continue

@@ -2,9 +2,6 @@ package docker
 
 import (
 	"context"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/pkg/term"
 	"io"
 	"os"
 
@@ -14,6 +11,9 @@ import (
 	"docker.io/go-docker/api/types"
 	"docker.io/go-docker/api/types/network"
 	"docker.io/go-docker/api/types/volume"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/pkg/term"
 )
 
 type engine struct {
@@ -49,10 +49,10 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 			return err
 		}
 	}
-	for _, network := range conf.Networks {
-		_, err := e.client.NetworkCreate(noContext, network.Name, types.NetworkCreate{
-			Driver:  network.Driver,
-			Options: network.DriverOpts,
+	for _, n := range conf.Networks {
+		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
+			Driver:  n.Driver,
+			Options: n.DriverOpts,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -89,7 +89,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	}
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
-	if docker.IsErrImageNotFound(err) {
+	if docker.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
@@ -178,11 +178,11 @@ func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 			e.client.ContainerRemove(noContext, step.Name, removeOpts)
 		}
 	}
-	for _, volume := range conf.Volumes {
-		e.client.VolumeRemove(noContext, volume.Name, true)
+	for _, v := range conf.Volumes {
+		e.client.VolumeRemove(noContext, v.Name, true)
 	}
-	for _, network := range conf.Networks {
-		e.client.NetworkRemove(noContext, network.Name)
+	for _, n := range conf.Networks {
+		e.client.NetworkRemove(noContext, n.Name)
 	}
 	return nil
 }

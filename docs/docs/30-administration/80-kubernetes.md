@@ -34,7 +34,7 @@ helm upgrade --install woodpecker-server --namespace <namespace> woodpecker/wood
 helm delete woodpecker-server
 ```
 
-## Woodpecker agent
+### Woodpecker agent
 
 ```shell
 # Install

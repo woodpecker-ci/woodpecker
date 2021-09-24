@@ -404,8 +404,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 	server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*shared.BuildItem) []string {
-	taskIds := []string{}
+func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, buildItem := range buildItems {
 			if buildItem.Proc.Name == dep {
@@ -413,7 +412,7 @@ func taskIds(dependsOn []string, buildItems []*shared.BuildItem) []string {
 			}
 		}
 	}
-	return taskIds
+	return
 }
 
 func shasum(raw []byte) string {

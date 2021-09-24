@@ -44,9 +44,8 @@ func (p *plugin) SenderDelete(repo *model.Repo, login string) error {
 	return internal.Send("DELETE", path, nil, nil)
 }
 
-func (p *plugin) SenderList(repo *model.Repo) ([]*model.Sender, error) {
+func (p *plugin) SenderList(repo *model.Repo) (out []*model.Sender, err error) {
 	path := fmt.Sprintf("%s/senders/%s/%s", p.endpoint, repo.Owner, repo.Name)
-	out := []*model.Sender{}
-	err := internal.Send("GET", path, nil, out)
+	err = internal.Send("GET", path, nil, out)
 	return out, err
 }

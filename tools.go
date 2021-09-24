@@ -5,6 +5,5 @@
 package tools
 
 import (
-	_ "github.com/bmatcuk/doublestar"
 	_ "github.com/woodpecker-ci/togo"
 )
