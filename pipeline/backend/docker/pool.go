@@ -3,7 +3,7 @@ package docker
 // import (
 // 	"context"
 //
-// 	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/backend"
+// 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 // )
 //
 // // Pool manages a pool of Docker clients.

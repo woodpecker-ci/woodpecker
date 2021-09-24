@@ -7,8 +7,8 @@ import (
 
 	doublestar "github.com/bmatcuk/doublestar/v4"
 	libcompose "github.com/docker/libcompose/yaml"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	"gopkg.in/yaml.v3"
 )
 
