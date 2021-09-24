@@ -46,10 +46,9 @@ require (
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/common v0.10.0 // indirect
-	github.com/rs/zerolog v1.18.0
+	github.com/rs/zerolog v1.25.0
 	github.com/russross/meddler v1.0.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.2.0 // indirect
@@ -62,7 +61,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
