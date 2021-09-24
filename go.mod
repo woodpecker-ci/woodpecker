@@ -49,7 +49,7 @@ require (
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/common v0.10.0 // indirect
 	github.com/rs/zerolog v1.18.0
-	github.com/russross/meddler v1.0.0
+	github.com/russross/meddler v1.0.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1

@@ -174,8 +174,6 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v2.0.3+incompatible
 ## explicit
 github.com/mattn/go-sqlite3
-# github.com/mattn/go-zglob v0.0.3
-## explicit
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
@@ -227,7 +225,7 @@ github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
 # github.com/russross/blackfriday/v2 v2.0.1
 github.com/russross/blackfriday/v2
-# github.com/russross/meddler v1.0.0
+# github.com/russross/meddler v1.0.1
 ## explicit
 github.com/russross/meddler
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
