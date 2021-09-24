@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Source: https://github.com/icza/dyno/blob/f1bafe5d99965c48cc9d5c7cf024eeb495facc1e/dyno.go#L563-L601
