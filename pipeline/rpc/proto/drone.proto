@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
 message File {
