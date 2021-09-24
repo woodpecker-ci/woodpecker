@@ -156,8 +156,6 @@ github.com/joho/godotenv/autoload
 # github.com/json-iterator/go v1.1.12
 ## explicit
 github.com/json-iterator/go
-# github.com/konsorten/go-windows-terminal-sequences v1.0.3
-github.com/konsorten/go-windows-terminal-sequences
 # github.com/kr/pretty v0.3.0
 ## explicit
 github.com/kr/pretty
@@ -232,7 +230,7 @@ github.com/russross/blackfriday/v2
 github.com/russross/meddler
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
-# github.com/sirupsen/logrus v1.6.0
+# github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.2.0
