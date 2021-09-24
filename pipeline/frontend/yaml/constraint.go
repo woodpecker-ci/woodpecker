@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	doublestar "github.com/bmatcuk/doublestar/v4"
+	"github.com/bmatcuk/doublestar/v4"
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"

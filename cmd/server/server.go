@@ -279,7 +279,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = server.Config.Server.Host
+	serverHost := server.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"

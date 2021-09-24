@@ -55,15 +55,15 @@ type Opts struct {
 // New returns a Remote implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
-	remote := &client{
+	r := &client{
 		API:         defaultAPI,
 		URL:         defaultURL,
 		Context:     opts.Context,
@@ -73,18 +73,19 @@ func New(opts Opts) (remote.Remote, error) {
 		PrivateMode: opts.PrivateMode,
 		SkipVerify:  opts.SkipVerify,
 		MergeRef:    opts.MergeRef,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 	}
 	if opts.URL != defaultURL {
-		remote.URL = strings.TrimSuffix(opts.URL, "/")
-		remote.API = remote.URL + "/api/v3/"
+		r.URL = strings.TrimSuffix(opts.URL, "/")
+		r.API = r.URL + "/api/v3/"
 	}
 
 	// Hack to enable oauth2 access in older GHE
-	oauth2.RegisterBrokenAuthHeaderProvider(remote.URL)
-	return remote, nil
+	// TODO: dont use deprecated func
+	oauth2.RegisterBrokenAuthHeaderProvider(r.URL)
+	return r, nil
 }
 
 type client struct {
@@ -371,9 +372,9 @@ func (c *client) newClientToken(token string) *github.Client {
 			},
 		}
 	}
-	github := github.NewClient(tc)
-	github.BaseURL, _ = url.Parse(c.API)
-	return github
+	client := github.NewClient(tc)
+	client.BaseURL, _ = url.Parse(c.API)
+	return client
 }
 
 // helper function to return matching user email.
@@ -437,13 +438,12 @@ func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link strin
 }
 
 func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
-	context := ctx
 	switch b.Event {
 	case model.EventPull:
-		context += "/pr"
+		ctx += "/pr"
 	default:
 		if len(b.Event) > 0 {
-			context += "/" + b.Event
+			ctx += "/" + b.Event
 		}
 	}
 
@@ -451,13 +451,13 @@ func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx 
 	desc := github.String(convertDesc(b.Status))
 
 	if proc != nil {
-		context += "/" + proc.Name
+		ctx += "/" + proc.Name
 		status = github.String(convertStatus(proc.State))
 		desc = github.String(convertDesc(proc.State))
 	}
 
 	data := github.RepoStatus{
-		Context:     github.String(context),
+		Context:     github.String(ctx),
 		State:       status,
 		Description: desc,
 		TargetURL:   github.String(link),
