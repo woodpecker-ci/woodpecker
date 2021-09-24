@@ -14,38 +14,58 @@ func TestSchema(t *testing.T) {
 		testFile string
 	}{
 		{
+			name:     "Branches",
+			testFile: ".woodpecker/test-branches.yml",
+		},
+		{
+			name:     "Branches exclude & include",
+			testFile: ".woodpecker/test-branches-exclude-include.yml",
+		},
+		{
 			name:     "Clone",
-			testFile: "./test/test-clone.yml",
+			testFile: ".woodpecker/test-clone.yml",
+		},
+		{
+			name:     "Clone skip",
+			testFile: ".woodpecker/test-clone-skip.yml",
 		},
 		{
 			name:     "Matrix",
-			testFile: "./test/test-matrix.yml",
+			testFile: ".woodpecker/test-matrix.yml",
+		},
+		{
+			name:     "Multi Pipeline",
+			testFile: ".woodpecker/test-multi.yml",
 		},
 		{
 			name:     "Plugin",
-			testFile: "./test/test-plugin.yml",
+			testFile: ".woodpecker/test-plugin.yml",
+		},
+		{
+			name:     "Run on",
+			testFile: ".woodpecker/test-run-on.yml",
 		},
 		{
 			name:     "Service",
-			testFile: "./test/test-service.yml",
+			testFile: ".woodpecker/test-service.yml",
 		},
 		{
 			name:     "Step",
-			testFile: "./test/test-step.yml",
+			testFile: ".woodpecker/test-step.yml",
 		},
 		{
 			name:     "When",
-			testFile: "./test/test-when.yml",
+			testFile: ".woodpecker/test-when.yml",
 		},
 		{
 			name:     "Workspace",
-			testFile: "./test/test-workspace.yml",
+			testFile: ".woodpecker/test-workspace.yml",
 		},
 	}
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			err, configErrors := schema.LintSchema(tt.testFile)
+			err, configErrors := schema.Lint(tt.testFile)
 			if err != nil {
 				t.Error("Validation failed", err, configErrors)
 			}

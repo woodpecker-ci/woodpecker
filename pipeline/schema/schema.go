@@ -11,11 +11,11 @@ import (
 //go:embed woodpecker.json
 var schemaDefinition []byte
 
-func LintSchema(file string) (error, []gojsonschema.ResultError) {
+func Lint(file string) (error, []gojsonschema.ResultError) {
 	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
 	j, err := yml.LoadYmlFileAsJson(file)
 	if err != nil {
-		return fmt.Errorf("Failed loading yml file %w", err), nil
+		return fmt.Errorf("Failed to load yml file %w", err), nil
 	}
 
 	documentLoader := gojsonschema.NewBytesLoader(j)

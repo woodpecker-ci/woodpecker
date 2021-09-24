@@ -1,0 +1,9 @@
+branches:
+  incluse: master
+  exclude: [ develop, feature/* ]
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go test

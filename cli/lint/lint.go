@@ -41,9 +41,9 @@ func lint(c *cli.Context) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			err := lintFile(path)
+			lintFile(path)
 			fmt.Println("")
-			return err
+			return nil
 		}
 
 		return nil
@@ -51,7 +51,7 @@ func lint(c *cli.Context) error {
 }
 
 func lintFile(file string) error {
-	err, configErrors := schema.LintSchema(file)
+	err, configErrors := schema.Lint(file)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {

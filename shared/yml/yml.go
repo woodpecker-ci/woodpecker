@@ -8,7 +8,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Source: https://github.com/icza/dyno/blob/f1bafe5d9996/dyno.go#L563-L601
+// Source: https://github.com/icza/dyno/blob/f1bafe5d99965c48cc9d5c7cf024eeb495facc1e/dyno.go#L563-L601
+// License: Apache 2.0 - Copyright 2017 Andras Belicza
 // ConvertMapI2MapS walks the given dynamic object recursively, and
 // converts maps with interface{} key type to maps with string key type.
 // This function comes handy if you want to marshal a dynamic object into
