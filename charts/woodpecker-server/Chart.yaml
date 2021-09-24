@@ -1,9 +1,9 @@
 apiVersion: v2
 name: woodpecker-server
-description: A Helm chart for Woodpecker a fork of the Drone CI system
+description: A Helm chart for the Woodpecker server
 type: application
-version: 0.1.0
-appVersion: "v0.13.0-rc.3"
+version: <version>
+appVersion: "<version>"
 keywords:
 - continuous-delivery
 - continuous-deployment
