@@ -18,6 +18,10 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-branches.yml",
 		},
 		{
+			name:     "Branches Array",
+			testFile: ".woodpecker/test-branches-array.yml",
+		},
+		{
 			name:     "Branches exclude & include",
 			testFile: ".woodpecker/test-branches-exclude-include.yml",
 		},

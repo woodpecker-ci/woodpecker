@@ -16,12 +16,24 @@
     "pipeline": { "$ref": "#/definitions/pipeline" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
-    "matrix": { "$ref": "#/definitions/matrix" }
+    "matrix": { "$ref": "#/definitions/matrix" },
+    "skip_clone": { "type": "boolean" },
+    "depends_on": {
+      "type": "array",
+      "minLength": 1,
+      "items": { "type": "string" }
+    },
+    "run_on": {
+      "type": "array",
+      "minLength": 1,
+      "items": { "type": "string" }
+    }
   },
   "definitions": {
     "clone": {
-      "description": "TODO",
+      "description": "Configures the clone step. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#clone",
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "git": {
           "type": "object",
@@ -45,6 +57,32 @@
         },
         {
           "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "exclude": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minLength": 1
+                },
+                { "type": "string" }
+              ]
+            },
+            "include": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minLength": 1
+                },
+                { "type": "string" }
+              ]
+            }
+          }
         }
       ]
     },
@@ -60,7 +98,7 @@
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#steps",
       "type": "object",
       "additionalProperties": true,
-      "required": ["image", "commands"],
+      "required": ["image"],
       "properties": {
         "image": {
           "description": "TODO Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-image",
@@ -109,7 +147,10 @@
         },
         "volumes": {
           "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.github.io/docs/usage/volumes",
-          "type": "string"
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" }, "minLength": 1 }
+          ]
         }
       }
     },

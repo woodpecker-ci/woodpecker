@@ -1,6 +1,4 @@
-branches:
-  include: master
-  exclude: [ develop, feature/* ]
+branches: [master, pages]
 
 pipeline:
   build:
