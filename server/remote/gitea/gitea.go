@@ -110,24 +110,26 @@ func getDesc(status string) string {
 // New returns a Remote implementation that integrates with Gitea, an open
 // source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
 	return &client{
 		URL:         opts.URL,
 		Context:     opts.Context,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,
 		SkipVerify:  opts.SkipVerify,
 	}, nil
 }
+
+// TODO: dont create a new client for each func
 
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
@@ -228,16 +230,14 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
-func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
-	repos := []*model.Repo{}
-
+func (c *client) Repos(u *model.User) (repos []*model.Repo, err error) {
 	client, err := c.newClientToken(u.Token)
 	if err != nil {
 		return nil, err
 	}
 
 	// Gitea SDK forces us to read repo list paginated.
-	var page int = 1
+	var page = 1
 	for {
 		all, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{

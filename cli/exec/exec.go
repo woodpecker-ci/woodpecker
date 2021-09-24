@@ -319,7 +319,7 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
-	secrets := []compiler.Secret{}
+	var secrets []compiler.Secret
 	for k, v := range metadata.EnvironDrone() {
 		environ[k] = v
 	}
