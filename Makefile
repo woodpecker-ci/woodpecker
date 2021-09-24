@@ -51,7 +51,7 @@ test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v 'store/')
 
 test-server-datastore:
-	$(DOCKER_RUN) go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store
+	$(DOCKER_RUN) go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-cli:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
