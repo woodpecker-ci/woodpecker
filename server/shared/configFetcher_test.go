@@ -161,13 +161,14 @@ func TestFetch(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
+			data := []byte("TEST")
 			dirs := map[string][]*remote.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, file).Return([]byte{}, nil)
+				r.On("File", mock.Anything, mock.Anything, mock.Anything, file).Return(data, nil)
 				path := filepath.Dir(file)
 				dirs[path] = append(dirs[path], &remote.FileMeta{
 					Name: file,
-					Data: []byte{},
+					Data: data,
 				})
 			}
 
