@@ -32,7 +32,6 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
-	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
@@ -58,6 +57,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+	github.com/xanzy/go-gitlab v0.51.1
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d

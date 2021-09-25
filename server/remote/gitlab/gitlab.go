@@ -29,20 +29,34 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/client"
+	oldclient "github.com/woodpecker-ci/woodpecker/server/remote/gitlab/client"
 )
 
 const DefaultScope = "api"
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Gogs server url.
-	Client      string // Oauth2 client id.
-	Secret      string // Oauth2 client secret.
-	Username    string // Optional machine account username.
-	Password    string // Optional machine account password.
-	PrivateMode bool   // Gogs is running in private mode.
-	SkipVerify  bool   // Skip ssl verification.
+	URL          string // Gitlab server url.
+	ClientID     string // Oauth2 client id.
+	ClientSecret string // Oauth2 client secret.
+	Username     string // Optional machine account username.
+	Password     string // Optional machine account password.
+	PrivateMode  bool   // Gogs is running in private mode.
+	SkipVerify   bool   // Skip ssl verification.
+}
+
+// Gitlab implements "Remote" interface
+type Gitlab struct {
+	URL          string
+	ClientID     string
+	ClientSecret string
+	Machine      string
+	Username     string
+	Password     string
+	PrivateMode  bool
+	SkipVerify   bool
+	HideArchives bool
+	Search       bool
 }
 
 // New returns a Remote implementation that integrates with Gitlab, an open
@@ -57,28 +71,15 @@ func New(opts Opts) (remote.Remote, error) {
 		u.Host = host
 	}
 	return &Gitlab{
-		URL:         opts.URL,
-		Client:      opts.Client,
-		Secret:      opts.Secret,
-		Machine:     u.Host,
-		Username:    opts.Username,
-		Password:    opts.Password,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
+		URL:          opts.URL,
+		ClientID:     opts.ClientID,
+		ClientSecret: opts.ClientSecret,
+		Machine:      u.Host,
+		Username:     opts.Username,
+		Password:     opts.Password,
+		PrivateMode:  opts.PrivateMode,
+		SkipVerify:   opts.SkipVerify,
 	}, nil
-}
-
-type Gitlab struct {
-	URL          string
-	Client       string
-	Secret       string
-	Machine      string
-	Username     string
-	Password     string
-	PrivateMode  bool
-	SkipVerify   bool
-	HideArchives bool
-	Search       bool
 }
 
 func Load(config string) *Gitlab {
@@ -91,8 +92,8 @@ func Load(config string) *Gitlab {
 
 	gitlab := Gitlab{}
 	gitlab.URL = url_.String()
-	gitlab.Client = params.Get("client_id")
-	gitlab.Secret = params.Get("client_secret")
+	gitlab.ClientID = params.Get("client_id")
+	gitlab.ClientSecret = params.Get("client_secret")
 	// gitlab.AllowedOrgs = params["orgs"]
 	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
 	gitlab.HideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
@@ -116,8 +117,8 @@ func Load(config string) *Gitlab {
 func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
 
 	var config = &oauth2.Config{
-		ClientId:     g.Client,
-		ClientSecret: g.Secret,
+		ClientId:     g.ClientID,
+		ClientSecret: g.ClientSecret,
 		Scope:        DefaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
@@ -151,8 +152,12 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
 
-	client := NewClient(g.URL, token_.AccessToken, g.SkipVerify)
-	login, err := client.CurrentUser()
+	client, err := NewClient(g.URL, token_.AccessToken, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	login, _, err := client.Users.CurrentUser()
 	if err != nil {
 		return nil, err
 	}
@@ -184,18 +189,22 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 	user.Token = token_.AccessToken
 	user.Secret = token_.RefreshToken
 
-	if strings.HasPrefix(login.AvatarUrl, "http") {
-		user.Avatar = login.AvatarUrl
+	if strings.HasPrefix(login.AvatarURL, "http") {
+		user.Avatar = login.AvatarURL
 	} else {
-		user.Avatar = g.URL + "/" + login.AvatarUrl
+		user.Avatar = g.URL + "/" + login.AvatarURL
 	}
 
 	return user, nil
 }
 
 func (g *Gitlab) Auth(token, secret string) (string, error) {
-	client := NewClient(g.URL, token, g.SkipVerify)
-	login, err := client.CurrentUser()
+	client, err := NewClient(g.URL, token, g.SkipVerify)
+	if err != nil {
+		return "", err
+	}
+
+	login, _, err := client.Users.CurrentUser()
 	if err != nil {
 		return "", err
 	}
@@ -203,8 +212,11 @@ func (g *Gitlab) Auth(token, secret string) (string, error) {
 }
 
 func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
-	client := NewClient(g.URL, u.Token, g.SkipVerify)
-	groups, err := client.AllGroups()
+	_, _ = NewClient(g.URL, u.Token, g.SkipVerify)
+
+	oldClient := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
+
+	groups, err := oldClient.AllGroups()
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +231,7 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 
 // Repo fetches the named repository from the remote system.
 func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client := NewClient(g.URL, u.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, owner, name)
 	if err != nil {
 		return nil, err
@@ -258,7 +270,7 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos fetches a list of repos from the remote system.
 func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
-	client := NewClient(g.URL, u.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 
 	var repos = []*model.Repo{}
 
@@ -298,8 +310,7 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 
 // Perm fetches the named repository from the remote system.
 func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-
-	client := NewClient(g.URL, u.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, owner, name)
 	if err != nil {
 		return nil, err
@@ -325,7 +336,7 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 
 // File fetches a file from the remote repository and returns in string format.
 func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f string) ([]byte, error) {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
@@ -346,7 +357,7 @@ func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.
 func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client := NewClient(g.URL, u.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 
 	status := getStatus(b.Status)
 	desc := getDesc(b.Status)
@@ -364,28 +375,6 @@ func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link st
 	// if gitlab version not support this
 	return nil
 }
-
-// Netrc returns a .netrc file that can be used to clone
-// private repositories from a remote system.
-// func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-// 	url_, err := url.Parse(g.URL)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	netrc := &model.Netrc{}
-// 	netrc.Machine = url_.Host
-//
-// 	switch g.CloneMode {
-// 	case "oauth":
-// 		netrc.Login = "oauth2"
-// 		netrc.Password = u.Token
-// 	case "token":
-// 		t := token.New(token.HookToken, r.FullName)
-// 		netrc.Login = "drone-ci-token"
-// 		netrc.Password, err = t.Sign(r.Hash)
-// 	}
-// 	return netrc, err
-// }
 
 // Netrc returns a netrc file capable of authenticating Gitlab requests and
 // cloning Gitlab repositories. The netrc will use the global machine account
@@ -408,7 +397,7 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
@@ -433,7 +422,7 @@ func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error
 // Deactivate removes a repository by removing all the post-commit hooks
 // which are equal to link and removing the SSH deploy key.
 func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) error {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
+	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
@@ -447,7 +436,7 @@ func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) err
 func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
 	var payload, _ = ioutil.ReadAll(req.Body)
-	var parsed, err = client.ParseHook(payload)
+	var parsed, err = oldclient.ParseHook(payload)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -462,7 +451,7 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 	}
 }
 
-func mergeRequest(parsed *client.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
+func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
 
 	repo := &model.Repo{}
 
@@ -546,7 +535,7 @@ func mergeRequest(parsed *client.HookPayload, req *http.Request) (*model.Repo, *
 	return repo, build, nil
 }
 
-func push(parsed *client.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
+func push(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 
 	// Since gitlab 8.5, used project instead repository key
@@ -626,8 +615,8 @@ func push(parsed *client.HookPayload, req *http.Request) (*model.Repo, *model.Bu
 func (g *Gitlab) Oauth2Transport(r *http.Request) *oauth2.Transport {
 	return &oauth2.Transport{
 		Config: &oauth2.Config{
-			ClientId:     g.Client,
-			ClientSecret: g.Secret,
+			ClientId:     g.ClientID,
+			ClientSecret: g.ClientSecret,
 			Scope:        DefaultScope,
 			AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 			TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
