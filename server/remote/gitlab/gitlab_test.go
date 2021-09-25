@@ -17,12 +17,35 @@ package gitlab
 import (
 	"bytes"
 	"net/http"
+	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
+
+func Load(config string) *Gitlab {
+	url_, err := url.Parse(config)
+	if err != nil {
+		panic(err)
+	}
+	params := url_.Query()
+	url_.RawQuery = ""
+
+	gitlab := Gitlab{}
+	gitlab.URL = url_.String()
+	gitlab.ClientID = params.Get("client_id")
+	gitlab.ClientSecret = params.Get("client_secret")
+	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
+	gitlab.HideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
+
+	// this is a temp workaround
+	gitlab.Search, _ = strconv.ParseBool(params.Get("search"))
+
+	return &gitlab
+}
 
 func Test_Gitlab(t *testing.T) {
 	// setup a dummy github server

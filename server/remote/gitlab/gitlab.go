@@ -82,36 +82,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
-func Load(config string) *Gitlab {
-	url_, err := url.Parse(config)
-	if err != nil {
-		panic(err)
-	}
-	params := url_.Query()
-	url_.RawQuery = ""
-
-	gitlab := Gitlab{}
-	gitlab.URL = url_.String()
-	gitlab.ClientID = params.Get("client_id")
-	gitlab.ClientSecret = params.Get("client_secret")
-	// gitlab.AllowedOrgs = params["orgs"]
-	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
-	gitlab.HideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
-	// gitlab.Open, _ = strconv.ParseBool(params.Get("open"))
-
-	// switch params.Get("clone_mode") {
-	// case "oauth":
-	// 	gitlab.CloneMode = "oauth"
-	// default:
-	// 	gitlab.CloneMode = "token"
-	// }
-
-	// this is a temp workaround
-	gitlab.Search, _ = strconv.ParseBool(params.Get("search"))
-
-	return &gitlab
-}
-
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -609,25 +579,6 @@ func push(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model
 	}
 
 	return repo, build, nil
-}
-
-// ¯\_(ツ)_/¯
-func (g *Gitlab) Oauth2Transport(r *http.Request) *oauth2.Transport {
-	return &oauth2.Transport{
-		Config: &oauth2.Config{
-			ClientId:     g.ClientID,
-			ClientSecret: g.ClientSecret,
-			Scope:        DefaultScope,
-			AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
-			TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-			RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
-			//settings.Server.Scheme, settings.Server.Hostname),
-		},
-		Transport: &http.Transport{
-			Proxy:           http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-		},
-	}
 }
 
 const (
