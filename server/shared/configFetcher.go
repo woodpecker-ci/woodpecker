@@ -55,8 +55,9 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				// test .woodpecker/ folder
 				// if folder is not supported we will get a "Not implemented" error and continue
 				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, ".woodpecker")
+				files = filterPipelineFiles(files)
 				if err == nil && len(files) != 0 {
-					return filterPipelineFiles(files), nil
+					return files, nil
 				}
 
 				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".woodpecker.yml")

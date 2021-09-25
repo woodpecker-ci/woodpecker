@@ -114,6 +114,24 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
+			name:       "Default config - Empty Folder",
+			repoConfig: " ",
+			files: []file{{
+				name: ".woodpecker/.keep",
+				data: dummyData,
+			}, {
+				name: ".woodpecker.yml",
+				data: nil,
+			}, {
+				name: ".drone.yml",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".drone.yml",
+			},
+			expectedError: false,
+		},
+		{
 			name:       "Special config - folder (ignoring default files)",
 			repoConfig: ".my-ci-folder/",
 			files: []file{{
@@ -200,7 +218,7 @@ func TestFetch(t *testing.T) {
 			for _, file := range tt.files {
 				r.On("File", mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
-				if len(path) != 0 {
+				if path != "." {
 					dirs[path] = append(dirs[path], &remote.FileMeta{
 						Name: file.name,
 						Data: file.data,
