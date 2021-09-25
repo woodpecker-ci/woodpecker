@@ -26,14 +26,15 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 
 func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 	var file []byte
+	config := strings.TrimSpace(cf.repo.Config)
 
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
 			if len(cf.repo.Config) > 0 {
 				// either a file
-				if !strings.HasSuffix(cf.repo.Config, "/") {
-					file, err = cf.remote_.File(cf.user, cf.repo, cf.build, cf.repo.Config)
+				if !strings.HasSuffix(config, "/") {
+					file, err = cf.remote_.File(cf.user, cf.repo, cf.build, config)
 					if err == nil {
 						return []*remote.FileMeta{{
 							Name: cf.repo.Config,
@@ -43,11 +44,9 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				}
 
 				// or a folder
-				if strings.HasSuffix(cf.repo.Config, "/") {
-					files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(cf.repo.Config, "/"))
-					if err == nil {
-						return filterPipelineFiles(files), nil
-					}
+				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
+				if err == nil {
+					return filterPipelineFiles(files), nil
 				}
 			} else {
 				// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
