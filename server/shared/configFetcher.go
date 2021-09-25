@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,7 +36,7 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				// either a file
 				if !strings.HasSuffix(config, "/") {
 					file, err = cf.remote_.File(cf.user, cf.repo, cf.build, config)
-					if err == nil {
+					if err == nil && len(file) != 0 {
 						return []*remote.FileMeta{{
 							Name: cf.repo.Config,
 							Data: file,
@@ -54,12 +55,12 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				// test .woodpecker/ folder
 				// if folder is not supported we will get a "Not implemented" error and continue
 				files, err = cf.remote_.Dir(cf.user, cf.repo, cf.build, ".woodpecker")
-				if err == nil {
+				if err == nil && len(files) != 0 {
 					return filterPipelineFiles(files), nil
 				}
 
 				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".woodpecker.yml")
-				if err == nil {
+				if err == nil && len(file) != 0 {
 					return []*remote.FileMeta{{
 						Name: ".woodpecker.yml",
 						Data: file,
@@ -67,11 +68,15 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				}
 
 				file, err = cf.remote_.File(cf.user, cf.repo, cf.build, ".drone.yml")
-				if err == nil {
+				if err == nil && len(file) != 0 {
 					return []*remote.FileMeta{{
 						Name: ".drone.yml",
 						Data: file,
 					}}, nil
+				}
+
+				if err == nil && len(files) == 0 {
+					return nil, fmt.Errorf("ConfigFetcher: Fallback did not found config")
 				}
 			}
 
