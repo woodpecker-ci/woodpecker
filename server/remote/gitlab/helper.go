@@ -45,7 +45,7 @@ func NewClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 
 // IsRead is a helper function that returns true if the
 // user has Read-only access to the repository.
-func IsRead(proj *client.Project) bool {
+func IsRead(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -63,7 +63,7 @@ func IsRead(proj *client.Project) bool {
 
 // IsWrite is a helper function that returns true if the
 // user has Read-Write access to the repository.
-func IsWrite(proj *client.Project) bool {
+func IsWrite(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -79,7 +79,7 @@ func IsWrite(proj *client.Project) bool {
 
 // IsAdmin is a helper function that returns true if the
 // user has Admin access to the repository.
-func IsAdmin(proj *client.Project) bool {
+func IsAdmin(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -91,13 +91,6 @@ func IsAdmin(proj *client.Project) bool {
 	default:
 		return false
 	}
-}
-
-// GetKeyTitle is a helper function that generates a title for the
-// RSA public key based on the username and domain name.
-
-func ns(owner, name string) string {
-	return fmt.Sprintf("%s%%2F%s", owner, name)
 }
 
 func GetUserAvatar(email string) string {
@@ -129,7 +122,6 @@ func GetProjectId(r *Gitlab, c *client.Client, owner, name string) (projectId st
 		projectId := strconv.Itoa(_projectId)
 		return projectId, nil
 	} else {
-		projectId := ns(owner, name)
-		return projectId, nil
+		return fmt.Sprintf("%s%%2F%s", owner, name), nil
 	}
 }

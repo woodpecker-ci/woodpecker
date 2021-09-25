@@ -196,32 +196,50 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 
 // Repo fetches the named repository from the remote system.
 func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, owner, name)
+	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-	repo_, err := client.Project(id)
+	repo_, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	repo := &model.Repo{}
-	repo.Owner = owner
-	repo.Name = name
-	repo.FullName = repo_.PathWithNamespace
-	repo.Link = repo_.Url
-	repo.Clone = repo_.HttpRepoUrl
-	repo.Branch = "master"
+	repo := &model.Repo{
+		Owner:      repo_.Owner.Username,
+		Name:       repo_.Name,
+		FullName:   repo_.NameWithNamespace,
+		Avatar:     repo_.AvatarURL,
+		Link:       repo_.WebURL,
+		Clone:      repo_.HTTPURLToRepo,
+		Branch:     repo_.DefaultBranch,
+		Visibility: "",
+		IsPrivate:  false,
+		IsTrusted:  false,
+		IsStarred:  false,
+		IsGated:    false,
+		IsActive:   false,
+		AllowPull:  false,
+		Counter:    0,
+		Config:     "",
+		Hash:       "",
+		Perm:       nil,
+	}
 
-	repo.Avatar = repo_.AvatarUrl
+	{ // TODO: do we need that?
+		if len(repo.Branch) == 0 {
+			repo.Branch = "master"
+		}
+		if len(repo.Owner) == 0 {
+			repo.Owner = owner
+		}
+		if len(repo.Name) == 0 {
+			repo.Owner = name
+		}
+	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
 		repo.Avatar = fmt.Sprintf("%s/%s", g.URL, repo.Avatar)
-	}
-
-	if repo_.DefaultBranch != "" {
-		repo.Branch = repo_.DefaultBranch
 	}
 
 	if g.PrivateMode {
@@ -237,7 +255,7 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 
-	var repos = []*model.Repo{}
+	var repos []*model.Repo
 
 	all, err := client.AllProjects(g.HideArchives)
 	if err != nil {
@@ -275,13 +293,11 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 
 // Perm fetches the named repository from the remote system.
 func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, owner, name)
+	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-
-	repo, err := client.Project(id)
+	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +344,7 @@ func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link st
 	desc := getDesc(b.Status)
 
 	client.SetStatus(
-		ns(repo.Owner, repo.Name),
+		fmt.Sprintf("%s%%2F%s", repo.Owner, repo.Name),
 		b.Commit,
 		status,
 		desc,
