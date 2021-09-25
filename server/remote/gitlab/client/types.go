@@ -16,14 +16,6 @@ package client
 
 type QMap map[string]string
 
-type User struct {
-	Id        int    `json:"id,omitempty"`
-	Username  string `json:"username,omitempty"`
-	Email     string `json:"email,omitempty"`
-	AvatarUrl string `json:"avatar_url,omitempty"`
-	Name      string `json:"name,omitempty"`
-}
-
 type ProjectAccess struct {
 	AccessLevel       int `json:"access_level,omitempty"`
 	NotificationLevel int `json:"notification_level,omitempty"`

@@ -33,12 +33,6 @@ func encodeParameter(value string) string {
 	return value
 }
 
-// Tag returns current tag for push event hook payload
-// This function returns empty string for any other events
-func (h *HookPayload) Tag() string {
-	return strings.TrimPrefix(h.Ref, "refs/tags/")
-}
-
 // Branch returns current branch for push event hook payload
 // This function returns empty string for any other events
 func (h *HookPayload) Branch() string {
