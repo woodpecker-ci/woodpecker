@@ -5,11 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestFetch(t *testing.T) {
@@ -198,10 +200,12 @@ func TestFetch(t *testing.T) {
 			for _, file := range tt.files {
 				r.On("File", mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
-				dirs[path] = append(dirs[path], &remote.FileMeta{
-					Name: file.name,
-					Data: file.data,
-				})
+				if len(path) != 0 {
+					dirs[path] = append(dirs[path], &remote.FileMeta{
+						Name: file.name,
+						Data: file.data,
+					})
+				}
 			}
 
 			for path, files := range dirs {
@@ -225,22 +229,11 @@ func TestFetch(t *testing.T) {
 				t.Fatal("error fetching config:", err)
 			}
 
-			matchingFiles := 0
-			for _, expectedFileName := range tt.expectedFileNames {
-				for _, file := range files {
-					if file.Name == expectedFileName {
-						matchingFiles += 1
-					}
-				}
+			matchingFiles := make([]string, len(files))
+			for i := range files {
+				matchingFiles[i] = files[i].Name
 			}
-
-			if matchingFiles != len(tt.expectedFileNames) {
-				var receivedFileNames []string
-				for _, file := range files {
-					receivedFileNames = append(receivedFileNames, file.Name)
-				}
-				t.Fatal("expected some other pipeline files", tt.expectedFileNames, receivedFileNames)
-			}
+			assert.ElementsMatch(t, tt.expectedFileNames, matchingFiles, "expected some other pipeline files")
 		})
 	}
 }
