@@ -32,13 +32,13 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 	for i := 0; i < 5; i++ {
 		select {
 		case <-time.After(time.Second * time.Duration(i)):
-			if len(cf.repo.Config) > 0 {
+			if len(config) > 0 {
 				// either a file
 				if !strings.HasSuffix(config, "/") {
 					file, err = cf.remote_.File(cf.user, cf.repo, cf.build, config)
 					if err == nil && len(file) != 0 {
 						return []*remote.FileMeta{{
-							Name: cf.repo.Config,
+							Name: config,
 							Data: file,
 						}}, nil
 					}
