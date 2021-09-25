@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -30,7 +31,6 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
@@ -44,6 +44,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -144,11 +145,15 @@ func loop(c *cli.Context) error {
 
 	setupMetrics(&g, store_)
 
-	// start the server with tls enabled
-	if c.String("server-cert") != "" {
+	// start http => https redirect if https is active
+	if len(c.String("server-cert")) != 0 || c.Bool("lets-encrypt") {
 		g.Go(func() error {
 			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
 		})
+	}
+
+	// start the server with tls enabled
+	if len(c.String("server-cert")) != 0 {
 		g.Go(func() error {
 			serve := &http.Server{
 				Addr:    ":https",
@@ -165,45 +170,32 @@ func loop(c *cli.Context) error {
 		return g.Wait()
 	}
 
-	// start the server without tls enabled
-	if !c.Bool("lets-encrypt") {
-		return http.ListenAndServe(
-			c.String("server-addr"),
-			handler,
-		)
-	}
-
 	// start the server with lets encrypt enabled
-	// listen on ports 443 and 80
-	address, err := url.Parse(c.String("server-host"))
-	if err != nil {
-		return err
-	}
-
-	dir := cacheDir()
-	os.MkdirAll(dir, 0700)
-
-	manager := &autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(address.Host),
-		Cache:      autocert.DirCache(dir),
-	}
-	g.Go(func() error {
-		return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
-	})
-	g.Go(func() error {
-		serve := &http.Server{
-			Addr:    ":https",
-			Handler: handler,
-			TLSConfig: &tls.Config{
-				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"http/1.1"}, // disable h2 because Safari :(
-			},
+	if c.Bool("lets-encrypt") {
+		address, err := url.Parse(c.String("server-host"))
+		if err != nil {
+			return err
 		}
-		return serve.ListenAndServeTLS("", "")
-	})
 
-	return g.Wait()
+		email := c.String("lets-encrypt-email")
+		if len(email) == 0 {
+			return fmt.Errorf("Please provide an email for lets-encrypt with WOODPECKER_LETS_ENCRYPT_EMAIL")
+		}
+
+		certmagic.DefaultACME.Agreed = true
+		certmagic.DefaultACME.Email = email
+
+		g.Go(func() error {
+			return certmagic.HTTPS([]string{address.Host}, handler)
+		})
+		return g.Wait()
+	}
+
+	// start the server without tls enabled
+	return http.ListenAndServe(
+		c.String("server-addr"),
+		handler,
+	)
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {

@@ -10,6 +10,7 @@ require (
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
+	github.com/caddyserver/certmagic v0.14.5
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/dimfeld/httptreemux v5.0.1+incompatible
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
@@ -58,7 +59,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

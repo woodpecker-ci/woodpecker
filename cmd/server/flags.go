@@ -58,6 +58,12 @@ var flags = []cli.Flag{
 		Name:   "lets-encrypt",
 		Usage:  "enable let's encrypt",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_LETS_ENCRYPT_EMAIL",
+		Name:   "lets-encrypt-email",
+		Usage:  "let's encrypt email",
+		Value:  "",
+	},
 	cli.BoolFlag{
 		EnvVar: "DRONE_QUIC,WOODPECKER_QUIC",
 		Name:   "quic",

@@ -40,6 +40,9 @@ github.com/bmatcuk/doublestar/v4
 ## explicit
 github.com/bradrydzewski/togo/parser
 github.com/bradrydzewski/togo/template
+# github.com/caddyserver/certmagic v0.14.5
+## explicit
+github.com/caddyserver/certmagic
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
 # github.com/cpuguy83/go-md2man/v2 v2.0.0
@@ -156,6 +159,8 @@ github.com/joho/godotenv/autoload
 # github.com/json-iterator/go v1.1.12
 ## explicit
 github.com/json-iterator/go
+# github.com/klauspost/cpuid/v2 v2.0.6
+github.com/klauspost/cpuid/v2
 # github.com/kr/pretty v0.3.0
 ## explicit
 github.com/kr/pretty
@@ -168,6 +173,8 @@ github.com/leodido/go-urn
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
+# github.com/libdns/libdns v0.2.1
+github.com/libdns/libdns
 # github.com/mattn/go-isatty v0.0.14
 ## explicit
 github.com/mattn/go-isatty
@@ -176,6 +183,11 @@ github.com/mattn/go-isatty
 github.com/mattn/go-sqlite3
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/mholt/acmez v1.0.0
+github.com/mholt/acmez
+github.com/mholt/acmez/acme
+# github.com/miekg/dns v1.1.42
+github.com/miekg/dns
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
@@ -256,13 +268,24 @@ github.com/woodpecker-ci/expr/parse
 # github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
 ## explicit
 github.com/woodpecker-ci/togo
+# go.uber.org/atomic v1.7.0
+go.uber.org/atomic
+# go.uber.org/multierr v1.6.0
+go.uber.org/multierr
+# go.uber.org/zap v1.17.0
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 ## explicit
-golang.org/x/crypto/acme
-golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/ocsp
 golang.org/x/crypto/sha3
 # golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 ## explicit
+golang.org/x/net/bpf
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/html
@@ -271,8 +294,12 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
 golang.org/x/net/internal/socks
 golang.org/x/net/internal/timeseries
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
 golang.org/x/net/proxy
 golang.org/x/net/trace
 # golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
