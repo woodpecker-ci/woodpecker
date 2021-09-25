@@ -81,6 +81,7 @@ func (cf *configFetcher) Fetch() (files []*remote.FileMeta, err error) {
 				}
 			}
 
+			// TODO: retry loop is inactive and could maybe be fixed/deleted
 			return nil, err
 		}
 	}
