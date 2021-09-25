@@ -29,11 +29,12 @@ services:
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
       - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 +     - WOODPECKER_LETS_ENCRYPT=true
++     - WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@sample.tld
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`. To receive expiration-emails lets-encrypt requires an email address set with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@sample.tld`.
 
->Once enabled you can visit your website at both the http and the https address
+> Once enabled you can visit your website at both the http and the https address
 
 ### Certificate Cache
 
