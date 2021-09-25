@@ -21,9 +21,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
+
+	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 )
 
 func Load(config string) *Gitlab {
@@ -49,7 +51,7 @@ func Load(config string) *Gitlab {
 
 func Test_Gitlab(t *testing.T) {
 	// setup a dummy github server
-	var server = testdata.NewServer()
+	var server = testdata.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
@@ -91,11 +93,10 @@ func Test_Gitlab(t *testing.T) {
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
 				_repo, err := gitlab.Repo(&user, "diaspora", "diaspora-client")
-
-				g.Assert(err == nil).IsTrue()
-				g.Assert(_repo.Name).Equal("diaspora-client")
-				g.Assert(_repo.Owner).Equal("diaspora")
-				g.Assert(_repo.IsPrivate).Equal(true)
+				assert.NoError(t, err)
+				assert.Equal(t, "diaspora-client", _repo.Name)
+				assert.Equal(t, "diaspora", _repo.Owner)
+				assert.True(t, _repo.IsPrivate)
 			})
 
 			g.It("Should return error, when repo not exist", func() {

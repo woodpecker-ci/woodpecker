@@ -17,10 +17,11 @@ package testdata
 import (
 	"net/http"
 	"net/http/httptest"
+	"testing"
 )
 
-// setup a mock server for testing purposes.
-func NewServer() *httptest.Server {
+// NewServer setup a mock server for testing purposes.
+func NewServer(t *testing.T) *httptest.Server {
 	mux := http.NewServeMux()
 	server := httptest.NewServer(mux)
 
@@ -28,6 +29,10 @@ func NewServer() *httptest.Server {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		//println(r.URL.Path + "  " + r.Method)
 		// evaluate the path to serve a dummy data file
+
+		// TODO: enable to see only library do make requests
+		// assert.EqualValues(t, "go-gitlab", r.Header.Get("user-agent"))
+
 		switch r.URL.Path {
 		case "/api/v4/projects":
 			if r.URL.Query().Get("archived") == "false" {

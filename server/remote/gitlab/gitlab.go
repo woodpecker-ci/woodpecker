@@ -206,36 +206,18 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 	}
 
 	repo := &model.Repo{
-		Owner:      repo_.Owner.Username,
-		Name:       repo_.Name,
+		Owner:      owner,
+		Name:       name,
 		FullName:   repo_.NameWithNamespace,
 		Avatar:     repo_.AvatarURL,
 		Link:       repo_.WebURL,
 		Clone:      repo_.HTTPURLToRepo,
 		Branch:     repo_.DefaultBranch,
-		Visibility: "",
-		IsPrivate:  false,
-		IsTrusted:  false,
-		IsStarred:  false,
-		IsGated:    false,
-		IsActive:   false,
-		AllowPull:  false,
-		Counter:    0,
-		Config:     "",
-		Hash:       "",
-		Perm:       nil,
+		Visibility: string(repo_.Visibility),
 	}
 
-	{ // TODO: do we need that?
-		if len(repo.Branch) == 0 {
-			repo.Branch = "master"
-		}
-		if len(repo.Owner) == 0 {
-			repo.Owner = owner
-		}
-		if len(repo.Name) == 0 {
-			repo.Owner = name
-		}
+	if len(repo.Branch) == 0 { // TODO: do we need that?
+		repo.Branch = "master"
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
