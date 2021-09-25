@@ -38,6 +38,7 @@ func NewClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 	return gitlab.NewClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}))
 }

@@ -28,7 +28,7 @@
 //		t.Exchange(r.FormValue("code"))
 //		// The Transport now has a valid Token. Create an *http.Client
 //		// with which we can make authenticated API requests.
-//		c := t.ClientID()
+//		c := t.Client()
 //		c.Post(...)
 //		// ...
 //		// btw, r.FormValue("state") == "foo"

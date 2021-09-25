@@ -86,7 +86,6 @@ func New(opts Opts) (remote.Remote, error) {
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
-
 	var config = &oauth2.Config{
 		ClientId:     g.ClientID,
 		ClientSecret: g.ClientSecret,
@@ -94,11 +93,6 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
 		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
-	}
-
-	trans_ := &http.Transport{
-		Proxy:           http.ProxyFromEnvironment,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 	}
 
 	// get the OAuth errors
@@ -117,7 +111,10 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	var trans = &oauth2.Transport{Config: config, Transport: trans_}
+	var trans = &oauth2.Transport{Config: config, Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+		Proxy:           http.ProxyFromEnvironment,
+	}}
 	var token_, err = trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
@@ -133,43 +130,22 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, err
 	}
 
-	// if len(g.AllowedOrgs) != 0 {
-	// 	groups, err := client.AllGroups()
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("Could not check org membership. %s", err)
-	// 	}
-	//
-	// 	var member bool
-	// 	for _, group := range groups {
-	// 		for _, allowedOrg := range g.AllowedOrgs {
-	// 			if group.Path == allowedOrg {
-	// 				member = true
-	// 				break
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	if !member {
-	// 		return nil, false, fmt.Errorf("User does not belong to correct group. Must belong to %v", g.AllowedOrgs)
-	// 	}
-	// }
-
-	user := &model.User{}
-	user.Login = login.Username
-	user.Email = login.Email
-	user.Token = token_.AccessToken
-	user.Secret = token_.RefreshToken
-
-	if strings.HasPrefix(login.AvatarURL, "http") {
-		user.Avatar = login.AvatarURL
-	} else {
+	user := &model.User{
+		Login:  login.Username,
+		Email:  login.Email,
+		Avatar: login.AvatarURL,
+		Token:  token_.AccessToken,
+		Secret: token_.RefreshToken,
+	}
+	if !strings.HasPrefix(user.Avatar, "http") {
 		user.Avatar = g.URL + "/" + login.AvatarURL
 	}
 
 	return user, nil
 }
 
-func (g *Gitlab) Auth(token, secret string) (string, error) {
+// Auth authenticates the session and returns the remote user login for the given token
+func (g *Gitlab) Auth(token, _ string) (string, error) {
 	client, err := NewClient(g.URL, token, g.SkipVerify)
 	if err != nil {
 		return "", err
@@ -182,6 +158,7 @@ func (g *Gitlab) Auth(token, secret string) (string, error) {
 	return login.Username, nil
 }
 
+// Teams fetches a list of team memberships from the remote system.
 func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
@@ -337,7 +314,7 @@ func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f 
 	return out, err
 }
 
-func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (g *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
