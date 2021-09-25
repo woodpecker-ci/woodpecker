@@ -2,9 +2,10 @@
 
 ## User registration
 
-Registration is closed by default.
+Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-This example enables open registration for users that are members of approved GitHub organizations.
+If registration is open every user with an account at the configured [SCM](docs/administration/vcs/overview) can login to Woodpecker.
+This example enables open registration for users that are members of approved organizations:
 
 ```diff
 services:
@@ -38,7 +39,6 @@ services:
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
       - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
-
 
 ## Filtering repositories
 
