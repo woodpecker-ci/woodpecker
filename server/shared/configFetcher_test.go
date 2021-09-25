@@ -15,21 +15,33 @@ import (
 func TestFetch(t *testing.T) {
 	t.Parallel()
 
+	type file struct {
+		name string
+		data []byte
+	}
+
+	dummyData := []byte("TEST")
+
 	testTable := []struct {
 		name              string
 		repoConfig        string
-		files             []string
+		files             []file
 		expectedFileNames []string
 		expectedError     bool
 	}{
 		{
 			name:       "Default config - .woodpecker/",
 			repoConfig: "",
-			files: []string{
-				".woodpecker/text.txt",
-				".woodpecker/release.yml",
-				".woodpecker/image.png",
-			},
+			files: []file{{
+				name: ".woodpecker/text.txt",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/release.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/image.png",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".woodpecker/release.yml",
 			},
@@ -38,9 +50,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Default config - .woodpecker.yml",
 			repoConfig: "",
-			files: []string{
-				".woodpecker.yml",
-			},
+			files: []file{{
+				name: ".woodpecker.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".woodpecker.yml",
 			},
@@ -49,9 +62,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Default config - .drone.yml",
 			repoConfig: "",
-			files: []string{
-				".drone.yml",
-			},
+			files: []file{{
+				name: ".drone.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".drone.yml",
 			},
@@ -60,17 +74,20 @@ func TestFetch(t *testing.T) {
 		{
 			name:              "Default config - Empty repo",
 			repoConfig:        "",
-			files:             []string{},
+			files:             []file{},
 			expectedFileNames: []string{},
 			expectedError:     true,
 		},
 		{
 			name:       "Default config - Additional sub-folders",
 			repoConfig: "",
-			files: []string{
-				".woodpecker/test.yml",
-				".woodpecker/sub-folder/config.yml",
-			},
+			files: []file{{
+				name: ".woodpecker/test.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/sub-folder/config.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".woodpecker/test.yml",
 			},
@@ -79,11 +96,16 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Default config - Additional none .yml files",
 			repoConfig: "",
-			files: []string{
-				".woodpecker/notes.txt",
-				".woodpecker/image.png",
-				".woodpecker/test.yml",
-			},
+			files: []file{{
+				name: ".woodpecker/notes.txt",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/image.png",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/test.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".woodpecker/test.yml",
 			},
@@ -92,12 +114,19 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Special config - folder (ignoring default files)",
 			repoConfig: ".my-ci-folder/",
-			files: []string{
-				".woodpecker/test.yml",
-				".woodpecker.yml",
-				".drone.yml",
-				".my-ci-folder/test.yml",
-			},
+			files: []file{{
+				name: ".woodpecker/test.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker.yml",
+				data: dummyData,
+			}, {
+				name: ".drone.yml",
+				data: dummyData,
+			}, {
+				name: ".my-ci-folder/test.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
@@ -106,9 +135,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Special config - folder",
 			repoConfig: ".my-ci-folder/",
-			files: []string{
-				".my-ci-folder/test.yml",
-			},
+			files: []file{{
+				name: ".my-ci-folder/test.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
@@ -117,9 +147,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Special config - subfolder",
 			repoConfig: ".my-ci-folder/my-config/",
-			files: []string{
-				".my-ci-folder/my-config/test.yml",
-			},
+			files: []file{{
+				name: ".my-ci-folder/my-config/test.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".my-ci-folder/my-config/test.yml",
 			},
@@ -128,9 +159,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Special config - file",
 			repoConfig: ".config.yml",
-			files: []string{
-				".config.yml",
-			},
+			files: []file{{
+				name: ".config.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".config.yml",
 			},
@@ -139,9 +171,10 @@ func TestFetch(t *testing.T) {
 		{
 			name:       "Special config - file inside subfolder",
 			repoConfig: ".my-ci-folder/sub-folder/config.yml",
-			files: []string{
-				".my-ci-folder/sub-folder/config.yml",
-			},
+			files: []file{{
+				name: ".my-ci-folder/sub-folder/config.yml",
+				data: dummyData,
+			}},
 			expectedFileNames: []string{
 				".my-ci-folder/sub-folder/config.yml",
 			},
@@ -150,7 +183,7 @@ func TestFetch(t *testing.T) {
 		{
 			name:              "Special config - empty repo",
 			repoConfig:        ".config.yml",
-			files:             []string{},
+			files:             []file{},
 			expectedFileNames: []string{},
 			expectedError:     true,
 		},
@@ -161,14 +194,13 @@ func TestFetch(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
-			data := []byte("TEST")
 			dirs := map[string][]*remote.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, file).Return(data, nil)
-				path := filepath.Dir(file)
+				r.On("File", mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				path := filepath.Dir(file.name)
 				dirs[path] = append(dirs[path], &remote.FileMeta{
-					Name: file,
-					Data: data,
+					Name: file.name,
+					Data: file.data,
 				})
 			}
 
