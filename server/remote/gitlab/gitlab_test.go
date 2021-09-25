@@ -28,7 +28,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Load(config string) *Gitlab {
+func load(config string) *Gitlab {
 	url_, err := url.Parse(config)
 	if err != nil {
 		panic(err)
@@ -56,7 +56,7 @@ func Test_Gitlab(t *testing.T) {
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	gitlab := Load(env)
+	gitlab := load(env)
 
 	var user = model.User{
 		Login: "test_user",
