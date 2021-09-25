@@ -30,6 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 
 	oldclient "github.com/woodpecker-ci/woodpecker/server/remote/gitlab/client"
+	"github.com/xanzy/go-gitlab"
 )
 
 const DefaultScope = "api"
@@ -182,20 +183,37 @@ func (g *Gitlab) Auth(token, secret string) (string, error) {
 }
 
 func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
-	_, _ = NewClient(g.URL, u.Token, g.SkipVerify)
-
-	oldClient := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
-
-	groups, err := oldClient.AllGroups()
+	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
+
+	var perPage = 100
 	var teams []*model.Team
-	for _, group := range groups {
-		teams = append(teams, &model.Team{
-			Login: group.Name,
+
+	for i := 1; true; i++ {
+		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+			ListOptions:    gitlab.ListOptions{Page: i, PerPage: perPage},
+			AllAvailable:   gitlab.Bool(false),
+			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
 		})
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range batch {
+			teams = append(teams, &model.Team{
+				Login:  batch[i].Name,
+				Avatar: batch[i].AvatarURL,
+			},
+			)
+		}
+
+		if len(batch) > perPage {
+			break
+		}
 	}
+
 	return teams, nil
 }
 
