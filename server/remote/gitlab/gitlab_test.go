@@ -26,7 +26,10 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+	"github.com/xanzy/go-gitlab"
 )
+
+const eventTypeHeader = "X-Gitlab-Event"
 
 func load(config string) *Gitlab {
 	url_, err := url.Parse(config)
@@ -56,7 +59,7 @@ func Test_Gitlab(t *testing.T) {
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	gitlab := load(env)
+	client := load(env)
 
 	var user = model.User{
 		Login: "test_user",
@@ -73,15 +76,15 @@ func Test_Gitlab(t *testing.T) {
 		// Test projects method
 		g.Describe("AllProjects", func() {
 			g.It("Should return only non-archived projects is hidden", func() {
-				gitlab.HideArchives = true
-				_projects, err := gitlab.Repos(&user)
+				client.HideArchives = true
+				_projects, err := client.Repos(&user)
 				assert.NoError(t, err)
 				assert.Len(t, _projects, 1)
 			})
 
 			g.It("Should return all the projects", func() {
-				gitlab.HideArchives = false
-				_projects, err := gitlab.Repos(&user)
+				client.HideArchives = false
+				_projects, err := client.Repos(&user)
 
 				g.Assert(err == nil).IsTrue()
 				g.Assert(len(_projects)).Equal(2)
@@ -91,7 +94,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test repository method
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
-				_repo, err := gitlab.Repo(&user, "diaspora", "diaspora-client")
+				_repo, err := client.Repo(&user, "diaspora", "diaspora-client")
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
@@ -99,7 +102,7 @@ func Test_Gitlab(t *testing.T) {
 			})
 
 			g.It("Should return error, when repo not exist", func() {
-				_, err := gitlab.Repo(&user, "not-existed", "not-existed")
+				_, err := client.Repo(&user, "not-existed", "not-existed")
 				assert.Error(t, err)
 			})
 		})
@@ -107,21 +110,21 @@ func Test_Gitlab(t *testing.T) {
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := gitlab.Perm(&user, "diaspora", "diaspora-client")
+				perm, err := client.Perm(&user, "diaspora", "diaspora-client")
 				assert.NoError(t, err)
 				assert.True(t, perm.Admin)
 				assert.True(t, perm.Pull)
 				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := gitlab.Perm(&user, "brightbox", "puppet")
+				perm, err := client.Perm(&user, "brightbox", "puppet")
 				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := gitlab.Perm(&user, "not-existed", "not-existed")
+				_, err := client.Perm(&user, "not-existed", "not-existed")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -130,12 +133,12 @@ func Test_Gitlab(t *testing.T) {
 		// Test activate method
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 				assert.NoError(t, err)
 			})
 
 			g.It("Should be failed, when token not given", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test")
+				err := client.Activate(&user, &repo, "http://example.com/api/hook/test/test")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -144,7 +147,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test deactivate method
 		g.Describe("Deactivate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Deactivate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Deactivate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
 				g.Assert(err == nil).IsTrue()
 			})
@@ -153,14 +156,14 @@ func Test_Gitlab(t *testing.T) {
 		// Test login method
 		// g.Describe("Login", func() {
 		// 	g.It("Should return user", func() {
-		// 		user, err := gitlab.Login("valid_token", "")
+		// 		user, err := client.Login("valid_token", "")
 
 		// 		g.Assert(err == nil).IsTrue()
 		// 		g.Assert(user == nil).IsFalse()
 		// 	})
 
 		// 	g.It("Should return error, when token is invalid", func() {
-		// 		_, err := gitlab.Login("invalid_token", "")
+		// 		_, err := client.Login("invalid_token", "")
 
 		// 		g.Assert(err != nil).IsTrue()
 		// 	})
@@ -175,8 +178,9 @@ func Test_Gitlab(t *testing.T) {
 						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
 						bytes.NewReader(testdata.PushHook),
 					)
+					req.Header.Set(eventTypeHeader, string(gitlab.EventTypePush))
 
-					hookRepo, build, err := gitlab.Hook(req)
+					hookRepo, build, err := client.Hook(req)
 					assert.NoError(t, err)
 					assert.NotNil(t, hookRepo)
 					assert.NotNil(t, build)
@@ -185,24 +189,6 @@ func Test_Gitlab(t *testing.T) {
 					assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 					assert.Equal(t, "develop", hookRepo.Branch)
 					assert.Equal(t, "refs/heads/master", build.Ref)
-
-				})
-
-				g.It("Should parse legacy push hoook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyPushHook),
-					)
-
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
-					g.Assert(repo.Avatar).Equal("")
-					g.Assert(repo.Branch).Equal("master")
-					g.Assert(build.Ref).Equal("refs/heads/master")
 
 				})
 			})
@@ -214,30 +200,15 @@ func Test_Gitlab(t *testing.T) {
 						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
 						bytes.NewReader(testdata.TagHook),
 					)
+					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeTagPush))
 
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("jsmith")
-					g.Assert(repo.Name).Equal("example")
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
-
-				})
-
-				g.It("Should parse legacy tag push hook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyTagHook),
-					)
-
-					repo, build, err := gitlab.Hook(req)
+					hookRepo, build, err := client.Hook(req)
 
 					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
+					g.Assert(hookRepo.Owner).Equal("jsmith")
+					g.Assert(hookRepo.Name).Equal("example")
+					g.Assert(hookRepo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
+					g.Assert(hookRepo.Branch).Equal("develop")
 					g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
 
 				})
@@ -250,14 +221,15 @@ func Test_Gitlab(t *testing.T) {
 						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
 						bytes.NewReader(testdata.MergeRequestHook),
 					)
+					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeMergeRequest))
 
-					repo, build, err := gitlab.Hook(req)
+					hookRepo, build, err := client.Hook(req)
 
 					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(repo.Owner).Equal("awesome_space")
-					g.Assert(repo.Name).Equal("awesome_project")
+					g.Assert(hookRepo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
+					g.Assert(hookRepo.Branch).Equal("develop")
+					g.Assert(hookRepo.Owner).Equal("awesome_space")
+					g.Assert(hookRepo.Name).Equal("awesome_project")
 
 					g.Assert(build.Title).Equal("MS-Viewport")
 				})
@@ -268,12 +240,13 @@ func Test_Gitlab(t *testing.T) {
 						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
 						bytes.NewReader(testdata.LegacyMergeRequestHook),
 					)
+					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeMergeRequest))
 
-					repo, build, err := gitlab.Hook(req)
+					hookRepo, build, err := client.Hook(req)
 
 					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
+					g.Assert(hookRepo.Owner).Equal("diaspora")
+					g.Assert(hookRepo.Name).Equal("diaspora-client")
 
 					g.Assert(build.Title).Equal("MS-Viewport")
 				})

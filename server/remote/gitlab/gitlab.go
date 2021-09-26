@@ -448,33 +448,39 @@ func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) err
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
-	var payload, _ = ioutil.ReadAll(req.Body)
-	var parsed, err = oldclient.ParseHook(payload)
+	payload, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	switch parsed.ObjectKind {
-	case "merge_request":
-		return mergeRequest(parsed, req)
-	case "tag_push", "push":
-		return push(parsed, req)
+	eventType := gitlab.WebhookEventType(req)
+	parsed, err := gitlab.ParseWebhook(eventType, payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	switch eventType {
+	case gitlab.EventTypeMergeRequest:
+		event := parsed.(*gitlab.MergeEvent)
+		return convertMergeRequestHock(event, req)
+	case gitlab.EventTypePush:
+		event := parsed.(*gitlab.PushEvent)
+		return convertPushHock(event)
+	case gitlab.EventTypeTagPush:
+		event := parsed.(*gitlab.TagEvent)
+		return convertTagHock(event)
 	default:
 		return nil, nil, nil
 	}
 }
 
-func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
-
+func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
+	build := &model.Build{}
 
-	obj := parsed.ObjectAttributes
-	if obj == nil {
-		return nil, nil, fmt.Errorf("object_attributes key expected in merge request hook")
-	}
-
-	target := obj.Target
-	source := obj.Source
+	target := hook.ObjectAttributes.Target
+	source := hook.ObjectAttributes.Source
+	obj := hook.ObjectAttributes
 
 	if target == nil && source == nil {
 		return nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
@@ -496,12 +502,12 @@ func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo
 		repo.FullName = fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	}
 
-	repo.Link = target.WebUrl
+	repo.Link = target.WebURL
 
-	if target.GitHttpUrl != "" {
-		repo.Clone = target.GitHttpUrl
+	if target.GitHTTPURL != "" {
+		repo.Clone = target.GitHTTPURL
 	} else {
-		repo.Clone = target.HttpUrl
+		repo.Clone = target.HTTPURL
 	}
 
 	if target.DefaultBranch != "" {
@@ -510,30 +516,23 @@ func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo
 		repo.Branch = "master"
 	}
 
-	if target.AvatarUrl != "" {
-		repo.Avatar = target.AvatarUrl
+	if target.AvatarURL != "" {
+		repo.Avatar = target.AvatarURL
 	}
 
-	build := &model.Build{}
-	build.Event = "pull_request"
+	build.Event = model.EventPull
 
 	lastCommit := obj.LastCommit
-	if lastCommit == nil {
-		return nil, nil, fmt.Errorf("last_commit key expected in merge request hook")
-	}
 
 	build.Message = lastCommit.Message
-	build.Commit = lastCommit.Id
-	//build.Remote = parsed.ObjectAttributes.Source.HttpUrl
+	build.Commit = lastCommit.ID
+	build.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IId)
+	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IID)
 
 	build.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
-	if author == nil {
-		return nil, nil, fmt.Errorf("author key expected in merge request hook")
-	}
 
 	build.Author = author.Name
 	build.Email = author.Email
@@ -543,82 +542,96 @@ func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo
 	}
 
 	build.Title = obj.Title
-	build.Link = obj.Url
+	build.Link = obj.URL
 
 	return repo, build, nil
 }
 
-func push(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model.Build, error) {
+func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
-
-	// Since gitlab 8.5, used project instead repository key
-	// see https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md#web-hooks
-	if project := parsed.Project; project != nil {
-		var err error
-		if repo.Owner, repo.Name, err = extractFromPath(project.PathWithNamespace); err != nil {
-			return nil, nil, err
-		}
-
-		repo.Avatar = project.AvatarUrl
-		repo.Link = project.WebUrl
-		repo.Clone = project.GitHttpUrl
-		repo.FullName = project.PathWithNamespace
-		repo.Branch = project.DefaultBranch
-
-		switch project.VisibilityLevel {
-		case 0:
-			repo.IsPrivate = true
-		case 10:
-			repo.IsPrivate = true
-		case 20:
-			repo.IsPrivate = false
-		}
-	} else if repository := parsed.Repository; repository != nil {
-		repo.Owner = req.FormValue("owner")
-		repo.Name = req.FormValue("name")
-		repo.Link = repository.URL
-		repo.Clone = repository.GitHttpUrl
-		repo.Branch = "master"
-		repo.FullName = fmt.Sprintf("%s/%s", req.FormValue("owner"), req.FormValue("name"))
-
-		switch repository.VisibilityLevel {
-		case 0:
-			repo.IsPrivate = true
-		case 10:
-			repo.IsPrivate = true
-		case 20:
-			repo.IsPrivate = false
-		}
-	} else {
-		return nil, nil, fmt.Errorf("No project/repository keys given")
-	}
-
 	build := &model.Build{}
-	build.Event = model.EventPush
-	build.Commit = parsed.After
-	build.Branch = parsed.Branch()
-	build.Ref = parsed.Ref
-	// hook.Commit.Remote = cloneUrl
 
-	var head = parsed.Head()
-	build.Message = head.Message
-	// build.Timestamp = head.Timestamp
-
-	// extracts the commit author (ideally email)
-	// from the post-commit hook
-	switch {
-	case head.Author != nil:
-		build.Email = head.Author.Email
-		build.Author = parsed.UserName
-		if len(build.Email) != 0 {
-			build.Avatar = getUserAvatar(build.Email)
-		}
-	case head.Author == nil:
-		build.Author = parsed.UserName
+	var err error
+	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
 	}
 
-	if strings.HasPrefix(build.Ref, "refs/tags/") {
-		build.Event = model.EventTag
+	repo.Avatar = hook.Project.AvatarURL
+	repo.Link = hook.Project.WebURL
+	repo.Clone = hook.Project.GitHTTPURL
+	repo.FullName = hook.Project.PathWithNamespace
+	repo.Branch = hook.Project.DefaultBranch
+
+	switch hook.Project.Visibility {
+	case gitlab.PrivateVisibility:
+		repo.IsPrivate = true
+	case gitlab.InternalVisibility:
+		repo.IsPrivate = true
+	case gitlab.PublicVisibility:
+		repo.IsPrivate = false
+	}
+
+	build.Event = model.EventPush
+	build.Commit = hook.After
+	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	build.Ref = hook.Ref
+
+	for _, cm := range hook.Commits {
+		if hook.After == cm.ID {
+			build.Author = cm.Author.Name
+			build.Email = cm.Author.Email
+			build.Message = cm.Message
+			build.Timestamp = cm.Timestamp.Unix()
+			if len(build.Email) != 0 {
+				build.Avatar = getUserAvatar(build.Email)
+			}
+			break
+		}
+	}
+
+	return repo, build, nil
+}
+
+func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+	repo := &model.Repo{}
+	build := &model.Build{}
+
+	var err error
+	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
+	}
+
+	repo.Avatar = hook.Project.AvatarURL
+	repo.Link = hook.Project.WebURL
+	repo.Clone = hook.Project.GitHTTPURL
+	repo.FullName = hook.Project.PathWithNamespace
+	repo.Branch = hook.Project.DefaultBranch
+
+	switch hook.Project.Visibility {
+	case gitlab.PrivateVisibility:
+		repo.IsPrivate = true
+	case gitlab.InternalVisibility:
+		repo.IsPrivate = true
+	case gitlab.PublicVisibility:
+		repo.IsPrivate = false
+	}
+
+	build.Event = model.EventPush
+	build.Commit = hook.After
+	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	build.Ref = hook.Ref
+
+	for _, cm := range hook.Commits {
+		if hook.After == cm.ID {
+			build.Author = cm.Author.Name
+			build.Email = cm.Author.Email
+			build.Message = cm.Message
+			build.Timestamp = cm.Timestamp.Unix()
+			if len(build.Email) != 0 {
+				build.Avatar = getUserAvatar(build.Email)
+			}
+			break
+		}
 	}
 
 	return repo, build, nil
