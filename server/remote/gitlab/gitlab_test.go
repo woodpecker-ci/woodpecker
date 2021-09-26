@@ -75,9 +75,8 @@ func Test_Gitlab(t *testing.T) {
 			g.It("Should return only non-archived projects is hidden", func() {
 				gitlab.HideArchives = true
 				_projects, err := gitlab.Repos(&user)
-
-				g.Assert(err == nil).IsTrue()
-				g.Assert(len(_projects)).Equal(1)
+				assert.NoError(t, err)
+				assert.Len(t, _projects, 1)
 			})
 
 			g.It("Should return all the projects", func() {
@@ -101,8 +100,7 @@ func Test_Gitlab(t *testing.T) {
 
 			g.It("Should return error, when repo not exist", func() {
 				_, err := gitlab.Repo(&user, "not-existed", "not-existed")
-
-				g.Assert(err != nil).IsTrue()
+				assert.Error(t, err)
 			})
 		})
 
@@ -110,14 +108,14 @@ func Test_Gitlab(t *testing.T) {
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
 				perm, err := gitlab.Perm(&user, "diaspora", "diaspora-client")
-				g.Assert(err == nil).IsTrue()
-				g.Assert(perm.Admin).Equal(true)
-				g.Assert(perm.Pull).Equal(true)
-				g.Assert(perm.Push).Equal(true)
+				assert.NoError(t, err)
+				assert.True(t, perm.Admin)
+				assert.True(t, perm.Pull)
+				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
 				perm, err := gitlab.Perm(&user, "brightbox", "puppet")
-				g.Assert(err == nil).IsTrue()
+				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
@@ -133,8 +131,7 @@ func Test_Gitlab(t *testing.T) {
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
 				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
-
-				g.Assert(err == nil).IsTrue()
+				assert.NoError(t, err)
 			})
 
 			g.It("Should be failed, when token not given", func() {
@@ -179,14 +176,15 @@ func Test_Gitlab(t *testing.T) {
 						bytes.NewReader(testdata.PushHook),
 					)
 
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("mike")
-					g.Assert(repo.Name).Equal("diaspora")
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(build.Ref).Equal("refs/heads/master")
+					hookRepo, build, err := gitlab.Hook(req)
+					assert.NoError(t, err)
+					assert.NotNil(t, hookRepo)
+					assert.NotNil(t, build)
+					assert.Equal(t, "mike", hookRepo.Owner)
+					assert.Equal(t, "diaspora", hookRepo.Name)
+					assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+					assert.Equal(t, "develop", hookRepo.Branch)
+					assert.Equal(t, "refs/heads/master", build.Ref)
 
 				})
 

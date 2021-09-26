@@ -368,12 +368,12 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.
 func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
+	oldClient := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
 
 	status := getStatus(b.Status)
 	desc := getDesc(b.Status)
 
-	client.SetStatus(
+	oldClient.SetStatus(
 		fmt.Sprintf("%s%%2F%s", repo.Owner, repo.Name),
 		b.Commit,
 		status,

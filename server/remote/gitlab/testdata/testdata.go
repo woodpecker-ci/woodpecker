@@ -15,10 +15,13 @@
 package testdata
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	//	"github.com/stretchr/testify/assert"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // NewServer setup a mock server for testing purposes.
@@ -52,7 +55,12 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/projects/diaspora/diaspora-client/services/drone-ci":
 			switch r.Method {
 			case "PUT":
-				if r.FormValue("token") == "" {
+				body, _ := io.ReadAll(r.Body)
+				opts := make(map[string]interface{})
+				assert.NoError(t, json.Unmarshal(body, &opts))
+				token, ok := opts["token"].(string)
+				assert.True(t, ok)
+				if token == "" {
 					w.WriteHeader(404)
 				} else {
 					w.WriteHeader(201)
