@@ -12,7 +12,7 @@ require (
 	github.com/dimfeld/httptreemux v5.0.1+incompatible
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 	github.com/docker/distribution v2.7.1+incompatible
-	github.com/docker/docker v20.10.8+incompatible // indirect
+	github.com/docker/docker v20.10.8+incompatible
 	github.com/docker/docker-credential-helpers v0.6.3 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/libcompose v0.4.0
