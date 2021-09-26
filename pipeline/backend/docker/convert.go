@@ -1,12 +1,12 @@
 package docker
 
 import (
-	"docker.io/go-docker/api/types/container"
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
 	"strings"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
 
