@@ -110,9 +110,14 @@
         },
         "commands": {
           "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#step-commands",
-          "type": "array",
-          "items": { "type": "string" },
-          "minLength": 1
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "minLength": 1
+            },
+            { "type": "string" }
+          ]
         },
         "environment": {
           "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.github.io/docs/usage/environment",

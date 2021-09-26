@@ -10,6 +10,10 @@ pipeline:
     commands:
       - go test
 
+  single-command:
+    image: golang
+    commands: go test
+
   commands:
     image: golang
     commands:
