@@ -134,7 +134,7 @@ func loop(c *cli.Context) error {
 				}
 
 				r := agent.NewRunner(client, filter, hostname, counter, &engine)
-				if err := r.Run(ctx); err != nil {
+				if err := r.Run(ctx, c.BoolT("use-podman")); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}

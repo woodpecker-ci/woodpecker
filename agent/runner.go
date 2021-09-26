@@ -27,6 +27,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/podman"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 
@@ -60,7 +62,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run(ctx context.Context, usePodman bool) error {
 	log.Debug().
 		Msg("request next execution")
 
@@ -97,6 +99,21 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().
 		Msg("received execution")
+
+	var engine backend.Engine
+	if usePodman == true {
+		engine = podman.New()
+	} else {
+		// new docker engine
+		engine, err = docker.NewEnv()
+		if err != nil {
+			logger.Error().
+				Err(err).
+				Msg("cannot create docker client")
+
+			return err
+		}
+	}
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
