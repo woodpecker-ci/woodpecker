@@ -1,6 +1,8 @@
 package schema_test
 
 import (
+	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
@@ -12,6 +14,7 @@ func TestSchema(t *testing.T) {
 	testTable := []struct {
 		name     string
 		testFile string
+		fail     bool
 	}{
 		{
 			name:     "Branches",
@@ -65,13 +68,22 @@ func TestSchema(t *testing.T) {
 			name:     "Workspace",
 			testFile: ".woodpecker/test-workspace.yml",
 		},
+		{
+			name:     "Broken Config",
+			testFile: ".woodpecker/test-broken.yml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			err, configErrors := schema.Lint(tt.testFile)
-			if err != nil {
-				t.Error("Validation failed", err, configErrors)
+			if tt.fail {
+				if len(configErrors) == 0 {
+					assert.Error(t, err, "Expected config errors but got none")
+				}
+			} else {
+				assert.NoError(t, err, fmt.Sprintf("Validation failed: %v", configErrors))
 			}
 		})
 	}
