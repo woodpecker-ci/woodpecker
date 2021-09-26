@@ -32,20 +32,3 @@ func encodeParameter(value string) string {
 
 	return value
 }
-
-// Branch returns current branch for push event hook payload
-// This function returns empty string for any other events
-func (h *HookPayload) Branch() string {
-	return strings.TrimPrefix(h.Ref, "refs/heads/")
-}
-
-// Head returns the latest changeset for push event hook payload
-func (h *HookPayload) Head() hCommit {
-	c := hCommit{}
-	for _, cm := range h.Commits {
-		if h.After == cm.Id {
-			return cm
-		}
-	}
-	return c
-}
