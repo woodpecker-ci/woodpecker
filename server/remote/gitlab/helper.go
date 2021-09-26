@@ -35,7 +35,7 @@ const (
 // newClient is a helper function that returns a new GitHub
 // client using the provided OAuth token.
 func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
-	return gitlab.NewClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
+	return gitlab.NewOAuthClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
