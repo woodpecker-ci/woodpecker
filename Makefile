@@ -39,11 +39,17 @@ vet:
 	@echo "Running go vet..."
 	@go vet $(GO_PACKAGES)
 
+frontend-dependencies:
+	(cd web/; yarn install --frozen-lockfile)
+
 test-agent:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
 
 test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
+
+test-frontend: frontend-dependencies
+	(cd web/; yarn run test)
 
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
@@ -55,6 +61,9 @@ build-agent:
 
 build-server:
 	$(DOCKER_RUN) go build -o build/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+
+build-frontend: frontend-dependencies
+	(cd web/; yarn run build)
 
 build: build-agent build-server
 

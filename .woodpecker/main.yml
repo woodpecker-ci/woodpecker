@@ -32,11 +32,7 @@ pipeline:
   build-frontend:
     image: node:14-alpine
     commands:
-      - cd web/
-      - curl -f https://get.pnpm.io/v6.js | node - add --global pnpm@6
-      - pnpm config set store-dir .pnpm-store
-      - pnpm install
-      - pnpm build
+      - make build-frontend
 
   build:
     image: golang:1.16

@@ -9,7 +9,7 @@ pipeline:
       - cd web/
       - yarn install --frozen-lockfile
     when:
-      path: "web/*"
+      path: "web/**"
 
   lint:
     group: test
@@ -18,7 +18,7 @@ pipeline:
       - cd web/
       - yarn lint
     when:
-      path: "web/*"
+      path: "web/**"
 
   formatcheck:
     group: test
@@ -27,7 +27,7 @@ pipeline:
       - cd web/
       - yarn formatcheck
     when:
-      path: "web/*"
+      path: "web/**"
 
   typecheck:
     group: test
@@ -36,11 +36,12 @@ pipeline:
       - cd web/
       - yarn typecheck
     when:
-      path: "web/*"
+      path: "web/**"
 
   build:
     image: node:14-alpine
     commands:
+      - cd web/
       - yarn build
     when:
-      path: "web/*"
+      path: "web/**"
