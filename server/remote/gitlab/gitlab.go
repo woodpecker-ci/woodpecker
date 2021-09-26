@@ -443,7 +443,7 @@ func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) err
 	return client.DeleteDroneService(id)
 }
 
-// ParseHook parses the post-commit hook from the Request body
+// Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
