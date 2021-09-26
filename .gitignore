@@ -33,7 +33,7 @@ docker-compose.yml
 /.env
 extras/
 release/
-./build/
+/build/
 cli/release/
 
 server/swagger/files/*.json
