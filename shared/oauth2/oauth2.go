@@ -380,29 +380,6 @@ func (t *Transport) AuthenticateClient() error {
 	return t.updateToken(t.Token, url.Values{"grant_type": {"client_credentials"}})
 }
 
-// providerAuthHeaderWorks reports whether the OAuth2 server identified by the tokenURL
-// implements the OAuth2 spec correctly
-// See https://code.google.com/p/goauth2/issues/detail?id=31 for background.
-// In summary:
-// - Reddit only accepts client secret in the Authorization header
-// - Dropbox accepts either it in URL param or Auth header, but not both.
-// - Google only accepts URL param (not spec compliant?), not Auth header
-func providerAuthHeaderWorks(tokenURL string) bool {
-	if strings.HasPrefix(tokenURL, "https://accounts.google.com/") ||
-		strings.HasPrefix(tokenURL, "https://github.com/") ||
-		strings.HasPrefix(tokenURL, "https://api.instagram.com/") ||
-		strings.HasPrefix(tokenURL, "https://www.douban.com/") {
-		// Some sites fail to implement the OAuth2 spec fully.
-		return false
-	}
-
-	// Assume the provider implements the spec properly
-	// otherwise. We can add more exceptions as they're
-	// discovered. We will _not_ be adding configurable hooks
-	// to this package to let users select server bugs.
-	return true
-}
-
 // updateToken mutates both tok and v.
 func (t *Transport) updateToken(tok *Token, v url.Values) error {
 	v.Set("client_id", t.ClientId)

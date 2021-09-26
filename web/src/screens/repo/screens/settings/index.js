@@ -32,10 +32,7 @@ export default class Settings extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.handlePushChange = this.handlePushChange.bind(this);
     this.handlePullChange = this.handlePullChange.bind(this);
-    this.handleTagChange = this.handleTagChange.bind(this);
-    this.handleDeployChange = this.handleDeployChange.bind(this);
     this.handleTrustedChange = this.handleTrustedChange.bind(this);
     this.handleProtectedChange = this.handleProtectedChange.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
@@ -81,34 +78,10 @@ export default class Settings extends Component {
             <label>
               <input
                 type="checkbox"
-                checked={repo.allow_push}
-                onChange={this.handlePushChange}
-              />
-              <span>push</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
                 checked={repo.allow_pr}
                 onChange={this.handlePullChange}
               />
-              <span>pull request</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={repo.allow_tags}
-                onChange={this.handleTagChange}
-              />
-              <span>tag</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={repo.allow_deploys}
-                onChange={this.handleDeployChange}
-              />
-              <span>deployment</span>
+              <span>Allow to execute pipelines on Pull-Requests</span>
             </label>
           </div>
         </section>
@@ -186,20 +159,8 @@ export default class Settings extends Component {
     );
   }
 
-  handlePushChange(e) {
-    this.handleChange("allow_push", e.target.checked);
-  }
-
   handlePullChange(e) {
     this.handleChange("allow_pr", e.target.checked);
-  }
-
-  handleTagChange(e) {
-    this.handleChange("allow_tag", e.target.checked);
-  }
-
-  handleDeployChange(e) {
-    this.handleChange("allow_deploy", e.target.checked);
   }
 
   handleTrustedChange(e) {
