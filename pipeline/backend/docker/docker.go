@@ -8,10 +8,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/pkg/term"
+	"github.com/moby/moby/client"
+	"github.com/moby/moby/pkg/jsonmessage"
+	"github.com/moby/moby/pkg/stdcopy"
+	"github.com/moby/term"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
@@ -30,7 +30,7 @@ func New(cli client.APIClient) backend.Engine {
 // NewEnv returns a new Docker Engine using the client connection
 // environment variables.
 func NewEnv() (backend.Engine, error) {
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return nil, err
 	}
