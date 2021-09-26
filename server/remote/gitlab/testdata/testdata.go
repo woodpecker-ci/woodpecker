@@ -31,10 +31,10 @@ func NewServer(t *testing.T) *httptest.Server {
 
 	// handle requests and serve mock data
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		//println(r.URL.Path + "  " + r.Method)
+		t.Logf("gitlab remote mock server: [%s] %s", r.Method, r.URL.Path)
 		// evaluate the path to serve a dummy data file
 
-		// TODO: enable to see only library do make requests
+		// TODO: find source of "/api/v4/" requests
 		// assert.EqualValues(t, "go-gitlab", r.Header.Get("user-agent"), "on request: "+r.URL.Path)
 
 		switch r.URL.Path {
