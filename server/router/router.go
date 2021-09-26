@@ -187,8 +187,6 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 		debugger.GET("/pprof/trace", debug.TraceHandler())
 	}
 
-	e.GET("/api/web-config.js", web.WebConfig)
-
 	monitor := e.Group("/metrics")
 	{
 		monitor.GET("", metrics.PromHandler())

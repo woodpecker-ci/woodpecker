@@ -16,21 +16,33 @@ package web
 
 import (
 	"testing"
-	"time"
 )
 
-func TestWithSync(t *testing.T) {
-	opts := new(Options)
-	WithSync(time.Minute)(opts)
-	if got, want := opts.sync, time.Minute; got != want {
-		t.Errorf("Want sync duration %v, got %v", want, got)
+func Test_injectPartials(t *testing.T) {
+	got, want := injectPartials(before), after
+	if got != want {
+		t.Errorf("Want html %q, got %q", want, got)
 	}
 }
 
-func TestWithDocs(t *testing.T) {
-	opts := new(Options)
-	WithDocs("http://docs.drone.io")(opts)
-	if got, want := opts.docs, "http://docs.drone.io"; got != want {
-		t.Errorf("Want documentation url %q, got %q", want, got)
-	}
-}
+var before = `<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- drone:version -->
+	<!-- drone:user -->
+	<!-- drone:csrf -->
+<link rel="shortcut icon" href="/favicon.png"></head>
+<body>
+</html>`
+
+var after = `<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	{{ template "version" . }}
+	{{ template "user" . }}
+	{{ template "csrf" . }}
+<link rel="shortcut icon" href="/favicon.png"></head>
+<body>
+</html>`

@@ -18,12 +18,13 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"io/ioutil"
+	"html/template"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web/dist"
 
 	"github.com/dimfeld/httptreemux"
@@ -42,34 +43,19 @@ func New(opt ...Option) Endpoint {
 		f(opts)
 	}
 
-	if opts.path != "" {
-		return fromPath(opts)
-	}
-
 	return &website{
-		fs:      dist.New(),
-		opts:    opts,
-		content: dist.MustLookup("/index.html"),
-	}
-}
-
-func fromPath(opts *Options) *website {
-	f := filepath.Join(opts.path, "index.html")
-	b, err := ioutil.ReadFile(f)
-	if err != nil {
-		panic(err)
-	}
-	return &website{
-		fs:      http.Dir(opts.path),
-		content: b,
-		opts:    opts,
+		fs:   dist.New(),
+		opts: opts,
+		tmpl: mustCreateTemplate(
+			string(dist.MustLookup("/index.html")),
+		),
 	}
 }
 
 type website struct {
-	opts    *Options
-	fs      http.FileSystem
-	content []byte
+	opts *Options
+	fs   http.FileSystem
+	tmpl *template.Template
 }
 
 func (w *website) Register(mux *httptreemux.ContextMux) {
@@ -82,8 +68,28 @@ func (w *website) Register(mux *httptreemux.ContextMux) {
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
+
+	var csrf string
+	var user, _ = ToUser(r.Context())
+	if user != nil {
+		csrf, _ = token.New(
+			token.CsrfToken,
+			user.Login,
+		).Sign(user.Hash)
+	}
+	var syncing bool
+	if user != nil {
+		syncing = time.Unix(user.Synced, 0).Add(w.opts.sync).Before(time.Now())
+	}
+	params := map[string]interface{}{
+		"user":    user,
+		"csrf":    csrf,
+		"syncing": syncing,
+		"version": version.String(),
+	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	rw.Write(w.content)
+
+	w.tmpl.Execute(rw, params)
 }
 
 func setupCache(h http.Handler) http.Handler {
