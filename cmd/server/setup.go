@@ -209,7 +209,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 func setupTree(c *cli.Context) *httptreemux.ContextMux {
 	tree := httptreemux.NewContextMux()
 	web.New(
-		web.WithDir(c.String("www")),
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),
 	).Register(tree)

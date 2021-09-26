@@ -1,30 +1,10 @@
 # code.gitea.io/sdk/gitea v0.15.0
 ## explicit
 code.gitea.io/sdk/gitea
-# docker.io/go-docker v1.0.0
-## explicit
-docker.io/go-docker
-docker.io/go-docker/api
-docker.io/go-docker/api/types
-docker.io/go-docker/api/types/blkiodev
-docker.io/go-docker/api/types/container
-docker.io/go-docker/api/types/events
-docker.io/go-docker/api/types/filters
-docker.io/go-docker/api/types/image
-docker.io/go-docker/api/types/mount
-docker.io/go-docker/api/types/network
-docker.io/go-docker/api/types/registry
-docker.io/go-docker/api/types/strslice
-docker.io/go-docker/api/types/swarm
-docker.io/go-docker/api/types/swarm/runtime
-docker.io/go-docker/api/types/time
-docker.io/go-docker/api/types/versions
-docker.io/go-docker/api/types/volume
-# github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
-## explicit
+# github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1
 github.com/Azure/go-ansiterm
 github.com/Azure/go-ansiterm/winterm
-# github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5
+# github.com/Microsoft/go-winio v0.5.0
 ## explicit
 github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
@@ -42,8 +22,12 @@ github.com/bradrydzewski/togo/parser
 github.com/bradrydzewski/togo/template
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
-# github.com/cpuguy83/go-md2man/v2 v2.0.0
+# github.com/containerd/containerd v1.5.5
 ## explicit
+github.com/containerd/containerd/errdefs
+github.com/containerd/containerd/log
+github.com/containerd/containerd/platforms
+# github.com/cpuguy83/go-md2man/v2 v2.0.0
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
@@ -59,13 +43,26 @@ github.com/docker/cli/cli/config/types
 ## explicit
 github.com/docker/distribution/digestset
 github.com/docker/distribution/reference
-# github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
+github.com/docker/distribution/registry/api/errcode
+# github.com/docker/docker v20.10.8+incompatible
 ## explicit
+github.com/docker/docker/api
+github.com/docker/docker/api/types
+github.com/docker/docker/api/types/blkiodev
+github.com/docker/docker/api/types/container
+github.com/docker/docker/api/types/events
+github.com/docker/docker/api/types/filters
+github.com/docker/docker/api/types/image
+github.com/docker/docker/api/types/mount
+github.com/docker/docker/api/types/network
+github.com/docker/docker/api/types/registry
 github.com/docker/docker/api/types/strslice
-github.com/docker/docker/pkg/jsonmessage
-github.com/docker/docker/pkg/stdcopy
-github.com/docker/docker/pkg/term
-github.com/docker/docker/pkg/term/windows
+github.com/docker/docker/api/types/swarm
+github.com/docker/docker/api/types/swarm/runtime
+github.com/docker/docker/api/types/time
+github.com/docker/docker/api/types/versions
+github.com/docker/docker/api/types/volume
+github.com/docker/docker/errdefs
 # github.com/docker/docker-credential-helpers v0.6.3
 ## explicit
 github.com/docker/docker-credential-helpers/client
@@ -76,7 +73,6 @@ github.com/docker/go-connections/nat
 github.com/docker/go-connections/sockets
 github.com/docker/go-connections/tlsconfig
 # github.com/docker/go-units v0.4.0
-## explicit
 github.com/docker/go-units
 # github.com/docker/libcompose v0.4.0
 ## explicit
@@ -121,8 +117,7 @@ github.com/go-sql-driver/mysql
 # github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
 ## explicit
 github.com/gogits/go-gogs-client
-# github.com/gogo/protobuf v1.3.1
-## explicit
+# github.com/gogo/protobuf v1.3.2
 github.com/gogo/protobuf/proto
 # github.com/golang-jwt/jwt v3.2.2+incompatible
 ## explicit
@@ -174,8 +169,18 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v2.0.3+incompatible
 ## explicit
 github.com/mattn/go-sqlite3
-# github.com/matttproud/golang_protobuf_extensions v1.0.1
+# github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/moby/moby v20.10.8+incompatible
+## explicit
+github.com/moby/moby/client
+github.com/moby/moby/pkg/jsonmessage
+github.com/moby/moby/pkg/stdcopy
+github.com/moby/moby/pkg/term
+# github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
+## explicit
+github.com/moby/term
+github.com/moby/term/windows
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
@@ -187,17 +192,15 @@ github.com/morikuni/aec
 ## explicit
 github.com/mrjones/oauth
 # github.com/opencontainers/go-digest v1.0.0
-## explicit
 github.com/opencontainers/go-digest
 # github.com/opencontainers/image-spec v1.0.1
-## explicit
 github.com/opencontainers/image-spec/specs-go
 github.com/opencontainers/image-spec/specs-go/v1
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/prometheus/client_golang v1.6.0
+# github.com/prometheus/client_golang v1.7.1
 ## explicit
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
@@ -206,11 +209,10 @@ github.com/prometheus/client_golang/prometheus/promhttp
 # github.com/prometheus/client_model v0.2.0
 github.com/prometheus/client_model/go
 # github.com/prometheus/common v0.10.0
-## explicit
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
-# github.com/prometheus/procfs v0.0.11
+# github.com/prometheus/procfs v0.6.0
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
@@ -308,22 +310,21 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
-## explicit
+# google.golang.org/genproto v0.0.0-20201110150050-8816d57aaa9a
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.29.1
+# google.golang.org/grpc v1.33.2
 ## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base
+google.golang.org/grpc/balancer/grpclb/state
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
-google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -333,6 +334,7 @@ google.golang.org/grpc/internal/balancerload
 google.golang.org/grpc/internal/binarylog
 google.golang.org/grpc/internal/buffer
 google.golang.org/grpc/internal/channelz
+google.golang.org/grpc/internal/credentials
 google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpclog
 google.golang.org/grpc/internal/grpcrand
@@ -340,12 +342,12 @@ google.golang.org/grpc/internal/grpcsync
 google.golang.org/grpc/internal/grpcutil
 google.golang.org/grpc/internal/resolver/dns
 google.golang.org/grpc/internal/resolver/passthrough
+google.golang.org/grpc/internal/serviceconfig
 google.golang.org/grpc/internal/status
 google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
-google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
 google.golang.org/grpc/serviceconfig
@@ -385,10 +387,7 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v2 v2.4.0
-## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 ## explicit
 gopkg.in/yaml.v3
-# gotest.tools v2.2.0+incompatible
-## explicit

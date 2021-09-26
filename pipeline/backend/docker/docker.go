@@ -5,23 +5,23 @@ import (
 	"io"
 	"os"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/volume"
+	"github.com/moby/moby/client"
+	"github.com/moby/moby/pkg/jsonmessage"
+	"github.com/moby/moby/pkg/stdcopy"
+	"github.com/moby/term"
 
-	"docker.io/go-docker"
-	"docker.io/go-docker/api/types"
-	"docker.io/go-docker/api/types/network"
-	"docker.io/go-docker/api/types/volume"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/docker/docker/pkg/term"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
 
 type engine struct {
-	client docker.APIClient
+	client client.APIClient
 }
 
 // New returns a new Docker Engine using the given client.
-func New(cli docker.APIClient) backend.Engine {
+func New(cli client.APIClient) backend.Engine {
 	return &engine{
 		client: cli,
 	}
@@ -30,7 +30,7 @@ func New(cli docker.APIClient) backend.Engine {
 // NewEnv returns a new Docker Engine using the client connection
 // environment variables.
 func NewEnv() (backend.Engine, error) {
-	cli, err := docker.NewEnvClient()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func NewEnv() (backend.Engine, error) {
 
 func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumesCreateBody{
+		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:       vol.Name,
 			Driver:     vol.Driver,
 			DriverOpts: vol.DriverOpts,
@@ -88,8 +88,8 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		}
 	}
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
-	if docker.IsErrNotFound(err) {
+	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
+	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
@@ -100,7 +100,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, proc.Name)
+		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
 	}
 	if err != nil {
 		return err
