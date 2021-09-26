@@ -309,7 +309,7 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches a file from the remote repository and returns in string format.
-// TODO: either use raw api or to return metadata - best would be io.Reader
+// TODO: use io.Reader
 func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, fileName string) ([]byte, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
