@@ -8,14 +8,14 @@ image:
   tag: ""
 
 env:
-  DRONE_ADMIN: "xxxx"
-  DRONE_HOST: https://"xxxxxxx"
-  DRONE_GITHUB: true
+  WOODPECKER_ADMIN: "xxxx"
+  WOODPECKER_HOST: https://"xxxxxxx"
+  WOODPECKER_GITHUB: true
 
 extraSecretNamesForEnvFrom:
-- drone-github-client
-- drone-github-secret
-- drone-secret
+- woodpecker-github-client
+- woodpecker-github-secret
+- woodpecker-secret
 
 persistentVolume:
   enabled: true
