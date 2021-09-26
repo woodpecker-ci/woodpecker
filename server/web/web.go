@@ -18,9 +18,7 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -42,27 +40,10 @@ func New(opt ...Option) Endpoint {
 		f(opts)
 	}
 
-	if opts.path != "" {
-		return fromPath(opts)
-	}
-
 	return &website{
 		fs:      dist.New(),
 		opts:    opts,
 		content: dist.MustLookup("/index.html"),
-	}
-}
-
-func fromPath(opts *Options) *website {
-	f := filepath.Join(opts.path, "index.html")
-	b, err := ioutil.ReadFile(f)
-	if err != nil {
-		panic(err)
-	}
-	return &website{
-		fs:      http.Dir(opts.path),
-		content: b,
-		opts:    opts,
 	}
 }
 

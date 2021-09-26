@@ -19,7 +19,6 @@ import "time"
 // Options defines website handler options.
 type Options struct {
 	sync time.Duration
-	path string
 	docs string
 }
 
@@ -34,10 +33,10 @@ func WithSync(d time.Duration) Option {
 	}
 }
 
-// WithDir configures the website handler with the directory value
-// used to serve the website from the local filesystem.
-func WithDir(s string) Option {
+// WithDocs configures the website handler with the documentation
+// website address, which should be included in the user interface.
+func WithDocs(s string) Option {
 	return func(o *Options) {
-		o.path = s
+		o.docs = s
 	}
 }

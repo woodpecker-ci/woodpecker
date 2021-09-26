@@ -27,10 +27,10 @@ func TestWithSync(t *testing.T) {
 	}
 }
 
-func TestWithDir(t *testing.T) {
+func TestWithDocs(t *testing.T) {
 	opts := new(Options)
-	WithDir("/tmp/www")(opts)
-	if got, want := opts.path, "/tmp/www"; got != want {
-		t.Errorf("Want www directory %q, got %q", want, got)
+	WithDocs("http://docs.drone.io")(opts)
+	if got, want := opts.docs, "http://docs.drone.io"; got != want {
+		t.Errorf("Want documentation url %q, got %q", want, got)
 	}
 }
