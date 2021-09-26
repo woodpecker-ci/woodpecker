@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	//	"github.com/stretchr/testify/assert"
 )
 
 // NewServer setup a mock server for testing purposes.
@@ -31,7 +32,7 @@ func NewServer(t *testing.T) *httptest.Server {
 		// evaluate the path to serve a dummy data file
 
 		// TODO: enable to see only library do make requests
-		// assert.EqualValues(t, "go-gitlab", r.Header.Get("user-agent"))
+		// assert.EqualValues(t, "go-gitlab", r.Header.Get("user-agent"), "on request: "+r.URL.Path)
 
 		switch r.URL.Path {
 		case "/api/v4/projects":
