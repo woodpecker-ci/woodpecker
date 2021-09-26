@@ -20,10 +20,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/client"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -111,17 +108,4 @@ func extractFromPath(str string) (string, string, error) {
 		return "", "", fmt.Errorf("Minimum match not found")
 	}
 	return s[0], s[1], nil
-}
-
-func getProjectId(r *Gitlab, c *client.Client, owner, name string) (projectId string, err error) {
-	if r.Search {
-		_projectId, err := c.SearchProjectId(owner, name)
-		if err != nil || _projectId == 0 {
-			return "", err
-		}
-		projectId := strconv.Itoa(_projectId)
-		return projectId, nil
-	} else {
-		return fmt.Sprintf("%s%%2F%s", owner, name), nil
-	}
 }

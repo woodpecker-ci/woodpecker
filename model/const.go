@@ -21,6 +21,8 @@ const (
 	EventDeploy = "deployment"
 )
 
+// TODO: type StatusValue string
+
 const (
 	StatusSkipped  = "skipped"
 	StatusPending  = "pending"

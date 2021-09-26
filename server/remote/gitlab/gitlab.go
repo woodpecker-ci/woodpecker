@@ -28,13 +28,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 
-	oldclient "github.com/woodpecker-ci/woodpecker/server/remote/gitlab/client"
 	"github.com/xanzy/go-gitlab"
 )
 
 const (
-	defaultScope = "api"
-	perPage      = 100
+	defaultScope  = "api"
+	perPage       = 100
+	statusContext = "ci/drone"
 )
 
 // Opts defines configuration options.
@@ -161,8 +161,8 @@ func (g *Gitlab) Auth(token, _ string) (string, error) {
 }
 
 // Teams fetches a list of team memberships from the remote system.
-func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
-	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+func (g *Gitlab) Teams(user *model.User) ([]*model.Team, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -229,8 +229,8 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 }
 
 // Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+func (g *Gitlab) Repo(user *model.User, owner, name string) (*model.Repo, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -244,8 +244,8 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 }
 
 // Repos fetches a list of repos from the remote system.
-func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
-	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+func (g *Gitlab) Repos(user *model.User) ([]*model.Repo, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -283,8 +283,8 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 }
 
 // Perm fetches the named repository from the remote system.
-func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+func (g *Gitlab) Perm(user *model.User, owner, name string) (*model.Perm, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +295,7 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 	}
 
 	// repo owner is granted full access
-	if repo.Owner != nil && repo.Owner.Username == u.Login {
+	if repo.Owner != nil && repo.Owner.Username == user.Login {
 		return &model.Perm{Push: true, Pull: true, Admin: true}, nil
 	}
 
@@ -364,27 +364,25 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 	return nil, nil
 }
 
-// NOTE Currently gitlab doesn't support status for commits and events,
-//      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
-//      gitlab uses API to fetch build status on client side. But for now we skip this.
-func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	oldClient := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
+// Status sends the commit status back to gitlab.
+func (g *Gitlab) Status(user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return err
+	}
 
-	status := getStatus(b.Status)
-	desc := getDesc(b.Status)
+	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	_, _, err = client.Commits.SetCommitStatus(id, build.Commit, &gitlab.SetCommitStatusOptions{
+		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
+		State:       getStatus(build.Status),
+		Description: gitlab.String(getDesc(build.Status)),
+		TargetURL:   &link,
+		PipelineID:  gitlab.Int(int(proc.ID)),
+		Name:        nil,
+		Context:     gitlab.String(statusContext),
+	})
 
-	oldClient.SetStatus(
-		fmt.Sprintf("%s%%2F%s", repo.Owner, repo.Name),
-		b.Commit,
-		status,
-		desc,
-		strings.Replace(b.Ref, "refs/heads/", "", -1),
-		link,
-	)
-
-	// Gitlab statuses it's a new feature, just ignore error
-	// if gitlab version not support this
-	return nil
+	return err
 }
 
 // Netrc returns a netrc file capable of authenticating Gitlab requests and
@@ -638,14 +636,6 @@ func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 }
 
 const (
-	StatusPending  = "pending"
-	StatusRunning  = "running"
-	StatusSuccess  = "success"
-	StatusFailure  = "failed"
-	StatusCanceled = "canceled"
-)
-
-const (
 	DescPending  = "the build is pending"
 	DescRunning  = "the buils is running"
 	DescSuccess  = "the build was successful"
@@ -655,22 +645,21 @@ const (
 	DescDeclined = "the build was rejected"
 )
 
-// getStatus is a helper functin that converts a Drone
-// status to a GitHub status.
-func getStatus(status string) string {
+// getStatus is a helper that converts a Woodpecker status to a Gitlab status.
+func getStatus(status string) gitlab.BuildStateValue {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
-		return StatusPending
+		return gitlab.Pending
 	case model.StatusRunning:
-		return StatusRunning
+		return gitlab.Running
 	case model.StatusSuccess:
-		return StatusSuccess
+		return gitlab.Success
 	case model.StatusFailure, model.StatusError:
-		return StatusFailure
+		return gitlab.Failed
 	case model.StatusKilled:
-		return StatusCanceled
+		return gitlab.Canceled
 	default:
-		return StatusFailure
+		return gitlab.Failed
 	}
 }
 
