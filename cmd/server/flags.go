@@ -69,12 +69,6 @@ var flags = []cli.Flag{
 		Usage:  "serve the website by using a proxy (used for development)",
 		Hidden: true,
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_WWW_PROXY",
-		Name:   "www-proxy",
-		Usage:  "serve the website with a proxy",
-		Hidden: true,
-	},
 	cli.StringSliceFlag{
 		EnvVar: "DRONE_ADMIN,WOODPECKER_ADMIN",
 		Name:   "admin",
