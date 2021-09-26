@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
 )

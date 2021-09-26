@@ -26,11 +26,3 @@ func TestWithSync(t *testing.T) {
 		t.Errorf("Want sync duration %v, got %v", want, got)
 	}
 }
-
-func TestWithDocs(t *testing.T) {
-	opts := new(Options)
-	WithDocs("http://docs.drone.io")(opts)
-	if got, want := opts.docs, "http://docs.drone.io"; got != want {
-		t.Errorf("Want documentation url %q, got %q", want, got)
-	}
-}
