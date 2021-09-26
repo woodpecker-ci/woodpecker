@@ -35,7 +35,7 @@ func NewServer(t *testing.T) *httptest.Server {
 
 		switch r.URL.Path {
 		case "/api/v4/projects":
-			if r.URL.Query().Get("archived") == "false" {
+			if r.FormValue("archived") == "false" {
 				w.Write(notArchivedProjectsPayload)
 			} else {
 				w.Write(allProjectsPayload)

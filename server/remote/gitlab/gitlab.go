@@ -188,7 +188,7 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 			)
 		}
 
-		if len(batch) > perPage {
+		if len(batch) < perPage {
 			break
 		}
 	}
@@ -275,7 +275,7 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 			repos = append(repos, repo)
 		}
 
-		if len(batch) > perPage {
+		if len(batch) < perPage {
 			break
 		}
 	}
@@ -357,7 +357,7 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 			})
 		}
 
-		if len(batch) > perPage {
+		if len(batch) < perPage {
 			break
 		}
 	}
