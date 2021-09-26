@@ -21,7 +21,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/model"
@@ -409,38 +408,40 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error {
-	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := getProjectId(g, client, repo.Owner, repo.Name)
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
 	}
-
 	uri, err := url.Parse(link)
 	if err != nil {
 		return err
 	}
+	token := uri.Query().Get("access_token")
+	webUrl := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
-	droneUrl := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
-	droneToken := uri.Query().Get("access_token")
-	ssl_verify := strconv.FormatBool(!g.SkipVerify)
-
-	return client.AddDroneService(id, map[string]string{
-		"token":                   droneToken,
-		"drone_url":               droneUrl,
-		"enable_ssl_verification": ssl_verify,
+	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	// TODO: "WoodpeckerCIService"
+	_, err = client.Services.SetDroneCIService(id, &gitlab.SetDroneCIServiceOptions{
+		Token:                 &token,
+		DroneURL:              &webUrl,
+		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
 	})
+	return err
 }
 
 // Deactivate removes a repository by removing all the post-commit hooks
 // which are equal to link and removing the SSH deploy key.
 func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) error {
-	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := getProjectId(g, client, repo.Owner, repo.Name)
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
 	}
 
-	return client.DeleteDroneService(id)
+	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	// TODO: "WoodpeckerCIService"
+	_, err = client.Services.DeleteDroneCIService(id)
+
+	return err
 }
 
 // Hook parses the post-commit hook from the Request body
