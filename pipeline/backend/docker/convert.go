@@ -6,7 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/api/types/container"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
 

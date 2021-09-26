@@ -12,7 +12,7 @@ require (
 	github.com/dimfeld/httptreemux v5.0.1+incompatible
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 	github.com/docker/distribution v2.7.1+incompatible
-	github.com/docker/docker v20.10.8+incompatible
+	github.com/docker/docker v20.10.8+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.6.3 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/libcompose v0.4.0
@@ -38,6 +38,7 @@ require (
 	github.com/lib/pq v1.5.2
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/moby/moby v20.10.8+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450

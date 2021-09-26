@@ -62,11 +62,7 @@ github.com/docker/docker/api/types/swarm/runtime
 github.com/docker/docker/api/types/time
 github.com/docker/docker/api/types/versions
 github.com/docker/docker/api/types/volume
-github.com/docker/docker/client
 github.com/docker/docker/errdefs
-github.com/docker/docker/pkg/jsonmessage
-github.com/docker/docker/pkg/stdcopy
-github.com/docker/docker/pkg/term
 # github.com/docker/docker-credential-helpers v0.6.3
 ## explicit
 github.com/docker/docker-credential-helpers/client
@@ -175,6 +171,16 @@ github.com/mattn/go-isatty
 github.com/mattn/go-sqlite3
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/moby/moby v20.10.8+incompatible
+## explicit
+github.com/moby/moby/api/types
+github.com/moby/moby/api/types/container
+github.com/moby/moby/api/types/network
+github.com/moby/moby/api/types/volume
+github.com/moby/moby/client
+github.com/moby/moby/pkg/jsonmessage
+github.com/moby/moby/pkg/stdcopy
+github.com/moby/moby/pkg/term
 # github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
 ## explicit
 github.com/moby/term
