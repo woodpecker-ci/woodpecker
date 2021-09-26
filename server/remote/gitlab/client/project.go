@@ -15,43 +15,16 @@
 package client
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"strings"
 )
 
 const (
 	projectsUrl       = "/projects"
-	repoUrlRawFileRef = "/projects/:id/repository/files/:filepath"
 	commitStatusUrl   = "/projects/:id/statuses/:sha"
 )
 
-func (c *Client) RepoRawFileRef(id, ref, filepath string) ([]byte, error) {
-	var fileRef FileRef
-	url, opaque := c.ResourceUrl(
-		repoUrlRawFileRef,
-		QMap{
-			":id":       id,
-			":filepath": filepath,
-		},
-		QMap{
-			"ref": ref,
-		},
-	)
 
-	contents, err := c.Do("GET", url, opaque, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(contents, &fileRef)
-	if err != nil {
-		return nil, err
-	}
-
-	fileRawContent, err := base64.StdEncoding.DecodeString(fileRef.Content)
-	return fileRawContent, err
-}
 
 // SetStatus report ci status of a specific commit
 func (c *Client) SetStatus(id, sha, state, desc, ref, link string) error {

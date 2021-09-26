@@ -16,6 +16,7 @@ package gitlab
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -233,7 +234,8 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 	if err != nil {
 		return nil, err
 	}
-	repo_, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
+	id := fmt.Sprintf("%s/%s", owner, name) // TODO: support nested repos
+	repo_, _, err := client.Projects.GetProject(id, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +289,8 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 	if err != nil {
 		return nil, err
 	}
-	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
+	id := fmt.Sprintf("%s/%s", owner, name) // TODO: support nested repos
+	repo, _, err := client.Projects.GetProject(id, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -306,18 +309,19 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches a file from the remote repository and returns in string format.
-func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f string) ([]byte, error) {
-	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := getProjectId(g, client, repo.Owner, repo.Name)
+// TODO: either use raw api or to return metadata - best would be io.Reader
+func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, fileName string) ([]byte, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	file, _, err := client.RepositoryFiles.GetFile(id, fileName, &gitlab.GetFileOptions{Ref: &build.Commit})
 	if err != nil {
 		return nil, err
 	}
 
-	out, err := client.RepoRawFileRef(id, build.Commit, f)
-	if err != nil {
-		return nil, err
-	}
-	return out, err
+	return base64.StdEncoding.DecodeString(file.Content)
 }
 
 func (g *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
