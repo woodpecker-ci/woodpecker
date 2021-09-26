@@ -16,7 +16,6 @@ package gitlab
 
 import (
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -34,7 +33,10 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-const DefaultScope = "api"
+const (
+	defaultScope = "api"
+	perPage      = 100
+)
 
 // Opts defines configuration options.
 type Opts struct {
@@ -90,7 +92,7 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 	var config = &oauth2.Config{
 		ClientId:     g.ClientID,
 		ClientSecret: g.ClientSecret,
-		Scope:        DefaultScope,
+		Scope:        defaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
 		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
@@ -166,8 +168,7 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 		return nil, err
 	}
 
-	var perPage = 100
-	var teams []*model.Team
+	teams := make([]*model.Team, 0, perPage)
 
 	for i := 1; true; i++ {
 		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
@@ -250,8 +251,7 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 		return nil, err
 	}
 
-	var perPage = 100
-	var repos []*model.Repo
+	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions:    gitlab.ListOptions{PerPage: perPage},
 		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
@@ -316,16 +316,53 @@ func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, fi
 		return nil, err
 	}
 	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
-	file, _, err := client.RepositoryFiles.GetFile(id, fileName, &gitlab.GetFileOptions{Ref: &build.Commit})
+	file, _, err := client.RepositoryFiles.GetRawFile(id, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit})
+	return file, err
+}
+
+// Dir fetches a folder from the remote repository
+func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, path string) ([]*remote.FileMeta, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	return base64.StdEncoding.DecodeString(file.Content)
-}
+	files := make([]*remote.FileMeta, 0, perPage)
+	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	opts := &gitlab.ListTreeOptions{
+		ListOptions: gitlab.ListOptions{PerPage: perPage},
+		Path:        &path,
+		Ref:         &build.Commit,
+		Recursive:   gitlab.Bool(false),
+	}
 
-func (g *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	for i := 1; true; i++ {
+		opts.Page = 1
+		batch, _, err := client.Repositories.ListTree(id, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range batch {
+			if batch[i].Type != "blob" { // no file
+				continue
+			}
+			data, err := g.File(user, repo, build, batch[i].Path)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, &remote.FileMeta{
+				Name: batch[i].Path,
+				Data: data,
+			})
+		}
+
+		if len(batch) > perPage {
+			break
+		}
+	}
+
+	return nil, nil
 }
 
 // NOTE Currently gitlab doesn't support status for commits and events,

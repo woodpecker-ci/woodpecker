@@ -20,11 +20,9 @@ import (
 )
 
 const (
-	projectsUrl       = "/projects"
-	commitStatusUrl   = "/projects/:id/statuses/:sha"
+	projectsUrl     = "/projects"
+	commitStatusUrl = "/projects/:id/statuses/:sha"
 )
-
-
 
 // SetStatus report ci status of a specific commit
 func (c *Client) SetStatus(id, sha, state, desc, ref, link string) error {
