@@ -120,7 +120,7 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
 
-	client, err := NewClient(g.URL, token_.AccessToken, g.SkipVerify)
+	client, err := newClient(g.URL, token_.AccessToken, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 
 // Auth authenticates the session and returns the remote user login for the given token
 func (g *Gitlab) Auth(token, _ string) (string, error) {
-	client, err := NewClient(g.URL, token, g.SkipVerify)
+	client, err := newClient(g.URL, token, g.SkipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -160,7 +160,7 @@ func (g *Gitlab) Auth(token, _ string) (string, error) {
 
 // Teams fetches a list of team memberships from the remote system.
 func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
-	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -194,17 +194,11 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 	return teams, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
-	if err != nil {
-		return nil, err
-	}
-	repo_, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
-	if err != nil {
-		return nil, err
-	}
-
+func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
+	parts := strings.Split(repo_.PathWithNamespace, "/")
+	// TODO: save repo id (support nested repos)
+	var owner = parts[0]
+	var name = parts[1]
 	repo := &model.Repo{
 		Owner:      owner,
 		Name:       name,
@@ -230,44 +224,58 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 		repo.IsPrivate = !repo_.Public
 	}
 
-	return repo, err
+	return repo, nil
+}
+
+// Repo fetches the named repository from the remote system.
+func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+	repo_, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.convertGitlabRepo(repo_)
 }
 
 // Repos fetches a list of repos from the remote system.
 func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
-	client := oldclient.New(g.URL, "/api/v4", u.Token, g.SkipVerify)
-
-	var repos []*model.Repo
-
-	all, err := client.AllProjects(g.HideArchives)
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
-		return repos, err
+		return nil, err
 	}
 
-	for _, repo_ := range all {
-		var parts = strings.Split(repo_.PathWithNamespace, "/")
-		var owner = parts[0]
-		var name = parts[1]
+	var perPage = 100
+	var repos []*model.Repo
+	opts := &gitlab.ListProjectsOptions{
+		ListOptions:    gitlab.ListOptions{PerPage: perPage},
+		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
+	}
+	if g.HideArchives {
+		opts.Archived = gitlab.Bool(false)
+	}
 
-		repo := &model.Repo{}
-		repo.Owner = owner
-		repo.Name = name
-		repo.FullName = repo_.PathWithNamespace
-		repo.Link = repo_.Url
-		repo.Clone = repo_.HttpRepoUrl
-		repo.Branch = "master"
-
-		if repo_.DefaultBranch != "" {
-			repo.Branch = repo_.DefaultBranch
+	for i := 1; true; i++ {
+		opts.Page = i
+		batch, _, err := client.Projects.ListProjects(opts)
+		if err != nil {
+			return nil, err
 		}
 
-		if g.PrivateMode {
-			repo.IsPrivate = true
-		} else {
-			repo.IsPrivate = !repo_.Public
+		for i := range batch {
+			repo, err := g.convertGitlabRepo(batch[i])
+			if err != nil {
+				return nil, err
+			}
+			repos = append(repos, repo)
 		}
 
-		repos = append(repos, repo)
+		if len(batch) > perPage {
+			break
+		}
 	}
 
 	return repos, err
@@ -275,7 +283,7 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 
 // Perm fetches the named repository from the remote system.
 func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client, err := NewClient(g.URL, u.Token, g.SkipVerify)
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -289,18 +297,18 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 		return &model.Perm{Push: true, Pull: true, Admin: true}, nil
 	}
 
-	// check permission for current user
-	m := &model.Perm{}
-	m.Admin = IsAdmin(repo)
-	m.Pull = IsRead(repo)
-	m.Push = IsWrite(repo)
-	return m, nil
+	// return permission for current user
+	return &model.Perm{
+		Pull:  isRead(repo),
+		Push:  isWrite(repo),
+		Admin: isAdmin(repo),
+	}, nil
 }
 
 // File fetches a file from the remote repository and returns in string format.
 func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f string) ([]byte, error) {
 	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+	id, err := getProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -361,7 +369,7 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error {
 	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+	id, err := getProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -386,7 +394,7 @@ func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error
 // which are equal to link and removing the SSH deploy key.
 func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) error {
 	client := oldclient.New(g.URL, "/api/v4", user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+	id, err := getProjectId(g, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -436,7 +444,7 @@ func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo
 
 	if target.PathWithNamespace != "" {
 		var err error
-		if repo.Owner, repo.Name, err = ExtractFromPath(target.PathWithNamespace); err != nil {
+		if repo.Owner, repo.Name, err = extractFromPath(target.PathWithNamespace); err != nil {
 			return nil, nil, err
 		}
 		repo.FullName = target.PathWithNamespace
@@ -489,7 +497,7 @@ func mergeRequest(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo
 	build.Email = author.Email
 
 	if len(build.Email) != 0 {
-		build.Avatar = GetUserAvatar(build.Email)
+		build.Avatar = getUserAvatar(build.Email)
 	}
 
 	build.Title = obj.Title
@@ -505,7 +513,7 @@ func push(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model
 	// see https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/web_hooks/web_hooks.md#web-hooks
 	if project := parsed.Project; project != nil {
 		var err error
-		if repo.Owner, repo.Name, err = ExtractFromPath(project.PathWithNamespace); err != nil {
+		if repo.Owner, repo.Name, err = extractFromPath(project.PathWithNamespace); err != nil {
 			return nil, nil, err
 		}
 
@@ -561,7 +569,7 @@ func push(parsed *oldclient.HookPayload, req *http.Request) (*model.Repo, *model
 		build.Email = head.Author.Email
 		build.Author = parsed.UserName
 		if len(build.Email) != 0 {
-			build.Avatar = GetUserAvatar(build.Email)
+			build.Avatar = getUserAvatar(build.Email)
 		}
 	case head.Author == nil:
 		build.Author = parsed.UserName

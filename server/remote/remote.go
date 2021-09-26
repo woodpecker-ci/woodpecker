@@ -24,6 +24,9 @@ import (
 	"golang.org/x/net/context"
 )
 
+// TODO: use pagination
+// TODO: use context
+
 type Remote interface {
 	// Login authenticates the session and returns the
 	// remote user details.

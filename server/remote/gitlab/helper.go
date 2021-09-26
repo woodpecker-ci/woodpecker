@@ -32,9 +32,9 @@ const (
 	gravatarBase = "https://www.gravatar.com/avatar"
 )
 
-// NewClient is a helper function that returns a new GitHub
+// newClient is a helper function that returns a new GitHub
 // client using the provided OAuth token.
-func NewClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
+func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
 	return gitlab.NewClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
@@ -43,9 +43,9 @@ func NewClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 	}))
 }
 
-// IsRead is a helper function that returns true if the
+// isRead is a helper function that returns true if the
 // user has Read-only access to the repository.
-func IsRead(proj *gitlab.Project) bool {
+func isRead(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -61,9 +61,9 @@ func IsRead(proj *gitlab.Project) bool {
 	}
 }
 
-// IsWrite is a helper function that returns true if the
+// isWrite is a helper function that returns true if the
 // user has Read-Write access to the repository.
-func IsWrite(proj *gitlab.Project) bool {
+func isWrite(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -77,9 +77,9 @@ func IsWrite(proj *gitlab.Project) bool {
 	}
 }
 
-// IsAdmin is a helper function that returns true if the
+// isAdmin is a helper function that returns true if the
 // user has Admin access to the repository.
-func IsAdmin(proj *gitlab.Project) bool {
+func isAdmin(proj *gitlab.Project) bool {
 	var user = proj.Permissions.ProjectAccess
 	var group = proj.Permissions.GroupAccess
 
@@ -93,7 +93,7 @@ func IsAdmin(proj *gitlab.Project) bool {
 	}
 }
 
-func GetUserAvatar(email string) string {
+func getUserAvatar(email string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(email))
 
@@ -105,7 +105,7 @@ func GetUserAvatar(email string) string {
 	)
 }
 
-func ExtractFromPath(str string) (string, string, error) {
+func extractFromPath(str string) (string, string, error) {
 	s := strings.Split(str, "/")
 	if len(s) < 2 {
 		return "", "", fmt.Errorf("Minimum match not found")
@@ -113,7 +113,7 @@ func ExtractFromPath(str string) (string, string, error) {
 	return s[0], s[1], nil
 }
 
-func GetProjectId(r *Gitlab, c *client.Client, owner, name string) (projectId string, err error) {
+func getProjectId(r *Gitlab, c *client.Client, owner, name string) (projectId string, err error) {
 	if r.Search {
 		_projectId, err := c.SearchProjectId(owner, name)
 		if err != nil || _projectId == 0 {
