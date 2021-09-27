@@ -187,15 +187,32 @@ func (c *Gitea) Teams(u *model.User) ([]*model.Team, error) {
 		return nil, err
 	}
 
-	orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
-	if err != nil {
-		return nil, err
+	teams := make([]*model.Team, 0, perPage)
+
+	page := 1
+	for {
+		orgs, _, err := client.ListMyOrgs(
+			gitea.ListOrgsOptions{
+				ListOptions: gitea.ListOptions{
+					Page:     page,
+					PageSize: perPage,
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, org := range orgs {
+			teams = append(teams, toTeam(org, c.URL))
+		}
+
+		if len(orgs) < perPage {
+			break
+		}
+		page++
 	}
 
-	var teams []*model.Team
-	for _, org := range orgs {
-		teams = append(teams, toTeam(org, c.URL))
-	}
 	return teams, nil
 }
 
@@ -238,31 +255,23 @@ func (c *Gitea) Repos(u *model.User) ([]*model.Repo, error) {
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage, // Gitea SDK limit per page.
+					PageSize: perPage,
 				},
 			},
 		)
-
-		// Gitea SDK does not return error when asking for
-		// non existing repos page (empty list is returned)
-		// so this should be safe.
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
 
 		for _, repo := range all {
 			repos = append(repos, toRepo(repo, c.PrivateMode))
 		}
 
-		// Check if no more repos are available; we don't test len(all) < 50
-		// because of Gitea SDK bug https://gitea.com/gitea/go-sdk/issues/507.
-		if len(all) == 0 {
-			// Empty page returned - finish loop.
+		if len(all) < perPage {
 			break
-		} else {
-			// Last page was not empty so more repos may be available - continue loop.
-			page = page + 1
 		}
+		// Last page was not empty so more repos may be available - continue loop.
+		page++
 	}
 
 	return repos, nil
