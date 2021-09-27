@@ -1,0 +1,12 @@
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+
+services:
+  database:
+    image: mysql
+  cache:
+    image: redis
