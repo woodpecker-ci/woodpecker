@@ -289,15 +289,6 @@ var (
 		Name:  "not_found_project",
 	}
 
-	fakeRepos = []*model.RepoLite{
-		&model.RepoLite{
-			Owner:    "demo1",
-			Name:     "test1",
-			FullName: "demo1/test1",
-			Avatar:   "/static/project_icon/scenery-5.png",
-		},
-	}
-
 	fakeBuild = &model.Build{
 		Commit: "4504a072cc",
 	}

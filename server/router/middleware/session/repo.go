@@ -38,18 +38,6 @@ func Repo(c *gin.Context) *model.Repo {
 	return r
 }
 
-func Repos(c *gin.Context) []*model.RepoLite {
-	v, ok := c.Get("repos")
-	if !ok {
-		return nil
-	}
-	r, ok := v.([]*model.RepoLite)
-	if !ok {
-		return nil
-	}
-	return r
-}
-
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -93,7 +81,6 @@ func Perm(c *gin.Context) *model.Perm {
 }
 
 func SetPerm() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 		user := User(c)
 		repo := Repo(c)
