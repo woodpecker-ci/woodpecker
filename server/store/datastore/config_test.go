@@ -17,7 +17,7 @@ package datastore
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestConfig(t *testing.T) {

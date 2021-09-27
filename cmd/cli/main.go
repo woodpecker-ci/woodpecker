@@ -8,6 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
 	"github.com/woodpecker-ci/woodpecker/cli/info"
+	"github.com/woodpecker-ci/woodpecker/cli/lint"
 	"github.com/woodpecker-ci/woodpecker/cli/log"
 	"github.com/woodpecker-ci/woodpecker/cli/registry"
 	"github.com/woodpecker-ci/woodpecker/cli/repo"
@@ -66,6 +67,7 @@ func main() {
 		secret.Command,
 		repo.Command,
 		user.Command,
+		lint.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {

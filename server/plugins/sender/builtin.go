@@ -1,7 +1,7 @@
 package sender
 
 import (
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type builtin struct {
