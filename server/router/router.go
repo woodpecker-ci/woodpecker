@@ -34,6 +34,12 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 	e := gin.New()
 	e.Use(gin.Recovery())
 
+	// TODO: need better logging
+	// e.Use(func(c *gin.Context) {
+	//	fmt.Printf("[%s] %s\n", c.Request.Method, c.Request.URL.String())
+	//	c.Next()
+	// })
+
 	e.Use(header.NoCache)
 	e.Use(header.Options)
 	e.Use(header.Secure)
