@@ -201,7 +201,7 @@ func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 		repo.IsPrivate = false
 	}
 
-	build.Event = model.EventPush
+	build.Event = model.EventTag
 	build.Commit = hook.After
 	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	build.Ref = hook.Ref

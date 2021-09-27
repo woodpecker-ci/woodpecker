@@ -339,13 +339,18 @@ func (g *Gitlab) Status(user *model.User, repo *model.Repo, build *model.Build, 
 		return err
 	}
 
+	var procID *int
+	if proc != nil {
+		*procID = int(proc.ID)
+	}
+
 	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
 	_, _, err = client.Commits.SetCommitStatus(id, build.Commit, &gitlab.SetCommitStatusOptions{
 		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
 		TargetURL:   &link,
-		PipelineID:  gitlab.Int(int(proc.ID)),
+		PipelineID:  procID,
 		Name:        nil,
 		Context:     gitlab.String(statusContext),
 	})
