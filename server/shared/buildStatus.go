@@ -17,7 +17,7 @@ package shared
 import (
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type UpdateBuildStore interface {
