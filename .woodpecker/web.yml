@@ -38,6 +38,15 @@ pipeline:
     when:
       path: "web/**"
 
+  test:
+    group: test
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn test
+    when:
+      path: "web/**"
+
   build:
     image: node:14-alpine
     commands:

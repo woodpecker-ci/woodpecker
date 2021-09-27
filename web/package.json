@@ -13,7 +13,8 @@
     "lint": "eslint --max-warnings 0 --ext .js,.ts,.vue,.json .",
     "formatcheck": "prettier -c .",
     "format:fix": "prettier --write .",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "test": "echo 'No tests configured' && exit 0"
   },
   "dependencies": {
     "@kyvg/vue3-notification": "2.3.4",

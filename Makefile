@@ -49,6 +49,9 @@ test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
 
 test-frontend: frontend-dependencies
+	(cd web/; yarn run lint)
+	(cd web/; yarn run formatcheck)
+	(cd web/; yarn run typecheck)
 	(cd web/; yarn run test)
 
 test-lib:
@@ -59,7 +62,7 @@ test: test-lib test-agent test-server
 build-agent:
 	$(DOCKER_RUN) go build -o build/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
 
-build-server:
+build-server: build-frontend
 	$(DOCKER_RUN) go build -o build/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-frontend: frontend-dependencies
