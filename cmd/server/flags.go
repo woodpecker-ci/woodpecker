@@ -89,6 +89,12 @@ var flags = []cli.Flag{
 		Name:   "open",
 		Usage:  "enable open user registration",
 	},
+	cli.StringFlag{
+		EnvVar: "DRONE_DOCS,WOODPECKER_DOCS",
+		Name:   "docs",
+		Usage:  "link to user documentation",
+		Value:  "https://woodpecker-ci.github.io/",
+	},
 	cli.DurationFlag{
 		EnvVar: "DRONE_SESSION_EXPIRES,WOODPECKER_SESSION_EXPIRES",
 		Name:   "session-expires",

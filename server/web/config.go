@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
@@ -49,7 +50,7 @@ func WebConfig(c *gin.Context) {
 		"user":    user,
 		"csrf":    csrf,
 		"syncing": syncing,
-		"docs":    "https://woodpecker-ci.github.io/",
+		"docs":    server.Config.Server.Docs,
 		"version": version.String(),
 	}
 
