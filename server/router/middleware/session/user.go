@@ -36,18 +36,6 @@ func User(c *gin.Context) *model.User {
 	return u
 }
 
-func Token(c *gin.Context) *token.Token {
-	v, ok := c.Get("token")
-	if !ok {
-		return nil
-	}
-	u, ok := v.(*token.Token)
-	if !ok {
-		return nil
-	}
-	return u
-}
-
 func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
