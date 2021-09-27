@@ -344,7 +344,7 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 		}
 	}
 
-	return nil, nil
+	return files, nil
 }
 
 // Status sends the commit status back to gitlab.
@@ -352,11 +352,6 @@ func (g *Gitlab) Status(user *model.User, repo *model.Repo, build *model.Build, 
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
-	}
-
-	var procID *int
-	if proc != nil {
-		*procID = int(proc.ID)
 	}
 
 	repo_, err := g.getProject(client, repo.Owner, repo.Name)
@@ -369,7 +364,6 @@ func (g *Gitlab) Status(user *model.User, repo *model.Repo, build *model.Build, 
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
 		TargetURL:   &link,
-		PipelineID:  procID,
 		Name:        nil,
 		Context:     gitlab.String(statusContext),
 	})
