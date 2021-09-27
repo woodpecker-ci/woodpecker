@@ -95,23 +95,12 @@ This is the reference list of all environment variables available to your build 
 
 If you want specific environment variables to be available in all of your builds use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server.
 
-```.env
-WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
-```
-
 ```.diff
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_ORGS=dolores,dogpatch
-      - WOODPECKER_ADMIN=johnsmith,janedoe
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - [...]
 +     - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
