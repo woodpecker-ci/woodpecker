@@ -196,14 +196,24 @@ func (g *Gitlab) Teams(user *model.User) ([]*model.Team, error) {
 	return teams, nil
 }
 
+// getProject fetches the named repository from the remote system.
+func (g *Gitlab) getProject(client *gitlab.Client, owner, name string) (*gitlab.Project, error) {
+	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return repo, nil
+}
+
 // Repo fetches the named repository from the remote system.
 func (g *Gitlab) Repo(user *model.User, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-	id := fmt.Sprintf("%s/%s", owner, name) // TODO: support nested repos
-	repo_, _, err := client.Projects.GetProject(id, nil)
+
+	repo_, err := g.getProject(client, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -256,8 +266,7 @@ func (g *Gitlab) Perm(user *model.User, owner, name string) (*model.Perm, error)
 	if err != nil {
 		return nil, err
 	}
-	id := fmt.Sprintf("%s/%s", owner, name) // TODO: support nested repos
-	repo, _, err := client.Projects.GetProject(id, nil)
+	repo, err := g.getProject(client, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -282,8 +291,11 @@ func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, fi
 	if err != nil {
 		return nil, err
 	}
-	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
-	file, _, err := client.RepositoryFiles.GetRawFile(id, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit})
+	repo_, err := g.getProject(client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+	file, _, err := client.RepositoryFiles.GetRawFile(repo_.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit})
 	return file, err
 }
 
@@ -295,7 +307,10 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 	}
 
 	files := make([]*remote.FileMeta, 0, perPage)
-	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	repo_, err := g.getProject(client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: perPage},
 		Path:        &path,
@@ -305,7 +320,7 @@ func (g *Gitlab) Dir(user *model.User, repo *model.Repo, build *model.Build, pat
 
 	for i := 1; true; i++ {
 		opts.Page = 1
-		batch, _, err := client.Repositories.ListTree(id, opts)
+		batch, _, err := client.Repositories.ListTree(repo_.ID, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -344,8 +359,12 @@ func (g *Gitlab) Status(user *model.User, repo *model.Repo, build *model.Build, 
 		*procID = int(proc.ID)
 	}
 
-	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
-	_, _, err = client.Commits.SetCommitStatus(id, build.Commit, &gitlab.SetCommitStatusOptions{
+	repo_, err := g.getProject(client, repo.Owner, repo.Name)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = client.Commits.SetCommitStatus(repo_.ID, build.Commit, &gitlab.SetCommitStatusOptions{
 		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
@@ -390,9 +409,12 @@ func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error
 	token := uri.Query().Get("access_token")
 	webUrl := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
-	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	repo_, err := g.getProject(client, repo.Owner, repo.Name)
+	if err != nil {
+		return err
+	}
 	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.SetDroneCIService(id, &gitlab.SetDroneCIServiceOptions{
+	_, err = client.Services.SetDroneCIService(repo_.ID, &gitlab.SetDroneCIServiceOptions{
 		Token:                 &token,
 		DroneURL:              &webUrl,
 		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
@@ -408,9 +430,12 @@ func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) err
 		return err
 	}
 
-	id := fmt.Sprintf("%s/%s", repo.Owner, repo.Name) // TODO: support nested repos
+	repo_, err := g.getProject(client, repo.Owner, repo.Name)
+	if err != nil {
+		return err
+	}
 	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.DeleteDroneCIService(id)
+	_, err = client.Services.DeleteDroneCIService(repo_.ID)
 
 	return err
 }
