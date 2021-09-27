@@ -73,7 +73,7 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
 
-// helper function to setup the remote from the CLI arguments.
+// SetupRemote helper function to setup the remote from the CLI arguments.
 func SetupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
 	case c.Bool("github"):
@@ -116,17 +116,7 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
-	if !c.IsSet("gitea-client") {
-		return gitea.New(gitea.Opts{
-			URL:         c.String("gitea-server"),
-			Context:     c.String("gitea-context"),
-			Username:    c.String("gitea-git-username"),
-			Password:    c.String("gitea-git-password"),
-			PrivateMode: c.Bool("gitea-private-mode"),
-			SkipVerify:  c.Bool("gitea-skip-verify"),
-		})
-	}
-	return gitea.NewOauth(gitea.Opts{
+	return gitea.New(gitea.Opts{
 		URL:         c.String("gitea-server"),
 		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
