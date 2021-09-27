@@ -17,7 +17,7 @@ package swagger
 import (
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // swagger:route GET /users/{login} user getUser
