@@ -32,7 +32,7 @@ var (
 )
 
 // ServiceHookPushBody is payload of ServiceHook: Push
-var ServiceHookPushBody = `{
+var ServiceHookPushBody = []byte(`{
   "object_kind": "push",
   "event_name": "push",
   "before": "ffe8eb4f91d1fe6bc49f1e610e50e4b5767f0104",
@@ -51,13 +51,13 @@ var ServiceHookPushBody = `{
     "name": "Woodpecker",
     "description": "",
     "web_url": "http://10.40.8.5:3200/test/woodpecker",
-    "avatar_url": null,
+    "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
     "namespace": "te st",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
-    "default_branch": "master",
+    "default_branch": "develop",
     "ci_config_path": null,
     "homepage": "http://10.40.8.5:3200/test/woodpecker",
     "url": "git@10.40.8.5:test/woodpecker.git",
@@ -98,10 +98,10 @@ var ServiceHookPushBody = `{
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "visibility_level": 20
   }
-}`
+}`)
 
 // ServiceHookTagPushBody is payload of ServiceHook: TagPush
-var ServiceHookTagPushBody = `{
+var ServiceHookTagPushBody = []byte(`{
   "object_kind": "tag_push",
   "event_name": "tag_push",
   "before": "0000000000000000000000000000000000000000",
@@ -120,13 +120,13 @@ var ServiceHookTagPushBody = `{
     "name": "Woodpecker",
     "description": "",
     "web_url": "http://10.40.8.5:3200/test/woodpecker",
-    "avatar_url": null,
+    "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
     "namespace": "te st",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
-    "default_branch": "master",
+    "default_branch": "develop",
     "ci_config_path": null,
     "homepage": "http://10.40.8.5:3200/test/woodpecker",
     "url": "git@10.40.8.5:test/woodpecker.git",
@@ -167,10 +167,10 @@ var ServiceHookTagPushBody = `{
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "visibility_level": 20
   }
-}`
+}`)
 
 // ServiceHookMergeRequestBody is payload of ServiceHook: MergeRequest
-var ServiceHookMergeRequestBody = `{
+var ServiceHookMergeRequestBody = []byte(`{
   "object_kind": "tag_push",
   "event_name": "tag_push",
   "before": "0000000000000000000000000000000000000000",
@@ -189,13 +189,13 @@ var ServiceHookMergeRequestBody = `{
     "name": "Woodpecker",
     "description": "",
     "web_url": "http://10.40.8.5:3200/test/woodpecker",
-    "avatar_url": null,
+    "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
     "namespace": "te st",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
-    "default_branch": "master",
+    "default_branch": "develop",
     "ci_config_path": null,
     "homepage": "http://10.40.8.5:3200/test/woodpecker",
     "url": "git@10.40.8.5:test/woodpecker.git",
@@ -236,4 +236,4 @@ var ServiceHookMergeRequestBody = `{
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "visibility_level": 20
   }
-}`
+}`)

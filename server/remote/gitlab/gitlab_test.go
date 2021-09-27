@@ -26,7 +26,6 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
-	"github.com/xanzy/go-gitlab"
 )
 
 const eventTypeHeader = "X-Gitlab-Event"
@@ -153,54 +152,38 @@ func Test_Gitlab(t *testing.T) {
 			})
 		})
 
-		// Test login method
-		// g.Describe("Login", func() {
-		// 	g.It("Should return user", func() {
-		// 		user, err := client.Login("valid_token", "")
-
-		// 		g.Assert(err == nil).IsTrue()
-		// 		g.Assert(user == nil).IsFalse()
-		// 	})
-
-		// 	g.It("Should return error, when token is invalid", func() {
-		// 		_, err := client.Login("invalid_token", "")
-
-		// 		g.Assert(err != nil).IsTrue()
-		// 	})
-		// })
-
 		// Test hook method
 		g.Describe("Hook", func() {
 			g.Describe("Push hook", func() {
 				g.It("Should parse actual push hoook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.PushHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.ServiceHookPushBody),
 					)
-					req.Header.Set(eventTypeHeader, string(gitlab.EventTypePush))
+					req.Header = testdata.ServiceHookHeaders
 
 					hookRepo, build, err := client.Hook(req)
 					assert.NoError(t, err)
 					assert.NotNil(t, hookRepo)
 					assert.NotNil(t, build)
-					assert.Equal(t, "mike", hookRepo.Owner)
-					assert.Equal(t, "diaspora", hookRepo.Name)
+					assert.Equal(t, build.Event, model.EventPush)
+					assert.Equal(t, "test", hookRepo.Owner)
+					assert.Equal(t, "woodpecker", hookRepo.Name)
 					assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 					assert.Equal(t, "develop", hookRepo.Branch)
 					assert.Equal(t, "refs/heads/master", build.Ref)
-
 				})
 			})
 
 			g.Describe("Tag push hook", func() {
 				g.It("Should parse tag push hook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.TagHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.ServiceHookTagPushBody),
 					)
-					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeTagPush))
+					req.Header = testdata.ServiceHookHeaders
 
 					hookRepo, build, err := client.Hook(req)
 
@@ -217,11 +200,10 @@ func Test_Gitlab(t *testing.T) {
 			g.Describe("Merge request hook", func() {
 				g.It("Should parse merge request hook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.MergeRequestHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.ServiceHookMergeRequestBody),
 					)
-					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeMergeRequest))
 
 					hookRepo, build, err := client.Hook(req)
 
@@ -230,23 +212,6 @@ func Test_Gitlab(t *testing.T) {
 					g.Assert(hookRepo.Branch).Equal("develop")
 					g.Assert(hookRepo.Owner).Equal("awesome_space")
 					g.Assert(hookRepo.Name).Equal("awesome_project")
-
-					g.Assert(build.Title).Equal("MS-Viewport")
-				})
-
-				g.It("Should parse legacy merge request hook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyMergeRequestHook),
-					)
-					req.Header.Set(eventTypeHeader, string(gitlab.EventTypeMergeRequest))
-
-					hookRepo, build, err := client.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(hookRepo.Owner).Equal("diaspora")
-					g.Assert(hookRepo.Name).Equal("diaspora-client")
 
 					g.Assert(build.Title).Equal("MS-Viewport")
 				})
