@@ -243,3 +243,20 @@ func expandAvatar(repo, rawurl string) string {
 
 	return aurl.String()
 }
+
+// helper function to return matching hooks.
+func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
+	link, err := url.Parse(rawurl)
+	if err != nil {
+		return nil
+	}
+	for _, hook := range hooks {
+		if val, ok := hook.Config["url"]; ok {
+			hookurl, err := url.Parse(val)
+			if err == nil && hookurl.Host == link.Host {
+				return hook
+			}
+		}
+	}
+	return nil
+}
