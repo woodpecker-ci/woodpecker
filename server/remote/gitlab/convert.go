@@ -34,7 +34,7 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 	repo := &model.Repo{
 		Owner:      owner,
 		Name:       name,
-		FullName:   repo_.NameWithNamespace,
+		FullName:   repo_.PathWithNamespace,
 		Avatar:     repo_.AvatarURL,
 		Link:       repo_.WebURL,
 		Clone:      repo_.HTTPURLToRepo,
