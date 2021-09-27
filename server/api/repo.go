@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -162,6 +164,72 @@ func ChownRepo(c *gin.Context) {
 
 func GetRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
+}
+
+func GetRepoPermissions(c *gin.Context) {
+	var (
+		owner = c.Param("owner")
+		name  = c.Param("name")
+		user  = session.User(c)
+		perm  = new(model.Perm)
+	)
+
+	repo, err := store.GetRepoOwnerName(c, owner, name)
+	if err != nil {
+		log.Debugf("Cannot find repository %s/%s. %s",
+			owner,
+			name,
+			err.Error(),
+		)
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	if user != nil {
+		var err error
+		perm, err = store.FromContext(c).PermFind(user, repo)
+		if err != nil {
+			log.Errorf("Error fetching permission for %s %s. %s",
+				user.Login, repo.FullName, err)
+		}
+		if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
+			perm, err = remote.FromContext(c).Perm(user, repo.Owner, repo.Name)
+			if err == nil {
+				log.Debugf("Synced user permission for %s %s", user.Login, repo.FullName)
+				perm.Repo = repo.FullName
+				perm.UserID = user.ID
+				perm.Synced = time.Now().Unix()
+				store.FromContext(c).PermUpsert(perm)
+			}
+		}
+	}
+
+	if perm == nil {
+		perm = new(model.Perm)
+	}
+
+	if user != nil && user.Admin {
+		perm.Pull = true
+		perm.Push = true
+		perm.Admin = true
+	}
+
+	switch {
+	case repo.Visibility == model.VisibilityPublic:
+		perm.Pull = true
+	case repo.Visibility == model.VisibilityInternal && user != nil:
+		perm.Pull = true
+	}
+
+	if user != nil {
+		log.Debugf("%s granted %+v permission to %s",
+			user.Login, perm, repo.FullName)
+
+	} else {
+		log.Debugf("Guest granted %+v to %s", perm, repo.FullName)
+	}
+
+	c.JSON(http.StatusOK, perm)
 }
 
 func DeleteRepo(c *gin.Context) {

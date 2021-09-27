@@ -63,3 +63,10 @@ export enum RepoVisibility {
 }
 
 export type RepoSettings = Pick<Repo, 'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr'>;
+
+export type RepoPermissions = {
+  pull: boolean;
+  push: boolean;
+  admin: boolean;
+  synced: number;
+};

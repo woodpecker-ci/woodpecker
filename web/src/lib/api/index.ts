@@ -1,5 +1,5 @@
 import ApiClient, { encodeQueryString } from './client';
-import { Build, BuildFeed, BuildLog, BuildProc, Registry, Repo, RepoSettings, Secret } from './types';
+import { Build, BuildFeed, BuildLog, BuildProc, Registry, Repo, RepoPermissions, RepoSettings, Secret } from './types';
 
 type RepoListOptions = {
   all?: boolean;
@@ -13,6 +13,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   getRepo(owner: string, repo: string): Promise<Repo> {
     return this._get(`/api/repos/${owner}/${repo}`) as Promise<Repo>;
+  }
+
+  getRepoPermissions(owner: string, repo: string): Promise<RepoPermissions> {
+    return this._get(`/api/repos/${owner}/${repo}/permissions`) as Promise<RepoPermissions>;
   }
 
   activateRepo(owner: string, repo: string): Promise<unknown> {
