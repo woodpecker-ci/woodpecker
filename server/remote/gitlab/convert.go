@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"github.com/xanzy/go-gitlab"
 )
