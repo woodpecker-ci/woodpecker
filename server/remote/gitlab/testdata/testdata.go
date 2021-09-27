@@ -52,7 +52,7 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/projects/brightbox/puppet":
 			w.Write(project6Paylod)
 			return
-		case "/api/v4/projects/diaspora/diaspora-client/services/drone-ci":
+		case "/api/v4/projects/4/services/drone-ci":
 			switch r.Method {
 			case "PUT":
 				body, _ := io.ReadAll(r.Body)

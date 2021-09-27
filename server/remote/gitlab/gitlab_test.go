@@ -28,8 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const eventTypeHeader = "X-Gitlab-Event"
-
 func load(config string) *Gitlab {
 	url_, err := url.Parse(config)
 	if err != nil {
@@ -165,14 +163,14 @@ func Test_Gitlab(t *testing.T) {
 
 					hookRepo, build, err := client.Hook(req)
 					assert.NoError(t, err)
-					assert.NotNil(t, hookRepo)
-					assert.NotNil(t, build)
-					assert.Equal(t, build.Event, model.EventPush)
-					assert.Equal(t, "test", hookRepo.Owner)
-					assert.Equal(t, "woodpecker", hookRepo.Name)
-					assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-					assert.Equal(t, "develop", hookRepo.Branch)
-					assert.Equal(t, "refs/heads/master", build.Ref)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, build.Event, model.EventPush)
+						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "develop", hookRepo.Branch)
+						assert.Equal(t, "refs/heads/master", build.Ref)
+					}
 				})
 			})
 
@@ -186,14 +184,14 @@ func Test_Gitlab(t *testing.T) {
 					req.Header = testdata.ServiceHookHeaders
 
 					hookRepo, build, err := client.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(hookRepo.Owner).Equal("jsmith")
-					g.Assert(hookRepo.Name).Equal("example")
-					g.Assert(hookRepo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(hookRepo.Branch).Equal("develop")
-					g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
-
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "develop", hookRepo.Branch)
+						assert.Equal(t, "refs/tags/v22", build.Ref)
+					}
 				})
 			})
 
@@ -204,16 +202,17 @@ func Test_Gitlab(t *testing.T) {
 						testdata.ServiceHookURL.String(),
 						bytes.NewReader(testdata.ServiceHookMergeRequestBody),
 					)
+					req.Header = testdata.ServiceHookHeaders
 
 					hookRepo, build, err := client.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(hookRepo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(hookRepo.Branch).Equal("develop")
-					g.Assert(hookRepo.Owner).Equal("awesome_space")
-					g.Assert(hookRepo.Name).Equal("awesome_project")
-
-					g.Assert(build.Title).Equal("MS-Viewport")
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "develop", hookRepo.Branch)
+						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "Update client.go 🎉", build.Title)
+					}
 				})
 			})
 		})
