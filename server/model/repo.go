@@ -19,13 +19,6 @@ import (
 	"strings"
 )
 
-type RepoLite struct {
-	Owner    string `json:"owner"`
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Avatar   string `json:"avatar_url"`
-}
-
 // Repo represents a repository.
 //
 // swagger:model repo

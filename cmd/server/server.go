@@ -54,7 +54,9 @@ import (
 func loop(c *cli.Context) error {
 
 	// debug level if requested by user
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	if c.Bool("debug") {
+		logrus.SetReportCaller(true)
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.WarnLevel)

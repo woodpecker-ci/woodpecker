@@ -24,6 +24,10 @@ import (
 	"golang.org/x/net/context"
 )
 
+// TODO: use pagination
+// TODO: use context
+// TODO: add Driver() who return source forge back
+
 type Remote interface {
 	// Login authenticates the session and returns the
 	// remote user details.
