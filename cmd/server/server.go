@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -91,13 +92,30 @@ func loop(c *cli.Context) error {
 	store_ := setupStore(c)
 	setupEvilGlobals(c, store_, remote_)
 
-	// we are switching from gin to httpservermux|treemux,
-	// so if this code looks strange, that is why.
-	tree := setupTree(c)
+	proxyWebUI := c.String("www-proxy")
+
+	var webUIServe func(w http.ResponseWriter, r *http.Request)
+
+	if proxyWebUI == "" {
+		// we are switching from gin to httpservermux|treemux,
+		webUIServe = setupTree(c).ServeHTTP
+	} else {
+		origin, _ := url.Parse(proxyWebUI)
+
+		director := func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", origin.Host)
+			req.URL.Scheme = origin.Scheme
+			req.URL.Host = origin.Host
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		webUIServe = proxy.ServeHTTP
+	}
 
 	// setup the server and start the listener
 	handler := router.Load(
-		tree,
+		webUIServe,
 		ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),

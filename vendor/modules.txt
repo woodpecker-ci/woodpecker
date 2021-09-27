@@ -65,11 +65,7 @@ github.com/docker/docker/api/types/swarm/runtime
 github.com/docker/docker/api/types/time
 github.com/docker/docker/api/types/versions
 github.com/docker/docker/api/types/volume
-github.com/docker/docker/client
 github.com/docker/docker/errdefs
-github.com/docker/docker/pkg/jsonmessage
-github.com/docker/docker/pkg/stdcopy
-github.com/docker/docker/pkg/term
 # github.com/docker/docker-credential-helpers v0.6.3
 ## explicit
 github.com/docker/docker-credential-helpers/client
@@ -187,6 +183,11 @@ github.com/mholt/acmez
 github.com/mholt/acmez/acme
 # github.com/miekg/dns v1.1.42
 github.com/miekg/dns
+# github.com/moby/moby v20.10.8+incompatible
+## explicit
+github.com/moby/moby/client
+github.com/moby/moby/pkg/jsonmessage
+github.com/moby/moby/pkg/stdcopy
 # github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
 ## explicit
 github.com/moby/term
@@ -268,6 +269,13 @@ github.com/woodpecker-ci/expr/parse
 # github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
 ## explicit
 github.com/woodpecker-ci/togo
+# github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
+github.com/xeipuuv/gojsonpointer
+# github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415
+github.com/xeipuuv/gojsonreference
+# github.com/xeipuuv/gojsonschema v1.2.0
+## explicit
+github.com/xeipuuv/gojsonschema
 # go.uber.org/atomic v1.7.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.6.0
