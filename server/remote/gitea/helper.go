@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // helper function that converts a Gitea repository to a Drone repository.

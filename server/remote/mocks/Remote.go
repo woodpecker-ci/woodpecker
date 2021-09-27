@@ -6,7 +6,7 @@ import (
 	http "net/http"
 
 	mock "github.com/stretchr/testify/mock"
-	model "github.com/woodpecker-ci/woodpecker/model"
+	model "github.com/woodpecker-ci/woodpecker/server/model"
 
 	remote "github.com/woodpecker-ci/woodpecker/server/remote"
 )

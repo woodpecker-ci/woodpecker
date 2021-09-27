@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/gogits/go-gogs-client"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
