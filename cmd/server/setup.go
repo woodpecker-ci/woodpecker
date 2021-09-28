@@ -18,11 +18,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dimfeld/httptreemux"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
@@ -39,9 +36,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-	"golang.org/x/sync/errgroup"
 
+	"github.com/dimfeld/httptreemux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"golang.org/x/sync/errgroup"
 )
 
 func setupStore(c *cli.Context) store.Store {
@@ -74,7 +75,7 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
 
-// helper function to setup the remote from the CLI arguments.
+// SetupRemote helper function to setup the remote from the CLI arguments.
 func SetupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
 	case c.Bool("github"):
@@ -117,17 +118,7 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
-	if !c.IsSet("gitea-client") {
-		return gitea.New(gitea.Opts{
-			URL:         c.String("gitea-server"),
-			Context:     c.String("gitea-context"),
-			Username:    c.String("gitea-git-username"),
-			Password:    c.String("gitea-git-password"),
-			PrivateMode: c.Bool("gitea-private-mode"),
-			SkipVerify:  c.Bool("gitea-skip-verify"),
-		})
-	}
-	return gitea.NewOauth(gitea.Opts{
+	opts := gitea.Opts{
 		URL:         c.String("gitea-server"),
 		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
@@ -136,7 +127,11 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		Secret:      c.String("gitea-secret"),
 		PrivateMode: c.Bool("gitea-private-mode"),
 		SkipVerify:  c.Bool("gitea-skip-verify"),
-	})
+	}
+	if len(opts.URL) == 0 {
+		logrus.Fatalln("WOODPECKER_GITEA_URL must be set")
+	}
+	return gitea.New(opts)
 }
 
 // helper function to setup the Stash remote from the CLI arguments.
@@ -209,7 +204,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 func setupTree(c *cli.Context) *httptreemux.ContextMux {
 	tree := httptreemux.NewContextMux()
 	web.New(
-		web.WithDir(c.String("www")),
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),
 	).Register(tree)

@@ -15,6 +15,7 @@
 package github
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -24,12 +25,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 
+	// TODO upgrade to v39 to pass context down
 	"github.com/google/go-github/github"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
@@ -55,15 +56,15 @@ type Opts struct {
 // New returns a Remote implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
-	remote := &client{
+	r := &client{
 		API:         defaultAPI,
 		URL:         defaultURL,
 		Context:     opts.Context,
@@ -73,18 +74,16 @@ func New(opts Opts) (remote.Remote, error) {
 		PrivateMode: opts.PrivateMode,
 		SkipVerify:  opts.SkipVerify,
 		MergeRef:    opts.MergeRef,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 	}
 	if opts.URL != defaultURL {
-		remote.URL = strings.TrimSuffix(opts.URL, "/")
-		remote.API = remote.URL + "/api/v3/"
+		r.URL = strings.TrimSuffix(opts.URL, "/")
+		r.API = r.URL + "/api/v3/"
 	}
 
-	// Hack to enable oauth2 access in older GHE
-	oauth2.RegisterBrokenAuthHeaderProvider(remote.URL)
-	return remote, nil
+	return r, nil
 }
 
 type client struct {
@@ -103,7 +102,7 @@ type client struct {
 }
 
 // Login authenticates the session and returns the remote user details.
-func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)
 
 	// get the OAuth errors
@@ -125,12 +124,12 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, nil
 	}
 
-	token, err := config.Exchange(c.newContext(), code)
+	token, err := config.Exchange(c.newContext(ctx), code)
 	if err != nil {
 		return nil, err
 	}
 
-	client := c.newClientToken(token.AccessToken)
+	client := c.newClientToken(ctx, token.AccessToken)
 	user, _, err := client.Users.Get("")
 	if err != nil {
 		return nil, err
@@ -154,8 +153,8 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 }
 
 // Auth returns the GitHub user login for the given access token.
-func (c *client) Auth(token, secret string) (string, error) {
-	client := c.newClientToken(token)
+func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
+	client := c.newClientToken(ctx, token)
 	user, _, err := client.Users.Get("")
 	if err != nil {
 		return "", err
@@ -164,8 +163,8 @@ func (c *client) Auth(token, secret string) (string, error) {
 }
 
 // Teams returns a list of all team membership for the GitHub account.
-func (c *client) Teams(u *model.User) ([]*model.Team, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.ListOptions)
 	opts.Page = 1
@@ -183,8 +182,8 @@ func (c *client) Teams(u *model.User) ([]*model.Team, error) {
 }
 
 // Repo returns the named GitHub repository.
-func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+	client := c.newClientToken(ctx, u.Token)
 	repo, _, err := client.Repositories.Get(owner, name)
 	if err != nil {
 		return nil, err
@@ -194,8 +193,8 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
-func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryListOptions)
 	opts.PerPage = 100
@@ -214,8 +213,8 @@ func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 }
 
 // Perm returns the user permissions for the named GitHub repository.
-func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+	client := c.newClientToken(ctx, u.Token)
 	repo, _, err := client.Repositories.Get(owner, name)
 	if err != nil {
 		return nil, err
@@ -224,8 +223,8 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches the file from the GitHub repository and returns its contents.
-func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
@@ -239,8 +238,8 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return data.Decode()
 }
 
-func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	client := c.newClientToken(u.Token)
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
@@ -254,7 +253,7 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 
 	for _, file := range data {
 		go func(path string) {
-			content, err := c.File(u, r, b, path)
+			content, err := c.File(ctx, u, r, b, path)
 			if err != nil {
 				errc <- err
 			} else {
@@ -304,8 +303,8 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Deactivate deactives the repository be removing registered push hooks from
 // the GitHub repository.
-func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
-	client := c.newClientToken(u.Token)
+func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	client := c.newClientToken(ctx, u.Token)
 	hooks, _, err := client.Repositories.ListHooks(r.Owner, r.Name, nil)
 	if err != nil {
 		return err
@@ -320,11 +319,11 @@ func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
 
 // helper function to return the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the remote settings.
-func (c *client) newContext() context.Context {
+func (c *client) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
-		return oauth2.NoContext
+		return ctx
 	}
-	return context.WithValue(nil, oauth2.HTTPClient, &http.Client{
+	return context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
@@ -358,11 +357,11 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 }
 
 // helper function to return the GitHub oauth2 client
-func (c *client) newClientToken(token string) *github.Client {
+func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	tc := oauth2.NewClient(ctx, ts)
 	if c.SkipVerify {
 		tc.Transport.(*oauth2.Transport).Base = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
@@ -371,9 +370,9 @@ func (c *client) newClientToken(token string) *github.Client {
 			},
 		}
 	}
-	github := github.NewClient(tc)
-	github.BaseURL, _ = url.Parse(c.API)
-	return github
+	client := github.NewClient(tc)
+	client.BaseURL, _ = url.Parse(c.API)
+	return client
 }
 
 // helper function to return matching user email.
@@ -426,8 +425,8 @@ func matchingHooks(hooks []github.Hook, rawurl string) *github.Hook {
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client := c.newClientToken(u.Token)
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+	client := c.newClientToken(ctx, u.Token)
 	switch b.Event {
 	case "deployment":
 		return deploymentStatus(client, r, b, link)
@@ -437,13 +436,12 @@ func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link strin
 }
 
 func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
-	context := ctx
 	switch b.Event {
 	case model.EventPull:
-		context += "/pr"
+		ctx += "/pr"
 	default:
 		if len(b.Event) > 0 {
-			context += "/" + b.Event
+			ctx += "/" + b.Event
 		}
 	}
 
@@ -451,13 +449,13 @@ func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx 
 	desc := github.String(convertDesc(b.Status))
 
 	if proc != nil {
-		context += "/" + proc.Name
+		ctx += "/" + proc.Name
 		status = github.String(convertStatus(proc.State))
 		desc = github.String(convertDesc(proc.State))
 	}
 
 	data := github.RepoStatus{
-		Context:     github.String(context),
+		Context:     github.String(ctx),
 		State:       status,
 		Description: desc,
 		TargetURL:   github.String(link),
@@ -486,11 +484,11 @@ func deploymentStatus(client *github.Client, r *model.Repo, b *model.Build, link
 
 // Activate activates a repository by creating the post-commit hook and
 // adding the SSH deploy key, if applicable.
-func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
-	if err := c.Deactivate(u, r, link); err != nil {
+func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	if err := c.Deactivate(ctx, u, r, link); err != nil {
 		return err
 	}
-	client := c.newClientToken(u.Token)
+	client := c.newClientToken(ctx, u.Token)
 	hook := &github.Hook{
 		Name: github.String("web"),
 		Events: []string{

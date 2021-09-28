@@ -8,6 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
 	"github.com/woodpecker-ci/woodpecker/cli/info"
+	"github.com/woodpecker-ci/woodpecker/cli/lint"
 	"github.com/woodpecker-ci/woodpecker/cli/log"
 	"github.com/woodpecker-ci/woodpecker/cli/registry"
 	"github.com/woodpecker-ci/woodpecker/cli/repo"
@@ -27,18 +28,20 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			EnvVar: "DRONE_TOKEN,WOODPECKER_TOKEN",
-			Name:   "t, token",
-			Usage:  "server auth token",
+			EnvVar: "WOODPECKER_TOKEN",
+			// TODO: rename to `token`
+			Name:  "t, token",
+			Usage: "server auth token",
 		},
 
 		cli.StringFlag{
-			EnvVar: "DRONE_SERVER,WOODPECKER_SERVER",
-			Name:   "s, server",
-			Usage:  "server address",
+			EnvVar: "WOODPECKER_SERVER",
+			// TODO: rename to `server`
+			Name:  "s, server",
+			Usage: "server address",
 		},
 		cli.BoolFlag{
-			EnvVar: "DRONE_SKIP_VERIFY,WOODPECKER_SKIP_VERIFY",
+			EnvVar: "WOODPECKER_SKIP_VERIFY",
 			Name:   "skip-verify",
 			Usage:  "skip ssl verification",
 			Hidden: true,
@@ -66,6 +69,7 @@ func main() {
 		secret.Command,
 		repo.Command,
 		user.Command,
+		lint.Command,
 	}
 
 	if err := app.Run(os.Args); err != nil {

@@ -85,9 +85,9 @@ func openTest() *sql.DB {
 		driver = "sqlite3"
 		config = ":memory:"
 	)
-	if os.Getenv("DATABASE_DRIVER") != "" {
-		driver = os.Getenv("DATABASE_DRIVER")
-		config = os.Getenv("DATABASE_CONFIG")
+	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
+		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
+		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
 	}
 	return open(driver, config)
 }
@@ -100,9 +100,9 @@ func newTest() *datastore {
 		driver = "sqlite3"
 		config = ":memory:"
 	)
-	if os.Getenv("DATABASE_DRIVER") != "" {
-		driver = os.Getenv("DATABASE_DRIVER")
-		config = os.Getenv("DATABASE_CONFIG")
+	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
+		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
+		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
 	}
 	return &datastore{
 		DB:     open(driver, config),

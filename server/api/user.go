@@ -24,7 +24,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/sirupsen/logrus"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -54,7 +54,7 @@ func GetFeed(c *gin.Context) {
 			Perms:  store.FromContext(c),
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
-		if err := sync.Sync(user); err != nil {
+		if err := sync.Sync(c, user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
 		} else {
 			logrus.Debugf("sync complete: %s", user.Login)
@@ -100,7 +100,7 @@ func GetRepos(c *gin.Context) {
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
-		if err := sync.Sync(user); err != nil {
+		if err := sync.Sync(c, user); err != nil {
 			logrus.Debugf("sync error: %s: %s", user.Login, err)
 		} else {
 			logrus.Debugf("sync complete: %s", user.Login)
@@ -118,7 +118,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	active := []*model.Repo{}
+	var active []*model.Repo
 	for _, repo := range repos {
 		if repo.IsActive {
 			active = append(active, repo)
@@ -129,14 +129,12 @@ func GetRepos(c *gin.Context) {
 
 func PostToken(c *gin.Context) {
 	user := session.User(c)
-
-	token := token.New(token.UserToken, user.Login)
-	tokenstr, err := token.Sign(user.Hash)
+	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.String(http.StatusOK, tokenstr)
+	c.String(http.StatusOK, tokenString)
 }
 
 func DeleteToken(c *gin.Context) {
@@ -149,11 +147,10 @@ func DeleteToken(c *gin.Context) {
 		return
 	}
 
-	token := token.New(token.UserToken, user.Login)
-	tokenstr, err := token.Sign(user.Hash)
+	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.String(http.StatusOK, tokenstr)
+	c.String(http.StatusOK, tokenString)
 }

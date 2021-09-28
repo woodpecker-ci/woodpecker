@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // helper function that converts a Gitea repository to a Drone repository.
@@ -242,4 +242,21 @@ func expandAvatar(repo, rawurl string) string {
 	aurl = burl.ResolveReference(aurl)
 
 	return aurl.String()
+}
+
+// helper function to return matching hooks.
+func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
+	link, err := url.Parse(rawurl)
+	if err != nil {
+		return nil
+	}
+	for _, hook := range hooks {
+		if val, ok := hook.Config["url"]; ok {
+			hookurl, err := url.Parse(val)
+			if err == nil && hookurl.Host == link.Host {
+				return hook
+			}
+		}
+	}
+	return nil
 }

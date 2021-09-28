@@ -10,7 +10,7 @@ Woodpecker does not support Kubernetes natively, but being a container first CI 
 # create secrets
 kubectl create secret generic woodpecker-secret \
   --namespace <namespace> \
-  --from-literal=WOODPECKER_SECRET=$(openssl rand -hex 32)
+  --from-literal=WOODPECKER_AGENT_SECRET=$(openssl rand -hex 32)
 
 kubectl create secret generic woodpecker-github-client \
   --namespace <namespace> \
@@ -34,7 +34,7 @@ helm upgrade --install woodpecker-server --namespace <namespace> woodpecker/wood
 helm delete woodpecker-server
 ```
 
-## Woodpecker agent
+### Woodpecker agent
 
 ```shell
 # Install
@@ -91,7 +91,7 @@ spec:
             value: "xxx"
           - name: "WOODPECKER_GITHUB_SECRET"
             value: "xxx"
-          - name: "WOODPECKER_SECRET"
+          - name: "WOODPECKER_AGENT_SECRET"
             value: "xxx"
         volumeMounts:
           - name: sqlite-volume
@@ -183,7 +183,7 @@ spec:
         env:
           - name: WOODPECKER_SERVER
             value: woodpecker.tools.svc.cluster.local:9000
-          - name: WOODPECKER_SECRET
+          - name: WOODPECKER_AGENT_SECRET
             value: "xxx"
         resources:
           limits:

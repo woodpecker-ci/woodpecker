@@ -34,8 +34,10 @@ const (
 	MIMEPOSTForm          = binding.MIMEPOSTForm
 	MIMEMultipartPOSTForm = binding.MIMEMultipartPOSTForm
 	MIMEYAML              = binding.MIMEYAML
-	BodyBytesKey          = "_gin-gonic/gin/bodybyteskey"
 )
+
+// BodyBytesKey indicates a default body bytes key.
+const BodyBytesKey = "_gin-gonic/gin/bodybyteskey"
 
 const abortIndex int8 = math.MaxInt8 / 2
 
@@ -52,6 +54,7 @@ type Context struct {
 	fullPath string
 
 	engine *Engine
+	params *Params
 
 	// This mutex protect Keys map
 	mu sync.RWMutex
@@ -93,6 +96,7 @@ func (c *Context) reset() {
 	c.Accepted = nil
 	c.queryCache = nil
 	c.formCache = nil
+	*c.params = (*c.params)[0:0]
 }
 
 // Copy returns a copy of the current context that can be safely used outside the request's scope.
@@ -291,6 +295,22 @@ func (c *Context) GetInt64(key string) (i64 int64) {
 	return
 }
 
+// GetUint returns the value associated with the key as an unsigned integer.
+func (c *Context) GetUint(key string) (ui uint) {
+	if val, ok := c.Get(key); ok && val != nil {
+		ui, _ = val.(uint)
+	}
+	return
+}
+
+// GetUint64 returns the value associated with the key as an unsigned integer.
+func (c *Context) GetUint64(key string) (ui64 uint64) {
+	if val, ok := c.Get(key); ok && val != nil {
+		ui64, _ = val.(uint64)
+	}
+	return
+}
+
 // GetFloat64 returns the value associated with the key as a float64.
 func (c *Context) GetFloat64(key string) (f64 float64) {
 	if val, ok := c.Get(key); ok && val != nil {
@@ -410,16 +430,20 @@ func (c *Context) QueryArray(key string) []string {
 	return values
 }
 
-func (c *Context) getQueryCache() {
+func (c *Context) initQueryCache() {
 	if c.queryCache == nil {
-		c.queryCache = c.Request.URL.Query()
+		if c.Request != nil {
+			c.queryCache = c.Request.URL.Query()
+		} else {
+			c.queryCache = url.Values{}
+		}
 	}
 }
 
 // GetQueryArray returns a slice of strings for a given query key, plus
 // a boolean value whether at least one value exists for the given key.
 func (c *Context) GetQueryArray(key string) ([]string, bool) {
-	c.getQueryCache()
+	c.initQueryCache()
 	if values, ok := c.queryCache[key]; ok && len(values) > 0 {
 		return values, true
 	}
@@ -435,7 +459,7 @@ func (c *Context) QueryMap(key string) map[string]string {
 // GetQueryMap returns a map for a given query key, plus a boolean value
 // whether at least one value exists for the given key.
 func (c *Context) GetQueryMap(key string) (map[string]string, bool) {
-	c.getQueryCache()
+	c.initQueryCache()
 	return c.get(c.queryCache, key)
 }
 
@@ -477,7 +501,7 @@ func (c *Context) PostFormArray(key string) []string {
 	return values
 }
 
-func (c *Context) getFormCache() {
+func (c *Context) initFormCache() {
 	if c.formCache == nil {
 		c.formCache = make(url.Values)
 		req := c.Request
@@ -493,7 +517,7 @@ func (c *Context) getFormCache() {
 // GetPostFormArray returns a slice of strings for a given form key, plus
 // a boolean value whether at least one value exists for the given key.
 func (c *Context) GetPostFormArray(key string) ([]string, bool) {
-	c.getFormCache()
+	c.initFormCache()
 	if values := c.formCache[key]; len(values) > 0 {
 		return values, true
 	}
@@ -509,7 +533,7 @@ func (c *Context) PostFormMap(key string) map[string]string {
 // GetPostFormMap returns a map for a given form key, plus a boolean value
 // whether at least one value exists for the given key.
 func (c *Context) GetPostFormMap(key string) (map[string]string, bool) {
-	c.getFormCache()
+	c.initFormCache()
 	return c.get(c.formCache, key)
 }
 
@@ -701,32 +725,80 @@ func (c *Context) ShouldBindBodyWith(obj interface{}, bb binding.BindingBody) (e
 	return bb.BindBody(body, obj)
 }
 
-// ClientIP implements a best effort algorithm to return the real client IP, it parses
-// X-Real-IP and X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
-// Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
+// ClientIP implements a best effort algorithm to return the real client IP.
+// It called c.RemoteIP() under the hood, to check if the remote IP is a trusted proxy or not.
+// If it's it will then try to parse the headers defined in Engine.RemoteIPHeaders (defaulting to [X-Forwarded-For, X-Real-Ip]).
+// If the headers are nots syntactically valid OR the remote IP does not correspong to a trusted proxy,
+// the remote IP (coming form Request.RemoteAddr) is returned.
 func (c *Context) ClientIP() string {
-	if c.engine.ForwardedByClientIP {
-		clientIP := c.requestHeader("X-Forwarded-For")
-		clientIP = strings.TrimSpace(strings.Split(clientIP, ",")[0])
-		if clientIP == "" {
-			clientIP = strings.TrimSpace(c.requestHeader("X-Real-Ip"))
-		}
-		if clientIP != "" {
-			return clientIP
-		}
-	}
-
 	if c.engine.AppEngine {
 		if addr := c.requestHeader("X-Appengine-Remote-Addr"); addr != "" {
 			return addr
 		}
 	}
 
-	if ip, _, err := net.SplitHostPort(strings.TrimSpace(c.Request.RemoteAddr)); err == nil {
-		return ip
+	remoteIP, trusted := c.RemoteIP()
+	if remoteIP == nil {
+		return ""
 	}
 
-	return ""
+	if trusted && c.engine.ForwardedByClientIP && c.engine.RemoteIPHeaders != nil {
+		for _, headerName := range c.engine.RemoteIPHeaders {
+			ip, valid := validateHeader(c.requestHeader(headerName))
+			if valid {
+				return ip
+			}
+		}
+	}
+	return remoteIP.String()
+}
+
+// RemoteIP parses the IP from Request.RemoteAddr, normalizes and returns the IP (without the port).
+// It also checks if the remoteIP is a trusted proxy or not.
+// In order to perform this validation, it will see if the IP is contained within at least one of the CIDR blocks
+// defined in Engine.TrustedProxies
+func (c *Context) RemoteIP() (net.IP, bool) {
+	ip, _, err := net.SplitHostPort(strings.TrimSpace(c.Request.RemoteAddr))
+	if err != nil {
+		return nil, false
+	}
+	remoteIP := net.ParseIP(ip)
+	if remoteIP == nil {
+		return nil, false
+	}
+
+	if c.engine.trustedCIDRs != nil {
+		for _, cidr := range c.engine.trustedCIDRs {
+			if cidr.Contains(remoteIP) {
+				return remoteIP, true
+			}
+		}
+	}
+
+	return remoteIP, false
+}
+
+func validateHeader(header string) (clientIP string, valid bool) {
+	if header == "" {
+		return "", false
+	}
+	items := strings.Split(header, ",")
+	for i, ipStr := range items {
+		ipStr = strings.TrimSpace(ipStr)
+		ip := net.ParseIP(ipStr)
+		if ip == nil {
+			return "", false
+		}
+
+		// We need to return the first IP in the list, but,
+		// we should not early return since we need to validate that
+		// the rest of the header is syntactically valid
+		if i == 0 {
+			clientIP = ipStr
+			valid = true
+		}
+	}
+	return
 }
 
 // ContentType returns the Content-Type header of the request.
@@ -863,11 +935,11 @@ func (c *Context) IndentedJSON(code int, obj interface{}) {
 // Default prepends "while(1)," to response body if the given struct is array values.
 // It also sets the Content-Type as "application/json".
 func (c *Context) SecureJSON(code int, obj interface{}) {
-	c.Render(code, render.SecureJSON{Prefix: c.engine.secureJsonPrefix, Data: obj})
+	c.Render(code, render.SecureJSON{Prefix: c.engine.secureJSONPrefix, Data: obj})
 }
 
 // JSONP serializes the given struct as JSON into the response body.
-// It add padding to response body to request data from a server residing in a different domain than the client.
+// It adds padding to response body to request data from a server residing in a different domain than the client.
 // It also sets the Content-Type as "application/javascript".
 func (c *Context) JSONP(code int, obj interface{}) {
 	callback := c.DefaultQuery("callback", "")
@@ -944,12 +1016,12 @@ func (c *Context) DataFromReader(code int, contentLength int64, contentType stri
 	})
 }
 
-// File writes the specified file into the body stream in a efficient way.
+// File writes the specified file into the body stream in an efficient way.
 func (c *Context) File(filepath string) {
 	http.ServeFile(c.Writer, c.Request, filepath)
 }
 
-// FileFromFS writes the specified file from http.FileSytem into the body stream in an efficient way.
+// FileFromFS writes the specified file from http.FileSystem into the body stream in an efficient way.
 func (c *Context) FileFromFS(filepath string, fs http.FileSystem) {
 	defer func(old string) {
 		c.Request.URL.Path = old
@@ -963,7 +1035,7 @@ func (c *Context) FileFromFS(filepath string, fs http.FileSystem) {
 // FileAttachment writes the specified file into the body stream in an efficient way
 // On the client side, the file will typically be downloaded with the given filename
 func (c *Context) FileAttachment(filepath, filename string) {
-	c.Writer.Header().Set("content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	http.ServeFile(c.Writer, c.Request, filepath)
 }
 

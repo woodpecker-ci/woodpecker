@@ -20,6 +20,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -53,32 +54,33 @@ import (
 func loop(c *cli.Context) error {
 
 	// debug level if requested by user
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	if c.Bool("debug") {
+		logrus.SetReportCaller(true)
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.WarnLevel)
 	}
 
-	// must configure the drone_host variable
 	if c.String("server-host") == "" {
-		logrus.Fatalln("DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST is not properly configured")
+		logrus.Fatalln("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
 		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must be <scheme>://<hostname> format",
+			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		logrus.Warningln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must not have trailing slash",
+			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
@@ -90,13 +92,30 @@ func loop(c *cli.Context) error {
 	store_ := setupStore(c)
 	setupEvilGlobals(c, store_, remote_)
 
-	// we are switching from gin to httpservermux|treemux,
-	// so if this code looks strange, that is why.
-	tree := setupTree(c)
+	proxyWebUI := c.String("www-proxy")
+
+	var webUIServe func(w http.ResponseWriter, r *http.Request)
+
+	if proxyWebUI == "" {
+		// we are switching from gin to httpservermux|treemux,
+		webUIServe = setupTree(c).ServeHTTP
+	} else {
+		origin, _ := url.Parse(proxyWebUI)
+
+		director := func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", origin.Host)
+			req.URL.Scheme = origin.Scheme
+			req.URL.Host = origin.Host
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		webUIServe = proxy.ServeHTTP
+	}
 
 	// setup the server and start the listener
 	handler := router.Load(
-		tree,
+		webUIServe,
 		ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
@@ -279,7 +298,7 @@ func (a *authorizer) authorize(ctx context.Context) error {
 }
 
 func redirect(w http.ResponseWriter, req *http.Request) {
-	var serverHost string = server.Config.Server.Host
+	serverHost := server.Config.Server.Host
 	serverHost = strings.TrimPrefix(serverHost, "http://")
 	serverHost = strings.TrimPrefix(serverHost, "https://")
 	req.URL.Scheme = "https"

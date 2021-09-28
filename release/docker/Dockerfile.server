@@ -4,10 +4,11 @@ FROM golang:1.16
 FROM scratch
 EXPOSE 8000 9000 80 443
 
-ENV DATABASE_DRIVER=sqlite3
-ENV DATABASE_CONFIG=/var/lib/drone/drone.sqlite
 ENV GODEBUG=netdns=go
-ENV XDG_CACHE_HOME /var/lib/drone
+ENV XDG_CACHE_HOME=/var/lib/drone
+ENV WOODPECKER_DATABASE_DRIVER=sqlite3
+ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/drone/drone.sqlite
+
 
 # copy certs from golang:1.16 image
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

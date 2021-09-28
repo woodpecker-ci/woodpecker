@@ -19,7 +19,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 
 	"github.com/russross/meddler"

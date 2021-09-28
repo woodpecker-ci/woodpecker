@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3/testdata"
 )
 
@@ -49,7 +49,7 @@ func Test_Gitlab(t *testing.T) {
 		g.Describe("AllProjects", func() {
 			g.It("Should return only non-archived projects is hidden", func() {
 				gitlab.HideArchives = true
-				_projects, err := gitlab.Repos(&user)
+				_projects, err := gitlab.Repos(nil, &user)
 
 				g.Assert(err == nil).IsTrue()
 				g.Assert(len(_projects)).Equal(1)
@@ -57,7 +57,7 @@ func Test_Gitlab(t *testing.T) {
 
 			g.It("Should return all the projects", func() {
 				gitlab.HideArchives = false
-				_projects, err := gitlab.Repos(&user)
+				_projects, err := gitlab.Repos(nil, &user)
 
 				g.Assert(err == nil).IsTrue()
 				g.Assert(len(_projects)).Equal(2)
@@ -67,7 +67,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test repository method
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
-				_repo, err := gitlab.Repo(&user, "diaspora", "diaspora-client")
+				_repo, err := gitlab.Repo(nil, &user, "diaspora", "diaspora-client")
 
 				g.Assert(err == nil).IsTrue()
 				g.Assert(_repo.Name).Equal("diaspora-client")
@@ -76,7 +76,7 @@ func Test_Gitlab(t *testing.T) {
 			})
 
 			g.It("Should return error, when repo not exist", func() {
-				_, err := gitlab.Repo(&user, "not-existed", "not-existed")
+				_, err := gitlab.Repo(nil, &user, "not-existed", "not-existed")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -85,21 +85,21 @@ func Test_Gitlab(t *testing.T) {
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := gitlab.Perm(&user, "diaspora", "diaspora-client")
+				perm, err := gitlab.Perm(nil, &user, "diaspora", "diaspora-client")
 				g.Assert(err == nil).IsTrue()
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := gitlab.Perm(&user, "brightbox", "puppet")
+				perm, err := gitlab.Perm(nil, &user, "brightbox", "puppet")
 				g.Assert(err == nil).IsTrue()
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := gitlab.Perm(&user, "not-existed", "not-existed")
+				_, err := gitlab.Perm(nil, &user, "not-existed", "not-existed")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -108,13 +108,13 @@ func Test_Gitlab(t *testing.T) {
 		// Test activate method
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := gitlab.Activate(nil, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
 				g.Assert(err == nil).IsTrue()
 			})
 
 			g.It("Should be failed, when token not given", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test")
+				err := gitlab.Activate(nil, &user, &repo, "http://example.com/api/hook/test/test")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -123,7 +123,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test deactivate method
 		g.Describe("Deactivate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Deactivate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := gitlab.Deactivate(nil, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
 				g.Assert(err == nil).IsTrue()
 			})

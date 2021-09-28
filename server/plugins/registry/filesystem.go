@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"os"
 	"strings"
 )
@@ -50,8 +50,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 		}
 	}
 
-	auths := []*model.Registry{}
-
+	var auths []*model.Registry
 	for key, auth := range configFile.AuthConfigs {
 		auths = append(auths, &model.Registry{
 			Address:  key,

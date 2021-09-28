@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 
@@ -32,18 +32,6 @@ func Repo(c *gin.Context) *model.Repo {
 		return nil
 	}
 	r, ok := v.(*model.Repo)
-	if !ok {
-		return nil
-	}
-	return r
-}
-
-func Repos(c *gin.Context) []*model.RepoLite {
-	v, ok := c.Get("repos")
-	if !ok {
-		return nil
-	}
-	r, ok := v.([]*model.RepoLite)
 	if !ok {
 		return nil
 	}
@@ -93,7 +81,6 @@ func Perm(c *gin.Context) *model.Perm {
 }
 
 func SetPerm() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 		user := User(c)
 		repo := Repo(c)
@@ -108,7 +95,7 @@ func SetPerm() gin.HandlerFunc {
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = remote.FromContext(c).Perm(user, repo.Owner, repo.Name)
+				perm, err = remote.FromContext(c).Perm(c, user, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debugf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName
