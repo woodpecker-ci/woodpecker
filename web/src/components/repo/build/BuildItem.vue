@@ -15,7 +15,7 @@
         <img
           v-if="build.status === 'started' || build.status === 'running'"
           class="w-6"
-          src="../../assets/pecking_woodpecker.gif"
+          src="../../../assets/pecking_woodpecker.gif"
         />
         <BuildStatusIcon v-else class="mx-3" :build="build" />
       </div>
