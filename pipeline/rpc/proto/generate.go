@@ -15,3 +15,8 @@
 package proto
 
 //go:generate protoc --go_out=paths=source_relative:. woodpecker.proto
+//go:generate protoc --go-grpc_out=paths=source_relative:. woodpecker.proto
+
+// get needed binary's:
+// go install google.golang.org/protobuf/cmd/protoc-gen-go
+// go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
