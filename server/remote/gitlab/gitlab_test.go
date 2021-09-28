@@ -16,6 +16,7 @@ package gitlab
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -68,20 +69,21 @@ func Test_Gitlab(t *testing.T) {
 		Owner: "diaspora",
 	}
 
+	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gitlab Plugin", func() {
 		// Test projects method
 		g.Describe("AllProjects", func() {
 			g.It("Should return only non-archived projects is hidden", func() {
 				client.HideArchives = true
-				_projects, err := client.Repos(&user)
+				_projects, err := client.Repos(ctx, &user)
 				assert.NoError(t, err)
 				assert.Len(t, _projects, 1)
 			})
 
 			g.It("Should return all the projects", func() {
 				client.HideArchives = false
-				_projects, err := client.Repos(&user)
+				_projects, err := client.Repos(ctx, &user)
 
 				g.Assert(err == nil).IsTrue()
 				g.Assert(len(_projects)).Equal(2)
@@ -91,7 +93,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test repository method
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
-				_repo, err := client.Repo(&user, "diaspora", "diaspora-client")
+				_repo, err := client.Repo(ctx, &user, "diaspora", "diaspora-client")
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
@@ -99,7 +101,7 @@ func Test_Gitlab(t *testing.T) {
 			})
 
 			g.It("Should return error, when repo not exist", func() {
-				_, err := client.Repo(&user, "not-existed", "not-existed")
+				_, err := client.Repo(ctx, &user, "not-existed", "not-existed")
 				assert.Error(t, err)
 			})
 		})
@@ -107,21 +109,21 @@ func Test_Gitlab(t *testing.T) {
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := client.Perm(&user, "diaspora", "diaspora-client")
+				perm, err := client.Perm(ctx, &user, "diaspora", "diaspora-client")
 				assert.NoError(t, err)
 				assert.True(t, perm.Admin)
 				assert.True(t, perm.Pull)
 				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := client.Perm(&user, "brightbox", "puppet")
+				perm, err := client.Perm(ctx, &user, "brightbox", "puppet")
 				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := client.Perm(&user, "not-existed", "not-existed")
+				_, err := client.Perm(ctx, &user, "not-existed", "not-existed")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -130,12 +132,12 @@ func Test_Gitlab(t *testing.T) {
 		// Test activate method
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
-				err := client.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 				assert.NoError(t, err)
 			})
 
 			g.It("Should be failed, when token not given", func() {
-				err := client.Activate(&user, &repo, "http://example.com/api/hook/test/test")
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test")
 
 				g.Assert(err != nil).IsTrue()
 			})
@@ -144,7 +146,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test deactivate method
 		g.Describe("Deactivate", func() {
 			g.It("Should be success", func() {
-				err := client.Deactivate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Deactivate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
 				g.Assert(err == nil).IsTrue()
 			})
