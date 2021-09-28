@@ -99,7 +99,7 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
-func (c *config) Refresh(user *model.User) (bool, error) {
+func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newConfig("")
 	source := config.TokenSource(
 		oauth2.NoContext, &oauth2.Token{RefreshToken: user.Secret})

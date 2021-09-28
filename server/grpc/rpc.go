@@ -420,7 +420,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, _ := refresher.Refresh(user)
+			ok, _ := refresher.Refresh(ctx, user)
 			if ok {
 				s.store.UpdateUser(user)
 			}

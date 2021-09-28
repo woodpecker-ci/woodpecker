@@ -25,8 +25,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-// IMPORTANT Gerrit support is not yet implemented. This file is a placeholder
-// for future implementation.
+// TODO: Delete Gerrit "support" - can be added back if one do implemented it
 
 // Opts defines configuration options.
 type Opts struct {

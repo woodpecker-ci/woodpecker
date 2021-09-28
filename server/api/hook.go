@@ -155,7 +155,7 @@ func PostHook(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the build.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(user)
+		ok, err := refresher.Refresh(c, user)
 		if err != nil {
 			logrus.Errorf("failed to refresh oauth2 token: %s", err)
 		} else if ok {

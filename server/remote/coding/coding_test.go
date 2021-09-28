@@ -97,14 +97,14 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("Given a refresh token", func() {
 			g.It("Should return a refresh access token", func() {
-				ok, err := c.Refresh(fakeUserRefresh)
+				ok, err := c.Refresh(ctx, fakeUserRefresh)
 				g.Assert(err == nil).IsTrue()
 				g.Assert(ok).IsTrue()
 				g.Assert(fakeUserRefresh.Token).Equal("VDZupx0usVRV4oOd1FCu4xUxgk8SY0TK")
 				g.Assert(fakeUserRefresh.Secret).Equal("BenBQq7TWZ7Cp0aUM47nQjTz2QHNmTWcPctB609n")
 			})
 			g.It("Should handle an invalid refresh token", func() {
-				ok, _ := c.Refresh(fakeUserRefreshInvalid)
+				ok, _ := c.Refresh(ctx, fakeUserRefreshInvalid)
 				g.Assert(ok).IsFalse()
 			})
 		})

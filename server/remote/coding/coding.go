@@ -97,12 +97,12 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		return nil, nil
 	}
 
-	token, err := config.Exchange(c.newContext(), code)
+	token, err := config.Exchange(c.newContext(ctx), code)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := c.newClientToken(token.AccessToken, token.RefreshToken).GetCurrentUser()
+	user, err := c.newClientToken(ctx, token.AccessToken).GetCurrentUser()
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 // Auth authenticates the session and returns the remote user
 // login for the given token and secret
 func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error) {
-	user, err := c.newClientToken(token, secret).GetCurrentUser()
+	user, err := c.newClientToken(ctx, token).GetCurrentUser()
 	if err != nil {
 		return "", err
 	}
@@ -130,9 +130,9 @@ func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error)
 // Refresh refreshes an oauth token and expiration for the given
 // user. It returns true if the token was refreshed, false if the
 // token was not refreshed, and error if it failed to refersh.
-func (c *Coding) Refresh(u *model.User) (bool, error) {
+func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newConfig("")
-	source := config.TokenSource(c.newContext(), &oauth2.Token{RefreshToken: u.Secret})
+	source := config.TokenSource(c.newContext(ctx), &oauth2.Token{RefreshToken: u.Secret})
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
 		return false, err
@@ -159,11 +159,12 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 
 // Repo fetches the named repository from the remote system.
 func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
-	project, err := c.newClient(u).GetProject(owner, name)
+	client := c.newClient(ctx, u)
+	project, err := client.GetProject(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	depot, err := c.newClient(u).GetDepot(owner, name)
+	depot, err := client.GetDepot(owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -182,14 +183,15 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 
 // Repos fetches a list of repos from the remote system.
 func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	projectList, err := c.newClient(u).GetProjectList()
+	client := c.newClient(ctx, u)
+	projectList, err := client.GetProjectList()
 	if err != nil {
 		return nil, err
 	}
 
 	repos := make([]*model.Repo, 0)
 	for _, project := range projectList {
-		depot, err := c.newClient(u).GetDepot(project.Owner, project.Name)
+		depot, err := client.GetDepot(project.Owner, project.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -212,7 +214,7 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 // Perm fetches the named repository permissions from
 // the remote system for the specified user.
 func (c *Coding) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
-	project, err := c.newClient(u).GetProject(owner, repo)
+	project, err := c.newClient(ctx, u).GetProject(owner, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +231,7 @@ func (c *Coding) Perm(ctx context.Context, u *model.User, owner, repo string) (*
 // File fetches a file from the remote repository and returns in string
 // format.
 func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	data, err := c.newClient(u).GetFile(r.Owner, r.Name, b.Commit, f)
+	data, err := c.newClient(ctx, u).GetFile(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
 	}
@@ -265,13 +267,13 @@ func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Activate activates a repository by creating the post-commit hook.
 func (c *Coding) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	return c.newClient(u).AddWebhook(r.Owner, r.Name, link)
+	return c.newClient(ctx, u).AddWebhook(r.Owner, r.Name, link)
 }
 
 // Deactivate deactivates a repository by removing all previously created
 // post-commit hooks matching the given link.
 func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	return c.newClient(u).RemoveWebhook(r.Owner, r.Name, link)
+	return c.newClient(ctx, u).RemoveWebhook(r.Owner, r.Name, link)
 }
 
 // Hook parses the post-commit hook from the Request body and returns the
@@ -286,11 +288,11 @@ func (c *Coding) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 
 // helper function to return the Coding oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the remote settings.
-func (c *Coding) newContext() context.Context {
+func (c *Coding) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
-		return oauth2.NoContext
+		return ctx
 	}
-	return context.WithValue(nil, oauth2.HTTPClient, &http.Client{
+	return context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
@@ -315,12 +317,12 @@ func (c *Coding) newConfig(redirect string) *oauth2.Config {
 }
 
 // helper function to return the Coding oauth2 client
-func (c *Coding) newClient(u *model.User) *internal.Client {
-	return c.newClientToken(u.Token, u.Secret)
+func (c *Coding) newClient(ctx context.Context, u *model.User) *internal.Client {
+	return c.newClientToken(ctx, u.Token)
 }
 
 // helper function to return the Coding oauth2 client
-func (c *Coding) newClientToken(token, secret string) *internal.Client {
+func (c *Coding) newClientToken(ctx context.Context, token string) *internal.Client {
 	client := &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
@@ -329,7 +331,7 @@ func (c *Coding) newClientToken(token, secret string) *internal.Client {
 			},
 		},
 	}
-	return internal.NewClient(c.URL, "/api", token, "drone", client)
+	return internal.NewClient(ctx, c.URL, "/api", token, "drone", client)
 }
 
 func (c *Coding) resourceLink(resourcePath string) string {

@@ -426,7 +426,7 @@ func PostBuild(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the job.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, _ := refresher.Refresh(user)
+		ok, _ := refresher.Refresh(c, user)
 		if ok {
 			store.UpdateUser(c, user)
 		}

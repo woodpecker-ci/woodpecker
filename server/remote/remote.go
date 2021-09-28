@@ -92,7 +92,7 @@ func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 // returns true if the token was refreshed, false if the token was not refreshed,
 // and error if it failed to refersh.
 type Refresher interface {
-	Refresh(*model.User) (bool, error)
+	Refresh(context.Context, *model.User) (bool, error)
 }
 
 // Login authenticates the session and returns the
@@ -167,5 +167,5 @@ func Refresh(c context.Context, u *model.User) (bool, error) {
 	if !ok {
 		return false, nil
 	}
-	return refresher.Refresh(u)
+	return refresher.Refresh(c, u)
 }

@@ -52,7 +52,7 @@ func Refresh(c *gin.Context) {
 	// attempts to refresh the access token. If the
 	// token is refreshed, we must also persist to the
 	// database.
-	ok, _ = refresher.Refresh(user)
+	ok, _ = refresher.Refresh(c, user)
 	if ok {
 		err := store.UpdateUser(c, user)
 		if err != nil {

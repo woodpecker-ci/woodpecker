@@ -107,19 +107,19 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("Given a refresh token", func() {
 			g.It("Should return a refresh access token", func() {
-				ok, err := c.Refresh(fakeUserRefresh)
+				ok, err := c.Refresh(ctx, fakeUserRefresh)
 				g.Assert(err == nil).IsTrue()
 				g.Assert(ok).IsTrue()
 				g.Assert(fakeUserRefresh.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
 				g.Assert(fakeUserRefresh.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
 			})
 			g.It("Should handle an empty access token", func() {
-				ok, err := c.Refresh(fakeUserRefreshEmpty)
+				ok, err := c.Refresh(ctx, fakeUserRefreshEmpty)
 				g.Assert(err == nil).IsFalse()
 				g.Assert(ok).IsFalse()
 			})
 			g.It("Should handle a failure to refresh", func() {
-				ok, err := c.Refresh(fakeUserRefreshFail)
+				ok, err := c.Refresh(ctx, fakeUserRefreshFail)
 				g.Assert(err != nil).IsTrue()
 				g.Assert(ok).IsFalse()
 			})
