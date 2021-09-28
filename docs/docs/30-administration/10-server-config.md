@@ -2,22 +2,23 @@
 
 ## User registration
 
-Registration is closed by default.
+Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-This example enables open registration for users that are members of approved GitHub organizations.
+If registration is open every user with an account at the configured [SCM](docs/administration/vcs/overview) can login to Woodpecker.
+This example enables open registration for users that are members of approved organizations:
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
+      - [...]
 +     - WOODPECKER_OPEN=true
 +     - WOODPECKER_ORGS=dolores,dogpatch
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+
 ```
 
 ## Administrators
@@ -25,20 +26,16 @@ services:
 Administrators should also be enumerated in your configuration.
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_ORGS=dolores,dogpatch
+      - [...]
 +     - WOODPECKER_ADMIN=johnsmith,janedoe
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
-
 
 ## Filtering repositories
 
@@ -47,18 +44,15 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_ORGS=dolores,dogpatch
+      - [...]
 +     - WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 ## Global registry setting
@@ -72,19 +66,8 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
-    ports:
-      - 80:8000
-      - 9000
-    volumes:
-      - woodpecker-server-data:/var/lib/drone/
-    restart: always
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - [...]
 +     - WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json
 ```

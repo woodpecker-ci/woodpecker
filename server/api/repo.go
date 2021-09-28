@@ -23,8 +23,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -32,7 +32,7 @@ import (
 )
 
 func PostRepo(c *gin.Context) {
-	remote := remote.FromContext(c)
+	r := remote.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
 
@@ -75,13 +75,13 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	err = remote.Activate(user, repo, link)
+	err = r.Activate(user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return
 	}
 
-	from, err := remote.Repo(user, repo.Owner, repo.Name)
+	from, err := r.Repo(user, repo.Owner, repo.Name)
 	if err == nil {
 		repo.Update(from)
 	}
@@ -166,7 +166,7 @@ func GetRepo(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
-	remote := remote.FromContext(c)
+	r := remote.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -187,12 +187,12 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	remote.Deactivate(user, repo, server.Config.Server.Host)
+	r.Deactivate(user, repo, server.Config.Server.Host)
 	c.JSON(200, repo)
 }
 
 func RepairRepo(c *gin.Context) {
-	remote := remote.FromContext(c)
+	r := remote.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -212,14 +212,14 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	remote.Deactivate(user, repo, host)
-	err = remote.Activate(user, repo, link)
+	r.Deactivate(user, repo, host)
+	err = r.Activate(user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return
 	}
 
-	from, err := remote.Repo(user, repo.Owner, repo.Name)
+	from, err := r.Repo(user, repo.Owner, repo.Name)
 	if err == nil {
 		repo.Name = from.Name
 		repo.Owner = from.Owner
@@ -238,7 +238,7 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	remote := remote.FromContext(c)
+	r := remote.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -255,7 +255,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote.Repo(user, owner, name)
+	from, err := r.Repo(user, owner, name)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -298,8 +298,8 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	remote.Deactivate(user, repo, host)
-	err = remote.Activate(user, repo, link)
+	r.Deactivate(user, repo, host)
+	err = r.Activate(user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return

@@ -17,7 +17,7 @@ package shared
 import (
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -69,12 +69,12 @@ func (s *Syncer) Sync(user *model.User) error {
 		return err
 	}
 
-	var remote []*model.Repo
+	var remoteRepos []*model.Repo
 	var perms []*model.Perm
 
 	for _, repo := range repos {
 		if s.Match(repo) {
-			remote = append(remote, repo)
+			remoteRepos = append(remoteRepos, repo)
 			perm := model.Perm{
 				UserID: user.ID,
 				Repo:   repo.FullName,
@@ -89,7 +89,7 @@ func (s *Syncer) Sync(user *model.User) error {
 		}
 	}
 
-	err = s.Store.RepoBatch(remote)
+	err = s.Store.RepoBatch(remoteRepos)
 	if err != nil {
 		return err
 	}

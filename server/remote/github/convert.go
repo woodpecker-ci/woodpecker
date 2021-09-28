@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"github.com/google/go-github/github"
 )

@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	"github.com/mrjones/oauth"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
 )
@@ -104,13 +104,13 @@ func New(opts Opts) (remote.Remote, error) {
 }
 
 func (c *Config) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	requestToken, url, err := c.Consumer.GetRequestTokenAndUrl("oob")
+	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
 		return nil, err
 	}
 	var code = req.FormValue("oauth_verifier")
 	if len(code) == 0 {
-		http.Redirect(res, req, url, http.StatusSeeOther)
+		http.Redirect(res, req, u, http.StatusSeeOther)
 		return nil, nil
 	}
 	requestToken.Token = req.FormValue("oauth_token")

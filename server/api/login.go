@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/gorilla/securecookie"
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
@@ -133,15 +133,14 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	token := token.New(token.SessToken, u.Login)
-	tokenstr, err := token.SignExpires(u.Hash, exp)
+	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
 		logrus.Errorf("cannot create token for %s. %s", u.Login, err)
 		c.Redirect(303, "/login?error=internal_error")
 		return
 	}
 
-	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenstr)
+	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
 	intendedURL := c.Request.URL.Query()["url"]
 	if len(intendedURL) > 0 {

@@ -24,8 +24,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 
@@ -48,19 +48,19 @@ type Opts struct {
 // New returns a Remote implementation that integrates with Gitlab, an open
 // source Git service. See https://gitlab.com
 func New(opts Opts) (remote.Remote, error) {
-	url, err := url.Parse(opts.URL)
+	u, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(url.Host)
+	host, _, err := net.SplitHostPort(u.Host)
 	if err == nil {
-		url.Host = host
+		u.Host = host
 	}
 	return &Gitlab{
 		URL:         opts.URL,
 		Client:      opts.Client,
 		Secret:      opts.Secret,
-		Machine:     url.Host,
+		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,

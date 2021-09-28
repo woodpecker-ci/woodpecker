@@ -15,9 +15,10 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/version"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Health endpoint returns a 500 if the server state is unhealthy.

@@ -1,11 +1,12 @@
 package docker
 
 import (
-	"docker.io/go-docker/api/types/container"
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
 	"strings"
+
+	"github.com/docker/docker/api/types/container"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
@@ -165,7 +166,7 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 	}
 	if r.MatchString(volumeParts) {
 		results := r.FindStringSubmatch(volumeParts)[1:]
-		cleanResults := []string{}
+		var cleanResults []string
 		for _, item := range results {
 			if item != "" {
 				cleanResults = append(cleanResults, item)

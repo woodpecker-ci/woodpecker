@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
 
 	"golang.org/x/oauth2"

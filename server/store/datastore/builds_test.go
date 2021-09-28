@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestBuilds(t *testing.T) {
