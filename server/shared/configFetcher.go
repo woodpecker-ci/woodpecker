@@ -119,7 +119,7 @@ func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
 	var res []*remote.FileMeta
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
+		if strings.HasSuffix(file.Name, ".yml") {
 			res = append(res, file)
 		}
 	}
