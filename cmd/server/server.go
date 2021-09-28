@@ -62,26 +62,25 @@ func loop(c *cli.Context) error {
 		logrus.SetLevel(logrus.WarnLevel)
 	}
 
-	// must configure the drone_host variable
 	if c.String("server-host") == "" {
-		logrus.Fatalln("DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST is not properly configured")
+		logrus.Fatalln("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
 		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must be <scheme>://<hostname> format",
+			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		logrus.Warningln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must not have trailing slash",
+			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 

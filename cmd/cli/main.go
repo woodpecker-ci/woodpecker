@@ -28,18 +28,20 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			EnvVar: "DRONE_TOKEN,WOODPECKER_TOKEN",
-			Name:   "t, token",
-			Usage:  "server auth token",
+			EnvVar: "WOODPECKER_TOKEN",
+			// TODO: rename to `token`
+			Name:  "t, token",
+			Usage: "server auth token",
 		},
 
 		cli.StringFlag{
-			EnvVar: "DRONE_SERVER,WOODPECKER_SERVER",
-			Name:   "s, server",
-			Usage:  "server address",
+			EnvVar: "WOODPECKER_SERVER",
+			// TODO: rename to `server`
+			Name:  "s, server",
+			Usage: "server address",
 		},
 		cli.BoolFlag{
-			EnvVar: "DRONE_SKIP_VERIFY,WOODPECKER_SKIP_VERIFY",
+			EnvVar: "WOODPECKER_SKIP_VERIFY",
 			Name:   "skip-verify",
 			Usage:  "skip ssl verification",
 			Hidden: true,
