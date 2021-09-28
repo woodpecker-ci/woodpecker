@@ -24,7 +24,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_SERVER",
 		Name:   "server",
-		Usage:  "drone server address",
+		Usage:  "server address",
 		Value:  "localhost:9000",
 	},
 	cli.StringFlag{
