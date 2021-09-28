@@ -9,7 +9,7 @@
       overflow-hidden
       p-4
       border-gray-300
-      dark:bg-dark-500 dark:border-dark-400
+      dark:bg-dark-gray-700 dark:border-dark-400
     "
     :class="{ 'cursor-pointer hover:shadow-md hover:bg-gray-200 dark:hover:bg-dark-400': clickable }"
   >
