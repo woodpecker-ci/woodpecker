@@ -147,7 +147,7 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 // Teams fetches a list of team memberships from the remote system.
 func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
-	return nil, nil
+	return nil, fmt.Errorf("Not implemented")
 }
 
 // TeamPerm fetches the named organization permissions from
