@@ -15,16 +15,17 @@
 package shared
 
 import (
+	"context"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // UserSyncer syncs the user repository and permissions.
 type UserSyncer interface {
-	Sync(user *model.User) error
+	Sync(ctx context.Context, user *model.User) error
 }
 
 type Syncer struct {
@@ -62,9 +63,9 @@ func (s *Syncer) SetFilter(fn FilterFunc) {
 	s.Match = fn
 }
 
-func (s *Syncer) Sync(user *model.User) error {
+func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
-	repos, err := s.Remote.Repos(user)
+	repos, err := s.Remote.Repos(ctx, user)
 	if err != nil {
 		return err
 	}

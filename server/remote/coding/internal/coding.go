@@ -15,6 +15,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -29,6 +30,7 @@ type Client struct {
 	token   string
 	agent   string
 	client  *http.Client
+	ctx     context.Context
 }
 
 type GenericAPIResponse struct {
@@ -36,13 +38,14 @@ type GenericAPIResponse struct {
 	Data json.RawMessage `json:"data,omitempty"`
 }
 
-func NewClient(baseURL, apiPath, token, agent string, client *http.Client) *Client {
+func NewClient(ctx context.Context, baseURL, apiPath, token, agent string, client *http.Client) *Client {
 	return &Client{
 		baseURL: baseURL,
 		apiPath: apiPath,
 		token:   token,
 		agent:   agent,
 		client:  client,
+		ctx:     ctx,
 	}
 }
 
@@ -63,10 +66,10 @@ func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 	var req *http.Request
 	var err error
 	if method != "GET" {
-		req, err = http.NewRequest(method, rawURL+"?access_token="+c.token, strings.NewReader(params.Encode()))
+		req, err = http.NewRequestWithContext(c.ctx, method, rawURL+"?access_token="+c.token, strings.NewReader(params.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
 	} else {
-		req, err = http.NewRequest("GET", rawURL+"?"+params.Encode(), nil)
+		req, err = http.NewRequestWithContext(c.ctx, "GET", rawURL+"?"+params.Encode(), nil)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("fail to create request for url %q: %v", rawURL, err)
