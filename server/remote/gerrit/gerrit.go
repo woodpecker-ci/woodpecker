@@ -15,6 +15,7 @@
 package gerrit
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -68,47 +69,47 @@ func New(opts Opts) (remote.Remote, error) {
 
 // Login authenticates an account with Gerrit using oauth authentication. The
 // Gerrit account details are returned when the user is successfully authenticated.
-func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	return nil, nil
 }
 
 // Auth is not supported by the Gerrit driver.
-func (c *client) Auth(token, secret string) (string, error) {
+func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
 
 // Teams is not supported by the Gerrit driver.
-func (c *client) Teams(u *model.User) ([]*model.Team, error) {
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	var empty []*model.Team
 	return empty, nil
 }
 
 // Repo is not supported by the Gerrit driver.
-func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
 	return nil, nil
 }
 
 // Repos is not supported by the Gerrit driver.
-func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	return nil, nil
 }
 
 // Perm is not supported by the Gerrit driver.
-func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
 	return nil, nil
 }
 
 // File is not supported by the Gerrit driver.
-func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
 	return nil, nil
 }
 
-func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	return nil
 }
 
@@ -118,12 +119,12 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 // Activate is not supported by the Gerrit driver.
-func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
+func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return nil
 }
 
 // Deactivate is not supported by the Gogs driver.
-func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
+func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return nil
 }
 

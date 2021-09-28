@@ -15,6 +15,7 @@
 package bitbucket
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -53,7 +54,7 @@ func New(client, secret string) remote.Remote {
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
-func (c *config) Login(w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(server.Config.Server.Host)
 
 	// get the OAuth errors
@@ -87,7 +88,7 @@ func (c *config) Login(w http.ResponseWriter, req *http.Request) (*model.User, e
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
 // a session and return the Bitbucket account login.
-func (c *config) Auth(token, secret string) (string, error) {
+func (c *config) Auth(ctx context.Context, token, secret string) (string, error) {
 	client := c.newClientToken(token, secret)
 	user, err := client.FindCurrent()
 	if err != nil {
@@ -115,7 +116,7 @@ func (c *config) Refresh(user *model.User) (bool, error) {
 }
 
 // Teams returns a list of all team membership for the Bitbucket account.
-func (c *config) Teams(u *model.User) ([]*model.Team, error) {
+func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	opts := &internal.ListTeamOpts{
 		PageLen: 100,
 		Role:    "member",
@@ -128,7 +129,7 @@ func (c *config) Teams(u *model.User) ([]*model.Team, error) {
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(u *model.User, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
 	repo, err := c.newClient(u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -138,7 +139,7 @@ func (c *config) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
-func (c *config) Repos(u *model.User) ([]*model.Repo, error) {
+func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(u)
 
 	var all []*model.Repo
@@ -171,7 +172,7 @@ func (c *config) Repos(u *model.User) ([]*model.Repo, error) {
 // does not have an endpoint to access user permissions, we attempt to fetch
 // the repository hook list, which is restricted to administrators to calculate
 // administrative access to a repository.
-func (c *config) Perm(u *model.User, owner, name string) (*model.Perm, error) {
+func (c *config) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
 	client := c.newClient(u)
 
 	perms := new(model.Perm)
@@ -200,7 +201,7 @@ func (c *config) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches the file from the Bitbucket repository and returns its contents.
-func (c *config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
 	config, err := c.newClient(u).FindSource(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
@@ -208,12 +209,12 @@ func (c *config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return []byte(*config), err
 }
 
-func (c *config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status creates a build status for the Bitbucket commit.
-func (c *config) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
@@ -226,12 +227,12 @@ func (c *config) Status(u *model.User, r *model.Repo, b *model.Build, link strin
 // Activate activates the repository by registering repository push hooks with
 // the Bitbucket repository. Prior to registering hook, previously created hooks
 // are deleted.
-func (c *config) Activate(u *model.User, r *model.Repo, link string) error {
+func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	rawurl, err := url.Parse(link)
 	if err != nil {
 		return err
 	}
-	c.Deactivate(u, r, link)
+	c.Deactivate(ctx, u, r, link)
 
 	return c.newClient(u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
@@ -243,7 +244,7 @@ func (c *config) Activate(u *model.User, r *model.Repo, link string) error {
 
 // Deactivate deactives the repository be removing repository push hooks from
 // the Bitbucket repository.
-func (c *config) Deactivate(u *model.User, r *model.Repo, link string) error {
+func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(u)
 
 	hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})

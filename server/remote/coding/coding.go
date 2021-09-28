@@ -15,6 +15,7 @@
 package coding
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -25,7 +26,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )
 
@@ -78,7 +78,7 @@ type Coding struct {
 
 // Login authenticates the session and returns the
 // remote user details.
-func (c *Coding) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(server.Config.Server.Host)
 
 	// get the OAuth errors
@@ -119,7 +119,7 @@ func (c *Coding) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 
 // Auth authenticates the session and returns the remote user
 // login for the given token and secret
-func (c *Coding) Auth(token, secret string) (string, error) {
+func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error) {
 	user, err := c.newClientToken(token, secret).GetCurrentUser()
 	if err != nil {
 		return "", err
@@ -145,7 +145,7 @@ func (c *Coding) Refresh(u *model.User) (bool, error) {
 }
 
 // Teams fetches a list of team memberships from the remote system.
-func (c *Coding) Teams(u *model.User) ([]*model.Team, error) {
+func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil, nil
 }
@@ -158,12 +158,12 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo fetches the named repository from the remote system.
-func (c *Coding) Repo(u *model.User, owner, repo string) (*model.Repo, error) {
-	project, err := c.newClient(u).GetProject(owner, repo)
+func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+	project, err := c.newClient(u).GetProject(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	depot, err := c.newClient(u).GetDepot(owner, repo)
+	depot, err := c.newClient(u).GetDepot(owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (c *Coding) Repo(u *model.User, owner, repo string) (*model.Repo, error) {
 }
 
 // Repos fetches a list of repos from the remote system.
-func (c *Coding) Repos(u *model.User) ([]*model.Repo, error) {
+func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	projectList, err := c.newClient(u).GetProjectList()
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (c *Coding) Repos(u *model.User) ([]*model.Repo, error) {
 
 // Perm fetches the named repository permissions from
 // the remote system for the specified user.
-func (c *Coding) Perm(u *model.User, owner, repo string) (*model.Perm, error) {
+func (c *Coding) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
 	project, err := c.newClient(u).GetProject(owner, repo)
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (c *Coding) Perm(u *model.User, owner, repo string) (*model.Perm, error) {
 
 // File fetches a file from the remote repository and returns in string
 // format.
-func (c *Coding) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
 	data, err := c.newClient(u).GetFile(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
@@ -236,12 +236,12 @@ func (c *Coding) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return data, nil
 }
 
-func (c *Coding) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status sends the commit status to the remote system.
-func (c *Coding) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }
@@ -264,13 +264,13 @@ func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 // Activate activates a repository by creating the post-commit hook.
-func (c *Coding) Activate(u *model.User, r *model.Repo, link string) error {
+func (c *Coding) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return c.newClient(u).AddWebhook(r.Owner, r.Name, link)
 }
 
 // Deactivate deactivates a repository by removing all previously created
 // post-commit hooks matching the given link.
-func (c *Coding) Deactivate(u *model.User, r *model.Repo, link string) error {
+func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return c.newClient(u).RemoveWebhook(r.Owner, r.Name, link)
 }
 

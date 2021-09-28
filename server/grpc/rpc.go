@@ -338,12 +338,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		}
 
 		if !isMultiPipeline(procs) {
-			s.updateRemoteStatus(repo, build, nil)
+			s.updateRemoteStatus(c, repo, build, nil)
 		}
 	}
 
 	if isMultiPipeline(procs) {
-		s.updateRemoteStatus(repo, build, proc)
+		s.updateRemoteStatus(c, repo, build, proc)
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
@@ -416,7 +416,7 @@ func buildStatus(procs []*model.Proc) string {
 	return status
 }
 
-func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *model.Proc) {
+func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
@@ -426,7 +426,7 @@ func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *mod
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = s.remote.Status(user, repo, build, uri, proc)
+		err = s.remote.Status(ctx, user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 		}

@@ -1,6 +1,7 @@
 package shared_test
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -240,7 +241,7 @@ func TestFetch(t *testing.T) {
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
-			files, err := configFetcher.Fetch()
+			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {
