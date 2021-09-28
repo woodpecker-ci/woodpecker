@@ -120,7 +120,7 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		return nil, err
 	}
 
-	client := internal.NewClientWithToken(c.URL, c.Consumer, accessToken.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, accessToken.Token)
 
 	user, err := client.FindCurrentUser()
 	if err != nil {
@@ -148,7 +148,7 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
-	repo, err := internal.NewClientWithToken(c.URL, c.Consumer, u.Token).FindRepo(owner, name)
+	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*
 }
 
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos, err := internal.NewClientWithToken(c.URL, c.Consumer, u.Token).FindRepos()
+	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
 	if err != nil {
 		return nil, err
 	}
@@ -169,13 +169,13 @@ func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 func (c *Config) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.FindRepoPerms(owner, repo)
 }
 
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
 }
@@ -194,7 +194,7 @@ func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 		Url:   link,
 	}
 
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.CreateStatus(b.Commit, &status)
 }
@@ -219,13 +219,13 @@ func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.CreateHook(r.Owner, r.Name, link)
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
