@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +21,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Client API for Drone service
+// Client API for Woodpecker service
 
-type DroneClient interface {
+type WoodpeckerClient interface {
 	Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*NextReply, error)
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
 	Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -33,89 +34,89 @@ type DroneClient interface {
 	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
-type droneClient struct {
+type woodpeckerClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewDroneClient(cc *grpc.ClientConn) DroneClient {
-	return &droneClient{cc}
+func NewWoodpeckerClient(cc *grpc.ClientConn) WoodpeckerClient {
+	return &woodpeckerClient{cc}
 }
 
-func (c *droneClient) Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*NextReply, error) {
+func (c *woodpeckerClient) Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*NextReply, error) {
 	out := new(NextReply)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Next", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Next", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Init", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Init", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Wait", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Wait", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Done", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Done", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Extend(ctx context.Context, in *ExtendRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Extend(ctx context.Context, in *ExtendRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Extend", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Extend", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Upload", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Upload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *droneClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *woodpeckerClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/proto.Drone/Log", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Log", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Drone service
+// Server API for Woodpecker service
 
-type DroneServer interface {
+type WoodpeckerServer interface {
 	Next(context.Context, *NextRequest) (*NextReply, error)
 	Init(context.Context, *InitRequest) (*Empty, error)
 	Wait(context.Context, *WaitRequest) (*Empty, error)
@@ -126,8 +127,8 @@ type DroneServer interface {
 	Log(context.Context, *LogRequest) (*Empty, error)
 }
 
-func RegisterDroneServer(s *grpc.Server, srv DroneServer) {
-	s.RegisterService(&DroneServiceDesc, srv)
+func RegisterWoodpeckerServer(s *grpc.Server, srv WoodpeckerServer) {
+	s.RegisterService(&WoodpeckerServiceDesc, srv)
 }
 
 func NextHandler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -136,14 +137,14 @@ func NextHandler(srv interface{}, ctx context.Context, dec func(interface{}) err
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Next(ctx, in)
+		return srv.(WoodpeckerServer).Next(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Next",
+		FullMethod: "/proto.Woodpecker/Next",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Next(ctx, req.(*NextRequest))
+		return srv.(WoodpeckerServer).Next(ctx, req.(*NextRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -154,14 +155,14 @@ func InitHandler(srv interface{}, ctx context.Context, dec func(interface{}) err
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Init(ctx, in)
+		return srv.(WoodpeckerServer).Init(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Init",
+		FullMethod: "/proto.Woodpecker/Init",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Init(ctx, req.(*InitRequest))
+		return srv.(WoodpeckerServer).Init(ctx, req.(*InitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -172,14 +173,14 @@ func WaitHandler(srv interface{}, ctx context.Context, dec func(interface{}) err
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Wait(ctx, in)
+		return srv.(WoodpeckerServer).Wait(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Wait",
+		FullMethod: "/proto.Woodpecker/Wait",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Wait(ctx, req.(*WaitRequest))
+		return srv.(WoodpeckerServer).Wait(ctx, req.(*WaitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -190,14 +191,14 @@ func DoneHandler(srv interface{}, ctx context.Context, dec func(interface{}) err
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Done(ctx, in)
+		return srv.(WoodpeckerServer).Done(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Done",
+		FullMethod: "/proto.Woodpecker/Done",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Done(ctx, req.(*DoneRequest))
+		return srv.(WoodpeckerServer).Done(ctx, req.(*DoneRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -208,14 +209,14 @@ func ExtendHandler(srv interface{}, ctx context.Context, dec func(interface{}) e
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Extend(ctx, in)
+		return srv.(WoodpeckerServer).Extend(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Extend",
+		FullMethod: "/proto.Woodpecker/Extend",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Extend(ctx, req.(*ExtendRequest))
+		return srv.(WoodpeckerServer).Extend(ctx, req.(*ExtendRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,14 +227,14 @@ func UpdateHandler(srv interface{}, ctx context.Context, dec func(interface{}) e
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Update(ctx, in)
+		return srv.(WoodpeckerServer).Update(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Update",
+		FullMethod: "/proto.Woodpecker/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Update(ctx, req.(*UpdateRequest))
+		return srv.(WoodpeckerServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -244,14 +245,14 @@ func UploadHandler(srv interface{}, ctx context.Context, dec func(interface{}) e
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Upload(ctx, in)
+		return srv.(WoodpeckerServer).Upload(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Upload",
+		FullMethod: "/proto.Woodpecker/Upload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Upload(ctx, req.(*UploadRequest))
+		return srv.(WoodpeckerServer).Upload(ctx, req.(*UploadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -262,21 +263,21 @@ func LogHandler(srv interface{}, ctx context.Context, dec func(interface{}) erro
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DroneServer).Log(ctx, in)
+		return srv.(WoodpeckerServer).Log(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Drone/Log",
+		FullMethod: "/proto.Woodpecker/Log",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DroneServer).Log(ctx, req.(*LogRequest))
+		return srv.(WoodpeckerServer).Log(ctx, req.(*LogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var DroneServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Drone",
-	HandlerType: (*DroneServer)(nil),
+var WoodpeckerServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Woodpecker",
+	HandlerType: (*WoodpeckerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Next",
@@ -312,7 +313,7 @@ var DroneServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "drone.proto",
+	Metadata: "woodpecker.proto",
 }
 
 // Client API for Health service
@@ -375,5 +376,5 @@ var HealthServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "drone.proto",
+	Metadata: "woodpecker.proto",
 }

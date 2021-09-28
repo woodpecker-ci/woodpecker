@@ -151,7 +151,7 @@ func loop(c *cli.Context) error {
 			store_,
 			server.Config.Server.Host,
 		)
-		proto.RegisterDroneServer(grpcServer, droneServer)
+		proto.RegisterWoodpeckerServer(grpcServer, droneServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
