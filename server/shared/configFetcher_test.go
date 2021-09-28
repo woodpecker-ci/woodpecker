@@ -210,6 +210,7 @@ func TestFetch(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
@@ -217,7 +218,7 @@ func TestFetch(t *testing.T) {
 			r := new(mocks.Remote)
 			dirs := map[string][]*remote.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				r.On("File", ctx, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &remote.FileMeta{
@@ -228,12 +229,12 @@ func TestFetch(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				r.On("Dir", mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				r.On("Dir", ctx, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors
-			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			r.On("File", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
+			r.On("Dir", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
