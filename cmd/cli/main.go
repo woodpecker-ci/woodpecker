@@ -29,6 +29,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_TOKEN",
+			// TODO: rename to `token`
 			Name:   "t, token",
 			Usage:  "server auth token",
 		},
