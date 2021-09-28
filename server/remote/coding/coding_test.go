@@ -20,7 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 
 	"github.com/franela/goblin"
@@ -287,15 +287,6 @@ var (
 	fakeRepoNotFound = &model.Repo{
 		Owner: "not_found_owner",
 		Name:  "not_found_project",
-	}
-
-	fakeRepos = []*model.RepoLite{
-		&model.RepoLite{
-			Owner:    "demo1",
-			Name:     "test1",
-			FullName: "demo1/test1",
-			Avatar:   "/static/project_icon/scenery-5.png",
-		},
 	}
 
 	fakeBuild = &model.Build{

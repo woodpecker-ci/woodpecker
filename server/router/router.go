@@ -17,20 +17,26 @@ package router
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // Load loads the router
 func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...gin.HandlerFunc) http.Handler {
 	e := gin.New()
 	e.Use(gin.Recovery())
+
+	e.Use(func(c *gin.Context) {
+		logrus.Tracef("[%s] %s", c.Request.Method, c.Request.URL.String())
+		c.Next()
+	})
 
 	e.Use(header.NoCache)
 	e.Use(header.Options)

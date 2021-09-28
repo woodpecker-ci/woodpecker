@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/web/dist"
 
 	"github.com/dimfeld/httptreemux"

@@ -20,7 +20,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 )
 
@@ -50,13 +50,13 @@ func Test_gitea(t *testing.T) {
 					SkipVerify:  true,
 					PrivateMode: true,
 				})
-				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*client).Context).Equal("continuous-integration/test")
-				g.Assert(remote.(*client).Machine).Equal("localhost")
-				g.Assert(remote.(*client).Username).Equal("someuser")
-				g.Assert(remote.(*client).Password).Equal("password")
-				g.Assert(remote.(*client).SkipVerify).Equal(true)
-				g.Assert(remote.(*client).PrivateMode).Equal(true)
+				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
+				g.Assert(remote.(*Gitea).Context).Equal("continuous-integration/test")
+				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
+				g.Assert(remote.(*Gitea).Username).Equal("someuser")
+				g.Assert(remote.(*Gitea).Password).Equal("password")
+				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
+				g.Assert(remote.(*Gitea).PrivateMode).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})

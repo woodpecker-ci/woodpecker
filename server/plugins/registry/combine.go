@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type combined struct {

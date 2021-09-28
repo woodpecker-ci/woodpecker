@@ -19,10 +19,14 @@ package remote
 import (
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"golang.org/x/net/context"
 )
+
+// TODO: use pagination
+// TODO: use context
+// TODO: add Driver() who return source forge back
 
 type Remote interface {
 	// Login authenticates the session and returns the
