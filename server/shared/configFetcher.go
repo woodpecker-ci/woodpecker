@@ -83,7 +83,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
-          logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
+		logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 		return files, nil
 	}
 
