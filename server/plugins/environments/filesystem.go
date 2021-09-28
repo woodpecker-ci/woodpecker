@@ -9,13 +9,13 @@ type builtin struct {
 	globals []*model.Environ
 }
 
-// New returns a new local registry service.
+// Filesystem returns a new local registry service.
 func Filesystem(params []string) model.EnvironService {
 	var globals []*model.Environ
 
 	for _, item := range params {
-		kvpair := strings.SplitN(item, ":", 2)
-		globals = append(globals, &model.Environ{Name: kvpair[0], Value: kvpair[1]})
+		kvPair := strings.SplitN(item, ":", 2)
+		globals = append(globals, &model.Environ{Name: kvPair[0], Value: kvPair[1]})
 	}
 	return &builtin{globals}
 }

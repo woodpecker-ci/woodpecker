@@ -16,6 +16,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -48,20 +49,27 @@ type Client struct {
 	client      *http.Client
 	base        string
 	accessToken string
+	ctx         context.Context
 }
 
-func NewClientWithToken(url string, consumer *oauth.Consumer, AccessToken string) *Client {
+func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consumer, AccessToken string) *Client {
 	var token oauth.AccessToken
 	token.Token = AccessToken
 	client, err := consumer.MakeHttpClient(&token)
 	if err != nil {
 		log.Error(err)
 	}
-	return &Client{client, url, AccessToken}
+
+	return &Client{
+		client:      client,
+		base:        url,
+		accessToken: AccessToken,
+		ctx:         ctx,
+	}
 }
 
 func (c *Client) FindCurrentUser() (*User, error) {
-	CurrentUserIdResponse, err := c.client.Get(fmt.Sprintf(currentUserId, c.base))
+	CurrentUserIdResponse, err := c.doGet(fmt.Sprintf(currentUserId, c.base))
 	if CurrentUserIdResponse != nil {
 		defer CurrentUserIdResponse.Body.Close()
 	}
@@ -75,7 +83,7 @@ func (c *Client) FindCurrentUser() (*User, error) {
 	}
 	login := string(bits)
 
-	CurrentUserResponse, err := c.client.Get(fmt.Sprintf(pathUser, c.base, login))
+	CurrentUserResponse, err := c.doGet(fmt.Sprintf(pathUser, c.base, login))
 	if CurrentUserResponse != nil {
 		defer CurrentUserResponse.Body.Close()
 	}
@@ -100,7 +108,7 @@ func (c *Client) FindCurrentUser() (*User, error) {
 
 func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
 	urlString := fmt.Sprintf(pathRepo, c.base, owner, name)
-	response, err := c.client.Get(urlString)
+	response, err := c.doGet(urlString)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -128,7 +136,7 @@ func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
 		return perms, err
 	}
 	// Must have admin to be able to list hooks. If have access the enable perms
-	resp, err := c.client.Get(fmt.Sprintf(pathHook, c.base, owner, repo, hookName))
+	resp, err := c.doGet(fmt.Sprintf(pathHook, c.base, owner, repo, hookName))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -141,7 +149,7 @@ func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
 }
 
 func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref string) ([]byte, error) {
-	response, err := c.client.Get(fmt.Sprintf(pathSource, c.base, owner, repo, fileName, ref))
+	response, err := c.doGet(fmt.Sprintf(pathSource, c.base, owner, repo, fileName, ref))
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -203,7 +211,7 @@ func (c *Client) DeleteHook(owner string, name string, link string) error {
 
 func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, error) {
 	urlString := fmt.Sprintf(pathHookDetails, c.base, owner, name, hookName)
-	response, err := c.client.Get(urlString)
+	response, err := c.doGet(urlString)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -218,7 +226,7 @@ func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, 
 
 func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
 	urlString := fmt.Sprintf(pathHookSettings, c.base, owner, name, hookName)
-	response, err := c.client.Get(urlString)
+	response, err := c.doGet(urlString)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -233,9 +241,22 @@ func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
 
 //TODO: make these as as general do with the action
 
+//Helper function to help create get
+func (c *Client) doGet(url string) (*http.Response, error) {
+	request, err := http.NewRequestWithContext(c.ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add("Content-Type", "application/json")
+	return c.client.Do(request)
+}
+
 //Helper function to help create the hook
 func (c *Client) doPut(url string, body []byte) error {
-	request, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
+	request, err := http.NewRequestWithContext(c.ctx, "PUT", url, bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
 	request.Header.Add("Content-Type", "application/json")
 	response, err := c.client.Do(request)
 	if response != nil {
@@ -258,7 +279,10 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 			return err
 		}
 	}
-	request, err := http.NewRequest("POST", url, buf)
+	request, err := http.NewRequestWithContext(c.ctx, "POST", url, buf)
+	if err != nil {
+		return err
+	}
 	request.Header.Add("Content-Type", "application/json")
 	response, err := c.client.Do(request)
 	if response != nil {
@@ -269,7 +293,10 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 
 //Helper function to do delete on the hook
 func (c *Client) doDelete(url string) error {
-	request, err := http.NewRequest("DELETE", url, nil)
+	request, err := http.NewRequestWithContext(c.ctx, "DELETE", url, nil)
+	if err != nil {
+		return err
+	}
 	response, err := c.client.Do(request)
 	if response != nil {
 		defer response.Body.Close()
@@ -281,7 +308,7 @@ func (c *Client) doDelete(url string) error {
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
 	requestUrl := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
-	response, err := c.client.Get(requestUrl)
+	response, err := c.doGet(requestUrl)
 	if response != nil {
 		defer response.Body.Close()
 	}

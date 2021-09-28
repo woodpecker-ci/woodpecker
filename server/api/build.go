@@ -333,9 +333,9 @@ func PostApproval(c *gin.Context) {
 		for _, item := range buildItems {
 			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
-				err = remote_.Status(user, repo, build, uri, item.Proc)
+				err = remote_.Status(c, user, repo, build, uri, item.Proc)
 			} else {
-				err = remote_.Status(user, repo, build, uri, nil)
+				err = remote_.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
 				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
@@ -373,7 +373,7 @@ func PostDecline(c *gin.Context) {
 	}
 
 	uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-	err = remote_.Status(user, repo, build, uri, nil)
+	err = remote_.Status(c, user, repo, build, uri, nil)
 	if err != nil {
 		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
@@ -426,7 +426,7 @@ func PostBuild(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the job.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, _ := refresher.Refresh(user)
+		ok, _ := refresher.Refresh(c, user)
 		if ok {
 			store.UpdateUser(c, user)
 		}
