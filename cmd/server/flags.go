@@ -27,7 +27,7 @@ var flags = []cli.Flag{
 		Usage:  "enable server debug mode",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_SERVER_HOST",
+		EnvVar: "WOODPECKER_HOST",
 		Name:   "server-host",
 		Usage:  "server fully qualified url (<scheme>://<host>)",
 	},

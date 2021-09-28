@@ -83,7 +83,7 @@ spec:
         env:
           - name: "WOODPECKER_ADMIN"
             value: "xxx"
-          - name: "WOODPECKER_SERVER_HOST"
+          - name: "WOODPECKER_HOST"
             value: "https://xxx"
           - name: "WOODPECKER_GITHUB"
             value: "true"

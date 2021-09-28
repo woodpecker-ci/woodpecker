@@ -36,7 +36,7 @@ services:
       - woodpecker-server-data:/var/lib/drone/
     environment:
       - WOODPECKER_OPEN=true
-      - WOODPECKER_SERVER_HOST=${WOODPECKER_SERVER_HOST}
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
       - WOODPECKER_GITHUB=true
       - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
@@ -69,7 +69,7 @@ services:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_SERVER_HOST=${WOODPECKER_SERVER_HOST}
++     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
 
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:

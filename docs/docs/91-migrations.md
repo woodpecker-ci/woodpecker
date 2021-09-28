@@ -15,7 +15,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
   Additionally some alternative namings have been removed to simplify maintenance:
   - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
-  - `WOODPECKER_SERVER_HOST` replaces `WOODPECKER_HOST`, `DRONE_HOST` and `DRONE_SERVER_HOST`.
+  - `WOODPECKER_HOST` replaces `DRONE_HOST` and `DRONE_SERVER_HOST`.
   - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
   - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
 

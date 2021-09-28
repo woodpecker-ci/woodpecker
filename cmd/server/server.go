@@ -63,24 +63,24 @@ func loop(c *cli.Context) error {
 	}
 
 	if c.String("server-host") == "" {
-		logrus.Fatalln("WOODPECKER_SERVER_HOST is not properly configured")
+		logrus.Fatalln("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
 		logrus.Fatalln(
-			"WOODPECKER_SERVER_HOST must be <scheme>://<hostname> format",
+			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		logrus.Warningln(
-			"WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		logrus.Fatalln(
-			"WOODPECKER_SERVER_HOST must not have trailing slash",
+			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
