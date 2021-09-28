@@ -155,7 +155,7 @@ func PostHook(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the build.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(user)
+		ok, err := refresher.Refresh(c, user)
 		if err != nil {
 			logrus.Errorf("failed to refresh oauth2 token: %s", err)
 		} else if ok {
@@ -168,7 +168,7 @@ func PostHook(c *gin.Context) {
 
 	// fetch the build file from the remote
 	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
-	remoteYamlConfigs, err := configFetcher.Fetch()
+	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
@@ -278,9 +278,9 @@ func PostHook(c *gin.Context) {
 		for _, item := range buildItems {
 			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
-				err = remote_.Status(user, repo, build, uri, item.Proc)
+				err = remote_.Status(c, user, repo, build, uri, item.Proc)
 			} else {
-				err = remote_.Status(user, repo, build, uri, nil)
+				err = remote_.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
 				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)

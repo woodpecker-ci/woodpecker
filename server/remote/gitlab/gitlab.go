@@ -15,6 +15,7 @@
 package gitlab
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
@@ -113,7 +114,7 @@ func Load(config string) *Gitlab {
 
 // Login authenticates the session and returns the
 // remote user details.
-func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 
 	var config = &oauth2.Config{
 		ClientId:     g.Client,
@@ -193,7 +194,7 @@ func (g *Gitlab) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 	return user, nil
 }
 
-func (g *Gitlab) Auth(token, secret string) (string, error) {
+func (g *Gitlab) Auth(ctx context.Context, token, secret string) (string, error) {
 	client := NewClient(g.URL, token, g.SkipVerify)
 	login, err := client.CurrentUser()
 	if err != nil {
@@ -202,7 +203,7 @@ func (g *Gitlab) Auth(token, secret string) (string, error) {
 	return login.Username, nil
 }
 
-func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
+func (g *Gitlab) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 	groups, err := client.AllGroups()
 	if err != nil {
@@ -218,7 +219,7 @@ func (g *Gitlab) Teams(u *model.User) ([]*model.Team, error) {
 }
 
 // Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
+func (g *Gitlab) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, owner, name)
 	if err != nil {
@@ -257,7 +258,7 @@ func (g *Gitlab) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 }
 
 // Repos fetches a list of repos from the remote system.
-func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
+func (g *Gitlab) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 
 	var repos = []*model.Repo{}
@@ -297,7 +298,7 @@ func (g *Gitlab) Repos(u *model.User) ([]*model.Repo, error) {
 }
 
 // Perm fetches the named repository from the remote system.
-func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
+func (g *Gitlab) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
 
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 	id, err := GetProjectId(g, client, owner, name)
@@ -324,35 +325,35 @@ func (g *Gitlab) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches a file from the remote repository and returns in string format.
-func (g *Gitlab) File(user *model.User, repo *model.Repo, build *model.Build, f string) ([]byte, error) {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+func (g *Gitlab) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+	var client = NewClient(g.URL, u.Token, g.SkipVerify)
+	id, err := GetProjectId(g, client, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	out, err := client.RepoRawFileRef(id, build.Commit, f)
+	out, err := client.RepoRawFileRef(id, b.Commit, f)
 	if err != nil {
 		return nil, err
 	}
 	return out, err
 }
 
-func (c *Gitlab) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Gitlab) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // NOTE Currently gitlab doesn't support status for commits and events,
 //      also if we want get MR status in gitlab we need implement a special plugin for gitlab,
 //      gitlab uses API to fetch build status on client side. But for now we skip this.
-func (g *Gitlab) Status(u *model.User, repo *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	client := NewClient(g.URL, u.Token, g.SkipVerify)
 
 	status := getStatus(b.Status)
 	desc := getDesc(b.Status)
 
 	client.SetStatus(
-		ns(repo.Owner, repo.Name),
+		ns(r.Owner, r.Name),
 		b.Commit,
 		status,
 		desc,
@@ -407,9 +408,9 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
-func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+func (g *Gitlab) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	var client = NewClient(g.URL, u.Token, g.SkipVerify)
+	id, err := GetProjectId(g, client, r.Owner, r.Name)
 	if err != nil {
 		return err
 	}
@@ -432,9 +433,9 @@ func (g *Gitlab) Activate(user *model.User, repo *model.Repo, link string) error
 
 // Deactivate removes a repository by removing all the post-commit hooks
 // which are equal to link and removing the SSH deploy key.
-func (g *Gitlab) Deactivate(user *model.User, repo *model.Repo, link string) error {
-	var client = NewClient(g.URL, user.Token, g.SkipVerify)
-	id, err := GetProjectId(g, client, repo.Owner, repo.Name)
+func (g *Gitlab) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	var client = NewClient(g.URL, u.Token, g.SkipVerify)
+	id, err := GetProjectId(g, client, r.Owner, r.Name)
 	if err != nil {
 		return err
 	}
