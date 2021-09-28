@@ -243,7 +243,7 @@ func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
 
 //Helper function to help create get
 func (c *Client) doGet(url string) (*http.Response, error) {
-	request, err := http.NewRequestWithContext(c.ctx, "PUT", url, nil)
+	request, err := http.NewRequestWithContext(c.ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

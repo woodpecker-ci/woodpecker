@@ -81,9 +81,9 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	// if folder is not supported we will get a "Not implemented" error and continue
 	config = ".woodpecker"
 	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
-	logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
+          logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 		return files, nil
 	}
 
