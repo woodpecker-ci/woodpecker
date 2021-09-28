@@ -63,7 +63,7 @@ type User struct {
 
 	// Admin indicates the user is a system administrator.
 	//
-	// NOTE: This is sourced from the DRONE_ADMINS environment variable and is no
+	// NOTE: This is sourced from the WOODPECKER_ADMINS environment variable and is no
 	// longer persisted in the database.
 	Admin bool `json:"admin,omitempty" meddler:"-"`
 

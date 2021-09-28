@@ -40,7 +40,7 @@ services:
       - WOODPECKER_GITHUB=true
       - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
@@ -52,7 +52,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
 volumes:
   woodpecker-server-data:
@@ -110,12 +110,12 @@ services:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
   woodpecker-agent:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
++     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
 ## Authentication
