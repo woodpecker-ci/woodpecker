@@ -35,6 +35,7 @@ func main() {
 
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_SERVER",
+			// TODO: rename to `server`
 			Name:   "s, server",
 			Usage:  "server address",
 		},
