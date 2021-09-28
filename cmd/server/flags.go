@@ -216,7 +216,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITHUB_CONTEXT",
 		Name:   "github-context",
 		Usage:  "github status context",
-		Value:  "continuous-integration/drone",
+		Value:  "continuous-integration/woodpecker",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_GITHUB_CLIENT",
