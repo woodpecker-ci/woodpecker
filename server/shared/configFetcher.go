@@ -29,8 +29,7 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 	}
 }
 
-// Fetch
-// TODO: dedupe code
+// Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	logrus.Tracef("Start Fetching config for '%s'", cf.repo.FullName)
 
@@ -46,11 +45,13 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 }
 
 // fetch config by timeout
+// TODO: dedupe code
 func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
 	if len(config) > 0 {
+		logrus.Tracef("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
 			file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
@@ -65,56 +66,52 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 
 		// or a folder
 		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
-		if err == nil {
+		if err == nil && len(files) != 0 {
 			logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
 		}
-	} else {
-		logrus.Tracef("ConfigFetch[%s]: user did not defined own config follow default procedure", cf.repo.FullName)
-		// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
 
-		// test .woodpecker/ folder
-		// if folder is not supported we will get a "Not implemented" error and continue
-		config = ".woodpecker"
-		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
-		logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
-		files = filterPipelineFiles(files)
-		if err == nil && len(files) != 0 {
-			return files, nil
-		}
+		return nil, fmt.Errorf("config '%s' not found: %s", config, err)
+	}
 
-		config = ".woodpecker.yml"
-		file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
-		if err == nil && len(file) != 0 {
-			logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
-			return []*remote.FileMeta{{
-				Name: ".woodpecker.yml",
-				Data: file,
-			}}, nil
-		}
+	logrus.Tracef("ConfigFetch[%s]: user did not defined own config follow default procedure", cf.repo.FullName)
+	// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
 
-		config = ".drone.yml"
-		file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
-		if err == nil && len(file) != 0 {
-			logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
-			return []*remote.FileMeta{{
-				Name: ".drone.yml",
-				Data: file,
-			}}, nil
-		}
+	// test .woodpecker/ folder
+	// if folder is not supported we will get a "Not implemented" error and continue
+	config = ".woodpecker"
+	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
+	logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
+	files = filterPipelineFiles(files)
+	if err == nil && len(files) != 0 {
+		return files, nil
+	}
 
-		if err == nil && len(files) == 0 {
-			return nil, fmt.Errorf("ConfigFetcher: Fallback did not found config")
-		}
+	config = ".woodpecker.yml"
+	file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	if err == nil && len(file) != 0 {
+		logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+		return []*remote.FileMeta{{
+			Name: config,
+			Data: file,
+		}}, nil
+	}
 
-		return nil, err
+	config = ".drone.yml"
+	file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	if err == nil && len(file) != 0 {
+		logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+		return []*remote.FileMeta{{
+			Name: config,
+			Data: file,
+		}}, nil
 	}
 
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*remote.FileMeta{}, nil
+		return []*remote.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not found config: %s", err)
 	}
 }
 
