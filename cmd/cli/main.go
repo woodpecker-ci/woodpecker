@@ -30,15 +30,15 @@ func main() {
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_TOKEN",
 			// TODO: rename to `token`
-			Name:   "t, token",
-			Usage:  "server auth token",
+			Name:  "t, token",
+			Usage: "server auth token",
 		},
 
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_SERVER",
 			// TODO: rename to `server`
-			Name:   "s, server",
-			Usage:  "server address",
+			Name:  "s, server",
+			Usage: "server address",
 		},
 		cli.BoolFlag{
 			EnvVar: "WOODPECKER_SKIP_VERIFY",

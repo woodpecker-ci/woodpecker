@@ -54,7 +54,7 @@ var flags = []cli.Flag{
 		Usage:  "disable colored debug output",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_HOSTNAME,HOSTNAME",
+		EnvVar: "WOODPECKER_HOSTNAME",
 		Name:   "hostname",
 		Usage:  "agent hostname",
 	},
