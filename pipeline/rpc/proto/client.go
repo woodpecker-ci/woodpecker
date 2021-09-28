@@ -43,8 +43,7 @@ func NewDroneClient(cc *grpc.ClientConn) DroneClient {
 
 func (c *droneClient) Next(ctx context.Context, in *NextRequest, opts ...grpc.CallOption) (*NextReply, error) {
 	out := new(NextReply)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Next", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Next", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +52,7 @@ func (c *droneClient) Next(ctx context.Context, in *NextRequest, opts ...grpc.Ca
 
 func (c *droneClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Init", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Init", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +61,7 @@ func (c *droneClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.Ca
 
 func (c *droneClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Wait", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Wait", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +70,7 @@ func (c *droneClient) Wait(ctx context.Context, in *WaitRequest, opts ...grpc.Ca
 
 func (c *droneClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Done", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Done", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +79,7 @@ func (c *droneClient) Done(ctx context.Context, in *DoneRequest, opts ...grpc.Ca
 
 func (c *droneClient) Extend(ctx context.Context, in *ExtendRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Extend", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Extend", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +88,7 @@ func (c *droneClient) Extend(ctx context.Context, in *ExtendRequest, opts ...grp
 
 func (c *droneClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Update", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +97,7 @@ func (c *droneClient) Update(ctx context.Context, in *UpdateRequest, opts ...grp
 
 func (c *droneClient) Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Upload", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Upload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +106,7 @@ func (c *droneClient) Upload(ctx context.Context, in *UploadRequest, opts ...grp
 
 func (c *droneClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Drone/Log", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Drone/Log", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -339,8 +331,7 @@ func NewHealthClient(cc *grpc.ClientConn) HealthClient {
 
 func (c *healthClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	out := new(HealthCheckResponse)
-	// DEPRECATED: Use ClientConn.Invoke instead
-	err := grpc.Invoke(ctx, "/proto.Health/Check", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Health/Check", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
