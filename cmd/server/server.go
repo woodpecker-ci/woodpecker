@@ -143,7 +143,7 @@ func loop(c *cli.Context) error {
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := woodpeckerGrpcServer.NewDroneServer(
+		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
 			remote_,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
@@ -151,7 +151,7 @@ func loop(c *cli.Context) error {
 			store_,
 			server.Config.Server.Host,
 		)
-		proto.RegisterWoodpeckerServer(grpcServer, droneServer)
+		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
