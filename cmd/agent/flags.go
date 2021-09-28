@@ -30,7 +30,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_USERNAME",
 		Name:   "username",
-		Usage:  "drone auth username",
+		Usage:  "auth username",
 		Value:  "x-oauth-basic",
 	},
 	cli.StringFlag{
