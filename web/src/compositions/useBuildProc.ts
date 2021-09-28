@@ -40,7 +40,7 @@ export default () => {
     }
 
     if (isProcRunning(_proc)) {
-      stream = apiClient.streamLogs(owner, repo, build, _proc.ppid, onLogsUpdate);
+      stream = apiClient.streamLogs(owner, repo, build, _proc.pid, onLogsUpdate);
     }
   }
 

@@ -1,7 +1,7 @@
 import { Build, BuildProc, Repo } from '~/lib/api/types';
 
 export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined {
-  return procs.find((proc) => {
+  return procs.reduce((prev, proc) => {
     if (proc.pid === pid) {
       return proc;
     }
@@ -13,8 +13,8 @@ export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined
       }
     }
 
-    return undefined;
-  });
+    return prev;
+  }, undefined as BuildProc | undefined);
 }
 
 /**
