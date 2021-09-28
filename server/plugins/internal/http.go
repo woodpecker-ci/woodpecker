@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -11,7 +12,7 @@ import (
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and unmarshaling the output from the response body.
-func Send(method, path string, in, out interface{}) error {
+func Send(ctx context.Context, method, path string, in, out interface{}) error {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return err
@@ -29,7 +30,7 @@ func Send(method, path string, in, out interface{}) error {
 	}
 
 	// creates a new http request to bitbucket.
-	req, err := http.NewRequest(method, uri.String(), buf)
+	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
 	if err != nil {
 		return err
 	}
