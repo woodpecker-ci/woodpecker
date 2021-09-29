@@ -25,7 +25,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
-	"github.com/woodpecker-ci/woodpecker/web/dist"
+	"github.com/woodpecker-ci/woodpecker/web"
 
 	"github.com/dimfeld/httptreemux"
 )
@@ -44,10 +44,10 @@ func New(opt ...Option) Endpoint {
 	}
 
 	return &website{
-		fs:   dist.New(),
+		fs:   web.HttpFS(),
 		opts: opts,
 		tmpl: mustCreateTemplate(
-			string(dist.MustLookup("/index.html")),
+			string(web.MustLookup("index.html")),
 		),
 	}
 }
