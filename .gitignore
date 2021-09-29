@@ -18,8 +18,9 @@
 *.out
 
 ### Frontend ###
-web/node_modules
-web/dist/files
+web/dist/**
+!web/dist/.gitkeep
+web/node_modules/
 web/*.log
 web/.env
 
