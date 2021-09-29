@@ -126,11 +126,10 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
+# github.com/google/go-github/v39 v39.1.0
 ## explicit
-github.com/google/go-github/github
-# github.com/google/go-querystring v1.0.0
-## explicit
+github.com/google/go-github/v39/github
+# github.com/google/go-querystring v1.1.0
 github.com/google/go-querystring/query
 # github.com/gorilla/securecookie v1.1.1
 ## explicit
@@ -265,6 +264,13 @@ github.com/xeipuuv/gojsonschema
 ## explicit
 golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/cast5
+golang.org/x/crypto/openpgp
+golang.org/x/crypto/openpgp/armor
+golang.org/x/crypto/openpgp/elgamal
+golang.org/x/crypto/openpgp/errors
+golang.org/x/crypto/openpgp/packet
+golang.org/x/crypto/openpgp/s2k
 golang.org/x/crypto/sha3
 # golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 ## explicit
@@ -304,8 +310,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/appengine v1.6.6
-## explicit
+# google.golang.org/appengine v1.6.7
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore
