@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
 message File {
@@ -52,7 +53,7 @@ message HealthCheckResponse {
   ServingStatus status = 1;
 }
 
-service Drone {
+service Woodpecker {
   rpc Next   (NextRequest)   returns (NextReply) {}
   rpc Init   (InitRequest)   returns (Empty) {}
   rpc Wait   (WaitRequest)   returns (Empty) {}
@@ -80,7 +81,7 @@ message NextReply {
 }
 
 message InitRequest {
-  string id    = 1;
+  string id = 1;
   State  state = 2;
 }
 
@@ -89,7 +90,7 @@ message WaitRequest {
 }
 
 message DoneRequest {
-  string id    = 1;
+  string id = 1;
   State  state = 2;
 }
 
@@ -98,17 +99,17 @@ message ExtendRequest {
 }
 
 message UploadRequest {
-  string id   = 1;
+  string id = 1;
   File   file = 2;
 }
 
 message UpdateRequest {
-  string id    = 1;
+  string id = 1;
   State  state = 2;
 }
 
 message LogRequest {
-  string id   = 1;
+  string id = 1;
   Line   line = 2;
 }
 
