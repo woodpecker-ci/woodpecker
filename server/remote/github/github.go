@@ -29,8 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 
-	// TODO upgrade to v39 to pass context down
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v39/github"
 	"golang.org/x/oauth2"
 )
 
@@ -130,12 +129,12 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	client := c.newClientToken(ctx, token.AccessToken)
-	user, _, err := client.Users.Get("")
+	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
 		return nil, err
 	}
 
-	emails, _, err := client.Users.ListEmails(nil)
+	emails, _, err := client.Users.ListEmails(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +154,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 // Auth returns the GitHub user login for the given access token.
 func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
 	client := c.newClientToken(ctx, token)
-	user, _, err := client.Users.Get("")
+	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
 		return "", err
 	}
@@ -171,7 +170,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 
 	var teams []*model.Team
 	for opts.Page > 0 {
-		list, resp, err := client.Organizations.List("", opts)
+		list, resp, err := client.Organizations.List(ctx, "", opts)
 		if err != nil {
 			return nil, err
 		}
@@ -184,7 +183,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 // Repo returns the named GitHub repository.
 func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
-	repo, _, err := client.Repositories.Get(owner, name)
+	repo, _, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +201,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 	var repos []*model.Repo
 	for opts.Page > 0 {
-		list, resp, err := client.Repositories.List("", opts)
+		list, resp, err := client.Repositories.List(ctx, "", opts)
 		if err != nil {
 			return nil, err
 		}
@@ -215,7 +214,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 // Perm returns the user permissions for the named GitHub repository.
 func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
 	client := c.newClientToken(ctx, u.Token)
-	repo, _, err := client.Repositories.Get(owner, name)
+	repo, _, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +227,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	data, _, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
+	data, _, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +242,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	_, data, _, err := client.Repositories.GetContents(r.Owner, r.Name, f, opts)
+	_, data, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +304,7 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // the GitHub repository.
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClientToken(ctx, u.Token)
-	hooks, _, err := client.Repositories.ListHooks(r.Owner, r.Name, nil)
+	hooks, _, err := client.Repositories.ListHooks(ctx, r.Owner, r.Name, nil)
 	if err != nil {
 		return err
 	}
@@ -313,7 +312,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	if match == nil {
 		return nil
 	}
-	_, err = client.Repositories.DeleteHook(r.Owner, r.Name, *match.ID)
+	_, err = client.Repositories.DeleteHook(ctx, r.Owner, r.Name, *match.ID)
 	return err
 }
 
@@ -429,13 +428,13 @@ func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 	client := c.newClientToken(ctx, u.Token)
 	switch b.Event {
 	case "deployment":
-		return deploymentStatus(client, r, b, link)
+		return deploymentStatus(ctx, client, r, b, link)
 	default:
-		return repoStatus(client, r, b, link, c.Context, proc)
+		return repoStatus(ctx, client, r, b, link, c.Context, proc)
 	}
 }
 
-func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
+func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
 	switch b.Event {
 	case model.EventPull:
 		ctx += "/pr"
@@ -460,13 +459,13 @@ func repoStatus(client *github.Client, r *model.Repo, b *model.Build, link, ctx 
 		Description: desc,
 		TargetURL:   github.String(link),
 	}
-	_, _, err := client.Repositories.CreateStatus(r.Owner, r.Name, b.Commit, &data)
+	_, _, err := client.Repositories.CreateStatus(c, r.Owner, r.Name, b.Commit, &data)
 	return err
 }
 
 var reDeploy = regexp.MustCompile(".+/deployments/(\\d+)")
 
-func deploymentStatus(client *github.Client, r *model.Repo, b *model.Build, link string) error {
+func deploymentStatus(ctx context.Context, client *github.Client, r *model.Repo, b *model.Build, link string) error {
 	matches := reDeploy.FindStringSubmatch(b.Link)
 	if len(matches) != 2 {
 		return nil
@@ -476,9 +475,9 @@ func deploymentStatus(client *github.Client, r *model.Repo, b *model.Build, link
 	data := github.DeploymentStatusRequest{
 		State:       github.String(convertStatus(b.Status)),
 		Description: github.String(convertDesc(b.Status)),
-		TargetURL:   github.String(link),
+		LogURL:      github.String(link),
 	}
-	_, _, err := client.Repositories.CreateDeploymentStatus(r.Owner, r.Name, id, &data)
+	_, _, err := client.Repositories.CreateDeploymentStatus(ctx, r.Owner, r.Name, int64(id), &data)
 	return err
 }
 
@@ -501,7 +500,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"content_type": "form",
 		},
 	}
-	_, _, err := client.Repositories.CreateHook(r.Owner, r.Name, hook)
+	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
 	return err
 }
 

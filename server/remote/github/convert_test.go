@@ -17,10 +17,10 @@ package github
 import (
 	"testing"
 
-	"github.com/google/go-github/github"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"github.com/franela/goblin"
+	"github.com/google/go-github/v39/github"
 )
 
 func Test_helper(t *testing.T) {
@@ -76,7 +76,7 @@ func Test_helper(t *testing.T) {
 					},
 					HTMLURL:  github.String("https://github.com/octocat/hello-world"),
 					CloneURL: github.String("https://github.com/octocat/hello-world.git"),
-					Permissions: &map[string]bool{
+					Permissions: map[string]bool{
 						"push":  true,
 						"pull":  true,
 						"admin": true,
@@ -103,7 +103,7 @@ func Test_helper(t *testing.T) {
 					AvatarURL: github.String("http://..."),
 					Login:     github.String("octocat"),
 				},
-				Permissions: &map[string]bool{
+				Permissions: map[string]bool{
 					"push":  true,
 					"pull":  true,
 					"admin": true,
@@ -124,7 +124,7 @@ func Test_helper(t *testing.T) {
 
 		g.It("should convert repository permissions", func() {
 			from := &github.Repository{
-				Permissions: &map[string]bool{
+				Permissions: map[string]bool{
 					"admin": true,
 					"push":  true,
 					"pull":  true,

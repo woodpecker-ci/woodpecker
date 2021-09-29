@@ -20,7 +20,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v39/github"
 )
 
 const defaultBranch = "master"
@@ -109,9 +109,9 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 // permissions to the common Drone permissions structure.
 func convertPerm(from *github.Repository) *model.Perm {
 	return &model.Perm{
-		Admin: (*from.Permissions)["admin"],
-		Push:  (*from.Permissions)["push"],
-		Pull:  (*from.Permissions)["pull"],
+		Admin: from.Permissions["admin"],
+		Push:  from.Permissions["push"],
+		Pull:  from.Permissions["pull"],
 	}
 }
 
@@ -136,17 +136,6 @@ func convertRepoList(from []github.Repository, private bool) []*model.Repo {
 	}
 	return repos
 }
-
-// // convertRepoLite is a helper function used to convert a GitHub repository
-// // structure to the common Drone repository structure.
-// func convertRepoLite(from github.Repository) *model.RepoLite {
-// 	return &model.RepoLite{
-// 		Owner:    *from.Owner.Login,
-// 		Name:     *from.Name,
-// 		FullName: *from.FullName,
-// 		Avatar:   *from.Owner.AvatarURL,
-// 	}
-// }
 
 // convertTeamList is a helper function used to convert a GitHub team list to
 // the common Drone repository structure.
