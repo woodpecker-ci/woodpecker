@@ -32,7 +32,7 @@ module.exports = {
   // where to dump the output of a production build
   output: {
     publicPath: "/",
-    path: path.join(__dirname, "dist/files"),
+    path: path.join(__dirname, "dist"),
     filename: "static/bundle.[chunkhash].js"
   },
 

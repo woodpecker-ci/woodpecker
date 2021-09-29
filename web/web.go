@@ -11,7 +11,7 @@ import (
 var webFiles embed.FS
 
 func HttpFS() http.FileSystem {
-	httpFS, err := fs.Sub(webFiles, "files")
+	httpFS, err := fs.Sub(webFiles, "dist")
 	if err != nil {
 		panic(err)
 	}
