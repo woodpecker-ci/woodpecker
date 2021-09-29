@@ -26,8 +26,8 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/golang/protobuf v1.5.2
-	github.com/google/go-github v0.0.0-20151120211125-47f2593dad19
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
@@ -60,8 +60,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/grpc v1.33.2
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
