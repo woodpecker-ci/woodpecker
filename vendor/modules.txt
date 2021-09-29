@@ -31,9 +31,6 @@ github.com/containerd/containerd/platforms
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/dimfeld/httptreemux v5.0.1+incompatible
-## explicit
-github.com/dimfeld/httptreemux
 # github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 ## explicit
 github.com/docker/cli/cli/config/configfile

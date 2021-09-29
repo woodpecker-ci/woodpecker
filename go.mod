@@ -9,7 +9,6 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	github.com/containerd/containerd v1.5.5 // indirect
-	github.com/dimfeld/httptreemux v5.0.1+incompatible
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v20.10.8+incompatible
