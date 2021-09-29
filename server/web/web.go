@@ -22,18 +22,17 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web"
-
-	"github.com/dimfeld/httptreemux"
 )
 
 // Endpoint provides the website endpoints.
 type Endpoint interface {
 	// Register registers the provider endpoints.
-	Register(*httptreemux.ContextMux)
+	Register(*gin.Engine)
 }
 
 // New returns the default website endpoint.
@@ -58,12 +57,12 @@ type website struct {
 	tmpl *template.Template
 }
 
-func (w *website) Register(mux *httptreemux.ContextMux) {
+func (w *website) Register(mux *gin.Engine) {
 	h := http.FileServer(w.fs)
 	h = setupCache(h)
-	mux.Handler("GET", "/favicon.svg", h)
-	mux.Handler("GET", "/static/*filepath", h)
-	mux.NotFoundHandler = w.handleIndex
+	mux.GET("/favicon.svg", gin.WrapH(h))
+	mux.GET("/static/*filepath", gin.WrapH(h))
+	mux.NoRoute(gin.WrapF(w.handleIndex))
 }
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
