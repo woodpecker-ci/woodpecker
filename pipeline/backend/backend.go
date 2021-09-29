@@ -10,7 +10,7 @@ import (
 type Engine interface {
 	// Setup the pipeline environment.
 	Setup(context.Context, *Config) error
-	// Start the pipeline step.
+	// Exec the pipeline step.
 	Exec(context.Context, *Step) error
 	// Kill the pipeline step.
 	Kill(context.Context, *Step) error
