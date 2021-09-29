@@ -14,20 +14,17 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// generate protobuffs
-//   protoc --go_out=plugins=grpc,import_path=proto:. *.proto
-
 var backoff = time.Second
 
 type client struct {
-	client proto.DroneClient
+	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 }
 
 // NewGrpcClient returns a new grpc Client.
 func NewGrpcClient(conn *grpc.ClientConn) Peer {
 	client := new(client)
-	client.client = proto.NewDroneClient(conn)
+	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
 	return client
 }
