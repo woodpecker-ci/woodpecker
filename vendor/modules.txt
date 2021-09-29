@@ -88,9 +88,6 @@ github.com/flynn/go-shlex
 # github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
 ## explicit
 github.com/franela/goblin
-# github.com/ghodss/yaml v1.0.0
-## explicit
-github.com/ghodss/yaml
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
