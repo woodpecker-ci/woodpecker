@@ -65,7 +65,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert repository list", func() {
-			from := []github.Repository{
+			from := []*github.Repository{
 				{
 					Private:  github.Bool(false),
 					FullName: github.String("octocat/hello-world"),
@@ -138,7 +138,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team", func() {
-			from := github.Organization{
+			from := &github.Organization{
 				Login:     github.String("octocat"),
 				AvatarURL: github.String("http://..."),
 			}
@@ -148,7 +148,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team list", func() {
-			from := []github.Organization{
+			from := []*github.Organization{
 				{
 					Login:     github.String("octocat"),
 					AvatarURL: github.String("http://..."),

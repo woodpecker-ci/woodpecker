@@ -227,14 +227,15 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	data, _, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	content, _, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if err != nil {
 		return nil, err
 	}
-	if data == nil {
+	if content == nil {
 		return nil, fmt.Errorf("%s is a folder not a file use Dir(..)", f)
 	}
-	return data.Decode()
+	data, err := content.GetContent()
+	return []byte(data), err
 }
 
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
@@ -375,25 +376,25 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 }
 
 // helper function to return matching user email.
-func matchingEmail(emails []github.UserEmail, rawurl string) *github.UserEmail {
+func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail {
 	for _, email := range emails {
 		if email.Email == nil || email.Primary == nil || email.Verified == nil {
 			continue
 		}
 		if *email.Primary && *email.Verified {
-			return &email
+			return email
 		}
 	}
 	// github enterprise does not support verified email addresses so instead
 	// we'll return the first email address in the list.
-	if len(emails) != 0 && rawurl != defaultAPI {
-		return &emails[0]
+	if len(emails) != 0 && rawURL != defaultAPI {
+		return emails[0]
 	}
 	return nil
 }
 
 // helper function to return matching hook.
-func matchingHooks(hooks []github.Hook, rawurl string) *github.Hook {
+func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 	link, err := url.Parse(rawurl)
 	if err != nil {
 		return nil
@@ -410,9 +411,9 @@ func matchingHooks(hooks []github.Hook, rawurl string) *github.Hook {
 		if !ok {
 			continue
 		}
-		hookurl, err := url.Parse(s)
-		if err == nil && hookurl.Host == link.Host {
-			return &hook
+		hookURL, err := url.Parse(s)
+		if err == nil && hookURL.Host == link.Host {
+			return hook
 		}
 	}
 	return nil

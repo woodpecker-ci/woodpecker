@@ -129,17 +129,17 @@ func convertTeamPerm(from *github.Membership) *model.Perm {
 
 // convertRepoList is a helper function used to convert a GitHub repository
 // list to the common Drone repository structure.
-func convertRepoList(from []github.Repository, private bool) []*model.Repo {
+func convertRepoList(from []*github.Repository, private bool) []*model.Repo {
 	var repos []*model.Repo
 	for _, repo := range from {
-		repos = append(repos, convertRepo(&repo, private))
+		repos = append(repos, convertRepo(repo, private))
 	}
 	return repos
 }
 
 // convertTeamList is a helper function used to convert a GitHub team list to
 // the common Drone repository structure.
-func convertTeamList(from []github.Organization) []*model.Team {
+func convertTeamList(from []*github.Organization) []*model.Team {
 	var teams []*model.Team
 	for _, team := range from {
 		teams = append(teams, convertTeam(team))
@@ -149,7 +149,7 @@ func convertTeamList(from []github.Organization) []*model.Team {
 
 // convertTeam is a helper function used to convert a GitHub team structure
 // to the common Drone repository structure.
-func convertTeam(from github.Organization) *model.Team {
+func convertTeam(from *github.Organization) *model.Team {
 	return &model.Team{
 		Login:  *from.Login,
 		Avatar: *from.AvatarURL,
