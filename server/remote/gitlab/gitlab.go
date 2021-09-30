@@ -467,15 +467,12 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	switch eventType {
-	case gitlab.EventTypeMergeRequest:
-		event := parsed.(*gitlab.MergeEvent)
+	switch event := parsed.(type) {
+	case *gitlab.MergeEvent:
 		return convertMergeRequestHock(event, req)
-	case gitlab.EventTypePush:
-		event := parsed.(*gitlab.PushEvent)
+	case *gitlab.PushEvent:
 		return convertPushHock(event)
-	case gitlab.EventTypeTagPush:
-		event := parsed.(*gitlab.TagEvent)
+	case *gitlab.TagEvent:
 		return convertTagHock(event)
 	default:
 		return nil, nil, nil
