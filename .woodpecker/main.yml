@@ -15,8 +15,8 @@ pipeline:
     image: golang:1.16
     group: db-test
     environment:
-      - DATABASE_DRIVER=postgres
-      - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
@@ -24,8 +24,8 @@ pipeline:
     image: golang:1.16
     group: db-test
     environment:
-      - DATABASE_DRIVER=mysql
-      - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DRIVER=mysql
+      - WOODPECKER_DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 

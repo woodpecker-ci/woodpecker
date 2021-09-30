@@ -77,13 +77,13 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	err = r.Activate(user, repo, link)
+	err = r.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return
 	}
 
-	from, err := r.Repo(user, repo.Owner, repo.Name)
+	from, err := r.Repo(c, user, repo.Owner, repo.Name)
 	if err == nil {
 		repo.Update(from)
 	}
@@ -255,7 +255,10 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	r.Deactivate(user, repo, server.Config.Server.Host)
+	if err := r.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.JSON(200, repo)
 }
 
@@ -280,14 +283,14 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	r.Deactivate(user, repo, host)
-	err = r.Activate(user, repo, link)
+	_ = r.Deactivate(c, user, repo, host)
+	err = r.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return
 	}
 
-	from, err := r.Repo(user, repo.Owner, repo.Name)
+	from, err := r.Repo(c, user, repo.Owner, repo.Name)
 	if err == nil {
 		repo.Name = from.Name
 		repo.Owner = from.Owner
@@ -323,7 +326,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := r.Repo(user, owner, name)
+	from, err := r.Repo(c, user, owner, name)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -366,8 +369,9 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	r.Deactivate(user, repo, host)
-	err = r.Activate(user, repo, link)
+	// TODO: check if we should handle that error
+	r.Deactivate(c, user, repo, host)
+	err = r.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(500, err.Error())
 		return
