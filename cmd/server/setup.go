@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
@@ -36,7 +37,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 
-	"github.com/dimfeld/httptreemux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
@@ -189,8 +189,8 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	})
 }
 
-func setupTree(c *cli.Context) *httptreemux.ContextMux {
-	tree := httptreemux.NewContextMux()
+func setupTree(c *cli.Context) *gin.Engine {
+	tree := gin.New()
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),
