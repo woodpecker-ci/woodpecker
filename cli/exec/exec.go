@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/woodpecker-ci/envsubst"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
@@ -23,6 +22,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/shared/envsubst"
 
 	"github.com/urfave/cli"
 )

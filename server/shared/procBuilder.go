@@ -22,7 +22,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/woodpecker-ci/envsubst"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -32,6 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/shared/envsubst"
 )
 
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
