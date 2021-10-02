@@ -11,11 +11,11 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 // NewClient returns a new client from the CLI context.
-func NewClient(c *cli.Context) (drone.Client, error) {
+func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	var (
 		skip     = c.GlobalBool("skip-verify")
 		socks    = c.GlobalString("socks-proxy")
@@ -26,12 +26,12 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 	server = strings.TrimRight(server, "/")
 
 	// if no server url is provided we can default
-	// to the hosted Drone service.
+	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Drone server address.")
+		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address.")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Drone access token.")
+		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token.")
 	}
 
 	// attempt to find system CA certs
@@ -68,7 +68,7 @@ func NewClient(c *cli.Context) (drone.Client, error) {
 		}
 	}
 
-	return drone.NewClient(server, auther), nil
+	return woodpecker.NewClient(server, auther), nil
 }
 
 // ParseRepo parses the repository owner and name from a string.
