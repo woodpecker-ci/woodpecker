@@ -139,13 +139,13 @@ func Test_gogs(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".drone.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
 			g.Assert(err == nil).IsTrue()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
 		g.It("Should return a repository file from a ref", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuildWithRef, ".drone.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuildWithRef, ".woodpecker.yml")
 			g.Assert(err == nil).IsTrue()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
