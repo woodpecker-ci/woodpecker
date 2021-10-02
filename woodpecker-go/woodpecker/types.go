@@ -1,4 +1,4 @@
-package drone
+package woodpecker
 
 type (
 	// User represents a user account.

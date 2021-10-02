@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli"
 )
@@ -52,7 +52,7 @@ func secretCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	secret := &drone.Secret{
+	secret := &woodpecker.Secret{
 		Name:   c.String("name"),
 		Value:  c.String("value"),
 		Images: c.StringSlice("image"),
@@ -74,7 +74,7 @@ func secretCreate(c *cli.Context) error {
 }
 
 var defaultSecretEvents = []string{
-	drone.EventPush,
-	drone.EventTag,
-	drone.EventDeploy,
+	woodpecker.EventPush,
+	woodpecker.EventTag,
+	woodpecker.EventDeploy,
 }

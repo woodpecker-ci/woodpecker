@@ -1,14 +1,14 @@
-# drone-go
+# woodpecker-go
 
 ```Go
 import (
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 	"golang.org/x/oauth2"
 )
 
 const (
 	token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-	host  = "http://drone.company.com"
+	host  = "http://woodpecker.company.tld"
 )
 
 func main() {
@@ -21,15 +21,15 @@ func main() {
 		},
 	)
 
-	// create the drone client with authenticator
-	client := drone.NewClient(host, auther)
+	// create the woodpecker client with authenticator
+	client := woodpecker.NewClient(host, auther)
 
 	// gets the current user
 	user, err := client.Self()
 	fmt.Println(user, err)
 
 	// gets the named repository information
-	repo, err := client.Repo("drone", "drone-go")
+	repo, err := client.Repo("woodpecker-ci", "woodpecker")
 	fmt.Println(repo, err)
 }
 ```
