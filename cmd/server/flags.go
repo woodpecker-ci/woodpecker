@@ -320,7 +320,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITEA_CONTEXT",
 		Name:   "gitea-context",
 		Usage:  "gitea status context",
-		Value:  "continuous-integration/drone",
+		Value:  "continuous-integration/woodpecker",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_GITEA_GIT_USERNAME",

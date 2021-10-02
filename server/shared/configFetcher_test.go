@@ -212,7 +212,7 @@ func TestFetch(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
+			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
 			dirs := map[string][]*remote.FileMeta{}
