@@ -91,7 +91,7 @@ func TestWithResourceLimit(t *testing.T) {
 }
 
 func TestWithPrefix(t *testing.T) {
-	if New(WithPrefix("drone_")).prefix != "drone_" {
+	if New(WithPrefix("someprefix_")).prefix != "someprefix_" {
 		t.Errorf("WithPrefix must set the prefix")
 	}
 }

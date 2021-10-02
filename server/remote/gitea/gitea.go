@@ -114,7 +114,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
@@ -451,7 +451,7 @@ const (
 	DescDeclined = "the build was rejected"
 )
 
-// getStatus is a helper function that converts a Drone
+// getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
 func getStatus(status string) gitea.StatusState {
 	switch status {

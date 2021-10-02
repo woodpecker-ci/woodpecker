@@ -40,9 +40,9 @@ func TestRepos(t *testing.T) {
 		g.It("Should Set a Repo", func() {
 			repo := model.Repo{
 				UserID:   1,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			err1 := s.CreateRepo(&repo)
 			err2 := s.UpdateRepo(&repo)
@@ -57,9 +57,9 @@ func TestRepos(t *testing.T) {
 		g.It("Should Add a Repo", func() {
 			repo := model.Repo{
 				UserID:   1,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			err := s.CreateRepo(&repo)
 			g.Assert(err == nil).IsTrue()
@@ -69,9 +69,9 @@ func TestRepos(t *testing.T) {
 		g.It("Should Get a Repo by ID", func() {
 			repo := model.Repo{
 				UserID:   1,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			s.CreateRepo(&repo)
 			getrepo, err := s.GetRepo(repo.ID)
@@ -85,9 +85,9 @@ func TestRepos(t *testing.T) {
 		g.It("Should Get a Repo by Name", func() {
 			repo := model.Repo{
 				UserID:   1,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			s.CreateRepo(&repo)
 			getrepo, err := s.GetRepoName(repo.FullName)
@@ -101,15 +101,15 @@ func TestRepos(t *testing.T) {
 		g.It("Should Enforce Unique Repo Name", func() {
 			repo1 := model.Repo{
 				UserID:   1,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			repo2 := model.Repo{
 				UserID:   2,
-				FullName: "bradrydzewski/drone",
+				FullName: "bradrydzewski/test",
 				Owner:    "bradrydzewski",
-				Name:     "drone",
+				Name:     "test",
 			}
 			err1 := s.CreateRepo(&repo1)
 			err2 := s.CreateRepo(&repo2)
@@ -141,13 +141,13 @@ func TestRepoList(t *testing.T) {
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
-		Name:     "drone",
-		FullName: "bradrydzewski/drone",
+		Name:     "test",
+		FullName: "bradrydzewski/test",
 	}
 	repo2 := &model.Repo{
-		Owner:    "drone",
-		Name:     "drone",
-		FullName: "drone/drone",
+		Owner:    "test",
+		Name:     "test",
+		FullName: "test/test",
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
@@ -197,14 +197,14 @@ func TestRepoListLatest(t *testing.T) {
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
-		Name:     "drone",
-		FullName: "bradrydzewski/drone",
+		Name:     "test",
+		FullName: "bradrydzewski/test",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "drone",
-		Name:     "drone",
-		FullName: "drone/drone",
+		Owner:    "test",
+		Name:     "test",
+		FullName: "test/test",
 		IsActive: true,
 	}
 	repo3 := &model.Repo{
@@ -276,20 +276,20 @@ func TestRepoCount(t *testing.T) {
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
-		Name:     "drone",
-		FullName: "bradrydzewski/drone",
+		Name:     "test",
+		FullName: "bradrydzewski/test",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "drone",
-		Name:     "drone",
-		FullName: "drone/drone",
+		Owner:    "test",
+		Name:     "test",
+		FullName: "test/test",
 		IsActive: true,
 	}
 	repo3 := &model.Repo{
-		Owner:    "drone",
-		Name:     "drone-ui",
-		FullName: "drone/drone-ui",
+		Owner:    "test",
+		Name:     "test-ui",
+		FullName: "test/test-ui",
 		IsActive: false,
 	}
 	s.CreateRepo(repo1)
@@ -373,9 +373,9 @@ func TestRepoCrud(t *testing.T) {
 
 	repo := model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	s.CreateRepo(&repo)
 	_, err1 := s.GetRepo(repo.ID)

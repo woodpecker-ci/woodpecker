@@ -31,7 +31,7 @@ import (
 var Command = cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
-	ArgsUsage: "[path/to/.drone.yml]",
+	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action: func(c *cli.Context) {
 		if err := exec(c); err != nil {
 			log.Fatalln(err)
@@ -62,8 +62,8 @@ var Command = cli.Command{
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_DOCKER_PREFIX",
 			Name:   "prefix",
-			Value:  "drone",
-			Usage:  "prefix containers created by drone",
+			Value:  "woodpecker",
+			Usage:  "prefix containers created by woodpecker",
 			Hidden: true,
 		},
 		cli.StringSliceFlag{
@@ -88,7 +88,7 @@ var Command = cli.Command{
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_WORKSPACE_BASE",
 			Name:   "workspace-base",
-			Value:  "/drone",
+			Value:  "/woodpecker",
 		},
 		cli.StringFlag{
 			EnvVar: "WOODPECKER_WORKSPACE_PATH",

@@ -145,7 +145,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".drone.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
 			g.Assert(err == nil).IsTrue()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})

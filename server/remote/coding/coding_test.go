@@ -164,7 +164,7 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When downloading a file", func() {
 			g.It("Should return file for specified build", func() {
-				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".drone.yml")
+				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
 				g.Assert(err == nil).IsTrue()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
