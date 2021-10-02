@@ -93,7 +93,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
@@ -331,7 +331,7 @@ func (c *Coding) newClientToken(ctx context.Context, token string) *internal.Cli
 			},
 		},
 	}
-	return internal.NewClient(ctx, c.URL, "/api", token, "drone", client)
+	return internal.NewClient(ctx, c.URL, "/api", token, "woodpecker", client)
 }
 
 func (c *Coding) resourceLink(resourcePath string) string {
