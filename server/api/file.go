@@ -102,7 +102,7 @@ func FileGet(c *gin.Context) {
 	defer rc.Close()
 
 	switch file.Mime {
-	case "application/vnd.drone.test+json":
+	case "application/vnd.test+json":
 		c.Header("Content-Type", "application/json")
 	}
 

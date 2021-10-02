@@ -486,12 +486,12 @@ type WoodpeckerServer struct {
 
 func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
 	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_time",
 		Help:      "Build time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_count",
 		Help:      "Build count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
