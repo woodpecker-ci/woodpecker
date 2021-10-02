@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/drone/envsubst"
+	"github.com/woodpecker-ci/envsubst"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"

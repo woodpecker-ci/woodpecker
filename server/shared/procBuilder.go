@@ -22,7 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/drone/envsubst"
+	"github.com/woodpecker-ci/envsubst"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
