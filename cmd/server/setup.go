@@ -32,7 +32,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/remote/github"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
@@ -149,25 +148,14 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitlab remote from the CLI arguments.
 func setupGitlab(c *cli.Context) (remote.Remote, error) {
-	if c.Bool("gitlab-v3-api") {
-		return gitlab3.New(gitlab3.Opts{
-			URL:         c.String("gitlab-server"),
-			Client:      c.String("gitlab-client"),
-			Secret:      c.String("gitlab-secret"),
-			Username:    c.String("gitlab-git-username"),
-			Password:    c.String("gitlab-git-password"),
-			PrivateMode: c.Bool("gitlab-private-mode"),
-			SkipVerify:  c.Bool("gitlab-skip-verify"),
-		})
-	}
 	return gitlab.New(gitlab.Opts{
-		URL:         c.String("gitlab-server"),
-		Client:      c.String("gitlab-client"),
-		Secret:      c.String("gitlab-secret"),
-		Username:    c.String("gitlab-git-username"),
-		Password:    c.String("gitlab-git-password"),
-		PrivateMode: c.Bool("gitlab-private-mode"),
-		SkipVerify:  c.Bool("gitlab-skip-verify"),
+		URL:          c.String("gitlab-server"),
+		ClientID:     c.String("gitlab-client"),
+		ClientSecret: c.String("gitlab-secret"),
+		Username:     c.String("gitlab-git-username"),
+		Password:     c.String("gitlab-git-password"),
+		PrivateMode:  c.Bool("gitlab-private-mode"),
+		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
 
