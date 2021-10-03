@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
@@ -31,13 +32,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/remote/github"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 
-	"github.com/dimfeld/httptreemux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
@@ -149,25 +148,14 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitlab remote from the CLI arguments.
 func setupGitlab(c *cli.Context) (remote.Remote, error) {
-	if c.Bool("gitlab-v3-api") {
-		return gitlab3.New(gitlab3.Opts{
-			URL:         c.String("gitlab-server"),
-			Client:      c.String("gitlab-client"),
-			Secret:      c.String("gitlab-secret"),
-			Username:    c.String("gitlab-git-username"),
-			Password:    c.String("gitlab-git-password"),
-			PrivateMode: c.Bool("gitlab-private-mode"),
-			SkipVerify:  c.Bool("gitlab-skip-verify"),
-		})
-	}
 	return gitlab.New(gitlab.Opts{
-		URL:         c.String("gitlab-server"),
-		Client:      c.String("gitlab-client"),
-		Secret:      c.String("gitlab-secret"),
-		Username:    c.String("gitlab-git-username"),
-		Password:    c.String("gitlab-git-password"),
-		PrivateMode: c.Bool("gitlab-private-mode"),
-		SkipVerify:  c.Bool("gitlab-skip-verify"),
+		URL:          c.String("gitlab-server"),
+		ClientID:     c.String("gitlab-client"),
+		ClientSecret: c.String("gitlab-secret"),
+		Username:     c.String("gitlab-git-username"),
+		Password:     c.String("gitlab-git-password"),
+		PrivateMode:  c.Bool("gitlab-private-mode"),
+		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
 
@@ -201,8 +189,8 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	})
 }
 
-func setupTree(c *cli.Context) *httptreemux.ContextMux {
-	tree := httptreemux.NewContextMux()
+func setupTree(c *cli.Context) *gin.Engine {
+	tree := gin.New()
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),

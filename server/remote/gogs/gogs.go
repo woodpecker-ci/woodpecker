@@ -83,24 +83,24 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	client := c.newClient()
 
-	// try to fetch drone token if it exists
+	// try to fetch woodpecker token if it exists
 	var accessToken string
 	tokens, err := client.ListAccessTokens(username, password)
 	if err == nil {
 		for _, token := range tokens {
-			if token.Name == "drone" {
+			if token.Name == "woodpecker" {
 				accessToken = token.Sha1
 				break
 			}
 		}
 	}
 
-	// if drone token not found, create it
+	// if woodpecker token not found, create it
 	if accessToken == "" {
 		token, terr := client.CreateAccessToken(
 			username,
 			password,
-			gogs.CreateAccessTokenOption{Name: "drone"},
+			gogs.CreateAccessTokenOption{Name: "woodpecker"},
 		)
 		if terr != nil {
 			return nil, terr

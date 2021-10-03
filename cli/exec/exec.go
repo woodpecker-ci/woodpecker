@@ -30,7 +30,7 @@ import (
 var Command = cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
-	ArgsUsage: "[path/to/.drone.yml]",
+	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action: func(c *cli.Context) {
 		if err := exec(c); err != nil {
 			log.Fatalln(err)

@@ -45,8 +45,8 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_DOCKER_PREFIX",
 		Name:   "prefix",
-		Value:  "drone",
-		Usage:  "prefix containers created by drone",
+		Value:  "woodpecker",
+		Usage:  "prefix containers created by woodpecker",
 		Hidden: true,
 	},
 	cli.StringSliceFlag{
@@ -70,7 +70,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_WORKSPACE_BASE",
 		Name:   "workspace-base",
-		Value:  "/drone",
+		Value:  "/woodpecker",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_WORKSPACE_PATH",

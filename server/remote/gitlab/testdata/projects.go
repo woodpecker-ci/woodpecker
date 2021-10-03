@@ -30,7 +30,7 @@ var allProjectsPayload = []byte(`
 			"id": 3,
 			"name": "Diaspora",
 			"username": "some_user",
-			"created_at": "2013-09-30T13: 46: 02Z"
+			"created_at": "2013-09-30T13:46:02Z"
 		},
 		"name": "Diaspora Client",
 		"name_with_namespace": "Diaspora / Diaspora Client",
@@ -40,16 +40,16 @@ var allProjectsPayload = []byte(`
 		"merge_requests_enabled": true,
 		"wiki_enabled": true,
 		"snippets_enabled": false,
-		"created_at": "2013-09-30T13: 46: 02Z",
-		"last_activity_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
+		"last_activity_at": "2013-09-30T13:46:02Z",
 		"namespace": {
-			"created_at": "2013-09-30T13: 46: 02Z",
+			"created_at": "2013-09-30T13:46:02Z",
 			"description": "",
 			"id": 3,
 			"name": "Diaspora",
 			"owner_id": 1,
 			"path": "diaspora",
-			"updated_at": "2013-09-30T13: 46: 02Z"
+			"updated_at": "2013-09-30T13:46:02Z"
 		},
 		"archived": false
 	},
@@ -107,7 +107,7 @@ var notArchivedProjectsPayload = []byte(`
 			"id": 3,
 			"name": "Diaspora",
 			"username": "some_user",
-			"created_at": "2013-09-30T13: 46: 02Z"
+			"created_at": "2013-09-30T13:46:02Z"
 		},
 		"name": "Diaspora Client",
 		"name_with_namespace": "Diaspora / Diaspora Client",
@@ -117,16 +117,16 @@ var notArchivedProjectsPayload = []byte(`
 		"merge_requests_enabled": true,
 		"wiki_enabled": true,
 		"snippets_enabled": false,
-		"created_at": "2013-09-30T13: 46: 02Z",
-		"last_activity_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
+		"last_activity_at": "2013-09-30T13:46:02Z",
 		"namespace": {
-			"created_at": "2013-09-30T13: 46: 02Z",
+			"created_at": "2013-09-30T13:46:02Z",
 			"description": "",
 			"id": 3,
 			"name": "Diaspora",
 			"owner_id": 1,
 			"path": "diaspora",
-			"updated_at": "2013-09-30T13: 46: 02Z"
+			"updated_at": "2013-09-30T13:46:02Z"
 		},
 		"archived": false
 	}
@@ -147,7 +147,7 @@ var project4Paylod = []byte(`
 		"id": 3,
 		"name": "Diaspora",
 		"username": "some_user",
-		"created_at": "2013-09-30T13: 46: 02Z"
+		"created_at": "2013-09-30T13:46:02Z"
 	},
 	"name": "Diaspora Client",
 	"name_with_namespace": "Diaspora / Diaspora Client",
@@ -157,16 +157,16 @@ var project4Paylod = []byte(`
 	"merge_requests_enabled": true,
 	"wiki_enabled": true,
 	"snippets_enabled": false,
-	"created_at": "2013-09-30T13: 46: 02Z",
-	"last_activity_at": "2013-09-30T13: 46: 02Z",
+	"created_at": "2013-09-30T13:46:02Z",
+	"last_activity_at": "2013-09-30T13:46:02Z",
 	"namespace": {
-		"created_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
 		"description": "",
 		"id": 3,
 		"name": "Diaspora",
 		"owner_id": 1,
 		"path": "diaspora",
-		"updated_at": "2013-09-30T13: 46: 02Z"
+		"updated_at": "2013-09-30T13:46:02Z"
 	},
 	"archived": false,
 	"permissions": {
