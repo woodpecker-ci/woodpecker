@@ -11,7 +11,7 @@ type Engine interface {
 	// Setup the pipeline environment.
 	Setup(context.Context, *Config) error
 
-	// Start the pipeline step.
+	// Exec start the pipeline step.
 	Exec(context.Context, *Step) error
 
 	// Kill the pipeline step.
