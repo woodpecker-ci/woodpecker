@@ -108,7 +108,7 @@ func getProjects(c *gin.Context) {
 func getFile(c *gin.Context) {
 	c.Header("Content-Type", "application/json;charset=UTF-8")
 	switch fmt.Sprintf("%s/%s/%s/%s", c.Param("gk"), c.Param("prj"), c.Param("ref"), c.Param("path")) {
-	case "demo1/test1/master/.drone.yml", "demo1/test1/4504a072cc/.drone.yml":
+	case "demo1/test1/master/.woodpecker.yml", "demo1/test1/4504a072cc/.woodpecker.yml":
 		c.String(200, fakeFilePayload)
 	default:
 		c.String(200, fileNotFoundPayload)

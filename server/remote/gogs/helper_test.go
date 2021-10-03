@@ -159,7 +159,7 @@ func Test_parse(t *testing.T) {
 
 		g.It("Should return a Team struct from a Gogs Org", func() {
 			from := &gogs.Organization{
-				UserName:  "drone",
+				UserName:  "woodpecker",
 				AvatarUrl: "/avatars/1",
 			}
 

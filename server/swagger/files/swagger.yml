@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Drone API
+  title: Woodpecker API
   license:
     name: Creative Commons 4.0 International
     url: "http://creativecommons.org/licenses/by/4.0/"
