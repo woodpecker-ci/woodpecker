@@ -1,4 +1,4 @@
-package drone
+package woodpecker
 
 // Event values.
 const (
