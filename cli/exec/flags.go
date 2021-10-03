@@ -60,9 +60,8 @@ var flags = []cli.Flag{
 	},
 
 	//
-	// Please note the below flags are mirrored in the pipec and
-	// should be kept synchronized. Do not edit directly
-	// https://github.com/cncd/pipeline/pipec
+	// Please note the below flags should match the flags from
+	// pipeline/frontend/metadata.go and should be kept synchronized.
 	//
 
 	//
@@ -261,6 +260,6 @@ var flags = []cli.Flag{
 	},
 	cli.StringSliceFlag{
 		EnvVar: "WOODPECKER_ENV",
-		Name:   "env, e",
+		Name:   "env",
 	},
 }
