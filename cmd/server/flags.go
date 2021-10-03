@@ -399,11 +399,6 @@ var flags = []cli.Flag{
 		Usage:  "gitlab is running in private mode",
 	},
 	cli.BoolFlag{
-		EnvVar: "WOODPECKER_GITLAB_V3_API",
-		Name:   "gitlab-v3-api",
-		Usage:  "gitlab is running the v3 api",
-	},
-	cli.BoolFlag{
 		EnvVar: "WOODPECKER_STASH",
 		Name:   "stash",
 		Usage:  "stash driver is enabled",
