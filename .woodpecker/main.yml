@@ -3,6 +3,41 @@ clone:
     image: plugins/git:next
 
 pipeline:
+  test:
+    image: golang:1.16
+    group: test
+    commands:
+      - make test
+      - make vet
+      - make formatcheck
+
+  test-frontend:
+    image: node:10.17.0-stretch
+    group: test
+    commands:
+      - (cd web/; yarn install)
+      - (cd web/; yarn run lesshint)
+      - (cd web/; yarn run lint --quiet)
+      - make test-frontend
+
+  test-postgres:
+    image: golang:1.16
+    group: db-test
+    environment:
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+    commands:
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
+
+  test-mysql:
+    image: golang:1.16
+    group: db-test
+    environment:
+      - WOODPECKER_DATABASE_DRIVER=mysql
+      - WOODPECKER_DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+    commands:
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
+
   build-frontend:
     image: node:10.17.0-stretch
     commands:
@@ -121,5 +156,16 @@ pipeline:
     when:
       event: tag
 
-depends_on:
-  - test
+services:
+  postgres:
+    image: postgres:9.6
+    ports: ["5432"]
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  mysql:
+    image: mysql:5.6.27
+    ports: ["3306"]
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes

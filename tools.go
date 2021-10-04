@@ -1,7 +1,7 @@
 //go:build tools
 // +build tools
 
-// this file makes sure tools are vendored too
+// this file make sure tools are vendored too
 package tools
 
 import (
