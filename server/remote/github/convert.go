@@ -20,7 +20,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v39/github"
 )
 
 const defaultBranch = "master"
@@ -109,9 +109,9 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 // permissions to the common Drone permissions structure.
 func convertPerm(from *github.Repository) *model.Perm {
 	return &model.Perm{
-		Admin: (*from.Permissions)["admin"],
-		Push:  (*from.Permissions)["push"],
-		Pull:  (*from.Permissions)["pull"],
+		Admin: from.Permissions["admin"],
+		Push:  from.Permissions["push"],
+		Pull:  from.Permissions["pull"],
 	}
 }
 
@@ -129,28 +129,17 @@ func convertTeamPerm(from *github.Membership) *model.Perm {
 
 // convertRepoList is a helper function used to convert a GitHub repository
 // list to the common Drone repository structure.
-func convertRepoList(from []github.Repository, private bool) []*model.Repo {
+func convertRepoList(from []*github.Repository, private bool) []*model.Repo {
 	var repos []*model.Repo
 	for _, repo := range from {
-		repos = append(repos, convertRepo(&repo, private))
+		repos = append(repos, convertRepo(repo, private))
 	}
 	return repos
 }
 
-// // convertRepoLite is a helper function used to convert a GitHub repository
-// // structure to the common Drone repository structure.
-// func convertRepoLite(from github.Repository) *model.RepoLite {
-// 	return &model.RepoLite{
-// 		Owner:    *from.Owner.Login,
-// 		Name:     *from.Name,
-// 		FullName: *from.FullName,
-// 		Avatar:   *from.Owner.AvatarURL,
-// 	}
-// }
-
 // convertTeamList is a helper function used to convert a GitHub team list to
 // the common Drone repository structure.
-func convertTeamList(from []github.Organization) []*model.Team {
+func convertTeamList(from []*github.Organization) []*model.Team {
 	var teams []*model.Team
 	for _, team := range from {
 		teams = append(teams, convertTeam(team))
@@ -160,7 +149,7 @@ func convertTeamList(from []github.Organization) []*model.Team {
 
 // convertTeam is a helper function used to convert a GitHub team structure
 // to the common Drone repository structure.
-func convertTeam(from github.Organization) *model.Team {
+func convertTeam(from *github.Organization) *model.Team {
 	return &model.Team{
 		Login:  *from.Login,
 		Avatar: *from.AvatarURL,

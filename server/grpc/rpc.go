@@ -478,12 +478,13 @@ func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
 //
 //
 
-// DroneServer is a grpc server implementation.
-type DroneServer struct {
+// WoodpeckerServer is a grpc server implementation.
+type WoodpeckerServer struct {
+	proto.UnimplementedWoodpeckerServer
 	peer RPC
 }
 
-func NewDroneServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *DroneServer {
+func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
 	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "drone",
 		Name:      "build_time",
@@ -504,10 +505,10 @@ func NewDroneServer(remote remote.Remote, queue queue.Queue, logger logging.Log,
 		buildTime:  buildTime,
 		buildCount: buildCount,
 	}
-	return &DroneServer{peer: peer}
+	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
+func (s *WoodpeckerServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 		Expr:   req.GetFilter().GetExpr(),
@@ -530,7 +531,7 @@ func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -544,7 +545,7 @@ func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -558,7 +559,7 @@ func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*p
 	return res, err
 }
 
-func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
 	file := &rpc.File{
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
@@ -574,7 +575,7 @@ func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*p
 	return res, err
 }
 
-func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -588,19 +589,19 @@ func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Wait(c, req.GetId())
 	return res, err
 }
 
-func (s *DroneServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Extend(c, req.GetId())
 	return res, err
 }
 
-func (s *DroneServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
 	line := &rpc.Line{
 		Out:  req.GetLine().GetOut(),
 		Pos:  int(req.GetLine().GetPos()),
