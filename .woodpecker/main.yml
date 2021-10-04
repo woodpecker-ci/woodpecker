@@ -64,15 +64,15 @@ pipeline:
       branch: master
       event: push
 
-  # publish-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
+  publish-server-alpine:
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine]
+    when:
+      branch: master
+      event: push
 
   publish-agent:
     image: plugins/docker
@@ -84,33 +84,15 @@ pipeline:
       branch: master
       event: push
 
-  # publish-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
-
-  # release-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
-  #
-  # release-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
+  publish-agent-alpine:
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-agent
+    dockerfile: docker/Dockerfile.agent.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine]
+    when:
+      branch: master
+      event: push
 
   release-server:
     image: plugins/docker
@@ -121,12 +103,30 @@ pipeline:
     when:
       event: tag
 
+  release-server-alpine:
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: "${DRONE_TAG}-alpine"
+    when:
+      event: tag
+
   release-agent:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
     tag: ${DRONE_TAG}
+    when:
+      event: tag
+
+  release-agent-alpine:
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-agent
+    dockerfile: docker/Dockerfile.agent.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: "${DRONE_TAG}-alpine"
     when:
       event: tag
 
