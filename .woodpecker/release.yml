@@ -6,11 +6,98 @@ pipeline:
   build:
     image: golang:1.16
     commands:
-      - go mod tidy
       - make release
-    when:
-      event: [push, tag]
-      branch: master
+
+  # publish-server:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-server
+  #   dockerfile: docker/Dockerfile.server
+  #   secrets: [docker_username, docker_password]
+  #   # TODO: only release as next after 0.15.0 got released
+  #   tag: [next, latest]
+  #   when:
+  #     branch: master
+  #     event: push
+
+  # publish-server-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-server
+  #   dockerfile: docker/Dockerfile.server.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   # TODO: only release as next-alpine after 0.15.0 got released
+  #   tag: [next-alpine, latest-alpine]
+  #   when:
+  #     branch: master
+  #     event: push
+
+  # publish-agent:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-agent
+  #   dockerfile: docker/Dockerfile.agent
+  #   secrets: [docker_username, docker_password]
+  #   # TODO: only release as next after 0.15.0 got released
+  #   tag: [next, latest]
+  #   when:
+  #     branch: master
+  #     event: push
+
+  # publish-agent-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-agent
+  #   dockerfile: docker/Dockerfile.agent.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   # TODO: only release as next-alpine after 0.15.0 got released
+  #   tag: [next-alpine, latest-alpine]
+  #   when:
+  #     branch: master
+  #     event: push
+
+  # release-server:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-server
+  #   dockerfile: docker/Dockerfile.server
+  #   secrets: [docker_username, docker_password]
+  #   tag: [latest, "${DRONE_TAG}"]
+  #   when:
+  #     event: tag
+
+  # release-server-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-server
+  #   dockerfile: docker/Dockerfile.server.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+  #   when:
+  #     event: tag
+
+  # release-agent:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-agent
+  #   dockerfile: docker/Dockerfile.agent
+  #   secrets: [docker_username, docker_password]
+  #   tag: [latest, "${DRONE_TAG}"]
+  #   when:
+  #     event: tag
+
+  # release-agent-alpine:
+  #   image: plugins/docker
+  #   repo: woodpeckerci/woodpecker-agent
+  #   dockerfile: docker/Dockerfile.agent.alpine
+  #   secrets: [ docker_username, docker_password ]
+  #   tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+  #   when:
+  #     event: tag
+
+  # release-cli:
+  #   image: plugins/github-release
+  #   files:
+  #     - cli/release/woodpecker_*.tar.gz
+  #     - cli/release/woodpecker_checksums.txt
+  #   secrets:
+  #     - source: github_token
+  #       target: github_release_api_key
+  #   when:
+  #     event: tag
 
   build-docker-server:
     group: build-docker
@@ -56,15 +143,15 @@ pipeline:
     image: golang:1.16
     commands:
       - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3
-      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager apk
-      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager deb
-      - nfpm package --config ./release/nfpm-server.yml --target ./dist --packager rpm
-      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager apk
-      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager deb
-      - nfpm package --config ./release/nfpm-agent.yml --target ./dist --packager rpm
-      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager apk
-      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager deb
-      - nfpm package --config ./release/nfpm-cli.yml --target ./dist --packager rpm
+      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager apk
+      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
+      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager apk
+      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
+      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager apk
+      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
+      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
     when:
       event: [push, tag]
       branch: master
