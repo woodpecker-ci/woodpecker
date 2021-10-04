@@ -46,8 +46,6 @@ pipeline:
   build:
     image: golang:1.16
     commands:
-      - go get github.com/woodpecker-ci/togo
-      - (cd web/; go generate ./...)
       - make release
 
   build-cli:
