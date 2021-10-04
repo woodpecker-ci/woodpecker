@@ -59,7 +59,8 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
     secrets: [docker_username, docker_password]
-    tag: [latest]
+    # TODO: only release as next-alpine after 0.15.0 got released
+    tag: [next, latest]
     when:
       branch: master
       event: push
@@ -69,7 +70,8 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [latest-alpine]
+    # TODO: only release as next-alpine after 0.15.0 got released
+    tag: [next-alpine, latest-alpine]
     when:
       branch: master
       event: push
@@ -89,7 +91,8 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [latest-alpine]
+    # TODO: only release as next-alpine after 0.15.0 got released
+    tag: [next-alpine, latest-alpine]
     when:
       branch: master
       event: push
@@ -108,7 +111,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
     secrets: [ docker_username, docker_password ]
-    tag: "${DRONE_TAG}-alpine"
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
     when:
       event: tag
 
@@ -117,7 +120,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: ${DRONE_TAG}
+    tag: [latest, ${DRONE_TAG}]
     when:
       event: tag
 
@@ -126,7 +129,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: "${DRONE_TAG}-alpine"
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
     when:
       event: tag
 
