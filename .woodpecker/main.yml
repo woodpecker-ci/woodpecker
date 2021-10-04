@@ -120,7 +120,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: [latest, ${DRONE_TAG}]
+    tag: [latest, "${DRONE_TAG}"]
     when:
       event: tag
 
