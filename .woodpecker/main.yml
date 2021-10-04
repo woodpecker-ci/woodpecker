@@ -109,6 +109,28 @@ pipeline:
       branch: master
       event: push
 
+  publish-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [next]
+    when:
+      branch: master
+      event: push
+
+  publish-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [next-alpine]
+    when:
+      branch: master
+      event: push
+
   release-server:
     group: docker
     image: plugins/docker
@@ -144,6 +166,26 @@ pipeline:
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    when:
+      event: tag
+
+  release-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [latest, "${DRONE_TAG}"]
+    when:
+      event: tag
+
+  release-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
     secrets: [ docker_username, docker_password ]
     tag: [latest-alpine, "${DRONE_TAG}-alpine"]
     when:
