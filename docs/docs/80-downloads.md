@@ -7,7 +7,7 @@
 ## Docker images
 
 Image variants:
-* The `next` version images are based on the current master branch
+* The `next` images are based on the current master branch
 * The `latest` is same as next (will change after v0.15.0 release to be latest stable release)
 * The `x.x.x` version images are stable releases
 
