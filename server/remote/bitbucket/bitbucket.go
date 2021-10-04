@@ -69,7 +69,7 @@ func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Req
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
@@ -218,7 +218,7 @@ func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
-		Key:   "Drone",
+		Key:   "Woodpecker",
 		Url:   link,
 	}
 	return c.newClient(ctx, u).CreateStatus(r.Owner, r.Name, b.Commit, &status)

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli"
 )
@@ -54,7 +54,7 @@ func registryCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry := &drone.Registry{
+	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
 		Password: password,

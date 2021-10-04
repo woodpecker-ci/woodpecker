@@ -320,7 +320,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITEA_CONTEXT",
 		Name:   "gitea-context",
 		Usage:  "gitea status context",
-		Value:  "continuous-integration/drone",
+		Value:  "continuous-integration/woodpecker",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_GITEA_GIT_USERNAME",
@@ -397,11 +397,6 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITLAB_PRIVATE_MODE",
 		Name:   "gitlab-private-mode",
 		Usage:  "gitlab is running in private mode",
-	},
-	cli.BoolFlag{
-		EnvVar: "WOODPECKER_GITLAB_V3_API",
-		Name:   "gitlab-v3-api",
-		Usage:  "gitlab is running the v3 api",
 	},
 	cli.BoolFlag{
 		EnvVar: "WOODPECKER_STASH",

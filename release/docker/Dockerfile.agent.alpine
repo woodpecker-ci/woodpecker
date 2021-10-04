@@ -1,5 +1,10 @@
+<<<<<<< HEAD:release/docker/Dockerfile.agent.alpine
 FROM alpine:3.14.1
+=======
+# docker build --rm -f docker/Dockerfile.agent.alpine -t woodpeckerci/woodpecker-agent .
+>>>>>>> upstream/master:docker/Dockerfile.agent.alpine
 
+FROM alpine:3.14
 RUN apk add -U --no-cache ca-certificates
 
 ENV GODEBUG=netdns=go
@@ -9,4 +14,3 @@ EXPOSE 3000
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 
 ENTRYPOINT ["/bin/woodpecker-agent"]
-

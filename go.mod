@@ -24,7 +24,7 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
@@ -51,6 +51,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+	github.com/xanzy/go-gitlab v0.51.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a

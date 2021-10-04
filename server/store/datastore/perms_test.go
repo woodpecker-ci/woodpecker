@@ -31,9 +31,9 @@ func TestPermFind(t *testing.T) {
 	user := &model.User{ID: 1}
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	s.CreateRepo(repo)
 
@@ -79,9 +79,9 @@ func TestPermUpsert(t *testing.T) {
 	user := &model.User{ID: 1}
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	s.CreateRepo(repo)
 
@@ -162,9 +162,9 @@ func TestPermDelete(t *testing.T) {
 	user := &model.User{ID: 1}
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	s.CreateRepo(repo)
 

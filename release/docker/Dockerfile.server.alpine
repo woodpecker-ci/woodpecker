@@ -1,7 +1,14 @@
+<<<<<<< HEAD:release/docker/Dockerfile.server.alpine
 FROM alpine:3.14.1
 EXPOSE 8000 9000 80 443
+=======
+# docker build --rm  -f docker/Dockerfile.server.alpine -t woodpeckerci/woodpecker-server .
+>>>>>>> upstream/master:docker/Dockerfile.server.alpine
 
+FROM alpine:3.14
 RUN apk add -U --no-cache ca-certificates
+
+EXPOSE 8000 9000 80 443
 
 ENV GODEBUG=netdns=go
 ENV XDG_CACHE_HOME=/var/lib/drone

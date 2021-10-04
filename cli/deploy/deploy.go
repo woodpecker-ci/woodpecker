@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli"
 )
@@ -32,12 +32,12 @@ var Command = cli.Command{
 		cli.StringFlag{
 			Name:  "event",
 			Usage: "event filter",
-			Value: drone.EventPush,
+			Value: woodpecker.EventPush,
 		},
 		cli.StringFlag{
 			Name:  "status",
 			Usage: "status filter",
-			Value: drone.StatusSuccess,
+			Value: woodpecker.StatusSuccess,
 		},
 		cli.StringSliceFlag{
 			Name:  "param, p",
