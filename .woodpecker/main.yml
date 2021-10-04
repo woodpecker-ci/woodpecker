@@ -38,11 +38,6 @@ pipeline:
     commands:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
-  build-frontend:
-    image: node:10.17.0-stretch
-    commands:
-      - make build-frontend
-
   build-release:
     image: golang:1.16
     commands:
@@ -128,11 +123,21 @@ pipeline:
     when:
       event: tag
 
-  release-cli:
+  checksums:
+    image: golang:1.16
+    commands:
+      - make release-checksums
+    when:
+      event: tag
+
+  # TODO: upload build artifacts for pushes to master
+
+  release:
     image: plugins/github-release
     files:
-      - cli/release/woodpecker_*.tar.gz
-      - cli/release/woodpecker_checksums.txt
+      - dist/*.tar.gz
+      - dist/checksums.txt
+    title: ${DRONE_TAG##v}
     secrets:
       - source: github_token
         target: github_release_api_key
