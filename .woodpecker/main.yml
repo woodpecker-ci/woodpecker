@@ -149,6 +149,19 @@ pipeline:
     when:
       event: tag
 
+  changelog:
+    image: alpine:3.14.1
+    commands:
+      - apk add make
+      - curl -L https://dl.gitea.io/changelog-tool/master/changelog-master-linux-amd64 > changelog
+      - chmod +x ./changelog
+      - ./changelog -m=$(make version) generate > CHANGELOG-latest.md
+      - ./changelog -m=$(make version) contributors >> CHANGELOG-latest.md
+      - echo -e "$(cat CHANGELOG-latest.md)\n$(cat CHANGELOG.md)" > CHANGELOG.md
+      # TODO push updated CHANGELOG.md with woodpecker-bot
+    when:
+      event: tag
+
   checksums:
     image: golang:1.16
     commands:
@@ -164,6 +177,7 @@ pipeline:
       - dist/*.tar.gz
       - dist/checksums.txt
     title: ${DRONE_TAG##v}
+    note: CHANGELOG-latest.md
     secrets:
       - source: github_token
         target: github_release_api_key
