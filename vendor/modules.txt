@@ -116,9 +116,9 @@ github.com/go-sql-driver/mysql
 github.com/gogits/go-gogs-client
 # github.com/gogo/protobuf v1.3.2
 github.com/gogo/protobuf/proto
-# github.com/golang-jwt/jwt v3.2.2+incompatible
+# github.com/golang-jwt/jwt/v4 v4.1.0
 ## explicit
-github.com/golang-jwt/jwt
+github.com/golang-jwt/jwt/v4
 # github.com/golang/protobuf v1.5.2
 ## explicit
 github.com/golang/protobuf/proto

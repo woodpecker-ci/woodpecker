@@ -24,7 +24,7 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
