@@ -1,7 +1,9 @@
-FROM alpine:3.9.4
-EXPOSE 8000 9000 80 443
+# docker build --rm  -f docker/Dockerfile.server.alpine -t woodpeckerci/woodpecker-server .
 
+FROM alpine:3.14
 RUN apk add -U --no-cache ca-certificates
+
+EXPOSE 8000 9000 80 443
 
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/drone/drone.sqlite
