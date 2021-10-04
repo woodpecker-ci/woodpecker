@@ -62,7 +62,7 @@ pipeline:
       - make release-cli
 
   build-docker-server:
-    group: bundle
+    group: docker
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -75,7 +75,7 @@ pipeline:
       branch: master
 
   build-docker-agent:
-    group: bundle
+    group: docker
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -88,7 +88,7 @@ pipeline:
       branch: master
 
   build-docker-cli:
-    group: bundle
+    group: docker
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -99,37 +99,6 @@ pipeline:
     when:
       event: [push, tag]
       branch: master
-
-  build-adk-deb-rpm:
-    group: bundle
-    image: golang:1.16
-    commands:
-      - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3
-      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager apk
-      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-      - nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
-      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager apk
-      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-      - nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
-      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager apk
-      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-      - nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
-    when:
-      event: [push, tag]
-      branch: master
-
-  changelog:
-    image: alpine:3.14.1
-    commands:
-      - apk add make
-      - curl -L https://dl.gitea.io/changelog-tool/master/changelog-master-linux-amd64 > changelog
-      - chmod +x ./changelog
-      - ./changelog -m=$(make version) generate > CHANGELOG-latest.md
-      - ./changelog -m=$(make version) contributors >> CHANGELOG-latest.md
-      - echo -e "$(cat CHANGELOG-latest.md)\n$(cat CHANGELOG.md)" > CHANGELOG.md
-      # TODO push changed CHANGELOG.md with woodpecker-bot
-    when:
-      event: tag
 
   checksums:
     image: golang:1.16
@@ -144,12 +113,8 @@ pipeline:
     image: plugins/github-release
     files:
       - dist/*.tar.gz
-      - dist/*.apk
-      - dist/*.deb
-      - dist/*.rpm
       - dist/checksums.txt
     title: ${DRONE_TAG##v}
-    note: CHANGELOG-latest.md
     secrets:
       - source: github_token
         target: github_release_api_key
