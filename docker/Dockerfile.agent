@@ -9,7 +9,7 @@ FROM scratch
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENV GODEBUG=netdns=go
-ADD release/woodpecker-agent /bin/
+ADD dist/agent/linux_amd64/woodpecker-agent /bin/
 
 EXPOSE 3000
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
