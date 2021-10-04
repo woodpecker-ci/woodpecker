@@ -3,104 +3,31 @@ clone:
     image: plugins/git:next
 
 pipeline:
-  build:
+  build-frontend:
+    image: node:10.17.0-stretch
+    commands:
+      - make release-frontend
+
+  build-server:
+    group: build
     image: golang:1.16
     commands:
-      - make release
+      - make release-server
 
-  # publish-server:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server
-  #   secrets: [docker_username, docker_password]
-  #   # TODO: only release as next after 0.15.0 got released
-  #   tag: [next, latest]
-  #   when:
-  #     branch: master
-  #     event: push
+  build-agent:
+    group: build
+    image: golang:1.16
+    commands:
+      - make release-agent
 
-  # publish-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   # TODO: only release as next-alpine after 0.15.0 got released
-  #   tag: [next-alpine, latest-alpine]
-  #   when:
-  #     branch: master
-  #     event: push
-
-  # publish-agent:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent
-  #   secrets: [docker_username, docker_password]
-  #   # TODO: only release as next after 0.15.0 got released
-  #   tag: [next, latest]
-  #   when:
-  #     branch: master
-  #     event: push
-
-  # publish-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   # TODO: only release as next-alpine after 0.15.0 got released
-  #   tag: [next-alpine, latest-alpine]
-  #   when:
-  #     branch: master
-  #     event: push
-
-  # release-server:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server
-  #   secrets: [docker_username, docker_password]
-  #   tag: [latest, "${DRONE_TAG}"]
-  #   when:
-  #     event: tag
-
-  # release-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: docker/Dockerfile.server.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [latest-alpine, "${DRONE_TAG}-alpine"]
-  #   when:
-  #     event: tag
-
-  # release-agent:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent
-  #   secrets: [docker_username, docker_password]
-  #   tag: [latest, "${DRONE_TAG}"]
-  #   when:
-  #     event: tag
-
-  # release-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: docker/Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [latest-alpine, "${DRONE_TAG}-alpine"]
-  #   when:
-  #     event: tag
-
-  # release-cli:
-  #   image: plugins/github-release
-  #   files:
-  #     - cli/release/woodpecker_*.tar.gz
-  #     - cli/release/woodpecker_checksums.txt
-  #   secrets:
-  #     - source: github_token
-  #       target: github_release_api_key
-  #   when:
-  #     event: tag
+  build-cli:
+    group: build
+    image: golang:1.16
+    commands:
+      - make release-cli
 
   build-docker-server:
-    group: build-docker
+    group: bundle
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -113,7 +40,7 @@ pipeline:
       branch: master
 
   build-docker-agent:
-    group: build-docker
+    group: bundle
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -126,7 +53,7 @@ pipeline:
       branch: master
 
   build-docker-cli:
-    group: build-docker
+    group: bundle
     image: anbraten/kaniko:v1.6.0-debug
     secrets: [docker_username, docker_password]
     environment:
@@ -139,7 +66,7 @@ pipeline:
       branch: master
 
   build-adk-deb-rpm:
-    group: build-docker
+    group: bundle
     image: golang:1.16
     commands:
       - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3

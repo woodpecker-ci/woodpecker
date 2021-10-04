@@ -34,6 +34,7 @@ docker-compose.yml
 /.env
 extras/
 /build/
+/dist/
 
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
