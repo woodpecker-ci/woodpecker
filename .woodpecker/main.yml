@@ -109,6 +109,28 @@ pipeline:
       branch: master
       event: push
 
+  publish-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [next]
+    when:
+      branch: master
+      event: push
+
+  publish-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [next-alpine]
+    when:
+      branch: master
+      event: push
+
   release-server:
     group: docker
     image: plugins/docker
@@ -149,6 +171,26 @@ pipeline:
     when:
       event: tag
 
+  release-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [latest, "${DRONE_TAG}"]
+    when:
+      event: tag
+
+  release-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    when:
+      event: tag
+
   changelog:
     image: alpine:3.14.1
     commands:
@@ -159,8 +201,6 @@ pipeline:
       - ./changelog -m=$(make version) contributors >> CHANGELOG-latest.md
       - echo -e "$(cat CHANGELOG-latest.md)\n$(cat CHANGELOG.md)" > CHANGELOG.md
       # TODO push updated CHANGELOG.md with woodpecker-bot
-    when:
-      event: tag
 
   checksums:
     image: golang:1.16
