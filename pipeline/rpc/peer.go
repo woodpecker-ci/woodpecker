@@ -6,7 +6,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
 
-// ErrCancelled signals the pipeine is cancelled.
+// ErrCancelled signals the pipeline is cancelled.
 // var ErrCancelled = errors.New("cancelled")
 
 type (

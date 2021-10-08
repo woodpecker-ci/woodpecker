@@ -151,6 +151,6 @@ func TestRegistryIndexes(t *testing.T) {
 		Username: "baz",
 		Password: "qux",
 	}); err == nil {
-		t.Errorf("Unexpected error: dupliate address")
+		t.Errorf("Unexpected error: duplicate address")
 	}
 }
