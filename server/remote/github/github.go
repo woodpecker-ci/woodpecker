@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	defaultURL = "https://github.com"     // Default GitHub URL
-	defaultAPI = "https://api.github.com" // Default GitHub API URL
+	defaultURL = "https://github.com"      // Default GitHub URL
+	defaultAPI = "https://api.github.com/" // Default GitHub API URL
 )
 
 // Opts defines configuration options.
