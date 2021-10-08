@@ -384,28 +384,28 @@ when:
   instance: stage.drone.company.com
 ```
 
-Execute a step only on commit with certain files added/removed/modified:
+### `path`
 
-**NOTE: Feature is only available for Github and Gitea repositories.**
+> NOTE: This feature is currently only available for GitHub and Gitea repositories.
+
+Execute a step only on a pipeline with certain files being changed:
 
 ```diff
 when:
   path: "src/*"
 ```
 
-Execute a step only on commit excluding certain files added/removed/modified:
-
-
-**NOTE: Feature is only available for Github and Gitea repositories.**
+You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
 ```diff
 when:
   path:
-    exclude: [ '*.md', '*.ini' ]
+    include: [ '.woodpecker/*.yml', '*.ini' ]
+    exclude: [ '*.md', 'docs/**' ]
     ignore_message: "[ALL]"
 ```
 
-> Note for `path` conditions: passing `[ALL]` inside the commit message will ignore all path conditions.
+** Hint: ** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 #### Failure Execution
 
