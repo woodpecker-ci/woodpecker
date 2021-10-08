@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -42,14 +43,14 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	auther := config.Client(
-		oauth2.NoContext,
+	client := config.Client(
+		context.TODO(),
 		&oauth2.Token{
 			AccessToken: token,
 		},
 	)
 
-	trans, _ := auther.Transport.(*oauth2.Transport)
+	trans, _ := client.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
@@ -68,7 +69,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 		}
 	}
 
-	return woodpecker.NewClient(server, auther), nil
+	return woodpecker.NewClient(server, client), nil
 }
 
 // ParseRepo parses the repository owner and name from a string.
