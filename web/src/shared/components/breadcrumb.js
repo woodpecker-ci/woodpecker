@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { ExpandIcon, BackIcon } from "shared/components/icons/index";
 import style from "./breadcrumb.less";
 
-// breadcrumb separater icon.
+// breadcrumb separator icon.
 export const SEPARATOR = <ExpandIcon size={18} className={style.separator} />;
 
 // breadcrumb back button.

@@ -23,7 +23,7 @@ func WithOption(option Option, b bool) Option {
 	}
 }
 
-// WithVolumes configutes the compiler with default volumes that
+// WithVolumes configures the compiler with default volumes that
 // are mounted to each container in the pipeline.
 func WithVolumes(volumes ...string) Option {
 	return func(compiler *Compiler) {
@@ -49,7 +49,7 @@ func WithSecret(secrets ...Secret) Option {
 	}
 }
 
-// WithMetadata configutes the compiler with the repostiory, build
+// WithMetadata configures the compiler with the repository, build
 // and system metadata. The metadata is used to remove steps from
 // the compiled pipeline configuration that should be skipped. The
 // metadata is also added to each container as environment variables.
@@ -189,7 +189,7 @@ func WithProxy() Option {
 	)
 }
 
-// WithNetworks configures the compiler with additionnal networks
+// WithNetworks configures the compiler with additional networks
 // to be connected to build containers
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {

@@ -126,7 +126,7 @@ func pingDatabase(db *sql.DB) (err error) {
 	return
 }
 
-// helper function to setup the databsae by performing
+// helper function to setup the database by performing
 // automated database migration steps.
 func setupDatabase(driver string, db *sql.DB) error {
 	return ddl.Migrate(driver, db)
