@@ -31,7 +31,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/sirupsen/logrus"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -79,7 +79,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 func PostHook(c *gin.Context) {
 	remote_ := remote.FromContext(c)
 
-	tmprepo, build, err := remote_.Hook(c.Request)
+	tmpRepo, build, err := remote_.Hook(c.Request)
 	if err != nil {
 		logrus.Errorf("failure to parse hook. %s", err)
 		c.AbortWithError(400, err)
@@ -89,7 +89,7 @@ func PostHook(c *gin.Context) {
 		c.Writer.WriteHeader(200)
 		return
 	}
-	if tmprepo == nil {
+	if tmpRepo == nil {
 		logrus.Errorf("failure to ascertain repo from hook.")
 		c.Writer.WriteHeader(400)
 		return
@@ -104,14 +104,14 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, tmprepo.Owner, tmprepo.Name)
+	repo, err := store.GetRepoOwnerName(c, tmpRepo.Owner, tmpRepo.Name)
 	if err != nil {
-		logrus.Errorf("failure to find repo %s/%s from hook. %s", tmprepo.Owner, tmprepo.Name, err)
+		logrus.Errorf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
 		c.AbortWithError(404, err)
 		return
 	}
 	if !repo.IsActive {
-		logrus.Errorf("ignoring hook. %s/%s is inactive.", tmprepo.Owner, tmprepo.Name)
+		logrus.Errorf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
 		c.AbortWithError(204, err)
 		return
 	}
@@ -139,6 +139,7 @@ func PostHook(c *gin.Context) {
 
 	if build.Event == model.EventPull && !repo.AllowPull {
 		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
+		c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
 		c.Writer.WriteHeader(204)
 		return
 	}
@@ -154,15 +155,20 @@ func PostHook(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the build.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, _ := refresher.Refresh(user)
-		if ok {
-			store.UpdateUser(c, user)
+		ok, err := refresher.Refresh(c, user)
+		if err != nil {
+			logrus.Errorf("failed to refresh oauth2 token: %s", err)
+		} else if ok {
+			if err := store.UpdateUser(c, user); err != nil {
+				logrus.Errorf("error while updating user: %s", err)
+				// move forward
+			}
 		}
 	}
 
 	// fetch the build file from the remote
 	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
-	remoteYamlConfigs, err := configFetcher.Fetch()
+	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
@@ -272,9 +278,9 @@ func PostHook(c *gin.Context) {
 		for _, item := range buildItems {
 			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
-				err = remote_.Status(user, repo, build, uri, item.Proc)
+				err = remote_.Status(c, user, repo, build, uri, item.Proc)
 			} else {
-				err = remote_.Status(user, repo, build, uri, nil)
+				err = remote_.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
 				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
@@ -286,12 +292,16 @@ func PostHook(c *gin.Context) {
 	queueBuild(build, repo, buildItems)
 }
 
+// TODO: parse yaml once and not for each filter function
 func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+	logrus.Tracef("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
 		if err != nil {
+			logrus.Tracef("parse config '%s': %s", remoteYamlConfig.Name, err)
 			return false, err
 		}
+		logrus.Tracef("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
 		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
 		} else {

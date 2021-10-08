@@ -12,6 +12,16 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
 
+- Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
+  Additionally some alternative namings have been removed to simplify maintenance:
+  - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
+  - `WOODPECKER_HOST` replaces `DRONE_HOST` and `DRONE_SERVER_HOST`.
+  - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
+  - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
+
+- From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
+  If you used `latest` before to try pre-release features you should switch to `next` after this release.
+
 - ...
 
 ## 0.14.0

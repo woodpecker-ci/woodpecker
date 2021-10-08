@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestUsers(t *testing.T) {
@@ -189,14 +189,14 @@ func TestUsers(t *testing.T) {
 
 			repo1 := &model.Repo{
 				Owner:    "bradrydzewski",
-				Name:     "drone",
-				FullName: "bradrydzewski/drone",
+				Name:     "test",
+				FullName: "bradrydzewski/test",
 				IsActive: true,
 			}
 			repo2 := &model.Repo{
-				Owner:    "drone",
-				Name:     "drone",
-				FullName: "drone/drone",
+				Owner:    "test",
+				Name:     "test",
+				FullName: "test/test",
 				IsActive: true,
 			}
 			repo3 := &model.Repo{

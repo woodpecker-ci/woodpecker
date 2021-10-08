@@ -15,10 +15,11 @@
 package github
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 
 	"github.com/franela/goblin"
@@ -34,6 +35,7 @@ func Test_github(t *testing.T) {
 		SkipVerify: true,
 	})
 
+	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("GitHub", func() {
 
@@ -95,7 +97,7 @@ func Test_github(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err == nil).IsTrue()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
@@ -105,21 +107,21 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.Link).Equal(fakeRepo.Link)
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err != nil).IsTrue()
 			})
 		})
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err == nil).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err != nil).IsTrue()
 			})
 		})

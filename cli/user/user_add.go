@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
@@ -24,7 +24,7 @@ func userAdd(c *cli.Context) error {
 		return err
 	}
 
-	user, err := client.UserPost(&drone.User{Login: login})
+	user, err := client.UserPost(&woodpecker.User{Login: login})
 	if err != nil {
 		return err
 	}

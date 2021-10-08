@@ -17,7 +17,7 @@ package bitbucketserver
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
 	"net/http"
 )

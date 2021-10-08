@@ -34,6 +34,12 @@ module.exports = {
           position: 'left',
           label: 'FAQ',
         },
+        {
+          type: 'doc',
+          docId: 'migrations',
+          position: 'left',
+          label: 'Migrations',
+        },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',

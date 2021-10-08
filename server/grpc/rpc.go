@@ -40,7 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 
@@ -338,12 +338,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		}
 
 		if !isMultiPipeline(procs) {
-			s.updateRemoteStatus(repo, build, nil)
+			s.updateRemoteStatus(c, repo, build, nil)
 		}
 	}
 
 	if isMultiPipeline(procs) {
-		s.updateRemoteStatus(repo, build, proc)
+		s.updateRemoteStatus(c, repo, build, proc)
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
@@ -416,17 +416,17 @@ func buildStatus(procs []*model.Proc) string {
 	return status
 }
 
-func (s *RPC) updateRemoteStatus(repo *model.Repo, build *model.Build, proc *model.Proc) {
+func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, _ := refresher.Refresh(user)
+			ok, _ := refresher.Refresh(ctx, user)
 			if ok {
 				s.store.UpdateUser(user)
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = s.remote.Status(user, repo, build, uri, proc)
+		err = s.remote.Status(ctx, user, repo, build, uri, proc)
 		if err != nil {
 			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 		}
@@ -478,19 +478,20 @@ func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
 //
 //
 
-// DroneServer is a grpc server implementation.
-type DroneServer struct {
+// WoodpeckerServer is a grpc server implementation.
+type WoodpeckerServer struct {
+	proto.UnimplementedWoodpeckerServer
 	peer RPC
 }
 
-func NewDroneServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *DroneServer {
+func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
 	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_time",
 		Help:      "Build time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_count",
 		Help:      "Build count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
@@ -504,10 +505,10 @@ func NewDroneServer(remote remote.Remote, queue queue.Queue, logger logging.Log,
 		buildTime:  buildTime,
 		buildCount: buildCount,
 	}
-	return &DroneServer{peer: peer}
+	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
+func (s *WoodpeckerServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 		Expr:   req.GetFilter().GetExpr(),
@@ -530,7 +531,7 @@ func (s *DroneServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -544,7 +545,7 @@ func (s *DroneServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -558,7 +559,7 @@ func (s *DroneServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*p
 	return res, err
 }
 
-func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
 	file := &rpc.File{
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
@@ -574,7 +575,7 @@ func (s *DroneServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*p
 	return res, err
 }
 
-func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -588,19 +589,19 @@ func (s *DroneServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto
 	return res, err
 }
 
-func (s *DroneServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Wait(c, req.GetId())
 	return res, err
 }
 
-func (s *DroneServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Extend(c, req.GetId())
 	return res, err
 }
 
-func (s *DroneServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
 	line := &rpc.Line{
 		Out:  req.GetLine().GetOut(),
 		Pos:  int(req.GetLine().GetPos()),

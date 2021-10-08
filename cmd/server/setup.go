@@ -18,11 +18,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dimfeld/httptreemux"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
@@ -34,14 +32,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/remote/github"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-	"golang.org/x/sync/errgroup"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"golang.org/x/sync/errgroup"
 )
 
 func setupStore(c *cli.Context) store.Store {
@@ -117,7 +117,7 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
-	return gitea.New(gitea.Opts{
+	opts := gitea.Opts{
 		URL:         c.String("gitea-server"),
 		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
@@ -126,7 +126,11 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		Secret:      c.String("gitea-secret"),
 		PrivateMode: c.Bool("gitea-private-mode"),
 		SkipVerify:  c.Bool("gitea-skip-verify"),
-	})
+	}
+	if len(opts.URL) == 0 {
+		logrus.Fatalln("WOODPECKER_GITEA_URL must be set")
+	}
+	return gitea.New(opts)
 }
 
 // helper function to setup the Stash remote from the CLI arguments.
@@ -144,25 +148,14 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitlab remote from the CLI arguments.
 func setupGitlab(c *cli.Context) (remote.Remote, error) {
-	if c.Bool("gitlab-v3-api") {
-		return gitlab3.New(gitlab3.Opts{
-			URL:         c.String("gitlab-server"),
-			Client:      c.String("gitlab-client"),
-			Secret:      c.String("gitlab-secret"),
-			Username:    c.String("gitlab-git-username"),
-			Password:    c.String("gitlab-git-password"),
-			PrivateMode: c.Bool("gitlab-private-mode"),
-			SkipVerify:  c.Bool("gitlab-skip-verify"),
-		})
-	}
 	return gitlab.New(gitlab.Opts{
-		URL:         c.String("gitlab-server"),
-		Client:      c.String("gitlab-client"),
-		Secret:      c.String("gitlab-secret"),
-		Username:    c.String("gitlab-git-username"),
-		Password:    c.String("gitlab-git-password"),
-		PrivateMode: c.Bool("gitlab-private-mode"),
-		SkipVerify:  c.Bool("gitlab-skip-verify"),
+		URL:          c.String("gitlab-server"),
+		ClientID:     c.String("gitlab-client"),
+		ClientSecret: c.String("gitlab-secret"),
+		Username:     c.String("gitlab-git-username"),
+		Password:     c.String("gitlab-git-password"),
+		PrivateMode:  c.Bool("gitlab-private-mode"),
+		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
 
@@ -196,8 +189,8 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	})
 }
 
-func setupTree(c *cli.Context) *httptreemux.ContextMux {
-	tree := httptreemux.NewContextMux()
+func setupTree(c *cli.Context) *gin.Engine {
+	tree := gin.New()
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),

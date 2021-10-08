@@ -23,10 +23,10 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// helper function that converts a Gitea repository to a Drone repository.
+// helper function that converts a Gitea repository to a Woodpecker repository.
 func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
@@ -50,7 +50,7 @@ func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
 	}
 }
 
-// helper function that converts a Gitea permission to a Drone permission.
+// helper function that converts a Gitea permission to a Woodpecker permission.
 func toPerm(from *gitea.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
@@ -59,7 +59,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 	}
 }
 
-// helper function that converts a Gitea team to a Drone team.
+// helper function that converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
 		Login:  from.UserName,

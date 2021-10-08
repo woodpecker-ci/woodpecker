@@ -20,7 +20,7 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 )
 
@@ -186,7 +186,7 @@ func Test_parse(t *testing.T) {
 
 		g.It("Should return a Team struct from a Gitea Org", func() {
 			from := &gitea.Organization{
-				UserName:  "drone",
+				UserName:  "woodpecker",
 				AvatarURL: "/avatars/1",
 			}
 

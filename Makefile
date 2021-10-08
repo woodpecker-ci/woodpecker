@@ -2,16 +2,18 @@ DOCKER_RUN_GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
-VERSION ?= ${DRONE_TAG}
-ifeq ($(VERSION),)
-	VERSION := $(shell echo ${DRONE_COMMIT_SHA} | head -c 8)
+VERSION ?= next
+ifneq ($(DRONE_TAG),)
+	VERSION := $(DRONE_TAG:v%=%)
 endif
 
-LDFLAGS ?= -extldflags "-static"
-ifneq ($(VERSION),)
-	LDFLAGS := ${LDFLAGS} -X github.com/woodpecker-ci/woodpecker/version.Version=${VERSION}
+# append commit-sha to next version
+BUILD_VERSION := $(VERSION)
+ifeq ($(BUILD_VERSION),next)
+	BUILD_VERSION := $(shell echo "next-$(shell echo ${DRONE_COMMIT_SHA} | head -c 8)")
 endif
 
+LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
 
 DOCKER_RUN?=
 _with-docker:
@@ -46,46 +48,63 @@ test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
 
 test-frontend:
-	(cd web/; yarn run test)
+	(cd web/; yarn; yarn run test)
 
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
 
 test: test-lib test-agent test-server
 
-build-agent:
-	$(DOCKER_RUN) go build -o build/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
-
-build-server:
-	$(DOCKER_RUN) go build -o build/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
-
 build-frontend:
-	(cd web/; yarn run build)
+	(cd web/; yarn; yarn build)
 
-build: build-agent build-server
+build-server: build-frontend
+	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
-release-agent:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o release/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+build-agent:
+	$(DOCKER_RUN) go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+
+build-cli:
+	$(DOCKER_RUN) go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
+
+build: build-agent build-server build-cli
+
+release-frontend: build-frontend
 
 release-server:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o release/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	# compile
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	# tar binary files
+	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
+
+release-agent:
+	# compile
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_amd64/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+	# tar binary files
+	tar -cvzf dist/woodpecker-agent_linux_amd64.tar.gz   -C dist/agent/linux_amd64 woodpecker-agent
 
 release-cli:
-	# disable CGO for cross-compiling
-	export CGO_ENABLED=0
-	# compile for all architectures
-	GOOS=linux   GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/linux/amd64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=linux   GOARCH=arm64 go build -ldflags '${LDFLAGS}' -o cli/release/linux/arm64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=linux   GOARCH=arm   go build -ldflags '${LDFLAGS}' -o cli/release/linux/arm/woodpecker-cli     github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=windows GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/windows/amd64/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=darwin  GOARCH=amd64 go build -ldflags '${LDFLAGS}' -o cli/release/darwin/amd64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cmd/cli
-	# tar binary files prior to upload
-	tar -cvzf cli/release/woodpecker_linux_amd64.tar.gz   -C cli/release/linux/amd64   woodpecker-cli
-	tar -cvzf cli/release/woodpecker_linux_arm64.tar.gz   -C cli/release/linux/arm64   woodpecker-cli
-	tar -cvzf cli/release/woodpecker_linux_arm.tar.gz     -C cli/release/linux/arm     woodpecker-cli
-	tar -cvzf cli/release/woodpecker_windows_amd64.tar.gz -C cli/release/windows/amd64 woodpecker-cli
-	tar -cvzf cli/release/woodpecker_darwin_amd64.tar.gz  -C cli/release/darwin/amd64  woodpecker-cli
-	# generate shas for tar files
-	sha256sum cli/release/*.tar.gz > cli/release/woodpecker_checksums.txt
+	# compile
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_amd64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm/woodpecker-cli     github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/windows_amd64/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_amd64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_arm64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cmd/cli
+	# tar binary files
+	tar -cvzf dist/woodpecker-cli_linux_amd64.tar.gz   -C dist/cli/linux_amd64   woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_linux_arm64.tar.gz   -C dist/cli/linux_arm64   woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_linux_arm.tar.gz     -C dist/cli/linux_arm     woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_windows_amd64.tar.gz -C dist/cli/windows_amd64 woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
 
-release: release-agent release-server
+release-checksums:
+	# generate shas for tar files
+	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
+
+release: release-frontend release-server release-agent release-cli
+
+.PHONY: version
+version:
+	@echo ${VERSION}

@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 
 	"github.com/franela/goblin"
@@ -55,7 +55,7 @@ func Test_hook(t *testing.T) {
 				Ref:     "refs/heads/master",
 				Link:    "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
 				Branch:  "master",
-				Message: "new file .drone.yml\n",
+				Message: "new file .woodpecker.yml\n",
 				Email:   "demo1@gmail.com",
 				Avatar:  "/static/fruit_avatar/Fruit-20.png",
 				Author:  "demo1",
@@ -122,7 +122,7 @@ func Test_hook(t *testing.T) {
 				Ref:     "refs/heads/master",
 				Link:    "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
 				Branch:  "master",
-				Message: "new file .drone.yml\n",
+				Message: "new file .woodpecker.yml\n",
 				Email:   "demo1@gmail.com",
 				Avatar:  "/static/fruit_avatar/Fruit-20.png",
 				Author:  "demo1",

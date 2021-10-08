@@ -17,7 +17,7 @@ package session
 import (
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 
@@ -30,18 +30,6 @@ func User(c *gin.Context) *model.User {
 		return nil
 	}
 	u, ok := v.(*model.User)
-	if !ok {
-		return nil
-	}
-	return u
-}
-
-func Token(c *gin.Context) *token.Token {
-	v, ok := c.Get("token")
-	if !ok {
-		return nil
-	}
-	u, ok := v.(*token.Token)
 	if !ok {
 		return nil
 	}

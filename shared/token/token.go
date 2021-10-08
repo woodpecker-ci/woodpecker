@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/sirupsen/logrus"
 )
 
 type SecretFunc func(*Token) (string, error)
@@ -31,7 +32,7 @@ const (
 	AgentToken = "agent"
 )
 
-// Default algorithm used to sign JWT tokens.
+// SignerAlgo id default algorithm used to sign JWT tokens.
 const SignerAlgo = "HS256"
 
 type Token struct {
@@ -39,7 +40,7 @@ type Token struct {
 	Text string
 }
 
-func Parse(raw string, fn SecretFunc) (*Token, error) {
+func parse(raw string, fn SecretFunc) (*Token, error) {
 	token := &Token{}
 	parsed, err := jwt.Parse(raw, keyFunc(token, fn))
 	if err != nil {
@@ -51,21 +52,24 @@ func Parse(raw string, fn SecretFunc) (*Token, error) {
 }
 
 func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
-	var token = r.Header.Get("Authorization")
+	token := r.Header.Get("Authorization")
 
 	// first we attempt to get the token from the
 	// authorization header.
 	if len(token) != 0 {
-		token = r.Header.Get("Authorization")
-		fmt.Sscanf(token, "Bearer %s", &token)
-		return Parse(token, fn)
+		logrus.Tracef("token.ParseRequest: found token in header: %s", token)
+		bearer := token
+		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
+			return nil, err
+		}
+		return parse(bearer, fn)
 	}
 
 	// then we attempt to get the token from the
 	// access_token url query parameter
 	token = r.FormValue("access_token")
 	if len(token) != 0 {
-		return Parse(token, fn)
+		return parse(token, fn)
 	}
 
 	// and finally we attempt to get the token from
@@ -74,7 +78,7 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Parse(cookie.Value, fn)
+	return parse(cookie.Value, fn)
 }
 
 func CheckCsrf(r *http.Request, fn SecretFunc) error {
@@ -88,7 +92,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 
 	// parse the raw CSRF token value and validate
 	raw := r.Header.Get("X-CSRF-TOKEN")
-	_, err := Parse(raw, fn)
+	_, err := parse(raw, fn)
 	return err
 }
 
