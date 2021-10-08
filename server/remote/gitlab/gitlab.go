@@ -175,7 +175,7 @@ func (g *Gitlab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 			ListOptions:    gitlab.ListOptions{Page: i, PerPage: perPage},
 			AllAvailable:   gitlab.Bool(false),
-			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
+			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
 		}, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -232,7 +232,7 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions:    gitlab.ListOptions{PerPage: perPage},
-		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
+		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.HideArchives {
 		opts.Archived = gitlab.Bool(false)
