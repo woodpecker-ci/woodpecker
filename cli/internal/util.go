@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -44,7 +43,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	config := new(oauth2.Config)
 	client := config.Client(
-		context.TODO(),
+		oauth2.NoContext,
 		&oauth2.Token{
 			AccessToken: token,
 		},
