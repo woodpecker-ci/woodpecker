@@ -16,11 +16,9 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE": "true",
-            "DRONE_ARCH": "linux/amd64",
-            "DRONE_BUILD_LINK": "https://github.com/cncd/pipec//0",
-            "DRONE_REPO_SCM": "git",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git"
           },
           "volumes": [
             "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
@@ -28,9 +26,7 @@
           "networks": [
             {
               "name": "pipeline_default",
-              "aliases": [
-                "redis1"
-              ]
+              "aliases": ["redis1"]
             }
           ],
           "on_success": true,
@@ -48,11 +44,9 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE": "true",
-            "DRONE_ARCH": "linux/amd64",
-            "DRONE_BUILD_LINK": "https://github.com/cncd/pipec//0",
-            "DRONE_REPO_SCM": "git",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst"
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git"
           },
           "volumes": [
             "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
@@ -60,9 +54,7 @@
           "networks": [
             {
               "name": "pipeline_default",
-              "aliases": [
-                "redis2"
-              ]
+              "aliases": ["redis2"]
             }
           ],
           "on_success": true,
@@ -88,29 +80,21 @@
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "DRONE": "true",
-            "DRONE_ARCH": "linux/amd64",
-            "DRONE_BUILD_LINK": "https://github.com/cncd/pipec//0",
-            "DRONE_REPO_SCM": "git",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
           "volumes": [
             "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
           ],
           "networks": [
             {
               "name": "pipeline_default",
-              "aliases": [
-                "build"
-              ]
+              "aliases": ["build"]
             }
           ],
           "on_success": true,

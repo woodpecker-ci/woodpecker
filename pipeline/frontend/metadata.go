@@ -1,7 +1,6 @@
 package frontend
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -28,12 +27,12 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string   `json:"name,omitempty"`
-		Link    string   `json:"link,omitempty"`
-		Remote  string   `json:"remote,omitempty"`
-		Private bool     `json:"private,omitempty"`
-		Secrets []Secret `json:"secrets,omitempty"`
-		Branch  string   `json:"default_branch,omitempty"`
+		Name          string   `json:"name,omitempty"`
+		Link          string   `json:"link,omitempty"`
+		Remote        string   `json:"remote,omitempty"`
+		Private       bool     `json:"private,omitempty"`
+		Secrets       []Secret `json:"secrets,omitempty"`
+		DefaultBranch string   `json:"default_branch,omitempty"`
 	}
 
 	// Build defines runtime metadata for a build.
@@ -96,13 +95,39 @@ type (
 
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
+	var (
+		repoOwner    string
+		repoName     string
+		sourceBranch string
+		targetBranch string
+
+		repoParts   = strings.Split(m.Repo.Name, "/")
+		branchParts = strings.Split(m.Curr.Commit.Refspec, ":")
+	)
+	if len(repoParts) == 2 {
+		repoOwner = repoParts[0]
+		repoName = repoParts[1]
+	} else {
+		repoName = m.Repo.Name
+	}
+
+	if len(branchParts) == 2 {
+		sourceBranch = branchParts[0]
+		targetBranch = branchParts[1]
+	}
+
 	params := map[string]string{
+		"CI":                           m.Sys.Name,
 		"CI_REPO":                      m.Repo.Name,
-		"CI_REPO_NAME":                 m.Repo.Name,
+		"CI_REPO_SCM":                  "git",
+		"CI_REPO_OWNER":                repoOwner,
+		"CI_REPO_NAME":                 repoName,
 		"CI_REPO_LINK":                 m.Repo.Link,
 		"CI_REPO_REMOTE":               m.Repo.Remote,
-		"CI_REMOTE_URL":                m.Repo.Remote,
+		"CI_REPO_DEFAULT_BRANCH":       m.Repo.DefaultBranch,
 		"CI_REPO_PRIVATE":              strconv.FormatBool(m.Repo.Private),
+		"CI_REPO_TRUSTED":              "false", // TODO should this be added?
+		"CI_REMOTE_URL":                m.Repo.Remote,
 		"CI_BUILD_NUMBER":              strconv.Itoa(m.Curr.Number),
 		"CI_PARENT_BUILD_NUMBER":       strconv.Itoa(m.Curr.Parent),
 		"CI_BUILD_CREATED":             strconv.FormatInt(m.Curr.Created, 10),
@@ -116,6 +141,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_REF":                m.Curr.Commit.Ref,
 		"CI_COMMIT_REFSPEC":            m.Curr.Commit.Refspec,
 		"CI_COMMIT_BRANCH":             m.Curr.Commit.Branch,
+		"CI_COMMIT_SOURCE_BRANCH":      sourceBranch,
+		"CI_COMMIT_TARGET_BRANCH":      targetBranch,
 		"CI_COMMIT_MESSAGE":            m.Curr.Commit.Message,
 		"CI_COMMIT_AUTHOR":             m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_NAME":        m.Curr.Commit.Author.Name,
@@ -138,97 +165,19 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
 		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
 		"CI_JOB_NUMBER":                strconv.Itoa(m.Job.Number),
+		"CI_JOB_STARTED":               strconv.FormatInt(m.Curr.Started, 10), // ISSUE: no job started
 		"CI_SYSTEM":                    m.Sys.Name,
 		"CI_SYSTEM_NAME":               m.Sys.Name,
 		"CI_SYSTEM_LINK":               m.Sys.Link,
 		"CI_SYSTEM_HOST":               m.Sys.Host,
 		"CI_SYSTEM_ARCH":               m.Sys.Arch,
 		"CI_SYSTEM_VERSION":            m.Sys.Version,
-		"CI":                           m.Sys.Name,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
-	}
-	return params
-}
-
-// EnvironDrone returns metadata as a map of DRONE_ environment variables.
-// TODO: This is here for backward compatibility and will eventually be removed.
-func (m *Metadata) EnvironDrone() map[string]string {
-	// MISSING PARAMETERS
-	// * DRONE_REPO_TRUSTED
-	// * DRONE_YAML_VERIFIED
-	// * DRONE_YAML_VERIFIED
-	var (
-		owner        string
-		name         string
-		sourceBranch string
-		targetBranch string
-
-		repoParts   = strings.Split(m.Repo.Name, "/")
-		branchParts = strings.Split(m.Curr.Commit.Refspec, ":")
-	)
-	if len(repoParts) == 2 {
-		owner = repoParts[0]
-		name = repoParts[1]
-	} else {
-		name = m.Repo.Name
-	}
-
-	if len(branchParts) == 2 {
-		sourceBranch = branchParts[0]
-		targetBranch = branchParts[1]
-	}
-
-	params := map[string]string{
-		"CI":                         "drone",
-		"DRONE":                      "true",
-		"DRONE_ARCH":                 m.Sys.Arch,
-		"DRONE_REPO":                 m.Repo.Name,
-		"DRONE_REPO_SCM":             "git",
-		"DRONE_REPO_OWNER":           owner,
-		"DRONE_REPO_NAME":            name,
-		"DRONE_REPO_LINK":            m.Repo.Link,
-		"DRONE_REPO_BRANCH":          m.Repo.Branch,
-		"DRONE_REPO_PRIVATE":         fmt.Sprintf("%v", m.Repo.Private),
-		"DRONE_REPO_TRUSTED":         "false", // TODO should this be added?
-		"DRONE_REMOTE_URL":           m.Repo.Remote,
-		"DRONE_COMMIT_SHA":           m.Curr.Commit.Sha,
-		"DRONE_COMMIT_REF":           m.Curr.Commit.Ref,
-		"DRONE_COMMIT_REFSPEC":       m.Curr.Commit.Refspec,
-		"DRONE_COMMIT_BRANCH":        m.Curr.Commit.Branch,
-		"DRONE_COMMIT_LINK":          m.Curr.Link,
-		"DRONE_COMMIT_MESSAGE":       m.Curr.Commit.Message,
-		"DRONE_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
-		"DRONE_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
-		"DRONE_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"DRONE_BUILD_NUMBER":         fmt.Sprintf("%d", m.Curr.Number),
-		"DRONE_PARENT_BUILD_NUMBER":  fmt.Sprintf("%d", m.Curr.Parent),
-		"DRONE_BUILD_EVENT":          m.Curr.Event,
-		"DRONE_BUILD_LINK":           fmt.Sprintf("%s/%s/%d", m.Sys.Link, m.Repo.Name, m.Curr.Number),
-		"DRONE_BUILD_CREATED":        fmt.Sprintf("%d", m.Curr.Created),
-		"DRONE_BUILD_STARTED":        fmt.Sprintf("%d", m.Curr.Started),
-		"DRONE_BUILD_FINISHED":       fmt.Sprintf("%d", m.Curr.Finished),
-		"DRONE_JOB_NUMBER":           fmt.Sprintf("%d", m.Job.Number),
-		"DRONE_JOB_STARTED":          fmt.Sprintf("%d", m.Curr.Started), // ISSUE: no job started
-		"DRONE_BRANCH":               m.Curr.Commit.Branch,
-		"DRONE_SOURCE_BRANCH":        sourceBranch,
-		"DRONE_TARGET_BRANCH":        targetBranch,
-		"DRONE_COMMIT":               m.Curr.Commit.Sha,
-		"DRONE_VERSION":              m.Sys.Version,
-		"DRONE_DEPLOY_TO":            m.Curr.Target,
-		"DRONE_PREV_BUILD_STATUS":    m.Prev.Status,
-		"DRONE_PREV_BUILD_NUMBER":    fmt.Sprintf("%v", m.Prev.Number),
-		"DRONE_PREV_COMMIT_SHA":      m.Prev.Commit.Sha,
-	}
-	if m.Curr.Event == EventTag || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
-		params["DRONE_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
-	}
-	if m.Curr.Event == EventPull {
-		params["DRONE_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
 	return params
 }

@@ -31,31 +31,9 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "PLUGIN_DEPTH": "50"
           },
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -99,39 +77,12 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -169,39 +120,12 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -245,39 +169,12 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -321,39 +218,12 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -391,39 +261,12 @@
             "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
             "CI_SYSTEM_NAME": "pipec",
             "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
-            "DRONE_BUILD_CREATED": "1486119586",
-            "DRONE_BUILD_EVENT": "push",
-            "DRONE_BUILD_NUMBER": "6",
-            "DRONE_BUILD_STARTED": "1486119585",
-            "DRONE_COMMIT_AUTHOR": "bradrydzewski",
-            "DRONE_COMMIT_AUTHOR_NAME": "bradrydzewski",
-            "DRONE_COMMIT_BRANCH": "master",
-            "DRONE_COMMIT_MESSAGE": "added a few more test cases for escaping behavior",
-            "DRONE_COMMIT_REF": "refs/heads/master",
-            "DRONE_COMMIT_SHA": "d0876d3176965f9552a611cbd56e24a9264355e6",
-            "DRONE_REMOTE_URL": "https://github.com/drone/envsubst.git",
-            "DRONE_REPO": "drone/envsubst",
-            "DRONE_REPO_LINK": "https://github.com/drone/envsubst",
-            "DRONE_REPO_NAME": "drone/envsubst",
-            "DRONE_REPO_REMOTE": "https://github.com/drone/envsubst.git",
-            "DRONE_SYSTEM": "pipec",
-            "DRONE_SYSTEM_ARCH": "linux/amd64",
-            "DRONE_SYSTEM_LINK": "https://github.com/cncd/pipec",
-            "DRONE_SYSTEM_NAME": "pipec",
-            "DRONE_WORKSPACE": "/go/src/github.com/drone/envsubst",
             "HOME": "/root",
             "SHELL": "/bin/sh"
           },
-          "entrypoint": [
-            "/bin/sh",
-            "-c"
-          ],
-          "command": [
-            "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-          ],
-          "volumes": [
-            "pipeline_default:/go"
-          ],
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": ["pipeline_default:/go"],
           "networks": [
             {
               "name": "pipeline_default",

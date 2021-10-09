@@ -76,9 +76,6 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for key, val := range metadata.Job.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
