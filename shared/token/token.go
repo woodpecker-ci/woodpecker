@@ -143,7 +143,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		token.Kind, _ = kindv.(string)
 
 		// extract the token value and cast to
-		// exepected type.
+		// expected type.
 		textv, ok := claims["text"]
 		if !ok {
 			return nil, jwt.ValidationError{}

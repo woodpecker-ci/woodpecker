@@ -19,7 +19,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-// AuthorizeAgent authorizes requsts from build agents to access the queue.
+// AuthorizeAgent authorizes requests from build agents to access the queue.
 func AuthorizeAgent(c *gin.Context) {
 	secret := c.MustGet("agent").(string)
 	if secret == "" {
