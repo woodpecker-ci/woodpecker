@@ -17,6 +17,8 @@ package token
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -57,9 +59,9 @@ func Refresh(c *gin.Context) {
 		if err != nil {
 			// we only log the error at this time. not sure
 			// if we really want to fail the request, do we?
-			log.Errorf("cannot refresh access token for %s. %s", user.Login, err)
+			log.Error().Msgf("cannot refresh access token for %s. %s", user.Login, err)
 		} else {
-			log.Infof("refreshed access token for %s", user.Login)
+			log.Info().Msgf("refreshed access token for %s", user.Login)
 		}
 	}
 

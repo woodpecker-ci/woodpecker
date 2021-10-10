@@ -16,11 +16,13 @@ package github
 
 import (
 	"bytes"
-	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 	"net/http"
 	"testing"
+
+	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 )
 
 func Test_parser(t *testing.T) {

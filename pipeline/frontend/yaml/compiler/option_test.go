@@ -1,10 +1,11 @@
 package compiler
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 )
 
 func TestWithWorkspace(t *testing.T) {

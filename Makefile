@@ -31,6 +31,9 @@ formatcheck:
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
+imports:
+	@goimports -local "github.com/woodpecker-ci" -w ${GOFILES_NOVENDOR}
+
 .PHONY: clean
 clean:
 	go clean -i ./...
@@ -40,6 +43,11 @@ clean:
 vet:
 	@echo "Running go vet..."
 	@go vet $(GO_PACKAGES)
+
+.PHONY: lint
+lint:
+	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
+	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/server
 
 test-agent:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)

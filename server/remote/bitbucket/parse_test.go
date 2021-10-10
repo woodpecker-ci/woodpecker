@@ -16,10 +16,12 @@ package bitbucket
 
 import (
 	"bytes"
-	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 	"net/http"
 	"testing"
+
+	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 )
 
 func Test_parser(t *testing.T) {

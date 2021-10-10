@@ -16,12 +16,14 @@ package gitea
 
 import (
 	"context"
-	"github.com/franela/goblin"
-	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/franela/goblin"
+	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 )
 
 func Test_gitea(t *testing.T) {

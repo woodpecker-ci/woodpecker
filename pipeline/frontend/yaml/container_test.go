@@ -1,11 +1,12 @@
 package yaml
 
 import (
+	"reflect"
+	"testing"
+
 	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v3"
-	"reflect"
-	"testing"
 )
 
 var containerYaml = []byte(`

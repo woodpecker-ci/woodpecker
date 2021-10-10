@@ -15,13 +15,15 @@
 package coding
 
 import (
-	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 )
 
 func Test_hook(t *testing.T) {

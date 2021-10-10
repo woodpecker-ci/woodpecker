@@ -15,9 +15,10 @@
 package main
 
 import (
-	"github.com/woodpecker-ci/woodpecker/agent"
 	"testing"
 	"time"
+
+	"github.com/woodpecker-ci/woodpecker/agent"
 )
 
 func TestHealthy(t *testing.T) {

@@ -17,13 +17,15 @@ package coding
 import (
 	"bytes"
 	"context"
-	"github.com/franela/goblin"
-	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/franela/goblin"
+	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 )
 
 func Test_coding(t *testing.T) {

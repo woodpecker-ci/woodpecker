@@ -20,6 +20,8 @@ package api
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -59,7 +61,7 @@ func GetBadge(c *gin.Context) {
 
 	build, err := store.GetBuildLast(c, repo, branch)
 	if err != nil {
-		log.Warning(err)
+		log.Warn().Err(err).Msg("")
 		c.String(200, badgeNone)
 		return
 	}

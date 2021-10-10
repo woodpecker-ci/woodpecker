@@ -1,8 +1,9 @@
 package linter
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"testing"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
 func TestLint(t *testing.T) {

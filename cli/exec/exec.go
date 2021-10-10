@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli"
@@ -33,7 +34,7 @@ var Command = cli.Command{
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action: func(c *cli.Context) {
 		if err := exec(c); err != nil {
-			log.Fatalln(err)
+			log.Fatal().Err(err).Msg("")
 		}
 	},
 	Flags: flags,

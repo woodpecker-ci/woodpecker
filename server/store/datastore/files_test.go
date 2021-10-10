@@ -16,9 +16,10 @@ package datastore
 
 import (
 	"bytes"
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"io/ioutil"
 	"testing"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestFileFind(t *testing.T) {

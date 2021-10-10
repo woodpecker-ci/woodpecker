@@ -15,9 +15,10 @@
 package model
 
 import (
-	"github.com/franela/goblin"
 	"testing"
 	"time"
+
+	"github.com/franela/goblin"
 )
 
 func TestCC(t *testing.T) {

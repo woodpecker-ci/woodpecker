@@ -16,11 +16,12 @@ package testdata
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // NewServer setup a mock server for testing purposes.

@@ -15,11 +15,13 @@
 package bitbucketserver
 
 import (
+	"testing"
+
 	"github.com/franela/goblin"
 	"github.com/mrjones/oauth"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
-	"testing"
 )
 
 func Test_helper(t *testing.T) {
