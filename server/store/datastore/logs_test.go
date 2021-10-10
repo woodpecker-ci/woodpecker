@@ -16,10 +16,9 @@ package datastore
 
 import (
 	"bytes"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"io/ioutil"
 	"testing"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestLogCreateFind(t *testing.T) {

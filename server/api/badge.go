@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"

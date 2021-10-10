@@ -15,9 +15,8 @@
 package model
 
 import (
-	"testing"
-
 	"github.com/franela/goblin"
+	"testing"
 )
 
 func TestSecret(t *testing.T) {

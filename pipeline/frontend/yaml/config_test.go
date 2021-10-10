@@ -1,10 +1,9 @@
 package yaml
 
 import (
-	"testing"
-
 	"github.com/docker/libcompose/yaml"
 	"github.com/franela/goblin"
+	"testing"
 )
 
 func TestParse(t *testing.T) {

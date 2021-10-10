@@ -15,9 +15,8 @@
 package datastore
 
 import (
-	"testing"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"testing"
 )
 
 func TestSecretFind(t *testing.T) {

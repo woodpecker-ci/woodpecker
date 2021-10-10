@@ -1,9 +1,8 @@
 package matrix
 
 import (
-	"testing"
-
 	"github.com/franela/goblin"
+	"testing"
 )
 
 func TestMatrix(t *testing.T) {

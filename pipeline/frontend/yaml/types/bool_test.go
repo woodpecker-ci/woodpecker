@@ -1,10 +1,9 @@
 package types
 
 import (
-	"testing"
-
 	"github.com/franela/goblin"
 	"gopkg.in/yaml.v3"
+	"testing"
 )
 
 func TestBoolTrue(t *testing.T) {

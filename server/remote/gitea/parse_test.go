@@ -16,12 +16,11 @@ package gitea
 
 import (
 	"bytes"
-	"net/http"
-	"testing"
-
 	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"net/http"
+	"testing"
 )
 
 func Test_parser(t *testing.T) {

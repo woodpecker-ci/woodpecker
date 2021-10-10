@@ -16,12 +16,11 @@ package gitea
 
 import (
 	"bytes"
-	"testing"
-
 	"code.gitea.io/sdk/gitea"
 	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"testing"
 )
 
 func Test_parse(t *testing.T) {

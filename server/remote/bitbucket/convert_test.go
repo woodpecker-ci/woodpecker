@@ -15,14 +15,12 @@
 package bitbucket
 
 import (
-	"testing"
-	"time"
-
+	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
+	"testing"
+	"time"
 )
 
 func Test_helper(t *testing.T) {

@@ -21,21 +21,19 @@ import (
 	"os"
 	"sync"
 
-	grpccredentials "google.golang.org/grpc/credentials"
-
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/tevino/abool"
+	"github.com/urfave/cli"
+	oldcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
+	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
-	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 )
 
 func loop(c *cli.Context) error {

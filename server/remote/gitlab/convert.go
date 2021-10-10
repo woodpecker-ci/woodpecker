@@ -21,9 +21,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/xanzy/go-gitlab"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {

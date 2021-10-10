@@ -1,11 +1,9 @@
 package yaml
 
 import (
-	"testing"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-
 	"gopkg.in/yaml.v3"
+	"testing"
 )
 
 func TestConstraint(t *testing.T) {

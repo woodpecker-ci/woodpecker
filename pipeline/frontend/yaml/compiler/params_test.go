@@ -1,10 +1,9 @@
 package compiler
 
 import (
+	"github.com/kr/pretty"
 	"reflect"
 	"testing"
-
-	"github.com/kr/pretty"
 )
 
 func TestParamsToEnv(t *testing.T) {

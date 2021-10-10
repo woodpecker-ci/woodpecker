@@ -18,12 +18,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func Repo(c *gin.Context) *model.Repo {

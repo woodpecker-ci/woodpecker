@@ -2,9 +2,8 @@ package compiler
 
 import (
 	"encoding/base64"
-	"testing"
-
 	"github.com/kr/pretty"
+	"testing"
 )
 
 func TestGenerateScriptPosix(t *testing.T) {

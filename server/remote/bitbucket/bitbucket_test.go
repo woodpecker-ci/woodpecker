@@ -17,16 +17,14 @@ package bitbucket
 import (
 	"bytes"
 	"context"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
+	"github.com/franela/goblin"
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"github.com/franela/goblin"
-	"github.com/gin-gonic/gin"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func Test_bitbucket(t *testing.T) {

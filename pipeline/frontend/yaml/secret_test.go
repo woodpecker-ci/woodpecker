@@ -1,11 +1,10 @@
 package yaml
 
 import (
-	"reflect"
-	"testing"
-
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v3"
+	"reflect"
+	"testing"
 )
 
 func TestUnmarshalSecrets(t *testing.T) {

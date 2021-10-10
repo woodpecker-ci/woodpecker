@@ -16,14 +16,12 @@ package gogs
 
 import (
 	"context"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
+	"net/http/httptest"
+	"testing"
 )
 
 func Test_gogs(t *testing.T) {

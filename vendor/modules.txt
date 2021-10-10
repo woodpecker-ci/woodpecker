@@ -90,9 +90,6 @@ github.com/franela/goblin
 github.com/ghodss/yaml
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
-# github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
-## explicit
-github.com/gin-gonic/contrib/ginrus
 # github.com/gin-gonic/gin v1.7.4
 ## explicit
 github.com/gin-gonic/gin
@@ -231,7 +228,6 @@ github.com/russross/meddler
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/sirupsen/logrus v1.8.1
-## explicit
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.3.0
 ## explicit

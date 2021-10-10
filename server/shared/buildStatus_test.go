@@ -16,10 +16,9 @@ package shared
 
 import (
 	"errors"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"testing"
 	"time"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type mockUpdateBuildStore struct {

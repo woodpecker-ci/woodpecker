@@ -9,7 +9,6 @@ import (
 	mock "github.com/stretchr/testify/mock"
 
 	model "github.com/woodpecker-ci/woodpecker/server/model"
-
 	remote "github.com/woodpecker-ci/woodpecker/server/remote"
 )
 

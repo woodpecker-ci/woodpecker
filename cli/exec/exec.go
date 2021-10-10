@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
@@ -22,8 +24,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-
-	"github.com/urfave/cli"
 )
 
 // Command exports the exec command.

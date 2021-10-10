@@ -25,26 +25,22 @@ import (
 	"log"
 	"strconv"
 
-	oldcontext "golang.org/x/net/context"
-
-	grpcMetadata "google.golang.org/grpc/metadata"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
+	oldcontext "golang.org/x/net/context"
+	grpcMetadata "google.golang.org/grpc/metadata"
+
+	"github.com/woodpecker-ci/expr"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/woodpecker-ci/expr"
 )
 
 type RPC struct {
@@ -64,7 +60,7 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
-			logrus.Debugf("agent connected: %s: polling", hostname[0])
+			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
 		}
 	}
 
@@ -428,7 +424,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(ctx, user, repo, build, uri, proc)
 		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 		}
 	}
 }

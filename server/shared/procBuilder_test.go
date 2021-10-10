@@ -16,10 +16,9 @@ package shared
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"testing"
 )
 
 func TestMultilineEnvsubst(t *testing.T) {

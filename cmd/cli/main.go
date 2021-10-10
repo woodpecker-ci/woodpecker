@@ -18,6 +18,9 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/build"
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
@@ -29,9 +32,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/secret"
 	"github.com/woodpecker-ci/woodpecker/cli/user"
 	"github.com/woodpecker-ci/woodpecker/version"
-
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli"
 )
 
 func main() {

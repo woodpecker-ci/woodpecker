@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 

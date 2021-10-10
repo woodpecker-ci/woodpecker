@@ -15,11 +15,10 @@
 package shared
 
 import (
-	"testing"
-	"time"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"testing"
+	"time"
 )
 
 type mockUpdateProcStore struct {

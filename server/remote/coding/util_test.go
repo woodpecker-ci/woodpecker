@@ -15,9 +15,8 @@
 package coding
 
 import (
-	"testing"
-
 	"github.com/franela/goblin"
+	"testing"
 )
 
 func Test_util(t *testing.T) {

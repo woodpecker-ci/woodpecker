@@ -15,10 +15,9 @@
 package datastore
 
 import (
-	"testing"
-
 	"github.com/franela/goblin"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"testing"
 )
 
 func TestRepos(t *testing.T) {

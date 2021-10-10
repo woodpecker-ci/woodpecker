@@ -23,11 +23,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
 	"strings"
 
 	"github.com/mrjones/oauth"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 

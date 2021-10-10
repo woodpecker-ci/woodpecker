@@ -2,11 +2,9 @@ package schema_test
 
 import (
 	"fmt"
-	"testing"
-
-	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
+	"testing"
 )
 
 func TestSchema(t *testing.T) {
