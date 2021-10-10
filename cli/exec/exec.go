@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
