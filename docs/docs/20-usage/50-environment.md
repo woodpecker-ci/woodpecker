@@ -46,72 +46,78 @@ pipeline:
 
 This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
 
-| NAME                           | Description                                                              |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| `CI=woodpecker`                | environment is woodpecker                                                |
-| `CI_REPO`                      | repository full name `<owner>/<name>`                                    |
-| `CI_REPO_OWNER`                | repository owner                                                         |
-| `CI_REPO_NAME`                 | repository name                                                          |
-| `CI_REPO_SCM`                  | repository scm (git)                                                     |
-| `CI_REPO_LINK`                 | repository link                                                          |
-| `CI_REPO_REMOTE`               | repository clone url                                                     |
-| `CI_REPO_DEFAULT_BRANCH`       | repository default branch (master)                                       |
-| `CI_REPO_PRIVATE`              | repository is private                                                    |
-| `CI_REPO_TRUSTED`              | repository is trusted                                                    |
-|                                | **Current Commit**                                                       |
-| `CI_COMMIT_SHA`                | commit sha                                                               |
-| `CI_COMMIT_REF`                | commit ref                                                               |
-| `CI_COMMIT_REFSPEC`            | commit ref spec                                                          |
-| `CI_COMMIT_BRANCH`             | commit branch                                                            |
-| `CI_COMMIT_SOURCE_BRANCH`      | commit source branch                                                     |
-| `CI_COMMIT_TARGET_BRANCH`      | commit target branch                                                     |
-| `CI_COMMIT_TAG`                | commit tag name (empty if event is not `tag`)                            |
-| `CI_COMMIT_PULL_REQUEST`       | commit pull request number (empty if event is not `pull_request`)        |
-| `CI_COMMIT_LINK`               | commit link in remote                                                    |
-| `CI_COMMIT_MESSAGE`            | commit message                                                           |
-| `CI_COMMIT_AUTHOR`             | commit author username                                                   |
-| `CI_COMMIT_AUTHOR_EMAIL`       | commit author email address                                              |
-| `CI_COMMIT_AUTHOR_AVATAR`      | commit author avatar                                                     |
-|                                | **Current build**                                                        |
-| `CI_BUILD_NUMBER`              | build number                                                             |
-| `CI_BUILD_PARENT`              | build number of parent build                                             |
-| `CI_BUILD_EVENT`               | build event (push, pull_request, tag, deployment)                        |
-| `CI_BUILD_LINK`                | build link in ci                                                         |
-| `CI_BUILD_DEPLOY_TARGET`       | build deploy target for `deployment` events (ie production)              |
-| `CI_BUILD_STATUS`              | build status (success, failure)                                          |
-| `CI_BUILD_CREATED`             | build created unix timestamp                                             |
-| `CI_BUILD_STARTED`             | build started unix timestamp                                             |
-| `CI_BUILD_FINISHED`            | build finished unix timestamp                                            |
-| `CI_BUILD_JOB_NUMBER`          | build-job number                                                         |
-| `CI_BUILD_JOB_STARTED`         | build-job started unix timestamp                                         |
-|                                | **Previous commit**                                                      |
-| `CI_PREV_COMMIT_SHA`           | previous commit sha                                                      |
-| `CI_PREV_COMMIT_REF`           | previous commit ref                                                      |
-| `CI_PREV_COMMIT_REFSPEC`       | previous commit ref spec                                                 |
-| `CI_PREV_COMMIT_BRANCH`        | previous commit branch                                                   |
-| `CI_PREV_COMMIT_SOURCE_BRANCH` | previous commit source branch                                            |
-| `CI_PREV_COMMIT_TARGET_BRANCH` | previous commit target branch                                            |
-| `CI_PREV_COMMIT_LINK`          | previous commit link in remote                                           |
-| `CI_PREV_COMMIT_MESSAGE`       | previous commit message                                                  |
-| `CI_PREV_COMMIT_AUTHOR`        | previous commit author username                                          |
-| `CI_PREV_COMMIT_AUTHOR_EMAIL`  | previous commit author email address                                     |
-| `CI_PREV_COMMIT_AUTHOR_AVATAR` | previous commit author avatar                                            |
-|                                | **Previous build**                                                       |
-| `CI_PREV_BUILD_NUMBER`         | previous build number                                                    |
-| `CI_PREV_BUILD_PARENT`         | previous build number of parent build                                    |
-| `CI_PREV_BUILD_EVENT`          | previous build event (push, pull_request, tag, deployment)               |
-| `CI_PREV_BUILD_LINK`           | previous build link in ci                                                |
-| `CI_PREV_BUILD_DEPLOY_TARGET`  | previous build deploy target for `deployment` events (ie production)     |
-| `CI_PREV_BUILD_STATUS`         | previous build status (success, failure)                                 |
-| `CI_PREV_BUILD_CREATED`        | previous build created unix timestamp                                    |
-| `CI_PREV_BUILD_STARTED`        | previous build started unix timestamp                                    |
-| `CI_PREV_BUILD_FINISHED`       | previous build finished unix timestamp                                   |
-|                                | **System**                                                               |
-| `CI_SYSTEM_NAME`               | name of the ci system (woodpecker)                                       |
-| `CI_SYSTEM_LINK`               | link to ci system                                                        |
-| `CI_SYSTEM_HOST`               | hostname of ci system server                                             |
-| `CI_SYSTEM_ARCH`               | architecture of agent (defined in pipeline file, default: `linux/amd64`) |
-| `CI_SYSTEM_VERSION`            | todo                                                                     |
+| NAME                           | Description                                                          |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `CI=woodpecker`                | environment is woodpecker                                            |
+|                                | **Repository**                                                       |
+| `CI_REPO`                      | repository full name `<owner>/<name>`                                |
+| `CI_REPO_OWNER`                | repository owner                                                     |
+| `CI_REPO_NAME`                 | repository name                                                      |
+| `CI_REPO_SCM`                  | repository scm (git)                                                 |
+| `CI_REPO_LINK`                 | repository link                                                      |
+| `CI_REPO_REMOTE`               | repository clone url                                                 |
+| `CI_REPO_DEFAULT_BRANCH`       | repository default branch (master)                                   |
+| `CI_REPO_PRIVATE`              | repository is private                                                |
+| `CI_REPO_TRUSTED`              | repository is trusted                                                |
+|                                | **Current Commit**                                                   |
+| `CI_COMMIT_SHA`                | commit sha                                                           |
+| `CI_COMMIT_REF`                | commit ref                                                           |
+| `CI_COMMIT_REFSPEC`            | commit ref spec                                                      |
+| `CI_COMMIT_BRANCH`             | commit branch                                                        |
+| `CI_COMMIT_SOURCE_BRANCH`      | commit source branch                                                 |
+| `CI_COMMIT_TARGET_BRANCH`      | commit target branch                                                 |
+| `CI_COMMIT_TAG`                | commit tag name (empty if event is not `tag`)                        |
+| `CI_COMMIT_PULL_REQUEST`       | commit pull request number (empty if event is not `pull_request`)    |
+| `CI_COMMIT_LINK`               | commit link in remote                                                |
+| `CI_COMMIT_MESSAGE`            | commit message                                                       |
+| `CI_COMMIT_AUTHOR`             | commit author username                                               |
+| `CI_COMMIT_AUTHOR_EMAIL`       | commit author email address                                          |
+| `CI_COMMIT_AUTHOR_AVATAR`      | commit author avatar                                                 |
+|                                | **Current build**                                                    |
+| `CI_BUILD_NUMBER`              | build number                                                         |
+| `CI_BUILD_PARENT`              | build number of parent build                                         |
+| `CI_BUILD_EVENT`               | build event (push, pull_request, tag, deployment)                    |
+| `CI_BUILD_LINK`                | build link in ci                                                     |
+| `CI_BUILD_DEPLOY_TARGET`       | build deploy target for `deployment` events (ie production)          |
+| `CI_BUILD_STATUS`              | build status (success, failure)                                      |
+| `CI_BUILD_CREATED`             | build created unix timestamp                                         |
+| `CI_BUILD_STARTED`             | build started unix timestamp                                         |
+| `CI_BUILD_FINISHED`            | build finished unix timestamp                                        |
+| `CI_BUILD_JOB_NUMBER`          | build-job number                                                     |
+| `CI_BUILD_JOB_STARTED`         | build-job started unix timestamp (TODO: same as build started atm)   |
+|                                | **Previous commit**                                                  |
+| `CI_PREV_COMMIT_SHA`           | previous commit sha                                                  |
+| `CI_PREV_COMMIT_REF`           | previous commit ref                                                  |
+| `CI_PREV_COMMIT_REFSPEC`       | previous commit ref spec                                             |
+| `CI_PREV_COMMIT_BRANCH`        | previous commit branch                                               |
+| `CI_PREV_COMMIT_SOURCE_BRANCH` | previous commit source branch                                        |
+| `CI_PREV_COMMIT_TARGET_BRANCH` | previous commit target branch                                        |
+| `CI_PREV_COMMIT_LINK`          | previous commit link in remote                                       |
+| `CI_PREV_COMMIT_MESSAGE`       | previous commit message                                              |
+| `CI_PREV_COMMIT_AUTHOR`        | previous commit author username                                      |
+| `CI_PREV_COMMIT_AUTHOR_EMAIL`  | previous commit author email address                                 |
+| `CI_PREV_COMMIT_AUTHOR_AVATAR` | previous commit author avatar                                        |
+|                                | **Previous build**                                                   |
+| `CI_PREV_BUILD_NUMBER`         | previous build number                                                |
+| `CI_PREV_BUILD_PARENT`         | previous build number of parent build                                |
+| `CI_PREV_BUILD_EVENT`          | previous build event (push, pull_request, tag, deployment)           |
+| `CI_PREV_BUILD_LINK`           | previous build link in ci                                            |
+| `CI_PREV_BUILD_DEPLOY_TARGET`  | previous build deploy target for `deployment` events (ie production) |
+| `CI_PREV_BUILD_STATUS`         | previous build status (success, failure)                             |
+| `CI_PREV_BUILD_CREATED`        | previous build created unix timestamp                                |
+| `CI_PREV_BUILD_STARTED`        | previous build started unix timestamp                                |
+| `CI_PREV_BUILD_FINISHED`       | previous build finished unix timestamp                               |
+|                                | **System**                                                           |
+| `CI_SYSTEM_NAME`               | name of the ci system: `woodpecker`                                  |
+| `CI_SYSTEM_LINK`               | link to ci system                                                    |
+| `CI_SYSTEM_HOST`               | hostname of ci server                                                |
+| `CI_SYSTEM_VERSION`            | TODO                                                                 |
+|                                | **Agent** this pipeline step is running on                           |
+| `CI_AGENT_NAME`                | TODO                                                                 |
+| `CI_AGENT_HOST`                | TODO                                                                 |
+| `CI_AGENT_OS`                  | TODO                                                                 |
+| `CI_AGENT_ARCH`                | TODO                                                                 |
+| `CI_AGENT_VERSION`             | TODO                                                                 |
 
 ## Global environment variables
 

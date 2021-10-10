@@ -151,8 +151,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_BUILD_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_BUILD_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_BUILD_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
-		"CI_JOB_NUMBER":          strconv.Itoa(m.Job.Number),
-		"CI_JOB_STARTED":         strconv.FormatInt(m.Curr.Started, 10), // ISSUE: no job started
+		"CI_BUILD_JOB_NUMBER":    strconv.Itoa(m.Job.Number),
+		"CI_BUILD_JOB_STARTED":   strconv.FormatInt(m.Curr.Started, 10), // ISSUE: no job started
 
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,

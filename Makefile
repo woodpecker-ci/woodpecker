@@ -3,8 +3,8 @@ GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 VERSION ?= next
-ifneq ($(CI_TAG),)
-	VERSION := $(CI_TAG:v%=%)
+ifneq ($(CI_COMMIT_TAG),)
+	VERSION := $(CI_COMMIT_TAG:v%=%)
 endif
 
 # append commit-sha to next version
