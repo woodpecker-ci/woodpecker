@@ -22,6 +22,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
 
+- Dropped support for `DRONE_*` environment variables in pipeline steps. Pipeline meta-data can be accessed with `CI_*` variables. Please have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables) for all available variables and their descriptions.
+
 - ...
 
 ## 0.14.0
