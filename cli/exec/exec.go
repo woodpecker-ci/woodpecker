@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli"
 

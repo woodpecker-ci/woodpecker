@@ -55,7 +55,7 @@ func EventStreamSSE(c *gin.Context) {
 	io.WriteString(rw, ": ping\n\n")
 	flusher.Flush()
 
-	log.Debug().Msgf("user feed: connection opened")
+	log.Debug().Msg("user feed: connection opened")
 
 	user := session.User(c)
 	repo := map[string]bool{}
@@ -74,7 +74,7 @@ func EventStreamSSE(c *gin.Context) {
 	defer func() {
 		cancel()
 		close(eventc)
-		log.Debug().Msgf("user feed: connection closed")
+		log.Debug().Msg("user feed: connection closed")
 	}()
 
 	go func() {
