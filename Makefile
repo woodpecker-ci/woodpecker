@@ -1,5 +1,5 @@
 DOCKER_RUN_GO_VERSION=1.16
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*" -not -name "*.pb.go")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 VERSION ?= next
