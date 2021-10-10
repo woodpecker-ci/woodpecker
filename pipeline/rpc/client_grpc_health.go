@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"context"
+	"time"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 )
