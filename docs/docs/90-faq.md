@@ -8,4 +8,4 @@ Apart from Woodpecker staying free and OpenSource forever, the growing community
 - [More features are already in the pipeline :wink:](https://github.com/woodpecker-ci/woodpecker/pulls) ...
 ## Why is Woodpecker a fork of Drone version 0.8?
 
-The Drone CI license was changed after the 0.8 release from Apache 2 to a proprietary license. Woodpecker is based on this lastest freely available version.
+The Drone CI license was changed after the 0.8 release from Apache 2 to a proprietary license. Woodpecker is based on this latest freely available version.

@@ -181,7 +181,7 @@ paths:
 
 
   #
-  # Repos Param Encryption Enpoint
+  # Repos Param Encryption Endpoint
   # TODO: properly add the input output schema
 
   /repos/{owner}/{name}/encrypt:
@@ -600,7 +600,7 @@ definitions:
         description: The url for the avatar image.
         type: string
       admin:
-        description: Whether the account has administrative priviledges.
+        description: Whether the account has administrative privileges.
         type: boolean
       active:
         description: Whether the account is currently active.
