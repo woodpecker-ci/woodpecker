@@ -57,6 +57,8 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 		serveHTTP(c.Writer, req)
 	})
 
+	e.GET("/web-config.js", web.WebConfig)
+
 	e.GET("/logout", api.GetLogout)
 	e.GET("/login", api.HandleLogin)
 
