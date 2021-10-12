@@ -43,6 +43,8 @@ func apiRoutes(e *gin.Engine) {
 		users.DELETE("/:login", api.DeleteUser)
 	}
 
+	e.GET("/api/repos/:owner/:name/permissions", api.GetRepoPermissions)
+
 	repo := e.Group("/api/repos/:owner/:name")
 	{
 		repo.Use(session.SetRepo())
