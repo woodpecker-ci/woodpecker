@@ -1,6 +1,6 @@
 # Downloads
 
-## Binaries & APK, DEB, RPM
+## Binaries & DEB, RPM
 
 [Latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
 

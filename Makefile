@@ -119,17 +119,14 @@ bundle-prepare:
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3
 
 bundle-agent: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager apk
 	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
 	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager apk
 	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
 	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager apk
 	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
 	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
 

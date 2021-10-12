@@ -61,7 +61,7 @@ pipeline:
     commands:
       - make release-cli
 
-  build-adk-deb-rpm:
+  build-deb-rpm:
     group: bundle
     image: golang:1.16
     commands:
@@ -213,7 +213,6 @@ pipeline:
     image: plugins/github-release
     files:
       - dist/*.tar.gz
-      - dist/*.apk
       - dist/*.deb
       - dist/*.rpm
       - dist/checksums.txt
