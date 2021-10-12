@@ -66,21 +66,8 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 		auth.POST("/token", api.GetLoginToken)
 	}
 
-	e.POST("/hook", api.PostHook)
-	e.POST("/api/hook", api.PostHook)
-
-	sse := e.Group("/stream")
-	{
-		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:build/:number",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
-	}
-
 	e.GET("/metrics", metrics.PromHandler())
+
 	e.GET("/version", api.Version)
 	e.GET("/healthz", api.Health)
 

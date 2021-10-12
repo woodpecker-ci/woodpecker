@@ -1,7 +1,22 @@
+// Copyright 2021 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package router
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -41,6 +56,8 @@ func apiRoutes(e *gin.Engine) {
 
 		repo.GET("/builds", api.GetBuilds)
 		repo.GET("/builds/:number", api.GetBuild)
+
+		// requires push permissions
 		repo.POST("/builds/:number", session.MustPush, api.PostBuild)
 		repo.DELETE("/builds/:number", session.MustPush, api.DeleteBuild)
 		repo.POST("/builds/:number/approve", session.MustPush, api.PostApproval)
@@ -49,6 +66,8 @@ func apiRoutes(e *gin.Engine) {
 
 		repo.GET("/logs/:number/:pid", api.GetProcLogs)
 		repo.GET("/logs/:number/:pid/:proc", api.GetBuildLogs)
+
+		// requires push permissions
 		repo.DELETE("/logs/:number", session.MustPush, api.DeleteBuildLogs)
 
 		repo.GET("/files/:number", api.FileList)
@@ -82,6 +101,12 @@ func apiRoutes(e *gin.Engine) {
 		badges.GET("/cc.xml", api.GetCC)
 	}
 
+	builds := e.Group("/api/builds")
+	{
+		builds.Use(session.MustAdmin())
+		builds.GET("", api.GetBuildQueue)
+	}
+
 	queue := e.Group("/api/queue")
 	{
 		queue.Use(session.MustAdmin())
@@ -89,12 +114,6 @@ func apiRoutes(e *gin.Engine) {
 		queue.GET("/pause", api.PauseQueue)
 		queue.GET("/resume", api.ResumeQueue)
 		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
-	}
-
-	builds := e.Group("/api/builds")
-	{
-		builds.Use(session.MustAdmin())
-		builds.GET("", api.GetBuildQueue)
 	}
 
 	debugger := e.Group("/api/debug")
@@ -110,5 +129,21 @@ func apiRoutes(e *gin.Engine) {
 		debugger.GET("/pprof/symbol", debug.SymbolHandler())
 		debugger.POST("/pprof/symbol", debug.SymbolHandler())
 		debugger.GET("/pprof/trace", debug.TraceHandler())
+	}
+
+	// TODO: remove /hook in favor of /api/hook
+	e.POST("/hook", api.PostHook)
+	e.POST("/api/hook", api.PostHook)
+
+	// TODO: move to /api/stream
+	sse := e.Group("/stream")
+	{
+		sse.GET("/events", api.EventStreamSSE)
+		sse.GET("/logs/:owner/:name/:build/:number",
+			session.SetRepo(),
+			session.SetPerm(),
+			session.MustPull,
+			api.LogStreamSSE,
+		)
 	}
 }
