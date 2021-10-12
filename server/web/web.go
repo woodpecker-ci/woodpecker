@@ -18,12 +18,15 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web"
 )
 
@@ -43,14 +46,16 @@ func New(opt ...Option) Endpoint {
 	return &website{
 		fs:   web.HttpFS(),
 		opts: opts,
-		content: web.MustLookup("index.html"),
+		tmpl: mustCreateTemplate(
+			string(web.MustLookup("index.html")),
+		),
 	}
 }
 
 type website struct {
-	opts    *Options
-	fs      http.FileSystem
-	content []byte
+	opts *Options
+	fs   http.FileSystem
+	tmpl *template.Template
 }
 
 func (w *website) Register(mux *gin.Engine) {
@@ -63,8 +68,28 @@ func (w *website) Register(mux *gin.Engine) {
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
+
+	var csrf string
+	var user, _ = ToUser(r.Context())
+	if user != nil {
+		csrf, _ = token.New(
+			token.CsrfToken,
+			user.Login,
+		).Sign(user.Hash)
+	}
+	var syncing bool
+	if user != nil {
+		syncing = time.Unix(user.Synced, 0).Add(w.opts.sync).Before(time.Now())
+	}
+	params := map[string]interface{}{
+		"user":    user,
+		"csrf":    csrf,
+		"syncing": syncing,
+		"version": version.String(),
+	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	rw.Write(w.content)
+
+	w.tmpl.Execute(rw, params)
 }
 
 func setupCache(h http.Handler) http.Handler {
