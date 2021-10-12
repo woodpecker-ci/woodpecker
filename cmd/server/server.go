@@ -267,6 +267,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Host = c.String("server-host")
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.RepoConfig = c.String("repo-config")
+	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
