@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
-
 	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 )
 
 func Test_parser(t *testing.T) {

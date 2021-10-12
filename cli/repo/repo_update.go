@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
-
-	"github.com/urfave/cli"
 )
 
 var repoUpdateCmd = cli.Command{

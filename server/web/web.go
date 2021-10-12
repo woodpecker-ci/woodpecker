@@ -22,12 +22,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Endpoint provides the website endpoints.

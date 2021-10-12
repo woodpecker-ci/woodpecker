@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
 var registryDeleteCmd = cli.Command{

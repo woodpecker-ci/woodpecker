@@ -25,12 +25,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/go-github/v39/github"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"github.com/google/go-github/v39/github"
-	"golang.org/x/oauth2"
 )
 
 const (

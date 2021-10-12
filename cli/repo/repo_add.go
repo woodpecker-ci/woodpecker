@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 

@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/google/go-github/v39/github"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const defaultBranch = "master"

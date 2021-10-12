@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gogits/go-gogs-client"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 

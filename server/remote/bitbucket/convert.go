@@ -20,10 +20,10 @@ import (
 	"regexp"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"golang.org/x/oauth2"
 )
 
 const (

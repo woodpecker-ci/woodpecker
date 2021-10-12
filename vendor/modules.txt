@@ -90,9 +90,6 @@ github.com/franela/goblin
 github.com/ghodss/yaml
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
-# github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
-## explicit
-github.com/gin-gonic/contrib/ginrus
 # github.com/gin-gonic/gin v1.7.4
 ## explicit
 github.com/gin-gonic/gin
@@ -220,6 +217,7 @@ github.com/rogpeppe/go-internal/fmtsort
 # github.com/rs/zerolog v1.25.0
 ## explicit
 github.com/rs/zerolog
+github.com/rs/zerolog/cmd/lint
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
@@ -231,7 +229,6 @@ github.com/russross/meddler
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/sirupsen/logrus v1.8.1
-## explicit
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.3.0
 ## explicit
@@ -304,6 +301,7 @@ golang.org/x/sync/errgroup
 # golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7
 ## explicit
 golang.org/x/sys/cpu
+golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -319,6 +317,12 @@ golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 golang.org/x/time/rate
+# golang.org/x/tools v0.1.5
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/buildutil
+golang.org/x/tools/go/internal/cgo
+golang.org/x/tools/go/loader
+golang.org/x/tools/internal/typeparams
 # google.golang.org/appengine v1.6.7
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base

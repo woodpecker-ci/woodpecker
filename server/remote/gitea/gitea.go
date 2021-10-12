@@ -28,11 +28,11 @@ import (
 	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"golang.org/x/oauth2"
 )
 
 const (

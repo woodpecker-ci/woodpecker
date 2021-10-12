@@ -19,11 +19,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 )
 
 func Test_github(t *testing.T) {

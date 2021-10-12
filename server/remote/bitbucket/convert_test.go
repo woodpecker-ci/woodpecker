@@ -18,11 +18,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
 	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
 )
 
 func Test_helper(t *testing.T) {

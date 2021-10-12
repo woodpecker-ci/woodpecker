@@ -6,10 +6,10 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
-
-	"github.com/urfave/cli"
 )
 
 // Command exports the deploy command.
