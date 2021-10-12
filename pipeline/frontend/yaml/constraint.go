@@ -7,9 +7,10 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	libcompose "github.com/docker/libcompose/yaml"
+	"gopkg.in/yaml.v3"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"gopkg.in/yaml.v3"
 )
 
 type (

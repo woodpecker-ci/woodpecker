@@ -19,12 +19,11 @@ require (
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
 	github.com/ghodss/yaml v1.0.0
-	github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
@@ -43,7 +42,6 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/rs/zerolog v1.25.0
 	github.com/russross/meddler v1.0.1
-	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5

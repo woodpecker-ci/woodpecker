@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 

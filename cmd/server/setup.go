@@ -19,6 +19,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
@@ -36,12 +42,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	"golang.org/x/sync/errgroup"
 )
 
 func setupStore(c *cli.Context) store.Store {
@@ -128,7 +128,7 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		SkipVerify:  c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
-		logrus.Fatalln("WOODPECKER_GITEA_URL must be set")
+		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
 	}
 	return gitea.New(opts)
 }

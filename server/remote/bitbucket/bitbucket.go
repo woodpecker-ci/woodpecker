@@ -20,12 +20,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"golang.org/x/oauth2"
 )
 
 // Bitbucket cloud endpoints.

@@ -239,6 +239,6 @@ func TestConfigIndexes(t *testing.T) {
 			Hash:   hash,
 		},
 	); err == nil {
-		t.Errorf("Unexpected error: dupliate sha")
+		t.Errorf("Unexpected error: duplicate sha")
 	}
 }

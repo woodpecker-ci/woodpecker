@@ -25,17 +25,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/go-github/v39/github"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"github.com/google/go-github/v39/github"
-	"golang.org/x/oauth2"
 )
 
 const (
-	defaultURL = "https://github.com"     // Default GitHub URL
-	defaultAPI = "https://api.github.com" // Default GitHub API URL
+	defaultURL = "https://github.com"      // Default GitHub URL
+	defaultAPI = "https://api.github.com/" // Default GitHub API URL
 )
 
 // Opts defines configuration options.

@@ -17,10 +17,10 @@ package github
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/franela/goblin"
 	"github.com/google/go-github/v39/github"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func Test_helper(t *testing.T) {

@@ -140,6 +140,6 @@ func TestSenderIndexes(t *testing.T) {
 		Allow:  true,
 		Block:  false,
 	}); err == nil {
-		t.Errorf("Unexpected error: dupliate login")
+		t.Errorf("Unexpected error: duplicate login")
 	}
 }

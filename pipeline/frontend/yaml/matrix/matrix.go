@@ -68,7 +68,7 @@ func calc(matrix Matrix) []Axis {
 	// structure to hold the transformed result set
 	var axisList []Axis
 
-	// for each axis calculate the uniqe set of values that should be used.
+	// for each axis calculate the unique set of values that should be used.
 	for p := 0; p < perm; p++ {
 		axis := map[string]string{}
 		decr := perm

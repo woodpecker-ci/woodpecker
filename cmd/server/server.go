@@ -27,12 +27,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli"
+	"golang.org/x/crypto/acme/autocert"
+	oldcontext "golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
-
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -43,12 +46,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/logger"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/contrib/ginrus"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 )
 
 func loop(c *cli.Context) error {
@@ -56,37 +55,45 @@ func loop(c *cli.Context) error {
 	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	if c.Bool("debug") {
-		logrus.SetReportCaller(true)
-		logrus.SetLevel(logrus.DebugLevel)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
-		logrus.SetLevel(logrus.WarnLevel)
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	}
+
+	if c.Bool("pretty") {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{
+				Out:     os.Stderr,
+				NoColor: c.BoolT("nocolor"),
+			},
+		)
 	}
 
 	if c.String("server-host") == "" {
-		logrus.Fatalln("WOODPECKER_HOST is not properly configured")
+		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		logrus.Fatalln(
+		log.Fatal().Msg(
 			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
-		logrus.Warningln(
+		log.Warn().Msg(
 			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
-		logrus.Fatalln(
+		log.Fatal().Msg(
 			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
 	remote_, err := SetupRemote(c)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal().Err(err).Msg("")
 	}
 
 	store_ := setupStore(c)
@@ -116,7 +123,7 @@ func loop(c *cli.Context) error {
 	// setup the server and start the listener
 	handler := router.Load(
 		webUIServe,
-		ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true),
+		logger.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
 		middleware.Store(c, store_),
@@ -130,7 +137,7 @@ func loop(c *cli.Context) error {
 
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
 		auther := &authorizer{
@@ -155,7 +162,7 @@ func loop(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
 		return nil
