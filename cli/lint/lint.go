@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
 )
 

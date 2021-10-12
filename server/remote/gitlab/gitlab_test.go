@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
-
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
 func load(config string) *Gitlab {
@@ -155,7 +155,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test hook method
 		g.Describe("Hook", func() {
 			g.Describe("Push hook", func() {
-				g.It("Should parse actual push hoook", func() {
+				g.It("Should parse actual push hook", func() {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),

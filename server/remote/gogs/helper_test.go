@@ -18,11 +18,11 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gogits/go-gogs-client"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
 )
 
 func Test_parse(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 

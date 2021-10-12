@@ -21,9 +21,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/xanzy/go-gitlab"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
@@ -72,7 +72,7 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	} else if target == nil {
 		return nil, nil, fmt.Errorf("target key expected in merge request hook")
 	} else if source == nil {
-		return nil, nil, fmt.Errorf("source key exptected in merge request hook")
+		return nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {

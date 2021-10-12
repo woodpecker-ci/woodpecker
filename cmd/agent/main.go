@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/woodpecker-ci/woodpecker/version"
-
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func main() {

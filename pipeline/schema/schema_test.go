@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
-
 	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
 )
 
 func TestSchema(t *testing.T) {

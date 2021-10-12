@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/urfave/cli"
+
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/version"
 )

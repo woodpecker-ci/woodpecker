@@ -22,7 +22,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -41,7 +41,7 @@ func GetFeed(c *gin.Context) {
 	latest, _ := strconv.ParseBool(c.Query("latest"))
 
 	if time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now()) {
-		logrus.Debugf("sync begin: %s", user.Login)
+		log.Debug().Msgf("sync begin: %s", user.Login)
 
 		user.Synced = time.Now().Unix()
 		store.FromContext(c).UpdateUser(user)
@@ -55,9 +55,9 @@ func GetFeed(c *gin.Context) {
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user); err != nil {
-			logrus.Debugf("sync error: %s: %s", user.Login, err)
+			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
-			logrus.Debugf("sync complete: %s", user.Login)
+			log.Debug().Msgf("sync complete: %s", user.Login)
 		}
 	}
 
@@ -87,7 +87,7 @@ func GetRepos(c *gin.Context) {
 	)
 
 	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
-		logrus.Debugf("sync begin: %s", user.Login)
+		log.Debug().Msgf("sync begin: %s", user.Login)
 		user.Synced = time.Now().Unix()
 		store.FromContext(c).UpdateUser(user)
 
@@ -101,9 +101,9 @@ func GetRepos(c *gin.Context) {
 		}
 
 		if err := sync.Sync(c, user); err != nil {
-			logrus.Debugf("sync error: %s: %s", user.Login, err)
+			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
-			logrus.Debugf("sync complete: %s", user.Login)
+			log.Debug().Msgf("sync complete: %s", user.Login)
 		}
 	}
 

@@ -194,8 +194,8 @@
             "enum": ["success", "failure"]
           }
         },
-        "plattform": {
-          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#plattform",
+        "platform": {
+          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.github.io/docs/usage/pipeline-syntax#platform",
           "oneOf": [
             {
               "type": "array",

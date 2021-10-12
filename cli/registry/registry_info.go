@@ -4,9 +4,9 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
 var registryInfoCmd = cli.Command{

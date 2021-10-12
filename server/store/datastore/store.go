@@ -19,11 +19,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/russross/meddler"
+
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/ddl"
-
-	"github.com/sirupsen/logrus"
 )
 
 // datastore is an implementation of a model.Store built on top
@@ -55,8 +55,7 @@ func From(db *sql.DB) store.Store {
 func open(driver, config string) *sql.DB {
 	db, err := sql.Open(driver, config)
 	if err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database connection failed")
+		log.Fatal().Err(err).Msg("database connection failed")
 	}
 	if driver == "mysql" {
 		// per issue https://github.com/go-sql-driver/mysql/issues/257
@@ -66,13 +65,11 @@ func open(driver, config string) *sql.DB {
 	setupMeddler(driver)
 
 	if err := pingDatabase(db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("database ping attempts failed")
+		log.Fatal().Err(err).Msg("database ping attempts failed")
 	}
 
 	if err := setupDatabase(driver, db); err != nil {
-		logrus.Errorln(err)
-		logrus.Fatalln("migration failed")
+		log.Fatal().Err(err).Msg("migration failed")
 	}
 	return db
 }
@@ -120,13 +117,13 @@ func pingDatabase(db *sql.DB) (err error) {
 		if err == nil {
 			return
 		}
-		logrus.Infof("database ping failed. retry in 1s")
+		log.Info().Msgf("database ping failed. retry in 1s")
 		time.Sleep(time.Second)
 	}
 	return
 }
 
-// helper function to setup the databsae by performing
+// helper function to setup the database by performing
 // automated database migration steps.
 func setupDatabase(driver string, db *sql.DB) error {
 	return ddl.Migrate(driver, db)

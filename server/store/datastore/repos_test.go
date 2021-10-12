@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 

@@ -3,9 +3,9 @@ package repo
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
 var repoRemoveCmd = cli.Command{

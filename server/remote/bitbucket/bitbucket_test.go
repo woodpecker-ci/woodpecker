@@ -21,12 +21,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/franela/goblin"
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"github.com/franela/goblin"
-	"github.com/gin-gonic/gin"
 )
 
 func Test_bitbucket(t *testing.T) {

@@ -26,6 +26,16 @@ var flags = []cli.Flag{
 		Name:   "debug",
 		Usage:  "enable server debug mode",
 	},
+	cli.BoolFlag{
+		EnvVar: "WOODPECKER_DEBUG_PRETTY",
+		Name:   "pretty",
+		Usage:  "enable pretty-printed debug output",
+	},
+	cli.BoolTFlag{
+		EnvVar: "WOODPECKER_DEBUG_NOCOLOR",
+		Name:   "nocolor",
+		Usage:  "disable colored debug output",
+	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_HOST",
 		Name:   "server-host",
