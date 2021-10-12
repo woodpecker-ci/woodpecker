@@ -26,17 +26,15 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `CI_*` prefix replaces `DRONE_*`
   - `CI` value is now `woodpecker`
   - `DRONE=true` has been removed
-  - Use `CI_REPO_DEFAULT_BRANCH` instead of `*_REPO_BRANCH`
+  - Use `CI_REPO_DEFAULT_BRANCH` instead of `DRONE_REPO_BRANCH`
   - Use `CI_COMMIT_BRANCH`, `CI_COMMIT_SOURCE_BRANCH` and `CI_COMMIT_TARGET_BRANCH` instead of `DRONE_BRANCH`, `DRONE_TARGET_BRANCH` and `DRONE_SOURCE_BRANCH` variables
-  - Use `CI_COMMIT_AUTHOR` instead of `*_COMMIT_AUTHOR_NAME`
-  - Use `CI_BUILD_PARENT` instead of ``
+  - Use `CI_COMMIT_AUTHOR` instead of `DRONE_COMMIT_AUTHOR_NAME`
   - Use `CI_COMMIT_TAG` instead of `DRONE_TAG`
   - Use `CI_COMMIT_PULL_REQUEST` instead of `DRONE_PULL_REQUEST`
   - Use `CI_BUILD_DEPLOY_TARGET` instead of `DRONE_DEPLOY_TO`
   - Use `CI_REPO_REMOTE` instead of `DRONE_REMOTE_URL`
-  - Use `CI_SYS_ARCH` instead of `DRONE_ARCH`
+  - Use `CI_AGENT_ARCH` instead of `DRONE_ARCH`
   - Use `CI_COMMIT_SHA` instead of `DRONE_COMMIT`
-  - Use `CI_BUILD_JOB_*` instead of `DRONE_JOB_*`
 
   For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
 

@@ -68,12 +68,12 @@ var flags = []cli.Flag{
 	// workspace default
 	//
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_WORKSPACE_BASE",
+		EnvVar: "CI_WORKSPACE_BASE",
 		Name:   "workspace-base",
 		Value:  "/woodpecker",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_WORKSPACE_PATH",
+		EnvVar: "CI_WORKSPACE_PATH",
 		Name:   "workspace-path",
 		Value:  "src",
 	},
@@ -81,15 +81,15 @@ var flags = []cli.Flag{
 	// netrc parameters
 	//
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_NETRC_USERNAME",
+		EnvVar: "CI_NETRC_USERNAME",
 		Name:   "netrc-username",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_NETRC_PASSWORD",
+		EnvVar: "CI_NETRC_PASSWORD",
 		Name:   "netrc-password",
 	},
 	cli.StringFlag{
-		EnvVar: "WOODPECKER_NETRC_MACHINE",
+		EnvVar: "CI_NETRC_MACHINE",
 		Name:   "netrc-machine",
 	},
 	//

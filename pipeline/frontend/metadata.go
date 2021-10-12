@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // Event types corresponding to scm hooks.
@@ -17,12 +19,13 @@ const (
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		ID   string `json:"id,omitempty"`
-		Repo Repo   `json:"repo,omitempty"`
-		Curr Build  `json:"curr,omitempty"`
-		Prev Build  `json:"prev,omitempty"`
-		Job  Job    `json:"job,omitempty"`
-		Sys  System `json:"sys,omitempty"`
+		ID    string `json:"id,omitempty"`
+		Repo  Repo   `json:"repo,omitempty"`
+		Curr  Build  `json:"curr,omitempty"`
+		Prev  Build  `json:"prev,omitempty"`
+		Job   Job    `json:"job,omitempty"`
+		Sys   System `json:"sys,omitempty"`
+		Agent Agent  `json:"agent,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -71,8 +74,12 @@ type (
 
 	// Job defines runtime metadata for a job.
 	Job struct {
-		Number int               `json:"number,omitempty"`
-		Matrix map[string]string `json:"matrix,omitempty"`
+		Number   int               `json:"number,omitempty"`
+		Matrix   map[string]string `json:"matrix,omitempty"`
+		Status   string            `json:"status,omitempty"`
+		Created  int64             `json:"created,omitempty"`
+		Started  int64             `json:"started,omitempty"`
+		Finished int64             `json:"finished,omitempty"`
 	}
 
 	// Secret defines a runtime secret
@@ -85,9 +92,15 @@ type (
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name    string `json:"name,omitempty"`
+		Name string `json:"name,omitempty"`
+		Host string `json:"host,omitempty"`
+		Link string `json:"link,omitempty"`
+		// Arch    string `json:"arch,omitempty"`
+		// Version string `json:"version,omitempty"`
+	}
+
+	Agent struct {
 		Host    string `json:"host,omitempty"`
-		Link    string `json:"link,omitempty"`
 		Arch    string `json:"arch,omitempty"`
 		Version string `json:"version,omitempty"`
 	}
@@ -151,8 +164,11 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_BUILD_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_BUILD_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_BUILD_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
-		"CI_BUILD_JOB_NUMBER":    strconv.Itoa(m.Job.Number),
-		"CI_BUILD_JOB_STARTED":   strconv.FormatInt(m.Curr.Started, 10), // ISSUE: no job started
+
+		"CI_JOB_NUMBER":   strconv.Itoa(m.Job.Number),
+		"CI_JOB_STATUS":   "", // will be set by agent
+		"CI_JOB_STARTED":  "", // will be set by agent
+		"CI_JOB_FINISHED": "", // will be set by agent
 
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
@@ -177,8 +193,11 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_NAME":    m.Sys.Name,
 		"CI_SYSTEM_LINK":    m.Sys.Link,
 		"CI_SYSTEM_HOST":    m.Sys.Host,
-		"CI_SYSTEM_ARCH":    m.Sys.Arch,
-		"CI_SYSTEM_VERSION": m.Sys.Version,
+		"CI_SYSTEM_VERSION": version.Version,
+
+		"CI_AGENT_HOST":    m.Agent.Host,
+		"CI_AGENT_ARCH":    m.Agent.Arch,
+		"CI_AGENT_VERSION": m.Agent.Version,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
@@ -191,9 +210,9 @@ func (m *Metadata) Environ() map[string]string {
 
 var pullRegexp = regexp.MustCompile("\\d+")
 
-func (m *Metadata) SetPlatform(platform string) {
-	if platform == "" {
-		platform = "linux/amd64"
-	}
-	m.Sys.Arch = platform
-}
+// func (m *Metadata) SetPlatform(platform string) {
+// 	if platform == "" {
+// 		platform = "linux/amd64"
+// 	}
+// 	m.Sys.Arch = platform
+// }

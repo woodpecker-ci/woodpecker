@@ -83,8 +83,11 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_BUILD_CREATED`             | build created unix timestamp                                         |
 | `CI_BUILD_STARTED`             | build started unix timestamp                                         |
 | `CI_BUILD_FINISHED`            | build finished unix timestamp                                        |
-| `CI_BUILD_JOB_NUMBER`          | build-job number                                                     |
-| `CI_BUILD_JOB_STARTED`         | build-job started unix timestamp (TODO: same as build started atm)   |
+|                                | **Current job**                                                      |
+| `CI_JOB_NUMBER`                | job number                                                           |
+| `CI_JOB_STATUS`                | job status (success, failure)                                        |
+| `CI_JOB_STARTED`               | job started unix timestamp                                           |
+| `CI_JOB_FINISHED`              | job finished unix timestamp                                          |
 |                                | **Previous commit**                                                  |
 | `CI_PREV_COMMIT_SHA`           | previous commit sha                                                  |
 | `CI_PREV_COMMIT_REF`           | previous commit ref                                                  |
@@ -111,13 +114,19 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_SYSTEM_NAME`               | name of the ci system: `woodpecker`                                  |
 | `CI_SYSTEM_LINK`               | link to ci system                                                    |
 | `CI_SYSTEM_HOST`               | hostname of ci server                                                |
-| `CI_SYSTEM_VERSION`            | TODO                                                                 |
+| `CI_SYSTEM_VERSION`            | version of the server                                                |
 |                                | **Agent** this pipeline step is running on                           |
-| `CI_AGENT_NAME`                | TODO                                                                 |
-| `CI_AGENT_HOST`                | TODO                                                                 |
-| `CI_AGENT_OS`                  | TODO                                                                 |
-| `CI_AGENT_ARCH`                | TODO                                                                 |
-| `CI_AGENT_VERSION`             | TODO                                                                 |
+| `CI_AGENT_HOST`                | hostname of agent                                                    |
+| `CI_AGENT_ARCH`                | arch and os of agent (ie `linux/amd64`)                              |
+| `CI_AGENT_VERSION`             | version of the agent                                                 |
+
+### TODO
+- CI_WORKSPACE
+- CI_SCRIPT
+- CI_NETRC_USERNAME
+- CI_NETRC_PASSWORD
+- CI_NETRC_MACHINE
+
 
 ## Global environment variables
 
@@ -142,7 +151,7 @@ Example commit substitution:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${DRONE_COMMIT_SHA}
++   tags: ${CI_COMMIT_SHA}
 ```
 
 Example tag substitution:
@@ -151,7 +160,7 @@ Example tag substitution:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${DRONE_TAG}
++   tags: ${CI_COMMIT_TAG}
 ```
 
 ## String Operations
@@ -178,7 +187,7 @@ Example variable substitution with substring:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${DRONE_COMMIT_SHA:0:8}
++   tags: ${CI_COMMIT_SHA:0:8}
 ```
 
 Example variable substitution strips `v` prefix from `v.1.0.0`:
@@ -187,5 +196,5 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${DRONE_TAG##v}
++   tags: ${CI_COMMIT_TAG##v}
 ```
