@@ -193,6 +193,7 @@ func setupTree(c *cli.Context) *gin.Engine {
 	tree := gin.New()
 	web.New(
 		web.WithSync(time.Hour*72),
+		web.WithDocs(c.String("docs")),
 	).Register(tree)
 	return tree
 }
