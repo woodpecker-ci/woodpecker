@@ -53,7 +53,6 @@ var Config = struct {
 		Host           string
 		Port           string
 		Pass           string
-		RepoConfig     string
 		Docs           string
 		SessionExpires time.Duration
 		// Open bool
