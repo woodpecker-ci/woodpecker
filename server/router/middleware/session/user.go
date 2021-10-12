@@ -17,11 +17,11 @@ package session
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-
-	"github.com/gin-gonic/gin"
 )
 
 func User(c *gin.Context) *model.User {

@@ -15,9 +15,9 @@
 package gitlab
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/xanzy/go-gitlab"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const (

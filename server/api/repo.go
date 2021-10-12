@@ -43,6 +43,7 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
+	repo.AllowPull = true
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic

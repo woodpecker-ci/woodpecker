@@ -14,7 +14,7 @@ const (
 func main() {
 	// create an http client with oauth authentication.
 	config := new(oauth2.Config)
-	auther := config.Client(
+	authenticator := config.Client(
 		oauth2.NoContext,
 		&oauth2.Token{
 			AccessToken: token,
@@ -22,7 +22,7 @@ func main() {
 	)
 
 	// create the woodpecker client with authenticator
-	client := woodpecker.NewClient(host, auther)
+	client := woodpecker.NewClient(host, authenticator)
 
 	// gets the current user
 	user, err := client.Self()

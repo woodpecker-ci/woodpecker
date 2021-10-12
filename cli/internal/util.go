@@ -42,14 +42,14 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	auther := config.Client(
+	client := config.Client(
 		oauth2.NoContext,
 		&oauth2.Token{
 			AccessToken: token,
 		},
 	)
 
-	trans, _ := auther.Transport.(*oauth2.Transport)
+	trans, _ := client.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
@@ -68,7 +68,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 		}
 	}
 
-	return woodpecker.NewClient(server, auther), nil
+	return woodpecker.NewClient(server, client), nil
 }
 
 // ParseRepo parses the repository owner and name from a string.

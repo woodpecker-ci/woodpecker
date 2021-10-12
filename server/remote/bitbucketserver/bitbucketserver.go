@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/mrjones/oauth"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"

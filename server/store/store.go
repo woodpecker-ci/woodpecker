@@ -17,9 +17,9 @@ package store
 import (
 	"io"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"golang.org/x/net/context"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type Store interface {

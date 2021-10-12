@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var userAddCmd = cli.Command{

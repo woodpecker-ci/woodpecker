@@ -61,6 +61,15 @@ pipeline:
     commands:
       - make release-cli
 
+  build-adk-deb-rpm:
+    group: bundle
+    image: golang:1.16
+    commands:
+      - make bundle
+    when:
+      event: [push, tag]
+      branch: master
+
   publish-server:
     group: bundle
     image: plugins/docker
@@ -109,6 +118,28 @@ pipeline:
       branch: master
       event: push
 
+  publish-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [next]
+    when:
+      branch: master
+      event: push
+
+  publish-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [next-alpine]
+    when:
+      branch: master
+      event: push
+
   release-server:
     group: bundle
     image: plugins/docker
@@ -149,14 +180,25 @@ pipeline:
     when:
       event: tag
 
-  build-adk-deb-rpm:
-    group: bundle
-    image: golang:1.16
-    commands:
-      - make bundle
+  release-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [latest, "${DRONE_TAG}"]
     when:
-      event: [push, tag]
-      branch: master
+      event: tag
+
+  release-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    when:
+      event: tag
 
   checksums:
     image: golang:1.16
