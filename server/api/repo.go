@@ -23,7 +23,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -177,7 +177,7 @@ func GetRepoPermissions(c *gin.Context) {
 
 	repo, err := store.GetRepoOwnerName(c, owner, name)
 	if err != nil {
-		log.Debugf("Cannot find repository %s/%s. %s",
+		log.Debug().Msgf("Cannot find repository %s/%s. %s",
 			owner,
 			name,
 			err.Error(),
@@ -190,13 +190,13 @@ func GetRepoPermissions(c *gin.Context) {
 		var err error
 		perm, err = store.FromContext(c).PermFind(user, repo)
 		if err != nil {
-			log.Errorf("Error fetching permission for %s %s. %s",
+			log.Error().Msgf("Error fetching permission for %s %s. %s",
 				user.Login, repo.FullName, err)
 		}
 		if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-			perm, err = remote.FromContext(c).Perm(user, repo.Owner, repo.Name)
+			perm, err = remote.FromContext(c).Perm(c, user, repo.Owner, repo.Name)
 			if err == nil {
-				log.Debugf("Synced user permission for %s %s", user.Login, repo.FullName)
+				log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 				perm.Repo = repo.FullName
 				perm.UserID = user.ID
 				perm.Synced = time.Now().Unix()
@@ -223,11 +223,11 @@ func GetRepoPermissions(c *gin.Context) {
 	}
 
 	if user != nil {
-		log.Debugf("%s granted %+v permission to %s",
+		log.Debug().Msgf("%s granted %+v permission to %s",
 			user.Login, perm, repo.FullName)
 
 	} else {
-		log.Debugf("Guest granted %+v to %s", perm, repo.FullName)
+		log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 	}
 
 	c.JSON(http.StatusOK, perm)
