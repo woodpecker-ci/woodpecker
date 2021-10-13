@@ -113,22 +113,11 @@ func apiRoutes(e *gin.Engine) {
 
 	queue := e.Group("/api/queue")
 	{
-		queue.GET("/info",
-			session.MustAdmin(),
-			api.GetQueueInfo,
-		)
-		queue.GET("/pause",
-			session.MustAdmin(),
-			api.PauseQueue,
-		)
-		queue.GET("/resume",
-			session.MustAdmin(),
-			api.ResumeQueue,
-		)
-		queue.GET("/norunningbuilds",
-			session.MustAdmin(),
-			api.BlockTilQueueHasRunningItem,
-		)
+		queue.Use(session.MustAdmin())
+		queue.GET("/info", api.GetQueueInfo)
+		queue.GET("/pause", api.PauseQueue)
+		queue.GET("/resume", api.ResumeQueue)
+		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
 	}
 
 	debugger := e.Group("/api/debug")

@@ -67,11 +67,7 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 		auth.POST("/token", api.GetLoginToken)
 	}
 
-	monitor := e.Group("/metrics")
-	{
-		monitor.GET("", metrics.PromHandler())
-	}
-
+	e.GET("/metrics", metrics.PromHandler())
 	e.GET("/version", api.Version)
 	e.GET("/healthz", api.Health)
 
