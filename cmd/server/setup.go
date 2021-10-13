@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -45,10 +46,27 @@ import (
 )
 
 func setupStore(c *cli.Context) store.Store {
+	if !c.IsSet("datasource") {
+		if err := checkSqliteFile(); err != nil {
+			log.Fatal().Err(err).Msg("could not migrate legacy sqlite file")
+		}
+	}
 	return datastore.New(
 		c.String("driver"),
 		c.String("datasource"),
 	)
+}
+
+// TODO Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
+func checkSqliteFile() error {
+	_, err := os.Stat("drone.sqlite")
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	return os.Rename("drone.sqlite", "woodpecker.sqlite")
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {

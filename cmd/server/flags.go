@@ -167,7 +167,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_DATABASE_DATASOURCE",
 		Name:   "datasource",
 		Usage:  "database driver configuration string",
-		Value:  "drone.sqlite",
+		Value:  "woodpecker.sqlite",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_PROMETHEUS_AUTH_TOKEN",
