@@ -63,20 +63,21 @@ func loop(c *cli.Context) error {
 
 	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+	logLevel := zerolog.WarnLevel
 	if c.Bool("debug") {
 		log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+		logLevel = zerolog.DebugLevel
 	}
+
 	if c.IsSet("log-level") {
-		logLevel := c.String("log-level")
-		lvl, err := zerolog.ParseLevel(logLevel)
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
 		if err != nil {
-			log.Fatal().Msgf("unknown logging level: %s", logLevel)
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
 		}
-		zerolog.SetGlobalLevel(lvl)
+		logLevel = lvl
 	}
+	zerolog.SetGlobalLevel(logLevel)
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
