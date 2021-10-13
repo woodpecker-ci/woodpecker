@@ -16,6 +16,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
