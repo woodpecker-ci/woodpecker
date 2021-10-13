@@ -6,4 +6,5 @@ package tools
 
 import (
 	_ "github.com/woodpecker-ci/togo"
+	_ "github.com/rs/zerolog/cmd/lint"
 )
