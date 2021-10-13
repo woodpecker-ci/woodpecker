@@ -22,6 +22,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
 
+- Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
+
 - ...
 
 ## 0.14.0
