@@ -49,12 +49,6 @@ func loop(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
-	if c.BoolT("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -62,6 +56,22 @@ func loop(c *cli.Context) error {
 				NoColor: c.BoolT("nocolor"),
 			},
 		)
+	}
+
+	if c.BoolT("debug") {
+		log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	}
+
+	if c.IsSet("log-level") {
+		logLevel := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevel)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevel)
+		}
+		zerolog.SetGlobalLevel(lvl)
 	}
 
 	counter.Polling = c.Int("max-procs")
