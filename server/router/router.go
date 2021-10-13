@@ -67,7 +67,6 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 	}
 
 	e.GET("/metrics", metrics.PromHandler())
-
 	e.GET("/version", api.Version)
 	e.GET("/healthz", api.Health)
 
