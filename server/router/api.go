@@ -43,56 +43,60 @@ func apiRoutes(e *gin.Engine) {
 		users.DELETE("/:login", api.DeleteUser)
 	}
 
-	e.GET("/api/repos/:owner/:name/permissions", api.GetRepoPermissions)
-
-	repo := e.Group("/api/repos/:owner/:name")
+	repoBase := e.Group("/api/repos/:owner/:name")
 	{
-		repo.Use(session.SetRepo())
-		repo.Use(session.SetPerm())
-		repo.Use(session.MustPull)
+		repoBase.Use(session.SetRepo())
+		repoBase.Use(session.SetPerm())
 
-		repo.POST("", session.MustRepoAdmin(), api.PostRepo)
-		repo.GET("", api.GetRepo)
+		repoBase.GET("/permissions", api.GetRepoPermissions)
 
-		repo.GET("/builds", api.GetBuilds)
-		repo.GET("/builds/:number", api.GetBuild)
+		repo := repoBase.Group("")
+		{
+			repo.Use(session.MustPull)
 
-		// requires push permissions
-		repo.POST("/builds/:number", session.MustPush, api.PostBuild)
-		repo.DELETE("/builds/:number", session.MustPush, api.DeleteBuild)
-		repo.POST("/builds/:number/approve", session.MustPush, api.PostApproval)
-		repo.POST("/builds/:number/decline", session.MustPush, api.PostDecline)
-		repo.DELETE("/builds/:number/:job", session.MustPush, api.DeleteBuild)
+			repo.POST("", session.MustRepoAdmin(), api.PostRepo)
+			repo.GET("", api.GetRepo)
 
-		repo.GET("/logs/:number/:pid", api.GetProcLogs)
-		repo.GET("/logs/:number/:pid/:proc", api.GetBuildLogs)
+			repo.GET("/builds", api.GetBuilds)
+			repo.GET("/builds/:number", api.GetBuild)
 
-		// requires push permissions
-		repo.DELETE("/logs/:number", session.MustPush, api.DeleteBuildLogs)
+			// requires push permissions
+			repo.POST("/builds/:number", session.MustPush, api.PostBuild)
+			repo.DELETE("/builds/:number", session.MustPush, api.DeleteBuild)
+			repo.POST("/builds/:number/approve", session.MustPush, api.PostApproval)
+			repo.POST("/builds/:number/decline", session.MustPush, api.PostDecline)
+			repo.DELETE("/builds/:number/:job", session.MustPush, api.DeleteBuild)
 
-		repo.GET("/files/:number", api.FileList)
-		repo.GET("/files/:number/:proc/*file", api.FileGet)
+			repo.GET("/logs/:number/:pid", api.GetProcLogs)
+			repo.GET("/logs/:number/:pid/:proc", api.GetBuildLogs)
 
-		// requires push permissions
-		repo.GET("/secrets", session.MustPush, api.GetSecretList)
-		repo.POST("/secrets", session.MustPush, api.PostSecret)
-		repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
-		repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
-		repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
+			// requires push permissions
+			repo.DELETE("/logs/:number", session.MustPush, api.DeleteBuildLogs)
 
-		// requires push permissions
-		repo.GET("/registry", session.MustPush, api.GetRegistryList)
-		repo.POST("/registry", session.MustPush, api.PostRegistry)
-		repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-		repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-		repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+			repo.GET("/files/:number", api.FileList)
+			repo.GET("/files/:number/:proc/*file", api.FileGet)
 
-		// requires admin permissions
-		repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
-		repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
-		repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
-		repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
-		repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
+			// requires push permissions
+			repo.GET("/secrets", session.MustPush, api.GetSecretList)
+			repo.POST("/secrets", session.MustPush, api.PostSecret)
+			repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
+			repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
+			repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
+
+			// requires push permissions
+			repo.GET("/registry", session.MustPush, api.GetRegistryList)
+			repo.POST("/registry", session.MustPush, api.PostRegistry)
+			repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
+			repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
+			repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+
+			// requires admin permissions
+			repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
+			repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
+			repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
+			repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
+			repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
+		}
 	}
 
 	badges := e.Group("/api/badges/:owner/:name")
