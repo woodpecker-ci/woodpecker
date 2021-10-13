@@ -71,6 +71,13 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 	e.GET("/version", api.Version)
 	e.GET("/healthz", api.Health)
 
+	logLevel := e.Group("/log-level")
+	{
+		logLevel.Use(session.MustAdmin())
+		logLevel.GET("", api.LogLevel)
+		logLevel.POST("", api.SetLogLevel)
+	}
+
 	apiRoutes(e)
 
 	return e
