@@ -9,7 +9,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - /var/lib/drone:/var/lib/drone/
+      - /var/lib/woodpecker:/var/lib/woodpecker/
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ADMIN=laszlocph

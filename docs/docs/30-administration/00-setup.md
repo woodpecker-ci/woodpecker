@@ -33,7 +33,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - woodpecker-server-data:/var/lib/drone/
+      - woodpecker-server-data:/var/lib/woodpecker/
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_HOST=${WOODPECKER_HOST}
