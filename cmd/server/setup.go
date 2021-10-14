@@ -202,37 +202,37 @@ func before(c *cli.Context) error { return nil }
 
 func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "pending_jobs",
 		Help:      "Total number of pending build processes.",
 	})
 	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "waiting_jobs",
 		Help:      "Total number of builds waiting on deps.",
 	})
 	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "running_jobs",
 		Help:      "Total number of running build processes.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
 	builds := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_total_count",
 		Help:      "Total number of builds.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "user_count",
 		Help:      "Total number of users.",
 	})
 	repos := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "repo_count",
 		Help:      "Total number of repos.",
 	})

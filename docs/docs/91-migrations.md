@@ -25,6 +25,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Base paths have moved from `drone` to `woodpecker`
   - `/var/lib/drone` -> `/var/lib/woodpecker`
 
+- Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
+
 - ...
 
 ## 0.14.0
