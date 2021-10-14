@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"io"
+	"os"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
@@ -20,6 +21,15 @@ func New(namespace, endpoint, token string) backend.Engine {
 		endpoint:  endpoint,
 		token:     token,
 	}
+}
+
+func (e *engine) Name() string {
+	return "kubernetes"
+}
+
+func (e *engine) IsAvivable() bool {
+	host := os.Getenv("KUBERNETES_SERVICE_HOST")
+	return len(host) > 0
 }
 
 // Setup the pipeline environment.

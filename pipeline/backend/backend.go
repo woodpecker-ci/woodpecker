@@ -8,6 +8,10 @@ import (
 // Engine defines a container orchestration backend and is used
 // to create and manage container resources.
 type Engine interface {
+	Name() string
+
+	IsAvivable() bool
+
 	// Setup the pipeline environment.
 	Setup(context.Context, *Config) error
 

@@ -101,4 +101,10 @@ var flags = []cli.Flag{
 		Name:   "skip-insecure-grpc",
 		Usage:  "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_BACKEND",
+		Name:   "backend-engine",
+		Usage:  "backend engine to run pipelines on",
+		Value:  "auto-detect",
+	},
 }

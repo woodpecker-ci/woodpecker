@@ -37,6 +37,15 @@ func NewEnv() (backend.Engine, error) {
 	return New(cli), nil
 }
 
+func (e *engine) Name() string {
+	return "docker"
+}
+
+func (e *engine) IsAvivable() bool {
+	_, err := os.Stat("/.dockerenv")
+	return os.IsNotExist(err)
+}
+
 func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
