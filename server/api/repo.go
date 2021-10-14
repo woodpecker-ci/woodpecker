@@ -165,6 +165,11 @@ func GetRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
 
+func GetRepoPermissions(c *gin.Context) {
+	perm := session.Perm(c)
+	c.JSON(http.StatusOK, perm)
+}
+
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	r := remote.FromContext(c)
