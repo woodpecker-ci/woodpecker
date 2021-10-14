@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref, ref, toRef } from 'vue';
 
 import { Tab } from './types';
 
@@ -13,6 +13,13 @@ export default defineComponent({
   name: 'Tab',
 
   props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
+    id: {
+      type: String,
+      default: undefined,
+    },
+
     title: {
       type: String,
       required: true,
@@ -20,7 +27,8 @@ export default defineComponent({
   },
 
   setup(props) {
-    const activeTab = inject<Ref<number>>('active-tab');
+    const id = toRef(props, 'id');
+    const activeTab = inject<Ref<string>>('active-tab');
     const tabs = inject<Ref<Tab[]>>('tabs');
     if (activeTab === undefined || tabs === undefined) {
       throw new Error('Please wrap this "Tab"-component inside a "Tabs" list.');
@@ -35,7 +43,7 @@ export default defineComponent({
     onMounted(() => {
       tab.value = {
         ...tab.value,
-        id: tabs.value.length,
+        id: id.value || tabs.value.length.toString(),
       };
       tabs.value.push(tab.value);
     });

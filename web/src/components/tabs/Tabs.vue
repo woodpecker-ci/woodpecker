@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, ref } from 'vue';
+import { computed, defineComponent, provide, ref, toRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Tab } from './types';
@@ -31,14 +31,39 @@ import { Tab } from './types';
 export default defineComponent({
   name: 'Tabs',
 
-  setup() {
+  props: {
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
+    disableHashMode: {
+      type: Boolean,
+    },
+
+    // used by toRef
+    // eslint-disable-next-line vue/no-unused-properties
+    modelValue: {
+      type: String,
+      default: '',
+    },
+  },
+
+  emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    'update:modelValue': (_value: string): boolean => true,
+  },
+
+  setup(props) {
     const router = useRouter();
     const route = useRoute();
 
+    const disableHashMode = toRef(props, 'disableHashMode');
+    const modelValue = toRef(props, 'modelValue');
     const tabs = ref<Tab[]>([]);
-    const activeTab = ref(parseInt(route.hash.replace(/^#tab-/, '') || '0', 10));
+    const activeTab = ref(route.hash.replace(/^#tab-/, '') || undefined);
     provide('tabs', tabs);
-    provide('active-tab', activeTab);
+    provide(
+      'active-tab',
+      computed(() => activeTab.value || modelValue.value || '0'),
+    );
 
     async function selectTab(tab: Tab) {
       if (tab.id === undefined) {
@@ -51,7 +76,9 @@ export default defineComponent({
 
       activeTab.value = tab.id;
 
-      await router.push({ params: route.params, hash: `#tab-${tab.id}` });
+      if (!disableHashMode.value) {
+        await router.push({ params: route.params, hash: `#tab-${tab.id}` });
+      }
     }
 
     return { tabs, activeTab, selectTab };

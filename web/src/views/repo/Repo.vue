@@ -17,7 +17,7 @@
       <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
 
-    <Tabs>
+    <Tabs disable-hash-mode v-model="openTab">
       <Tab title="Activity">
         <div v-if="builds" class="space-y-4">
           <router-link

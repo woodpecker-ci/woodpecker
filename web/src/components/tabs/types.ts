@@ -1,5 +1,5 @@
 export type Tab = {
-  id?: number;
+  id?: string;
   title: string;
   slug: string;
 };
