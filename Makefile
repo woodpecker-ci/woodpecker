@@ -41,6 +41,13 @@ vet:
 	@echo "Running go vet..."
 	@go vet $(GO_PACKAGES)
 
+.PHONY: lint
+lint:
+	@echo "Running zerolog linter"
+	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
+	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
+	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/server
+
 test-agent:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
 
