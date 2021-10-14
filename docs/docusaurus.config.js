@@ -5,7 +5,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 module.exports = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple CI engine with great extensibility.',
-  url: 'https://woodpecker-ci.github.io',
+  url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
