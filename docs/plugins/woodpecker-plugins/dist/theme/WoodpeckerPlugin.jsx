@@ -1,9 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
 exports.WoodpeckerPlugin = void 0;
-var react_1 = require("react");
-var clsx_1 = require("clsx");
-var Layout_1 = require("@theme/Layout");
+var react_1 = __importDefault(require("react"));
+var clsx_1 = __importDefault(require("clsx"));
+var Layout_1 = __importDefault(require("@theme/Layout"));
 function WoodpeckerPlugin(_a) {
     var plugin = _a.plugin;
     return (<Layout_1.default title="Woodpecker CI plugins" description="List of Woodpecker-CI plugins">

@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
 exports.getContent = exports.getRawHeader = exports.getHeader = void 0;
-var marked_1 = require("marked");
+var marked_1 = __importDefault(require("marked"));
 var tokens = ['---', '---'];
 var regexHeader = new RegExp('^' + tokens[0] + '([\\s|\\S]*?)' + tokens[1]);
 var regexContent = new RegExp('^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*');

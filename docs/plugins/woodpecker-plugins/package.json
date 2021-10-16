@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "devDependencies": {
+    "@tsconfig/docusaurus": "^1.0.4",
     "@docusaurus/types": "^2.0.0-beta.7",
     "@octokit/rest": "^18.12.0",
     "@types/marked": "^3.0.1",
