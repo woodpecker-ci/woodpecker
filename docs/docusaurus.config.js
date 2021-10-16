@@ -122,10 +122,6 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
         },
-        // blog: {
-        //   showReadingTime: true,
-        //   editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/blog/',
-        // },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
