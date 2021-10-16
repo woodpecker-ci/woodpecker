@@ -101,6 +101,12 @@ module.exports = {
       theme: lightCodeTheme,
       darkTheme: darkCodeTheme,
     },
+    algolia: {
+      appId: "BH4D9OD16A",
+      apiKey: "148f85e216b68d20ffa49d46a2b89d0e",
+      indexName: "woodpecker-ci",
+      debug: false, // Set debug to true if you want to inspect the modal
+    },
   },
   presets: [
     [
