@@ -52,14 +52,6 @@ import (
 
 func loop(c *cli.Context) error {
 
-	// debug level if requested by user
-	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	if c.Bool("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -67,6 +59,23 @@ func loop(c *cli.Context) error {
 				NoColor: c.BoolT("nocolor"),
 			},
 		)
+	}
+
+	// debug level if requested by user
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.Bool("debug") {
+		log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
 	}
 
 	if c.String("server-host") == "" {
