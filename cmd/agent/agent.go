@@ -58,12 +58,12 @@ func loop(c *cli.Context) error {
 		)
 	}
 
-	logLevel := zerolog.WarnLevel
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 	if c.BoolT("debug") {
 		if c.IsSet("debug") {
 			log.Warn().Msg("--debug is deprecated, use --log-level instead")
 		}
-		logLevel = zerolog.DebugLevel
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
 	if c.IsSet("log-level") {
@@ -72,9 +72,8 @@ func loop(c *cli.Context) error {
 		if err != nil {
 			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
 		}
-		logLevel = lvl
+		zerolog.SetGlobalLevel(lvl)
 	}
-	zerolog.SetGlobalLevel(logLevel)
 
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
