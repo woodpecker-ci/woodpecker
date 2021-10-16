@@ -72,24 +72,24 @@ function loadContent() {
                     octokit = new rest_1.Octokit();
                     return [4 /*yield*/, octokit.rest.search.code({
                             // search for repos in woodpecker-ci org with a file docs.md containing the string WOODPECKER_PLUGIN_DOCS
-                            q: 'org:woodpecker-ci filename:docs.md WOODPECKER_PLUGIN_DOCS'
+                            q: "org:woodpecker-ci filename:docs.md WOODPECKER_PLUGIN_DOCS"
                         })];
                 case 1:
                     codeResults = (_a.sent()).data.items;
                     return [4 /*yield*/, Promise.all(codeResults
-                            .filter(function (i) { return i.repository.name.startsWith('plugin-'); })
+                            .filter(function (i) { return i.repository.name.startsWith("plugin-"); })
                             .map(function (i) { return __awaiter(_this, void 0, void 0, function () {
                             var docsResult, docs, header, plugin;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0: return [4 /*yield*/, octokit.repos.getContent({
-                                            owner: 'woodpecker-ci',
+                                            owner: "woodpecker-ci",
                                             repo: i.repository.name,
-                                            path: '/docs.md'
+                                            path: "/docs.md"
                                         })];
                                     case 1:
                                         docsResult = (_a.sent()).data;
-                                        docs = Buffer.from(docsResult.content, 'base64').toString('ascii');
+                                        docs = Buffer.from(docsResult.content, "base64").toString("ascii");
                                         header = markdown.getHeader(docs);
                                         plugin = {
                                             name: (header === null || header === void 0 ? void 0 : header.name) || i.repository.name,
@@ -121,7 +121,7 @@ function contentLoaded(_a) {
             switch (_b.label) {
                 case 0:
                     createData = actions.createData, addRoute = actions.addRoute;
-                    return [4 /*yield*/, createData('plugins.json', JSON.stringify(plugins))];
+                    return [4 /*yield*/, createData("plugins.json", JSON.stringify(plugins))];
                 case 1:
                     pluginsJsonPath = _b.sent();
                     return [4 /*yield*/, Promise.all(plugins.map(function (plugin) { return __awaiter(_this, void 0, void 0, function () {
@@ -133,7 +133,7 @@ function contentLoaded(_a) {
                                         pluginJsonPath = _a.sent();
                                         addRoute({
                                             path: "/plugins/" + plugin.repoName,
-                                            component: '@theme/WoodpeckerPlugin',
+                                            component: "@theme/WoodpeckerPlugin",
                                             modules: {
                                                 plugin: pluginJsonPath
                                             },
@@ -146,8 +146,8 @@ function contentLoaded(_a) {
                 case 2:
                     _b.sent();
                     addRoute({
-                        path: '/plugins',
-                        component: '@theme/WoodpeckerPluginList',
+                        path: "/plugins",
+                        component: "@theme/WoodpeckerPluginList",
                         modules: {
                             plugins: pluginsJsonPath
                         },
@@ -160,22 +160,22 @@ function contentLoaded(_a) {
 }
 function pluginWoodpeckerPluginsIndex(context, options) {
     return {
-        name: 'woodpecker-plugins',
+        name: "woodpecker-plugins",
         loadContent: loadContent,
         contentLoaded: contentLoaded,
         getThemePath: function () {
-            return path_1["default"].join(__dirname, '..', 'dist', 'theme');
+            return path_1["default"].join(__dirname, "..", "dist", "theme");
         },
         getTypeScriptThemePath: function () {
-            return path_1["default"].join(__dirname, '..', 'src', 'theme');
+            return path_1["default"].join(__dirname, "..", "src", "theme");
         },
         getPathsToWatch: function () {
-            return [path_1["default"].join(__dirname, '..', 'dist', '**', '*.{js,jsx}')];
+            return [path_1["default"].join(__dirname, "..", "dist", "**", "*.{js,jsx}")];
         }
     };
 }
 exports["default"] = pluginWoodpeckerPluginsIndex;
 var getSwizzleComponentList = function () {
-    return ['WoodpeckerPluginList', 'WoodpeckerPlugin'];
+    return ["WoodpeckerPluginList", "WoodpeckerPlugin"];
 };
 exports.getSwizzleComponentList = getSwizzleComponentList;

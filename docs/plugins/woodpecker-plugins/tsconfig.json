@@ -1,14 +1,13 @@
 {
   "extends": "@tsconfig/docusaurus/tsconfig.json",
   "include": ["src", "types"],
+  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*", "src/theme"],
   "compilerOptions": {
     "rootDir": "./src",
-    // significant perf increase by skipping checking .d.ts files, particularly those in node_modules. Recommended by TS
+    "baseUrl": ".",
     "skipLibCheck": true,
-    // `tsdx build` ignores this option, but it is commonly used when type-checking separately with `tsc`
     "noEmit": false,
     "pretty": true,
-    "outDir": "./dist",
-    "jsx": "preserve"
+    "outDir": "./dist"
   }
 }

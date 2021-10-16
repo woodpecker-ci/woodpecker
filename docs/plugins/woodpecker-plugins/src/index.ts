@@ -2,13 +2,12 @@ import {
   LoadContext,
   Plugin,
   PluginContentLoadedActions,
-} from '@docusaurus/types';
-import { Octokit } from '@octokit/rest';
-import { components as OctokitComponents } from '@octokit/openapi-types';
-import path from 'path';
-import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader } from './types';
-import * as markdown from './markdown';
-import routes from '@generated/routes';
+} from "@docusaurus/types";
+import { Octokit } from "@octokit/rest";
+import { components as OctokitComponents } from "@octokit/openapi-types";
+import path from "path";
+import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader } from "./types";
+import * as markdown from "./markdown";
 
 async function loadContent(): Promise<Content> {
   const octokit = new Octokit();
@@ -16,24 +15,24 @@ async function loadContent(): Promise<Content> {
   const codeResults = (
     await octokit.rest.search.code({
       // search for repos in woodpecker-ci org with a file docs.md containing the string WOODPECKER_PLUGIN_DOCS
-      q: 'org:woodpecker-ci filename:docs.md WOODPECKER_PLUGIN_DOCS',
+      q: "org:woodpecker-ci filename:docs.md WOODPECKER_PLUGIN_DOCS",
     })
   ).data.items;
 
   const plugins = await Promise.all(
     codeResults
-      .filter((i) => i.repository.name.startsWith('plugin-'))
+      .filter((i) => i.repository.name.startsWith("plugin-"))
       .map(async (i) => {
         const docsResult = (
           await octokit.repos.getContent({
-            owner: 'woodpecker-ci',
+            owner: "woodpecker-ci",
             repo: i.repository.name,
-            path: '/docs.md',
+            path: "/docs.md",
           })
-        ).data as OctokitComponents['schemas']['content-file'];
+        ).data as OctokitComponents["schemas"]["content-file"];
 
-        const docs = Buffer.from(docsResult.content, 'base64').toString(
-          'ascii'
+        const docs = Buffer.from(docsResult.content, "base64").toString(
+          "ascii"
         );
 
         const header = markdown.getHeader<WoodpeckerPluginHeader>(docs);
@@ -66,7 +65,7 @@ async function contentLoaded({
   const { createData, addRoute } = actions;
 
   const pluginsJsonPath = await createData(
-    'plugins.json',
+    "plugins.json",
     JSON.stringify(plugins)
   );
 
@@ -79,7 +78,7 @@ async function contentLoaded({
 
       addRoute({
         path: `/plugins/${plugin.repoName}`,
-        component: '@theme/WoodpeckerPlugin',
+        component: "@theme/WoodpeckerPlugin",
         modules: {
           plugin: pluginJsonPath,
         },
@@ -89,8 +88,8 @@ async function contentLoaded({
   );
 
   addRoute({
-    path: '/plugins',
-    component: '@theme/WoodpeckerPluginList',
+    path: "/plugins",
+    component: "@theme/WoodpeckerPluginList",
     modules: {
       plugins: pluginsJsonPath,
     },
@@ -103,23 +102,23 @@ export default function pluginWoodpeckerPluginsIndex(
   options: any
 ): Plugin<Content> {
   return {
-    name: 'woodpecker-plugins',
+    name: "woodpecker-plugins",
     loadContent,
     contentLoaded,
     getThemePath() {
-      return path.join(__dirname, '..', 'dist', 'theme');
+      return path.join(__dirname, "..", "dist", "theme");
     },
     getTypeScriptThemePath() {
-      return path.join(__dirname, '..', 'src', 'theme');
+      return path.join(__dirname, "..", "src", "theme");
     },
     getPathsToWatch() {
-      return [path.join(__dirname, '..', 'dist', '**', '*.{js,jsx}')];
+      return [path.join(__dirname, "..", "dist", "**", "*.{js,jsx}")];
     },
   };
 }
 
 const getSwizzleComponentList = (): string[] => {
-  return ['WoodpeckerPluginList', 'WoodpeckerPlugin'];
+  return ["WoodpeckerPluginList", "WoodpeckerPlugin"];
 };
 
 export { getSwizzleComponentList };
