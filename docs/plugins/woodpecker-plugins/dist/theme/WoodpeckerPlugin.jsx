@@ -27,8 +27,4 @@ export function WoodpeckerPlugin(_a) {
       </main>
     </Layout>);
 }
-// if (typeof window !== 'undefined' && React) {
-//   // FIX to resolve "React is not defined"
-//   window.React = React;
-// }
 export default WoodpeckerPlugin;
