@@ -69,7 +69,7 @@ module.exports = {
             },
             {
               label: "FAQ",
-              to: "/docs/faq",
+              to: "/faq",
             },
           ],
         },
@@ -80,15 +80,15 @@ module.exports = {
               label: "Discord",
               href: "https://discord.gg/fcMQqSMXJy",
             },
+            {
+              label: "Mastodon",
+              href: "https://mastodon.technology/@WoodpeckerCI",
+            },
           ],
         },
         {
           title: "More",
           items: [
-            // {
-            //   label: 'Blog',
-            //   to: '/blog',
-            // },
             {
               label: "GitHub",
               href: "https://github.com/woodpecker-ci/woodpecker",
