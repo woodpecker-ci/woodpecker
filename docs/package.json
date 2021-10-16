@@ -5,7 +5,8 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "yarn build:woodpecker-plugins && docusaurus build",
+    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && yarn && yarn build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
