@@ -1,0 +1,17 @@
+{
+  "name": "@woodpecker-ci/plugin-index",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "start": "tsc -w",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "^2.0.0-beta.7",
+    "@octokit/rest": "^18.12.0",
+    "@types/marked": "^3.0.1",
+    "marked": "^3.0.7",
+    "typescript": "^4.4.4"
+  }
+}
