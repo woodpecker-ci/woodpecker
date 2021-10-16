@@ -1,102 +1,102 @@
-const lightCodeTheme = require("prism-react-renderer/themes/github");
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const path = require("path");
+const lightCodeTheme = require('prism-react-renderer/themes/github');
+const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const path = require('path');
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
-  title: "Woodpecker CI",
-  tagline: "Woodpecker is a simple CI engine with great extensibility.",
-  url: "https://woodpecker-ci.org",
-  baseUrl: "/",
-  onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.ico",
-  organizationName: "woodpecker-ci",
-  projectName: "woodpecker-ci.github.io",
+  title: 'Woodpecker CI',
+  tagline: 'Woodpecker is a simple CI engine with great extensibility.',
+  url: 'https://woodpecker-ci.org',
+  baseUrl: '/',
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'warn',
+  favicon: 'img/favicon.ico',
+  organizationName: 'woodpecker-ci',
+  projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
   themeConfig: {
     navbar: {
-      title: "Woodpecker",
+      title: 'Woodpecker',
       logo: {
-        alt: "Woodpecker Logo",
-        src: "img/logo.svg",
-        srcDark: "img/logo-darkmode.svg",
+        alt: 'Woodpecker Logo',
+        src: 'img/logo.svg',
+        srcDark: 'img/logo-darkmode.svg',
       },
       items: [
         {
-          type: "doc",
-          docId: "intro",
-          position: "left",
-          label: "Docs",
+          type: 'doc',
+          docId: 'intro',
+          position: 'left',
+          label: 'Docs',
         },
         {
-          to: "/plugins",
-          position: "left",
-          label: "Plugins",
+          to: '/plugins',
+          position: 'left',
+          label: 'Plugins',
         },
         {
-          type: "doc",
-          docId: "faq",
-          position: "left",
-          label: "FAQ",
+          type: 'doc',
+          docId: 'faq',
+          position: 'left',
+          label: 'FAQ',
         },
         {
-          type: "doc",
-          docId: "migrations",
-          position: "left",
-          label: "Migrations",
+          type: 'doc',
+          docId: 'migrations',
+          position: 'left',
+          label: 'Migrations',
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: "https://github.com/woodpecker-ci/woodpecker",
-          label: "GitHub",
-          position: "right",
+          href: 'https://github.com/woodpecker-ci/woodpecker',
+          label: 'GitHub',
+          position: 'right',
         },
       ],
     },
     footer: {
-      style: "dark",
+      style: 'dark',
       links: [
         {
-          title: "Docs",
+          title: 'Docs',
           items: [
             {
-              label: "Usage",
-              to: "/docs/usage/intro",
+              label: 'Usage',
+              to: '/docs/usage/intro',
             },
             {
-              label: "Server setup",
-              to: "/docs/administration/setup",
+              label: 'Server setup',
+              to: '/docs/administration/setup',
             },
             {
-              label: "FAQ",
-              to: "/docs/faq",
+              label: 'FAQ',
+              to: '/docs/faq',
             },
           ],
         },
         {
-          title: "Community",
+          title: 'Community',
           items: [
             {
-              label: "Discord",
-              href: "https://discord.gg/fcMQqSMXJy",
+              label: 'Discord',
+              href: 'https://discord.gg/fcMQqSMXJy',
             },
           ],
         },
         {
-          title: "More",
+          title: 'More',
           items: [
             // {
             //   label: 'Blog',
             //   to: '/blog',
             // },
             {
-              label: "GitHub",
-              href: "https://github.com/woodpecker-ci/woodpecker",
+              label: 'GitHub',
+              href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: "https://wp.laszlo.cloud/woodpecker-ci/woodpecker",
-              label: "CI",
+              href: 'https://wp.laszlo.cloud/woodpecker-ci/woodpecker',
+              label: 'CI',
             },
           ],
         },
@@ -108,22 +108,21 @@ module.exports = {
       darkTheme: darkCodeTheme,
     },
   },
-  themes: [path.resolve(__dirname, "plugins", "woodpecker-plugins", "dist")],
+  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
   presets: [
     [
-      "@docusaurus/preset-classic",
+      '@docusaurus/preset-classic',
       {
         docs: {
-          sidebarPath: require.resolve("./sidebars.js"),
-          editUrl:
-            "https://github.com/woodpecker-ci/woodpecker/edit/master/docs/",
+          sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
         },
         // blog: {
         //   showReadingTime: true,
         //   editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/blog/',
         // },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: require.resolve('./src/css/custom.css'),
         },
       },
     ],
