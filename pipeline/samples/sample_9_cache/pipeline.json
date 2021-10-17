@@ -7,7 +7,7 @@
         {
           "name": "pipeline_clone",
           "alias": "clone",
-          "image": "plugins/git:latest",
+          "image": "woodpeckerci/plugin-git:latest",
           "working_dir": "/pipeline/src",
           "environment": {
             "CI": "drone",

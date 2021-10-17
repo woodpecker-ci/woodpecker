@@ -26,7 +26,7 @@ This command generates static content into the `build` directory and can be serv
 
 ### Deployment
 
-Deployment happen via [CI](https://github.com/woodpecker-ci/woodpecker/blob/d59fdb4602bfdd0d00078716ba61b05c02cbd1af/.woodpecker/docs.yml#L8-L30) to [woodpecker-ci.github.io](https://woodpecker-ci.github.io).
+Deployment happen via [CI](https://github.com/woodpecker-ci/woodpecker/blob/d59fdb4602bfdd0d00078716ba61b05c02cbd1af/.woodpecker/docs.yml#L8-L30) to [woodpecker-ci.org](https://woodpecker-ci.org).
 
 To manually build the website and push it exec:
 

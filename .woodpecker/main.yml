@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make test
       - make vet
+      - make lint
       - make formatcheck
 
   test-postgres:
