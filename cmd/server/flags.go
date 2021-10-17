@@ -26,6 +26,11 @@ var flags = []cli.Flag{
 		Name:   "debug",
 		Usage:  "enable server debug mode",
 	},
+	cli.StringFlag{
+		EnvVar: "WOODPECKER_LOG_LEVEL",
+		Name:   "log-level",
+		Usage:  "set logging level",
+	},
 	cli.BoolFlag{
 		EnvVar: "WOODPECKER_DEBUG_PRETTY",
 		Name:   "pretty",
@@ -103,7 +108,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",
-		Value:  "https://woodpecker-ci.github.io/",
+		Value:  "https://woodpecker-ci.org/",
 	},
 	cli.DurationFlag{
 		EnvVar: "WOODPECKER_SESSION_EXPIRES",
