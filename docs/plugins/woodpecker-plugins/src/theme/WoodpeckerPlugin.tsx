@@ -17,7 +17,7 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
               <div className={clsx("col col--10")}>
                 <h1>{plugin.name}</h1>
                 <p>{plugin.description}</p>
-                <a target="_blank" rel="noopener noreferrer" href={plugin.url}>
+                <a href={plugin.url} target="_blank" rel="noopener noreferrer">
                   {plugin.url}
                 </a>
               </div>
