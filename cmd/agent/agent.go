@@ -25,7 +25,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
 	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -160,7 +159,7 @@ type credentials struct {
 	password string
 }
 
-func (c *credentials) GetRequestMetadata(oldcontext.Context, ...string) (map[string]string, error) {
+func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
 	return map[string]string{
 		"username": c.username,
 		"password": c.password,

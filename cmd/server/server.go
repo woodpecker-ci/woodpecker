@@ -31,7 +31,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/acme/autocert"
-	oldcontext "golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -296,7 +295,7 @@ func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, stream)
 }
 
-func (a *authorizer) unaryIntercaptor(ctx oldcontext.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if err := a.authorize(ctx); err != nil {
 		return nil, err
 	}
