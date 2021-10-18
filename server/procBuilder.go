@@ -361,6 +361,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 func sanitizePath(path string, configFolder string) string {
 	path = strings.TrimSuffix(path, ".yml")
 	path = strings.TrimPrefix(path, configFolder)
+	path = strings.TrimPrefix(path, "/")
 	path = strings.TrimPrefix(path, ".")
 	return path
 }
