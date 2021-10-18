@@ -11,15 +11,10 @@ import (
 
 // Command exports the log-level command used to change the servers log-level.
 var Command = cli.Command{
-	Name:   "log-level",
-	Usage:  "get the logging level of the server, or set it with --level",
-	Action: logLevel,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "level",
-			Usage: "set the logging level",
-		},
-	},
+	Name:      "log-level",
+	ArgsUsage: "[level]",
+	Usage:     "get the logging level of the server, or set it with [level]",
+	Action:    logLevel,
 }
 
 func logLevel(c *cli.Context) error {
@@ -29,8 +24,9 @@ func logLevel(c *cli.Context) error {
 	}
 
 	var ll *woodpecker.LogLevel
-	if c.IsSet("level") {
-		lvl, err := zerolog.ParseLevel(c.String("level"))
+	arg := c.Args().First()
+	if arg != "" {
+		lvl, err := zerolog.ParseLevel(arg)
 		if err != nil {
 			return err
 		}
@@ -39,6 +35,9 @@ func logLevel(c *cli.Context) error {
 		})
 	} else {
 		ll, err = client.LogLevel()
+	}
+	if err != nil {
+		return err
 	}
 
 	log.Info().Msgf("Logging level: %s", ll.Level)

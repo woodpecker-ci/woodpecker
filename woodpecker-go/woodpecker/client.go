@@ -37,7 +37,7 @@ const (
 	pathBuildQueue     = "%s/api/builds"
 	pathQueue          = "%s/api/queue"
 	pathVersion        = "%s/version"
-	pathLogLevel       = "%s/log-level"
+	pathLogLevel       = "%s/api/log-level"
 )
 
 type client struct {
