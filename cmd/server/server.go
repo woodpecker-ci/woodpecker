@@ -105,6 +105,10 @@ func loop(c *cli.Context) error {
 	}
 
 	store_ := setupStore(c)
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+
 	setupEvilGlobals(c, store_, remote_)
 
 	proxyWebUI := c.String("www-proxy")

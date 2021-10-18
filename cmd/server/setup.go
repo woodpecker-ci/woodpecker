@@ -44,11 +44,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
-func setupStore(c *cli.Context) store.Store {
-	return datastore.New(
-		c.String("driver"),
-		c.String("datasource"),
-	)
+func setupStore(c *cli.Context) (store.Store, error) {
+	opts := &datastore.Opts{
+		Driver: c.String("driver"),
+		Config: c.String("datasource"),
+	}
+	log.Trace().Msgf("setup datastore: %#v", opts)
+	return datastore.New(opts)
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
