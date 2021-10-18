@@ -17,7 +17,6 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -80,40 +79,6 @@ func open(driver, config string) (*sql.DB, error) {
 		return nil, fmt.Errorf("database migration failed: %v", err)
 	}
 	return db, nil
-}
-
-// openTest opens a new database connection for testing purposes.
-// The database driver and connection string are provided by
-// environment variables, with fallback to in-memory sqlite.
-func openTest() *sql.DB {
-	var (
-		driver = "sqlite3"
-		config = ":memory:"
-	)
-	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
-		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
-	}
-	return open(driver, config)
-}
-
-// newTest creates a new database connection for testing purposes.
-// The database driver and connection string are provided by
-// environment variables, with fallback to in-memory sqlite.
-func newTest() *datastore {
-	var (
-		driver = "sqlite3"
-		config = ":memory:"
-	)
-	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
-		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
-	}
-	return &datastore{
-		DB:     open(driver, config),
-		driver: driver,
-		config: config,
-	}
 }
 
 // helper function to ping the database with backoff to ensure

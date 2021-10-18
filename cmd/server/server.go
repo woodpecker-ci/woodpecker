@@ -104,7 +104,7 @@ func loop(c *cli.Context) error {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	store_ := setupStore(c)
+	store_, err := setupStore(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
