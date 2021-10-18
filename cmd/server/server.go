@@ -188,7 +188,7 @@ func loop(c *cli.Context) error {
 				Addr:    ":https",
 				Handler: handler,
 				TLSConfig: &tls.Config{
-					NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
+					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
 			return serve.ListenAndServeTLS(
@@ -231,7 +231,7 @@ func loop(c *cli.Context) error {
 			Handler: handler,
 			TLSConfig: &tls.Config{
 				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"http/1.1"}, // disable h2 because Safari :(
+				NextProtos:     []string{"h2", "http/1.1"},
 			},
 		}
 		return serve.ListenAndServeTLS("", "")
