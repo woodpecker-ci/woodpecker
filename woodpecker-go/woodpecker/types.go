@@ -152,4 +152,9 @@ type (
 		} `json:"stats"`
 		Paused bool `json:"paused,omitempty"`
 	}
+
+	// LogLevel is for checking/setting logging level
+	LogLevel struct {
+		Level string `json:"log-level"`
+	}
 )
