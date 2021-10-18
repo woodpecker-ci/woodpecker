@@ -75,7 +75,7 @@ func loop(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(lvl)
 	}
-	log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
