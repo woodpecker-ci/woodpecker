@@ -98,21 +98,25 @@ func SetupRemote(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Bitbucket remote from the CLI arguments.
 func setupBitbucket(c *cli.Context) (remote.Remote, error) {
-	return bitbucket.New(
-		c.String("bitbucket-client"),
-		c.String("bitbucket-secret"),
-	), nil
+	opts := &bitbucket.Opts{
+		Client: c.String("bitbucket-client"),
+		Secret: c.String("bitbucket-secret"),
+	}
+	log.Trace().Msgf("Remote (bitbucket) opts: %#v", opts)
+	return bitbucket.New(opts)
 }
 
 // helper function to setup the Gogs remote from the CLI arguments.
 func setupGogs(c *cli.Context) (remote.Remote, error) {
-	return gogs.New(gogs.Opts{
+	opts := gogs.Opts{
 		URL:         c.String("gogs-server"),
 		Username:    c.String("gogs-git-username"),
 		Password:    c.String("gogs-git-password"),
 		PrivateMode: c.Bool("gogs-private-mode"),
 		SkipVerify:  c.Bool("gogs-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (gogs) opts: %#v", opts)
+	return gogs.New(opts)
 }
 
 // helper function to setup the Gitea remote from the CLI arguments.
@@ -130,12 +134,13 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 	if len(opts.URL) == 0 {
 		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
 	}
+	log.Trace().Msgf("Remote (gitea) opts: %#v", opts)
 	return gitea.New(opts)
 }
 
 // helper function to setup the Stash remote from the CLI arguments.
 func setupStash(c *cli.Context) (remote.Remote, error) {
-	return bitbucketserver.New(bitbucketserver.Opts{
+	opts := bitbucketserver.Opts{
 		URL:               c.String("stash-server"),
 		Username:          c.String("stash-git-username"),
 		Password:          c.String("stash-git-password"),
@@ -143,7 +148,9 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 		ConsumerRSA:       c.String("stash-consumer-rsa"),
 		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
 		SkipVerify:        c.Bool("stash-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (bitbucketserver) opts: %#v", opts)
+	return bitbucketserver.New(opts)
 }
 
 // helper function to setup the Gitlab remote from the CLI arguments.
@@ -161,7 +168,7 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the GitHub remote from the CLI arguments.
 func setupGithub(c *cli.Context) (remote.Remote, error) {
-	return github.New(github.Opts{
+	opts := github.Opts{
 		URL:         c.String("github-server"),
 		Context:     c.String("github-context"),
 		Client:      c.String("github-client"),
@@ -172,12 +179,14 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		PrivateMode: c.Bool("github-private-mode"),
 		SkipVerify:  c.Bool("github-skip-verify"),
 		MergeRef:    c.BoolT("github-merge-ref"),
-	})
+	}
+	log.Trace().Msgf("Remote (github) opts: %#v", opts)
+	return github.New(opts)
 }
 
 // helper function to setup the Coding remote from the CLI arguments.
 func setupCoding(c *cli.Context) (remote.Remote, error) {
-	return coding.New(coding.Opts{
+	opts := coding.Opts{
 		URL:        c.String("coding-server"),
 		Client:     c.String("coding-client"),
 		Secret:     c.String("coding-secret"),
@@ -186,7 +195,9 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Username:   c.String("coding-git-username"),
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (coding) opts: %#v", opts)
+	return coding.New(opts)
 }
 
 func setupTree(c *cli.Context) *gin.Engine {

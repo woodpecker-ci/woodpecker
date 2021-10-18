@@ -67,7 +67,6 @@ func loop(c *cli.Context) error {
 		log.Warn().Msg("--debug is deprecated, use --log-level instead")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
-
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -76,6 +75,7 @@ func loop(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(lvl)
 	}
+	log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
