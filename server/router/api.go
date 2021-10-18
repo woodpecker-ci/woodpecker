@@ -135,6 +135,13 @@ func apiRoutes(e *gin.Engine) {
 		debugger.GET("/pprof/trace", debug.TraceHandler())
 	}
 
+	logLevel := e.Group("/api/log-level")
+	{
+		logLevel.Use(session.MustAdmin())
+		logLevel.GET("", api.LogLevel)
+		logLevel.POST("", api.SetLogLevel)
+	}
+
 	// TODO: remove /hook in favor of /api/hook
 	e.POST("/hook", api.PostHook)
 	e.POST("/api/hook", api.PostHook)
