@@ -15,9 +15,8 @@
 package store
 
 import (
+	"context"
 	"io"
-
-	"golang.org/x/net/context"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )

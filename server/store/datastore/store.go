@@ -16,7 +16,7 @@ package datastore
 
 import (
 	"database/sql"
-	"os"
+	"fmt"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -35,14 +35,21 @@ type datastore struct {
 	config string
 }
 
+// Opts are options for a new database connection
+type Opts struct {
+	Driver string
+	Config string
+}
+
 // New creates a database connection for the given driver and datasource
 // and returns a new Store.
-func New(driver, config string) store.Store {
+func New(opts *Opts) (store.Store, error) {
+	db, err := open(opts.Driver, opts.Config)
 	return &datastore{
-		DB:     open(driver, config),
-		driver: driver,
-		config: config,
-	}
+		DB:     db,
+		driver: opts.Driver,
+		config: opts.Config,
+	}, err
 }
 
 // From returns a Store using an existing database connection.
@@ -52,10 +59,10 @@ func From(db *sql.DB) store.Store {
 
 // open opens a new database connection with the specified
 // driver and connection string and returns a store.
-func open(driver, config string) *sql.DB {
+func open(driver, config string) (*sql.DB, error) {
 	db, err := sql.Open(driver, config)
 	if err != nil {
-		log.Fatal().Err(err).Msg("database connection failed")
+		return nil, fmt.Errorf("database connection failed: %v", err)
 	}
 	if driver == "mysql" {
 		// per issue https://github.com/go-sql-driver/mysql/issues/257
@@ -65,47 +72,13 @@ func open(driver, config string) *sql.DB {
 	setupMeddler(driver)
 
 	if err := pingDatabase(db); err != nil {
-		log.Fatal().Err(err).Msg("database ping attempts failed")
+		return nil, fmt.Errorf("database ping attempts failed: %v", err)
 	}
 
 	if err := setupDatabase(driver, db); err != nil {
-		log.Fatal().Err(err).Msg("migration failed")
+		return nil, fmt.Errorf("database migration failed: %v", err)
 	}
-	return db
-}
-
-// openTest opens a new database connection for testing purposes.
-// The database driver and connection string are provided by
-// environment variables, with fallback to in-memory sqlite.
-func openTest() *sql.DB {
-	var (
-		driver = "sqlite3"
-		config = ":memory:"
-	)
-	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
-		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
-	}
-	return open(driver, config)
-}
-
-// newTest creates a new database connection for testing purposes.
-// The database driver and connection string are provided by
-// environment variables, with fallback to in-memory sqlite.
-func newTest() *datastore {
-	var (
-		driver = "sqlite3"
-		config = ":memory:"
-	)
-	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
-		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
-	}
-	return &datastore{
-		DB:     open(driver, config),
-		driver: driver,
-		config: config,
-	}
+	return db, nil
 }
 
 // helper function to ping the database with backoff to ensure

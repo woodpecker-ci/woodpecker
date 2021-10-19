@@ -15,10 +15,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/zerolog"
+	zlog "github.com/rs/zerolog/log"
 	"github.com/urfave/cli"
 
 	"github.com/woodpecker-ci/woodpecker/cli/build"
@@ -27,6 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/info"
 	"github.com/woodpecker-ci/woodpecker/cli/lint"
 	"github.com/woodpecker-ci/woodpecker/cli/log"
+	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
 	"github.com/woodpecker-ci/woodpecker/cli/registry"
 	"github.com/woodpecker-ci/woodpecker/cli/repo"
 	"github.com/woodpecker-ci/woodpecker/cli/secret"
@@ -84,10 +86,16 @@ func main() {
 		repo.Command,
 		user.Command,
 		lint.Command,
+		loglevel.Command,
 	}
 
+	zlog.Logger = zlog.Output(
+		zerolog.ConsoleWriter{
+			Out: os.Stderr,
+		},
+	)
+
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		zlog.Fatal().Err(err).Msg("error running cli")
 	}
 }

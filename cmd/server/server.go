@@ -31,7 +31,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/acme/autocert"
-	oldcontext "golang.org/x/net/context"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -52,14 +51,6 @@ import (
 
 func loop(c *cli.Context) error {
 
-	// debug level if requested by user
-	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	if c.Bool("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -68,6 +59,23 @@ func loop(c *cli.Context) error {
 			},
 		)
 	}
+
+	// debug level if requested by user
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.Bool("debug") {
+		log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
+	}
+	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
@@ -96,7 +104,11 @@ func loop(c *cli.Context) error {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	store_ := setupStore(c)
+	store_, err := setupStore(c)
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+
 	setupEvilGlobals(c, store_, remote_)
 
 	proxyWebUI := c.String("www-proxy")
@@ -180,7 +192,7 @@ func loop(c *cli.Context) error {
 				Addr:    ":https",
 				Handler: handler,
 				TLSConfig: &tls.Config{
-					NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
+					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
 			return serve.ListenAndServeTLS(
@@ -223,7 +235,7 @@ func loop(c *cli.Context) error {
 			Handler: handler,
 			TLSConfig: &tls.Config{
 				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"http/1.1"}, // disable h2 because Safari :(
+				NextProtos:     []string{"h2", "http/1.1"},
 			},
 		}
 		return serve.ListenAndServeTLS("", "")
@@ -287,7 +299,7 @@ func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, stream)
 }
 
-func (a *authorizer) unaryIntercaptor(ctx oldcontext.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if err := a.authorize(ctx); err != nil {
 		return nil, err
 	}

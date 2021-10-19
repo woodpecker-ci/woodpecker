@@ -26,7 +26,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
 	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -51,12 +50,6 @@ func loop(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
-	if c.BoolT("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -64,6 +57,23 @@ func loop(c *cli.Context) error {
 				NoColor: c.BoolT("nocolor"),
 			},
 		)
+	}
+
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.BoolT("debug") {
+		if c.IsSet("debug") {
+			log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		}
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
 	}
 
 	counter.Polling = c.Int("max-procs")
@@ -188,7 +198,7 @@ type credentials struct {
 	password string
 }
 
-func (c *credentials) GetRequestMetadata(oldcontext.Context, ...string) (map[string]string, error) {
+func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
 	return map[string]string{
 		"username": c.username,
 		"password": c.password,

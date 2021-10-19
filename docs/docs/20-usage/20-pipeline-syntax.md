@@ -505,7 +505,7 @@ Woodpecker automatically configures a default clone step if not explicitly defin
 ```diff
 +clone:
 +  git:
-+    image: plugins/git
++    image: woodpeckerci/plugin-git
 
 pipeline:
   build:
@@ -520,7 +520,7 @@ Example configuration to override depth:
 ```diff
 clone:
   git:
-    image: plugins/git
+    image: woodpeckerci/plugin-git
 +   depth: 50
 ```
 
@@ -557,7 +557,7 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 ```diff
 clone:
   git:
-    image: plugins/git
+    image: woodpeckerci/plugin-git
     recursive: true
 +   submodule_override:
 +     my-module: https://github.com/octocat/my-module.git

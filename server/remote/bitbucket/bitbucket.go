@@ -34,6 +34,12 @@ const (
 	DefaultURL = "https://bitbucket.org"
 )
 
+// Opts are remote options for bitbucket
+type Opts struct {
+	Client string
+	Secret string
+}
+
 type config struct {
 	API    string
 	URL    string
@@ -43,13 +49,14 @@ type config struct {
 
 // New returns a new remote Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
-func New(client, secret string) remote.Remote {
+func New(opts *Opts) (remote.Remote, error) {
 	return &config{
 		API:    DefaultAPI,
 		URL:    DefaultURL,
-		Client: client,
-		Secret: secret,
-	}
+		Client: opts.Client,
+		Secret: opts.Secret,
+	}, nil
+	// TODO: add checks
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
