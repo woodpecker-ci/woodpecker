@@ -18,8 +18,11 @@ async function getDocs(repoName: string): Promise<string | undefined> {
     ).data as OctokitComponents['schemas']['content-file'];
 
     return Buffer.from(docsResult.content, 'base64').toString('ascii');
-  } catch (e) {}
-  return;
+  } catch (e) {
+    console.error("Can't fetch docs file for repository", repoName, e);
+  }
+
+  return undefined;
 }
 
 async function loadContent(): Promise<Content> {
@@ -37,7 +40,7 @@ async function loadContent(): Promise<Content> {
       repositories.map(async (i) => {
         const docs = await getDocs(i.name);
         if (!docs) {
-          return;
+          return undefined;
         }
 
         const header = markdown.getHeader<WoodpeckerPluginHeader>(docs);

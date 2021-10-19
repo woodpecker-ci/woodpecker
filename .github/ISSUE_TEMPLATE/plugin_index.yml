@@ -1,6 +1,6 @@
 name: "\U0001F4E6 Add plugin to official index"
 description: Add your plugin to the official index at https://woodpecker-ci.org/plugins
-labels: ["pending::plugin"]
+labels: ["plugin"]
 body:
   - type: markdown
     attributes:
