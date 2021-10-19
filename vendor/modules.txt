@@ -30,16 +30,9 @@ github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
-# github.com/bmatcuk/doublestar v1.3.4
-## explicit
-github.com/bmatcuk/doublestar
 # github.com/bmatcuk/doublestar/v4 v4.0.2
 ## explicit
 github.com/bmatcuk/doublestar/v4
-# github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74
-## explicit
-github.com/bradrydzewski/togo/parser
-github.com/bradrydzewski/togo/template
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
 # github.com/cpuguy83/go-md2man/v2 v2.0.0
@@ -251,16 +244,18 @@ github.com/stretchr/testify/mock
 github.com/tevino/abool
 # github.com/ugorji/go/codec v1.1.7
 github.com/ugorji/go/codec
-# github.com/urfave/cli v1.22.4
+# github.com/urfave/cli v1.22.5
 ## explicit
 github.com/urfave/cli
 # github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
-# github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+# github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
 ## explicit
 github.com/woodpecker-ci/togo
+github.com/woodpecker-ci/togo/parser
+github.com/woodpecker-ci/togo/template
 # golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 ## explicit
 golang.org/x/crypto/acme

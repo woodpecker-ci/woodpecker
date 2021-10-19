@@ -11,8 +11,8 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "togo"
 	app.Usage = "togo provides tools to convert files to go"
-	app.Version = "1.0.0"
-	app.Author = "bradrydzewski"
+	app.Version = "dev"
+	app.Author = "Woodpecker Authors"
 	app.Commands = []cli.Command{
 		ddlCommand,
 		sqlCommand,
