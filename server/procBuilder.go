@@ -359,7 +359,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
-func SanitizePath(path string) string {
+func sanitizePath(path string) string {
 	path = filepath.Base(path)
 	path = strings.TrimSuffix(path, ".yml")
 	path = strings.TrimPrefix(path, ".")
