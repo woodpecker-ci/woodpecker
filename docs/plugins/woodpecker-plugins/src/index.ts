@@ -33,6 +33,8 @@ async function loadContent(): Promise<Content> {
     })
   ).data.items;
 
+ console.log(repositories.map((r) => r.name));
+
   const plugins = (
     await Promise.all(
       repositories.map(async (repo) => {

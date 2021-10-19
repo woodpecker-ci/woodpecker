@@ -31,7 +31,7 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
 
 export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] }) {
   const applyForIndexUrl =
-    'https://github.com/woodpecker-ci/woodpecker/issues/new?assignees=&labels=pending%3Aplugin&template=plugin_index.yml';
+    'https://github.com/woodpecker-ci/woodpecker/issues/new?labels=plugin&template=plugin_index.yml';
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
       <main className="container margin-vert--lg">
