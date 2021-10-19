@@ -142,7 +142,7 @@ func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
 	b := procBuilder{
-		Repo:  &model.Repo{ Config: ".woodpecker" },
+		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Build{},
 		Last:  &model.Build{},
 		Netrc: &model.Netrc{},
@@ -168,7 +168,7 @@ pipeline:
 		t.Fatal(err)
 	}
 	pipelineNames := []string{buildItems[0].Proc.Name, buildItems[1].Proc.Name}
-  if !containsItemWithName("lint", buildItems) || !containsItemWithName("test", buildItems) {
+	if !containsItemWithName("lint", buildItems) || !containsItemWithName("test", buildItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
 }
