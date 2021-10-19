@@ -41,7 +41,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
               {plugins.map((plugin, idx) => (
                 <PluginPanel key={idx} plugin={plugin} />
               ))}
-              <div className={clsx('col col--6')}>
+              {/* <div className={clsx('col col--6')}>
                 <div className={clsx('card margin-horiz--sm margin-vert--md ')}>
                   <div className={clsx('card__header row')}>
                     <div className={clsx('col col--8')}>
@@ -79,7 +79,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
                     </a>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>
