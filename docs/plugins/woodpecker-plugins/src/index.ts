@@ -34,28 +34,26 @@ async function loadContent(): Promise<Content> {
 
   const plugins = (
     await Promise.all(
-      repositories
-        .filter((i) => i.name.startsWith('plugin-'))
-        .map(async (i) => {
-          const docs = await getDocs(i.name);
-          if (!docs) {
-            return;
-          }
+      repositories.map(async (i) => {
+        const docs = await getDocs(i.name);
+        if (!docs) {
+          return;
+        }
 
-          const header = markdown.getHeader<WoodpeckerPluginHeader>(docs);
-          const body = markdown.getContent(docs);
+        const header = markdown.getHeader<WoodpeckerPluginHeader>(docs);
+        const body = markdown.getContent(docs);
 
-          const plugin: WoodpeckerPlugin = {
-            name: header?.name || i.name,
-            repoName: i.name,
-            url: i.html_url,
-            icon: header?.icon,
-            description: header?.description,
-            docs: body,
-          };
+        const plugin: WoodpeckerPlugin = {
+          name: header?.name || i.name,
+          repoName: i.name,
+          url: i.html_url,
+          icon: header?.icon,
+          description: header?.description,
+          docs: body,
+        };
 
-          return plugin;
-        }),
+        return plugin;
+      }),
     )
   ).filter((i) => i);
 
