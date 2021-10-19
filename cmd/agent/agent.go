@@ -35,7 +35,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
@@ -159,12 +158,13 @@ func getBackendEngine(c *cli.Context) (backend.Engine, error) {
 	}
 	engines[engine.Name()] = engine
 
+	// TODO: disabled for now as kubernetes backend has not been implemented yet
 	// kubernetes
-	engine = kubernetes.New("", "", "")
-	if err != nil {
-		return nil, err
-	}
-	engines[engine.Name()] = engine
+	// engine = kubernetes.New("", "", "")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// engines[engine.Name()] = engine
 
 	if c.String("backend-engine") == "auto-detect" {
 		for _, engine := range engines {
