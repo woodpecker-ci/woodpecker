@@ -29,13 +29,16 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 	}
 }
 
+// configFetchTimeout determine seconds the configFetcher wait until cancel fetch process
+var configFetchTimeout = 3 // seconds
+
 // Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times, timeout is one second longer each time
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*time.Duration(i), strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
 		log.Trace().Msgf("%d try failed: %v", i, err)
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
@@ -46,7 +49,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 }
 
 // fetch config by timeout
-// TODO: dedupe code
+// TODO: deduplicate code
 func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
