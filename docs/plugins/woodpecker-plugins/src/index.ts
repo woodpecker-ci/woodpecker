@@ -33,12 +33,10 @@ async function loadContent(): Promise<Content> {
     })
   ).data.items;
 
-  console.log(repositories.map((r) => r.name));
-
   const plugins = (
     await Promise.all(
-      repositories.map(async (i) => {
-        const docs = await getDocs(i.name);
+      repositories.map(async (repo) => {
+        const docs = await getDocs(repo.name);
         if (!docs) {
           return undefined;
         }
@@ -47,9 +45,9 @@ async function loadContent(): Promise<Content> {
         const body = markdown.getContent(docs);
 
         const plugin: WoodpeckerPlugin = {
-          name: header?.name || i.name,
-          repoName: i.name,
-          url: i.html_url,
+          name: header?.name || repo.name,
+          repoName: repo.name,
+          url: repo.html_url,
           icon: header?.icon,
           description: header?.description,
           docs: body,
@@ -58,7 +56,7 @@ async function loadContent(): Promise<Content> {
         return plugin;
       }),
     )
-  ).filter((i) => i);
+  ).filter((plugin) => plugin);
 
   return {
     plugins,
