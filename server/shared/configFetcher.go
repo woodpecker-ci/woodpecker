@@ -39,6 +39,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 	// try to fetch 3 times, timeout is one second longer each time
 	for i := 0; i < 3; i++ {
 		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
+		log.Trace().Msgf("%d try failed: %v", i, err)
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
 		}

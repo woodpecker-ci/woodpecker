@@ -15,7 +15,7 @@
 package remote
 
 import (
-	"golang.org/x/net/context"
+	"context"
 )
 
 const key = "remote"

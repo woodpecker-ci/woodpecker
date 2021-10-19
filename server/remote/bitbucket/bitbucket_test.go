@@ -44,7 +44,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should return client with default endpoint", func() {
-			remote := New("4vyW6b49Z", "a5012f6c6")
+			remote, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
 			g.Assert(remote.(*config).URL).Equal(DefaultURL)
 			g.Assert(remote.(*config).API).Equal(DefaultAPI)
 			g.Assert(remote.(*config).Client).Equal("4vyW6b49Z")
@@ -52,7 +52,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should return the netrc file", func() {
-			remote := New("", "")
+			remote, _ := New(&Opts{})
 			netrc, _ := remote.Netrc(fakeUser, nil)
 			g.Assert(netrc.Machine).Equal("bitbucket.org")
 			g.Assert(netrc.Login).Equal("x-token-auth")
