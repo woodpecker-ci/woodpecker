@@ -31,6 +31,11 @@ module.exports = {
           label: 'Docs',
         },
         {
+          to: '/plugins',
+          position: 'left',
+          label: 'Plugins',
+        },
+        {
           type: 'doc',
           docId: 'migrations',
           position: 'left',
@@ -120,6 +125,7 @@ module.exports = {
       debug: false, // Set debug to true if you want to inspect the modal
     },
   },
+  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
   presets: [
     [
       '@docusaurus/preset-classic',
