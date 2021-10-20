@@ -110,7 +110,9 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		container := &yaml.Container{
 			Name:  "clone",
 			Image: "woodpeckerci/plugin-git:latest",
-			Vargs: map[string]interface{}{"depth": "0"},
+			Settings: yaml.Settings{
+				Params: map[string]interface{}{"depth": "0"},
+			},
 		}
 		// TODO: migrate to woodpeckerci/plugin-git:latest (multi arch)
 		switch c.metadata.Sys.Arch {

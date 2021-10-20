@@ -57,7 +57,12 @@ type (
 		Secrets       Secrets                   `yaml:"secrets,omitempty"`
 		Sysctls       libcompose.SliceorMap     `yaml:"sysctls,omitempty"`
 		Constraints   Constraints               `yaml:"when,omitempty"`
-		Vargs         map[string]interface{}    `yaml:",inline"`
+		Settings      Settings                  `yaml:"settings"`
+	}
+
+	// Settings is a map of settings
+	Settings struct {
+		Params map[string]interface{} `yaml:",inline"`
 	}
 )
 

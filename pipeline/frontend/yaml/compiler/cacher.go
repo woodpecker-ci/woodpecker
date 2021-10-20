@@ -24,12 +24,14 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Conta
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
-		Vargs: map[string]interface{}{
-			"mount":       mounts,
-			"path":        "/cache",
-			"restore":     true,
-			"file":        strings.Replace(branch, "/", "_", -1) + ".tar",
-			"fallback_to": "master.tar",
+		Settings: yaml.Settings{
+			Params: map[string]interface{}{
+				"mount":       mounts,
+				"path":        "/cache",
+				"restore":     true,
+				"file":        strings.Replace(branch, "/", "_", -1) + ".tar",
+				"fallback_to": "master.tar",
+			},
 		},
 		Volumes: libcompose.Volumes{
 			Volumes: []*libcompose.Volume{
@@ -47,12 +49,14 @@ func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Conta
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
-		Vargs: map[string]interface{}{
-			"mount":   mounts,
-			"path":    "/cache",
-			"rebuild": true,
-			"flush":   true,
-			"file":    strings.Replace(branch, "/", "_", -1) + ".tar",
+		Settings: yaml.Settings{
+			Params: map[string]interface{}{
+				"mount":   mounts,
+				"path":    "/cache",
+				"rebuild": true,
+				"flush":   true,
+				"file":    strings.Replace(branch, "/", "_", -1) + ".tar",
+			},
 		},
 		Volumes: libcompose.Volumes{
 			Volumes: []*libcompose.Volume{
@@ -77,13 +81,15 @@ func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
-		Vargs: map[string]interface{}{
-			"mount":      mounts,
-			"access_key": c.access,
-			"secret_key": c.secret,
-			"bucket":     c.bucket,
-			"region":     c.region,
-			"rebuild":    true,
+		Settings: yaml.Settings{
+			Params: map[string]interface{}{
+				"mount":      mounts,
+				"access_key": c.access,
+				"secret_key": c.secret,
+				"bucket":     c.bucket,
+				"region":     c.region,
+				"rebuild":    true,
+			},
 		},
 	}
 }
@@ -92,14 +98,16 @@ func (c *s3Cacher) Rebuild(repo, branch string, mounts []string) *yaml.Container
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
-		Vargs: map[string]interface{}{
-			"mount":      mounts,
-			"access_key": c.access,
-			"secret_key": c.secret,
-			"bucket":     c.bucket,
-			"region":     c.region,
-			"rebuild":    true,
-			"flush":      true,
+		Settings: yaml.Settings{
+			Params: map[string]interface{}{
+				"mount":      mounts,
+				"access_key": c.access,
+				"secret_key": c.secret,
+				"bucket":     c.bucket,
+				"region":     c.region,
+				"rebuild":    true,
+				"flush":      true,
+			},
 		},
 	}
 }
