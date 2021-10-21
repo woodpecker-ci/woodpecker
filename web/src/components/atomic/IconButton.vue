@@ -11,7 +11,7 @@
       py-1
       rounded-full
       hover:bg-gray-200 hover:text-gray-700
-      dark:hover:bg-gray-600 dark:bg-transparent
+      dark:text-gray-600 dark:hover:text-gray-700 dark:hover:bg-gray-600 dark:bg-transparent
       shadow-none
       bg-transparent
       border-none

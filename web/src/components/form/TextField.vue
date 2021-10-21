@@ -8,17 +8,18 @@
       rounded-md
       bg-white
       hover:border-gray-300
-      dark:bg-dark-200 dark:border-dark-500
+      dark:bg-dark-gray-700 dark:border-gray-600
     "
   >
     <input
       v-model="innerValue"
       class="
         w-full
+        bg-transparent
         text-gray-600
         placeholder-gray-400
         focus:outline-none focus:border-blue-400
-        dark:placeholder-dark-100 dark:bg-dark-200 dark:text-gray-500
+        dark:placeholder-true-gray-600 dark:text-gray-500
       "
       :type="type"
       :placeholder="placeholder"

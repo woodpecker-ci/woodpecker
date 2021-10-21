@@ -19,13 +19,13 @@
       disabled:opacity-50 disabled:cursor-not-allowed
     "
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-gray-500 dark:bg-dark-100 dark:border-dark-200 dark:hover:bg-dark-50':
+      'bg-white hover:bg-gray-200 border-gray-300 text-gray-500 dark:text-gray-400 dark:bg-dark-100 dark:border-dark-200 dark:hover:bg-dark-50':
         color === 'gray',
-      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-500 dark:bg-lime-900 dark:hover:bg-lime-800':
+      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-400 dark:bg-lime-900 dark:hover:bg-lime-800':
         color === 'green',
-      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-500 dark:bg-cyan-900 dark:hover:bg-cyan-800':
+      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-400 dark:bg-cyan-900 dark:hover:bg-cyan-800':
         color === 'blue',
-      'bg-red-500 hover:bg-red-600 border-red-700 text-white dark:text-gray-500 dark:bg-red-900 dark:hover:bg-red-800':
+      'bg-red-500 hover:bg-red-600 border-red-700 text-white dark:text-gray-400 dark:bg-red-900 dark:hover:bg-red-800':
         color === 'red',
       ...passedClasses,
     }"

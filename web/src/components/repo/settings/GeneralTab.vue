@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <h1 class="text-xl ml-2 text-gray-500">General</h1>
     </div>
 

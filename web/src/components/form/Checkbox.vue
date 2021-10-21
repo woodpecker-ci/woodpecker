@@ -7,18 +7,22 @@
         checkbox
         relative
         border border-gray-400
+        dark:border-gray-600
         cursor-pointer
         rounded-md
         transition-colors
         duration-150
         w-5
         h-5
-        checked:bg-lime-600 checked:border-lime-600 checked:text-white
+        checked:bg-lime-600 checked:border-lime-600
+        dark:checked:bg-lime-800 dark:checked:border-lime-800
       "
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
-    <label v-if="label" class="ml-4 cursor-pointer text-gray-600" :for="`checkbox-${id}`">{{ label }}</label>
+    <label v-if="label" class="ml-4 cursor-pointer text-gray-600 dark:text-gray-500" :for="`checkbox-${id}`">{{
+      label
+    }}</label>
   </div>
 </template>
 
@@ -87,6 +91,7 @@ export default defineComponent({
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
+  @apply dark:border-gray-400;
 }
 
 .checkbox:checked::before {

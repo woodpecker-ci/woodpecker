@@ -7,17 +7,21 @@
         radio
         relative
         border border-gray-400
+        dark:border-gray-600
         cursor-pointer
         rounded-full
         w-5
         h-5
-        checked:bg-lime-600 checked:border-lime-600 checked:text-white
+        checked:bg-lime-600 checked:border-lime-600
+        dark:checked:bg-lime-700 dark:checked:border-lime-700
       "
       :value="option.value"
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
     />
-    <label class="ml-4 cursor-pointer text-gray-600" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+    <label class="ml-4 cursor-pointer text-gray-600 dark:text-gray-500" :for="`radio-${id}-${option.value}`">{{
+      option.text
+    }}</label>
   </div>
 </template>
 
@@ -89,6 +93,7 @@ export default defineComponent({
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
+  @apply dark:bg-gray-400;
 }
 
 .radio:checked::before {

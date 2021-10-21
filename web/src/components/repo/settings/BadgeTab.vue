@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <h1 class="text-xl ml-2 text-gray-500">Badge</h1>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
@@ -9,17 +9,17 @@
 
     <div class="flex flex-col space-y-4">
       <div>
-        <h2 class="text-lg text-gray-500">Url</h2>
+        <h2 class="text-lg text-gray-500 ml-2">Url</h2>
         <pre class="box">{{ baseUrl }}{{ badgeUrl }}</pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-gray-500">Url for specific branch</h2>
+        <h2 class="text-lg text-gray-500 ml-2">Url for specific branch</h2>
         <pre class="box">{{ baseUrl }}{{ badgeUrl }}?branch=<span class="font-bold">&lt;branch&gt;</span></pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-gray-500">Markdown</h2>
+        <h2 class="text-lg text-gray-500 ml-2">Markdown</h2>
         <pre class="box">![status-badge]({{ baseUrl }}{{ badgeUrl }})</pre>
       </div>
     </div>

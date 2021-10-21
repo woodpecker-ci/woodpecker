@@ -2,7 +2,7 @@
   <div class="flex flex-col mt-2 mb-4">
     <label v-if="label" v-bind="$attrs" class="text-gray-500 font-bold mb-2">{{ label }}</label>
     <slot />
-    <div v-if="$slots['description']" class="ml-1">
+    <div v-if="$slots['description']" class="ml-1 text-gray-400">
       <slot name="description" />
     </div>
   </div>
