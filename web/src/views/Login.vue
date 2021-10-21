@@ -9,7 +9,7 @@
       </div>
       <div class="flex flex-col md:w-2/5 my-8 p-4 items-center justify-center">
         <h1 class="text-xl text-gray-600 dark:text-gray-500">Welcome to Woodpecker</h1>
-        <Button class="mt-4" @click="doLogin">Login with SSO</Button>
+        <Button class="mt-4" @click="doLogin">Login</Button>
       </div>
     </Panel>
   </div>
