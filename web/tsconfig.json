@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "types": ["vite-svg-loader", "vite/client"],
     "module": "esnext",
+    "types": ["vite-svg-loader", "vite/client"],
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
@@ -14,5 +14,6 @@
       "~/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*"],
 }
