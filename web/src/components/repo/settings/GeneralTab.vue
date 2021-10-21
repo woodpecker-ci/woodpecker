@@ -12,7 +12,7 @@
           placeholder="By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
         />
         <template #description>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-600 dark:text-gray-500">
             Path to your pipeline config (for example
             <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">my/path/</span>). Folders should end with a
             <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">/</span>.
@@ -24,7 +24,7 @@
       <InputField label="Project settings">
         <Checkbox v-model="repoSettings.allow_pr" label="Allow Pull Request" />
         <Checkbox v-model="repoSettings.gated" label="Protected" />
-        <Checkbox v-model="repoSettings.trusted" label="Trusted" />
+        <Checkbox v-if="user?.admin" v-model="repoSettings.trusted" label="Trusted" />
       </InputField>
 
       <InputField label="Project visibility">
@@ -56,6 +56,7 @@ import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility } from '~/lib/api/types';
 import RepoStore from '~/store/repos';
@@ -74,6 +75,7 @@ export default defineComponent({
   setup() {
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const { user } = useAuthentication();
     const repoStore = RepoStore();
 
     const repo = inject<Ref<Repo>>('repo');
@@ -122,6 +124,7 @@ export default defineComponent({
     });
 
     return {
+      user,
       repoSettings,
       saveRepoSettings,
       projectVisibilityOptions,
