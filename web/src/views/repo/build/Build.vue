@@ -75,7 +75,6 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildProcs from '~/components/repo/build/BuildProcs.vue';
 import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
-import useAuthentication from '~/compositions/useAuthentication';
 import useBuild from '~/compositions/useBuild';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoPermissions } from '~/lib/api/types';
@@ -123,7 +122,6 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { isAuthenticated } = useAuthentication();
     const apiClient = useApiClient();
     const router = useRouter();
     const route = useRoute();
