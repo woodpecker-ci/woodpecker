@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref, toRef } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import { Tab } from './types';
 
@@ -27,23 +27,18 @@ export default defineComponent({
   },
 
   setup(props) {
-    const id = toRef(props, 'id');
     const activeTab = inject<Ref<string>>('active-tab');
     const tabs = inject<Ref<Tab[]>>('tabs');
     if (activeTab === undefined || tabs === undefined) {
       throw new Error('Please wrap this "Tab"-component inside a "Tabs" list.');
     }
 
-    const tab = ref<Tab>({
-      id: undefined,
-      title: props.title,
-      slug: props.title.toLowerCase().replace(/ /g, '-'),
-    });
+    const tab = ref<Tab>();
 
     onMounted(() => {
       tab.value = {
-        ...tab.value,
-        id: id.value || tabs.value.length.toString(),
+        id: props.title.toLocaleLowerCase() || tabs.value.length.toString(),
+        title: props.title,
       };
       tabs.value.push(tab.value);
     });

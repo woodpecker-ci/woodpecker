@@ -4,11 +4,19 @@
       <div
         v-for="tab in tabs"
         :key="tab.id"
-        class="flex cursor-pointer pb-2 px-8 text-gray-600 border-b-2"
+        class="
+          flex
+          cursor-pointer
+          pb-2
+          px-8
+          border-b-2
+          text-gray-500
+          hover:text-gray-700
+          dark:text-gray-500 dark:hover:text-gray-400
+        "
         :class="{
-          'border-gray-500 text-gray-600 hover:border-gray-600 dark:border-gray-600 dark:hover:border-gray-500':
-            activeTab === tab.id,
-          'border-transparent hover:border-gray-300 dark:hover:border-gray-700': activeTab !== tab.id,
+          'border-gray-400 dark:border-gray-600': activeTab === tab.id,
+          'border-transparent': activeTab !== tab.id,
         }"
         @click="selectTab(tab)"
       >
@@ -23,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, provide, ref, toRef } from 'vue';
+import { computed, defineComponent, onMounted, provide, ref, toRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Tab } from './types';
@@ -51,18 +59,18 @@ export default defineComponent({
     'update:modelValue': (_value: string): boolean => true,
   },
 
-  setup(props) {
+  setup(props, { emit }) {
     const router = useRouter();
     const route = useRoute();
 
     const disableHashMode = toRef(props, 'disableHashMode');
     const modelValue = toRef(props, 'modelValue');
     const tabs = ref<Tab[]>([]);
-    const activeTab = ref(route.hash.replace(/^#tab-/, '') || undefined);
+    const activeTab = ref();
     provide('tabs', tabs);
     provide(
       'active-tab',
-      computed(() => activeTab.value || modelValue.value || '0'),
+      computed(() => activeTab.value),
     );
 
     async function selectTab(tab: Tab) {
@@ -70,16 +78,28 @@ export default defineComponent({
         return;
       }
 
-      if (activeTab.value === undefined) {
-        throw new Error('Please wrap this "Tab"-component inside a "Tabs" list.');
-      }
-
       activeTab.value = tab.id;
+      emit('update:modelValue', activeTab.value);
 
       if (!disableHashMode.value) {
-        await router.push({ params: route.params, hash: `#tab-${tab.id}` });
+        await router.push({ params: route.params, hash: `#${tab.id}` });
       }
     }
+
+    onMounted(() => {
+      if (modelValue.value) {
+        activeTab.value = modelValue.value;
+        return;
+      }
+
+      const hashTab = route.hash.replace(/^#/, '');
+      if (hashTab) {
+        activeTab.value = hashTab;
+        return;
+      }
+
+      activeTab.value = tabs.value[0].id;
+    });
 
     return { tabs, activeTab, selectTab };
   },
