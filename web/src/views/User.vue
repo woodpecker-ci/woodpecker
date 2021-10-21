@@ -61,7 +61,7 @@ export default defineComponent({
 
     const usageWithCurl =
       // eslint-disable-next-line no-template-curly-in-string
-      '# do shell setup steps before\ncurl -i ${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer ${WOODPECKER_SERVER}"';
+      '# do shell setup steps before\ncurl -i ${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer ${WOODPECKER_TOKEN}"';
 
     const usageWithCli = '# do shell setup steps before\nwoodpecker info';
 
