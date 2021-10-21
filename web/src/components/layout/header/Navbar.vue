@@ -54,7 +54,9 @@ export default defineComponent({
       authentication.authenticate();
     }
 
-    return { darkMode, user: authentication.user, doLogin, docsUrl, version: config.version };
+    const version = config.version?.startsWith('next') ? 'next' : config.version;
+
+    return { darkMode, user: authentication.user, doLogin, docsUrl, version };
   },
 });
 </script>
