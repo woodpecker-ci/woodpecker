@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject, onMounted, Ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
@@ -37,6 +38,8 @@ import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
+import useNotifications from '~/compositions/useNotifications';
+import { RepoPermissions } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'RepoSettings',
@@ -51,6 +54,23 @@ export default defineComponent({
     RegistriesTab,
     ActionsTab,
     BadgeTab,
+  },
+
+  setup() {
+    const notifications = useNotifications();
+    const router = useRouter();
+
+    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+    if (!repoPermissions) {
+      throw new Error('Unexpected: "repoPermissions" should be provided at this place');
+    }
+
+    onMounted(async () => {
+      if (!repoPermissions.value.admin) {
+        notifications.notify({ type: 'error', title: 'Not allowed to access these repository settings' });
+        await router.replace({ name: 'home' });
+      }
+    });
   },
 });
 </script>

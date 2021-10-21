@@ -4,7 +4,7 @@
       <IconButton :to="{ name: 'repo' }" icon="back" />
       <h1 class="text-xl ml-2 text-gray-500">Pipeline #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
-      <template v-if="isAuthenticated">
+      <template v-if="repoPermissions.push">
         <Button
           v-if="build.status === 'pending' || build.status === 'running'"
           class="ml-4"
@@ -50,7 +50,7 @@
       <div v-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
         <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
         <p class="text-xl text-gray-500">This pipeline is awaiting approval by some maintainer!</p>
-        <div v-if="isAuthenticated" class="flex mt-2 space-x-4">
+        <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
           <Button color="green" text="Approve" @click="approveBuild" />
           <Button color="red" text="Decline" @click="declineBuild" />
         </div>
@@ -78,7 +78,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useBuild from '~/compositions/useBuild';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo } from '~/lib/api/types';
+import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import { findProc } from '~/utils/helpers';
 
@@ -134,8 +134,9 @@ export default defineComponent({
     const repoOwner = toRef(props, 'repoOwner');
     const repoName = toRef(props, 'repoName');
     const repo = inject<Ref<Repo>>('repo');
-    if (!repo) {
-      throw new Error('Unexpected: "repo" should be provided at this place');
+    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+    if (!repo || !repoPermissions) {
+      throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
     }
 
     const build = buildStore.getBuild(repoOwner, repoName, buildId);
@@ -223,7 +224,7 @@ export default defineComponent({
     watch([repo, buildId], loadBuild);
 
     return {
-      isAuthenticated,
+      repoPermissions,
       selectedProcId,
       build,
       since,

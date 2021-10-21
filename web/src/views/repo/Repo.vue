@@ -11,13 +11,12 @@
         class="flex ml-4 p-1 rounded-full text-gray-600 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
-        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="gitea" />
         <Icon v-else name="repo" />
       </a>
-      <IconButton v-if="isAuthenticated" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
 
-    <Tabs disable-hash-mode v-model="openTab">
+    <Tabs disable-hash-mode>
       <Tab title="Activity">
         <div v-if="builds" class="space-y-4">
           <router-link
@@ -48,8 +47,7 @@ import Panel from '~/components/layout/Panel.vue';
 import BuildItem from '~/components/repo/build/BuildItem.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
-import useAuthentication from '~/compositions/useAuthentication';
-import { Build, Repo } from '~/lib/api/types';
+import { Build, Repo, RepoPermissions } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'Repo',
@@ -57,16 +55,16 @@ export default defineComponent({
   components: { FluidContainer, BuildItem, IconButton, Icon, Panel, Tabs, Tab },
 
   setup() {
-    const { isAuthenticated } = useAuthentication();
     const repo = inject<Ref<Repo>>('repo');
-    if (!repo) {
-      throw new Error('Unexpected: "repo" should be provided at this place');
+    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+    if (!repo || !repoPermissions) {
+      throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
     }
 
     const badgeUrl = computed(() => `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
     const builds = inject<Ref<Build[]>>('builds');
 
-    return { isAuthenticated, repo, builds, badgeUrl };
+    return { repoPermissions, repo, builds, badgeUrl };
   },
 });
 </script>

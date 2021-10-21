@@ -1,13 +1,14 @@
 <template>
-  <router-view v-if="repo" />
+  <router-view v-if="repo && repoPermissions" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, provide, toRef, watch } from 'vue';
+import { defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
+import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
 
@@ -40,14 +41,16 @@ export default defineComponent({
     const router = useRouter();
 
     const repo = repoStore.getRepo(repoOwner, repoName);
+    const repoPermissions = ref<RepoPermissions>();
     const builds = buildStore.getSortedBuilds(repoOwner, repoName);
     provide('repo', repo);
+    provide('repo-permissions', repoPermissions);
     provide('builds', builds);
 
     async function loadRepo() {
-      const repoPermissions = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
-      if (!repoPermissions.pull) {
-        notifications.notify({ type: 'error', title: 'Not allowed to access Repository' });
+      repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+      if (!repoPermissions.value.pull) {
+        notifications.notify({ type: 'error', title: 'Not allowed to access this repository' });
         await router.replace({ name: 'home' });
         return;
       }
@@ -64,7 +67,7 @@ export default defineComponent({
       loadRepo();
     });
 
-    return { repo };
+    return { repo, repoPermissions };
   },
 });
 </script>
