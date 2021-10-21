@@ -129,7 +129,7 @@ release-checksums:
 release: release-frontend release-server release-agent release-cli
 
 bundle-prepare:
-	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v1.10.3
+	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare
 	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
