@@ -2,7 +2,7 @@
   <div class="flex shadow-lg bg-lime-600 text-neutral-content px-8 py-3 dark:bg-dark-gray-900">
     <div class="flex text-white dark:text-gray-500 items-center">
       <router-link :to="{ name: 'home' }" class="relative">
-        <img class="-mt-3 w-8" src="../../../assets/logo.svg" />
+        <img class="-mt-3 w-8" src="../../../assets/logo.svg?url" />
         <span class="absolute -bottom-4 text-xs">{{ version }}</span>
       </router-link>
       <router-link
