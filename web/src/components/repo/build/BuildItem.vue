@@ -12,12 +12,9 @@
         }"
       />
       <div class="w-8 flex">
-        <img
-          v-if="build.status === 'started' || build.status === 'running'"
-          class="w-6"
-          src="../../../assets/pecking_woodpecker.gif"
-        />
-        <BuildStatusIcon v-else class="mx-3" :build="build" />
+        <BuildRunningIcon />
+        <!-- <BuildRunningIcon v-if="build.status === 'started' || build.status === 'running'" /> -->
+        <!-- <BuildStatusIcon v-else class="mx-3" :build="build" /> -->
       </div>
     </div>
 
@@ -63,6 +60,7 @@ import { defineComponent, PropType, toRef } from 'vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import { buildStatusColors } from '~/components/repo/build/build-status';
+import BuildRunningIcon from '~/components/repo/build/BuildRunningIcon.vue';
 import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useBuild from '~/compositions/useBuild';
 import { Build } from '~/lib/api/types';
@@ -70,7 +68,7 @@ import { Build } from '~/lib/api/types';
 export default defineComponent({
   name: 'BuildItem',
 
-  components: { Icon, BuildStatusIcon, ListItem },
+  components: { Icon, BuildStatusIcon, ListItem, BuildRunningIcon },
 
   props: {
     build: {
