@@ -1,18 +1,18 @@
 <template>
-  <div class="flex mt-4 w-full bg-gray-600 dark:bg-dark-400 min-h-0 flex-grow">
+  <div class="flex mt-4 w-full bg-gray-600 dark:bg-dark-gray-800 min-h-0 flex-grow">
     <div v-if="build.error" class="flex flex-col p-4">
       <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
       <span class="text-red-400">{{ build.error }}</span>
     </div>
 
-    <div class="flex flex-col w-3/12 text-gray-500">
+    <div class="flex flex-col w-3/12 text-gray-200 dark:text-gray-400">
       <div v-for="proc in build.procs" :key="proc.id">
         <div class="p-4 pb-1">{{ proc.name }}</div>
         <div
           v-for="job in proc.children"
           :key="job.pid"
-          class="flex p-2 pl-6 cursor-pointer items-center"
-          :class="{ 'bg-gray-800 dark:bg-dark-300': selectedProcId && selectedProcId === job.pid }"
+          class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-500"
+          :class="{ 'bg-gray-700 dark:bg-dark-gray-500': selectedProcId && selectedProcId === job.pid }"
           @click="$emit('update:selected-proc-id', job.pid)"
         >
           <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
