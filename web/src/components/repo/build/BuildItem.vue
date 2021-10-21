@@ -12,9 +12,8 @@
         }"
       />
       <div class="w-8 flex">
-        <BuildRunningIcon />
-        <!-- <BuildRunningIcon v-if="build.status === 'started' || build.status === 'running'" /> -->
-        <!-- <BuildStatusIcon v-else class="mx-3" :build="build" /> -->
+        <BuildRunningIcon v-if="build.status === 'started' || build.status === 'running'" />
+        <BuildStatusIcon v-else class="mx-3" :build="build" />
       </div>
     </div>
 

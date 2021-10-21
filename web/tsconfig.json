@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "types": ["vite-svg-loader", "vite/client"],
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
