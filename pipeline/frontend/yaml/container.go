@@ -58,6 +58,7 @@ type (
 		Sysctls       libcompose.SliceorMap     `yaml:"sysctls,omitempty"`
 		Constraints   Constraints               `yaml:"when,omitempty"`
 		Settings      Settings                  `yaml:"settings"`
+		Vargs         map[string]interface{}    `yaml:",inline"`
 	}
 
 	// Settings is a map of settings
@@ -86,6 +87,16 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 				container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
 			}
 			c.Containers = append(c.Containers, &container)
+		}
+	}
+
+	// FIXME deprecate Vargs -> Settings
+	for _, cc := range c.Containers {
+		if cc.Settings.Params == nil && cc.Vargs != nil {
+			cc.Settings.Params = make(map[string]interface{})
+		}
+		for k, v := range cc.Vargs {
+			cc.Settings.Params[k] = v
 		}
 	}
 	return nil
