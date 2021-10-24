@@ -34,7 +34,7 @@ export function useElapsedTime(running: Ref<boolean>, startTime: Ref<number | un
     }
 
     // should not run or has no start-time and is running atm
-    if ((running.value || time.value === undefined) && timer.value !== undefined) {
+    if ((!running.value || time.value === undefined) && timer.value !== undefined) {
       stopTimer();
     }
   });

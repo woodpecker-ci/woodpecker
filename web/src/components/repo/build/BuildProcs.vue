@@ -23,7 +23,7 @@
           />
           <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
           <span class="ml-2">{{ job.name }}</span>
-          <BuildProcDuration v-if="job.start_time !== undefined" :proc="job" />
+          <BuildProcDuration :proc="job" />
         </div>
       </div>
     </div>
