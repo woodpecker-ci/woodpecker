@@ -601,3 +601,18 @@ services:
     command: [ "--storage-driver=vfs", "--tls=false" ]
 +   privileged: true
 ```
+
+## Platform
+
+To configure your pipeline to select an agent with a specific platform, you can use `platform` key.
+```diff
+
++platform: linux/arm64
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
