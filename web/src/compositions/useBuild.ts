@@ -22,7 +22,7 @@ export default (build: Ref<Build | undefined>) => {
   });
 
   const sinceUnderOneHour = computed(
-    () => build.value !== undefined && build.value.started_at > 0 && build.value.started_at <= 1000 * 60 * 60,
+    () => sinceRaw.value !== undefined && sinceRaw.value > 0 && sinceRaw.value <= 1000 * 60 * 60,
   );
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 

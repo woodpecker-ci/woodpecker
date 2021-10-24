@@ -14,7 +14,10 @@ const durationOptions: humanizeDuration.HumanizerOptions = {
 };
 
 export function prettyDuration(durationMs: number): string {
-  return humanizeDuration(durationMs, durationOptions);
+  if (durationMs < 1000 * 60 * 60) {
+    return humanizeDuration(durationMs, durationOptions);
+  }
+  return humanizeDuration(durationMs, { ...durationOptions, units: ['y', 'mo', 'd', 'h', 'm'] });
 }
 
 function leadingZeros(n: number, length: number): string {

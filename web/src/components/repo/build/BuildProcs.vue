@@ -23,7 +23,7 @@
           />
           <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
           <span class="ml-2">{{ job.name }}</span>
-          <span v-if="job.start_time !== undefined" class="ml-auto text-gray-500 text-sm">{{ jobDuration(job) }}</span>
+          <BuildProcDuration v-if="job.start_time !== undefined" :proc="job" />
         </div>
       </div>
     </div>
@@ -36,14 +36,15 @@
 import { defineComponent, PropType } from 'vue';
 
 import BuildLogs from '~/components/repo/build/BuildLogs.vue';
-import { Build, BuildProc } from '~/lib/api/types';
-import { durationAsNumber } from '~/utils/duration';
+import BuildProcDuration from '~/components/repo/build/BuildProcDuration.vue';
+import { Build } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'BuildProcs',
 
   components: {
     BuildLogs,
+    BuildProcDuration,
   },
 
   props: {
@@ -61,25 +62,6 @@ export default defineComponent({
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     'update:selected-proc-id': (selectedProcId: number) => true,
-  },
-
-  setup() {
-    function jobDuration(job: BuildProc): string {
-      const start = job.start_time || 0;
-      const end = job.end_time || 0;
-
-      if (end === 0 && start === 0) {
-        return '-';
-      }
-
-      if (end === 0) {
-        return durationAsNumber(Date.now() - start * 1000);
-      }
-
-      return durationAsNumber((end - start) * 1000);
-    }
-
-    return { jobDuration };
   },
 });
 </script>
