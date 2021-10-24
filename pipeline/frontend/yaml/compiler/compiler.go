@@ -118,6 +118,8 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			container.Image = "plugins/git:linux-arm"
 		case "linux/arm64":
 			container.Image = "plugins/git:linux-arm64"
+		case "linux/ppc64le":
+			container.Image = "quay.io/isuruf/drone-git:linux-ppc64le"
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
 		step := c.createProcess(name, container, "clone")
