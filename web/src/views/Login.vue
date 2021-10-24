@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -37,21 +37,15 @@ export default defineComponent({
     Panel,
   },
 
-  props: {
-    origin: {
-      type: String as PropType<string | undefined>,
-      default: null,
-    },
-  },
-
-  setup(props) {
+  setup() {
     const route = useRoute();
     const router = useRouter();
     const authentication = useAuthentication();
     const errorMessage = ref<string>();
 
     function doLogin() {
-      authentication.authenticate(props.origin);
+      const url = typeof route.query.origin === 'string' ? route.query.origin : '';
+      authentication.authenticate(url);
     }
 
     onMounted(async () => {

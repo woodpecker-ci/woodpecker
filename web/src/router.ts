@@ -70,7 +70,7 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: '/do-login/:origin?',
+    path: '/do-login',
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
@@ -91,7 +91,7 @@ const router = createRouter({
 router.beforeEach(async (to, _, next) => {
   const authentication = useAuthentication();
   if (to.meta.authentication === 'required' && !authentication.isAuthenticated) {
-    next({ name: 'login', params: { origin: to.fullPath } });
+    next({ name: 'login', query: { url: to.fullPath } });
     return;
   }
 
