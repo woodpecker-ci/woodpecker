@@ -1,7 +1,7 @@
 <template>
   <div v-if="build" class="bg-gray-700 dark:bg-dark-gray-700 p-4">
     <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
-      <div class="text-gray-500 text-sm w-4">{{ logLine.pos + 1 }}</div>
+      <div class="text-gray-500 text-sm w-4">{{ (logLine.pos || 0) + 1 }}</div>
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div class="mx-4 text-gray-200 dark:text-gray-400" v-html="logLine.out" />
       <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
