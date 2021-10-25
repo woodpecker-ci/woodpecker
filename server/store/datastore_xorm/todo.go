@@ -1,24 +1,45 @@
 package datastore_xorm
 
 import (
+	"errors"
 	"io"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+
+	"github.com/rs/zerolog/log"
 )
 
 const perPage = 50
 
+var RecordNotExist = errors.New("requested object not exist")
+
+func wrapGet(exist bool, err error) error {
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return RecordNotExist
+	}
+	return nil
+}
+
 func (s storage) GetUser(id int64) (*model.User, error) {
-	user := &model.User{}
-	_, err := s.engine.ID(id).Get(&user)
-	return user, err
+	user := new(model.User)
+	err := wrapGet(s.engine.ID(id).Get(user))
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s storage) GetUserLogin(login string) (*model.User, error) {
-	user := &model.User{}
-	_, err := s.engine.Where("user_login=?", login).Get(&user)
-	return user, err
+	user := new(model.User)
+	err := wrapGet(s.engine.Where("user_login=?", login).Get(user))
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s storage) GetUserList() ([]*model.User, error) {
@@ -54,8 +75,11 @@ func (s storage) GetRepo(i int64) (*model.Repo, error) {
 
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	repo := &model.Repo{}
-	_, err := s.engine.Where("repo_full_name = ?", fullName).Get(&repo)
-	return repo, err
+	err := wrapGet(s.engine.Where("repo_full_name = ?", fullName).Get(repo))
+	if err != nil {
+		return nil, err
+	}
+	return repo, nil
 }
 
 func (s storage) GetRepoCount() (int, error) {
@@ -83,8 +107,11 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 
 func (s storage) GetBuild(id int64) (*model.Build, error) {
 	build := &model.Build{}
-	_, err := s.engine.ID(id).Get(&build)
-	return build, err
+	err := wrapGet(s.engine.ID(id).Get(build))
+	if err != nil {
+		return nil, err
+	}
+	return build, nil
 }
 
 func (s storage) GetBuildNumber(repo *model.Repo, num int) (*model.Build, error) {
@@ -92,8 +119,11 @@ func (s storage) GetBuildNumber(repo *model.Repo, num int) (*model.Build, error)
 		RepoID: repo.ID,
 		Number: num,
 	}
-	_, err := s.engine.Get(&build)
-	return build, err
+	err := wrapGet(s.engine.Get(build))
+	if err != nil {
+		return nil, err
+	}
+	return build, nil
 }
 
 func (s storage) GetBuildRef(repo *model.Repo, ref string) (*model.Build, error) {
@@ -101,7 +131,10 @@ func (s storage) GetBuildRef(repo *model.Repo, ref string) (*model.Build, error)
 		RepoID: repo.ID,
 		Ref:    ref,
 	}
-	_, err := s.engine.Get(&build)
+	err := wrapGet(s.engine.Get(build))
+	if err != nil {
+		return nil, err
+	}
 	return build, err
 }
 
@@ -111,8 +144,11 @@ func (s storage) GetBuildCommit(repo *model.Repo, sha, branch string) (*model.Bu
 		Branch: branch,
 		Commit: sha,
 	}
-	_, err := s.engine.Get(&build)
-	return build, err
+	err := wrapGet(s.engine.Get(build))
+	if err != nil {
+		return nil, err
+	}
+	return build, nil
 }
 
 func (s storage) GetBuildLast(repo *model.Repo, branch string) (*model.Build, error) {
@@ -121,8 +157,10 @@ func (s storage) GetBuildLast(repo *model.Repo, branch string) (*model.Build, er
 		Branch: branch,
 		Event:  "push",
 	}
-	_, err := s.engine.Desc("build_number").Get(build)
-	return build, err
+	if err := wrapGet(s.engine.Desc("build_number").Get(build)); err != nil {
+		return nil, err
+	}
+	return build, nil
 }
 
 func (s storage) GetBuildLastBefore(repo *model.Repo, branch string, num int64) (*model.Build, error) {
@@ -130,8 +168,10 @@ func (s storage) GetBuildLastBefore(repo *model.Repo, branch string, num int64) 
 		RepoID: repo.ID,
 		Branch: branch,
 	}
-	_, err := s.engine.Desc("build_number").Where("build_id < ?", num).Get(build)
-	return build, err
+	if err := wrapGet(s.engine.Desc("build_number").Where("build_id < ?", num).Get(build)); err != nil {
+		return nil, err
+	}
+	return build, nil
 }
 
 func (s storage) GetBuildList(repo *model.Repo, page int) ([]*model.Build, error) {
@@ -195,8 +235,8 @@ func (s storage) CreateBuild(build *model.Build, procs ...*model.Proc) error {
 		return err
 	}
 
-	var repo *model.Repo
-	if _, err := sess.ID(build.RepoID).Get(&repo); err != nil {
+	repo := new(model.Repo)
+	if err := wrapGet(sess.ID(build.RepoID).Get(repo)); err != nil {
 		return err
 	}
 
@@ -246,48 +286,178 @@ SELECT
 FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
 INNER JOIN builds ON builds.build_repo_id = repos.repo_id
-`).Where("perms.perm_user_id = ?", user.ID).Limit(perPage).Desc("build_id").Find(&feed)
+`).Where("perms.perm_user_id = ?", user.ID).
+		Limit(perPage).Desc("build_id").
+		Find(&feed)
 	return feed, err
 }
 
 func (s storage) RepoList(user *model.User) ([]*model.Repo, error) {
-	panic("implement me")
+	repos := make([]*model.Repo, 0, perPage)
+	err := s.engine.Table("repos").
+		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").
+		Where("perms.perm_user_id = ?", user.ID).
+		Asc("repo_full_name").
+		Find(&repos)
+	// TODO: limit
+	return repos, err
 }
 
 func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
-	panic("implement me")
+	feed := make([]*model.Feed, 0, perPage)
+	const feedLatestBuild = `
+SELECT
+ repo_owner
+,repo_name
+,repo_full_name
+,build_number
+,build_event
+,build_status
+,build_created
+,build_started
+,build_finished
+,build_commit
+,build_branch
+,build_ref
+,build_refspec
+,build_remote
+,build_title
+,build_message
+,build_author
+,build_email
+,build_avatar
+FROM repos LEFT OUTER JOIN builds ON build_id = (
+	SELECT build_id FROM builds
+	WHERE builds.build_repo_id = repos.repo_id
+	ORDER BY build_id DESC
+	LIMIT 1
+)
+INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
+WHERE perms.perm_user_id = ?
+  AND repos.repo_active = true
+ORDER BY repo_full_name ASC;
+`
+	err := s.engine.SQL(feedLatestBuild).Find(&feed)
+	return feed, err
 }
 
 func (s storage) RepoBatch(repos []*model.Repo) error {
-	panic("implement me")
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	for _, repo := range repos {
+		if repo.UserID == 0 || len(repo.Owner) == 0 || len(repo.Name) == 0 || len(repo.FullName) == 0 {
+			log.Debug().Msgf("skip insert/update repo: %v", repo)
+			continue
+		}
+		exist, err := sess.Exist(&repo)
+		if err != nil {
+			return err
+		}
+		if exist {
+			if _, err := sess.Update(&repo); err != nil {
+				return err
+			}
+		} else {
+			if _, err := sess.InsertOne(&repo); err != nil {
+				return err
+			}
+		}
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
-	panic("implement me")
+	perm := &model.Perm{
+		UserID: user.ID,
+		RepoID: repo.ID,
+	}
+	if err := wrapGet(s.engine.Get(perm)); err != nil {
+		return nil, err
+	}
+	return perm, nil
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
-	panic("implement me")
+	// TODO: do we need sql?!? - what is this func for?
+	_, err := s.engine.SQL(`
+REPLACE INTO perms (
+ perm_user_id
+,perm_repo_id
+,perm_pull
+,perm_push
+,perm_admin
+,perm_synced
+) VALUES (?,(SELECT repo_id FROM repos WHERE repo_full_name = ? ),?,?,?,?)
+`,
+		perm.UserID,
+		perm.Repo,
+		perm.Pull,
+		perm.Push,
+		perm.Admin,
+		perm.Synced,
+	).Exec()
+
+	return err
 }
 
 func (s storage) PermBatch(perms []*model.Perm) error {
-	panic("implement me")
+	for i := range perms {
+		if err := s.PermUpsert(perms[i]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s storage) PermDelete(perm *model.Perm) error {
-	panic("implement me")
+	_, err := s.engine.
+		Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
+		Delete(new(model.Perm))
+	return err
 }
 
 func (s storage) PermFlush(user *model.User, before int64) error {
-	panic("implement me")
+	_, err := s.engine.
+		Where("perm_user_id = ? AND perm_synced < ?", user.ID, before).
+		Delete(new(model.Perm))
+	return err
 }
 
 func (s storage) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
-	panic("implement me")
+	configs := make([]*model.Config, 0, perPage)
+	err := s.engine.
+		Table("config").
+		Join("LEFT", "build_config", "config.config_id = build_config.config_id").
+		Where("build_config.build_id = ?", buildID).
+		Find(&configs)
+	return configs, err
 }
 
-func (s storage) ConfigFindIdentical(repoID int64, sha string) (*model.Config, error) {
-	panic("implement me")
+func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
+	var configFindRepoHash = `
+SELECT
+ config_id
+,config_repo_id
+,config_hash
+,config_data
+,config_name
+FROM config
+WHERE config_repo_id = ?
+  AND config_hash    = ?
+`
+	conf := &model.Config{
+		RepoID: repoID,
+		Hash:   hash,
+	}
+	if err := wrapGet(s.engine.Get(conf)); err != nil {
+		return nil, err
+	}
+	return conf, nil
 }
 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
@@ -427,5 +597,5 @@ func (s storage) TaskDelete(s2 string) error {
 }
 
 func (s storage) Ping() error {
-	panic("implement me")
+	return s.engine.Ping()
 }

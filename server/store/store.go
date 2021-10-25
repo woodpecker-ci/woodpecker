@@ -104,8 +104,10 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
+	// TODO: pagginate
 	RepoList(*model.User) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
+	// TODO: only store activated repos ...
 	RepoBatch([]*model.Repo) error
 
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -115,7 +117,7 @@ type Store interface {
 	PermFlush(user *model.User, before int64) error
 
 	ConfigsForBuild(buildID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, sha string) (*model.Config, error)
+	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
