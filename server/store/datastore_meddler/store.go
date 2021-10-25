@@ -35,6 +35,9 @@ type datastore struct {
 	config string
 }
 
+// make sure datastore implement Store
+var _ store.Store = &datastore{}
+
 func init() {
 	store.RegisterAdapter(newMeddler, "meddler")
 }

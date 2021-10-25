@@ -32,7 +32,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
-	github.com/lib/pq v1.5.2
+	github.com/lib/pq v1.10.2
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/moby/moby v20.10.8+incompatible
@@ -60,4 +60,5 @@ require (
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	xorm.io/xorm v1.2.5
 )
