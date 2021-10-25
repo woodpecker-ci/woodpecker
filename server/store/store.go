@@ -29,9 +29,11 @@ type Store interface {
 	GetUserLogin(string) (*model.User, error)
 
 	// GetUserList gets a list of all users in the system.
+	// TODO: pagination & total (make GetUserCount deprecated)
 	GetUserList() ([]*model.User, error)
 
 	// GetUserCount gets a count of all users in the system.
+	// TODO: int64
 	GetUserCount() (int, error)
 
 	// CreateUser creates a new user account.
@@ -50,6 +52,7 @@ type Store interface {
 	GetRepoName(string) (*model.Repo, error)
 
 	// GetRepoCount gets a count of all repositories in the system.
+	// TODO: int64
 	GetRepoCount() (int, error)
 
 	// CreateRepo creates a new repository.
@@ -86,6 +89,7 @@ type Store interface {
 	GetBuildQueue() ([]*model.Feed, error)
 
 	// GetBuildCount gets a count of all builds in the system.
+	// TODO: int64
 	GetBuildCount() (int, error)
 
 	// CreateBuild creates a new build and jobs.
@@ -172,11 +176,6 @@ func GetUserList(c context.Context) ([]*model.User, error) {
 	return FromContext(c).GetUserList()
 }
 
-// GetUserCount gets a count of all users in the system.
-func GetUserCount(c context.Context) (int, error) {
-	return FromContext(c).GetUserCount()
-}
-
 func CreateUser(c context.Context, user *model.User) error {
 	return FromContext(c).CreateUser(user)
 }
@@ -189,20 +188,8 @@ func DeleteUser(c context.Context, user *model.User) error {
 	return FromContext(c).DeleteUser(user)
 }
 
-func GetRepo(c context.Context, id int64) (*model.Repo, error) {
-	return FromContext(c).GetRepo(id)
-}
-
-func GetRepoName(c context.Context, name string) (*model.Repo, error) {
-	return FromContext(c).GetRepoName(name)
-}
-
 func GetRepoOwnerName(c context.Context, owner, name string) (*model.Repo, error) {
 	return FromContext(c).GetRepoName(owner + "/" + name)
-}
-
-func CreateRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).CreateRepo(repo)
 }
 
 func UpdateRepo(c context.Context, repo *model.Repo) error {
@@ -213,20 +200,8 @@ func DeleteRepo(c context.Context, repo *model.Repo) error {
 	return FromContext(c).DeleteRepo(repo)
 }
 
-func GetBuild(c context.Context, id int64) (*model.Build, error) {
-	return FromContext(c).GetBuild(id)
-}
-
 func GetBuildNumber(c context.Context, repo *model.Repo, num int) (*model.Build, error) {
 	return FromContext(c).GetBuildNumber(repo, num)
-}
-
-func GetBuildRef(c context.Context, repo *model.Repo, ref string) (*model.Build, error) {
-	return FromContext(c).GetBuildRef(repo, ref)
-}
-
-func GetBuildCommit(c context.Context, repo *model.Repo, sha, branch string) (*model.Build, error) {
-	return FromContext(c).GetBuildCommit(repo, sha, branch)
 }
 
 func GetBuildLast(c context.Context, repo *model.Repo, branch string) (*model.Build, error) {

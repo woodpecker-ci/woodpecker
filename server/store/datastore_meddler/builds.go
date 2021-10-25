@@ -194,12 +194,6 @@ WHERE build_repo_id = ?
 LIMIT 1
 `
 
-const buildNumberLast = `
-SELECT MAX(build_number)
-FROM builds
-WHERE build_repo_id = ?
-`
-
 const buildQueueList = `
 SELECT
  repo_owner

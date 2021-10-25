@@ -42,10 +42,11 @@ type Repo struct {
 	IsGated    bool   `json:"gated"                    meddler:"repo_gated"       xorm:"repo_gated"`
 	IsActive   bool   `json:"active"                   meddler:"repo_active"      xorm:"repo_active"`
 	AllowPull  bool   `json:"allow_pr"                 meddler:"repo_allow_pr"    xorm:"repo_allow_pr"`
-	Counter    int    `json:"last_build"               meddler:"repo_counter"     xorm:"repo_counter"`
-	Config     string `json:"config_file"              meddler:"repo_config_path" xorm:"repo_config_path"`
-	Hash       string `json:"-"                        meddler:"repo_hash"        xorm:"repo_hash"`
-	Perm       *Perm  `json:"-"                        meddler:"-"                xorm:"-"`
+	// Counter is used as index to determine new build numbers
+	Counter int    `json:"last_build"               meddler:"repo_counter"     xorm:"repo_counter"`
+	Config  string `json:"config_file"              meddler:"repo_config_path" xorm:"repo_config_path"`
+	Hash    string `json:"-"                        meddler:"repo_hash"        xorm:"repo_hash"`
+	Perm    *Perm  `json:"-"                        meddler:"-"                xorm:"-"`
 }
 
 // TableName return database table name for xorm
