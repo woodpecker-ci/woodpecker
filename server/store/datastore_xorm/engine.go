@@ -28,9 +28,15 @@ type storage struct {
 var _ store.Store = &storage{}
 
 func init() {
-	store.RegisterAdapter(todo, "xorm")
+	store.RegisterAdapter(newEngine, "xorm")
 }
 
-func todo(opts *store.Opts) (store.Store, error) {
-	return nil, nil
+func newEngine(opts *store.Opts) (store.Store, error) {
+	engine, err := xorm.NewEngine(opts.Driver, opts.Config)
+	if err != nil {
+		return nil, err
+	}
+	return &storage{
+		engine: engine,
+	}, nil
 }
