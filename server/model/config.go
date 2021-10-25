@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +26,11 @@ type ConfigStore interface {
 
 // Config represents a pipeline configuration.
 type Config struct {
-	ID     int64  `json:"-"    meddler:"config_id,pk"`
-	RepoID int64  `json:"-"    meddler:"config_repo_id"`
-	Data   string `json:"data" meddler:"config_data"`
-	Hash   string `json:"hash" meddler:"config_hash"`
-	Name   string `json:"name" meddler:"config_name"`
+	ID     int64  `json:"-"    meddler:"config_id,pk"   xorm:"pk autoincr 'config_id'"`
+	RepoID int64  `json:"-"    meddler:"config_repo_id" xorm:"config_repo_id"`
+	Data   string `json:"data" meddler:"config_data"    xorm:"config_data"`
+	Hash   string `json:"hash" meddler:"config_hash"    xorm:"config_hash"`
+	Name   string `json:"name" meddler:"config_name"    xorm:"config_name"`
 }
 
 // BuildConfig is the n:n relation between Build and Config

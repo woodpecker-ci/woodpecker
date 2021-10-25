@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,12 +32,17 @@ type SenderStore interface {
 }
 
 type Sender struct {
-	ID     int64    `json:"-"      meddler:"sender_id,pk"`
-	RepoID int64    `json:"-"      meddler:"sender_repo_id"`
-	Login  string   `json:"login"  meddler:"sender_login"`
-	Allow  bool     `json:"allow"  meddler:"sender_allow"`
-	Block  bool     `json:"block"  meddler:"sender_block"`
-	Branch []string `json:"branch" meddler:"-"`
-	Deploy []string `json:"deploy" meddler:"-"`
-	Event  []string `json:"event"  meddler:"-"`
+	ID     int64    `json:"-"      meddler:"sender_id,pk"   xorm:"pk autoincr 'sender_id'"`
+	RepoID int64    `json:"-"      meddler:"sender_repo_id" xorm:"sender_repo_id"`
+	Login  string   `json:"login"  meddler:"sender_login"   xorm:"sender_login"`
+	Allow  bool     `json:"allow"  meddler:"sender_allow"   xorm:"sender_allow"`
+	Block  bool     `json:"block"  meddler:"sender_block"   xorm:"sender_block"`
+	Branch []string `json:"branch" meddler:"-"              xorm:"-"`
+	Deploy []string `json:"deploy" meddler:"-"              xorm:"-"`
+	Event  []string `json:"event"  meddler:"-"              xorm:"-"`
+}
+
+// TableName return database table name for xorm
+func (Sender) TableName() string {
+	return "senders"
 }

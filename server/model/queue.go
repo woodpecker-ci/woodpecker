@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +25,16 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string            `meddler:"task_id"`
-	Data         []byte            `meddler:"task_data"`
-	Labels       map[string]string `meddler:"task_labels,json"`
-	Dependencies []string          `meddler:"task_dependencies,json"`
-	RunOn        []string          `meddler:"task_run_on,json"`
+	ID           string            `meddler:"task_id"                xorm:"task_id"`
+	Data         []byte            `meddler:"task_data"              xorm:"task_data"`
+	Labels       map[string]string `meddler:"task_labels,json"       xorm:"-"` // TODO: Xorm and json
+	Dependencies []string          `meddler:"task_dependencies,json" xorm:"-"` // TODO: Xorm and json
+	RunOn        []string          `meddler:"task_run_on,json"       xorm:"-"` // TODO: Xorm and json
+}
+
+// TableName return database table name for xorm
+func (Task) TableName() string {
+	return "tasks"
 }
 
 // TaskStore defines storage for scheduled Tasks.

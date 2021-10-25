@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +19,9 @@ package model
 //
 // swagger:model feed
 type Feed struct {
-	Owner    string `json:"owner"         meddler:"repo_owner"`
-	Name     string `json:"name"          meddler:"repo_name"`
-	FullName string `json:"full_name"     meddler:"repo_full_name"`
+	Owner    string `json:"owner"         meddler:"repo_owner"     xorm:"repo_owner"`
+	Name     string `json:"name"          meddler:"repo_name"      xorm:"repo_name"`
+	FullName string `json:"full_name"     meddler:"repo_full_name" xorm:"repo_full_name"`
 
 	Number   int    `json:"number,omitempty"        meddler:"build_number,zeroisnull"`
 	Event    string `json:"event,omitempty"         meddler:"build_event,zeroisnull"`
@@ -39,3 +40,6 @@ type Feed struct {
 	Avatar   string `json:"author_avatar,omitempty" meddler:"build_avatar,zeroisnull"`
 	Email    string `json:"author_email,omitempty"  meddler:"build_email,zeroisnull"`
 }
+
+// TODO: xorm: this is a query view
+// zeroisnull = for other types where a zero value should be

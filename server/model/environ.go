@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +37,9 @@ type EnvironStore interface {
 // Environ represents an environment variable.
 // swagger:model environ
 type Environ struct {
-	ID    int64  `json:"id"              meddler:"env_id,pk"`
-	Name  string `json:"name"            meddler:"env_name"`
-	Value string `json:"value,omitempty" meddler:"env_value"`
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Value string `json:"value,omitempty"`
 }
 
 // Validate validates the required fields and formats.

@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +26,16 @@ type PermStore interface {
 
 // Perm defines a repository permission for an individual user.
 type Perm struct {
-	UserID int64  `json:"-"      meddler:"perm_user_id"`
-	RepoID int64  `json:"-"      meddler:"perm_repo_id"`
-	Repo   string `json:"-"      meddler:"-"`
-	Pull   bool   `json:"pull"   meddler:"perm_pull"`
-	Push   bool   `json:"push"   meddler:"perm_push"`
-	Admin  bool   `json:"admin"  meddler:"perm_admin"`
-	Synced int64  `json:"synced" meddler:"perm_synced"`
+	UserID int64  `json:"-"      meddler:"perm_user_id" xorm:"perm_user_id"`
+	RepoID int64  `json:"-"      meddler:"perm_repo_id" xorm:"perm_repo_id"`
+	Repo   string `json:"-"      meddler:"-"            xorm:"-"` // TODO: better caching (use type *Repo)
+	Pull   bool   `json:"pull"   meddler:"perm_pull"    xorm:"perm_pull"`
+	Push   bool   `json:"push"   meddler:"perm_push"    xorm:"perm_push"`
+	Admin  bool   `json:"admin"  meddler:"perm_admin"   xorm:"perm_admin"`
+	Synced int64  `json:"synced" meddler:"perm_synced"  xorm:"perm_synced"`
+}
+
+// TableName return database table name for xorm
+func (Perm) TableName() string {
+	return "perms"
 }
