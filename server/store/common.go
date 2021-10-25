@@ -16,8 +16,6 @@ package store
 
 import (
 	"fmt"
-
-	"github.com/rs/zerolog/log"
 )
 
 // Opts are options for a new database connection
@@ -42,7 +40,7 @@ func init() {
 	storeCreators = make(map[string]func(opts *Opts) (Store, error))
 }
 
+// RegisterAdapter register a store backend
 func RegisterAdapter(fn func(opts *Opts) (Store, error), name string) {
-	log.Info().Msgf("Add adapter '%s'", name)
 	storeCreators[name] = fn
 }
