@@ -25,7 +25,7 @@ type storage struct {
 }
 
 // make sure storage implement Store
-// var _ store.Store = &storage{}
+var _ store.Store = &storage{}
 
 func init() {
 	store.RegisterAdapter(todo, "xorm")
