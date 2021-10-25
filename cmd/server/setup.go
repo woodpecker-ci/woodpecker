@@ -40,17 +40,18 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore_meddler"
+	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_meddler"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	opts := &datastore_meddler.Opts{
+	opts := &store.Opts{
 		Driver: c.String("driver"),
 		Config: c.String("datasource"),
 	}
+	opts.Adapter = "meddler" // TODO: make it config
 	log.Trace().Msgf("setup datastore: %#v", opts)
-	return datastore_meddler.New(opts)
+	return store.New(opts)
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {

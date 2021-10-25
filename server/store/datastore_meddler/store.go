@@ -35,15 +35,13 @@ type datastore struct {
 	config string
 }
 
-// Opts are options for a new database connection
-type Opts struct {
-	Driver string
-	Config string
+func init() {
+	store.RegisterAdapter(newMeddler, "meddler")
 }
 
-// New creates a database connection for the given driver and datasource
+// new creates a database connection for the given driver and datasource
 // and returns a new Store.
-func New(opts *Opts) (store.Store, error) {
+func newMeddler(opts *store.Opts) (store.Store, error) {
 	db, err := open(opts.Driver, opts.Config)
 	return &datastore{
 		DB:     db,
