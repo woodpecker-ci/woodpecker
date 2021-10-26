@@ -58,7 +58,7 @@ SELECT
 FROM repos
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = $1
-  AND (perms.perm_push = 1 OR perms.perm_admin = 1)
+  AND (perms.perm_push = true OR perms.perm_admin = true)
 ORDER BY repo_full_name ASC
 
 -- name: repo-insert-ignore
