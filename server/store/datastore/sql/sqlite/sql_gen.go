@@ -36,7 +36,7 @@ var index = map[string]string{
 	"registry-delete":             registryDelete,
 	"repo-update-counter":         repoUpdateCounter,
 	"repo-find-user":              repoFindUser,
-	"repo-find-user-push":         repoFindUserPush,
+	"repo-find-user-owned":        repoFindUserOwned,
 	"repo-insert-ignore":          repoInsertIgnore,
 	"repo-delete":                 repoDelete,
 	"secret-find-repo":            secretFindRepo,
@@ -454,7 +454,7 @@ WHERE perms.perm_user_id = ?
 ORDER BY repo_full_name ASC
 `
 
-var repoFindUserPush = `
+var repoFindUserOwned = `
 SELECT
  repo_id
 ,repo_user_id

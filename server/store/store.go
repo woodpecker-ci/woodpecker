@@ -100,7 +100,7 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	RepoList(user *model.User, canPush bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(user *model.User) ([]*model.Feed, error)
 	RepoBatch([]*model.Repo) error
 

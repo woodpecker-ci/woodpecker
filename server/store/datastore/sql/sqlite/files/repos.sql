@@ -32,7 +32,7 @@ INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = ?
 ORDER BY repo_full_name ASC
 
--- name: repo-find-user-push
+-- name: repo-find-user-owned
 
 SELECT
  repo_id

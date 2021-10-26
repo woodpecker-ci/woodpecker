@@ -180,7 +180,7 @@ func TestRepoList(t *testing.T) {
 	}
 }
 
-func TestRepoListWithPushAccess(t *testing.T) {
+func TestOwnedRepoList(t *testing.T) {
 	s := newTest()
 	s.Exec("delete from repos")
 	s.Exec("delete from users")
