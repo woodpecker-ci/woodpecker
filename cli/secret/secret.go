@@ -1,6 +1,6 @@
 package secret
 
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v2"
 
 // Command exports the secret command.
 var Command = cli.Command{

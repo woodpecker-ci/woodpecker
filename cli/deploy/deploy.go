@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"

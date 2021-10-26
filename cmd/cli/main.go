@@ -20,7 +20,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/build"
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"

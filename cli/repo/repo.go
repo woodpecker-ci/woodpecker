@@ -1,6 +1,6 @@
 package repo
 
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v2"
 
 // Command exports the repository command.
 var Command = cli.Command{

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/jackspirou/syscerts"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 

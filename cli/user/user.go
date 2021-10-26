@@ -1,6 +1,6 @@
 package user
 
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v2"
 
 // Command exports the user command set.
 var Command = cli.Command{

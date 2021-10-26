@@ -12,7 +12,7 @@ import (
 
 	"github.com/drone/envsubst"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"

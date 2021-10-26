@@ -1,6 +1,6 @@
 package log
 
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v2"
 
 // Command exports the build command set.
 var Command = cli.Command{

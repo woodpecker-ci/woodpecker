@@ -3,7 +3,7 @@ package build
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var buildLogsCmd = cli.Command{
