@@ -82,7 +82,7 @@ export default defineComponent({
       emit('update:modelValue', activeTab.value);
 
       if (!disableHashMode.value) {
-        await router.push({ params: route.params, hash: `#${tab.id}` });
+        await router.replace({ params: route.params, hash: `#${tab.id}` });
       }
     }
 

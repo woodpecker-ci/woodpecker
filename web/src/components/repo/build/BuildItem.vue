@@ -6,7 +6,7 @@
         :class="{
           'bg-yellow-400 dark:bg-dark-200': build.status === 'pending',
           'bg-red-400 dark:bg-red-800': buildStatusColors[build.status] === 'red',
-          'bg-gray-400 dark:bg-dark-200': buildStatusColors[build.status] === 'gray',
+          'bg-gray-600 dark:bg-gray-500': buildStatusColors[build.status] === 'gray',
           'bg-lime-400 dark:bg-lime-900': buildStatusColors[build.status] === 'green',
           'bg-blue-400 dark:bg-blue-900': buildStatusColors[build.status] === 'blue',
         }"

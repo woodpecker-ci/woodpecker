@@ -30,13 +30,27 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'repo',
-        component: (): Component => import('~/views/repo/Repo.vue'),
-        props: true,
+        component: (): Component => import('~/views/repo/RepoBuilds.vue'),
+        meta: { repoHeader: true },
+      },
+      {
+        path: 'branches',
+        name: 'repo-branches',
+        component: (): Component => import('~/views/repo/RepoBranches.vue'),
+        meta: { repoHeader: true },
+        props: (route) => ({ branch: route.params.branch }),
+      },
+      {
+        path: 'branches/:branch',
+        name: 'repo-branch',
+        component: (): Component => import('~/views/repo/RepoBranch.vue'),
+        meta: { repoHeader: true },
+        props: (route) => ({ branch: route.params.branch }),
       },
       {
         path: 'build/:buildId/:procId?',
         name: 'repo-build',
-        component: (): Component => import('~/views/repo/build/Build.vue'),
+        component: (): Component => import('~/views/repo/RepoBuild.vue'),
         props: true,
       },
       {

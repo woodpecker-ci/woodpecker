@@ -1,7 +1,7 @@
 <template>
   <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-dark-200">
-      <IconButton :to="{ name: 'repo' }" icon="back" />
+    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
+      <IconButton icon="back" @click="$router.back()" />
       <h1 class="text-xl ml-2 text-gray-500">Settings</h1>
     </div>
 

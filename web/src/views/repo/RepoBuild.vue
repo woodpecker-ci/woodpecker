@@ -1,7 +1,7 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex border-b mb-4 items-center">
-      <IconButton :to="{ name: 'repo' }" icon="back" />
+    <FluidContainer class="flex border-b mb-4 items-center dark:border-gray-600">
+      <IconButton icon="back" @click="$router.back()" />
       <h1 class="text-xl ml-2 text-gray-500">Pipeline #{{ buildId }} - {{ message }}</h1>
       <BuildStatusIcon :build="build" class="flex ml-auto" />
       <template v-if="repoPermissions.push">
@@ -85,7 +85,7 @@ import BuildStore from '~/store/builds';
 import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
-  name: 'Build',
+  name: 'RepoBuild',
 
   components: {
     FluidContainer,
