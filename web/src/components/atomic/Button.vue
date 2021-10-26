@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 
 import Icon, { IconNames } from '~/components/atomic/Icon.vue';
@@ -63,8 +63,6 @@ export default defineComponent({
   name: 'Button',
 
   components: { Icon },
-
-  inheritAttrs: false,
 
   props: {
     text: {
@@ -96,20 +94,16 @@ export default defineComponent({
       type: String as PropType<IconNames | null>,
       default: null,
     },
+
+    isLoading: {
+      type: Boolean,
+    },
   },
 
   setup(props, { attrs }) {
     const router = useRouter();
-    const isLoading = ref(false);
 
-    async function doClick(event: MouseEvent) {
-      if (attrs.onClick && !isLoading.value) {
-        const onClick = attrs.onClick as (event: MouseEvent) => Promise<void>;
-        isLoading.value = true;
-        await onClick(event);
-        isLoading.value = false;
-      }
-
+    async function doClick() {
       if (!props.to) {
         return;
       }
@@ -131,7 +125,7 @@ export default defineComponent({
       return classes;
     });
 
-    return { doClick, passedClasses, isLoading };
+    return { doClick, passedClasses };
   },
 });
 </script>

@@ -1,6 +1,7 @@
 <template>
   <Button
     :disabled="disabled"
+    :is-loading="isLoading"
     :to="to"
     class="
       flex
@@ -47,6 +48,10 @@ export default defineComponent({
     to: {
       type: [String, Object, null] as PropType<RouteLocationRaw | null>,
       default: null,
+    },
+
+    isLoading: {
+      type: Boolean,
     },
   },
 });

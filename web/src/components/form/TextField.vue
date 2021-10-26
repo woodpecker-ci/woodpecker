@@ -33,8 +33,6 @@ import { computed, defineComponent, toRef } from 'vue';
 export default defineComponent({
   name: 'TextField',
 
-  components: {},
-
   props: {
     // used by toRef
     // eslint-disable-next-line vue/no-unused-properties
