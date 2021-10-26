@@ -81,7 +81,7 @@ func (s *syncer) Sync(user *model.User) error {
 				Pull:   true,
 				Synced: unix,
 			}
-			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
+			remotePerm, err := s.remote.Perm(user, repo.Owner, repo.Name)
 			if err == nil && remotePerm != nil {
 				perm.Push = remotePerm.Push
 				perm.Admin = remotePerm.Admin
