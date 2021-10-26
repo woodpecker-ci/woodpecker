@@ -3,7 +3,7 @@
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <IconButton :to="{ name: 'repos' }" icon="back" />
       <h1 class="text-xl ml-2 text-gray-500">Add repository</h1>
-      <Button class="ml-auto" text="Reload repositories" @click="reloadRepos" />
+      <Button class="ml-auto" text="Reload repositories" :is-loading="isReloadingRepos" @click="reloadRepos" />
     </div>
 
     <div class="space-y-4">
@@ -16,7 +16,13 @@
       >
         <span class="text-gray-500">{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto text-gray-500">Already enabled</span>
-        <Button v-if="!repo.active" class="ml-auto" text="Enable" @click="activateRepo(repo)" />
+        <Button
+          v-if="!repo.active"
+          class="ml-auto"
+          text="Enable"
+          :is-loading="isActivatingRepo && repoToActivate?.id === repo.id"
+          @click="activateRepo(repo)"
+        />
       </ListItem>
     </div>
   </FluidContainer>
@@ -31,6 +37,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 
@@ -48,25 +55,28 @@ export default defineComponent({
     const router = useRouter();
     const apiClient = useApiClient();
     const notifications = useNotifications();
-    const repos = ref<Repo[] | undefined>();
+    const repos = ref<Repo[]>();
+    const repoToActivate = ref<Repo>();
 
     onMounted(async () => {
       repos.value = await apiClient.getRepoList({ all: true });
     });
 
-    async function reloadRepos(): Promise<void> {
+    const { doSubmit: reloadRepos, isLoading: isReloadingRepos } = useAsyncAction(async () => {
       repos.value = undefined;
       repos.value = await apiClient.getRepoList({ all: true, flush: true });
       notifications.notify({ title: 'Repository list reloaded', type: 'success' });
-    }
+    });
 
-    async function activateRepo(repo: Repo): Promise<void> {
+    const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
+      repoToActivate.value = repo;
       await apiClient.activateRepo(repo.owner, repo.name);
       notifications.notify({ title: 'Repository enabled', type: 'success' });
+      repoToActivate.value = undefined;
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
-    }
+    });
 
-    return { repos, reloadRepos, activateRepo };
+    return { repos, isReloadingRepos, isActivatingRepo, repoToActivate, reloadRepos, activateRepo };
   },
 });
 </script>

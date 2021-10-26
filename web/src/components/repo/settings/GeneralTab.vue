@@ -38,7 +38,7 @@
         </div>
       </InputField>
 
-      <Button class="mr-auto" color="green" text="Save settings" @click="saveRepoSettings" />
+      <Button class="mr-auto" color="green" text="Save settings" :is-loading="isSaving" @click="saveRepoSettings" />
     </div>
   </Panel>
 </template>
@@ -56,6 +56,7 @@ import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility } from '~/lib/api/types';
@@ -105,7 +106,7 @@ export default defineComponent({
       loadRepoSettings();
     }
 
-    async function saveRepoSettings() {
+    const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
       }
@@ -117,7 +118,7 @@ export default defineComponent({
       await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
       await loadRepo();
       notifications.notify({ title: 'Repository settings updated', type: 'success' });
-    }
+    });
 
     onMounted(() => {
       loadRepoSettings();
@@ -126,6 +127,7 @@ export default defineComponent({
     return {
       user,
       repoSettings,
+      isSaving,
       saveRepoSettings,
       projectVisibilityOptions,
     };

@@ -29,7 +29,12 @@
             >{{ event }}</span
           >
         </div>
-        <IconButton icon="trash" class="ml-2 w-8 h-8 hover:text-red-400" @click="deleteSecret(secret)" />
+        <IconButton
+          icon="trash"
+          class="ml-2 w-8 h-8 hover:text-red-400"
+          :is-loading="isDeleting"
+          @click="deleteSecret(secret)"
+        />
       </ListItem>
 
       <div v-if="secrets?.length === 0" class="ml-2">There are no secrets yet.</div>
@@ -49,7 +54,7 @@
           <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
 
-        <Button type="submit" text="Add secret" />
+        <Button :is-loading="isSaving" type="submit" text="Add secret" />
       </form>
     </div>
   </Panel>
@@ -68,6 +73,7 @@ import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
 
@@ -116,7 +122,7 @@ export default defineComponent({
       secrets.value = await apiClient.getSecretList(repo.value.owner, repo.value.name);
     }
 
-    async function createSecret() {
+    const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
@@ -126,9 +132,9 @@ export default defineComponent({
       showAddSecret.value = false;
       selectedSecret.value = { ...emptySecret };
       await loadSecrets();
-    }
+    });
 
-    async function deleteSecret(_secret: Secret) {
+    const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
@@ -136,13 +142,22 @@ export default defineComponent({
       await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
       notifications.notify({ title: 'Secret deleted', type: 'success' });
       await loadSecrets();
-    }
+    });
 
     onMounted(async () => {
       await loadSecrets();
     });
 
-    return { secretEventsOptions, selectedSecret, secrets, showAddSecret, createSecret, deleteSecret };
+    return {
+      secretEventsOptions,
+      selectedSecret,
+      secrets,
+      showAddSecret,
+      isSaving,
+      isDeleting,
+      createSecret,
+      deleteSecret,
+    };
   },
 });
 </script>

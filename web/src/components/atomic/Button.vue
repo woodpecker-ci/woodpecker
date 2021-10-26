@@ -104,6 +104,10 @@ export default defineComponent({
     const router = useRouter();
 
     async function doClick() {
+      if (props.isLoading) {
+        return;
+      }
+
       if (!props.to) {
         return;
       }

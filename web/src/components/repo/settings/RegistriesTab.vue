@@ -15,7 +15,12 @@
     <div v-if="!showAddRegistry" class="space-y-4 text-gray-500">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
-        <IconButton icon="trash" class="ml-auto w-6 h-6 hover:text-red-400" @click="deleteRegistry(registry)" />
+        <IconButton
+          icon="trash"
+          class="ml-auto w-8 h-8 hover:text-red-400"
+          :is-loading="isDeleting"
+          @click="deleteRegistry(registry)"
+        />
       </ListItem>
 
       <div v-if="registries?.length === 0" class="ml-2">There are no registry credentials yet.</div>
@@ -35,7 +40,7 @@
           <TextField v-model="selectedRegistry.password" placeholder="Password" required />
         </InputField>
 
-        <Button type="submit" text="Add registry" />
+        <Button type="submit" :is-loading="isSaving" text="Add registry" />
       </form>
     </div>
   </Panel>
@@ -52,6 +57,7 @@ import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
@@ -86,7 +92,7 @@ export default defineComponent({
       registries.value = await apiClient.getRegistryList(repo.value.owner, repo.value.name);
     }
 
-    async function createRegistry() {
+    const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
@@ -96,9 +102,9 @@ export default defineComponent({
       showAddRegistry.value = false;
       selectedRegistry.value = {};
       await loadRegistries();
-    }
+    });
 
-    async function deleteRegistry(_registry: Registry) {
+    const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
@@ -106,13 +112,13 @@ export default defineComponent({
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, _registry.address);
       notifications.notify({ title: 'Registry credentials deleted', type: 'success' });
       await loadRegistries();
-    }
+    });
 
     onMounted(async () => {
       await loadRegistries();
     });
 
-    return { selectedRegistry, registries, showAddRegistry, createRegistry, deleteRegistry };
+    return { selectedRegistry, registries, showAddRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };
   },
 });
 </script>

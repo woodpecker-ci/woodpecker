@@ -5,9 +5,21 @@
     </div>
 
     <div class="flex flex-col">
-      <Button class="mr-auto mt-4" color="blue" text="Repair repository" @click="repairRepo" />
+      <Button
+        class="mr-auto mt-4"
+        color="blue"
+        text="Repair repository"
+        :is-loading="isRepairingRepo"
+        @click="repairRepo"
+      />
 
-      <Button class="mr-auto mt-4" color="red" text="Delete repository" @click="deleteRepo" />
+      <Button
+        class="mr-auto mt-4"
+        color="red"
+        text="Delete repository"
+        :is-loading="isDeletingRepo"
+        @click="deleteRepo"
+      />
     </div>
   </Panel>
 </template>
@@ -19,6 +31,7 @@ import { useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 
@@ -34,16 +47,16 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
 
-    async function repairRepo() {
+    const { doSubmit: repairRepo, isLoading: isRepairingRepo } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
       }
 
       await apiClient.repairRepo(repo.value.owner, repo.value.name);
       notifications.notify({ title: 'Repository repaired', type: 'success' });
-    }
+    });
 
-    async function deleteRepo() {
+    const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
       }
@@ -57,9 +70,11 @@ export default defineComponent({
       await apiClient.deleteRepo(repo.value.owner, repo.value.name);
       notifications.notify({ title: 'Repository deleted', type: 'success' });
       await router.replace({ name: 'repos' });
-    }
+    });
 
     return {
+      isRepairingRepo,
+      isDeletingRepo,
       deleteRepo,
       repairRepo,
     };

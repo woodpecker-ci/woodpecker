@@ -9,12 +9,14 @@
           v-if="build.status === 'pending' || build.status === 'running'"
           class="ml-4"
           text="Cancel"
+          :is-loading="isCancelingBuild"
           @click="cancelBuild"
         />
         <Button
           v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
           class="ml-4"
           text="Restart"
+          :is-loading="isRestartingBuild"
           @click="restartBuild"
         />
       </template>
@@ -51,8 +53,8 @@
         <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
         <p class="text-xl text-gray-500">This pipeline is awaiting approval by some maintainer!</p>
         <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
-          <Button color="green" text="Approve" @click="approveBuild" />
-          <Button color="red" text="Decline" @click="declineBuild" />
+          <Button color="green" text="Approve" :is-loading="isApprovingBuild" @click="approveBuild" />
+          <Button color="red" text="Decline" :is-loading="isDecliningBuild" @click="declineBuild" />
         </div>
       </div>
       <div v-else-if="build.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
@@ -75,6 +77,7 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import BuildProcs from '~/components/repo/build/BuildProcs.vue';
 import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useBuild from '~/compositions/useBuild';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoPermissions } from '~/lib/api/types';
@@ -169,7 +172,7 @@ export default defineComponent({
       await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10));
     }
 
-    async function cancelBuild() {
+    const { doSubmit: cancelBuild, isLoading: isCancelingBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
@@ -187,27 +190,27 @@ export default defineComponent({
 
       await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), proc.ppid);
       notifications.notify({ title: 'Pipeline canceled', type: 'success' });
-    }
+    });
 
-    async function approveBuild() {
+    const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
 
       await apiClient.approveBuild(repo.value.owner, repo.value.name, buildId.value);
       notifications.notify({ title: 'Pipeline approved', type: 'success' });
-    }
+    });
 
-    async function declineBuild() {
+    const { doSubmit: declineBuild, isLoading: isDecliningBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
 
       await apiClient.declineBuild(repo.value.owner, repo.value.name, buildId.value);
       notifications.notify({ title: 'Pipeline declined', type: 'success' });
-    }
+    });
 
-    async function restartBuild() {
+    const { doSubmit: restartBuild, isLoading: isRestartingBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
@@ -216,7 +219,7 @@ export default defineComponent({
       notifications.notify({ title: 'Pipeline restarted', type: 'success' });
       // TODO: directly send to newest build?
       await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
-    }
+    });
 
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
@@ -229,6 +232,10 @@ export default defineComponent({
       duration,
       repo,
       message,
+      isCancelingBuild,
+      isApprovingBuild,
+      isDecliningBuild,
+      isRestartingBuild,
       cancelBuild,
       restartBuild,
       approveBuild,
