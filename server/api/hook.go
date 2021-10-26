@@ -104,7 +104,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, tmpRepo.Owner, tmpRepo.Name)
+	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
 		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
 		c.AbortWithError(404, err)

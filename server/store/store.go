@@ -15,7 +15,6 @@
 package store
 
 import (
-	"context"
 	"io"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -155,8 +154,4 @@ type Store interface {
 	TaskDelete(string) error
 
 	Ping() error
-}
-
-func GetRepoOwnerName(c context.Context, owner, name string) (*model.Repo, error) {
-	return FromContext(c).GetRepoName(owner + "/" + name)
 }

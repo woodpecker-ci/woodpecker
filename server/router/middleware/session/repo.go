@@ -42,12 +42,13 @@ func Repo(c *gin.Context) *model.Repo {
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			owner = c.Param("owner")
-			name  = c.Param("name")
-			user  = User(c)
+			store_ = store.FromContext(c)
+			owner  = c.Param("owner")
+			name   = c.Param("name")
+			user   = User(c)
 		)
 
-		repo, err := store.GetRepoOwnerName(c, owner, name)
+		repo, err := store_.GetRepoName(owner + "/" + name)
 		if err == nil {
 			c.Set("repo", repo)
 			c.Next()
