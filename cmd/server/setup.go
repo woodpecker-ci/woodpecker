@@ -50,7 +50,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		Driver: c.String("driver"),
 		Config: c.String("datasource"),
 	}
-	opts.Adapter = "meddler" // TODO: make it config
+	opts.Adapter = "xorm" // TODO: make it config
 	log.Trace().Msgf("setup datastore: %#v", opts)
 	return store.New(opts)
 }
