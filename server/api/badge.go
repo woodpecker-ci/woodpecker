@@ -59,7 +59,7 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	build, err := store.GetBuildLast(c, repo, branch)
+	build, err := store.FromContext(c).GetBuildLast(repo, branch)
 	if err != nil {
 		log.Warn().Err(err).Msg("")
 		c.String(200, badgeNone)
@@ -90,7 +90,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	builds, err := store.GetBuildList(c, repo, 1)
+	builds, err := store.FromContext(c).GetBuildList(repo, 1)
 	if err != nil || len(builds) == 0 {
 		c.AbortWithStatus(404)
 		return

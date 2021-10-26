@@ -46,7 +46,7 @@ func GetBuilds(c *gin.Context) {
 		return
 	}
 
-	builds, err := store.GetBuildList(c, repo, page)
+	builds, err := store.FromContext(c).GetBuildList(repo, page)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -67,7 +67,7 @@ func GetBuild(c *gin.Context) {
 		return
 	}
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store.FromContext(c).GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -84,7 +84,7 @@ func GetBuildLast(c *gin.Context) {
 	repo := session.Repo(c)
 	branch := c.DefaultQuery("branch", repo.Branch)
 
-	build, err := store.GetBuildLast(c, repo, branch)
+	build, err := store.FromContext(c).GetBuildLast(repo, branch)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +104,7 @@ func GetBuildLogs(c *gin.Context) {
 	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
 	name := c.Params.ByName("proc")
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store.FromContext(c).GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
@@ -136,7 +136,7 @@ func GetProcLogs(c *gin.Context) {
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
 	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store.FromContext(c).GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
@@ -165,7 +165,7 @@ func DeleteBuild(c *gin.Context) {
 	repo := session.Repo(c)
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store.FromContext(c).GetBuildNumber(repo, num)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
@@ -249,7 +249,7 @@ func PostApproval(c *gin.Context) {
 		)
 	)
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store.FromContext(c).GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
@@ -282,7 +282,7 @@ func PostApproval(c *gin.Context) {
 
 	// get the previous build so that we can send
 	// on status change notifications
-	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
+	last, _ := store.FromContext(c).GetBuildLastBefore(repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
@@ -350,14 +350,16 @@ func PostApproval(c *gin.Context) {
 func PostDecline(c *gin.Context) {
 	var (
 		remote_ = remote.FromContext(c)
-		repo    = session.Repo(c)
-		user    = session.User(c)
-		num, _  = strconv.Atoi(
+		store_  = store.FromContext(c)
+
+		repo   = session.Repo(c)
+		user   = session.User(c)
+		num, _ = strconv.Atoi(
 			c.Params.ByName("number"),
 		)
 	)
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
@@ -367,7 +369,7 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	if _, err = shared.UpdateToStatusDeclined(store.FromContext(c), *build, user.Login); err != nil {
+	if _, err = shared.UpdateToStatusDeclined(store_, *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
@@ -382,7 +384,7 @@ func PostDecline(c *gin.Context) {
 }
 
 func GetBuildQueue(c *gin.Context) {
-	out, err := store.GetBuildQueue(c)
+	out, err := store.FromContext(c).GetBuildQueue()
 	if err != nil {
 		c.String(500, "Error getting build queue. %s", err)
 		return
@@ -393,6 +395,7 @@ func GetBuildQueue(c *gin.Context) {
 // PostBuild restarts a build
 func PostBuild(c *gin.Context) {
 	remote_ := remote.FromContext(c)
+	store_ := store.FromContext(c)
 	repo := session.Repo(c)
 
 	num, err := strconv.Atoi(c.Param("number"))
@@ -401,14 +404,14 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	user, err := store.GetUser(c, repo.UserID)
+	user, err := store_.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		log.Error().Msgf("failure to get build %d. %s", num, err)
 		c.AbortWithError(404, err)
@@ -428,7 +431,7 @@ func PostBuild(c *gin.Context) {
 	if refresher, ok := remote_.(remote.Refresher); ok {
 		ok, _ := refresher.Refresh(c, user)
 		if ok {
-			store.UpdateUser(c, user)
+			store_.UpdateUser(user)
 		}
 	}
 
@@ -465,7 +468,7 @@ func PostBuild(c *gin.Context) {
 		build.Event = event
 	}
 
-	err = store.CreateBuild(c, build)
+	err = store_.CreateBuild(build)
 	if err != nil {
 		c.String(500, err.Error())
 		return
@@ -492,7 +495,7 @@ func PostBuild(c *gin.Context) {
 
 	// get the previous build so that we can send
 	// on status change notifications
-	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
+	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
@@ -535,7 +538,7 @@ func PostBuild(c *gin.Context) {
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store.FromContext(c).ProcCreate(build.Procs)
+	err = store_.ProcCreate(build.Procs)
 	if err != nil {
 		log.Error().Msgf("cannot restart %s#%d: %s", repo.FullName, build.Number, err)
 		build.Status = model.StatusError
@@ -552,17 +555,19 @@ func PostBuild(c *gin.Context) {
 }
 
 func DeleteBuildLogs(c *gin.Context) {
+	store_ := store.FromContext(c)
+
 	repo := session.Repo(c)
 	user := session.User(c)
 	num, _ := strconv.Atoi(c.Params.ByName("number"))
 
-	build, err := store.GetBuildNumber(c, repo, num)
+	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
 	}
 
-	procs, err := store.FromContext(c).ProcList(build)
+	procs, err := store_.ProcList(build)
 	if err != nil {
 		c.AbortWithError(404, err)
 		return
@@ -577,7 +582,7 @@ func DeleteBuildLogs(c *gin.Context) {
 	for _, proc := range procs {
 		t := time.Now().UTC()
 		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, proc.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := store.FromContext(c).LogSave(proc, buf)
+		lerr := store_.LogSave(proc, buf)
 		if lerr != nil {
 			err = lerr
 		}
