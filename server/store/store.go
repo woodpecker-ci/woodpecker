@@ -120,6 +120,7 @@ type Store interface {
 	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
+	// TODO: rm and use ConfigCreate (let the store handle consistency)
 	BuildConfigCreate(*model.BuildConfig) error
 
 	SenderFind(*model.Repo, string) (*model.Sender, error)

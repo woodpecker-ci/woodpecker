@@ -438,6 +438,7 @@ gopkg.in/yaml.v2
 ## explicit
 gopkg.in/yaml.v3
 # xorm.io/builder v0.3.9
+## explicit
 xorm.io/builder
 # xorm.io/xorm v1.2.5
 ## explicit

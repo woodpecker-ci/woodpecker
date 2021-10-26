@@ -8,6 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"github.com/rs/zerolog/log"
+	"xorm.io/builder"
 )
 
 const perPage = 50
@@ -439,17 +440,6 @@ func (s storage) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
 }
 
 func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
-	var configFindRepoHash = `
-SELECT
- config_id
-,config_repo_id
-,config_hash
-,config_data
-,config_name
-FROM config
-WHERE config_repo_id = ?
-  AND config_hash    = ?
-`
 	conf := &model.Config{
 		RepoID: repoID,
 		Hash:   hash,
@@ -461,35 +451,55 @@ WHERE config_repo_id = ?
 }
 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
-	panic("implement me")
+	return s.engine.Where("build_repo_id = ?", config.RepoID).
+		And(builder.In("build_id", builder.Expr( // TODO: use JOIN
+			`SELECT build_id
+  FROM build_config
+  WHERE build_config.config_id = ?`, config.ID))).
+		And(builder.In("build_status", "blocked", "pending")).
+		Exist(new(model.Build))
 }
 
 func (s storage) ConfigCreate(config *model.Config) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(config)
+	return err
 }
 
 func (s storage) BuildConfigCreate(config *model.BuildConfig) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(config)
+	return err
 }
 
-func (s storage) SenderFind(repo *model.Repo, s2 string) (*model.Sender, error) {
-	panic("implement me")
+func (s storage) SenderFind(repo *model.Repo, login string) (*model.Sender, error) {
+	sender := &model.Sender{
+		RepoID: repo.ID,
+		Login:  login,
+	}
+	if err := wrapGet(s.engine.Get(sender)); err != nil {
+		return nil, err
+	}
+	return sender, nil
 }
 
 func (s storage) SenderList(repo *model.Repo) ([]*model.Sender, error) {
-	panic("implement me")
+	senders := make([]*model.Sender, 0, perPage)
+	err := s.engine.Where("sender_repo_id = ?", repo.ID).Find(&senders)
+	return senders, err
 }
 
 func (s storage) SenderCreate(sender *model.Sender) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(sender)
+	return err
 }
 
 func (s storage) SenderUpdate(sender *model.Sender) error {
-	panic("implement me")
+	_, err := s.engine.ID(sender.ID).Update(sender)
+	return err
 }
 
 func (s storage) SenderDelete(sender *model.Sender) error {
-	panic("implement me")
+	_, err := s.engine.ID(sender.ID).Delete(new(model.Sender))
+	return err
 }
 
 func (s storage) SecretFind(repo *model.Repo, s2 string) (*model.Secret, error) {

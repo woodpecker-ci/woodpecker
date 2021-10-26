@@ -35,6 +35,6 @@ type Config struct {
 
 // BuildConfig is the n:n relation between Build and Config
 type BuildConfig struct {
-	ConfigID int64 `json:"-"    meddler:"config_id"`
-	BuildID  int64 `json:"-"    meddler:"build_id"`
+	ConfigID int64 `json:"-"    meddler:"config_id" xorm:"config_id"`
+	BuildID  int64 `json:"-"    meddler:"build_id"  xorm:"build_id"`
 }
