@@ -1,5 +1,5 @@
 <template>
-  <div class="flex shadow-lg bg-lime-600 text-neutral-content px-8 py-3 dark:bg-dark-gray-900">
+  <div class="flex shadow-lg bg-lime-600 text-neutral-content px-8 py-2 dark:bg-dark-gray-900">
     <div class="flex text-white dark:text-gray-500 items-center">
       <router-link :to="{ name: 'home' }" class="relative">
         <img class="-mt-3 w-8" src="../../../assets/logo.svg?url" />
@@ -8,12 +8,12 @@
       <router-link
         v-if="user"
         :to="{ name: 'repos' }"
-        class="mx-4 hover:bg-lime-700 dark:hover:bg-gray-700 px-2 rounded-md"
+        class="mx-4 hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md"
         >Repositories</router-link
       >
     </div>
     <div class="flex ml-auto items-center space-x-4 text-white dark:text-gray-500">
-      <a :href="docsUrl" target="_blank" class="hover:bg-lime-700 dark:hover:bg-gray-700 px-2 rounded-md">Docs</a>
+      <a :href="docsUrl" target="_blank" class="hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md">Docs</a>
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"
         class="!text-white !dark:text-gray-500"
