@@ -8,21 +8,7 @@
           <router-view />
         </div>
         <transition name="slide-right">
-          <BuildFeedSidebar
-            class="
-              shadow-md
-              bg-white
-              border-l
-              dark:bg-dark-500 dark:border-dark-500
-              w-full
-              absolute
-              top-0
-              right-0
-              bottom-0
-              max-w-80
-              xl:max-w-96
-            "
-          />
+          <BuildFeedSidebar class="shadow-md border-l w-full absolute top-0 right-0 bottom-0 max-w-80 xl:max-w-96" />
         </transition>
       </div>
     </template>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="flex text-gray-600">
+  <div v-if="build" class="flex text-gray-600 dark:text-gray-500">
     <BuildStatusIcon :build="build" class="flex items-center" />
     <div class="flex flex-col ml-4">
       <span class="underline">{{ build.owner }} / {{ build.name }}</span>

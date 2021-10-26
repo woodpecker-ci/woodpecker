@@ -28,7 +28,7 @@
             <BuildItem :build="build" />
           </router-link>
           <Panel v-if="builds.length === 0">
-            <span class="text-gray-500">There are no builds yet.</span>
+            <span class="text-gray-500">No pipelines have been started yet.</span>
           </Panel>
         </div>
       </Tab>

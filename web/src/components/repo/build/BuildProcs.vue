@@ -11,8 +11,8 @@
         <div
           v-for="job in proc.children"
           :key="job.pid"
-          class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-500"
-          :class="{ 'bg-gray-700 dark:bg-dark-gray-500': selectedProcId && selectedProcId === job.pid }"
+          class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-900"
+          :class="{ 'bg-gray-700 !dark:bg-dark-gray-600': selectedProcId && selectedProcId === job.pid }"
           @click="$emit('update:selected-proc-id', job.pid)"
         >
           <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
