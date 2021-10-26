@@ -295,16 +295,21 @@ FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
 INNER JOIN builds ON builds.build_repo_id = repos.repo_id
 `).Where("perms.perm_user_id = ?", user.ID).
+		And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true})).
 		Limit(perPage).Desc("build_id").
 		Find(&feed)
 	return feed, err
 }
 
-func (s storage) RepoList(user *model.User) ([]*model.Repo, error) {
+func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0, perPage)
-	err := s.engine.Table("repos").
+	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").
-		Where("perms.perm_user_id = ?", user.ID).
+		Where("perms.perm_user_id = ?", user.ID)
+	if owned {
+		sess = sess.And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true}))
+	}
+	err := sess.
 		Asc("repo_full_name").
 		Find(&repos)
 	// TODO: limit
@@ -342,6 +347,7 @@ FROM repos LEFT OUTER JOIN builds ON build_id = (
 )
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = ?
+  AND (perms.perm_push = 1 OR perms.perm_admin = 1)
   AND repos.repo_active = true
 ORDER BY repo_full_name ASC;
 `
