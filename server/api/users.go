@@ -45,6 +45,7 @@ func GetUser(c *gin.Context) {
 
 func PatchUser(c *gin.Context) {
 	store_ := store.FromContext(c)
+
 	in := &model.User{}
 	err := c.Bind(in)
 	if err != nil {
@@ -59,7 +60,7 @@ func PatchUser(c *gin.Context) {
 	}
 	user.Active = in.Active
 
-	err = store.FromContext(c).UpdateUser(user)
+	err = store_.UpdateUser(user)
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 		return

@@ -83,6 +83,7 @@ func Perm(c *gin.Context) *model.Perm {
 
 func SetPerm() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		store_ := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
 		perm := new(model.Perm)
@@ -90,7 +91,7 @@ func SetPerm() gin.HandlerFunc {
 		switch {
 		case user != nil:
 			var err error
-			perm, err = store.FromContext(c).PermFind(user, repo)
+			perm, err = store_.PermFind(user, repo)
 			if err != nil {
 				log.Error().Msgf("Error fetching permission for %s %s. %s",
 					user.Login, repo.FullName, err)
@@ -102,7 +103,7 @@ func SetPerm() gin.HandlerFunc {
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store.FromContext(c).PermUpsert(perm)
+					store_.PermUpsert(perm)
 				}
 			}
 		}
