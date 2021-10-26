@@ -41,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_meddler"
+	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
