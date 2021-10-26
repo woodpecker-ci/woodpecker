@@ -6,17 +6,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var secretDeleteCmd = cli.Command{
+var secretDeleteCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a secret",
 	ArgsUsage: "[repo/name]",
 	Action:    secretDelete,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
 		},

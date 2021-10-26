@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildApproveCmd = cli.Command{
+var buildApproveCmd = &cli.Command{
 	Name:      "approve",
 	Usage:     "approve a build",
 	ArgsUsage: "<repo/name> <build>",

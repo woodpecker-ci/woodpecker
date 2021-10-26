@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildKillCmd = cli.Command{
+var buildKillCmd = &cli.Command{
 	Name:      "kill",
 	Usage:     "force kill a build",
 	ArgsUsage: "<repo/name> <build>",

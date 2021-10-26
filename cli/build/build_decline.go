@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildDeclineCmd = cli.Command{
+var buildDeclineCmd = &cli.Command{
 	Name:      "decline",
 	Usage:     "decline a build",
 	ArgsUsage: "<repo/name> <build>",

@@ -8,7 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userRemoveCmd = cli.Command{
+var userRemoveCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a user",
 	ArgsUsage: "<username>",

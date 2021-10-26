@@ -10,26 +10,26 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-var registryUpdateCmd = cli.Command{
+var registryUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a registry",
 	ArgsUsage: "[repo/name]",
 	Action:    registryUpdate,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "username",
 			Usage: "registry username",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "password",
 			Usage: "registry password",
 		},

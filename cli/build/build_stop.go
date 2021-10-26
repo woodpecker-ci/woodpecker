@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildStopCmd = cli.Command{
+var buildStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a build",
 	ArgsUsage: "<repo/name> [build] [job]",

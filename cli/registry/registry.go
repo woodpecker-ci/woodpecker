@@ -3,10 +3,10 @@ package registry
 import "github.com/urfave/cli/v2"
 
 // Command exports the registry command set.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:  "registry",
 	Usage: "manage registries",
-	Subcommands: []cli.Command{
+	Subcommands: []*cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
 		registryUpdateCmd,

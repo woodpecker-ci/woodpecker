@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userInfoCmd = cli.Command{
+var userInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show user details",
 	ArgsUsage: "<username>",
 	Action:    userInfo,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplUserInfo,

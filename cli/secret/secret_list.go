@@ -10,17 +10,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var secretListCmd = cli.Command{
+var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
 	ArgsUsage: "[repo/name]",
 	Action:    secretList,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
 			Value:  tmplSecretList,

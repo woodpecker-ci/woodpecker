@@ -9,17 +9,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryListCmd = cli.Command{
+var registryListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list registries",
 	ArgsUsage: "[repo/name]",
 	Action:    registryList,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
 			Value:  tmplRegistryList,

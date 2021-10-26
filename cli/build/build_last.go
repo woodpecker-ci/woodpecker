@@ -9,18 +9,18 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildLastCmd = cli.Command{
+var buildLastCmd = &cli.Command{
 	Name:      "last",
 	Usage:     "show latest build details",
 	ArgsUsage: "<repo/name>",
 	Action:    buildLast,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildInfo,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
 			Value: "master",

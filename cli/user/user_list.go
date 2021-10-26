@@ -9,13 +9,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userListCmd = cli.Command{
+var userListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplUserList,

@@ -8,7 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoRemoveCmd = cli.Command{
+var repoRemoveCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a repository",
 	ArgsUsage: "<repo/name>",

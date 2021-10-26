@@ -8,7 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoAddCmd = cli.Command{
+var repoAddCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "add a repository",
 	ArgsUsage: "<repo/name>",

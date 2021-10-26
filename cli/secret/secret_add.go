@@ -10,29 +10,29 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-var secretCreateCmd = cli.Command{
+var secretCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a secret",
 	ArgsUsage: "[repo/name]",
 	Action:    secretCreate,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "value",
 			Usage: "secret value",
 		},
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  "event",
 			Usage: "secret limited to these events",
 		},
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},

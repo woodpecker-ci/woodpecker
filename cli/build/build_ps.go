@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildPsCmd = cli.Command{
+var buildPsCmd = &cli.Command{
 	Name:      "ps",
 	Usage:     "show build steps",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildPs,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildPs,

@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildInfoCmd = cli.Command{
+var buildInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show build details",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildInfo,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildInfo,

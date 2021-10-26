@@ -12,12 +12,11 @@ import (
 )
 
 // Command exports the info command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "lint",
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    lint,
-	Flags:     []cli.Flag{},
 }
 
 func lint(c *cli.Context) error {

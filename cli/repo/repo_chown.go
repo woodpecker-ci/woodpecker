@@ -8,7 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoChownCmd = cli.Command{
+var repoChownCmd = &cli.Command{
 	Name:      "chown",
 	Usage:     "assume ownership of a repository",
 	ArgsUsage: "<repo/name>",

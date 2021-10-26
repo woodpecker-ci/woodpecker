@@ -10,15 +10,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildStartCmd = cli.Command{
+var buildStartCmd = &cli.Command{
 	Name:      "start",
 	Usage:     "start a build",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildStart,
 	Flags: []cli.Flag{
-		cli.StringSliceFlag{
-			Name:  "param, p",
-			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		&cli.StringSliceFlag{
+			Name:    "param",
+			Aliases: []string{"p"},
+			Usage:   "custom parameters to be injected into the job environment. Format: KEY=value",
 		},
 	},
 }

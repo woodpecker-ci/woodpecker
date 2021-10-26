@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var buildLogsCmd = cli.Command{
+var buildLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show build logs",
 	ArgsUsage: "<repo/name> [build] [job]",

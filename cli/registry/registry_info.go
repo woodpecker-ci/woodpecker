@@ -9,22 +9,22 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryInfoCmd = cli.Command{
+var registryInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display registry info",
 	ArgsUsage: "[repo/name]",
 	Action:    registryInfo,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
 			Value:  tmplRegistryList,

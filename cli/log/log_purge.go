@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var logPurgeCmd = cli.Command{
+var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
 	ArgsUsage: "<repo/name> <build>",

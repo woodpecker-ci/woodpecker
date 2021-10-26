@@ -9,30 +9,30 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildListCmd = cli.Command{
+var buildListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show build history",
 	ArgsUsage: "<repo/name>",
 	Action:    buildList,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildList,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "event",
 			Usage: "event filter",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "status",
 			Usage: "status filter",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  "limit",
 			Usage: "limit the list size",
 			Value: 25,

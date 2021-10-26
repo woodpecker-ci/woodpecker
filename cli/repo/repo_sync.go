@@ -9,13 +9,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoSyncCmd = cli.Command{
+var repoSyncCmd = &cli.Command{
 	Name:      "sync",
 	Usage:     "synchronize the repository list",
 	ArgsUsage: " ",
 	Action:    repoSync,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplRepoList,

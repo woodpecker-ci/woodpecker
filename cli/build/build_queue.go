@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildQueueCmd = cli.Command{
+var buildQueueCmd = &cli.Command{
 	Name:      "queue",
 	Usage:     "show build queue",
 	ArgsUsage: " ",
 	Action:    buildQueue,
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildQueue,

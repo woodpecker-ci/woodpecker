@@ -42,40 +42,40 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			EnvVar: "WOODPECKER_TOKEN",
-			// TODO: rename to `token`
-			Name:  "t, token",
-			Usage: "server auth token",
+	app.Flags = []cli.Flag{ //TODO: global flags do not exist in this form anymore!
+		&cli.StringFlag{
+			EnvVars: []string{"WOODPECKER_TOKEN"},
+			Name:    "token",
+			Aliases: []string{"t"},
+			Usage:   "server auth token",
 		},
 
-		cli.StringFlag{
-			EnvVar: "WOODPECKER_SERVER",
-			// TODO: rename to `server`
-			Name:  "s, server",
-			Usage: "server address",
+		&cli.StringFlag{
+			EnvVars: []string{"WOODPECKER_SERVER"},
+			Name:    "server",
+			Aliases: []string{"s"},
+			Usage:   "server address",
 		},
-		cli.BoolFlag{
-			EnvVar: "WOODPECKER_SKIP_VERIFY",
-			Name:   "skip-verify",
-			Usage:  "skip ssl verification",
-			Hidden: true,
+		&cli.BoolFlag{
+			EnvVars: []string{"WOODPECKER_SKIP_VERIFY"},
+			Name:    "skip-verify",
+			Usage:   "skip ssl verification",
+			Hidden:  true,
 		},
-		cli.StringFlag{
-			EnvVar: "SOCKS_PROXY",
-			Name:   "socks-proxy",
-			Usage:  "socks proxy address",
-			Hidden: true,
+		&cli.StringFlag{
+			EnvVars: []string{"SOCKS_PROXY"},
+			Name:    "socks-proxy",
+			Usage:   "socks proxy address",
+			Hidden:  true,
 		},
-		cli.BoolFlag{
-			EnvVar: "SOCKS_PROXY_OFF",
-			Name:   "socks-proxy-off",
-			Usage:  "socks proxy ignored",
-			Hidden: true,
+		&cli.BoolFlag{
+			EnvVars: []string{"SOCKS_PROXY_OFF"},
+			Name:    "socks-proxy-off",
+			Usage:   "socks proxy ignored",
+			Hidden:  true,
 		},
 	}
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		build.Command,
 		log.Command,
 		deploy.Command,

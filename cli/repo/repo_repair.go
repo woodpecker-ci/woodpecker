@@ -6,7 +6,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoRepairCmd = cli.Command{
+var repoRepairCmd = &cli.Command{
 	Name:      "repair",
 	Usage:     "repair repository webhooks",
 	ArgsUsage: "<repo/name>",

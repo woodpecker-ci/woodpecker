@@ -10,7 +10,7 @@ import (
 )
 
 // Command exports the log-level command used to change the servers log-level.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "log-level",
 	ArgsUsage: "[level]",
 	Usage:     "get the logging level of the server, or set it with [level]",

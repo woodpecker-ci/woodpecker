@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-var userAddCmd = cli.Command{
+var userAddCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a user",
 	ArgsUsage: "<username>",
