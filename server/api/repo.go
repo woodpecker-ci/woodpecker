@@ -170,6 +170,14 @@ func GetRepoPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, perm)
 }
 
+func GetRepoBranches(c *gin.Context) {
+	repo := session.Repo(c)
+	branches := make([]string, 0)
+	// TODO: query open branches
+	branches = append(branches, repo.Branch)
+	c.JSON(http.StatusOK, branches)
+}
+
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	r := remote.FromContext(c)
