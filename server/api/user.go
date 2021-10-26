@@ -107,7 +107,8 @@ func GetRepos(c *gin.Context) {
 		}
 	}
 
-	repos, err := store.FromContext(c).RepoList(user, true)
+	owned := c.Query("all") == "" || c.Query("all") == "0"
+	repos, err := store.FromContext(c).RepoList(user, owned)
 	if err != nil {
 		c.String(500, "Error fetching repository list. %s", err)
 		return
