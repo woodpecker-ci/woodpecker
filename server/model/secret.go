@@ -49,7 +49,7 @@ type SecretStore interface {
 type Secret struct {
 	ID         int64    `json:"id"              meddler:"secret_id,pk"       xorm:"pk autoincr 'secret_id'"`
 	RepoID     int64    `json:"-"               meddler:"secret_repo_id"     xorm:"secret_repo_id"`
-	Name       string   `json:"name"            meddler:"secret_name"        xorm:"secret_name"`
+	Name       string   `json:"name"            meddler:"secret_name"        xorm:"secret_name"` // TODO: uniqe constrain (name&repoID)
 	Value      string   `json:"value,omitempty" meddler:"secret_value"       xorm:"secret_value"`
 	Images     []string `json:"image"           meddler:"secret_images,json" xorm:"-"` // TODO: Xorm and json
 	Events     []string `json:"event"           meddler:"secret_events,json" xorm:"-"` // TODO: Xorm and json

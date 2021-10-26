@@ -1,8 +1,10 @@
 package datastore_xorm
 
 import (
-	"errors"
+	"bytes"
+	"database/sql"
 	"io"
+	"io/ioutil"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -13,7 +15,7 @@ import (
 
 const perPage = 50
 
-var RecordNotExist = errors.New("requested object not exist")
+var RecordNotExist = sql.ErrNoRows
 
 func wrapGet(exist bool, err error) error {
 	if err != nil {
@@ -70,12 +72,17 @@ func (s storage) DeleteUser(user *model.User) error {
 	return err
 }
 
-func (s storage) GetRepo(i int64) (*model.Repo, error) {
-	panic("implement me")
+func (s storage) GetRepo(id int64) (*model.Repo, error) {
+	repo := new(model.Repo)
+	err := wrapGet(s.engine.ID(id).Get(repo))
+	if err != nil {
+		return nil, err
+	}
+	return repo, nil
 }
 
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
-	repo := &model.Repo{}
+	repo := new(model.Repo)
 	err := wrapGet(s.engine.Where("repo_full_name = ?", fullName).Get(repo))
 	if err != nil {
 		return nil, err
@@ -222,7 +229,7 @@ func (s storage) GetBuildCount() (int, error) {
 	return int(c), err
 }
 
-func (s storage) CreateBuild(build *model.Build, procs ...*model.Proc) error {
+func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error {
 	build.Trim()
 
 	sess := s.engine.NewSession()
@@ -248,7 +255,7 @@ func (s storage) CreateBuild(build *model.Build, procs ...*model.Proc) error {
 		return err
 	}
 
-	if _, err := sess.InsertMulti(procs); err != nil {
+	if _, err := sess.InsertMulti(procList); err != nil {
 		return err
 	}
 
@@ -502,108 +509,227 @@ func (s storage) SenderDelete(sender *model.Sender) error {
 	return err
 }
 
-func (s storage) SecretFind(repo *model.Repo, s2 string) (*model.Secret, error) {
-	panic("implement me")
+func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
+	secret := &model.Secret{
+		RepoID: repo.ID,
+		Name:   name,
+	}
+	if err := wrapGet(s.engine.Get(secret)); err != nil {
+		return nil, err
+	}
+	return secret, nil
 }
 
 func (s storage) SecretList(repo *model.Repo) ([]*model.Secret, error) {
-	panic("implement me")
+	secrets := make([]*model.Secret, 0, perPage)
+	err := s.engine.Where("secret_repo_id = ?", repo.ID).Find(&secrets)
+	return secrets, err
 }
 
 func (s storage) SecretCreate(secret *model.Secret) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(secret)
+	return err
 }
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
-	panic("implement me")
+	_, err := s.engine.ID(secret.ID).Update(&secret)
+	return err
 }
 
 func (s storage) SecretDelete(secret *model.Secret) error {
-	panic("implement me")
+	_, err := s.engine.ID(secret.ID).Delete(new(model.Secret))
+	return err
 }
 
-func (s storage) RegistryFind(repo *model.Repo, s2 string) (*model.Registry, error) {
-	panic("implement me")
+func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
+	reg := &model.Registry{
+		RepoID:  repo.ID,
+		Address: addr,
+	}
+	if err := wrapGet(s.engine.Get(reg)); err != nil {
+		return nil, err
+	}
+	return reg, nil
 }
 
 func (s storage) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
-	panic("implement me")
+	regs := make([]*model.Registry, 0, perPage)
+	err := s.engine.Where("registry_repo_id = ?", repo.ID).Find(&regs)
+	return regs, err
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(registry)
+	return err
 }
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {
-	panic("implement me")
+	_, err := s.engine.ID(registry.ID).Update(registry)
+	return err
 }
 
 func (s storage) RegistryDelete(registry *model.Registry) error {
-	panic("implement me")
+	_, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
+	return err
 }
 
-func (s storage) ProcLoad(i int64) (*model.Proc, error) {
-	panic("implement me")
+func (s storage) ProcLoad(id int64) (*model.Proc, error) {
+	proc := new(model.Proc)
+	if err := wrapGet(s.engine.ID(id).Get(proc)); err != nil {
+		return nil, err
+	}
+	return proc, nil
 }
 
-func (s storage) ProcFind(build *model.Build, i int) (*model.Proc, error) {
-	panic("implement me")
+func (s storage) ProcFind(build *model.Build, pid int) (*model.Proc, error) {
+	proc := &model.Proc{
+		BuildID: build.ID,
+		PID:     pid,
+	}
+	if err := wrapGet(s.engine.Get(proc)); err != nil {
+		return nil, err
+	}
+	return proc, nil
 }
 
-func (s storage) ProcChild(build *model.Build, i int, s2 string) (*model.Proc, error) {
-	panic("implement me")
+func (s storage) ProcChild(build *model.Build, ppid int, child string) (*model.Proc, error) {
+	proc := &model.Proc{
+		BuildID: build.ID,
+		PPID:    ppid,
+		Name:    child,
+	}
+	if err := wrapGet(s.engine.Get(proc)); err != nil {
+		return nil, err
+	}
+	return proc, nil
 }
 
 func (s storage) ProcList(build *model.Build) ([]*model.Proc, error) {
-	panic("implement me")
+	procList := make([]*model.Proc, 0, perPage)
+	err := s.engine.Where("proc_build_id = ?", build.ID).Find(&procList)
+	return procList, err
 }
 
 func (s storage) ProcCreate(procs []*model.Proc) error {
-	panic("implement me")
+	_, err := s.engine.Insert(procs)
+	return err
 }
 
 func (s storage) ProcUpdate(proc *model.Proc) error {
-	panic("implement me")
+	_, err := s.engine.ID(proc.ID).Update(proc)
+	return err
 }
 
 func (s storage) ProcClear(build *model.Build) error {
-	panic("implement me")
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("file_build_id = ?", build.ID).Delete(new(model.File)); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("proc_build_id = ?", build.ID).Delete(new(model.Proc)); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) LogFind(proc *model.Proc) (io.ReadCloser, error) {
-	panic("implement me")
+	logs := &model.Logs{
+		ProcID: proc.ID,
+	}
+	if err := wrapGet(s.engine.Get(logs)); err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(logs.Data)
+	return ioutil.NopCloser(buf), nil
 }
 
 func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
-	panic("implement me")
+	data, _ := ioutil.ReadAll(reader)
+
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	logs := new(model.Logs)
+	exist, err := sess.Where("log_job_id = ?", proc.ID).Get(logs)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		if _, err := sess.ID(logs.ID).Cols("log_data").Update(&model.Logs{Data: data}); err != nil {
+			return err
+		}
+	} else {
+		if _, err := sess.InsertOne(&model.Logs{
+			ProcID: proc.ID,
+			Data:   data,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) FileList(build *model.Build) ([]*model.File, error) {
-	panic("implement me")
+	files := make([]*model.File, 0, perPage)
+	err := s.engine.Where("file_build_id = ?", build.ID).Find(&files)
+	return files, err
 }
 
-func (s storage) FileFind(proc *model.Proc, s2 string) (*model.File, error) {
-	panic("implement me")
+func (s storage) FileFind(proc *model.Proc, name string) (*model.File, error) {
+	file := &model.File{
+		ProcID: proc.ID,
+		Name:   name,
+	}
+	if err := wrapGet(s.engine.Get(file)); err != nil {
+		return nil, err
+	}
+	return file, nil
 }
 
-func (s storage) FileRead(proc *model.Proc, s2 string) (io.ReadCloser, error) {
-	panic("implement me")
+func (s storage) FileRead(proc *model.Proc, name string) (io.ReadCloser, error) {
+	file, err := s.FileFind(proc, name)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(file.Data)
+	return ioutil.NopCloser(buf), err
 }
 
 func (s storage) FileCreate(file *model.File, reader io.Reader) error {
-	panic("implement me")
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	file.Data = data
+	_, err = s.engine.InsertOne(file)
+	return err
 }
 
 func (s storage) TaskList() ([]*model.Task, error) {
-	panic("implement me")
+	tasks := make([]*model.Task, 0, perPage)
+	err := s.engine.Find(&tasks)
+	return tasks, err
 }
 
 func (s storage) TaskInsert(task *model.Task) error {
-	panic("implement me")
+	_, err := s.engine.InsertOne(task)
+	return err
 }
 
-func (s storage) TaskDelete(s2 string) error {
-	panic("implement me")
+func (s storage) TaskDelete(id string) error {
+	_, err := s.engine.Where("task_id = ?", id).Delete(new(model.Task))
+	return err
 }
 
 func (s storage) Ping() error {

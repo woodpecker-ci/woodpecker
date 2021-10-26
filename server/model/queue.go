@@ -25,7 +25,7 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string            `meddler:"task_id"                xorm:"task_id"`
+	ID           string            `meddler:"task_id"                xorm:"task_id"` // xorm pk autoincr  ?
 	Data         []byte            `meddler:"task_data"              xorm:"task_data"`
 	Labels       map[string]string `meddler:"task_labels,json"       xorm:"-"` // TODO: Xorm and json
 	Dependencies []string          `meddler:"task_dependencies,json" xorm:"-"` // TODO: Xorm and json

@@ -38,6 +38,7 @@ type File struct {
 	Passed  int    `json:"passed"  meddler:"file_meta_passed"  xorm:"file_meta_passed"`
 	Failed  int    `json:"failed"  meddler:"file_meta_failed"  xorm:"file_meta_failed"`
 	Skipped int    `json:"skipped" meddler:"file_meta_skipped" xorm:"file_meta_skipped"`
+	Data    []byte `json:"-"                                   xorm:"file_data"` // TODO: dont store in db but object storage?
 }
 
 // TableName return database table name for xorm

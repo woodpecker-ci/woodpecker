@@ -150,6 +150,8 @@ type Store interface {
 	ProcClear(*model.Build) error
 
 	LogFind(*model.Proc) (io.ReadCloser, error)
+	// TODO: since we do ReadAll in any case a ioReader is not the best idear
+	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Proc, io.Reader) error
 
 	FileList(*model.Build) ([]*model.File, error)
@@ -157,6 +159,7 @@ type Store interface {
 	FileRead(*model.Proc, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
+	// TODO: we need pagination & filter
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
