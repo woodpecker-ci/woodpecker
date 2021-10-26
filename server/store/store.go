@@ -104,8 +104,8 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	// TODO: pagginate
-	RepoList(*model.User) ([]*model.Repo, error)
+	// TODO: pagginate & use struct for options
+	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	// TODO: only store activated repos ...
 	RepoBatch([]*model.Repo) error
