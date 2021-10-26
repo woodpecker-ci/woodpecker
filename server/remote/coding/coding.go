@@ -276,6 +276,12 @@ func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return c.newClient(ctx, u).RemoveWebhook(r.Owner, r.Name, link)
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
 func (c *Coding) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
