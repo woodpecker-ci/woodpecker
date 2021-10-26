@@ -78,7 +78,7 @@ build: build-agent build-server build-cli
 
 release-frontend: build-frontend
 
-release-server:
+release-server: release-frontend
 	# compile
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 	# tar binary files
