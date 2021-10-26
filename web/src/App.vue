@@ -3,24 +3,27 @@
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
-      <div class="flex min-h-0 h-full">
+      <div class="relative flex min-h-0 h-full">
         <div class="flex flex-col overflow-y-auto flex-grow">
           <router-view />
         </div>
-        <BuildFeedSidebar
-          class="
-            shadow-md
-            bg-white
-            border-l
-            dark:bg-dark-500 dark:border-dark-500
-            w-full
-            absolute
-            right-0
-            lg:relative
-            max-w-80
-            xl:max-w-96
-          "
-        />
+        <transition name="slide-right">
+          <BuildFeedSidebar
+            class="
+              shadow-md
+              bg-white
+              border-l
+              dark:bg-dark-500 dark:border-dark-500
+              w-full
+              absolute
+              top-0
+              right-0
+              bottom-0
+              max-w-80
+              xl:max-w-96
+            "
+          />
+        </transition>
       </div>
     </template>
     <notifications position="bottom right" />
@@ -113,5 +116,14 @@ body,
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-right-enter-from,
+.slide-right-leave-to {
+  transform: translate(100%, 0);
 }
 </style>

@@ -11,7 +11,7 @@ export default () => {
   const buildStore = BuildStore();
   const { isAuthenticated } = useAuthentication();
 
-  const isOpen = computed(() => userConfig.value.isBuildFeedOpen && isAuthenticated);
+  const isOpen = computed(() => userConfig.value.isBuildFeedOpen && !!isAuthenticated);
 
   function toggle() {
     setUserConfig('isBuildFeedOpen', !userConfig.value.isBuildFeedOpen);

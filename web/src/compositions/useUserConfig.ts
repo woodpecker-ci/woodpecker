@@ -7,7 +7,7 @@ type UserConfig = {
 };
 
 const defaultUserConfig: UserConfig = {
-  isBuildFeedOpen: true,
+  isBuildFeedOpen: false,
 };
 
 function loadUserConfig(): UserConfig {
