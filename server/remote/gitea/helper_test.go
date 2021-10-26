@@ -203,9 +203,10 @@ func Test_parse(t *testing.T) {
 					UserName:  "gordon",
 					AvatarURL: "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				},
-				CloneURL: "http://gitea.golang.org/gophers/hello-world.git",
-				HTMLURL:  "http://gitea.golang.org/gophers/hello-world",
-				Private:  true,
+				CloneURL:      "http://gitea.golang.org/gophers/hello-world.git",
+				HTMLURL:       "http://gitea.golang.org/gophers/hello-world",
+				Private:       true,
+				DefaultBranch: "master",
 			}
 			repo := toRepo(&from, false)
 			g.Assert(repo.FullName).Equal(from.FullName)
