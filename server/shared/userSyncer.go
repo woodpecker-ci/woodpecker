@@ -82,9 +82,10 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 				Pull:   true,
 				Synced: unix,
 			}
-			if repo.Perm != nil {
-				perm.Push = repo.Perm.Push
-				perm.Admin = repo.Perm.Admin
+			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
+			if err == nil && remotePerm != nil {
+				perm.Push = remotePerm.Push
+				perm.Admin = remotePerm.Admin
 			}
 			perms = append(perms, &perm)
 		}
