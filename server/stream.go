@@ -59,7 +59,7 @@ func EventStreamSSE(c *gin.Context) {
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := store.FromContext(c).RepoList(user)
+		repos, _ := store.FromContext(c).RepoList(user, false)
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}
