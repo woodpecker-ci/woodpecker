@@ -57,6 +57,6 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 		Name:   "format",
 		Usage:  "format output",
 		Value:  tmpl,
-		Hidden: !(len(hidden) == 0),
+		Hidden: len(hidden) != 0,
 	}
 }
