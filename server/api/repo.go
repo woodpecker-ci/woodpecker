@@ -172,9 +172,15 @@ func GetRepoPermissions(c *gin.Context) {
 
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
-	branches := make([]string, 0)
-	// TODO: query open branches
-	branches = append(branches, repo.Branch)
+	user := session.User(c)
+	r := remote.FromContext(c)
+
+	branches, err := r.Branches(c, user, repo)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, branches)
 }
 
