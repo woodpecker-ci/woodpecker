@@ -18,12 +18,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func Repo(c *gin.Context) *model.Repo {
@@ -54,7 +55,7 @@ func SetRepo() gin.HandlerFunc {
 		}
 
 		// debugging
-		log.Debugf("Cannot find repository %s/%s. %s",
+		log.Debug().Msgf("Cannot find repository %s/%s. %s",
 			owner,
 			name,
 			err.Error(),
@@ -91,13 +92,13 @@ func SetPerm() gin.HandlerFunc {
 			var err error
 			perm, err = store.FromContext(c).PermFind(user, repo)
 			if err != nil {
-				log.Errorf("Error fetching permission for %s %s. %s",
+				log.Error().Msgf("Error fetching permission for %s %s. %s",
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
 				perm, err = remote.FromContext(c).Perm(c, user, repo.Owner, repo.Name)
 				if err == nil {
-					log.Debugf("Synced user permission for %s %s", user.Login, repo.FullName)
+					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
@@ -124,11 +125,11 @@ func SetPerm() gin.HandlerFunc {
 		}
 
 		if user != nil {
-			log.Debugf("%s granted %+v permission to %s",
+			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
 
 		} else {
-			log.Debugf("Guest granted %+v to %s", perm, repo.FullName)
+			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 		}
 
 		c.Set("perm", perm)
@@ -148,11 +149,11 @@ func MustPull(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debugf("User %s denied read access to %s",
+		log.Debug().Msgf("User %s denied read access to %s",
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debugf("Guest denied read access to %s %s",
+		log.Debug().Msgf("Guest denied read access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)
@@ -173,12 +174,12 @@ func MustPush(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debugf("User %s denied write access to %s",
+		log.Debug().Msgf("User %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
 
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debugf("Guest denied write access to %s %s",
+		log.Debug().Msgf("Guest denied write access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)

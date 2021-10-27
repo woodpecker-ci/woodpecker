@@ -22,13 +22,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
@@ -208,11 +208,11 @@ func DeleteBuild(c *gin.Context) {
 		if proc.State == model.StatusPending {
 			if proc.PPID != 0 {
 				if _, err = shared.UpdateProcToStatusSkipped(store.FromContext(c), *proc, 0); err != nil {
-					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			} else {
 				if _, err = shared.UpdateProcToStatusKilled(store.FromContext(c), *proc); err != nil {
-					log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			}
 		}
@@ -262,7 +262,7 @@ func PostApproval(c *gin.Context) {
 	// fetch the build file from the database
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
-		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
 		return
 	}
@@ -285,11 +285,11 @@ func PostApproval(c *gin.Context) {
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
-		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 	envs := map[string]string{}
 	if server.Config.Services.Environ != nil {
@@ -318,7 +318,7 @@ func PostApproval(c *gin.Context) {
 	buildItems, err := b.Build()
 	if err != nil {
 		if _, err = shared.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
-			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
+			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
@@ -326,7 +326,7 @@ func PostApproval(c *gin.Context) {
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
-		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
+		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
 
 	defer func() {
@@ -338,7 +338,7 @@ func PostApproval(c *gin.Context) {
 				err = remote_.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
-				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+				log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 			}
 		}
 	}()
@@ -375,7 +375,7 @@ func PostDecline(c *gin.Context) {
 	uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 	err = remote_.Status(c, user, repo, build, uri, nil)
 	if err != nil {
-		logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+		log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
 
 	c.JSON(200, build)
@@ -403,14 +403,14 @@ func PostBuild(c *gin.Context) {
 
 	user, err := store.GetUser(c, repo.UserID)
 	if err != nil {
-		logrus.Errorf("failure to find repo owner %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
 
 	build, err := store.GetBuildNumber(c, repo, num)
 	if err != nil {
-		logrus.Errorf("failure to get build %d. %s", num, err)
+		log.Error().Msgf("failure to get build %d. %s", num, err)
 		c.AbortWithError(404, err)
 		return
 	}
@@ -435,14 +435,14 @@ func PostBuild(c *gin.Context) {
 	// fetch the pipeline config from database
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
-		logrus.Errorf("failure to get build config for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(404, err)
 		return
 	}
 
 	netrc, err := remote_.Netrc(user, repo)
 	if err != nil {
-		logrus.Errorf("failure to generate netrc for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to generate netrc for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
@@ -473,7 +473,7 @@ func PostBuild(c *gin.Context) {
 
 	err = persistBuildConfigs(configs, build.ID)
 	if err != nil {
-		logrus.Errorf("failure to persist build config for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to persist build config for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
@@ -495,11 +495,11 @@ func PostBuild(c *gin.Context) {
 	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
-		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 	if server.Config.Services.Environ != nil {
 		globals, _ := server.Config.Services.Environ.EnvironList(repo)
@@ -537,7 +537,7 @@ func PostBuild(c *gin.Context) {
 
 	err = store.FromContext(c).ProcCreate(build.Procs)
 	if err != nil {
-		logrus.Errorf("cannot restart %s#%d: %s", repo.FullName, build.Number, err)
+		log.Error().Msgf("cannot restart %s#%d: %s", repo.FullName, build.Number, err)
 		build.Status = model.StatusError
 		build.Started = time.Now().Unix()
 		build.Finished = build.Started

@@ -18,12 +18,11 @@ require (
 	github.com/drone/envsubst v1.0.3
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
 	github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
-	github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
@@ -42,7 +41,6 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/rs/zerolog v1.25.0
 	github.com/russross/meddler v1.0.1
-	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
@@ -50,6 +48,7 @@ require (
 	github.com/urfave/cli v1.22.4
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+	github.com/xanzy/go-gitlab v0.51.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a

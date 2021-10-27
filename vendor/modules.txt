@@ -87,9 +87,6 @@ github.com/flynn/go-shlex
 github.com/franela/goblin
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
-# github.com/gin-gonic/contrib v0.0.0-20191209060500-d6e26eeaa607
-## explicit
-github.com/gin-gonic/contrib/ginrus
 # github.com/gin-gonic/gin v1.7.4
 ## explicit
 github.com/gin-gonic/gin
@@ -113,9 +110,9 @@ github.com/go-sql-driver/mysql
 github.com/gogits/go-gogs-client
 # github.com/gogo/protobuf v1.3.2
 github.com/gogo/protobuf/proto
-# github.com/golang-jwt/jwt v3.2.2+incompatible
+# github.com/golang-jwt/jwt/v4 v4.1.0
 ## explicit
-github.com/golang-jwt/jwt
+github.com/golang-jwt/jwt/v4
 # github.com/golang/protobuf v1.5.2
 ## explicit
 github.com/golang/protobuf/proto
@@ -131,6 +128,10 @@ github.com/google/go-querystring/query
 # github.com/gorilla/securecookie v1.1.1
 ## explicit
 github.com/gorilla/securecookie
+# github.com/hashicorp/go-cleanhttp v0.5.1
+github.com/hashicorp/go-cleanhttp
+# github.com/hashicorp/go-retryablehttp v0.6.8
+github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-version v1.3.0
 ## explicit
 github.com/hashicorp/go-version
@@ -213,6 +214,7 @@ github.com/rogpeppe/go-internal/fmtsort
 # github.com/rs/zerolog v1.25.0
 ## explicit
 github.com/rs/zerolog
+github.com/rs/zerolog/cmd/lint
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
@@ -224,7 +226,6 @@ github.com/russross/meddler
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/sirupsen/logrus v1.8.1
-## explicit
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.3.0
 ## explicit
@@ -250,6 +251,9 @@ github.com/woodpecker-ci/expr/parse
 # github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
 ## explicit
 github.com/woodpecker-ci/togo
+# github.com/xanzy/go-gitlab v0.51.1
+## explicit
+github.com/xanzy/go-gitlab
 # github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f
 github.com/xeipuuv/gojsonpointer
 # github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415
@@ -294,6 +298,7 @@ golang.org/x/sync/errgroup
 # golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7
 ## explicit
 golang.org/x/sys/cpu
+golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -307,6 +312,14 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+golang.org/x/time/rate
+# golang.org/x/tools v0.1.5
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/buildutil
+golang.org/x/tools/go/internal/cgo
+golang.org/x/tools/go/loader
+golang.org/x/tools/internal/typeparams
 # google.golang.org/appengine v1.6.7
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base

@@ -4,9 +4,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-
 	libcompose "github.com/docker/libcompose/yaml"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
 // Cacher defines a compiler transform that can be used

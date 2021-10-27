@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/gogits/go-gogs-client"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
@@ -83,24 +84,24 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	client := c.newClient()
 
-	// try to fetch drone token if it exists
+	// try to fetch woodpecker token if it exists
 	var accessToken string
 	tokens, err := client.ListAccessTokens(username, password)
 	if err == nil {
 		for _, token := range tokens {
-			if token.Name == "drone" {
+			if token.Name == "woodpecker" {
 				accessToken = token.Sha1
 				break
 			}
 		}
 	}
 
-	// if drone token not found, create it
+	// if woodpecker token not found, create it
 	if accessToken == "" {
 		token, terr := client.CreateAccessToken(
 			username,
 			password,
-			gogs.CreateAccessTokenOption{Name: "drone"},
+			gogs.CreateAccessTokenOption{Name: "woodpecker"},
 		)
 		if terr != nil {
 			return nil, terr
@@ -253,6 +254,12 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 // Deactivate is not supported by the Gogs driver.
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build

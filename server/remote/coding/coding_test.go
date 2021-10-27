@@ -21,11 +21,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 )
 
 func Test_coding(t *testing.T) {
@@ -164,7 +164,7 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When downloading a file", func() {
 			g.It("Should return file for specified build", func() {
-				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".drone.yml")
+				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
 				g.Assert(err == nil).IsTrue()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})

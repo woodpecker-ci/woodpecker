@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -352,7 +353,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Matrix: proc.Environ,
 		},
 		Sys: frontend.System{
-			Name: "drone",
+			Name: "woodpecker",
 			Link: link,
 			Host: host,
 			Arch: "linux/amd64",

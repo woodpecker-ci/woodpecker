@@ -43,6 +43,7 @@ func PostRepo(c *gin.Context) {
 
 	repo.IsActive = true
 	repo.UserID = user.ID
+	repo.AllowPull = true
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -162,6 +163,25 @@ func ChownRepo(c *gin.Context) {
 
 func GetRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
+}
+
+func GetRepoPermissions(c *gin.Context) {
+	perm := session.Perm(c)
+	c.JSON(http.StatusOK, perm)
+}
+
+func GetRepoBranches(c *gin.Context) {
+	repo := session.Repo(c)
+	user := session.User(c)
+	r := remote.FromContext(c)
+
+	branches, err := r.Branches(c, user, repo)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, branches)
 }
 
 func DeleteRepo(c *gin.Context) {

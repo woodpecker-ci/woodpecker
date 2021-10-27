@@ -9,7 +9,6 @@ import (
 	mock "github.com/stretchr/testify/mock"
 
 	model "github.com/woodpecker-ci/woodpecker/server/model"
-
 	remote "github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
@@ -46,6 +45,29 @@ func (_m *Remote) Auth(ctx context.Context, token string, secret string) (string
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
 		r1 = rf(ctx, token, secret)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Branches provides a mock function with given fields: ctx, u, r
+func (_m *Remote) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	ret := _m.Called(ctx, u, r)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) []string); ok {
+		r0 = rf(ctx, u, r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo) error); ok {
+		r1 = rf(ctx, u, r)
 	} else {
 		r1 = ret.Error(1)
 	}

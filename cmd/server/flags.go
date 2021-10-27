@@ -27,6 +27,21 @@ var flags = []cli.Flag{
 		Usage:  "enable server debug mode",
 	},
 	cli.StringFlag{
+		EnvVar: "WOODPECKER_LOG_LEVEL",
+		Name:   "log-level",
+		Usage:  "set logging level",
+	},
+	cli.BoolFlag{
+		EnvVar: "WOODPECKER_DEBUG_PRETTY",
+		Name:   "pretty",
+		Usage:  "enable pretty-printed debug output",
+	},
+	cli.BoolTFlag{
+		EnvVar: "WOODPECKER_DEBUG_NOCOLOR",
+		Name:   "nocolor",
+		Usage:  "disable colored debug output",
+	},
+	cli.StringFlag{
 		EnvVar: "WOODPECKER_HOST",
 		Name:   "server-host",
 		Usage:  "server fully qualified url (<scheme>://<host>)",
@@ -93,7 +108,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_DOCS",
 		Name:   "docs",
 		Usage:  "link to user documentation",
-		Value:  "https://woodpecker-ci.github.io/",
+		Value:  "https://woodpecker-ci.org/",
 	},
 	cli.DurationFlag{
 		EnvVar: "WOODPECKER_SESSION_EXPIRES",
@@ -320,7 +335,7 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITEA_CONTEXT",
 		Name:   "gitea-context",
 		Usage:  "gitea status context",
-		Value:  "continuous-integration/drone",
+		Value:  "continuous-integration/woodpecker",
 	},
 	cli.StringFlag{
 		EnvVar: "WOODPECKER_GITEA_GIT_USERNAME",
@@ -397,11 +412,6 @@ var flags = []cli.Flag{
 		EnvVar: "WOODPECKER_GITLAB_PRIVATE_MODE",
 		Name:   "gitlab-private-mode",
 		Usage:  "gitlab is running in private mode",
-	},
-	cli.BoolFlag{
-		EnvVar: "WOODPECKER_GITLAB_V3_API",
-		Name:   "gitlab-v3-api",
-		Usage:  "gitlab is running the v3 api",
 	},
 	cli.BoolFlag{
 		EnvVar: "WOODPECKER_STASH",

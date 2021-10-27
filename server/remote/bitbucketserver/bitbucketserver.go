@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/mrjones/oauth"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
@@ -189,8 +190,8 @@ func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
-		Name:  fmt.Sprintf("Drone #%d - %s", b.Number, b.Branch),
-		Key:   "Drone",
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", b.Number, b.Branch),
+		Key:   "Woodpecker",
 		Url:   link,
 	}
 
@@ -222,6 +223,12 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.CreateHook(r.Owner, r.Name, link)
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {

@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -102,7 +103,7 @@ func FileGet(c *gin.Context) {
 	defer rc.Close()
 
 	switch file.Mime {
-	case "application/vnd.drone.test+json":
+	case "application/vnd.test+json":
 		c.Header("Content-Type", "application/json")
 	}
 

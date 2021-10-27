@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
-
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -93,7 +93,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
@@ -276,6 +276,12 @@ func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return c.newClient(ctx, u).RemoveWebhook(r.Owner, r.Name, link)
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
 func (c *Coding) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
@@ -331,7 +337,7 @@ func (c *Coding) newClientToken(ctx context.Context, token string) *internal.Cli
 			},
 		},
 	}
-	return internal.NewClient(ctx, c.URL, "/api", token, "drone", client)
+	return internal.NewClient(ctx, c.URL, "/api", token, "woodpecker", client)
 }
 
 func (c *Coding) resourceLink(resourcePath string) string {

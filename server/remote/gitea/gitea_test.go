@@ -21,6 +21,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 )
@@ -145,7 +146,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".drone.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
 			g.Assert(err == nil).IsTrue()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})

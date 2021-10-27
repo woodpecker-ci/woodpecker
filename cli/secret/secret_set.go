@@ -4,10 +4,10 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var secretUpdateCmd = cli.Command{
@@ -52,7 +52,7 @@ func secretUpdate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	secret := &drone.Secret{
+	secret := &woodpecker.Secret{
 		Name:   c.String("name"),
 		Value:  c.String("value"),
 		Images: c.StringSlice("image"),

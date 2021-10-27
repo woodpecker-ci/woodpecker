@@ -19,15 +19,16 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestBuilds(t *testing.T) {
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 
 	s := newTest()
@@ -287,9 +288,9 @@ func TestBuildIncrement(t *testing.T) {
 
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	if err := s.CreateRepo(repo); err != nil {
 		t.Error(err)

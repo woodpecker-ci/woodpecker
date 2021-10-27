@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -189,14 +190,14 @@ func TestUsers(t *testing.T) {
 
 			repo1 := &model.Repo{
 				Owner:    "bradrydzewski",
-				Name:     "drone",
-				FullName: "bradrydzewski/drone",
+				Name:     "test",
+				FullName: "bradrydzewski/test",
 				IsActive: true,
 			}
 			repo2 := &model.Repo{
-				Owner:    "drone",
-				Name:     "drone",
-				FullName: "drone/drone",
+				Owner:    "test",
+				Name:     "test",
+				FullName: "test/test",
 				IsActive: true,
 			}
 			repo3 := &model.Repo{
@@ -210,8 +211,8 @@ func TestUsers(t *testing.T) {
 			s.CreateRepo(repo3)
 
 			s.PermBatch([]*model.Perm{
-				{UserID: user.ID, Repo: repo1.FullName},
-				{UserID: user.ID, Repo: repo2.FullName},
+				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
+				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
 			})
 
 			build1 := &model.Build{

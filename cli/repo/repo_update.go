@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var repoUpdateCmd = cli.Command{
@@ -34,7 +34,7 @@ var repoUpdateCmd = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "config",
-			Usage: "repository configuration path (e.g. .drone.yml)",
+			Usage: "repository configuration path (e.g. .woodpecker.yml)",
 		},
 		cli.IntFlag{
 			Name:  "build-counter",
@@ -69,7 +69,7 @@ func repoUpdate(c *cli.Context) error {
 		unsafe       = c.Bool("unsafe")
 	)
 
-	patch := new(drone.RepoPatch)
+	patch := new(woodpecker.RepoPatch)
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}

@@ -42,7 +42,7 @@ export function fetchFeedOnce(tree, client) {
 }
 
 /**
- * Subscribes to the server-side event feed and synchonizes
+ * Subscribes to the server-side event feed and synchronizes
  * event data with the state tree.
  *
  * @param {Object} tree - The drone state tree.

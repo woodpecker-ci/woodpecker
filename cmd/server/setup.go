@@ -19,6 +19,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
@@ -32,24 +38,19 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/remote/github"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab3"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	"golang.org/x/sync/errgroup"
 )
 
-func setupStore(c *cli.Context) store.Store {
-	return datastore.New(
-		c.String("driver"),
-		c.String("datasource"),
-	)
+func setupStore(c *cli.Context) (store.Store, error) {
+	opts := &datastore.Opts{
+		Driver: c.String("driver"),
+		Config: c.String("datasource"),
+	}
+	log.Trace().Msgf("setup datastore: %#v", opts)
+	return datastore.New(opts)
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
@@ -99,21 +100,25 @@ func SetupRemote(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Bitbucket remote from the CLI arguments.
 func setupBitbucket(c *cli.Context) (remote.Remote, error) {
-	return bitbucket.New(
-		c.String("bitbucket-client"),
-		c.String("bitbucket-secret"),
-	), nil
+	opts := &bitbucket.Opts{
+		Client: c.String("bitbucket-client"),
+		Secret: c.String("bitbucket-secret"),
+	}
+	log.Trace().Msgf("Remote (bitbucket) opts: %#v", opts)
+	return bitbucket.New(opts)
 }
 
 // helper function to setup the Gogs remote from the CLI arguments.
 func setupGogs(c *cli.Context) (remote.Remote, error) {
-	return gogs.New(gogs.Opts{
+	opts := gogs.Opts{
 		URL:         c.String("gogs-server"),
 		Username:    c.String("gogs-git-username"),
 		Password:    c.String("gogs-git-password"),
 		PrivateMode: c.Bool("gogs-private-mode"),
 		SkipVerify:  c.Bool("gogs-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (gogs) opts: %#v", opts)
+	return gogs.New(opts)
 }
 
 // helper function to setup the Gitea remote from the CLI arguments.
@@ -129,14 +134,15 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		SkipVerify:  c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
-		logrus.Fatalln("WOODPECKER_GITEA_URL must be set")
+		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
 	}
+	log.Trace().Msgf("Remote (gitea) opts: %#v", opts)
 	return gitea.New(opts)
 }
 
 // helper function to setup the Stash remote from the CLI arguments.
 func setupStash(c *cli.Context) (remote.Remote, error) {
-	return bitbucketserver.New(bitbucketserver.Opts{
+	opts := bitbucketserver.Opts{
 		URL:               c.String("stash-server"),
 		Username:          c.String("stash-git-username"),
 		Password:          c.String("stash-git-password"),
@@ -144,36 +150,27 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 		ConsumerRSA:       c.String("stash-consumer-rsa"),
 		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
 		SkipVerify:        c.Bool("stash-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (bitbucketserver) opts: %#v", opts)
+	return bitbucketserver.New(opts)
 }
 
 // helper function to setup the Gitlab remote from the CLI arguments.
 func setupGitlab(c *cli.Context) (remote.Remote, error) {
-	if c.Bool("gitlab-v3-api") {
-		return gitlab3.New(gitlab3.Opts{
-			URL:         c.String("gitlab-server"),
-			Client:      c.String("gitlab-client"),
-			Secret:      c.String("gitlab-secret"),
-			Username:    c.String("gitlab-git-username"),
-			Password:    c.String("gitlab-git-password"),
-			PrivateMode: c.Bool("gitlab-private-mode"),
-			SkipVerify:  c.Bool("gitlab-skip-verify"),
-		})
-	}
 	return gitlab.New(gitlab.Opts{
-		URL:         c.String("gitlab-server"),
-		Client:      c.String("gitlab-client"),
-		Secret:      c.String("gitlab-secret"),
-		Username:    c.String("gitlab-git-username"),
-		Password:    c.String("gitlab-git-password"),
-		PrivateMode: c.Bool("gitlab-private-mode"),
-		SkipVerify:  c.Bool("gitlab-skip-verify"),
+		URL:          c.String("gitlab-server"),
+		ClientID:     c.String("gitlab-client"),
+		ClientSecret: c.String("gitlab-secret"),
+		Username:     c.String("gitlab-git-username"),
+		Password:     c.String("gitlab-git-password"),
+		PrivateMode:  c.Bool("gitlab-private-mode"),
+		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
 
 // helper function to setup the GitHub remote from the CLI arguments.
 func setupGithub(c *cli.Context) (remote.Remote, error) {
-	return github.New(github.Opts{
+	opts := github.Opts{
 		URL:         c.String("github-server"),
 		Context:     c.String("github-context"),
 		Client:      c.String("github-client"),
@@ -184,12 +181,14 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		PrivateMode: c.Bool("github-private-mode"),
 		SkipVerify:  c.Bool("github-skip-verify"),
 		MergeRef:    c.BoolT("github-merge-ref"),
-	})
+	}
+	log.Trace().Msgf("Remote (github) opts: %#v", opts)
+	return github.New(opts)
 }
 
 // helper function to setup the Coding remote from the CLI arguments.
 func setupCoding(c *cli.Context) (remote.Remote, error) {
-	return coding.New(coding.Opts{
+	opts := coding.Opts{
 		URL:        c.String("coding-server"),
 		Client:     c.String("coding-client"),
 		Secret:     c.String("coding-secret"),
@@ -198,7 +197,9 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Username:   c.String("coding-git-username"),
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),
-	})
+	}
+	log.Trace().Msgf("Remote (coding) opts: %#v", opts)
+	return coding.New(opts)
 }
 
 func setupTree(c *cli.Context) *gin.Engine {
@@ -214,37 +215,37 @@ func before(c *cli.Context) error { return nil }
 
 func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "pending_jobs",
 		Help:      "Total number of pending build processes.",
 	})
 	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "waiting_jobs",
 		Help:      "Total number of builds waiting on deps.",
 	})
 	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "running_jobs",
 		Help:      "Total number of running build processes.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
 	builds := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "build_total_count",
 		Help:      "Total number of builds.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "user_count",
 		Help:      "Total number of users.",
 	})
 	repos := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "drone",
+		Namespace: "woodpecker",
 		Name:      "repo_count",
 		Help:      "Total number of repos.",
 	})

@@ -28,11 +28,11 @@ import (
 	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -114,7 +114,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
@@ -424,6 +424,25 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	return nil
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range giteaBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
@@ -451,7 +470,7 @@ const (
 	DescDeclined = "the build was rejected"
 )
 
-// getStatus is a helper function that converts a Drone
+// getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
 func getStatus(status string) gitea.StatusState {
 	switch status {

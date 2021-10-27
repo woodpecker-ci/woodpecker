@@ -1,0 +1,17 @@
+# docker build --rm -f docker/Dockerfile.agent -t woodpeckerci/woodpecker-agent .
+
+# use golang image to copy ssl certs later
+FROM golang:1.16
+
+FROM scratch
+
+# copy certs from golang:1.16 image
+COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+ENV GODEBUG=netdns=go
+ADD dist/agent/linux_amd64/woodpecker-agent /bin/
+
+EXPOSE 3000
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+
+ENTRYPOINT ["/bin/woodpecker-agent"]

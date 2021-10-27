@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make test
       - make vet
+      - make lint
       - make formatcheck
 
   test-frontend:
@@ -41,98 +42,182 @@ pipeline:
   build-frontend:
     image: node:10.17.0-stretch
     commands:
-      - make build-frontend
+      - make release-frontend
 
-  build:
+  build-server:
+    group: build
     image: golang:1.16
     commands:
-      - go get github.com/woodpecker-ci/togo
-      - (cd web/; go generate ./...)
-      - make release
+      - make release-server
 
-  # publish-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: Dockerfile.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
+  build-agent:
+    group: build
+    image: golang:1.16
+    commands:
+      - make release-agent
 
   build-cli:
+    group: build
     image: golang:1.16
-    commands: make release-cli
+    commands:
+      - make release-cli
+
+  build-deb-rpm:
+    group: bundle
+    image: golang:1.16
+    commands:
+      - make bundle
+    when:
+      event: [push, tag]
+      branch: master
 
   publish-server:
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server
     secrets: [docker_username, docker_password]
-    tag: [latest]
+    # TODO: only release as next after 0.15.0 got released
+    tag: [next, latest]
+    when:
+      branch: master
+      event: push
+
+  publish-server-alpine:
+    group: bundle
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server.alpine
+    secrets: [ docker_username, docker_password ]
+    # TODO: only release as next-alpine after 0.15.0 got released
+    tag: [next-alpine, latest-alpine]
     when:
       branch: master
       event: push
 
   publish-agent:
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
-    dockerfile: Dockerfile.agent
+    dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: [latest]
+    # TODO: only release as next after 0.15.0 got released
+    tag: [next, latest]
     when:
       branch: master
       event: push
 
-  # publish-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
+  publish-agent-alpine:
+    group: bundle
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-agent
+    dockerfile: docker/Dockerfile.agent.alpine
+    secrets: [ docker_username, docker_password ]
+    # TODO: only release as next-alpine after 0.15.0 got released
+    tag: [next-alpine, latest-alpine]
+    when:
+      branch: master
+      event: push
 
-  # release-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: Dockerfile.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
-  #
-  # release-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
+  publish-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [next]
+    when:
+      branch: master
+      event: push
+
+  publish-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [next-alpine]
+    when:
+      branch: master
+      event: push
 
   release-server:
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server
     secrets: [docker_username, docker_password]
-    tag: ${DRONE_TAG}
+    tag: [latest, "${DRONE_TAG}"]
+    when:
+      event: tag
+
+  release-server-alpine:
+    group: bundle
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-server
+    dockerfile: docker/Dockerfile.server.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
     when:
       event: tag
 
   release-agent:
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
-    dockerfile: Dockerfile.agent
+    dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: ${DRONE_TAG}
+    tag: [latest, "${DRONE_TAG}"]
+    when:
+      event: tag
+
+  release-agent-alpine:
+    group: bundle
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-agent
+    dockerfile: docker/Dockerfile.agent.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
     when:
       event: tag
 
   release-cli:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    secrets: [docker_username, docker_password]
+    tag: [latest, "${DRONE_TAG}"]
+    when:
+      event: tag
+
+  release-cli-alpine:
+    group: docker
+    image: plugins/docker
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli.alpine
+    secrets: [ docker_username, docker_password ]
+    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    when:
+      event: tag
+
+  checksums:
+    image: golang:1.16
+    commands:
+      - make release-checksums
+    when:
+      event: tag
+
+  # TODO: upload build artifacts for pushes to master
+
+  release:
     image: plugins/github-release
     files:
-      - cli/release/woodpecker_*.tar.gz
-      - cli/release/woodpecker_checksums.txt
+      - dist/*.tar.gz
+      - dist/*.deb
+      - dist/*.rpm
+      - dist/checksums.txt
+    title: ${DRONE_TAG##v}
     secrets:
       - source: github_token
         target: github_release_api_key

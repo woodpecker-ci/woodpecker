@@ -106,12 +106,13 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	}
 
 	// add default clone step
-	if c.local == false && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
+	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		container := &yaml.Container{
 			Name:  "clone",
-			Image: "plugins/git:latest",
+			Image: "woodpeckerci/plugin-git:latest",
 			Vargs: map[string]interface{}{"depth": "0"},
 		}
+		// TODO: migrate to woodpeckerci/plugin-git:latest (multi arch)
 		switch c.metadata.Sys.Arch {
 		case "linux/arm":
 			container.Image = "plugins/git:linux-arm"
@@ -127,7 +128,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Steps = append(stage.Steps, step)
 
 		config.Stages = append(config.Stages, stage)
-	} else if c.local == false && !conf.SkipClone {
+	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
 			if !container.Constraints.Match(c.metadata) {
 				continue

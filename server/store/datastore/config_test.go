@@ -37,9 +37,9 @@ func TestConfig(t *testing.T) {
 
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	if err := s.CreateRepo(repo); err != nil {
 		t.Errorf("Unexpected error: insert repo: %s", err)
@@ -120,9 +120,9 @@ func TestConfigApproved(t *testing.T) {
 
 	repo := &model.Repo{
 		UserID:   1,
-		FullName: "bradrydzewski/drone",
+		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
-		Name:     "drone",
+		Name:     "test",
 	}
 	if err := s.CreateRepo(repo); err != nil {
 		t.Errorf("Unexpected error: insert repo: %s", err)
@@ -239,6 +239,6 @@ func TestConfigIndexes(t *testing.T) {
 			Hash:   hash,
 		},
 	); err == nil {
-		t.Errorf("Unexpected error: dupliate sha")
+		t.Errorf("Unexpected error: duplicate sha")
 	}
 }

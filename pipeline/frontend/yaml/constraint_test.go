@@ -3,9 +3,9 @@ package yaml
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-
 	"gopkg.in/yaml.v3"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 )
 
 func TestConstraint(t *testing.T) {
@@ -410,13 +410,13 @@ func TestConstraints(t *testing.T) {
 		// },
 		// repo constraint
 		{
-			conf: "{ repo: drone/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			conf: "{ repo: owner/* }",
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
 			want: true,
 		},
 		{
 			conf: "{ repo: octocat/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
 			want: false,
 		},
 		// ref constraint
@@ -443,13 +443,13 @@ func TestConstraints(t *testing.T) {
 		},
 		// instance constraint
 		{
-			conf: "{ instance: drone.io }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "drone.io"}},
+			conf: "{ instance: agent.tld }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "agent.tld"}},
 			want: true,
 		},
 		{
-			conf: "{ instance: drone.io }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "beta.drone.io"}},
+			conf: "{ instance: agent.tld }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
 	}

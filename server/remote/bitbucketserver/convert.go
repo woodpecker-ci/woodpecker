@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/mrjones/oauth"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
 )
@@ -40,7 +41,7 @@ const (
 	descError   = "oops, something went wrong"
 )
 
-// convertStatus is a helper function used to convert a Drone status to a
+// convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
 func convertStatus(status string) string {
 	switch status {
@@ -53,7 +54,7 @@ func convertStatus(status string) string {
 	}
 }
 
-// convertDesc is a helper function used to convert a Drone status to a
+// convertDesc is a helper function used to convert a Woodpecker status to a
 // Bitbucket status description.
 func convertDesc(status string) string {
 	switch status {
@@ -69,7 +70,7 @@ func convertDesc(status string) string {
 }
 
 // convertRepo is a helper function used to convert a Bitbucket server repository
-// structure to the common Drone repository structure.
+// structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 
 	repo := model.Repo{
@@ -101,7 +102,7 @@ func convertRepo(from *internal.Repo) *model.Repo {
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
-// hook to the Drone build struct holding commit information.
+// hook to the Woodpecker build struct holding commit information.
 func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
 	branch := strings.TrimPrefix(
 		strings.TrimPrefix(
@@ -138,7 +139,7 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
 }
 
 // convertUser is a helper function used to convert a Bitbucket user account
-// structure to the Drone User structure.
+// structure to the Woodpecker User structure.
 func convertUser(from *internal.User, token *oauth.AccessToken) *model.User {
 	return &model.User{
 		Login:  from.Slug,

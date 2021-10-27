@@ -1,0 +1,12 @@
+# docker build --rm -f docker/Dockerfile.agent.alpine -t woodpeckerci/woodpecker-agent .
+
+FROM alpine:3.14
+RUN apk add -U --no-cache ca-certificates
+
+ENV GODEBUG=netdns=go
+ADD dist/agent/linux_amd64/woodpecker-agent /bin/
+
+EXPOSE 3000
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+
+ENTRYPOINT ["/bin/woodpecker-agent"]

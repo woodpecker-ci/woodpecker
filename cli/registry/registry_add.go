@@ -4,10 +4,10 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
-
 	"github.com/urfave/cli"
+
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var registryCreateCmd = cli.Command{
@@ -54,7 +54,7 @@ func registryCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry := &drone.Registry{
+	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
 		Password: password,
