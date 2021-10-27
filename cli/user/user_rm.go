@@ -3,16 +3,18 @@ package user
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userRemoveCmd = cli.Command{
+var userRemoveCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a user",
 	ArgsUsage: "<username>",
 	Action:    userRemove,
+	Flags:     common.GlobalFlags,
 }
 
 func userRemove(c *cli.Context) error {

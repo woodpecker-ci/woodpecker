@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/jackspirou/syscerts"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
@@ -17,11 +17,11 @@ import (
 // NewClient returns a new client from the CLI context.
 func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	var (
-		skip     = c.GlobalBool("skip-verify")
-		socks    = c.GlobalString("socks-proxy")
-		socksoff = c.GlobalBool("socks-proxy-off")
-		token    = c.GlobalString("token")
-		server   = c.GlobalString("server")
+		skip     = c.Bool("skip-verify")
+		socks    = c.String("socks-proxy")
+		socksoff = c.Bool("socks-proxy-off")
+		token    = c.String("token")
+		server   = c.String("server")
 	)
 	server = strings.TrimRight(server, "/")
 

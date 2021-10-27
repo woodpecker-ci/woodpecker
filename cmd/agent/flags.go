@@ -17,93 +17,97 @@ package main
 import (
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var flags = []cli.Flag{
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_SERVER",
-		Name:   "server",
-		Usage:  "server address",
-		Value:  "localhost:9000",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SERVER"},
+		Name:    "server",
+		Usage:   "server address",
+		Value:   "localhost:9000",
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_USERNAME",
-		Name:   "username",
-		Usage:  "auth username",
-		Value:  "x-oauth-basic",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_USERNAME"},
+		Name:    "username",
+		Usage:   "auth username",
+		Value:   "x-oauth-basic",
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_AGENT_SECRET",
-		Name:   "password",
-		Usage:  "server-agent shared password",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
+		Name:    "password",
+		Usage:   "server-agent shared password",
 	},
-	cli.BoolTFlag{
-		EnvVar: "WOODPECKER_DEBUG",
-		Name:   "debug",
-		Usage:  "enable agent debug mode",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG"},
+		Name:    "debug",
+		Usage:   "enable agent debug mode",
+		Value:   true,
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_LOG_LEVEL",
-		Name:   "log-level",
-		Usage:  "set logging level",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Name:    "log-level",
+		Usage:   "set logging level",
 	},
-	cli.BoolFlag{
-		EnvVar: "WOODPECKER_DEBUG_PRETTY",
-		Name:   "pretty",
-		Usage:  "enable pretty-printed debug output",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
+		Name:    "pretty",
+		Usage:   "enable pretty-printed debug output",
 	},
-	cli.BoolTFlag{
-		EnvVar: "WOODPECKER_DEBUG_NOCOLOR",
-		Name:   "nocolor",
-		Usage:  "disable colored debug output",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
+		Name:    "nocolor",
+		Usage:   "disable colored debug output",
+		Value:   true,
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_HOSTNAME",
-		Name:   "hostname",
-		Usage:  "agent hostname",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HOSTNAME"},
+		Name:    "hostname",
+		Usage:   "agent hostname",
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_PLATFORM",
-		Name:   "platform",
-		Usage:  "restrict builds by platform conditions",
-		Value:  "linux/amd64",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_PLATFORM"},
+		Name:    "platform",
+		Usage:   "restrict builds by platform conditions",
+		Value:   "linux/amd64",
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_FILTER",
-		Name:   "filter",
-		Usage:  "filter expression to restrict builds by label",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_FILTER"},
+		Name:    "filter",
+		Usage:   "filter expression to restrict builds by label",
 	},
-	cli.IntFlag{
-		EnvVar: "WOODPECKER_MAX_PROCS",
-		Name:   "max-procs",
-		Usage:  "agent parallel builds",
-		Value:  1,
+	&cli.IntFlag{
+		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
+		Name:    "max-procs",
+		Usage:   "agent parallel builds",
+		Value:   1,
 	},
-	cli.BoolTFlag{
-		EnvVar: "WOODPECKER_HEALTHCHECK",
-		Name:   "healthcheck",
-		Usage:  "enable healthcheck endpoint",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_HEALTHCHECK"},
+		Name:    "healthcheck",
+		Usage:   "enable healthcheck endpoint",
+		Value:   true,
 	},
-	cli.DurationFlag{
-		EnvVar: "WOODPECKER_KEEPALIVE_TIME",
-		Name:   "keepalive-time",
-		Usage:  "after a duration of this time of no activity, the agent pings the server to check if the transport is still alive",
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIME"},
+		Name:    "keepalive-time",
+		Usage:   "after a duration of this time of no activity, the agent pings the server to check if the transport is still alive",
 	},
-	cli.DurationFlag{
-		EnvVar: "WOODPECKER_KEEPALIVE_TIMEOUT",
-		Name:   "keepalive-timeout",
-		Usage:  "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
-		Value:  time.Second * 20,
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIMEOUT"},
+		Name:    "keepalive-timeout",
+		Usage:   "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
+		Value:   time.Second * 20,
 	},
-	cli.BoolFlag{
-		EnvVar: "WOODPECKER_GRPC_SECURE",
-		Name:   "secure-grpc",
-		Usage:  "should the connection to WOODPECKER_SERVER be made using a secure transport",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
+		Name:    "secure-grpc",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
 	},
-	cli.BoolTFlag{
-		EnvVar: "WOODPECKER_GRPC_VERIFY",
-		Name:   "skip-insecure-grpc",
-		Usage:  "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
+		Name:    "skip-insecure-grpc",
+		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
+		Value:   true,
 	},
 }

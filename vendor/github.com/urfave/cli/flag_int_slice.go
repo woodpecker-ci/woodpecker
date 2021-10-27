@@ -22,12 +22,7 @@ func (f *IntSlice) Set(value string) error {
 
 // String returns a readable representation of this value (for usage defaults)
 func (f *IntSlice) String() string {
-	slice := make([]string, len(*f))
-	for i, v := range *f {
-		slice[i] = strconv.Itoa(v)
-	}
-
-	return strings.Join(slice, ",")
+	return fmt.Sprintf("%#v", *f)
 }
 
 // Value returns the slice of ints set by this flag
@@ -137,60 +132,11 @@ func (c *Context) GlobalIntSlice(name string) []int {
 func lookupIntSlice(name string, set *flag.FlagSet) []int {
 	f := set.Lookup(name)
 	if f != nil {
-		value, ok := f.Value.(*IntSlice)
-		if !ok {
+		parsed, err := (f.Value.(*IntSlice)).Value(), error(nil)
+		if err != nil {
 			return nil
 		}
-		// extract the slice from asserted value
-		slice := value.Value()
-
-		// extract default value from the flag
-		var defaultVal []int
-		for _, v := range strings.Split(f.DefValue, ",") {
-			if v != "" {
-				intValue, err := strconv.Atoi(v)
-				if err != nil {
-					panic(err)
-				}
-				defaultVal = append(defaultVal, intValue)
-			}
-		}
-		// if the current value is not equal to the default value
-		// remove the default values from the flag
-		if !isIntSliceEqual(slice, defaultVal) {
-			for _, v := range defaultVal {
-				slice = removeFromIntSlice(slice, v)
-			}
-		}
-		return slice
+		return parsed
 	}
 	return nil
-}
-
-func removeFromIntSlice(slice []int, val int) []int {
-	for i, v := range slice {
-		if v == val {
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	return slice
-}
-
-func isIntSliceEqual(newValue, defaultValue []int) bool {
-	// If one is nil, the other must also be nil.
-	if (newValue == nil) != (defaultValue == nil) {
-		return false
-	}
-
-	if len(newValue) != len(defaultValue) {
-		return false
-	}
-
-	for i, v := range newValue {
-		if v != defaultValue[i] {
-			return false
-		}
-	}
-
-	return true
 }

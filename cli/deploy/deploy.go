@@ -6,44 +6,42 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 // Command exports the deploy command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "deploy",
 	Usage:     "deploy code",
 	ArgsUsage: "<repo/name> <build> <environment>",
 	Action:    deploy,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplDeployInfo,
-		},
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		common.FormatFlag(tmplDeployInfo),
+		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
 			Value: "master",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "event",
 			Usage: "event filter",
 			Value: woodpecker.EventPush,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "status",
 			Usage: "status filter",
 			Value: woodpecker.StatusSuccess,
 		},
-		cli.StringSliceFlag{
-			Name:  "param, p",
-			Usage: "custom parameters to be injected into the job environment. Format: KEY=value",
+		&cli.StringSliceFlag{
+			Name:    "param",
+			Aliases: []string{"p"},
+			Usage:   "custom parameters to be injected into the job environment. Format: KEY=value",
 		},
-	},
+	),
 }
 
 func deploy(c *cli.Context) error {

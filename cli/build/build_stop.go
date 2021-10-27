@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildStopCmd = cli.Command{
+var buildStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a build",
 	ArgsUsage: "<repo/name> [build] [job]",
+	Flags:     common.GlobalFlags,
 	Action:    buildStop,
 }
 

@@ -22,7 +22,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -180,7 +180,7 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		Password:    c.String("github-git-password"),
 		PrivateMode: c.Bool("github-private-mode"),
 		SkipVerify:  c.Bool("github-skip-verify"),
-		MergeRef:    c.BoolT("github-merge-ref"),
+		MergeRef:    c.Bool("github-merge-ref"),
 	}
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)

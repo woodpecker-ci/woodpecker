@@ -9,6 +9,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	github.com/containerd/containerd v1.5.5 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v20.10.8+incompatible
@@ -46,7 +47,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/ugorji/go v1.2.6 // indirect
-	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli/v2 v2.3.0
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
 	github.com/xanzy/go-gitlab v0.51.1
