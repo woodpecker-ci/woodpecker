@@ -144,7 +144,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should return a Perm struct from a Gogs Perm", func() {
-			perms := []gogs.Permission{
+			perms := []*gogs.Permission{
 				{Admin: true, Pull: true, Push: true},
 				{Admin: true, Pull: true, Push: false},
 				{Admin: true, Push: false, Pull: false},
@@ -171,21 +171,22 @@ func Test_parse(t *testing.T) {
 		g.It("Should return a Repo struct from a Gogs Repo", func() {
 			from := gogs.Repository{
 				FullName: "gophers/hello-world",
-				Owner: gogs.User{
+				Owner: &gogs.User{
 					UserName:  "gordon",
 					AvatarUrl: "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				},
-				CloneUrl: "http://gogs.golang.org/gophers/hello-world.git",
-				HtmlUrl:  "http://gogs.golang.org/gophers/hello-world",
-				Private:  true,
+				CloneURL:      "http://gogs.golang.org/gophers/hello-world.git",
+				HTMLURL:       "http://gogs.golang.org/gophers/hello-world",
+				Private:       true,
+				DefaultBranch: "master",
 			}
 			repo := toRepo(&from, false)
 			g.Assert(repo.FullName).Equal(from.FullName)
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")
 			g.Assert(repo.Branch).Equal("master")
-			g.Assert(repo.Link).Equal(from.HtmlUrl)
-			g.Assert(repo.Clone).Equal(from.CloneUrl)
+			g.Assert(repo.Link).Equal(from.HTMLURL)
+			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarUrl)
 			g.Assert(repo.IsPrivate).Equal(from.Private)
 		})
