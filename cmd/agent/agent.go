@@ -52,13 +52,13 @@ func loop(c *cli.Context) error {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
 
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.BoolT("debug") {
+	if c.Bool("debug") {
 		if c.IsSet("debug") {
 			log.Warn().Msg("--debug is deprecated, use --log-level instead")
 		}
@@ -77,7 +77,7 @@ func loop(c *cli.Context) error {
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
-	if c.BoolT("healthcheck") {
+	if c.Bool("healthcheck") {
 		go http.ListenAndServe(":3000", nil)
 	}
 

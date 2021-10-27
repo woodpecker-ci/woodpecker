@@ -30,7 +30,7 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
 	app.Action = loop
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",
 			Usage:  "ping the agent",
