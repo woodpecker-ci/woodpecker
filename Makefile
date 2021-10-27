@@ -50,7 +50,7 @@ test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
 test-frontend:
-		(cd web/; yarn run test)
+		(cd web/; yarn install --frozen-lockfile; yarn run test)
 
 test-lib:
 	go get github.com/woodpecker-ci/woodpecker/cncd/pipeline/pipec
@@ -68,8 +68,8 @@ build-server:
 	$(DOCKER_RUN) go build -o build/drone-server github.com/woodpecker-ci/woodpecker/cmd/drone-server
 
 build-frontend:
-	(cd web/; yarn run build)
-
+	(cd web/; yarn install --frozen-lockfile; yarn run build)
+	go generate ./web/dist/...
 
 build: build-agent build-server
 
