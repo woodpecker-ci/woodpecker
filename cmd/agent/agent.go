@@ -78,7 +78,11 @@ func loop(c *cli.Context) error {
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
-		go http.ListenAndServe(":3000", nil)
+		go func() {
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				log.Error().Msgf("can not listen on port 3000: %v", err)
+			}
+		}()
 	}
 
 	// TODO pass version information to grpc server
