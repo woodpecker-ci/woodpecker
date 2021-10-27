@@ -70,6 +70,9 @@ type Remote interface {
 	// post-commit hooks matching the given link.
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
+	// Branches returns the names of all branches for the named repository.
+	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
+
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(r *http.Request) (*model.Repo, *model.Build, error)

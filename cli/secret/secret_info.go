@@ -4,32 +4,28 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var secretInfoCmd = cli.Command{
+var secretInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display secret info",
 	ArgsUsage: "[repo/name]",
 	Action:    secretInfo,
-	Flags: []cli.Flag{
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
 		},
-		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
-		},
-	},
+		common.FormatFlag(tmplSecretList, true),
+	),
 }
 
 func secretInfo(c *cli.Context) error {

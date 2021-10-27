@@ -4,47 +4,48 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-var repoUpdateCmd = cli.Command{
+var repoUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoUpdate,
-	Flags: []cli.Flag{
-		cli.BoolFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "repository is trusted",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "gated",
 			Usage: "repository is gated",
 		},
-		cli.DurationFlag{
+		&cli.DurationFlag{
 			Name:  "timeout",
 			Usage: "repository timeout",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "visibility",
 			Usage: "repository visibility",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path (e.g. .woodpecker.yml)",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  "build-counter",
 			Usage: "repository starting build number",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "unsafe",
 			Usage: "validate updating the build-counter is unsafe",
 		},
-	},
+	),
 }
 
 func repoUpdate(c *cli.Context) error {

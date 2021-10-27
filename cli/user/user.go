@@ -1,12 +1,17 @@
 package user
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
+)
 
 // Command exports the user command set.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:  "user",
 	Usage: "manage users",
-	Subcommands: []cli.Command{
+	Flags: common.GlobalFlags,
+	Subcommands: []*cli.Command{
 		userListCmd,
 		userInfoCmd,
 		userAddCmd,

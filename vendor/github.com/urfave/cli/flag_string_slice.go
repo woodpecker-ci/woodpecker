@@ -17,7 +17,7 @@ func (f *StringSlice) Set(value string) error {
 
 // String returns a readable representation of this value (for usage defaults)
 func (f *StringSlice) String() string {
-	return strings.Join(*f, ",")
+	return fmt.Sprintf("%s", *f)
 }
 
 // Value returns the slice of strings set by this flag
@@ -128,55 +128,11 @@ func (c *Context) GlobalStringSlice(name string) []string {
 func lookupStringSlice(name string, set *flag.FlagSet) []string {
 	f := set.Lookup(name)
 	if f != nil {
-		value, ok := f.Value.(*StringSlice)
-		if !ok {
+		parsed, err := (f.Value.(*StringSlice)).Value(), error(nil)
+		if err != nil {
 			return nil
 		}
-		// extract the slice from asserted value
-		slice := value.Value()
-
-		// extract default value from the flag
-		var defaultVal []string
-		for _, v := range strings.Split(f.DefValue, ",") {
-			defaultVal = append(defaultVal, v)
-		}
-
-		// if the current value is not equal to the default value
-		// remove the default values from the flag
-		if !isStringSliceEqual(slice, defaultVal) {
-			for _, v := range defaultVal {
-				slice = removeFromStringSlice(slice, v)
-			}
-		}
-		return slice
+		return parsed
 	}
 	return nil
-}
-
-func removeFromStringSlice(slice []string, val string) []string {
-	for i, v := range slice {
-		if v == val {
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	return slice
-}
-
-func isStringSliceEqual(newValue, defaultValue []string) bool {
-	// If one is nil, the other must also be nil.
-	if (newValue == nil) != (defaultValue == nil) {
-		return false
-	}
-
-	if len(newValue) != len(defaultValue) {
-		return false
-	}
-
-	for i, v := range newValue {
-		if v != defaultValue[i] {
-			return false
-		}
-	}
-
-	return true
 }
