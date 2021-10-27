@@ -256,6 +256,12 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return nil
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
