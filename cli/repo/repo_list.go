@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,7 +15,7 @@ var repoListCmd = &cli.Command{
 	Usage:     "list all repos",
 	ArgsUsage: " ",
 	Action:    repoList,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
@@ -24,7 +25,7 @@ var repoListCmd = &cli.Command{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
-	},
+	),
 }
 
 func repoList(c *cli.Context) error {

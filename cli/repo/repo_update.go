@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
@@ -15,7 +16,7 @@ var repoUpdateCmd = &cli.Command{
 	Usage:     "update a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoUpdate,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "repository is trusted",
@@ -44,7 +45,7 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "unsafe",
 			Usage: "validate updating the build-counter is unsafe",
 		},
-	},
+	),
 }
 
 func repoUpdate(c *cli.Context) error {

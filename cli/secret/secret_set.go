@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
@@ -15,7 +16,7 @@ var secretUpdateCmd = &cli.Command{
 	Usage:     "update a secret",
 	ArgsUsage: "[repo/name]",
 	Action:    secretUpdate,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -36,7 +37,7 @@ var secretUpdateCmd = &cli.Command{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},
-	},
+	),
 }
 
 func secretUpdate(c *cli.Context) error {

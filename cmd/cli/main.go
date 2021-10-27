@@ -23,6 +23,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/build"
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
 	"github.com/woodpecker-ci/woodpecker/cli/info"
@@ -42,39 +43,7 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
-	app.Flags = []cli.Flag{ //TODO: global flags do not exist in this form anymore!
-		&cli.StringFlag{
-			EnvVars: []string{"WOODPECKER_TOKEN"},
-			Name:    "token",
-			Aliases: []string{"t"},
-			Usage:   "server auth token",
-		},
-
-		&cli.StringFlag{
-			EnvVars: []string{"WOODPECKER_SERVER"},
-			Name:    "server",
-			Aliases: []string{"s"},
-			Usage:   "server address",
-		},
-		&cli.BoolFlag{
-			EnvVars: []string{"WOODPECKER_SKIP_VERIFY"},
-			Name:    "skip-verify",
-			Usage:   "skip ssl verification",
-			Hidden:  true,
-		},
-		&cli.StringFlag{
-			EnvVars: []string{"SOCKS_PROXY"},
-			Name:    "socks-proxy",
-			Usage:   "socks proxy address",
-			Hidden:  true,
-		},
-		&cli.BoolFlag{
-			EnvVars: []string{"SOCKS_PROXY_OFF"},
-			Name:    "socks-proxy-off",
-			Usage:   "socks proxy ignored",
-			Hidden:  true,
-		},
-	}
+	app.Flags = common.GlobalFlags
 	app.Commands = []*cli.Command{
 		build.Command,
 		log.Command,

@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,13 +15,13 @@ var repoInfoCmd = &cli.Command{
 	Usage:     "show repository details",
 	ArgsUsage: "<repo/name>",
 	Action:    repoInfo,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplRepoInfo,
 		},
-	},
+	),
 }
 
 func repoInfo(c *cli.Context) error {

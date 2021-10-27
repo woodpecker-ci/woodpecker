@@ -3,6 +3,7 @@ package secret
 import (
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -11,7 +12,7 @@ var secretDeleteCmd = &cli.Command{
 	Usage:     "remove a secret",
 	ArgsUsage: "[repo/name]",
 	Action:    secretDelete,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -20,7 +21,7 @@ var secretDeleteCmd = &cli.Command{
 			Name:  "name",
 			Usage: "secret name",
 		},
-	},
+	),
 }
 
 func secretDelete(c *cli.Context) error {

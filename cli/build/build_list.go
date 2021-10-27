@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,7 +15,7 @@ var buildListCmd = &cli.Command{
 	Usage:     "show build history",
 	ArgsUsage: "<repo/name>",
 	Action:    buildList,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
@@ -37,7 +38,7 @@ var buildListCmd = &cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
-	},
+	),
 }
 
 func buildList(c *cli.Context) error {

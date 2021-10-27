@@ -5,6 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
@@ -15,6 +16,7 @@ var Command = &cli.Command{
 	ArgsUsage: "[level]",
 	Usage:     "get the logging level of the server, or set it with [level]",
 	Action:    logLevel,
+	Flags:     common.GlobalFlags,
 }
 
 func logLevel(c *cli.Context) error {

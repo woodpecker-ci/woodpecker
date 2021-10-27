@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,7 +15,7 @@ var registryInfoCmd = &cli.Command{
 	Usage:     "display registry info",
 	ArgsUsage: "[repo/name]",
 	Action:    registryInfo,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -30,7 +31,7 @@ var registryInfoCmd = &cli.Command{
 			Value:  tmplRegistryList,
 			Hidden: true,
 		},
-	},
+	),
 }
 
 func registryInfo(c *cli.Context) error {

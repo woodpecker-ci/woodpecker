@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -15,13 +16,13 @@ var buildPsCmd = &cli.Command{
 	Usage:     "show build steps",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildPs,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildPs,
 		},
-	},
+	),
 }
 
 func buildPs(c *cli.Context) error {

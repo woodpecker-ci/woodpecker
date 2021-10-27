@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -15,14 +16,14 @@ var Command = &cli.Command{
 	Usage:     "show information about the current user",
 	ArgsUsage: " ",
 	Action:    info,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:   "format",
 			Usage:  "format output",
 			Value:  tmplInfo,
 			Hidden: true,
 		},
-	},
+	),
 }
 
 func info(c *cli.Context) error {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,7 +15,7 @@ var buildLastCmd = &cli.Command{
 	Usage:     "show latest build details",
 	ArgsUsage: "<repo/name>",
 	Action:    buildLast,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
@@ -25,7 +26,7 @@ var buildLastCmd = &cli.Command{
 			Usage: "branch name",
 			Value: "master",
 		},
-	},
+	),
 }
 
 func buildLast(c *cli.Context) error {

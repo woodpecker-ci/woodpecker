@@ -13,6 +13,7 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
@@ -31,7 +32,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    exec,
-	Flags:     flags,
+	Flags:     append(common.GlobalFlags, flags...),
 }
 
 func exec(c *cli.Context) error {

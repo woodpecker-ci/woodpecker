@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
@@ -15,7 +16,7 @@ var registryUpdateCmd = &cli.Command{
 	Usage:     "update a registry",
 	ArgsUsage: "[repo/name]",
 	Action:    registryUpdate,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -33,7 +34,7 @@ var registryUpdateCmd = &cli.Command{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	},
+	),
 }
 
 func registryUpdate(c *cli.Context) error {

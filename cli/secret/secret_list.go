@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -15,7 +16,7 @@ var secretListCmd = &cli.Command{
 	Usage:     "list secrets",
 	ArgsUsage: "[repo/name]",
 	Action:    secretList,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -26,7 +27,7 @@ var secretListCmd = &cli.Command{
 			Value:  tmplSecretList,
 			Hidden: true,
 		},
-	},
+	),
 }
 
 func secretList(c *cli.Context) error {

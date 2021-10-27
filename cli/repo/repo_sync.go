@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,13 +15,13 @@ var repoSyncCmd = &cli.Command{
 	Usage:     "synchronize the repository list",
 	ArgsUsage: " ",
 	Action:    repoSync,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplRepoList,
 		},
-	},
+	),
 }
 
 func repoSync(c *cli.Context) error {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -14,13 +15,13 @@ var userListCmd = &cli.Command{
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplUserList,
 		},
-	},
+	),
 }
 
 func userList(c *cli.Context) error {

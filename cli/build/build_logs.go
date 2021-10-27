@@ -3,6 +3,8 @@ package build
 import (
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -11,6 +13,7 @@ var buildLogsCmd = &cli.Command{
 	Usage:     "show build logs",
 	ArgsUsage: "<repo/name> [build] [job]",
 	Action:    buildLogs,
+	Flags:     common.GlobalFlags,
 }
 
 func buildLogs(c *cli.Context) error {

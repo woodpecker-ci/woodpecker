@@ -5,6 +5,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -13,6 +14,7 @@ var repoAddCmd = &cli.Command{
 	Usage:     "add a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoAdd,
+	Flags:     common.GlobalFlags,
 }
 
 func repoAdd(c *cli.Context) error {

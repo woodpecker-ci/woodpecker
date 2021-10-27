@@ -8,6 +8,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
@@ -18,7 +19,7 @@ var Command = &cli.Command{
 	Usage:     "deploy code",
 	ArgsUsage: "<repo/name> <build> <environment>",
 	Action:    deploy,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
@@ -44,7 +45,7 @@ var Command = &cli.Command{
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the job environment. Format: KEY=value",
 		},
-	},
+	),
 }
 
 func deploy(c *cli.Context) error {

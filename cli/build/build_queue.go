@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -15,13 +16,13 @@ var buildQueueCmd = &cli.Command{
 	Usage:     "show build queue",
 	ArgsUsage: " ",
 	Action:    buildQueue,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildQueue,
 		},
-	},
+	),
 }
 
 func buildQueue(c *cli.Context) error {

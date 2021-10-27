@@ -8,6 +8,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
 )
 
@@ -17,6 +18,7 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    lint,
+	Flags:     common.GlobalFlags,
 }
 
 func lint(c *cli.Context) error {

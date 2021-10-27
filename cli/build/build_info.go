@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
@@ -15,13 +16,13 @@ var buildInfoCmd = &cli.Command{
 	Usage:     "show build details",
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildInfo,
-	Flags: []cli.Flag{
+	Flags: append(common.GlobalFlags,
 		&cli.StringFlag{
 			Name:  "format",
 			Usage: "format output",
 			Value: tmplBuildInfo,
 		},
-	},
+	),
 }
 
 func buildInfo(c *cli.Context) error {
