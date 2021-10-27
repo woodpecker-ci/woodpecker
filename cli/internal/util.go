@@ -2,11 +2,12 @@ package internal
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/jackspirou/syscerts"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
@@ -35,7 +36,8 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	// attempt to find system CA certs
-	certs := syscerts.SystemRootsPool()
+	certs, err := x509.SystemCertPool()
+	log.Error().Err(err)
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
 		InsecureSkipVerify: skip,
@@ -43,7 +45,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	config := new(oauth2.Config)
 	client := config.Client(
-		oauth2.NoContext,
+		c.Context,
 		&oauth2.Token{
 			AccessToken: token,
 		},
