@@ -37,7 +37,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
-	log.Error().Err(err)
+	log.Error().Msgf("failed to find system CA certs: %v", err)
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
 		InsecureSkipVerify: skip,
