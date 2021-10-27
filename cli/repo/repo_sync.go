@@ -16,11 +16,7 @@ var repoSyncCmd = &cli.Command{
 	ArgsUsage: " ",
 	Action:    repoSync,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplRepoList,
-		},
+		common.FormatFlag(tmplRepoList),
 	),
 }
 

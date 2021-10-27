@@ -24,12 +24,7 @@ var secretInfoCmd = &cli.Command{
 			Name:  "name",
 			Usage: "secret name",
 		},
-		&cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
-		},
+		common.FormatFlag(tmplSecretList, true),
 	),
 }
 

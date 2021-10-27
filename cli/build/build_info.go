@@ -17,11 +17,7 @@ var buildInfoCmd = &cli.Command{
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildInfo,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplBuildInfo,
-		},
+		common.FormatFlag(tmplBuildInfo),
 	),
 }
 

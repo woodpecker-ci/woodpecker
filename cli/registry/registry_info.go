@@ -25,12 +25,7 @@ var registryInfoCmd = &cli.Command{
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-		&cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplRegistryList,
-			Hidden: true,
-		},
+		common.FormatFlag(tmplRegistryList, true),
 	),
 }
 

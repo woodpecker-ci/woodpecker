@@ -16,11 +16,7 @@ var repoListCmd = &cli.Command{
 	ArgsUsage: " ",
 	Action:    repoList,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplRepoList,
-		},
+		common.FormatFlag(tmplRepoList),
 		&cli.StringFlag{
 			Name:  "org",
 			Usage: "filter by organization",

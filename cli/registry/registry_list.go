@@ -20,12 +20,7 @@ var registryListCmd = &cli.Command{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		&cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplRegistryList,
-			Hidden: true,
-		},
+		common.FormatFlag(tmplRegistryList, true),
 	),
 }
 

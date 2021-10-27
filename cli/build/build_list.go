@@ -16,11 +16,7 @@ var buildListCmd = &cli.Command{
 	ArgsUsage: "<repo/name>",
 	Action:    buildList,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplBuildList,
-		},
+		common.FormatFlag(tmplBuildList),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",

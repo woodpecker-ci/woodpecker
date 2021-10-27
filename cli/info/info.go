@@ -17,12 +17,7 @@ var Command = &cli.Command{
 	ArgsUsage: " ",
 	Action:    info,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplInfo,
-			Hidden: true,
-		},
+		common.FormatFlag(tmplInfo, true),
 	),
 }
 

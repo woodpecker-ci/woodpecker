@@ -17,11 +17,7 @@ var buildQueueCmd = &cli.Command{
 	ArgsUsage: " ",
 	Action:    buildQueue,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplBuildQueue,
-		},
+		common.FormatFlag(tmplBuildQueue),
 	),
 }
 

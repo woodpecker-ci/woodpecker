@@ -17,11 +17,7 @@ var buildPsCmd = &cli.Command{
 	ArgsUsage: "<repo/name> [build]",
 	Action:    buildPs,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplBuildPs,
-		},
+		common.FormatFlag(tmplBuildPs),
 	),
 }
 

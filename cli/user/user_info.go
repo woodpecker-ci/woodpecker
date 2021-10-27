@@ -17,11 +17,7 @@ var userInfoCmd = &cli.Command{
 	ArgsUsage: "<username>",
 	Action:    userInfo,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplUserInfo,
-		},
+		common.FormatFlag(tmplUserInfo),
 	),
 }
 

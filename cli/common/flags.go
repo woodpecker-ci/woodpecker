@@ -49,3 +49,14 @@ var GlobalFlags = []cli.Flag{
 		Hidden:  true,
 	},
 }
+
+// FormatFlag return format flag with value set based on template
+// if hidden value is set, flag will be hidden
+func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
+	return &cli.StringFlag{
+		Name:   "format",
+		Usage:  "format output",
+		Value:  tmpl,
+		Hidden: !(len(hidden) == 0),
+	}
+}

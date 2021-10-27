@@ -16,11 +16,7 @@ var repoInfoCmd = &cli.Command{
 	ArgsUsage: "<repo/name>",
 	Action:    repoInfo,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplRepoInfo,
-		},
+		common.FormatFlag(tmplRepoInfo),
 	),
 }
 

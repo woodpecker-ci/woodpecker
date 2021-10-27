@@ -20,11 +20,7 @@ var Command = &cli.Command{
 	ArgsUsage: "<repo/name> <build> <environment>",
 	Action:    deploy,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplDeployInfo,
-		},
+		common.FormatFlag(tmplDeployInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",

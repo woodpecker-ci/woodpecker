@@ -16,11 +16,7 @@ var userListCmd = &cli.Command{
 	ArgsUsage: " ",
 	Action:    userList,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplUserList,
-		},
+		common.FormatFlag(tmplUserList),
 	),
 }
 
