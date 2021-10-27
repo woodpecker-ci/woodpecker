@@ -180,7 +180,7 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		Password:    c.String("github-git-password"),
 		PrivateMode: c.Bool("github-private-mode"),
 		SkipVerify:  c.Bool("github-skip-verify"),
-		MergeRef:    c.BoolT("github-merge-ref"),
+		MergeRef:    c.Bool("github-merge-ref"),
 	}
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)

@@ -55,7 +55,7 @@ func loop(c *cli.Context) error {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
