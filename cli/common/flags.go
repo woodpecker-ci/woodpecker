@@ -23,7 +23,6 @@ var GlobalFlags = []cli.Flag{
 		Aliases: []string{"t"},
 		Usage:   "server auth token",
 	},
-
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER"},
 		Name:    "server",
