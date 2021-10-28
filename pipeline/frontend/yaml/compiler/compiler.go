@@ -42,6 +42,7 @@ type Compiler struct {
 	volumes    []string
 	networks   []string
 	env        map[string]string
+	cloneEnv   map[string]string
 	base       string
 	path       string
 	metadata   frontend.Metadata
@@ -54,8 +55,9 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:     map[string]string{},
-		secrets: map[string]Secret{},
+		env:      map[string]string{},
+		cloneEnv: map[string]string{},
+		secrets:  map[string]Secret{},
 	}
 	for _, opt := range opts {
 		opt(compiler)
@@ -108,16 +110,10 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		container := &yaml.Container{
-			Name:  "clone",
-			Image: "woodpeckerci/plugin-git:latest",
-			Vargs: map[string]interface{}{"depth": "0"},
-		}
-		// TODO: migrate to woodpeckerci/plugin-git:latest (multi arch)
-		switch c.metadata.Sys.Arch {
-		case "linux/arm":
-			container.Image = "plugins/git:linux-arm"
-		case "linux/arm64":
-			container.Image = "plugins/git:linux-arm64"
+			Name:        "clone",
+			Image:       "woodpeckerci/plugin-git:latest",
+			Vargs:       map[string]interface{}{"depth": "0"},
+			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
 		step := c.createProcess(name, container, "clone")
