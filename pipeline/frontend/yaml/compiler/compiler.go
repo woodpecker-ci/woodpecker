@@ -142,6 +142,9 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
 			step := c.createProcess(name, container, "clone")
+			for k, v := range c.cloneEnv {
+				step.Environment[k] = v
+			}
 			stage.Steps = append(stage.Steps, step)
 
 			config.Stages = append(config.Stages, stage)
