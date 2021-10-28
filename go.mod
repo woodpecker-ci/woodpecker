@@ -29,7 +29,6 @@ require (
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-version v1.3.0 // indirect
-	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
