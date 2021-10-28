@@ -55,7 +55,7 @@ func Refresh(c *gin.Context) {
 	// database.
 	ok, _ = refresher.Refresh(c, user)
 	if ok {
-		err := store.UpdateUser(c, user)
+		err := store.FromContext(c).UpdateUser(user)
 		if err != nil {
 			// we only log the error at this time. not sure
 			// if we really want to fail the request, do we?

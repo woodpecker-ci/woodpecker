@@ -42,7 +42,7 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.GetUserLogin(c, t.Text)
+			user, err = store.FromContext(c).GetUserLogin(t.Text)
 			return user.Hash, err
 		})
 		if err == nil {

@@ -26,7 +26,7 @@ import (
 )
 
 func GetUsers(c *gin.Context) {
-	users, err := store.GetUserList(c)
+	users, err := store.FromContext(c).GetUserList()
 	if err != nil {
 		c.String(500, "Error getting user list. %s", err)
 		return
@@ -35,7 +35,7 @@ func GetUsers(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	user, err := store.GetUserLogin(c, c.Param("login"))
+	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
 		c.String(404, "Cannot find user. %s", err)
 		return
@@ -44,6 +44,8 @@ func GetUser(c *gin.Context) {
 }
 
 func PatchUser(c *gin.Context) {
+	store_ := store.FromContext(c)
+
 	in := &model.User{}
 	err := c.Bind(in)
 	if err != nil {
@@ -51,14 +53,14 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	user, err := store.GetUserLogin(c, c.Param("login"))
+	user, err := store_.GetUserLogin(c.Param("login"))
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 	user.Active = in.Active
 
-	err = store.UpdateUser(c, user)
+	err = store_.UpdateUser(user)
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 		return
@@ -87,7 +89,7 @@ func PostUser(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	if err = store.CreateUser(c, user); err != nil {
+	if err = store.FromContext(c).CreateUser(user); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -95,12 +97,14 @@ func PostUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	user, err := store.GetUserLogin(c, c.Param("login"))
+	store_ := store.FromContext(c)
+
+	user, err := store_.GetUserLogin(c.Param("login"))
 	if err != nil {
 		c.String(404, "Cannot find user. %s", err)
 		return
 	}
-	if err = store.DeleteUser(c, user); err != nil {
+	if err = store_.DeleteUser(user); err != nil {
 		c.String(500, "Error deleting user. %s", err)
 		return
 	}
