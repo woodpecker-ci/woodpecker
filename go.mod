@@ -32,7 +32,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
-	github.com/lib/pq v1.5.2
+	github.com/lib/pq v1.10.3
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/moby/moby v20.10.8+incompatible
