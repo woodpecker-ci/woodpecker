@@ -34,7 +34,7 @@ require (
 	github.com/kr/pretty v0.3.0
 	github.com/lib/pq v1.10.3
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/moby/moby v20.10.10+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
 	github.com/morikuni/aec v1.0.0 // indirect
