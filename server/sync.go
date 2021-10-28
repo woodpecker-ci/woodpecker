@@ -62,7 +62,7 @@ func (s *syncer) SetFilter(fn FilterFunc) {
 	s.match = fn
 }
 
-func (s *syncer) Sync(user *model.User) error {
+func (s *syncer) Sync(user *model.User, flatPermissions bool) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
 	repos, err := s.remote.Repos(user)
 	if err != nil {
@@ -81,10 +81,21 @@ func (s *syncer) Sync(user *model.User) error {
 				Pull:   true,
 				Synced: unix,
 			}
-			remotePerm, err := s.remote.Perm(user, repo.Owner, repo.Name)
-			if err == nil && remotePerm != nil {
-				perm.Push = remotePerm.Push
-				perm.Admin = remotePerm.Admin
+			// temporary workaround for v0.14.x to not hit api rate limits
+			if flatPermissions {
+				if repo.Perm != nil {
+					perm.Push = repo.Perm.Push
+					perm.Admin = repo.Perm.Admin
+				} else {
+					perm.Push = true
+					perm.Admin = true
+				}
+			} else {
+				remotePerm, err := s.remote.Perm(user, repo.Owner, repo.Name)
+				if err == nil && remotePerm != nil {
+					perm.Push = remotePerm.Push
+					perm.Admin = remotePerm.Admin
+				}
 			}
 			perms = append(perms, &perm)
 		}
