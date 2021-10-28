@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildKillCmd = cli.Command{
+var buildKillCmd = &cli.Command{
 	Name:      "kill",
 	Usage:     "force kill a build",
 	ArgsUsage: "<repo/name> <build>",
 	Action:    buildKill,
 	Hidden:    true,
+	Flags:     common.GlobalFlags,
 }
 
 func buildKill(c *cli.Context) (err error) {

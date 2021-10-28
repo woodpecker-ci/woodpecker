@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildDeclineCmd = cli.Command{
+var buildDeclineCmd = &cli.Command{
 	Name:      "decline",
 	Usage:     "decline a build",
 	ArgsUsage: "<repo/name> <build>",
 	Action:    buildDecline,
+	Flags:     common.GlobalFlags,
 }
 
 func buildDecline(c *cli.Context) (err error) {

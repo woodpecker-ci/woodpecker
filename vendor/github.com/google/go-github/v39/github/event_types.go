@@ -384,6 +384,10 @@ type IssueCommentEvent struct {
 	Repo         *Repository   `json:"repository,omitempty"`
 	Sender       *User         `json:"sender,omitempty"`
 	Installation *Installation `json:"installation,omitempty"`
+
+	// The following field is only present when the webhook is triggered on
+	// a repository belonging to an organization.
+	Organization *Organization `json:"organization,omitempty"`
 }
 
 // IssuesEvent is triggered when an issue is opened, edited, deleted, transferred,
@@ -819,6 +823,10 @@ type PushEvent struct {
 	Pusher       *User                `json:"pusher,omitempty"`
 	Sender       *User                `json:"sender,omitempty"`
 	Installation *Installation        `json:"installation,omitempty"`
+
+	// The following field is only present when the webhook is triggered on
+	// a repository belonging to an organization.
+	Organization *Organization `json:"organization,omitempty"`
 }
 
 func (p PushEvent) String() string {
@@ -1116,13 +1124,16 @@ type WorkflowDispatchEvent struct {
 
 // WorkflowJobEvent is triggered when a job is queued, started or completed.
 //
-// GitHub API docs: pending
+// GitHub API docs: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#workflow_job
 type WorkflowJobEvent struct {
 	WorkflowJob *WorkflowJob `json:"workflow_job,omitempty"`
 
 	Action *string `json:"action,omitempty"`
 
 	// The following fields are only populated by Webhook events.
+
+	// Org is not nil when the webhook is configured for an organization or the event
+	// occurs from activity in a repository owned by an organization.
 	Org          *Organization `json:"organization,omitempty"`
 	Repo         *Repository   `json:"repository,omitempty"`
 	Sender       *User         `json:"sender,omitempty"`
