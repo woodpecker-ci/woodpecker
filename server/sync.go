@@ -83,8 +83,13 @@ func (s *syncer) Sync(user *model.User, flatPermissions bool) error {
 			}
 			// temporary workaround for v0.14.x to not hit api rate limits
 			if flatPermissions {
-				perm.Push = true
-				perm.Admin = true
+				if repo.Perm != nil {
+					perm.Push = repo.Perm.Push
+					perm.Admin = repo.Perm.Admin
+				} else {
+					perm.Push = true
+					perm.Admin = true
+				}
 			} else {
 				remotePerm, err := s.remote.Perm(user, repo.Owner, repo.Name)
 				if err == nil && remotePerm != nil {

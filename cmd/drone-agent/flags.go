@@ -101,10 +101,4 @@ var flags = []cli.Flag{
 		Usage:  "should the grpc server certificate be verified, only valid when DRONE_GRPC_SECURE is true",
 		EnvVar: "DRONE_GRPC_VERIFY,WOODPECKER_GRPC_VERIFY",
 	},
-	// temporary workaround for v0.14.x to not hit api rate limits
-	cli.BoolFlag{
-		Name:   "flat-permissions",
-		Usage:  "no remote call for permissions should be made",
-		EnvVar: "WOODPECKER_FLAT_PERMISSIONS",
-	},
 }
