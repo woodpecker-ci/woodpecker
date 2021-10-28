@@ -1,27 +1,28 @@
 package registry
 
 import (
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryDeleteCmd = cli.Command{
+var registryDeleteCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a registry",
 	ArgsUsage: "[repo/name]",
 	Action:    registryDelete,
-	Flags: []cli.Flag{
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-	},
+	),
 }
 
 func registryDelete(c *cli.Context) error {

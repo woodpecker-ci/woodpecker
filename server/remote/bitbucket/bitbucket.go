@@ -275,6 +275,12 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Build details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(req *http.Request) (*model.Repo, *model.Build, error) {

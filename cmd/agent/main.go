@@ -19,7 +19,7 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
@@ -30,7 +30,7 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
 	app.Action = loop
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",
 			Usage:  "ping the agent",
