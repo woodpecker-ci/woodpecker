@@ -218,6 +218,12 @@ var flags = []cli.Flag{
 	// remote parameters
 	//
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
+		Name:    "flat-permissions",
+		Usage:   "no remote call for permissions should be made",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",
 		Usage:   "github driver is enabled",

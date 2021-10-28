@@ -24,6 +24,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -54,7 +55,7 @@ func GetFeed(c *gin.Context) {
 			Perms:  store.FromContext(c),
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
-		if err := sync.Sync(c, user); err != nil {
+		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
 			log.Debug().Msgf("sync complete: %s", user.Login)
@@ -100,7 +101,7 @@ func GetRepos(c *gin.Context) {
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
-		if err := sync.Sync(c, user); err != nil {
+		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
 			log.Debug().Msgf("sync complete: %s", user.Login)

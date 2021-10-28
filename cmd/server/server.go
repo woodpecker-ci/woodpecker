@@ -286,6 +286,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// remote
+	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 
 type authorizer struct {

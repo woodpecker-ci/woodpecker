@@ -68,4 +68,5 @@ var Config = struct {
 		Networks   []string
 		Privileged []string
 	}
+	FlatPermissions bool
 }{}
