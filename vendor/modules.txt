@@ -139,9 +139,6 @@ github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-version v1.3.0
 ## explicit
 github.com/hashicorp/go-version
-# github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
-## explicit
-github.com/jackspirou/syscerts
 # github.com/joho/godotenv v1.3.0
 ## explicit
 github.com/joho/godotenv
