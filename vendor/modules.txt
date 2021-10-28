@@ -10,16 +10,9 @@ github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
-# github.com/bmatcuk/doublestar v1.3.4
-## explicit
-github.com/bmatcuk/doublestar
 # github.com/bmatcuk/doublestar/v4 v4.0.2
 ## explicit
 github.com/bmatcuk/doublestar/v4
-# github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74
-## explicit
-github.com/bradrydzewski/togo/parser
-github.com/bradrydzewski/togo/template
 # github.com/cespare/xxhash/v2 v2.1.1
 github.com/cespare/xxhash/v2
 # github.com/containerd/containerd v1.5.7
@@ -242,7 +235,6 @@ github.com/tevino/abool
 # github.com/ugorji/go/codec v1.2.6
 github.com/ugorji/go/codec
 # github.com/urfave/cli v1.22.5
-## explicit
 github.com/urfave/cli
 # github.com/urfave/cli/v2 v2.3.0
 ## explicit
@@ -251,9 +243,11 @@ github.com/urfave/cli/v2
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
-# github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+# github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
 ## explicit
 github.com/woodpecker-ci/togo
+github.com/woodpecker-ci/togo/parser
+github.com/woodpecker-ci/togo/template
 # github.com/xanzy/go-gitlab v0.51.1
 ## explicit
 github.com/xanzy/go-gitlab

@@ -5,9 +5,7 @@ go 1.16
 require (
 	code.gitea.io/sdk/gitea v0.15.0
 	github.com/Microsoft/go-winio v0.5.1 // indirect
-	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2
-	github.com/bradrydzewski/togo v0.0.0-20180401185031-50a0e4726e74 // indirect
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/docker/cli v20.10.10+incompatible
@@ -46,10 +44,9 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.6 // indirect
-	github.com/urfave/cli v1.22.5 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
-	github.com/woodpecker-ci/togo v0.0.0-20180401185031-50a0e4726e74
+	github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
 	github.com/xanzy/go-gitlab v0.51.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519

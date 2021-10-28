@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bmatcuk/doublestar"
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/urfave/cli"
 
-	"github.com/bradrydzewski/togo/template"
+	"github.com/woodpecker-ci/togo/template"
 )
 
 type (
@@ -61,8 +61,8 @@ func httptestAction(c *cli.Context) error {
 	if pattern == "" {
 		pattern = c.String("input")
 	}
-
-	matches, err := doublestar.Glob(pattern)
+	fsys := os.DirFS("")
+	matches, err := doublestar.Glob(fsys, pattern)
 	if err != nil {
 		return err
 	}
