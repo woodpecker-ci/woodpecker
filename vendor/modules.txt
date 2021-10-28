@@ -83,7 +83,7 @@ github.com/drone/envsubst/path
 # github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 ## explicit
 github.com/flynn/go-shlex
-# github.com/franela/goblin v0.0.0-20200512143142-b260c999b2d7
+# github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 ## explicit
 github.com/franela/goblin
 # github.com/ghodss/yaml v1.0.0

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -33,6 +34,7 @@ type DetailedReporter struct {
 	level, failed, passed, pending, excluded int
 	failures                                 []*Failure
 	executionTime, totalExecutionTime        time.Duration
+	executionTimeMu                          sync.RWMutex
 	fancy                                    TextFancier
 }
 
@@ -94,6 +96,8 @@ func (r *DetailedReporter) EndDescribe() {
 }
 
 func (r *DetailedReporter) ItTook(duration time.Duration) {
+	r.executionTimeMu.Lock()
+	defer r.executionTimeMu.Unlock()
 	r.executionTime = duration
 	r.totalExecutionTime += duration
 }
@@ -123,7 +127,10 @@ func (r *DetailedReporter) Begin() {
 
 func (r *DetailedReporter) End() {
 	comp := fmt.Sprintf("%d tests complete", r.passed)
+
+	r.executionTimeMu.RLock()
 	t := fmt.Sprintf("(%d ms)", r.totalExecutionTime/time.Millisecond)
+	r.executionTimeMu.RUnlock()
 
 	//fmt.Printf("\n\n \033[32m%d tests complete\033[0m \033[90m(%d ms)\033[0m\n", r.passed, r.totalExecutionTime/time.Millisecond)
 	fmt.Printf("\n\n %v %v\n", r.fancy.Green(comp), r.fancy.Gray(t))
