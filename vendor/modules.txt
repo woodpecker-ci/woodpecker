@@ -32,7 +32,7 @@ github.com/containerd/containerd/platforms
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/docker/cli v0.0.0-20200303215952-eb310fca4956
+# github.com/docker/cli v20.10.10+incompatible
 ## explicit
 github.com/docker/cli/cli/config/configfile
 github.com/docker/cli/cli/config/credentials
