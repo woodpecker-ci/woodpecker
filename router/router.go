@@ -17,7 +17,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/dimfeld/httptreemux"
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/router/middleware/header"
@@ -30,7 +29,7 @@ import (
 )
 
 // Load loads the router
-func Load(mux *httptreemux.ContextMux, middleware ...gin.HandlerFunc) http.Handler {
+func Load(mux *gin.Engine, middleware ...gin.HandlerFunc) http.Handler {
 
 	e := gin.New()
 	e.Use(gin.Recovery())

@@ -8,14 +8,12 @@ pipeline:
     group: test
     commands:
       - make test
-#     - make vet
-#     - make formatcheck
 
   test-frontend:
     image: node:10.17.0-stretch
     group: test
     commands:
-      - (cd web/; yarn install)
+      - (cd web/; yarn install --frozen-lockfile)
       - (cd web/; yarn run lesshint)
       - (cd web/; yarn run lint --quiet)
       - make test-frontend
@@ -46,19 +44,7 @@ pipeline:
   build:
     image: golang:1.16
     commands:
-      - go get github.com/woodpecker-ci/togo
-      - (cd web/; go generate ./...)
       - make release
-
-  # publish-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: Dockerfile.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
 
   build-cli:
     image: golang:1.16
@@ -82,34 +68,6 @@ pipeline:
     when:
       branch: release/v0.14
       event: push
-
-  # publish-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: [ alpine ]
-  #   when:
-  #     branch: master
-  #     event: push
-
-  # release-server-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-server
-  #   dockerfile: Dockerfile.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
-  #
-  # release-agent-alpine:
-  #   image: plugins/docker
-  #   repo: woodpeckerci/woodpecker-agent
-  #   dockerfile: Dockerfile.agent.alpine
-  #   secrets: [ docker_username, docker_password ]
-  #   tag: "${DRONE_TAG}-alpine"
-  #   when:
-  #     event: tag
 
   release-server:
     image: plugins/docker
