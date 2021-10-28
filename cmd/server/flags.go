@@ -221,7 +221,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
 		Name:    "flat-permissions",
 		Usage:   "no remote call for permissions should be made",
-		Value:   false,
+		// temporary workaround for v0.14.x to not hit api rate limits
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},

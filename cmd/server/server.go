@@ -287,7 +287,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
 
-	// remote
+	// temporary workaround for v0.14.x to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 

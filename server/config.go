@@ -68,5 +68,5 @@ var Config = struct {
 		Networks   []string
 		Privileged []string
 	}
-	FlatPermissions bool
+	FlatPermissions bool // temporary workaround for v0.14.x to not hit api rate limits
 }{}

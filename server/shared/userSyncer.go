@@ -83,6 +83,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 				Synced: unix,
 			}
 
+			// temporary workaround for v0.14.x to not hit api rate limits
 			if flatPermissions {
 				perm.Push = true
 				perm.Admin = true
