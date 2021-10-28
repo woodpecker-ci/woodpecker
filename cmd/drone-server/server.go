@@ -234,6 +234,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// prometheus
 	droneserver.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// temporary workaround for v0.14.x to not hit api rate limits
+	droneserver.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 
 type authorizer struct {
