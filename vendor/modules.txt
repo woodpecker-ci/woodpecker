@@ -109,7 +109,7 @@ github.com/go-playground/validator/v10
 # github.com/go-sql-driver/mysql v1.6.0
 ## explicit
 github.com/go-sql-driver/mysql
-# github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
+# github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 ## explicit
 github.com/gogits/go-gogs-client
 # github.com/gogo/protobuf v1.3.2
@@ -139,9 +139,6 @@ github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-version v1.3.0
 ## explicit
 github.com/hashicorp/go-version
-# github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
-## explicit
-github.com/jackspirou/syscerts
 # github.com/joho/godotenv v1.3.0
 ## explicit
 github.com/joho/godotenv

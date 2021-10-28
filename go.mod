@@ -23,13 +23,12 @@ require (
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gogits/go-gogs-client v0.0.0-20160212212711-d584b1e0fb4d
+	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.1.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-version v1.3.0 // indirect
-	github.com/jackspirou/syscerts v0.0.0-20160531025014-b68f5469dff1
 	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
