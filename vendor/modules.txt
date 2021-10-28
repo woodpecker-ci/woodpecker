@@ -140,7 +140,7 @@ github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-version v1.3.0
 ## explicit
 github.com/hashicorp/go-version
-# github.com/joho/godotenv v1.3.0
+# github.com/joho/godotenv v1.4.0
 ## explicit
 github.com/joho/godotenv
 github.com/joho/godotenv/autoload

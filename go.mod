@@ -29,7 +29,7 @@ require (
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-version v1.3.0 // indirect
-	github.com/joho/godotenv v1.3.0
+	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
 	github.com/lib/pq v1.5.2
