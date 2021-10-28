@@ -234,7 +234,7 @@ github.com/stretchr/objx
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
-# github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
+# github.com/tevino/abool v1.2.0
 ## explicit
 github.com/tevino/abool
 # github.com/ugorji/go v1.2.6

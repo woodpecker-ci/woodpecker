@@ -44,7 +44,7 @@ require (
 	github.com/russross/meddler v1.0.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
+	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/urfave/cli v1.22.5 // indirect
 	github.com/urfave/cli/v2 v2.3.0
