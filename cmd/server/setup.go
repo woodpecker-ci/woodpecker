@@ -46,7 +46,7 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	if err := migrateSqlFile(); err != nil {
+	if err := migrateSqlFile(c); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate legacy sqlite file")
 	}
 
@@ -59,19 +59,25 @@ func setupStore(c *cli.Context) (store.Store, error) {
 }
 
 // TODO Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
-func migrateSqlFile() error {
-	_, err := os.Stat("/var/lib/drone/drone.sqlite")
-	if err == nil {
-		return os.Rename("/var/lib/drone/drone.sqlite", "/var/lib/woodpecker/woodpecker.sqlite")
-	} else if !os.IsNotExist(err) {
-		return err
+func migrateSqlFile(c *cli.Context) error {
+	// default config for docker containers
+	if c.String("datasource") == "/var/lib/woodpecker/woodpecker.sqlite" {
+		_, err := os.Stat("/var/lib/drone/drone.sqlite")
+		if err == nil {
+			return os.Rename("/var/lib/drone/drone.sqlite", "/var/lib/woodpecker/woodpecker.sqlite")
+		} else if !os.IsNotExist(err) {
+			return err
+		}
 	}
 
-	_, err = os.Stat("drone.sqlite")
-	if err == nil {
-		return os.Rename("drone.sqlite", "woodpecker.sqlite")
-	} else if err != nil && !os.IsNotExist(err) {
-		return err
+	// default config for standalone installations
+	if c.String("datasource") == "woodpecker.sqlite" {
+		_, err := os.Stat("drone.sqlite")
+		if err == nil {
+			return os.Rename("drone.sqlite", "woodpecker.sqlite")
+		} else if err != nil && !os.IsNotExist(err) {
+			return err
+		}
 	}
 
 	return nil
