@@ -133,37 +133,21 @@ func LogStreamSSE(c *gin.Context) {
 	io.WriteString(rw, ": ping\n\n")
 	flusher.Flush()
 
-	// repo := session.Repo(c)
-	//
+	repo := session.Repo(c)
+	store_ := store.FromContext(c)
+
 	// // parse the build number and job sequence number from
 	// // the repquest parameter.
-	// num, _ := strconv.Atoi(c.Params.ByName("number"))
-	// ppid, _ := strconv.Atoi(c.Params.ByName("ppid"))
-	// name := c.Params.ByName("proc")
-	//
-	// build, err := store.GetBuildNumber(c, repo, num)
-	// if err != nil {
-	// 	c.AbortWithError(404, err)
-	// 	return
-	// }
-	//
-	// proc, err := store.FromContext(c).ProcChild(build, ppid, name)
-	// if err != nil {
-	// 	c.AbortWithError(404, err)
-	// 	return
-	// }
-
-	repo := session.Repo(c)
 	buildn, _ := strconv.Atoi(c.Param("build"))
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
-	build, err := store.GetBuildNumber(c, repo, buildn)
+	build, err := store_.GetBuildNumber(repo, buildn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get build number: %v", err)
 		io.WriteString(rw, "event: error\ndata: build not found\n\n")
 		return
 	}
-	proc, err := store.FromContext(c).ProcFind(build, jobn)
+	proc, err := store_.ProcFind(build, jobn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get proc number: %v", err)
 		io.WriteString(rw, "event: error\ndata: process not found\n\n")
