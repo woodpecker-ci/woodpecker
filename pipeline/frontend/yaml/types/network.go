@@ -58,7 +58,7 @@ func (n Networks) MarshalYAML() (interface{}, error) {
 	return m, nil
 }
 
-// UnmarshalYAML implements the Unmarshalled interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {
