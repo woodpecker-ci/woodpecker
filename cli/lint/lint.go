@@ -6,18 +6,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
 )
 
 // Command exports the info command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "lint",
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    lint,
-	Flags:     []cli.Flag{},
+	Flags:     common.GlobalFlags,
 }
 
 func lint(c *cli.Context) error {
