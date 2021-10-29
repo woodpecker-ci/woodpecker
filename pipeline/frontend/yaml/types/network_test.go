@@ -3,6 +3,7 @@ package types
 import (
 	"testing"
 
+	todo_yaml "gopkg.in/yaml.v2"
 	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/assert"
@@ -46,9 +47,9 @@ network2: {}
 				},
 			},
 			expected: `network1:
-  aliases:
-  - alias1
-  - alias2
+    aliases:
+        - alias1
+        - alias2
 network2: {}
 `,
 		},
@@ -67,12 +68,12 @@ network2: {}
 				},
 			},
 			expected: `network1:
-  aliases:
-  - alias1
-  - alias2
+    aliases:
+        - alias1
+        - alias2
 network2:
-  ipv4_address: 172.16.238.10
-  ipv6_address: 2001:3984:3989::10
+    ipv4_address: 172.16.238.10
+    ipv6_address: 2001:3984:3989::10
 `,
 		},
 	}
@@ -157,7 +158,7 @@ func TestUnmarshalNetworks(t *testing.T) {
 	}
 	for _, network := range networks {
 		actual := &Networks{}
-		err := yaml.Unmarshal([]byte(network.yaml), actual)
+		err := todo_yaml.Unmarshal([]byte(network.yaml), actual)
 		assert.Nil(t, err)
 		assert.Equal(t, network.expected, actual, "should be equal")
 	}

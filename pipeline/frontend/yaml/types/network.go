@@ -16,13 +16,12 @@ type Networks struct {
 // Network represents a  service network in compose file.
 type Network struct {
 	Name        string   `yaml:"-"`
-	RealName    string   `yaml:"-"`
 	Aliases     []string `yaml:"aliases,omitempty"`
 	IPv4Address string   `yaml:"ipv4_address,omitempty"`
 	IPv6Address string   `yaml:"ipv6_address,omitempty"`
 }
 
-// Generate a hash string to detect service network config changes
+// HashString generate a hash string to detect service network config changes
 func (n *Networks) HashString() string {
 	if n == nil {
 		return ""
@@ -35,14 +34,13 @@ func (n *Networks) HashString() string {
 	return strings.Join(result, ",")
 }
 
-// Generate a hash string to detect service network config changes
+// HashString generate a hash string to detect service network config changes
 func (n *Network) HashString() string {
 	if n == nil {
 		return ""
 	}
 	result := []string{}
 	result = append(result, n.Name)
-	result = append(result, n.RealName)
 	sort.Strings(n.Aliases)
 	result = append(result, strings.Join(n.Aliases, ","))
 	result = append(result, n.IPv4Address)
@@ -60,7 +58,7 @@ func (n Networks) MarshalYAML() (interface{}, error) {
 	return m, nil
 }
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshalled interface.
 func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {

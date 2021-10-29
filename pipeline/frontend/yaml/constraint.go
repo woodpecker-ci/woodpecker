@@ -180,7 +180,7 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	var out1 = struct {
 		Include       types.Stringorslice `yaml:"include,omitempty"`
 		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                   `yaml:"ignore_message,omitempty"`
+		IgnoreMessage string              `yaml:"ignore_message,omitempty"`
 	}{}
 
 	var out2 types.Stringorslice
