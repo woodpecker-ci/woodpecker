@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"errors"
@@ -217,6 +217,8 @@ func toSepMapParts(value map[interface{}]interface{}, sep string) ([]string, err
 				parts = append(parts, sk+sep+strconv.Itoa(sv))
 			} else if sv, ok := v.(int64); ok {
 				parts = append(parts, sk+sep+strconv.FormatInt(sv, 10))
+			} else if sv, ok := v.(float64); ok {
+				parts = append(parts, sk+sep+strconv.FormatFloat(sv, 'f', -1, 64))
 			} else if v == nil {
 				parts = append(parts, sk)
 			} else {
@@ -247,8 +249,9 @@ func toStrings(s []interface{}) ([]string, error) {
 func toMap(s []string, sep string) map[string]string {
 	m := map[string]string{}
 	for _, v := range s {
+		// Return everything past first sep
 		values := strings.Split(v, sep)
-		m[values[0]] = values[1]
+		m[values[0]] = strings.SplitN(v, sep, 2)[1]
 	}
 	return m
 }
