@@ -95,14 +95,3 @@ func (u Ulimit) MarshalYAML() (interface{}, error) {
 	}
 	return u.ulimitValues, nil
 }
-
-// NewUlimit creates a Ulimit based on the specified parts.
-func NewUlimit(name string, soft int64, hard int64) Ulimit {
-	return Ulimit{
-		Name: name,
-		ulimitValues: ulimitValues{
-			Soft: soft,
-			Hard: hard,
-		},
-	}
-}
