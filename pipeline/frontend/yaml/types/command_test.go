@@ -14,11 +14,9 @@ type StructCommand struct {
 	Command    Command `yaml:"command,flow,omitempty"`
 }
 
-var sampleStructCommand = `command: bash`
-
 func TestUnmarshalCommand(t *testing.T) {
 	s := &StructCommand{}
-	err := yaml.Unmarshal([]byte(sampleStructCommand), s)
+	err := yaml.Unmarshal([]byte(`command: bash`), s)
 
 	assert.Nil(t, err)
 	assert.Equal(t, Command{"bash"}, s.Command)
@@ -32,6 +30,13 @@ func TestUnmarshalCommand(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, Command{"bash"}, s2.Command)
 	assert.Nil(t, s2.Entrypoint)
+
+	s3 := &StructCommand{}
+	err = yaml.Unmarshal([]byte(`command:
+    - echo AAA; echo "wow"
+    - sleep 3s`), s3)
+	assert.Nil(t, err)
+	assert.Equal(t, Command{`echo AAA; echo "wow"`, `sleep 3s`}, s3.Command)
 }
 
 var sampleEmptyCommand = `{}`
