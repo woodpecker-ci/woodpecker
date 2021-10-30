@@ -1,17 +1,18 @@
-package yaml
+package types
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/docker/docker/api/types/strslice"
+	// TODO: search for maintained
 	"github.com/flynn/go-shlex"
 )
 
 // Command represents a docker command, can be a string or an array of strings.
 type Command strslice.StrSlice
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *Command) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var stringType string
 	if err := unmarshal(&stringType); err == nil {

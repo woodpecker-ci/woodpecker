@@ -5,14 +5,15 @@ import (
 	"io/ioutil"
 	"os"
 
-	libcompose "github.com/docker/libcompose/yaml"
 	"gopkg.in/yaml.v3"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 type (
 	// Config defines a pipeline configuration.
 	Config struct {
-		Cache     libcompose.Stringorslice
+		Cache     types.Stringorslice
 		Platform  string
 		Branches  Constraint
 		Workspace Workspace
@@ -21,7 +22,7 @@ type (
 		Services  Containers
 		Networks  Networks
 		Volumes   Volumes
-		Labels    libcompose.SliceorMap
+		Labels    types.SliceorMap
 		DependsOn []string `yaml:"depends_on,omitempty"`
 		RunsOn    []string `yaml:"runs_on,omitempty"`
 		SkipClone bool     `yaml:"skip_clone"`

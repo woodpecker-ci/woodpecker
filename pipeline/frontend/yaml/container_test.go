@@ -4,9 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	libcompose "github.com/docker/libcompose/yaml"
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v3"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 var containerYaml = []byte(`
@@ -68,27 +69,27 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       libcompose.Command{"bundle", "exec", "thin", "-p", "3000"},
-		Commands:      libcompose.Stringorslice{"go build", "go test"},
-		CPUQuota:      libcompose.StringorInt(11),
+		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Commands:      types.Stringorslice{"go build", "go test"},
+		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
-		CPUShares:     libcompose.StringorInt(99),
+		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		DNS:           libcompose.Stringorslice{"8.8.8.8"},
-		DNSSearch:     libcompose.Stringorslice{"example.com"},
-		Entrypoint:    libcompose.Command{"/code/entrypoint.sh"},
-		Environment:   libcompose.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
+		DNS:           types.Stringorslice{"8.8.8.8"},
+		DNSSearch:     types.Stringorslice{"example.com"},
+		Entrypoint:    types.Command{"/code/entrypoint.sh"},
+		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		Labels:        libcompose.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
-		MemLimit:      libcompose.MemStringorInt(1024),
-		MemSwapLimit:  libcompose.MemStringorInt(1024),
-		MemSwappiness: libcompose.MemStringorInt(1024),
+		Labels:        types.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
+		MemLimit:      types.MemStringorInt(1024),
+		MemSwapLimit:  types.MemStringorInt(1024),
+		MemSwappiness: types.MemStringorInt(1024),
 		Name:          "my-build-container",
-		Networks: libcompose.Networks{
-			Networks: []*libcompose.Network{
+		Networks: types.Networks{
+			Networks: []*types.Network{
 				{Name: "some-network"},
 				{Name: "other-network"},
 			},
@@ -96,10 +97,10 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     libcompose.MemStringorInt(1024),
-		Tmpfs:       libcompose.Stringorslice{"/var/lib/test"},
-		Volumes: libcompose.Volumes{
-			Volumes: []*libcompose.Volume{
+		ShmSize:     types.MemStringorInt(1024),
+		Tmpfs:       types.Stringorslice{"/var/lib/test"},
+		Volumes: types.Volumes{
+			Volumes: []*types.Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
 				{Source: "/opt/data", Destination: "/var/lib/mysql"},
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
