@@ -8,6 +8,7 @@
       <Button
         class="mr-auto mt-4"
         color="blue"
+        start-icon="heal"
         text="Repair repository"
         :is-loading="isRepairingRepo"
         @click="repairRepo"
@@ -16,6 +17,7 @@
       <Button
         class="mr-auto mt-4"
         color="red"
+        start-icon="trash"
         text="Delete repository"
         :is-loading="isDeletingRepo"
         @click="deleteRepo"

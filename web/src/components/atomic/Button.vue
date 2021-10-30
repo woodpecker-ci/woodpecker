@@ -40,7 +40,7 @@
         :class="{
           'opacity-100': isLoading,
           'opacity-0': !isLoading,
-          'bg-white dark:bg-dark-100': color === 'gray',
+          'bg-white dark:bg-dark-gray-700': color === 'gray',
           'bg-lime-700': color === 'green',
           'bg-cyan-700': color === 'blue',
           'bg-red-600': color === 'red',

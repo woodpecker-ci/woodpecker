@@ -20,9 +20,12 @@
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
-    <label v-if="label" class="ml-4 cursor-pointer text-gray-600 dark:text-gray-500" :for="`checkbox-${id}`">{{
-      label
-    }}</label>
+    <div class="flex flex-col ml-4">
+      <label v-if="label" class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`checkbox-${id}`">{{
+        label
+      }}</label>
+      <span v-if="description" class="text-sm text-gray-400 dark:text-gray-600">{{ description }}</span>
+    </div>
   </div>
 </template>
 
@@ -41,6 +44,11 @@ export default defineComponent({
     },
 
     label: {
+      type: String,
+      default: null,
+    },
+
+    description: {
       type: String,
       default: null,
     },

@@ -5,33 +5,45 @@
     </div>
 
     <div v-if="repoSettings" class="flex flex-col">
-      <InputField label="Pipeline path">
+      <InputField label="Pipeline path" docs-url="docs/usage/project-settings#pipeline-path">
         <TextField
           v-model="repoSettings.config_file"
           class="max-w-124"
           placeholder="By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
         />
         <template #description>
-          <p class="text-sm text-gray-600 dark:text-gray-500">
+          <p class="text-sm text-gray-400 dark:text-gray-600">
             Path to your pipeline config (for example
             <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">my/path/</span>). Folders should end with a
             <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">/</span>.
-            <DocsLink url="docs/usage/project-settings#pipeline-path" />
           </p>
         </template>
       </InputField>
 
-      <InputField label="Project settings">
-        <Checkbox v-model="repoSettings.allow_pr" label="Allow Pull Request" />
-        <Checkbox v-model="repoSettings.gated" label="Protected" />
-        <Checkbox v-if="user?.admin" v-model="repoSettings.trusted" label="Trusted" />
+      <InputField label="Project settings" docs-url="docs/usage/project-settings#project-settings-1">
+        <Checkbox
+          v-model="repoSettings.allow_pr"
+          label="Allow Pull Request"
+          description="Pipelines can run on pull requests."
+        />
+        <Checkbox
+          v-model="repoSettings.gated"
+          label="Protected"
+          description="Every pipeline needs to be approved before being executed."
+        />
+        <Checkbox
+          v-if="user?.admin"
+          v-model="repoSettings.trusted"
+          label="Trusted"
+          description="Underlying pipeline containers get access to escalated capabilities like mounting volumes."
+        />
       </InputField>
 
-      <InputField label="Project visibility">
+      <InputField label="Project visibility" docs-url="docs/usage/project-settings#project-visibility">
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
-      <InputField label="Timeout">
+      <InputField label="Timeout" docs-url="docs/usage/project-settings#timeout">
         <div class="flex items-center">
           <NumberField v-model="repoSettings.timeout" class="w-24" />
           <span class="ml-4 text-gray-600">minutes</span>
@@ -47,7 +59,6 @@
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import { RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
@@ -63,15 +74,27 @@ import { Repo, RepoSettings, RepoVisibility } from '~/lib/api/types';
 import RepoStore from '~/store/repos';
 
 const projectVisibilityOptions: RadioOption[] = [
-  { value: RepoVisibility.Public, text: 'Public' },
-  { value: RepoVisibility.Private, text: 'Private' },
-  { value: RepoVisibility.Internal, text: 'Internal' },
+  {
+    value: RepoVisibility.Public,
+    text: 'Public',
+    description: 'Every user can see your project without being logged in.',
+  },
+  {
+    value: RepoVisibility.Private,
+    text: 'Private',
+    description: 'Only authenticated users of the Woodpecker instance can see this project.',
+  },
+  {
+    value: RepoVisibility.Internal,
+    text: 'Internal',
+    description: 'Only you and other owners of the repository can see this project.',
+  },
 ];
 
 export default defineComponent({
   name: 'GeneralTab',
 
-  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox, DocsLink },
+  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox },
 
   setup() {
     const apiClient = useApiClient();

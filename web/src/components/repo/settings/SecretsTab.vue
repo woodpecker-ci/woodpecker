@@ -3,7 +3,7 @@
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
         <h1 class="text-xl text-gray-500">Secrets</h1>
-        <p class="text-sm text-gray-500">
+        <p class="text-sm text-gray-400 dark:text-gray-600">
           Secrets can be passed to individual pipeline steps at runtime as environmental variables.
           <DocsLink url="docs/usage/secrets" />
         </p>

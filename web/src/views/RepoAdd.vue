@@ -4,7 +4,13 @@
       <IconButton :to="{ name: 'repos' }" icon="back" />
       <h1 class="text-xl ml-2 text-gray-500">Add repository</h1>
       <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
-      <Button class="ml-auto" text="Reload repositories" :is-loading="isReloadingRepos" @click="reloadRepos" />
+      <Button
+        class="ml-auto"
+        start-icon="sync"
+        text="Reload repositories"
+        :is-loading="isReloadingRepos"
+        @click="reloadRepos"
+      />
     </div>
 
     <div class="space-y-4">

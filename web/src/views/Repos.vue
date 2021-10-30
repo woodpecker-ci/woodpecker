@@ -3,7 +3,7 @@
     <div class="flex flex-row border-b pb-4 mb-4 items-center dark:border-dark-200">
       <h1 class="text-xl text-gray-500">Repositories</h1>
       <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
-      <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add repository" />
+      <Button class="ml-auto" :to="{ name: 'repo-add' }" start-icon="plus" text="Add repository" />
     </div>
 
     <div class="space-y-4">

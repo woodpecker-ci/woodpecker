@@ -19,9 +19,12 @@
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
     />
-    <label class="ml-4 cursor-pointer text-gray-600 dark:text-gray-500" :for="`radio-${id}-${option.value}`">{{
-      option.text
-    }}</label>
+    <div class="flex flex-col ml-4">
+      <label class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`radio-${id}-${option.value}`">{{
+        option.text
+      }}</label>
+      <span v-if="option.description" class="text-sm text-gray-400 dark:text-gray-600">{{ option.description }}</span>
+    </div>
   </div>
 </template>
 

@@ -10,7 +10,7 @@
   <i-mdi-github v-else-if="name === 'github'" class="h-8 w-8" />
   <i-teenyicons-git-solid v-else-if="name === 'repo'" class="h-8 w-8" />
   <i-clarity-settings-solid v-else-if="name === 'settings'" class="w-8 h-8" />
-  <i-gg-trash v-else-if="name === 'trash'" class="h-8 w-8" />
+  <i-gg-trash v-else-if="name === 'trash'" class="h-6 w-6" />
   <i-ph-hand v-else-if="name === 'status-blocked'" class="h-6 w-6" />
   <i-ph-hand v-else-if="name === 'status-declined'" class="h-6 w-6" />
   <i-ph-warning v-else-if="name === 'status-error'" class="h-8 w-8" />
@@ -28,6 +28,8 @@
   <i-mdi-loading v-else-if="name === 'loading'" class="h-6 w-6" />
   <i-ic-baseline-dark-mode v-else-if="name === 'dark'" class="h-6 w-6" />
   <i-ic-round-light-mode v-else-if="name === 'light'" class="h-6 w-6" />
+  <i-mdi-sync v-else-if="name === 'sync'" class="h-6 w-6" />
+  <i-ic-baseline-healing v-else-if="name === 'heal'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -64,7 +66,9 @@ export type IconNames =
   | 'plus'
   | 'blank'
   | 'dark'
-  | 'light';
+  | 'light'
+  | 'sync'
+  | 'heal';
 
 export default defineComponent({
   name: 'Icon',

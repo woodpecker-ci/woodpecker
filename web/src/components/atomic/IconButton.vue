@@ -7,16 +7,16 @@
       flex
       items-center
       justify-center
-      text-gray-600
+      text-gray-500
       px-1
       py-1
       rounded-full
-      !hover:bg-gray-200
-      hover:text-gray-700
-      dark:text-gray-600 dark:hover:text-gray-700
-      !dark:hover:bg-gray-600
-      shadow-none
       !bg-transparent
+      !hover:bg-gray-200
+      !dark:hover:bg-gray-600
+      hover:text-gray-700
+      dark:text-gray-500 dark:hover:text-gray-700
+      shadow-none
       border-none
     "
   >
