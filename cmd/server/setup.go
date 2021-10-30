@@ -80,8 +80,17 @@ func fallbackSqlite3File(path string) (string, error) {
 		return path, nil
 	}
 
+	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite")
+	_, err := os.Stat(dockerDefaultPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		return dockerDefaultPath, nil
+	}
+
 	// woodpecker run in standalone mode, file is in same folder but not renamed
-	_, err := os.Stat(standaloneOld)
+	_, err = os.Stat(standaloneOld)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
 	}
@@ -89,15 +98,6 @@ func fallbackSqlite3File(path string) (string, error) {
 		// rename in same folder should be fine as it should be same docker volume
 		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", standaloneOld, standaloneDefault)
 		return standaloneDefault, os.Rename(standaloneOld, standaloneDefault)
-	}
-
-	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite")
-	_, err = os.Stat(dockerDefaultPath)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
-	}
-	if err == nil {
-		return dockerDefaultPath, nil
 	}
 
 	// file is in new folder but not renamed
