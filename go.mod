@@ -13,9 +13,9 @@ require (
 	github.com/docker/docker v20.10.10+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/docker/libcompose v0.4.0
+	github.com/docker/go-units v0.4.0
 	github.com/drone/envsubst v1.0.3
-	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
+	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/ghodss/yaml v1.0.0
 	github.com/gin-gonic/gin v1.7.4
