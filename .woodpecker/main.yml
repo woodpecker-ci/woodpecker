@@ -3,6 +3,58 @@ clone:
     image: plugins/git:next
 
 pipeline:
+  web-deps:
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn install --frozen-lockfile
+    when:
+      path: "web/**"
+
+  web-lint:
+    group: test
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn lint
+    when:
+      path: "web/**"
+
+  web-formatcheck:
+    group: test
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn formatcheck
+    when:
+      path: "web/**"
+
+  web-typecheck:
+    group: test
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn typecheck
+    when:
+      path: "web/**"
+
+  web-test:
+    group: test
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn test
+    when:
+      path: "web/**"
+
+  web-build:
+    image: node:14-alpine
+    commands:
+      - cd web/
+      - yarn build
+    when:
+      path: "web/**"
+
   test:
     image: golang:1.16
     group: test
@@ -228,6 +280,3 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-
-depends_on:
-  - web
