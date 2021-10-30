@@ -97,7 +97,7 @@ func fallbackSqlite3File(path string) (string, error) {
 		return "", err
 	}
 	if err == nil {
-		return path, nil
+		return dockerDefaultPath, nil
 	}
 
 	// file is in new folder but not renamed
