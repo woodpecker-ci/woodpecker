@@ -11,7 +11,6 @@
       border
       shadow-sm
       cursor-pointer
-      font-bold
       transition-all
       duration-150
       focus:outline-none
@@ -19,7 +18,7 @@
       disabled:opacity-50 disabled:cursor-not-allowed
     "
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-gray-500 dark:text-gray-400 dark:bg-dark-100 dark:border-dark-200 dark:hover:bg-dark-50':
+      'bg-white hover:bg-gray-200 border-gray-300 text-gray-500 dark:text-gray-500 dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:bg-dark-gray-800':
         color === 'gray',
       'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-400 dark:bg-lime-900 dark:hover:bg-lime-800':
         color === 'green',

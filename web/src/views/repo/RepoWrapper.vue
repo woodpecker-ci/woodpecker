@@ -8,7 +8,7 @@
       <a
         :href="repo.link_url"
         target="_blank"
-        class="flex ml-4 p-1 rounded-full text-gray-600 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
+        class="flex ml-4 p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
         <Icon v-else name="repo" />

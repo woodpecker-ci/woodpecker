@@ -8,7 +8,7 @@
       rounded-md
       bg-white
       hover:border-gray-300
-      dark:bg-dark-gray-700 dark:border-gray-600
+      dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:border-dark-800
     "
   >
     <input
@@ -19,7 +19,7 @@
         text-gray-600
         placeholder-gray-400
         focus:outline-none focus:border-blue-400
-        dark:placeholder-true-gray-600 dark:text-gray-500
+        dark:placeholder-gray-600 dark:text-gray-500
       "
       :type="type"
       :placeholder="placeholder"
