@@ -68,12 +68,30 @@ func setupStore(c *cli.Context) (store.Store, error) {
 
 // TODO: Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
 func fallbackSqlite3File(path string) (string, error) {
-	const defaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
-	const defaultDir = "/var/lib/woodpecker/drone.sqlite"
-	const oldPath = "/var/lib/drone/drone.sqlite"
+	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
+	const dockerDefaultDir = "/var/lib/woodpecker/drone.sqlite"
+	const dockerOldPath = "/var/lib/drone/drone.sqlite"
+	const standaloneDefault = "woodpecker.sqlite"
+	const standaloneOld = "drone.sqlite"
 
-	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite") / custom location
-	_, err := os.Stat(path)
+	// custom location was set, use that one
+	if path != dockerDefaultPath && path != standaloneDefault {
+		return path, nil
+	}
+
+	// woodpecker run in standalone mode, file is in same folder but not renamed
+	_, err := os.Stat(standaloneOld)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		// rename in same folder should be fine as it should be same docker volume
+		log.Warn().Msgf("found sqlite3 file at '%s', rename to '%s'", standaloneOld, standaloneDefault)
+		return standaloneDefault, os.Rename(standaloneOld, standaloneDefault)
+	}
+
+	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite")
+	_, err = os.Stat(dockerDefaultPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
 	}
@@ -82,22 +100,25 @@ func fallbackSqlite3File(path string) (string, error) {
 	}
 
 	// file is in new folder but not renamed
-	_, err = os.Stat(defaultDir)
+	_, err = os.Stat(dockerDefaultDir)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
 	}
 	if err == nil {
 		// rename in same folder should be fine as it should be same docker volume
-		return defaultPath, os.Rename(defaultDir, defaultPath)
+		log.Warn().Msgf("found sqlite3 file at '%s', rename to '%s'", dockerDefaultDir, dockerDefaultPath)
+		return dockerDefaultPath, os.Rename(dockerDefaultDir, dockerDefaultPath)
 	}
 
 	// file is still at old location
-	_, err = os.Stat(oldPath)
+	_, err = os.Stat(dockerOldPath)
 	if err == nil {
-		return oldPath, nil
+		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please migrate to '%s'", dockerOldPath, dockerDefaultPath)
+		return dockerOldPath, nil
 	}
 
-	// file does not exist at all => use default / custom location
+	// file does not exist at all
+	log.Warn().Msgf("no sqlite3 file found, will create one at '%s'", path)
 	return path, nil
 }
 
