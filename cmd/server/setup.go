@@ -66,7 +66,8 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	return datastore.New(opts)
 }
 
-// TODO: Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
+// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: add it to the "how to migrate from drone docs"
 func fallbackSqlite3File(path string) (string, error) {
 	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
 	const dockerDefaultDir = "/var/lib/woodpecker/drone.sqlite"
