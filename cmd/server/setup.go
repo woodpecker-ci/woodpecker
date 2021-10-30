@@ -89,6 +89,15 @@ func fallbackSqlite3File(path string) (string, error) {
 		return dockerDefaultPath, nil
 	}
 
+	// file is at new default("woodpecker.sqlite")
+	_, err = os.Stat(standaloneDefault)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		return standaloneDefault, nil
+	}
+
 	// woodpecker run in standalone mode, file is in same folder but not renamed
 	_, err = os.Stat(standaloneOld)
 	if err != nil && !os.IsNotExist(err) {
