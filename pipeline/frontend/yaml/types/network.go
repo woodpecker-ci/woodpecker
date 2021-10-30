@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"errors"
@@ -14,7 +14,6 @@ type Networks struct {
 // Network represents a  service network in compose file.
 type Network struct {
 	Name        string   `yaml:"-"`
-	RealName    string   `yaml:"-"`
 	Aliases     []string `yaml:"aliases,omitempty"`
 	IPv4Address string   `yaml:"ipv4_address,omitempty"`
 	IPv6Address string   `yaml:"ipv6_address,omitempty"`
@@ -29,7 +28,7 @@ func (n Networks) MarshalYAML() (interface{}, error) {
 	return m, nil
 }
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (n *Networks) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {

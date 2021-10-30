@@ -3,8 +3,9 @@ package yaml
 import (
 	"testing"
 
-	"github.com/docker/libcompose/yaml"
 	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 func TestParse(t *testing.T) {
@@ -29,10 +30,10 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Services.Containers[0].Image).Equal("mysql")
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("test")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("golang")
-				g.Assert(out.Pipeline.Containers[0].Commands).Equal(yaml.Stringorslice{"go install", "go test"})
+				g.Assert(out.Pipeline.Containers[0].Commands).Equal(types.Stringorslice{"go install", "go test"})
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("build")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("golang")
-				g.Assert(out.Pipeline.Containers[1].Commands).Equal(yaml.Stringorslice{"go build"})
+				g.Assert(out.Pipeline.Containers[1].Commands).Equal(types.Stringorslice{"go build"})
 				g.Assert(out.Pipeline.Containers[2].Name).Equal("notify")
 				g.Assert(out.Pipeline.Containers[2].Image).Equal("slack")
 				// g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
