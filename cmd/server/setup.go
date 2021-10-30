@@ -86,7 +86,7 @@ func fallbackSqlite3File(path string) (string, error) {
 	}
 	if err == nil {
 		// rename in same folder should be fine as it should be same docker volume
-		log.Warn().Msgf("found sqlite3 file at '%s', rename to '%s'", standaloneOld, standaloneDefault)
+		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", standaloneOld, standaloneDefault)
 		return standaloneDefault, os.Rename(standaloneOld, standaloneDefault)
 	}
 
@@ -106,14 +106,14 @@ func fallbackSqlite3File(path string) (string, error) {
 	}
 	if err == nil {
 		// rename in same folder should be fine as it should be same docker volume
-		log.Warn().Msgf("found sqlite3 file at '%s', rename to '%s'", dockerDefaultDir, dockerDefaultPath)
+		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", dockerDefaultDir, dockerDefaultPath)
 		return dockerDefaultPath, os.Rename(dockerDefaultDir, dockerDefaultPath)
 	}
 
 	// file is still at old location
 	_, err = os.Stat(dockerOldPath)
 	if err == nil {
-		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please migrate to '%s'", dockerOldPath, dockerDefaultPath)
+		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
 		return dockerOldPath, nil
 	}
 
