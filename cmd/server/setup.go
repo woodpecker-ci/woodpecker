@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -46,41 +47,58 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	if err := migrateSqlFile(c); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate legacy sqlite file")
+	datasource := c.String("datasource")
+	driver := c.String("driver")
+
+	if strings.ToLower(driver) == "sqlite3" {
+		if new, err := fallbackSqlite3File(datasource); err != nil {
+			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
+		} else {
+			datasource = new
+		}
 	}
 
 	opts := &datastore.Opts{
-		Driver: c.String("driver"),
-		Config: c.String("datasource"),
+		Driver: driver,
+		Config: datasource,
 	}
 	log.Trace().Msgf("setup datastore: %#v", opts)
 	return datastore.New(opts)
 }
 
-// TODO Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
-func migrateSqlFile(c *cli.Context) error {
-	// default config for docker containers
-	if c.String("datasource") == "/var/lib/woodpecker/woodpecker.sqlite" {
-		_, err := os.Stat("/var/lib/drone/drone.sqlite")
-		if err == nil {
-			return os.Rename("/var/lib/drone/drone.sqlite", "/var/lib/woodpecker/woodpecker.sqlite")
-		} else if !os.IsNotExist(err) {
-			return err
-		}
+// TODO: Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
+func fallbackSqlite3File(path string) (string, error) {
+	const defaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
+	const defaultDir = "/var/lib/woodpecker/drone.sqlite"
+	const oldPath = "/var/lib/drone/drone.sqlite"
+
+	// file is in new default("/var/lib/woodpecker/woodpecker.sqlite") / custom location
+	_, err := os.Stat(path)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		return path, nil
 	}
 
-	// default config for standalone installations
-	if c.String("datasource") == "woodpecker.sqlite" {
-		_, err := os.Stat("drone.sqlite")
-		if err == nil {
-			return os.Rename("drone.sqlite", "woodpecker.sqlite")
-		} else if err != nil && !os.IsNotExist(err) {
-			return err
-		}
+	// file is in new folder but not renamed
+	_, err = os.Stat(defaultDir)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		// rename in same folder should be fine as it should be same docker volume
+		return defaultPath, os.Rename(defaultDir, defaultPath)
 	}
 
-	return nil
+	// file is still old location
+	_, err = os.Stat(oldPath)
+	if err == nil {
+		return oldPath, nil
+	}
+
+	// file do not exist at all, use default / custom location
+	return path, nil
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
