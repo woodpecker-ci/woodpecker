@@ -12,7 +12,8 @@ pipeline:
       path: "web/**"
 
   web-lint:
-    group: test
+    # TODO: disabled group for now to prevent oom
+    # group: web-test
     image: node:14-alpine
     commands:
       - cd web/
@@ -21,7 +22,7 @@ pipeline:
       path: "web/**"
 
   web-formatcheck:
-    group: test
+    group: web-test
     image: node:14-alpine
     commands:
       - cd web/
@@ -30,7 +31,7 @@ pipeline:
       path: "web/**"
 
   web-typecheck:
-    group: test
+    group: web-test
     image: node:14-alpine
     commands:
       - cd web/
@@ -39,7 +40,7 @@ pipeline:
       path: "web/**"
 
   web-test:
-    group: test
+    group: web-test
     image: node:14-alpine
     commands:
       - cd web/
