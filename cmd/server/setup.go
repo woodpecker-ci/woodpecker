@@ -72,7 +72,7 @@ func fallbackSqlite3File(path string) (string, error) {
 	const defaultDir = "/var/lib/woodpecker/drone.sqlite"
 	const oldPath = "/var/lib/drone/drone.sqlite"
 
-	// file is in new default("/var/lib/woodpecker/woodpecker.sqlite") / custom location
+	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite") / custom location
 	_, err := os.Stat(path)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
@@ -91,13 +91,13 @@ func fallbackSqlite3File(path string) (string, error) {
 		return defaultPath, os.Rename(defaultDir, defaultPath)
 	}
 
-	// file is still old location
+	// file is still at old location
 	_, err = os.Stat(oldPath)
 	if err == nil {
 		return oldPath, nil
 	}
 
-	// file do not exist at all, use default / custom location
+	// file does not exist at all => use default / custom location
 	return path, nil
 }
 
