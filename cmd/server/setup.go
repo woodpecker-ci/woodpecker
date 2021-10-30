@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -45,12 +46,41 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
+	if err := migrateSqlFile(c); err != nil {
+		log.Fatal().Err(err).Msg("could not migrate legacy sqlite file")
+	}
+
 	opts := &datastore.Opts{
 		Driver: c.String("driver"),
 		Config: c.String("datasource"),
 	}
 	log.Trace().Msgf("setup datastore: %#v", opts)
 	return datastore.New(opts)
+}
+
+// TODO Remove this once we are sure users aren't attempting to migrate from Drone to Woodpecker (possibly never)
+func migrateSqlFile(c *cli.Context) error {
+	// default config for docker containers
+	if c.String("datasource") == "/var/lib/woodpecker/woodpecker.sqlite" {
+		_, err := os.Stat("/var/lib/drone/drone.sqlite")
+		if err == nil {
+			return os.Rename("/var/lib/drone/drone.sqlite", "/var/lib/woodpecker/woodpecker.sqlite")
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+	}
+
+	// default config for standalone installations
+	if c.String("datasource") == "woodpecker.sqlite" {
+		_, err := os.Stat("drone.sqlite")
+		if err == nil {
+			return os.Rename("drone.sqlite", "woodpecker.sqlite")
+		} else if err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
