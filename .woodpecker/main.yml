@@ -4,7 +4,7 @@ clone:
 
 pipeline:
   web-deps:
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn install --frozen-lockfile
@@ -14,7 +14,7 @@ pipeline:
   web-lint:
     # TODO: disabled group for now to prevent oom
     # group: web-test
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn lint
@@ -23,7 +23,7 @@ pipeline:
 
   web-formatcheck:
     group: web-test
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn formatcheck
@@ -32,7 +32,7 @@ pipeline:
 
   web-typecheck:
     group: web-test
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn typecheck
@@ -41,7 +41,7 @@ pipeline:
 
   web-test:
     group: web-test
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn test
@@ -49,7 +49,7 @@ pipeline:
       path: "web/**"
 
   web-build:
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
       - cd web/
       - yarn build
@@ -84,8 +84,9 @@ pipeline:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
   build-frontend:
-    image: node:14-alpine
+    image: node:16-alpine
     commands:
+      - apk add make
       - make release-frontend
 
   build-server:
