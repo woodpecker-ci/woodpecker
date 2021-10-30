@@ -2,12 +2,13 @@
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b pb-4 mb-4 items-center dark:border-dark-200">
       <h1 class="text-xl text-gray-500">Repositories</h1>
+      <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
       <Button class="ml-auto" :to="{ name: 'repo-add' }" text="Add repository" />
     </div>
 
     <div class="space-y-4">
       <ListItem
-        v-for="repo in repos"
+        v-for="repo in searchedRepos"
         :key="repo.id"
         clickable
         @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
@@ -19,11 +20,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import TextField from '~/components/form/TextField.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import { useRepoSearch } from '~/compositions/useRepoSearch';
 import RepoStore from '~/store/repos';
 
 export default defineComponent({
@@ -33,17 +36,21 @@ export default defineComponent({
     Button,
     FluidContainer,
     ListItem,
+    TextField,
   },
 
   setup() {
     const repoStore = RepoStore();
-    const { repos } = repoStore;
+    const repos = computed(() => Object.values(repoStore.repos));
+    const search = ref('');
+
+    const { searchedRepos } = useRepoSearch(repos, search);
 
     onMounted(async () => {
       await repoStore.loadRepos();
     });
 
-    return { repos };
+    return { searchedRepos, search };
   },
 });
 </script>

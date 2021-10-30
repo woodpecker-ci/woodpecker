@@ -3,12 +3,13 @@
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <IconButton :to="{ name: 'repos' }" icon="back" />
       <h1 class="text-xl ml-2 text-gray-500">Add repository</h1>
+      <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
       <Button class="ml-auto" text="Reload repositories" :is-loading="isReloadingRepos" @click="reloadRepos" />
     </div>
 
     <div class="space-y-4">
       <ListItem
-        v-for="repo in repos"
+        v-for="repo in searchedRepos"
         :key="repo.id"
         class="items-center"
         :clickable="repo.active"
@@ -35,10 +36,12 @@ import { useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import TextField from '~/components/form/TextField.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
@@ -49,6 +52,7 @@ export default defineComponent({
     FluidContainer,
     ListItem,
     IconButton,
+    TextField,
   },
 
   setup() {
@@ -57,6 +61,9 @@ export default defineComponent({
     const notifications = useNotifications();
     const repos = ref<Repo[]>();
     const repoToActivate = ref<Repo>();
+    const search = ref('');
+
+    const { searchedRepos } = useRepoSearch(repos, search);
 
     onMounted(async () => {
       repos.value = await apiClient.getRepoList({ all: true });
@@ -76,7 +83,15 @@ export default defineComponent({
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     });
 
-    return { repos, isReloadingRepos, isActivatingRepo, repoToActivate, reloadRepos, activateRepo };
+    return {
+      isReloadingRepos,
+      isActivatingRepo,
+      repoToActivate,
+      reloadRepos,
+      activateRepo,
+      searchedRepos,
+      search,
+    };
   },
 });
 </script>
