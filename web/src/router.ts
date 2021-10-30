@@ -60,6 +60,11 @@ const routes: RouteRecordRaw[] = [
         meta: { authentication: 'required' },
         props: true,
       },
+      // TODO: redirect to support backwards compatibility => remove after some time
+      {
+        path: ':buildId',
+        redirect: (route) => ({ name: 'repo-build', params: route.params }),
+      },
     ],
   },
   {
