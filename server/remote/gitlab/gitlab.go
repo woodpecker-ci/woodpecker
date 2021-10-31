@@ -434,6 +434,30 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	return err
 }
 
+// Branches returns the names of all branches for the named repository.
+func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabBranches, _, err := client.Branches.ListBranches(repo_.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gitlabBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {

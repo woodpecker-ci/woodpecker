@@ -49,6 +49,7 @@ func HandleLogin(c *gin.Context) {
 }
 
 func HandleAuth(c *gin.Context) {
+	store_ := store.FromContext(c)
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -68,7 +69,7 @@ func HandleAuth(c *gin.Context) {
 	config := ToConfig(c)
 
 	// get the user from the database
-	u, err := store.GetUserLogin(c, tmpuser.Login)
+	u, err := store_.GetUserLogin(tmpuser.Login)
 	if err != nil {
 
 		// if self-registration is disabled we should return a not authorized error
@@ -102,7 +103,7 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// insert the user into the database
-		if err := store.CreateUser(c, u); err != nil {
+		if err := store_.CreateUser(u); err != nil {
 			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
 			c.Redirect(303, "/login?error=internal_error")
 			return
@@ -126,7 +127,7 @@ func HandleAuth(c *gin.Context) {
 		}
 	}
 
-	if err := store.UpdateUser(c, u); err != nil {
+	if err := store_.UpdateUser(u); err != nil {
 		log.Error().Msgf("cannot update %s. %s", u.Login, err)
 		c.Redirect(303, "/login?error=internal_error")
 		return
@@ -157,6 +158,8 @@ func GetLogout(c *gin.Context) {
 }
 
 func GetLoginToken(c *gin.Context) {
+	store_ := store.FromContext(c)
+
 	in := &tokenPayload{}
 	err := c.Bind(in)
 	if err != nil {
@@ -170,7 +173,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	user, err := store.GetUserLogin(c, login)
+	user, err := store_.GetUserLogin(login)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return

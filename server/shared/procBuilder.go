@@ -245,7 +245,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 			),
 		),
 		compiler.WithProxy(),
-		compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
 	).Compile(parsed)
 }

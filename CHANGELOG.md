@@ -1,3 +1,12 @@
+## [0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
+
+* BUGFIXES
+  * Add flag for not fetching permissions (FlatPermissions) (#491)
+  * Gitea use default branch (#480) (#482)
+  * Fix repo access (#476) (#477)
+* ENHANCEMENTS
+  * Use go embed for web files and remove httptreemux (#382) (#489)
+
 ## [0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
 
 * BUGFIXES

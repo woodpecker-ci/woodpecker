@@ -15,7 +15,6 @@
 package store
 
 import (
-	"context"
 	"io"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -165,67 +164,4 @@ type Store interface {
 	TaskDelete(string) error
 
 	Ping() error
-}
-
-// GetUser gets a user by unique ID.
-func GetUser(c context.Context, id int64) (*model.User, error) {
-	return FromContext(c).GetUser(id)
-}
-
-// GetUserLogin gets a user by unique Login name.
-func GetUserLogin(c context.Context, login string) (*model.User, error) {
-	return FromContext(c).GetUserLogin(login)
-}
-
-// GetUserList gets a list of all users in the system.
-func GetUserList(c context.Context) ([]*model.User, error) {
-	return FromContext(c).GetUserList()
-}
-
-func CreateUser(c context.Context, user *model.User) error {
-	return FromContext(c).CreateUser(user)
-}
-
-func UpdateUser(c context.Context, user *model.User) error {
-	return FromContext(c).UpdateUser(user)
-}
-
-func DeleteUser(c context.Context, user *model.User) error {
-	return FromContext(c).DeleteUser(user)
-}
-
-func GetRepoOwnerName(c context.Context, owner, name string) (*model.Repo, error) {
-	return FromContext(c).GetRepoName(owner + "/" + name)
-}
-
-func UpdateRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).UpdateRepo(repo)
-}
-
-func DeleteRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).DeleteRepo(repo)
-}
-
-func GetBuildNumber(c context.Context, repo *model.Repo, num int) (*model.Build, error) {
-	return FromContext(c).GetBuildNumber(repo, num)
-}
-
-func GetBuildLast(c context.Context, repo *model.Repo, branch string) (*model.Build, error) {
-	return FromContext(c).GetBuildLast(repo, branch)
-}
-
-func GetBuildLastBefore(c context.Context, repo *model.Repo, branch string, number int64) (*model.Build, error) {
-	return FromContext(c).GetBuildLastBefore(repo, branch, number)
-}
-
-func GetBuildList(c context.Context, repo *model.Repo, page int) ([]*model.Build, error) {
-	return FromContext(c).GetBuildList(repo, page)
-}
-
-func GetBuildQueue(c context.Context) ([]*model.Feed, error) {
-	return FromContext(c).GetBuildQueue()
-}
-
-func CreateBuild(c context.Context, build *model.Build, procs ...*model.Proc) error {
-	return FromContext(c).CreateBuild(build, procs...)
 }
