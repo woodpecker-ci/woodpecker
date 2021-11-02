@@ -43,6 +43,7 @@ vet:
 
 .PHONY: lint
 lint:
+	go run vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
 	@echo "Running zerolog linter"
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
