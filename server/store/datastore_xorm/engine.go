@@ -38,7 +38,10 @@ func newEngine(opts *store.Opts) (store.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	// engine.SetLogger(log.Logger) // TODO: special config to enable/disable ?
+
+	logger := &LogWrapper{}
+	logger.ShowSQL(true)
+	engine.SetLogger(logger) // TODO: special config to enable/disable ?
 	return &storage{
 		engine: engine,
 	}, nil
