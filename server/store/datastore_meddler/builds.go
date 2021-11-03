@@ -73,7 +73,17 @@ func (db *datastore) GetBuildQueue() ([]*model.Feed, error) {
 }
 
 func (db *datastore) CreateBuild(build *model.Build, procs ...*model.Proc) error {
-	build.Trim()
+	// trims string values that would otherwise exceed
+	// the database column sizes and fail to insert.
+	{
+		if len(build.Title) > 1000 {
+			build.Title = build.Title[:1000]
+		}
+		if len(build.Message) > 2000 {
+			build.Message = build.Message[:2000]
+		}
+	}
+
 	id, err := db.incrementRepoRetry(build.RepoID)
 	if err != nil {
 		return err
