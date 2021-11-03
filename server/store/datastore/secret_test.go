@@ -176,6 +176,6 @@ func TestSecretIndexes(t *testing.T) {
 		Name:   "foo",
 		Value:  "baz",
 	}); err == nil {
-		t.Errorf("Unexpected error: dupliate name")
+		t.Errorf("Unexpected error: duplicate name")
 	}
 }

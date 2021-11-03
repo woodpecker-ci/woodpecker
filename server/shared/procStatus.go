@@ -57,7 +57,7 @@ func UpdateProcToStatusStarted(store UpdateProcStore, proc model.Proc, state rpc
 func UpdateProcToStatusSkipped(store UpdateProcStore, proc model.Proc, stopped int64) (*model.Proc, error) {
 	proc.State = model.StatusSkipped
 	if proc.Started != 0 {
-		proc.State = model.StatusSuccess // for deamons that are killed
+		proc.State = model.StatusSuccess // for daemons that are killed
 		proc.Stopped = stopped
 	}
 	return &proc, store.ProcUpdate(&proc)

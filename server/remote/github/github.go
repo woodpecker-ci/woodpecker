@@ -25,12 +25,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/go-github/v39/github"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"github.com/google/go-github/v39/github"
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -503,6 +503,22 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	}
 	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
 	return err
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client := c.newClientToken(ctx, u.Token)
+
+	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range githubBranches {
+		branches = append(branches, *branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the post-commit hook from the Request body

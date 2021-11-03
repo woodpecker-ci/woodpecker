@@ -19,16 +19,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func HandleLogin(c *gin.Context) {
@@ -49,6 +49,7 @@ func HandleLogin(c *gin.Context) {
 }
 
 func HandleAuth(c *gin.Context) {
+	store_ := store.FromContext(c)
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -56,7 +57,7 @@ func HandleAuth(c *gin.Context) {
 
 	tmpuser, err := remote.Login(c, c.Writer, c.Request)
 	if err != nil {
-		logrus.Errorf("cannot authenticate user. %s", err)
+		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(303, "/login?error=oauth_error")
 		return
 	}
@@ -68,12 +69,12 @@ func HandleAuth(c *gin.Context) {
 	config := ToConfig(c)
 
 	// get the user from the database
-	u, err := store.GetUserLogin(c, tmpuser.Login)
+	u, err := store_.GetUserLogin(tmpuser.Login)
 	if err != nil {
 
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
-			logrus.Errorf("cannot register %s. registration closed", tmpuser.Login)
+			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
 			c.Redirect(303, "/login?error=access_denied")
 			return
 		}
@@ -83,7 +84,7 @@ func HandleAuth(c *gin.Context) {
 		if len(config.Orgs) != 0 {
 			teams, terr := remote.Teams(c, tmpuser)
 			if terr != nil || config.IsMember(teams) == false {
-				logrus.Errorf("cannot verify team membership for %s.", u.Login)
+				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
 			}
@@ -102,8 +103,8 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// insert the user into the database
-		if err := store.CreateUser(c, u); err != nil {
-			logrus.Errorf("cannot insert %s. %s", u.Login, err)
+		if err := store_.CreateUser(u); err != nil {
+			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
 			c.Redirect(303, "/login?error=internal_error")
 			return
 		}
@@ -120,14 +121,14 @@ func HandleAuth(c *gin.Context) {
 	if len(config.Orgs) != 0 {
 		teams, terr := remote.Teams(c, u)
 		if terr != nil || config.IsMember(teams) == false {
-			logrus.Errorf("cannot verify team membership for %s.", u.Login)
+			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
 			return
 		}
 	}
 
-	if err := store.UpdateUser(c, u); err != nil {
-		logrus.Errorf("cannot update %s. %s", u.Login, err)
+	if err := store_.UpdateUser(u); err != nil {
+		log.Error().Msgf("cannot update %s. %s", u.Login, err)
 		c.Redirect(303, "/login?error=internal_error")
 		return
 	}
@@ -135,7 +136,7 @@ func HandleAuth(c *gin.Context) {
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
-		logrus.Errorf("cannot create token for %s. %s", u.Login, err)
+		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
 		c.Redirect(303, "/login?error=internal_error")
 		return
 	}
@@ -157,6 +158,8 @@ func GetLogout(c *gin.Context) {
 }
 
 func GetLoginToken(c *gin.Context) {
+	store_ := store.FromContext(c)
+
 	in := &tokenPayload{}
 	err := c.Bind(in)
 	if err != nil {
@@ -170,7 +173,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	user, err := store.GetUserLogin(c, login)
+	user, err := store_.GetUserLogin(login)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return

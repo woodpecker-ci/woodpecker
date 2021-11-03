@@ -6,7 +6,7 @@
       "steps": [
         {
           "name": "pipeline_clone",
-          "image": "plugins/git:latest",
+          "image": "woodpeckerci/plugin-git:latest",
           "working_dir": "/go/src/github.com/go-sql-driver/mysql",
           "environment": {
             "CI": "pipec",

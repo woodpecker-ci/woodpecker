@@ -26,6 +26,7 @@ FROM repos LEFT OUTER JOIN (
 ) b ON b.build_repo_id = repos.repo_id
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
 WHERE perms.perm_user_id = $1
+  AND (perms.perm_push = true OR perms.perm_admin = true)
   AND repos.repo_active = TRUE
 ORDER BY repo_full_name ASC;
 
@@ -55,5 +56,6 @@ FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
 INNER JOIN builds ON builds.build_repo_id = repos.repo_id
 WHERE perms.perm_user_id = $1
+  AND (perms.perm_push = true OR perms.perm_admin = true)
 ORDER BY build_id DESC
 LIMIT 50

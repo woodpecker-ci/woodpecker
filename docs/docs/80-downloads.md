@@ -1,6 +1,6 @@
 # Downloads
 
-## Binaries
+## Binaries & DEB, RPM
 
 [Latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
 
@@ -24,7 +24,3 @@ docker pull woodpeckerci/woodpecker-agent:latest-alpine
 docker pull woodpeckerci/woodpecker-cli:latest
 docker pull woodpeckerci/woodpecker-cli:latest-alpine
 ```
-
-## APK, DEB, RPM
-
-TODO

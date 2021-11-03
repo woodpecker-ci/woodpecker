@@ -8,6 +8,7 @@ type Info struct {
 	Host       *HostInfo              `json:"host"`
 	Store      *StoreInfo             `json:"store"`
 	Registries map[string]interface{} `json:"registries"`
+	Plugins    Plugins                `json:"plugins"`
 	Version    Version                `json:"version"`
 }
 
@@ -35,6 +36,7 @@ type HostInfo struct {
 	Hostname          string           `json:"hostname"`
 	IDMappings        IDMappings       `json:"idMappings,omitempty"`
 	Kernel            string           `json:"kernel"`
+	LogDriver         string           `json:"logDriver"`
 	MemFree           int64            `json:"memFree"`
 	MemTotal          int64            `json:"memTotal"`
 	OCIRuntime        *OCIRuntimeInfo  `json:"ociRuntime"`
@@ -76,7 +78,9 @@ type IDMappings struct {
 // for libpod
 type DistributionInfo struct {
 	Distribution string `json:"distribution"`
+	Variant      string `json:"variant,omitempty"`
 	Version      string `json:"version"`
+	Codename     string `json:"codename,omitempty"`
 }
 
 // ConmonInfo describes the conmon executable being used
@@ -122,4 +126,12 @@ type ContainerStore struct {
 	Paused  int `json:"paused"`
 	Running int `json:"running"`
 	Stopped int `json:"stopped"`
+}
+
+type Plugins struct {
+	Volume  []string `json:"volume"`
+	Network []string `json:"network"`
+	Log     []string `json:"log"`
+	// FIXME what should we do with Authorization, docker seems to return nothing by default
+	// Authorization []string `json:"authorization"`
 }

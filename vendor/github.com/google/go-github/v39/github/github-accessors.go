@@ -4516,6 +4516,22 @@ func (f *ForkEvent) GetSender() *User {
 	return f.Sender
 }
 
+// GetPreviousTagName returns the PreviousTagName field if it's non-nil, zero value otherwise.
+func (g *GenerateNotesOptions) GetPreviousTagName() string {
+	if g == nil || g.PreviousTagName == nil {
+		return ""
+	}
+	return *g.PreviousTagName
+}
+
+// GetTargetCommitish returns the TargetCommitish field if it's non-nil, zero value otherwise.
+func (g *GenerateNotesOptions) GetTargetCommitish() string {
+	if g == nil || g.TargetCommitish == nil {
+		return ""
+	}
+	return *g.TargetCommitish
+}
+
 // GetInclude returns the Include field if it's non-nil, zero value otherwise.
 func (g *GetAuditLogOptions) GetInclude() string {
 	if g == nil || g.Include == nil {
@@ -5234,6 +5250,14 @@ func (h *HookConfig) GetInsecureSSL() string {
 		return ""
 	}
 	return *h.InsecureSSL
+}
+
+// GetSecret returns the Secret field if it's non-nil, zero value otherwise.
+func (h *HookConfig) GetSecret() string {
+	if h == nil || h.Secret == nil {
+		return ""
+	}
+	return *h.Secret
 }
 
 // GetURL returns the URL field if it's non-nil, zero value otherwise.
@@ -6562,6 +6586,14 @@ func (i *IssueCommentEvent) GetIssue() *Issue {
 		return nil
 	}
 	return i.Issue
+}
+
+// GetOrganization returns the Organization field.
+func (i *IssueCommentEvent) GetOrganization() *Organization {
+	if i == nil {
+		return nil
+	}
+	return i.Organization
 }
 
 // GetRepo returns the Repo field.
@@ -9212,12 +9244,44 @@ func (p *Package) GetRegistry() *PackageRegistry {
 	return p.Registry
 }
 
+// GetRepository returns the Repository field.
+func (p *Package) GetRepository() *Repository {
+	if p == nil {
+		return nil
+	}
+	return p.Repository
+}
+
 // GetUpdatedAt returns the UpdatedAt field if it's non-nil, zero value otherwise.
 func (p *Package) GetUpdatedAt() Timestamp {
 	if p == nil || p.UpdatedAt == nil {
 		return Timestamp{}
 	}
 	return *p.UpdatedAt
+}
+
+// GetURL returns the URL field if it's non-nil, zero value otherwise.
+func (p *Package) GetURL() string {
+	if p == nil || p.URL == nil {
+		return ""
+	}
+	return *p.URL
+}
+
+// GetVersionCount returns the VersionCount field if it's non-nil, zero value otherwise.
+func (p *Package) GetVersionCount() int64 {
+	if p == nil || p.VersionCount == nil {
+		return 0
+	}
+	return *p.VersionCount
+}
+
+// GetVisibility returns the Visibility field if it's non-nil, zero value otherwise.
+func (p *Package) GetVisibility() string {
+	if p == nil || p.Visibility == nil {
+		return ""
+	}
+	return *p.Visibility
 }
 
 // GetAction returns the Action field if it's non-nil, zero value otherwise.
@@ -9362,6 +9426,46 @@ func (p *PackageFile) GetUpdatedAt() Timestamp {
 		return Timestamp{}
 	}
 	return *p.UpdatedAt
+}
+
+// GetPackageType returns the PackageType field if it's non-nil, zero value otherwise.
+func (p *PackageListOptions) GetPackageType() string {
+	if p == nil || p.PackageType == nil {
+		return ""
+	}
+	return *p.PackageType
+}
+
+// GetState returns the State field if it's non-nil, zero value otherwise.
+func (p *PackageListOptions) GetState() string {
+	if p == nil || p.State == nil {
+		return ""
+	}
+	return *p.State
+}
+
+// GetVisibility returns the Visibility field if it's non-nil, zero value otherwise.
+func (p *PackageListOptions) GetVisibility() string {
+	if p == nil || p.Visibility == nil {
+		return ""
+	}
+	return *p.Visibility
+}
+
+// GetContainer returns the Container field.
+func (p *PackageMetadata) GetContainer() *PackageContainerMetadata {
+	if p == nil {
+		return nil
+	}
+	return p.Container
+}
+
+// GetPackageType returns the PackageType field if it's non-nil, zero value otherwise.
+func (p *PackageMetadata) GetPackageType() string {
+	if p == nil || p.PackageType == nil {
+		return ""
+	}
+	return *p.PackageType
 }
 
 // GetAboutURL returns the AboutURL field if it's non-nil, zero value otherwise.
@@ -9564,6 +9668,30 @@ func (p *PackageVersion) GetManifest() string {
 	return *p.Manifest
 }
 
+// GetMetadata returns the Metadata field.
+func (p *PackageVersion) GetMetadata() *PackageMetadata {
+	if p == nil {
+		return nil
+	}
+	return p.Metadata
+}
+
+// GetName returns the Name field if it's non-nil, zero value otherwise.
+func (p *PackageVersion) GetName() string {
+	if p == nil || p.Name == nil {
+		return ""
+	}
+	return *p.Name
+}
+
+// GetPackageHTMLURL returns the PackageHTMLURL field if it's non-nil, zero value otherwise.
+func (p *PackageVersion) GetPackageHTMLURL() string {
+	if p == nil || p.PackageHTMLURL == nil {
+		return ""
+	}
+	return *p.PackageHTMLURL
+}
+
 // GetPrerelease returns the Prerelease field if it's non-nil, zero value otherwise.
 func (p *PackageVersion) GetPrerelease() bool {
 	if p == nil || p.Prerelease == nil {
@@ -9618,6 +9746,14 @@ func (p *PackageVersion) GetUpdatedAt() Timestamp {
 		return Timestamp{}
 	}
 	return *p.UpdatedAt
+}
+
+// GetURL returns the URL field if it's non-nil, zero value otherwise.
+func (p *PackageVersion) GetURL() string {
+	if p == nil || p.URL == nil {
+		return ""
+	}
+	return *p.URL
 }
 
 // GetVersion returns the Version field if it's non-nil, zero value otherwise.
@@ -12220,6 +12356,14 @@ func (p *PushEvent) GetInstallation() *Installation {
 	return p.Installation
 }
 
+// GetOrganization returns the Organization field.
+func (p *PushEvent) GetOrganization() *Organization {
+	if p == nil {
+		return nil
+	}
+	return p.Organization
+}
+
 // GetPusher returns the Pusher field.
 func (p *PushEvent) GetPusher() *User {
 	if p == nil {
@@ -14330,6 +14474,14 @@ func (r *RepositoryRelease) GetDraft() bool {
 		return false
 	}
 	return *r.Draft
+}
+
+// GetGenerateReleaseNotes returns the GenerateReleaseNotes field if it's non-nil, zero value otherwise.
+func (r *RepositoryRelease) GetGenerateReleaseNotes() bool {
+	if r == nil || r.GenerateReleaseNotes == nil {
+		return false
+	}
+	return *r.GenerateReleaseNotes
 }
 
 // GetHTMLURL returns the HTMLURL field if it's non-nil, zero value otherwise.

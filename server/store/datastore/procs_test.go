@@ -230,7 +230,7 @@ func TestProcIndexes(t *testing.T) {
 			Name:    "clone",
 		},
 	}); err == nil {
-		t.Errorf("Unexpected error: dupliate pid")
+		t.Errorf("Unexpected error: duplicate pid")
 	}
 
 	// // fail due to duplicate process name
@@ -244,7 +244,7 @@ func TestProcIndexes(t *testing.T) {
 	// 		Name:    "build",
 	// 	},
 	// }); err == nil {
-	// 	t.Errorf("Unexpected error: dupliate name")
+	// 	t.Errorf("Unexpected error: duplicate name")
 	// }
 }
 

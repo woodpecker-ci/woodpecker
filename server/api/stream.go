@@ -22,15 +22,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 //
@@ -55,12 +55,12 @@ func EventStreamSSE(c *gin.Context) {
 	io.WriteString(rw, ": ping\n\n")
 	flusher.Flush()
 
-	logrus.Debugf("user feed: connection opened")
+	log.Debug().Msg("user feed: connection opened")
 
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := store.FromContext(c).RepoList(user)
+		repos, _ := store.FromContext(c).RepoList(user, false)
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}
@@ -74,7 +74,7 @@ func EventStreamSSE(c *gin.Context) {
 	defer func() {
 		cancel()
 		close(eventc)
-		logrus.Debugf("user feed: connection closed")
+		log.Debug().Msg("user feed: connection closed")
 	}()
 
 	go func() {
@@ -133,44 +133,28 @@ func LogStreamSSE(c *gin.Context) {
 	io.WriteString(rw, ": ping\n\n")
 	flusher.Flush()
 
-	// repo := session.Repo(c)
-	//
+	repo := session.Repo(c)
+	store_ := store.FromContext(c)
+
 	// // parse the build number and job sequence number from
 	// // the repquest parameter.
-	// num, _ := strconv.Atoi(c.Params.ByName("number"))
-	// ppid, _ := strconv.Atoi(c.Params.ByName("ppid"))
-	// name := c.Params.ByName("proc")
-	//
-	// build, err := store.GetBuildNumber(c, repo, num)
-	// if err != nil {
-	// 	c.AbortWithError(404, err)
-	// 	return
-	// }
-	//
-	// proc, err := store.FromContext(c).ProcChild(build, ppid, name)
-	// if err != nil {
-	// 	c.AbortWithError(404, err)
-	// 	return
-	// }
-
-	repo := session.Repo(c)
 	buildn, _ := strconv.Atoi(c.Param("build"))
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
-	build, err := store.GetBuildNumber(c, repo, buildn)
+	build, err := store_.GetBuildNumber(repo, buildn)
 	if err != nil {
-		logrus.Debugln("stream cannot get build number.", err)
+		log.Debug().Msgf("stream cannot get build number: %v", err)
 		io.WriteString(rw, "event: error\ndata: build not found\n\n")
 		return
 	}
-	proc, err := store.FromContext(c).ProcFind(build, jobn)
+	proc, err := store_.ProcFind(build, jobn)
 	if err != nil {
-		logrus.Debugln("stream cannot get proc number.", err)
+		log.Debug().Msgf("stream cannot get proc number: %v", err)
 		io.WriteString(rw, "event: error\ndata: process not found\n\n")
 		return
 	}
 	if proc.State != model.StatusRunning {
-		logrus.Debugln("stream not found.")
+		log.Debug().Msg("stream not found.")
 		io.WriteString(rw, "event: error\ndata: stream not found\n\n")
 		return
 	}
@@ -180,12 +164,12 @@ func LogStreamSSE(c *gin.Context) {
 		context.Background(),
 	)
 
-	logrus.Debugf("log stream: connection opened")
+	log.Debug().Msgf("log stream: connection opened")
 
 	defer func() {
 		cancel()
 		close(logc)
-		logrus.Debugf("log stream: connection closed")
+		log.Debug().Msgf("log stream: connection closed")
 	}()
 
 	go func() {
@@ -214,7 +198,7 @@ func LogStreamSSE(c *gin.Context) {
 		c.Request.Header.Get("Last-Event-ID"),
 	)
 	if last != 0 {
-		logrus.Debugf("log stream: reconnect: last-event-id: %d", last)
+		log.Debug().Msgf("log stream: reconnect: last-event-id: %d", last)
 	}
 
 	// retry: 10000\n

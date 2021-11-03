@@ -34,19 +34,19 @@ pipeline:
     when:
       status: [success, failure]
 
-  when-plattform:
+  when-platform:
     image: alpine
     commands:
       - echo "test"
     when:
-      plattform: linux/amd64
+      platform: linux/amd64
 
-  when-plattform-array:
+  when-platform-array:
     image: alpine
     commands:
       - echo "test"
     when:
-      plattform: [ linux/*, windows/amd64 ]
+      platform: [ linux/*, windows/amd64 ]
 
   when-environment:
     image: alpine

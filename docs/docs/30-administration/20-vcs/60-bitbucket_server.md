@@ -38,7 +38,7 @@ This stores the private RSA certificate in `key.pem`. The next command generates
 openssl rsa -in /etc/bitbucket/key.pem -pubout >> /etc/bitbucket/key.pub
 ```
 
-Please note that the private key file can be mounted into your Woodpecker conatiner at runtime or as an environment variable
+Please note that the private key file can be mounted into your Woodpecker container at runtime or as an environment variable
 
 Private key file mounted into your Woodpecker container at runtime as a volume.
 

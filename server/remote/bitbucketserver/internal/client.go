@@ -23,11 +23,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-
 	"strings"
 
 	"github.com/mrjones/oauth"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -57,7 +57,7 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 	token.Token = AccessToken
 	client, err := consumer.MakeHttpClient(&token)
 	if err != nil {
-		log.Error(err)
+		log.Err(err).Msg("")
 	}
 
 	return &Client{
@@ -113,7 +113,7 @@ func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
 		defer response.Body.Close()
 	}
 	if err != nil {
-		log.Error(err)
+		log.Err(err).Msg("")
 	}
 	contents, err := ioutil.ReadAll(response.Body)
 	repo := Repo{}
@@ -154,14 +154,14 @@ func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref
 		defer response.Body.Close()
 	}
 	if err != nil {
-		log.Error(err)
+		log.Err(err).Msg("")
 	}
 	if response.StatusCode == 404 {
 		return nil, nil
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Error(err)
+		log.Err(err).Msg("")
 	}
 	return responseBytes, nil
 }

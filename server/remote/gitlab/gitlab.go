@@ -25,12 +25,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
-
-	"github.com/xanzy/go-gitlab"
 )
 
 const (
@@ -175,7 +175,7 @@ func (g *Gitlab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 			ListOptions:    gitlab.ListOptions{Page: i, PerPage: perPage},
 			AllAvailable:   gitlab.Bool(false),
-			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
+			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
 		}, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -232,7 +232,7 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions:    gitlab.ListOptions{PerPage: perPage},
-		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check whats best here
+		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.HideArchives {
 		opts.Archived = gitlab.Bool(false)
@@ -432,6 +432,30 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	_, err = client.Services.DeleteDroneCIService(repo_.ID, gitlab.WithContext(ctx))
 
 	return err
+}
+
+// Branches returns the names of all branches for the named repository.
+func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	gitlabBranches, _, err := client.Branches.ListBranches(repo_.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gitlabBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the post-commit hook from the Request body

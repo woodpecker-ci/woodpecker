@@ -20,10 +20,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/franela/goblin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
-
-	"github.com/franela/goblin"
 )
 
 func Test_hook(t *testing.T) {

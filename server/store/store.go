@@ -18,8 +18,6 @@ import (
 	"io"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-
-	"golang.org/x/net/context"
 )
 
 type Store interface {
@@ -101,8 +99,8 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	RepoList(*model.User) ([]*model.Repo, error)
-	RepoListLatest(*model.User) ([]*model.Feed, error)
+	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
+	RepoListLatest(user *model.User) ([]*model.Feed, error)
 	RepoBatch([]*model.Repo) error
 
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -156,96 +154,4 @@ type Store interface {
 	TaskDelete(string) error
 
 	Ping() error
-}
-
-// GetUser gets a user by unique ID.
-func GetUser(c context.Context, id int64) (*model.User, error) {
-	return FromContext(c).GetUser(id)
-}
-
-// GetUserLogin gets a user by unique Login name.
-func GetUserLogin(c context.Context, login string) (*model.User, error) {
-	return FromContext(c).GetUserLogin(login)
-}
-
-// GetUserList gets a list of all users in the system.
-func GetUserList(c context.Context) ([]*model.User, error) {
-	return FromContext(c).GetUserList()
-}
-
-// GetUserCount gets a count of all users in the system.
-func GetUserCount(c context.Context) (int, error) {
-	return FromContext(c).GetUserCount()
-}
-
-func CreateUser(c context.Context, user *model.User) error {
-	return FromContext(c).CreateUser(user)
-}
-
-func UpdateUser(c context.Context, user *model.User) error {
-	return FromContext(c).UpdateUser(user)
-}
-
-func DeleteUser(c context.Context, user *model.User) error {
-	return FromContext(c).DeleteUser(user)
-}
-
-func GetRepo(c context.Context, id int64) (*model.Repo, error) {
-	return FromContext(c).GetRepo(id)
-}
-
-func GetRepoName(c context.Context, name string) (*model.Repo, error) {
-	return FromContext(c).GetRepoName(name)
-}
-
-func GetRepoOwnerName(c context.Context, owner, name string) (*model.Repo, error) {
-	return FromContext(c).GetRepoName(owner + "/" + name)
-}
-
-func CreateRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).CreateRepo(repo)
-}
-
-func UpdateRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).UpdateRepo(repo)
-}
-
-func DeleteRepo(c context.Context, repo *model.Repo) error {
-	return FromContext(c).DeleteRepo(repo)
-}
-
-func GetBuild(c context.Context, id int64) (*model.Build, error) {
-	return FromContext(c).GetBuild(id)
-}
-
-func GetBuildNumber(c context.Context, repo *model.Repo, num int) (*model.Build, error) {
-	return FromContext(c).GetBuildNumber(repo, num)
-}
-
-func GetBuildRef(c context.Context, repo *model.Repo, ref string) (*model.Build, error) {
-	return FromContext(c).GetBuildRef(repo, ref)
-}
-
-func GetBuildCommit(c context.Context, repo *model.Repo, sha, branch string) (*model.Build, error) {
-	return FromContext(c).GetBuildCommit(repo, sha, branch)
-}
-
-func GetBuildLast(c context.Context, repo *model.Repo, branch string) (*model.Build, error) {
-	return FromContext(c).GetBuildLast(repo, branch)
-}
-
-func GetBuildLastBefore(c context.Context, repo *model.Repo, branch string, number int64) (*model.Build, error) {
-	return FromContext(c).GetBuildLastBefore(repo, branch, number)
-}
-
-func GetBuildList(c context.Context, repo *model.Repo, page int) ([]*model.Build, error) {
-	return FromContext(c).GetBuildList(repo, page)
-}
-
-func GetBuildQueue(c context.Context) ([]*model.Feed, error) {
-	return FromContext(c).GetBuildQueue()
-}
-
-func CreateBuild(c context.Context, build *model.Build, procs ...*model.Proc) error {
-	return FromContext(c).CreateBuild(build, procs...)
 }

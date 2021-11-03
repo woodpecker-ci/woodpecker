@@ -9,6 +9,7 @@ pipeline:
     commands:
       - make test
       - make vet
+      - make lint
       - make formatcheck
 
   test-frontend:
@@ -61,8 +62,17 @@ pipeline:
     commands:
       - make release-cli
 
+  build-deb-rpm:
+    group: bundle
+    image: golang:1.16
+    commands:
+      - make bundle
+    when:
+      event: [push, tag]
+      branch: master
+
   publish-server:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
@@ -74,7 +84,7 @@ pipeline:
       event: push
 
   publish-server-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
@@ -86,7 +96,7 @@ pipeline:
       event: push
 
   publish-agent:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
@@ -98,7 +108,7 @@ pipeline:
       event: push
 
   publish-agent-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
@@ -132,7 +142,7 @@ pipeline:
       event: push
 
   release-server:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
@@ -142,7 +152,7 @@ pipeline:
       event: tag
 
   release-server-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
@@ -152,7 +162,7 @@ pipeline:
       event: tag
 
   release-agent:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
@@ -162,7 +172,7 @@ pipeline:
       event: tag
 
   release-agent-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
@@ -204,6 +214,8 @@ pipeline:
     image: plugins/github-release
     files:
       - dist/*.tar.gz
+      - dist/*.deb
+      - dist/*.rpm
       - dist/checksums.txt
     title: ${DRONE_TAG##v}
     secrets:

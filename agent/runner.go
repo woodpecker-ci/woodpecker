@@ -23,15 +23,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	"github.com/tevino/abool"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-
-	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
 )
 
 // TODO: Implement log streaming.

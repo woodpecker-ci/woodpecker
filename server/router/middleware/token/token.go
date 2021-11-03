@@ -17,12 +17,13 @@ package token
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func Refresh(c *gin.Context) {
@@ -54,13 +55,13 @@ func Refresh(c *gin.Context) {
 	// database.
 	ok, _ = refresher.Refresh(c, user)
 	if ok {
-		err := store.UpdateUser(c, user)
+		err := store.FromContext(c).UpdateUser(user)
 		if err != nil {
 			// we only log the error at this time. not sure
 			// if we really want to fail the request, do we?
-			log.Errorf("cannot refresh access token for %s. %s", user.Login, err)
+			log.Error().Msgf("cannot refresh access token for %s. %s", user.Login, err)
 		} else {
-			log.Infof("refreshed access token for %s", user.Login)
+			log.Info().Msgf("refreshed access token for %s", user.Login)
 		}
 	}
 

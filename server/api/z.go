@@ -15,10 +15,14 @@
 package api
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // Health endpoint returns a 500 if the server state is unhealthy.
@@ -36,4 +40,32 @@ func Version(c *gin.Context) {
 		"source":  "https://github.com/woodpecker-ci/woodpecker",
 		"version": version.String(),
 	})
+}
+
+// LogLevel endpoint returns the current logging level
+func LogLevel(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"log-level": zerolog.GlobalLevel().String(),
+	})
+}
+
+// SetLogLevel endpoint allows setting the logging level via API
+func SetLogLevel(c *gin.Context) {
+	logLevel := struct {
+		LogLevel string `json:"log-level"`
+	}{}
+	if err := c.Bind(&logLevel); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	lvl, err := zerolog.ParseLevel(logLevel.LogLevel)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	log.Log().Msgf("log level set to %s", lvl.String())
+	zerolog.SetGlobalLevel(lvl)
+	c.JSON(200, logLevel)
 }

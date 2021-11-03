@@ -17,7 +17,8 @@ package model
 import (
 	"context"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
@@ -101,11 +102,11 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) err
 func (q *persistentQueue) Poll(c context.Context, f queue.Filter) (*queue.Task, error) {
 	task, err := q.Queue.Poll(c, f)
 	if task != nil {
-		logrus.Debugf("pull queue item: %s: remove from backup", task.ID)
+		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
 		if derr := q.store.TaskDelete(task.ID); derr != nil {
-			logrus.Errorf("pull queue item: %s: failed to remove from backup: %s", task.ID, derr)
+			log.Error().Msgf("pull queue item: %s: failed to remove from backup: %s", task.ID, derr)
 		} else {
-			logrus.Debugf("pull queue item: %s: successfully removed from backup", task.ID)
+			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
 		}
 	}
 	return task, err

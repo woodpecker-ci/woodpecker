@@ -29,19 +29,18 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/sirupsen/logrus"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -78,10 +77,11 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 
 func PostHook(c *gin.Context) {
 	remote_ := remote.FromContext(c)
+	store_ := store.FromContext(c)
 
 	tmpRepo, build, err := remote_.Hook(c.Request)
 	if err != nil {
-		logrus.Errorf("failure to parse hook. %s", err)
+		log.Error().Msgf("failure to parse hook. %s", err)
 		c.AbortWithError(400, err)
 		return
 	}
@@ -90,7 +90,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if tmpRepo == nil {
-		logrus.Errorf("failure to ascertain repo from hook.")
+		log.Error().Msgf("failure to ascertain repo from hook.")
 		c.Writer.WriteHeader(400)
 		return
 	}
@@ -99,19 +99,19 @@ func PostHook(c *gin.Context) {
 	// wrapped in square brackets appear in the commit message
 	skipMatch := skipRe.FindString(build.Message)
 	if len(skipMatch) > 0 {
-		logrus.Infof("ignoring hook. %s found in %s", skipMatch, build.Commit)
+		log.Info().Msgf("ignoring hook. %s found in %s", skipMatch, build.Commit)
 		c.Writer.WriteHeader(204)
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, tmpRepo.Owner, tmpRepo.Name)
+	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
-		logrus.Errorf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
+		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
 		c.AbortWithError(404, err)
 		return
 	}
 	if !repo.IsActive {
-		logrus.Errorf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
+		log.Error().Msgf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
 		c.AbortWithError(204, err)
 		return
 	}
@@ -121,32 +121,32 @@ func PostHook(c *gin.Context) {
 		return repo.Hash, nil
 	})
 	if err != nil {
-		logrus.Errorf("failure to parse token from hook for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to parse token from hook for %s. %s", repo.FullName, err)
 		c.AbortWithError(400, err)
 		return
 	}
 	if parsed.Text != repo.FullName {
-		logrus.Errorf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
+		log.Error().Msgf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
 		c.AbortWithStatus(403)
 		return
 	}
 
 	if repo.UserID == 0 {
-		logrus.Warnf("ignoring hook. repo %s has no owner.", repo.FullName)
+		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
 		c.Writer.WriteHeader(204)
 		return
 	}
 
 	if build.Event == model.EventPull && !repo.AllowPull {
-		logrus.Infof("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
+		log.Info().Msgf("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
 		c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
 		c.Writer.WriteHeader(204)
 		return
 	}
 
-	user, err := store.GetUser(c, repo.UserID)
+	user, err := store_.GetUser(repo.UserID)
 	if err != nil {
-		logrus.Errorf("failure to find repo owner %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
@@ -157,10 +157,10 @@ func PostHook(c *gin.Context) {
 	if refresher, ok := remote_.(remote.Refresher); ok {
 		ok, err := refresher.Refresh(c, user)
 		if err != nil {
-			logrus.Errorf("failed to refresh oauth2 token: %s", err)
+			log.Error().Msgf("failed to refresh oauth2 token: %s", err)
 		} else if ok {
-			if err := store.UpdateUser(c, user); err != nil {
-				logrus.Errorf("error while updating user: %s", err)
+			if err := store_.UpdateUser(user); err != nil {
+				log.Error().Msgf("error while updating user: %s", err)
 				// move forward
 			}
 		}
@@ -170,14 +170,14 @@ func PostHook(c *gin.Context) {
 	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
-		logrus.Errorf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
+		log.Error().Msgf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
 		c.AbortWithError(404, err)
 		return
 	}
 
 	filtered, err := branchFiltered(build, remoteYamlConfigs)
 	if err != nil {
-		logrus.Errorf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
 		c.AbortWithError(400, err)
 	}
 	if filtered {
@@ -199,9 +199,9 @@ func PostHook(c *gin.Context) {
 		build.Status = model.StatusBlocked
 	}
 
-	err = store.CreateBuild(c, build, build.Procs...)
+	err = store_.CreateBuild(build, build.Procs...)
 	if err != nil {
-		logrus.Errorf("failure to save commit for %s. %s", repo.FullName, err)
+		log.Error().Msgf("failure to save commit for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
 		return
 	}
@@ -210,7 +210,7 @@ func PostHook(c *gin.Context) {
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
-			logrus.Errorf("failure to find or persist build config for %s. %s", repo.FullName, err)
+			log.Error().Msgf("failure to find or persist build config for %s. %s", repo.FullName, err)
 			c.AbortWithError(500, err)
 			return
 		}
@@ -238,16 +238,16 @@ func PostHook(c *gin.Context) {
 
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
-		logrus.Debugf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 
 	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		logrus.Debugf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
+		log.Debug().Msgf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
 	}
 
 	// get the previous build so that we can send status change notifications
-	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
+	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
 
 	b := shared.ProcBuilder{
 		Repo:  repo,
@@ -262,16 +262,16 @@ func PostHook(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = shared.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
-			logrus.Errorf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
+		if _, err = shared.UpdateToStatusError(store_, *build, err); err != nil {
+			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store.FromContext(c).ProcCreate(build.Procs)
+	err = store_.ProcCreate(build.Procs)
 	if err != nil {
-		logrus.Errorf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
+		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
 
 	defer func() {
@@ -283,7 +283,7 @@ func PostHook(c *gin.Context) {
 				err = remote_.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
-				logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+				log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 			}
 		}
 	}()
@@ -294,14 +294,14 @@ func PostHook(c *gin.Context) {
 
 // TODO: parse yaml once and not for each filter function
 func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
-	logrus.Tracef("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
+	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
 		if err != nil {
-			logrus.Tracef("parse config '%s': %s", remoteYamlConfig.Name, err)
+			log.Trace().Msgf("parse config '%s': %s", remoteYamlConfig.Name, err)
 			return false, err
 		}
-		logrus.Tracef("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
+		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
 		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
 		} else {

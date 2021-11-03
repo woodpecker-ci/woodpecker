@@ -10,8 +10,13 @@ import (
 type PlayKubeOptions struct {
 	// Authfile - path to an authentication file.
 	Authfile string
+	// Indicator to build all images with Containerfile or Dockerfile
+	Build bool
 	// CertDir - to a directory containing TLS certifications and keys.
 	CertDir string
+	// Down indicates whether to bring contents of a yaml file "down"
+	// as in stop
+	Down bool
 	// Username for authenticating against the registry.
 	Username string
 	// Password for authenticating against the registry.
@@ -46,6 +51,8 @@ type PlayKubePod struct {
 	ID string
 	// Containers - the IDs of the containers running in the created pod.
 	Containers []string
+	// InitContainers - the IDs of the init containers to be run in the created pod.
+	InitContainers []string
 	// Logs - non-fatal errors and log messages while processing.
 	Logs []string
 	// ContainerErrors - any errors that occurred while starting containers
@@ -65,4 +72,14 @@ type PlayKubeReport struct {
 	Pods []PlayKubePod
 	// Volumes - volumes created by play kube.
 	Volumes []PlayKubeVolume
+	PlayKubeTeardown
+}
+
+// PlayKubeDownOptions are options for tearing down pods
+type PlayKubeDownOptions struct{}
+
+// PlayKubeDownReport contains the results of tearing down play kube
+type PlayKubeTeardown struct {
+	StopReport []*PodStopReport
+	RmReport   []*PodRmReport
 }

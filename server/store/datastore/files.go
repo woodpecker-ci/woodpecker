@@ -19,10 +19,10 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/russross/meddler"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
-
-	"github.com/russross/meddler"
 )
 
 func (db *datastore) FileList(build *model.Build) ([]*model.File, error) {

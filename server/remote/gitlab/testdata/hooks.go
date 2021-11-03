@@ -41,7 +41,7 @@ var ServiceHookPushBody = []byte(`{
   "checkout_sha": "16862e368d8ab812e48833b741dad720d6e2cb7f",
   "message": null,
   "user_id": 2,
-  "user_name": "te st",
+  "user_name": "the test",
   "user_username": "test",
   "user_email": "",
   "user_avatar": "https://www.gravatar.com/avatar/dd46a756faad4727fb679320751f6dea?s=80&d=identicon",
@@ -54,7 +54,7 @@ var ServiceHookPushBody = []byte(`{
     "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
-    "namespace": "te st",
+    "namespace": "the test",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
     "default_branch": "develop",
@@ -72,7 +72,7 @@ var ServiceHookPushBody = []byte(`{
       "timestamp": "2021-09-27T04:46:14+00:00",
       "url": "http://10.40.8.5:3200/test/woodpecker/-/commit/16862e368d8ab812e48833b741dad720d6e2cb7f",
       "author": {
-        "name": "te st",
+        "name": "the test",
         "email": "test@test.test"
       },
       "added": [
@@ -110,7 +110,7 @@ var ServiceHookTagPushBody = []byte(`{
   "checkout_sha": "16862e368d8ab812e48833b741dad720d6e2cb7f",
   "message": "hi",
   "user_id": 2,
-  "user_name": "te st",
+  "user_name": "the test",
   "user_username": "test",
   "user_email": "",
   "user_avatar": "https://www.gravatar.com/avatar/dd46a756faad4727fb679320751f6dea?s=80&d=identicon",
@@ -123,7 +123,7 @@ var ServiceHookTagPushBody = []byte(`{
     "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
-    "namespace": "te st",
+    "namespace": "the test",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
     "default_branch": "develop",
@@ -141,7 +141,7 @@ var ServiceHookTagPushBody = []byte(`{
       "timestamp": "2021-09-27T04:46:14+00:00",
       "url": "http://10.40.8.5:3200/test/woodpecker/-/commit/16862e368d8ab812e48833b741dad720d6e2cb7f",
       "author": {
-        "name": "te st",
+        "name": "the test",
         "email": "test@test.test"
       },
       "added": [
@@ -175,7 +175,7 @@ var ServiceHookMergeRequestBody = []byte(`{
   "event_type": "merge_request",
   "user": {
     "id": 2,
-    "name": "te st",
+    "name": "the test",
     "username": "test",
     "avatar_url": "https://www.gravatar.com/avatar/dd46a756faad4727fb679320751f6dea?s=80&d=identicon",
     "email": "test@test.test"
@@ -188,7 +188,7 @@ var ServiceHookMergeRequestBody = []byte(`{
     "avatar_url": null,
     "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
     "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
-    "namespace": "te st",
+    "namespace": "the test",
     "visibility_level": 20,
     "path_with_namespace": "test/woodpecker",
     "default_branch": "master",
@@ -235,7 +235,7 @@ var ServiceHookMergeRequestBody = []byte(`{
       "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
       "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
       "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
-      "namespace": "te st",
+      "namespace": "the test",
       "visibility_level": 20,
       "path_with_namespace": "test/woodpecker",
       "default_branch": "develop",
@@ -253,7 +253,7 @@ var ServiceHookMergeRequestBody = []byte(`{
       "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
       "git_ssh_url": "git@10.40.8.5:test/woodpecker.git",
       "git_http_url": "http://10.40.8.5:3200/test/woodpecker.git",
-      "namespace": "te st",
+      "namespace": "the test",
       "visibility_level": 20,
       "path_with_namespace": "test/woodpecker",
       "default_branch": "develop",
@@ -270,7 +270,7 @@ var ServiceHookMergeRequestBody = []byte(`{
       "timestamp": "2021-09-27T05:01:20+00:00",
       "url": "http://10.40.8.5:3200/test/woodpecker/-/commit/0ab96a10266b95b4b533dcfd98738015fbe70889",
       "author": {
-        "name": "te st",
+        "name": "the test",
         "email": "test@test.test"
       }
     },

@@ -112,12 +112,12 @@ func NewConnectionWithIdentity(ctx context.Context, uri string, identity string)
 		return nil, errors.Errorf("unable to create connection. %q is not a supported schema", _url.Scheme)
 	}
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create %sClient", _url.Scheme)
+		return nil, errors.Wrapf(err, "unable to connect to Podman. failed to create %sClient", _url.Scheme)
 	}
 
 	ctx = context.WithValue(ctx, clientKey, &connection)
 	if err := pingNewConnection(ctx); err != nil {
-		return nil, errors.Wrap(err, "cannot connect to the Podman socket, please verify that Podman REST API service is running")
+		return nil, errors.Wrap(err, "unable to connect to Podman socket")
 	}
 	return ctx, nil
 }

@@ -22,29 +22,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 
-	oldcontext "golang.org/x/net/context"
-
-	grpcMetadata "google.golang.org/grpc/metadata"
+	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
+	grpcMetadata "google.golang.org/grpc/metadata"
+
+	"github.com/woodpecker-ci/expr"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/woodpecker-ci/expr"
 )
 
 type RPC struct {
@@ -64,7 +60,7 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
-			logrus.Debugf("agent connected: %s: polling", hostname[0])
+			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
 		}
 	}
 
@@ -109,19 +105,19 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 
 	pproc, err := s.store.ProcLoad(procID)
 	if err != nil {
-		log.Printf("error: rpc.update: cannot find pproc with id %d: %s", procID, err)
+		log.Error().Msgf("error: rpc.update: cannot find pproc with id %d: %s", procID, err)
 		return err
 	}
 
 	build, err := s.store.GetBuild(pproc.BuildID)
 	if err != nil {
-		log.Printf("error: cannot find build with id %d: %s", pproc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
 		return err
 	}
 
 	proc, err := s.store.ProcChild(build, pproc.PID, state.Proc)
 	if err != nil {
-		log.Printf("error: cannot find proc with name %s: %s", state.Proc, err)
+		log.Error().Msgf("error: cannot find proc with name %s: %s", state.Proc, err)
 		return err
 	}
 
@@ -135,12 +131,12 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 
 	repo, err := s.store.GetRepo(build.RepoID)
 	if err != nil {
-		log.Printf("error: cannot find repo with id %d: %s", build.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
 		return err
 	}
 
 	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
-		log.Printf("error: rpc.update: cannot update proc: %s", err)
+		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
 	}
 
 	build.Procs, _ = s.store.ProcList(build)
@@ -169,19 +165,19 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 
 	pproc, err := s.store.ProcLoad(procID)
 	if err != nil {
-		log.Printf("error: cannot find parent proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find parent proc with id %d: %s", procID, err)
 		return err
 	}
 
 	build, err := s.store.GetBuild(pproc.BuildID)
 	if err != nil {
-		log.Printf("error: cannot find build with id %d: %s", pproc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
 		return err
 	}
 
 	proc, err := s.store.ProcChild(build, pproc.PID, file.Proc)
 	if err != nil {
-		log.Printf("error: cannot find child proc with name %s: %s", file.Proc, err)
+		log.Error().Msgf("error: cannot find child proc with name %s: %s", file.Proc, err)
 		return err
 	}
 
@@ -242,7 +238,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	proc, err := s.store.ProcLoad(procID)
 	if err != nil {
-		log.Printf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
 		return err
 	}
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
@@ -255,19 +251,19 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	build, err := s.store.GetBuild(proc.BuildID)
 	if err != nil {
-		log.Printf("error: cannot find build with id %d: %s", proc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(build.RepoID)
 	if err != nil {
-		log.Printf("error: cannot find repo with id %d: %s", build.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
 		return err
 	}
 
 	if build.Status == model.StatusPending {
 		if build, err = shared.UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
-			log.Printf("error: init: cannot update build_id %d state: %s", build.ID, err)
+			log.Error().Msgf("error: init: cannot update build_id %d state: %s", build.ID, err)
 		}
 	}
 
@@ -299,24 +295,24 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	proc, err := s.store.ProcLoad(procID)
 	if err != nil {
-		log.Printf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
 		return err
 	}
 
 	build, err := s.store.GetBuild(proc.BuildID)
 	if err != nil {
-		log.Printf("error: cannot find build with id %d: %s", proc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(build.RepoID)
 	if err != nil {
-		log.Printf("error: cannot find repo with id %d: %s", build.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
 		return err
 	}
 
 	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
-		log.Printf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
 
 	var queueErr error
@@ -326,7 +322,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		queueErr = s.queue.Done(c, id, proc.State)
 	}
 	if queueErr != nil {
-		log.Printf("error: done: cannot ack proc_id %d: %s", procID, err)
+		log.Error().Msgf("error: done: cannot ack proc_id %d: %s", procID, err)
 	}
 
 	procs, _ := s.store.ProcList(build)
@@ -334,7 +330,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	if !isThereRunningStage(procs) {
 		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
-			log.Printf("error: done: cannot update build_id %d final state: %s", build.ID, err)
+			log.Error().Msgf("error: done: cannot update build_id %d final state: %s", build.ID, err)
 		}
 
 		if !isMultiPipeline(procs) {
@@ -347,7 +343,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Printf("error: done: cannot close build_id %d logger: %s", proc.ID, err)
+		log.Error().Msgf("error: done: cannot close build_id %d logger: %s", proc.ID, err)
 	}
 
 	s.notify(c, repo, build, procs)
@@ -385,7 +381,7 @@ func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedPr
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
 			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
-				log.Printf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
+				log.Error().Msgf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
 			}
 		}
 	}
@@ -428,7 +424,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 		err = s.remote.Status(ctx, user, repo, build, uri, proc)
 		if err != nil {
-			logrus.Errorf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 		}
 	}
 }
@@ -508,7 +504,7 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *WoodpeckerServer) Next(c oldcontext.Context, req *proto.NextRequest) (*proto.NextReply, error) {
+func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 		Expr:   req.GetFilter().GetExpr(),
@@ -531,7 +527,7 @@ func (s *WoodpeckerServer) Next(c oldcontext.Context, req *proto.NextRequest) (*
 	return res, err
 }
 
-func (s *WoodpeckerServer) Init(c oldcontext.Context, req *proto.InitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -545,7 +541,7 @@ func (s *WoodpeckerServer) Init(c oldcontext.Context, req *proto.InitRequest) (*
 	return res, err
 }
 
-func (s *WoodpeckerServer) Update(c oldcontext.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -559,7 +555,7 @@ func (s *WoodpeckerServer) Update(c oldcontext.Context, req *proto.UpdateRequest
 	return res, err
 }
 
-func (s *WoodpeckerServer) Upload(c oldcontext.Context, req *proto.UploadRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (*proto.Empty, error) {
 	file := &rpc.File{
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
@@ -575,7 +571,7 @@ func (s *WoodpeckerServer) Upload(c oldcontext.Context, req *proto.UploadRequest
 	return res, err
 }
 
-func (s *WoodpeckerServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
@@ -589,19 +585,19 @@ func (s *WoodpeckerServer) Done(c oldcontext.Context, req *proto.DoneRequest) (*
 	return res, err
 }
 
-func (s *WoodpeckerServer) Wait(c oldcontext.Context, req *proto.WaitRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Wait(c, req.GetId())
 	return res, err
 }
 
-func (s *WoodpeckerServer) Extend(c oldcontext.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.Extend(c, req.GetId())
 	return res, err
 }
 
-func (s *WoodpeckerServer) Log(c oldcontext.Context, req *proto.LogRequest) (*proto.Empty, error) {
+func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
 	line := &rpc.Line{
 		Out:  req.GetLine().GetOut(),
 		Pos:  int(req.GetLine().GetPos()),

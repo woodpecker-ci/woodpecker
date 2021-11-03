@@ -174,6 +174,41 @@ runs_on:
 	}
 }
 
+func TestPipelineName(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{Config: ".woodpecker"},
+		Curr:  &model.Build{},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			&remote.FileMeta{Name: ".woodpecker/lint.yml", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			&remote.FileMeta{Name: ".woodpecker/.test.yml", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pipelineNames := []string{buildItems[0].Proc.Name, buildItems[1].Proc.Name}
+	if !containsItemWithName("lint", buildItems) || !containsItemWithName("test", buildItems) {
+		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
+	}
+}
+
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 

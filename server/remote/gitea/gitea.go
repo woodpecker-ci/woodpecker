@@ -28,11 +28,11 @@ import (
 	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -422,6 +422,25 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	}
 
 	return nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range giteaBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the incoming Gitea hook and returns the Repository and Build

@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/russross/meddler"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )

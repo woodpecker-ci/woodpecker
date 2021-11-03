@@ -21,7 +21,7 @@ type Line struct {
 	Proc string `json:"proc,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omityempty"`
+	Pos  int    `json:"pos,omitempty"`
 	Out  string `json:"out,omitempty"`
 }
 

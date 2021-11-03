@@ -25,7 +25,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	)
 
 	networks := []backend.Conn{
-		backend.Conn{
+		{
 			Name:    fmt.Sprintf("%s_default", c.prefix),
 			Aliases: []string{container.Name},
 		},

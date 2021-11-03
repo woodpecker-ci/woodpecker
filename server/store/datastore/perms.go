@@ -15,10 +15,10 @@
 package datastore
 
 import (
+	"github.com/russross/meddler"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
-
-	"github.com/russross/meddler"
 )
 
 func (db *datastore) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {

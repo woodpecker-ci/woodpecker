@@ -27,12 +27,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
-
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -43,53 +45,70 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/logger"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/contrib/ginrus"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 )
 
 func loop(c *cli.Context) error {
 
-	// debug level if requested by user
-	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	if c.Bool("debug") {
-		logrus.SetReportCaller(true)
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		logrus.SetLevel(logrus.WarnLevel)
+	if c.Bool("pretty") {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{
+				Out:     os.Stderr,
+				NoColor: c.Bool("nocolor"),
+			},
+		)
 	}
 
+	// debug level if requested by user
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.Bool("debug") {
+		log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
+	}
+	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+
 	if c.String("server-host") == "" {
-		logrus.Fatalln("WOODPECKER_HOST is not properly configured")
+		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		logrus.Fatalln(
+		log.Fatal().Msg(
 			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
-		logrus.Warningln(
+		log.Warn().Msg(
 			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
-		logrus.Fatalln(
+		log.Fatal().Msg(
 			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
 	remote_, err := SetupRemote(c)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal().Err(err).Msg("")
 	}
 
-	store_ := setupStore(c)
+	store_, err := setupStore(c)
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+
 	setupEvilGlobals(c, store_, remote_)
 
 	proxyWebUI := c.String("www-proxy")
@@ -116,7 +135,7 @@ func loop(c *cli.Context) error {
 	// setup the server and start the listener
 	handler := router.Load(
 		webUIServe,
-		ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true),
+		logger.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
 		middleware.Store(c, store_),
@@ -130,7 +149,7 @@ func loop(c *cli.Context) error {
 
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
 		auther := &authorizer{
@@ -155,7 +174,7 @@ func loop(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
 		return nil
@@ -173,7 +192,7 @@ func loop(c *cli.Context) error {
 				Addr:    ":https",
 				Handler: handler,
 				TLSConfig: &tls.Config{
-					NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
+					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
 			return serve.ListenAndServeTLS(
@@ -216,7 +235,7 @@ func loop(c *cli.Context) error {
 			Handler: handler,
 			TLSConfig: &tls.Config{
 				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"http/1.1"}, // disable h2 because Safari :(
+				NextProtos:     []string{"h2", "http/1.1"},
 			},
 		}
 		return serve.ListenAndServeTLS("", "")
@@ -259,7 +278,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
 	server.Config.Server.Port = c.String("server-addr")
-	server.Config.Server.RepoConfig = c.String("repo-config")
+	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
@@ -280,7 +299,7 @@ func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, stream)
 }
 
-func (a *authorizer) unaryIntercaptor(ctx oldcontext.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if err := a.authorize(ctx); err != nil {
 		return nil, err
 	}

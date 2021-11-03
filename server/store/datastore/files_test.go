@@ -149,7 +149,7 @@ func TestFileIndexes(t *testing.T) {
 		},
 		bytes.NewBufferString("hello world"),
 	); err == nil {
-		t.Errorf("Unexpected error: dupliate pid")
+		t.Errorf("Unexpected error: duplicate pid")
 	}
 }
 

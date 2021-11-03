@@ -1,0 +1,37 @@
+name: "\U0001F4E6 Add plugin to official index"
+description: Add your plugin to the official index at https://woodpecker-ci.org/plugins
+labels: ["plugin"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this request!
+        After successfully applying we will create a repository with the name `woodpecker-ci/plugin-<your plugin name>` and grant
+        you write access to it. You will be able to manage things as wanted, just the main branch will be protected and needs approval
+        by a maintainer for security reasons.
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Plugin name
+    validations:
+      required: true
+  - type: textarea
+    id: plugin-description
+    attributes:
+      label: Short description of the plugin
+      description: A short the description about the plugin.
+      placeholder: Plugin description
+    validations:
+      required: true
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Validations
+      description: Before submitting the request, please make sure you do the following
+      options:
+        # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
+        #   required: true
+        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
+          required: true
+        - label: All plugin code must be licensed under a [FOSS license](https://opensource.org/licenses)
+          required: true

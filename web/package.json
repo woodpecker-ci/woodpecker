@@ -100,5 +100,8 @@
     "url-loader": "^0.5.9",
     "webpack": "^3.4.1",
     "webpack-dev-server": "^2.6.1"
+  },
+  "resolutions": {
+    "ua-parser-js": "^0.7.30"
   }
 }

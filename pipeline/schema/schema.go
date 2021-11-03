@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/shared/yml"
 	"github.com/xeipuuv/gojsonschema"
+
+	"github.com/woodpecker-ci/woodpecker/shared/yml"
 )
 
 //go:embed schema.json

@@ -7,6 +7,8 @@ import (
 
 	"github.com/containers/podman/v3/libpod/define"
 	"github.com/containers/podman/v3/pkg/specgen"
+	"github.com/containers/podman/v3/pkg/util"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 type PodKillOptions struct {
@@ -104,6 +106,14 @@ type PodRmReport struct {
 	Id  string //nolint
 }
 
+// PddSpec is an abstracted version of PodSpecGen designed to eventually accept options
+// not meant to be in a specgen
+type PodSpec struct {
+	PodSpecGen specgen.PodSpecGenerator
+}
+
+// PodCreateOptions provides all possible options for creating a pod and its infra container
+// swagger:model PodCreateOptions
 type PodCreateOptions struct {
 	CGroupParent       string
 	CreateCommand      []string
@@ -118,27 +128,169 @@ type PodCreateOptions struct {
 	Net                *NetOptions
 	Share              []string
 	Pid                string
+	Cpus               float64
+	CpusetCpus         string
+	Userns             specgen.Namespace
+}
+
+// PodLogsOptions describes the options to extract pod logs.
+type PodLogsOptions struct {
+	// Other fields are exactly same as ContainerLogOpts
+	ContainerLogsOptions
+	// If specified will only fetch the logs of specified container
+	ContainerName string
+}
+
+type ContainerCreateOptions struct {
+	Annotation        []string
+	Attach            []string
+	Authfile          string
+	BlkIOWeight       string
+	BlkIOWeightDevice []string
+	CapAdd            []string
+	CapDrop           []string
+	CgroupNS          string
+	CGroupsMode       string
+	CGroupParent      string
+	CIDFile           string
+	ConmonPIDFile     string
+	CPUPeriod         uint64
+	CPUQuota          int64
+	CPURTPeriod       uint64
+	CPURTRuntime      int64
+	CPUShares         uint64
+	CPUS              float64
+	CPUSetCPUs        string
+	CPUSetMems        string
+	Devices           []string
+	DeviceCGroupRule  []string
+	DeviceReadBPs     []string
+	DeviceReadIOPs    []string
+	DeviceWriteBPs    []string
+	DeviceWriteIOPs   []string
+	Entrypoint        *string
+	Env               []string
+	EnvHost           bool
+	EnvFile           []string
+	Expose            []string
+	GIDMap            []string
+	GroupAdd          []string
+	HealthCmd         string
+	HealthInterval    string
+	HealthRetries     uint
+	HealthStartPeriod string
+	HealthTimeout     string
+	Hostname          string
+	HTTPProxy         bool
+	ImageVolume       string
+	Init              bool
+	InitContainerType string
+	InitPath          string
+	Interactive       bool
+	IPC               string
+	KernelMemory      string
+	Label             []string
+	LabelFile         []string
+	LogDriver         string
+	LogOptions        []string
+	Memory            string
+	MemoryReservation string
+	MemorySwap        string
+	MemorySwappiness  int64
+	Name              string
+	NoHealthCheck     bool
+	OOMKillDisable    bool
+	OOMScoreAdj       int
+	Arch              string
+	OS                string
+	Variant           string
+	PID               string
+	PIDsLimit         *int64
+	Platform          string
+	Pod               string
+	PodIDFile         string
+	Personality       string
+	PreserveFDs       uint
+	Privileged        bool
+	PublishAll        bool
+	Pull              string
+	Quiet             bool
+	ReadOnly          bool
+	ReadOnlyTmpFS     bool
+	Restart           string
+	Replace           bool
+	Requires          []string
+	Rm                bool
+	RootFS            bool
+	Secrets           []string
+	SecurityOpt       []string
+	SdNotifyMode      string
+	ShmSize           string
+	SignaturePolicy   string
+	StopSignal        string
+	StopTimeout       uint
+	StorageOpt        []string
+	SubUIDName        string
+	SubGIDName        string
+	Sysctl            []string
+	Systemd           string
+	Timeout           uint
+	TLSVerify         bool
+	TmpFS             []string
+	TTY               bool
+	Timezone          string
+	Umask             string
+	UIDMap            []string
+	Ulimit            []string
+	User              string
+	UserNS            string
+	UTS               string
+	Mount             []string
+	Volume            []string
+	VolumesFrom       []string
+	Workdir           string
+	SeccompPolicy     string
+	PidFile           string
+	IsInfra           bool
+
+	Net *NetOptions
+
+	CgroupConf []string
 }
 
 type PodCreateReport struct {
 	Id string //nolint
 }
 
-func setNamespaces(p *PodCreateOptions) ([4]specgen.Namespace, error) {
-	allNS := [4]specgen.Namespace{}
-	if p.Pid != "" {
-		pid, err := specgen.ParseNamespace(p.Pid)
-		if err != nil {
-			return [4]specgen.Namespace{}, err
-		}
-		allNS[0] = pid
+func (p *PodCreateOptions) CPULimits() *specs.LinuxCPU {
+	cpu := &specs.LinuxCPU{}
+	hasLimits := false
+
+	if p.Cpus != 0 {
+		period, quota := util.CoresToPeriodAndQuota(p.Cpus)
+		cpu.Period = &period
+		cpu.Quota = &quota
+		hasLimits = true
 	}
-	return allNS, nil
+	if p.CpusetCpus != "" {
+		cpu.Cpus = p.CpusetCpus
+		hasLimits = true
+	}
+	if !hasLimits {
+		return cpu
+	}
+	return cpu
 }
 
-func (p *PodCreateOptions) ToPodSpecGen(s *specgen.PodSpecGenerator) error {
+func ToPodSpecGen(s specgen.PodSpecGenerator, p *PodCreateOptions) (*specgen.PodSpecGenerator, error) {
 	// Basic Config
 	s.Name = p.Name
+	s.InfraName = p.InfraName
+	out, err := specgen.ParseNamespace(p.Pid)
+	if err != nil {
+		return nil, err
+	}
+	s.Pid = out
 	s.Hostname = p.Hostname
 	s.Labels = p.Labels
 	s.NoInfra = !p.Infra
@@ -149,38 +301,46 @@ func (p *PodCreateOptions) ToPodSpecGen(s *specgen.PodSpecGenerator) error {
 		s.InfraConmonPidFile = p.InfraConmonPidFile
 	}
 	s.InfraImage = p.InfraImage
-	s.InfraName = p.InfraName
 	s.SharedNamespaces = p.Share
 	s.PodCreateCommand = p.CreateCommand
 
 	// Networking config
-	s.NetNS = p.Net.Network
-	s.StaticIP = p.Net.StaticIP
-	s.StaticMAC = p.Net.StaticMAC
-	s.PortMappings = p.Net.PublishPorts
-	s.CNINetworks = p.Net.CNINetworks
-	s.NetworkOptions = p.Net.NetworkOptions
-	if p.Net.UseImageResolvConf {
-		s.NoManageResolvConf = true
-	}
-	s.DNSServer = p.Net.DNSServers
-	s.DNSSearch = p.Net.DNSSearch
-	s.DNSOption = p.Net.DNSOptions
-	s.NoManageHosts = p.Net.NoHosts
-	s.HostAdd = p.Net.AddHosts
 
-	namespaces, err := setNamespaces(p)
-	if err != nil {
-		return err
-	}
-	if !namespaces[0].IsDefault() {
-		s.Pid = namespaces[0]
+	if p.Net != nil {
+		s.NetNS = p.Net.Network
+		s.StaticIP = p.Net.StaticIP
+		s.StaticMAC = p.Net.StaticMAC
+		s.PortMappings = p.Net.PublishPorts
+		s.CNINetworks = p.Net.CNINetworks
+		s.NetworkOptions = p.Net.NetworkOptions
+		if p.Net.UseImageResolvConf {
+			s.NoManageResolvConf = true
+		}
+		s.DNSServer = p.Net.DNSServers
+		s.DNSSearch = p.Net.DNSSearch
+		s.DNSOption = p.Net.DNSOptions
+		s.NoManageHosts = p.Net.NoHosts
+		s.HostAdd = p.Net.AddHosts
 	}
 
 	// Cgroup
 	s.CgroupParent = p.CGroupParent
 
-	return nil
+	// Resource config
+	cpuDat := p.CPULimits()
+	if s.ResourceLimits == nil {
+		s.ResourceLimits = &specs.LinuxResources{}
+		s.ResourceLimits.CPU = &specs.LinuxCPU{}
+	}
+	if cpuDat != nil {
+		s.ResourceLimits.CPU = cpuDat
+		if p.Cpus != 0 {
+			s.CPUPeriod = *cpuDat.Period
+			s.CPUQuota = *cpuDat.Quota
+		}
+	}
+	s.Userns = p.Userns
+	return &s, nil
 }
 
 type PodPruneOptions struct {
@@ -273,4 +433,23 @@ func ValidatePodStatsOptions(args []string, options *PodStatsOptions) error {
 	default:
 		return errors.New("--all, --latest and arguments cannot be used together")
 	}
+}
+
+// Converts PodLogOptions to ContainerLogOptions
+func PodLogsOptionsToContainerLogsOptions(options PodLogsOptions) ContainerLogsOptions {
+	// PodLogsOptions are similar but contains few extra fields like ctrName
+	// So cast other values as is so we can re-use the code
+	containerLogsOpts := ContainerLogsOptions{
+		Details:      options.Details,
+		Latest:       options.Latest,
+		Follow:       options.Follow,
+		Names:        options.Names,
+		Since:        options.Since,
+		Until:        options.Until,
+		Tail:         options.Tail,
+		Timestamps:   options.Timestamps,
+		StdoutWriter: options.StdoutWriter,
+		StderrWriter: options.StderrWriter,
+	}
+	return containerLogsOpts
 }

@@ -2,12 +2,13 @@ package internal
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/jackspirou/syscerts"
-	"github.com/urfave/cli"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
@@ -17,11 +18,11 @@ import (
 // NewClient returns a new client from the CLI context.
 func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	var (
-		skip     = c.GlobalBool("skip-verify")
-		socks    = c.GlobalString("socks-proxy")
-		socksoff = c.GlobalBool("socks-proxy-off")
-		token    = c.GlobalString("token")
-		server   = c.GlobalString("server")
+		skip     = c.Bool("skip-verify")
+		socks    = c.String("socks-proxy")
+		socksoff = c.Bool("socks-proxy-off")
+		token    = c.String("token")
+		server   = c.String("server")
 	)
 	server = strings.TrimRight(server, "/")
 
@@ -35,21 +36,22 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	// attempt to find system CA certs
-	certs := syscerts.SystemRootsPool()
+	certs, err := x509.SystemCertPool()
+	log.Error().Msgf("failed to find system CA certs: %v", err)
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
 		InsecureSkipVerify: skip,
 	}
 
 	config := new(oauth2.Config)
-	auther := config.Client(
-		oauth2.NoContext,
+	client := config.Client(
+		c.Context,
 		&oauth2.Token{
 			AccessToken: token,
 		},
 	)
 
-	trans, _ := auther.Transport.(*oauth2.Transport)
+	trans, _ := client.Transport.(*oauth2.Transport)
 
 	if len(socks) != 0 && !socksoff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
@@ -68,7 +70,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 		}
 	}
 
-	return woodpecker.NewClient(server, auther), nil
+	return woodpecker.NewClient(server, client), nil
 }
 
 // ParseRepo parses the repository owner and name from a string.

@@ -104,6 +104,7 @@ type ContainerWaitOKBody struct {
 }
 
 // CreateContainerConfig used when compatible endpoint creates a container
+// swagger:model CreateContainerConfig
 type CreateContainerConfig struct {
 	Name                   string                         // container name
 	dockerContainer.Config                                // desired container configuration
@@ -182,7 +183,8 @@ func ImageToImageSummary(l *libimage.Image) (*entities.ImageSummary, error) {
 	}
 
 	is := entities.ImageSummary{
-		ID:           l.ID(),
+		// docker adds sha256: in front of the ID
+		ID:           "sha256:" + l.ID(),
 		ParentId:     imageData.Parent,
 		RepoTags:     imageData.RepoTags,
 		RepoDigests:  imageData.RepoDigests,

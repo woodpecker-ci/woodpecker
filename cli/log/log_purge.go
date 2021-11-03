@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var logPurgeCmd = cli.Command{
+var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
 	ArgsUsage: "<repo/name> <build>",
 	Action:    logPurge,
+	Flags:     common.GlobalFlags,
 }
 
 func logPurge(c *cli.Context) (err error) {

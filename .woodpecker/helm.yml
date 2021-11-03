@@ -35,7 +35,7 @@ pipeline:
       - cr package charts/woodpecker-server
       - cr package charts/woodpecker-agent
       - cr upload --owner woodpecker-ci --git-repo woodpecker-ci.github.io --release-name-template "helm-{{ .Name }}-{{ .Version }}"
-      - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.github.io --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
+      - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
       path: "charts/**"

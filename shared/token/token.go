@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type SecretFunc func(*Token) (string, error)
@@ -57,7 +57,7 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 	// first we attempt to get the token from the
 	// authorization header.
 	if len(token) != 0 {
-		logrus.Tracef("token.ParseRequest: found token in header: %s", token)
+		log.Trace().Msgf("token.ParseRequest: found token in header: %s", token)
 		bearer := token
 		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
 			return nil, err
@@ -143,7 +143,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		token.Kind, _ = kindv.(string)
 
 		// extract the token value and cast to
-		// exepected type.
+		// expected type.
 		textv, ok := claims["text"]
 		if !ok {
 			return nil, jwt.ValidationError{}

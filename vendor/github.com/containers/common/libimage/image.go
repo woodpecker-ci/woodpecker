@@ -74,7 +74,10 @@ func (i *Image) isCorrupted(name string) error {
 	}
 
 	if _, err := ref.NewImage(context.Background(), nil); err != nil {
-		return errors.Errorf("Image %s exists in local storage but may be corrupted: %v", name, err)
+		if name == "" {
+			name = i.ID()[:12]
+		}
+		return errors.Errorf("Image %s exists in local storage but may be corrupted (remove the image to resolve the issue): %v", name, err)
 	}
 	return nil
 }
@@ -448,12 +451,22 @@ func (i *Image) removeRecursive(ctx context.Context, rmMap map[string]*RemoveIma
 	return parent.removeRecursive(ctx, rmMap, processedIDs, "", options)
 }
 
+var errTagDigest = errors.New("tag by digest not supported")
+
 // Tag the image with the specified name and store it in the local containers
 // storage.  The name is normalized according to the rules of NormalizeName.
 func (i *Image) Tag(name string) error {
+	if strings.HasPrefix(name, "sha256:") { // ambiguous input
+		return errors.Wrap(errTagDigest, name)
+	}
+
 	ref, err := NormalizeName(name)
 	if err != nil {
 		return errors.Wrapf(err, "error normalizing name %q", name)
+	}
+
+	if _, isDigested := ref.(reference.Digested); isDigested {
+		return errors.Wrap(errTagDigest, name)
 	}
 
 	logrus.Debugf("Tagging image %s with %q", i.ID(), ref.String())
@@ -480,7 +493,7 @@ var errUntagDigest = errors.New("untag by digest not supported")
 // the local containers storage.  The name is normalized according to the rules
 // of NormalizeName.
 func (i *Image) Untag(name string) error {
-	if strings.HasPrefix(name, "sha256:") {
+	if strings.HasPrefix(name, "sha256:") { // ambiguous input
 		return errors.Wrap(errUntagDigest, name)
 	}
 
@@ -488,6 +501,17 @@ func (i *Image) Untag(name string) error {
 	if err != nil {
 		return errors.Wrapf(err, "error normalizing name %q", name)
 	}
+
+	// FIXME: this is breaking Podman CI but must be re-enabled once
+	// c/storage supports alterting the digests of an image.  Then,
+	// Podman will do the right thing.
+	//
+	// !!! Also make sure to re-enable the tests !!!
+	//
+	//	if _, isDigested := ref.(reference.Digested); isDigested {
+	//		return errors.Wrap(errUntagDigest, name)
+	//	}
+
 	name = ref.String()
 
 	logrus.Debugf("Untagging %q from image %s", ref.String(), i.ID())
@@ -691,10 +715,18 @@ func (i *Image) Size() (int64, error) {
 	return i.runtime.store.ImageSize(i.ID())
 }
 
+// HasDifferentDigestOptions allows for customizing the check if another
+// (remote) image has a different digest.
+type HasDifferentDigestOptions struct {
+	// containers-auth.json(5) file to use when authenticating against
+	// container registries.
+	AuthFilePath string
+}
+
 // HasDifferentDigest returns true if the image specified by `remoteRef` has a
 // different digest than the local one.  This check can be useful to check for
 // updates on remote registries.
-func (i *Image) HasDifferentDigest(ctx context.Context, remoteRef types.ImageReference) (bool, error) {
+func (i *Image) HasDifferentDigest(ctx context.Context, remoteRef types.ImageReference, options *HasDifferentDigestOptions) (bool, error) {
 	// We need to account for the arch that the image uses.  It seems
 	// common on ARM to tweak this option to pull the correct image.  See
 	// github.com/containers/podman/issues/6613.
@@ -714,6 +746,14 @@ func (i *Image) HasDifferentDigest(ctx context.Context, remoteRef types.ImageRef
 		sys.VariantChoice = inspectInfo.Variant
 	}
 
+	if options != nil && options.AuthFilePath != "" {
+		sys.AuthFilePath = options.AuthFilePath
+	}
+
+	return i.hasDifferentDigestWithSystemContext(ctx, remoteRef, sys)
+}
+
+func (i *Image) hasDifferentDigestWithSystemContext(ctx context.Context, remoteRef types.ImageReference, sys *types.SystemContext) (bool, error) {
 	remoteImg, err := remoteRef.NewImage(ctx, sys)
 	if err != nil {
 		return false, err

@@ -246,7 +246,6 @@ func TestFifoErrors2(t *testing.T) {
 }
 
 func TestFifoErrorsMultiThread(t *testing.T) {
-	//logrus.SetLevel(logrus.DebugLevel)
 	task1 := &Task{
 		ID: "1",
 	}

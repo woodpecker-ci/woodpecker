@@ -21,7 +21,7 @@ kubectl create secret generic woodpecker-github-secret \
   --from-literal=WOODPECKER_GITHUB_SECRET=xxxxxxxx
 
 # add helm repo
-helm repo add woodpecker https://woodpecker-ci.github.io/
+helm repo add woodpecker https://woodpecker-ci.org/
 ```
 
 ### Woodpecker server
@@ -95,7 +95,7 @@ spec:
             value: "xxx"
         volumeMounts:
           - name: sqlite-volume
-            mountPath: /var/lib/drone
+            mountPath: /var/lib/woodpecker
       volumes:
         - name: sqlite-volume
           persistentVolumeClaim:

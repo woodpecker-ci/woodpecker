@@ -17,11 +17,11 @@ package session
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-
-	"github.com/gin-gonic/gin"
 )
 
 func User(c *gin.Context) *model.User {
@@ -42,7 +42,7 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.GetUserLogin(c, t.Text)
+			user, err = store.FromContext(c).GetUserLogin(t.Text)
 			return user.Hash, err
 		})
 		if err == nil {

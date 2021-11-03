@@ -37,9 +37,9 @@ type CommitOptions struct {
 //go:generate go run ../generator/generator.go AttachOptions
 // AttachOptions are optional options for attaching to containers
 type AttachOptions struct {
-	DetachKeys *string
-	Logs       *bool
-	Stream     *bool
+	DetachKeys *string // Keys to detach from running container
+	Logs       *bool   // Flag to return all logs from container when true
+	Stream     *bool   // Flag only return container logs when false and Logs is true
 }
 
 //go:generate go run ../generator/generator.go CheckpointOptions
@@ -166,7 +166,8 @@ type StartOptions struct {
 //go:generate go run ../generator/generator.go StatsOptions
 // StatsOptions are optional options for getting stats on containers
 type StatsOptions struct {
-	Stream *bool
+	Stream   *bool
+	Interval *int
 }
 
 //go:generate go run ../generator/generator.go TopOptions

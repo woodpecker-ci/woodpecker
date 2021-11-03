@@ -1,8 +1,9 @@
 package environments
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"strings"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type builtin struct {
