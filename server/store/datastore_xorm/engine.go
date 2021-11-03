@@ -39,9 +39,7 @@ func newEngine(opts *store.Opts) (store.Store, error) {
 		return nil, err
 	}
 
-	logger := &LogWrapper{}
-	logger.ShowSQL(true)
-	engine.SetLogger(logger) // TODO: special config to enable/disable ?
+	// engine.SetLogger(X) // TODO: special config to enable xorm logging
 	return &storage{
 		engine: engine,
 	}, nil
