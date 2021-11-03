@@ -17,11 +17,10 @@ package datastore_xorm
 import (
 	"os"
 	"testing"
+	"xorm.io/xorm"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func testDriverConfig() (driver, config string) {
@@ -32,20 +31,26 @@ func testDriverConfig() (driver, config string) {
 		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
 		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
 	}
-
 	return
 }
 
 // newTestStore creates a new database connection for testing purposes.
 // The database driver and connection string are provided by
 // environment variables, with fallback to in-memory sqlite.
-func newTestStore(t *testing.T) store.Store {
-	driver, config := testDriverConfig()
-	engine, err := newEngine(&store.Opts{
-		Driver:  driver,
-		Config:  config,
-		Adapter: "xorm",
-	})
-	assert.NoError(t, err)
-	return engine
+func newTestStore(t *testing.T, tables ...interface{}) *storage {
+	engine, err := xorm.NewEngine(testDriverConfig())
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+
+	for _, table := range tables {
+		if err := engine.Sync2(table); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	}
+
+	return &storage{
+		engine: engine,
+	}
 }
