@@ -6,7 +6,7 @@
 import { defineComponent } from 'vue';
 
 // eslint-disable-next-line import/no-relative-parent-imports
-import WoodpeckerIcon from '../../../assets/woodpecker.svg';
+import WoodpeckerIcon from '../../../assets/woodpecker.svg?component';
 
 export default defineComponent({
   name: 'BuildRunningIcon',
