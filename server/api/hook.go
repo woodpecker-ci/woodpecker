@@ -276,7 +276,7 @@ func PostHook(c *gin.Context) {
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(c, user, repo, build, uri, item.Proc)
 			} else {

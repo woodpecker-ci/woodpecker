@@ -48,14 +48,20 @@ lint:
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/server
 
+frontend-dependencies:
+	(cd web/; yarn install --frozen-lockfile)
+
 test-agent:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
 
 test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
 
-test-frontend:
-	(cd web/; yarn; yarn run test)
+test-frontend: frontend-dependencies
+	(cd web/; yarn run lint)
+	(cd web/; yarn run formatcheck)
+	(cd web/; yarn run typecheck)
+	(cd web/; yarn run test)
 
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
