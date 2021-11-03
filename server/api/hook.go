@@ -402,6 +402,10 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]string)
 
+		if item.Proc.ID == 0 {
+			log.Error().Msgf("procID is 0: '%v'", *item)
+			return
+		}
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Proc.ID),
 			Config:  item.Config,
