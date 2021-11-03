@@ -20,26 +20,17 @@ import (
 
 func (s storage) GetUser(id int64) (*model.User, error) {
 	user := new(model.User)
-	err := wrapGet(s.engine.ID(id).Get(user))
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
 func (s storage) GetUserLogin(login string) (*model.User, error) {
 	user := new(model.User)
-	err := wrapGet(s.engine.Where("user_login=?", login).Get(user))
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return user, wrapGet(s.engine.Where("user_login=?", login).Get(user))
 }
 
 func (s storage) GetUserList() ([]*model.User, error) {
 	users := make([]*model.User, 0, 10)
-	err := s.engine.Find(&users)
-	return users, err
+	return users, s.engine.Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {

@@ -18,6 +18,7 @@ import "database/sql"
 
 var RecordNotExist = sql.ErrNoRows
 
+// wrapGet return error if err not nil or if requested entry do not exist
 func wrapGet(exist bool, err error) error {
 	if err != nil {
 		return err
