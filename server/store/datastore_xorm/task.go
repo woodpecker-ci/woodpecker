@@ -15,35 +15,20 @@
 package datastore_xorm
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"xorm.io/xorm"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type storage struct {
-	engine *xorm.Engine
+func (s storage) TaskList() ([]*model.Task, error) {
+	tasks := make([]*model.Task, 0, perPage)
+	return tasks, s.engine.Find(&tasks)
 }
 
-// make sure storage implement Store
-var _ store.Store = &storage{}
-
-const perPage = 50
-
-func init() {
-	store.RegisterAdapter(newEngine, "xorm")
+func (s storage) TaskInsert(task *model.Task) error {
+	_, err := s.engine.InsertOne(task)
+	return err
 }
 
-func newEngine(opts *store.Opts) (store.Store, error) {
-	engine, err := xorm.NewEngine(opts.Driver, opts.Config)
-	if err != nil {
-		return nil, err
-	}
-	// engine.SetLogger(log.Logger) // TODO: special config to enable/disable ?
-	return &storage{
-		engine: engine,
-	}, nil
-}
-
-func (s storage) Ping() error {
-	return s.engine.Ping()
+func (s storage) TaskDelete(id string) error {
+	_, err := s.engine.Where("task_id = ?", id).Delete(new(model.Task))
+	return err
 }
