@@ -19,6 +19,24 @@
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/agent/",
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Woodpecker UI",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "start",
+      ],
+      "cwd": "${workspaceFolder}/web",
+      "port": 3000,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/web/**",
+        "!**/node_modules/**"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     }
   ]
 }
