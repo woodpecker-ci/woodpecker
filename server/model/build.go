@@ -43,13 +43,13 @@ type Build struct {
 	Avatar       string   `json:"author_avatar" meddler:"build_avatar"    xorm:"build_avatar"`
 	Email        string   `json:"author_email"  meddler:"build_email"     xorm:"build_email"`
 	Link         string   `json:"link_url"      meddler:"build_link"      xorm:"build_link"`
-	Signed       bool     `json:"signed"        meddler:"build_signed"    xrom:"build_signed"`   // deprecate
+	Signed       bool     `json:"signed"        meddler:"build_signed"    xorm:"build_signed"`   // deprecate
 	Verified     bool     `json:"verified"      meddler:"build_verified"  xorm:"build_verified"` // deprecate
 	Reviewer     string   `json:"reviewed_by"   meddler:"build_reviewer"  xorm:"build_reviewer"`
 	Reviewed     int64    `json:"reviewed_at"   meddler:"build_reviewed"  xorm:"build_reviewed"`
 	Procs        []*Proc  `json:"procs,omitempty" meddler:"-"             xorm:"-"`
 	Files        []*File  `json:"files,omitempty" meddler:"-"             xorm:"-"`
-	ChangedFiles []string `json:"changed_files,omitempty" meddler:"changed_files,json" xorm:"json 'changed_files''"`
+	ChangedFiles []string `json:"changed_files,omitempty" meddler:"changed_files,json" xorm:"json 'changed_files'"`
 }
 
 // TableName return database table name for xorm

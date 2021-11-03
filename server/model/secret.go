@@ -51,7 +51,7 @@ type Secret struct {
 	RepoID     int64    `json:"-"               meddler:"secret_repo_id"     xorm:"secret_repo_id"`
 	Name       string   `json:"name"            meddler:"secret_name"        xorm:"secret_name"` // TODO: uniqe constrain (name&repoID)
 	Value      string   `json:"value,omitempty" meddler:"secret_value"       xorm:"secret_value"`
-	Images     []string `json:"image"           meddler:"secret_images,json" xorm:"json 'secret_images''"`
+	Images     []string `json:"image"           meddler:"secret_images,json" xorm:"json 'secret_images'"`
 	Events     []string `json:"event"           meddler:"secret_events,json" xorm:"json 'secret_events'"`
 	SkipVerify bool     `json:"-"               meddler:"secret_skip_verify" xorm:"secret_skip_verify"`
 	Conceal    bool     `json:"-"               meddler:"secret_conceal"     xorm:"secret_conceal"`
