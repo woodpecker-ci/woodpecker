@@ -253,8 +253,6 @@ github.com/tevino/abool
 ## explicit
 # github.com/ugorji/go/codec v1.2.6
 github.com/ugorji/go/codec
-# github.com/urfave/cli v1.22.5
-github.com/urfave/cli
 # github.com/urfave/cli/v2 v2.3.0
 ## explicit
 github.com/urfave/cli/v2
@@ -262,11 +260,6 @@ github.com/urfave/cli/v2
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
-# github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
-## explicit
-github.com/woodpecker-ci/togo
-github.com/woodpecker-ci/togo/parser
-github.com/woodpecker-ci/togo/template
 # github.com/xanzy/go-gitlab v0.51.1
 ## explicit
 github.com/xanzy/go-gitlab
