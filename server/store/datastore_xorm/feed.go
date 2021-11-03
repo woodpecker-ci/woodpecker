@@ -80,7 +80,8 @@ INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
 INNER JOIN builds ON builds.build_repo_id = repos.repo_id
 `).Where("perms.perm_user_id = ?", user.ID).
 		And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true})).
-		Limit(perPage).Desc("build_id").
+		Desc("build_created").
+		Limit(perPage).
 		Find(&feed)
 }
 
@@ -109,7 +110,6 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 FROM repos LEFT OUTER JOIN builds ON build_id = (
 	SELECT build_id FROM builds
 	WHERE builds.build_repo_id = repos.repo_id
-	ORDER BY build_id DESC
 	LIMIT 1
 )
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id`).
@@ -117,5 +117,6 @@ INNER JOIN perms ON perms.perm_repo_id = repos.repo_id`).
 		And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true})).
 		And(builder.Eq{"repos.repo_active": true}).
 		Asc("repo_full_name").
+		Desc("build_created").
 		Find(&feed)
 }
