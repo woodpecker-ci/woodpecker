@@ -132,7 +132,7 @@ func (db *datastore) UpdateBuild(build *model.Build) error {
 	return meddler.Update(db, buildTable, build)
 }
 
-func (db *datastore) GetBuildCount() (count int, err error) {
+func (db *datastore) GetBuildCount() (count int64, err error) {
 	err = db.QueryRow(
 		sql.Lookup(db.driver, "count-builds"),
 	).Scan(&count)

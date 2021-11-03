@@ -41,7 +41,7 @@ func (db *datastore) GetUserList() ([]*model.User, error) {
 	return data, err
 }
 
-func (db *datastore) GetUserCount() (count int, err error) {
+func (db *datastore) GetUserCount() (count int64, err error) {
 	err = db.QueryRow(
 		sql.Lookup(db.driver, "count-users"),
 	).Scan(&count)

@@ -32,8 +32,7 @@ type Store interface {
 	GetUserList() ([]*model.User, error)
 
 	// GetUserCount gets a count of all users in the system.
-	// TODO: int64
-	GetUserCount() (int, error)
+	GetUserCount() (int64, error)
 
 	// CreateUser creates a new user account.
 	CreateUser(*model.User) error
@@ -51,8 +50,7 @@ type Store interface {
 	GetRepoName(string) (*model.Repo, error)
 
 	// GetRepoCount gets a count of all repositories in the system.
-	// TODO: int64
-	GetRepoCount() (int, error)
+	GetRepoCount() (int64, error)
 
 	// CreateRepo creates a new repository.
 	CreateRepo(*model.Repo) error
@@ -88,8 +86,7 @@ type Store interface {
 	GetBuildQueue() ([]*model.Feed, error)
 
 	// GetBuildCount gets a count of all builds in the system.
-	// TODO: int64
-	GetBuildCount() (int, error)
+	GetBuildCount() (int64, error)
 
 	// CreateBuild creates a new build and jobs.
 	CreateBuild(*model.Build, ...*model.Proc) error

@@ -33,7 +33,7 @@ func (db *datastore) GetRepoName(name string) (*model.Repo, error) {
 	return repo, err
 }
 
-func (db *datastore) GetRepoCount() (count int, err error) {
+func (db *datastore) GetRepoCount() (count int64, err error) {
 	err = db.QueryRow(
 		sql.Lookup(db.driver, "count-repos"),
 	).Scan(&count)

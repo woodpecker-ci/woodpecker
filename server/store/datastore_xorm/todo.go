@@ -90,9 +90,8 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	return repo, nil
 }
 
-func (s storage) GetRepoCount() (int, error) {
-	c, err := s.engine.Count(&model.Repo{IsActive: true})
-	return int(c), err
+func (s storage) GetRepoCount() (int64, error) {
+	return s.engine.Count(&model.Repo{IsActive: true})
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {
@@ -224,9 +223,8 @@ WHERE b.build_repo_id = r.repo_id
 	return feed, err
 }
 
-func (s storage) GetBuildCount() (int, error) {
-	c, err := s.engine.Count(&model.Build{})
-	return int(c), err
+func (s storage) GetBuildCount() (int64, error) {
+	return s.engine.Count(&model.Build{})
 }
 
 func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error {
