@@ -17,7 +17,6 @@ package datastore_xorm
 import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 
-	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 )
 
@@ -28,6 +27,8 @@ type storage struct {
 // make sure storage implement Store
 var _ store.Store = &storage{}
 
+const perPage = 50
+
 func init() {
 	store.RegisterAdapter(newEngine, "xorm")
 }
@@ -37,7 +38,7 @@ func newEngine(opts *store.Opts) (store.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine.SetLogger(log.Logger) // TODO: special config to enable/disable ?
+	// engine.SetLogger(log.Logger) // TODO: special config to enable/disable ?
 	return &storage{
 		engine: engine,
 	}, nil

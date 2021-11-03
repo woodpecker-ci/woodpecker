@@ -2,7 +2,6 @@ package datastore_xorm
 
 import (
 	"bytes"
-	"database/sql"
 	"io"
 	"io/ioutil"
 	"time"
@@ -12,65 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 )
-
-const perPage = 50
-
-var RecordNotExist = sql.ErrNoRows
-
-func wrapGet(exist bool, err error) error {
-	if err != nil {
-		return err
-	}
-	if !exist {
-		return RecordNotExist
-	}
-	return nil
-}
-
-func (s storage) GetUser(id int64) (*model.User, error) {
-	user := new(model.User)
-	err := wrapGet(s.engine.ID(id).Get(user))
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (s storage) GetUserLogin(login string) (*model.User, error) {
-	user := new(model.User)
-	err := wrapGet(s.engine.Where("user_login=?", login).Get(user))
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (s storage) GetUserList() ([]*model.User, error) {
-	users := make([]*model.User, 0, 10)
-	err := s.engine.Find(&users)
-	return users, err
-}
-
-func (s storage) GetUserCount() (int, error) {
-	c, err := s.engine.Count(&model.User{})
-	return int(c), err
-}
-
-func (s storage) CreateUser(user *model.User) error {
-	_, err := s.engine.InsertOne(user)
-	return err
-}
-
-func (s storage) UpdateUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).AllCols().Update(user)
-	return err
-}
-
-func (s storage) DeleteUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).Delete(&user)
-	// TODO: delete related content that need this user to work
-	return err
-}
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	repo := new(model.Repo)
