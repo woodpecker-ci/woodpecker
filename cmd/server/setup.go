@@ -42,7 +42,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_meddler"
 	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
@@ -60,10 +59,10 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	}
 
 	opts := &store.Opts{
-		Driver: driver,
-		Config: datasource,
+		Driver:  driver,
+		Config:  datasource,
+		Adapter: "xorm",
 	}
-	opts.Adapter = "xorm" // TODO: make it config
 	log.Trace().Msgf("setup datastore: %#v", opts)
 	return store.New(opts)
 }
