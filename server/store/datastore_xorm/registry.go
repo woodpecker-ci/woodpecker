@@ -32,7 +32,8 @@ func (s storage) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
-	_, err := s.engine.InsertOne(registry)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(registry)
 	return err
 }
 

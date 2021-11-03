@@ -51,11 +51,13 @@ func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
 }
 
 func (s storage) ConfigCreate(config *model.Config) error {
-	_, err := s.engine.InsertOne(config)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(config)
 	return err
 }
 
 func (s storage) BuildConfigCreate(config *model.BuildConfig) error {
-	_, err := s.engine.InsertOne(config)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(config)
 	return err
 }

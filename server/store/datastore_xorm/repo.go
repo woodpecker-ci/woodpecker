@@ -43,7 +43,8 @@ func (s storage) GetRepoCount() (int64, error) {
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {
-	_, err := s.engine.InsertOne(repo)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(repo)
 	return err
 }
 
@@ -80,21 +81,26 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		return err
 	}
 
-	for _, repo := range repos {
-		if repo.UserID == 0 || len(repo.Owner) == 0 || len(repo.Name) == 0 || len(repo.FullName) == 0 {
-			log.Debug().Msgf("skip insert/update repo: %v", repo)
+	for i := range repos {
+		if repos[i].UserID == 0 || len(repos[i].Owner) == 0 || len(repos[i].Name) == 0 || len(repos[i].FullName) == 0 {
+			log.Debug().Msgf("skip insert/update repo: %v", repos[i])
 			continue
 		}
-		exist, err := sess.Exist(&repo)
+		exist, err := sess.
+			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+			Exist(new(model.Repo))
 		if err != nil {
 			return err
 		}
 		if exist {
-			if _, err := sess.Update(&repo); err != nil {
+			if _, err := sess.
+				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+				Update(repos[i]); err != nil {
 				return err
 			}
 		} else {
-			if _, err := sess.InsertOne(&repo); err != nil {
+			// only Insert on single object ref set auto created ID back to object
+			if _, err := sess.Insert(repos[i]); err != nil {
 				return err
 			}
 		}

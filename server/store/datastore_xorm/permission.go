@@ -58,7 +58,8 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 		_, err = sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
 			AllCols().Update(perm)
 	} else {
-		_, err = sess.InsertOne(perm)
+		// only Insert set auto created ID back to object
+		_, err = sess.Insert(perm)
 	}
 	if err != nil {
 		return err

@@ -20,6 +20,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+// TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
+
 type Store interface {
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)

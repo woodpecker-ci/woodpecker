@@ -24,7 +24,8 @@ func (s storage) TaskList() ([]*model.Task, error) {
 }
 
 func (s storage) TaskInsert(task *model.Task) error {
-	_, err := s.engine.InsertOne(task)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(task)
 	return err
 }
 

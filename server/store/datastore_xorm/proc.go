@@ -46,8 +46,20 @@ func (s storage) ProcList(build *model.Build) ([]*model.Proc, error) {
 }
 
 func (s storage) ProcCreate(procs []*model.Proc) error {
-	_, err := s.engine.Insert(procs)
-	return err
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	for i := range procs {
+		// only Insert on single object ref set auto created ID back to object
+		if _, err := sess.Insert(procs[i]); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) ProcUpdate(proc *model.Proc) error {

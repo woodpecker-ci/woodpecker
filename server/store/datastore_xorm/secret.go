@@ -32,7 +32,8 @@ func (s storage) SecretList(repo *model.Repo) ([]*model.Secret, error) {
 }
 
 func (s storage) SecretCreate(secret *model.Secret) error {
-	_, err := s.engine.InsertOne(secret)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(secret)
 	return err
 }
 

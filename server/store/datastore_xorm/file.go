@@ -50,6 +50,7 @@ func (s storage) FileCreate(file *model.File, reader io.Reader) error {
 		return err
 	}
 	file.Data = data
-	_, err = s.engine.InsertOne(file)
+	// only Insert set auto created ID back to object
+	_, err = s.engine.Insert(file)
 	return err
 }

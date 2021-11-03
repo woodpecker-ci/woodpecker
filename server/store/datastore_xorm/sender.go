@@ -32,7 +32,8 @@ func (s storage) SenderList(repo *model.Repo) ([]*model.Sender, error) {
 }
 
 func (s storage) SenderCreate(sender *model.Sender) error {
-	_, err := s.engine.InsertOne(sender)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(sender)
 	return err
 }
 

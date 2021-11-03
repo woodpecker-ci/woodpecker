@@ -102,12 +102,14 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 	build.Number = repo.Counter
 	build.Created = time.Now().UTC().Unix()
 	build.Enqueued = build.Created
-	if _, err := sess.InsertOne(build); err != nil {
+	// only Insert set auto created ID back to object
+	if _, err := sess.Insert(build); err != nil {
 		return err
 	}
 
-	if len(procList) != 0 {
-		if _, err := sess.InsertMulti(procList); err != nil {
+	for i := range procList {
+		// only Insert set auto created ID back to object
+		if _, err := sess.Insert(procList[i]); err != nil {
 			return err
 		}
 	}

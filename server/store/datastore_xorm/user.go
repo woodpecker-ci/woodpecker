@@ -38,7 +38,8 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
-	_, err := s.engine.InsertOne(user)
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(user)
 	return err
 }
 

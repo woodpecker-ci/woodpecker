@@ -53,7 +53,7 @@ func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
 			return err
 		}
 	} else {
-		if _, err := sess.InsertOne(&model.Logs{
+		if _, err := sess.Insert(&model.Logs{
 			ProcID: proc.ID,
 			Data:   data,
 		}); err != nil {
