@@ -155,14 +155,14 @@ func TestUsers(t *testing.T) {
 			if s.driver != "postgres" {
 				// we have to skip this check for postgres because it uses
 				// an estimate which may not be updated.
-				g.Assert(count).Equal(2)
+				g.Assert(count).Equal(int64(2))
 			}
 		})
 
 		g.It("Should Get a User Count Zero", func() {
 			count, err := s.GetUserCount()
 			g.Assert(err == nil).IsTrue()
-			g.Assert(count).Equal(0)
+			g.Assert(count).Equal(int64(0))
 		})
 
 		g.It("Should Del a User", func() {

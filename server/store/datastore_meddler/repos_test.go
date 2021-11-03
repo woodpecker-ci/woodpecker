@@ -367,7 +367,7 @@ func TestRepoCount(t *testing.T) {
 
 	s.Exec("ANALYZE")
 	count, _ := s.GetRepoCount()
-	if got, want := count, 2; got != want {
+	if got, want := count, int64(2); got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
 }
@@ -426,7 +426,7 @@ func TestRepoBatch(t *testing.T) {
 
 	s.Exec("ANALYZE")
 	count, _ := s.GetRepoCount()
-	if got, want := count, 3; got != want {
+	if got, want := count, int64(3); got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
 }
