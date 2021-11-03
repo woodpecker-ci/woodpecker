@@ -15,10 +15,12 @@
 //go:build cgo
 // +build cgo
 
-package datastore_meddler
+package datastore_xorm
 
 import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+const SupportSqlite3 = true
