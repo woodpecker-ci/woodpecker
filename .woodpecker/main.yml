@@ -11,15 +11,17 @@ pipeline:
     when:
       path: "web/**"
 
-  web-lint:
-    # TODO: disabled group for now to prevent oom
-    # group: web-test
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn lint
-    when:
-      path: "web/**"
+#  TODO: enable if we have enouth mem (~2g) to lint, cause an oom atm.
+#        For reviewers, please run localy to verify it passes
+#  web-lint:
+#    TODO: disabled group for now to prevent oom
+#    group: web-test
+#    image: node:16-alpine
+#    commands:
+#      - cd web/
+#      - yarn lint
+#    when:
+#      path: "web/**"
 
   web-formatcheck:
     group: web-test
