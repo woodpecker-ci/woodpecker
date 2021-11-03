@@ -62,7 +62,7 @@ func (w *website) Register(mux *gin.Engine) {
 	h := http.FileServer(w.fs)
 	h = setupCache(h)
 	mux.GET("/favicon.svg", gin.WrapH(h))
-	mux.GET("/static/*filepath", gin.WrapH(h))
+	mux.GET("/assets/*filepath", gin.WrapH(h))
 	mux.NoRoute(gin.WrapF(w.handleIndex))
 }
 
