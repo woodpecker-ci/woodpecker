@@ -32,47 +32,47 @@ type User struct {
 	// the id for this user.
 	//
 	// required: true
-	ID int64 `json:"id" meddler:"user_id,pk" xorm:"pk autoincr 'user_id'"`
+	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
 
 	// Login is the username for this user.
 	//
 	// required: true
-	Login string `json:"login"  meddler:"user_login" xorm:"user_login"`
+	Login string `json:"login"  xorm:"user_login"`
 
 	// Token is the oauth2 token.
-	Token string `json:"-"  meddler:"user_token" xorm:"user_token"`
+	Token string `json:"-"  xorm:"user_token"`
 
 	// Secret is the oauth2 token secret.
-	Secret string `json:"-" meddler:"user_secret" xorm:"user_secret"`
+	Secret string `json:"-" xorm:"user_secret"`
 
 	// Expiry is the token and secret expiration timestamp.
-	Expiry int64 `json:"-" meddler:"user_expiry" xorm:"user_expiry"`
+	Expiry int64 `json:"-" xorm:"user_expiry"`
 
 	// Email is the email address for this user.
 	//
 	// required: true
-	Email string `json:"email" meddler:"user_email" xorm:"user_email"`
+	Email string `json:"email" xorm:"user_email"`
 
 	// the avatar url for this user.
-	Avatar string `json:"avatar_url" meddler:"user_avatar" xorm:"user_avatar"`
+	Avatar string `json:"avatar_url" xorm:"user_avatar"`
 
 	// Activate indicates the user is active in the system.
-	Active bool `json:"active" meddler:"user_active" xorm:"user_active"`
+	Active bool `json:"active" xorm:"user_active"`
 
 	// Synced is the timestamp when the user was synced with the remote system.
-	Synced int64 `json:"synced" meddler:"user_synced" xorm:"user_synced"`
+	Synced int64 `json:"synced" xorm:"user_synced"`
 
 	// Admin indicates the user is a system administrator.
 	//
 	// NOTE: This is sourced from the WOODPECKER_ADMINS environment variable and is no
 	// longer persisted in the database.
-	Admin bool `json:"admin,omitempty" meddler:"-" xorm:"-"`
+	Admin bool `json:"admin,omitempty" xorm:"-"`
 
 	// Hash is a unique token used to sign tokens.
-	Hash string `json:"-" meddler:"user_hash" xorm:"user_hash"`
+	Hash string `json:"-" xorm:"user_hash"`
 
 	// DEPRECATED Admin indicates the user is a system administrator.
-	XAdmin bool `json:"-" meddler:"user_admin" xorm:"user_admin"`
+	XAdmin bool `json:"-" xorm:"user_admin"`
 }
 
 // TableName return database table name for xorm

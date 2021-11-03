@@ -50,13 +50,13 @@ type RegistryStore interface {
 // Registry represents a docker registry with credentials.
 // swagger:model registry
 type Registry struct {
-	ID       int64  `json:"id"       meddler:"registry_id,pk"    xorm:"pk autoincr 'registry_id'"`
-	RepoID   int64  `json:"-"        meddler:"registry_repo_id"  xorm:"registry_repo_id"`
-	Address  string `json:"address"  meddler:"registry_addr"     xorm:"registry_addr"`
-	Username string `json:"username" meddler:"registry_username" xorm:"registry_username"`
-	Password string `json:"password" meddler:"registry_password" xorm:"registry_password"`
-	Email    string `json:"email"    meddler:"registry_email"    xorm:"registry_email"`
-	Token    string `json:"token"    meddler:"registry_token"    xorm:"registry_token"`
+	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
+	RepoID   int64  `json:"-"        xorm:"registry_repo_id"`
+	Address  string `json:"address"  xorm:"registry_addr"`
+	Username string `json:"username" xorm:"registry_username"`
+	Password string `json:"password" xorm:"registry_password"`
+	Email    string `json:"email"    xorm:"registry_email"`
+	Token    string `json:"token"    xorm:"registry_token"`
 }
 
 // Validate validates the registry information.

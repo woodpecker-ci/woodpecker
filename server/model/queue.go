@@ -25,11 +25,11 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string            `meddler:"task_id"                xorm:"task_id"` // xorm pk autoincr  ?
-	Data         []byte            `meddler:"task_data"              xorm:"task_data"`
-	Labels       map[string]string `meddler:"task_labels,json"       xorm:"json 'task_labels'"`
-	Dependencies []string          `meddler:"task_dependencies,json" xorm:"json 'task_dependencies'"`
-	RunOn        []string          `meddler:"task_run_on,json"       xorm:"json 'task_run_on'"`
+	ID           string            `xorm:"task_id"` // TODO: xorm pk autoincr (need migration?)
+	Data         []byte            `xorm:"task_data"`
+	Labels       map[string]string `xorm:"json 'task_labels'"`
+	Dependencies []string          `xorm:"json 'task_dependencies'"`
+	RunOn        []string          `xorm:"json 'task_run_on'"`
 }
 
 // TableName return database table name for xorm

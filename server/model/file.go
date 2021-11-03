@@ -27,18 +27,18 @@ type FileStore interface {
 
 // File represents a pipeline artifact.
 type File struct {
-	ID      int64  `json:"id"      meddler:"file_id,pk"        xorm:"pk autoincr 'file_id'"`
-	BuildID int64  `json:"-"       meddler:"file_build_id"     xorm:"file_build_id"`
-	ProcID  int64  `json:"proc_id" meddler:"file_proc_id"      xorm:"file_proc_id"`
-	PID     int    `json:"pid"     meddler:"file_pid"          xorm:"file_pid"`
-	Name    string `json:"name"    meddler:"file_name"         xorm:"file_name"`
-	Size    int    `json:"size"    meddler:"file_size"         xorm:"file_size"`
-	Mime    string `json:"mime"    meddler:"file_mime"         xorm:"file_mime"`
-	Time    int64  `json:"time"    meddler:"file_time"         xorm:"file_time"`
-	Passed  int    `json:"passed"  meddler:"file_meta_passed"  xorm:"file_meta_passed"`
-	Failed  int    `json:"failed"  meddler:"file_meta_failed"  xorm:"file_meta_failed"`
-	Skipped int    `json:"skipped" meddler:"file_meta_skipped" xorm:"file_meta_skipped"`
-	Data    []byte `json:"-"                                   xorm:"file_data"` // TODO: dont store in db but object storage?
+	ID      int64  `json:"id"      xorm:"pk autoincr 'file_id'"`
+	BuildID int64  `json:"-"       xorm:"file_build_id"`
+	ProcID  int64  `json:"proc_id" xorm:"file_proc_id"`
+	PID     int    `json:"pid"     xorm:"file_pid"`
+	Name    string `json:"name"    xorm:"file_name"`
+	Size    int    `json:"size"    xorm:"file_size"`
+	Mime    string `json:"mime"    xorm:"file_mime"`
+	Time    int64  `json:"time"    xorm:"file_time"`
+	Passed  int    `json:"passed"  xorm:"file_meta_passed"`
+	Failed  int    `json:"failed"  xorm:"file_meta_failed"`
+	Skipped int    `json:"skipped" xorm:"file_meta_skipped"`
+	Data    []byte `json:"-"       xorm:"file_data"` // TODO: dont store in db but object storage?
 }
 
 // TableName return database table name for xorm

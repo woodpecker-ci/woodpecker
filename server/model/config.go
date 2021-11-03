@@ -26,15 +26,15 @@ type ConfigStore interface {
 
 // Config represents a pipeline configuration.
 type Config struct {
-	ID     int64  `json:"-"    meddler:"config_id,pk"   xorm:"pk autoincr 'config_id'"`
-	RepoID int64  `json:"-"    meddler:"config_repo_id" xorm:"config_repo_id"`
-	Data   string `json:"data" meddler:"config_data"    xorm:"config_data"`
-	Hash   string `json:"hash" meddler:"config_hash"    xorm:"config_hash"`
-	Name   string `json:"name" meddler:"config_name"    xorm:"config_name"`
+	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
+	RepoID int64  `json:"-"    xorm:"config_repo_id"`
+	Data   string `json:"data" xorm:"config_data"`
+	Hash   string `json:"hash" xorm:"config_hash"`
+	Name   string `json:"name" xorm:"config_name"`
 }
 
 // BuildConfig is the n:n relation between Build and Config
 type BuildConfig struct {
-	ConfigID int64 `json:"-"    meddler:"config_id" xorm:"config_id"`
-	BuildID  int64 `json:"-"    meddler:"build_id"  xorm:"build_id"`
+	ConfigID int64 `json:"-"   xorm:"config_id"`
+	BuildID  int64 `json:"-"   xorm:"build_id"`
 }

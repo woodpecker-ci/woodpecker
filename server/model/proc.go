@@ -31,21 +31,21 @@ type ProcStore interface {
 // Proc represents a process in the build pipeline.
 // swagger:model proc
 type Proc struct {
-	ID       int64             `json:"id"                   meddler:"proc_id,pk"        xorm:"pk autoincr 'proc_id'"`
-	BuildID  int64             `json:"build_id"             meddler:"proc_build_id"     xorm:"proc_build_id"`
-	PID      int               `json:"pid"                  meddler:"proc_pid"          xorm:"proc_pid"`
-	PPID     int               `json:"ppid"                 meddler:"proc_ppid"         xorm:"proc_ppid"`
-	PGID     int               `json:"pgid"                 meddler:"proc_pgid"         xorm:"proc_pgid"`
-	Name     string            `json:"name"                 meddler:"proc_name"         xorm:"proc_name"`
-	State    string            `json:"state"                meddler:"proc_state"        xorm:"proc_state"`
-	Error    string            `json:"error,omitempty"      meddler:"proc_error"        xorm:"proc_error"`
-	ExitCode int               `json:"exit_code"            meddler:"proc_exit_code"    xorm:"proc_exit_code"`
-	Started  int64             `json:"start_time,omitempty" meddler:"proc_started"      xorm:"proc_started"`
-	Stopped  int64             `json:"end_time,omitempty"   meddler:"proc_stopped"      xorm:"proc_stopped"`
-	Machine  string            `json:"machine,omitempty"    meddler:"proc_machine"      xorm:"proc_machine"`
-	Platform string            `json:"platform,omitempty"   meddler:"proc_platform"     xorm:"proc_platform"`
-	Environ  map[string]string `json:"environ,omitempty"    meddler:"proc_environ,json" xorm:"json 'proc_environ'"`
-	Children []*Proc           `json:"children,omitempty"   meddler:"-"                 xorm:"-"`
+	ID       int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
+	BuildID  int64             `json:"build_id"             xorm:"proc_build_id"`
+	PID      int               `json:"pid"                  xorm:"proc_pid"`
+	PPID     int               `json:"ppid"                 xorm:"proc_ppid"`
+	PGID     int               `json:"pgid"                 xorm:"proc_pgid"`
+	Name     string            `json:"name"                 xorm:"proc_name"`
+	State    string            `json:"state"                xorm:"proc_state"`
+	Error    string            `json:"error,omitempty"      xorm:"proc_error"`
+	ExitCode int               `json:"exit_code"            xorm:"proc_exit_code"`
+	Started  int64             `json:"start_time,omitempty" xorm:"proc_started"`
+	Stopped  int64             `json:"end_time,omitempty"   xorm:"proc_stopped"`
+	Machine  string            `json:"machine,omitempty"    xorm:"proc_machine"`
+	Platform string            `json:"platform,omitempty"   xorm:"proc_platform"`
+	Environ  map[string]string `json:"environ,omitempty"    xorm:"json 'proc_environ'"`
+	Children []*Proc           `json:"children,omitempty"   xorm:"-"`
 }
 
 // TableName return database table name for xorm

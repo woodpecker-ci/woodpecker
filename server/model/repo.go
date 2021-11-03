@@ -24,29 +24,29 @@ import (
 //
 // swagger:model repo
 type Repo struct {
-	ID         int64  `json:"id,omitempty"             meddler:"repo_id,pk"       xorm:"pk autoincr 'repo_id'"`
-	UserID     int64  `json:"-"                        meddler:"repo_user_id"     xorm:"repo_user_id"`
-	Owner      string `json:"owner"                    meddler:"repo_owner"       xorm:"repo_owner"`
-	Name       string `json:"name"                     meddler:"repo_name"        xorm:"repo_name"`
-	FullName   string `json:"full_name"                meddler:"repo_full_name"   xorm:"repo_full_name"`
-	Avatar     string `json:"avatar_url,omitempty"     meddler:"repo_avatar"      xorm:"repo_avatar"`
-	Link       string `json:"link_url,omitempty"       meddler:"repo_link"        xorm:"repo_link"`
-	Kind       string `json:"scm,omitempty"            meddler:"repo_scm"         xorm:"repo_scm"`
-	Clone      string `json:"clone_url,omitempty"      meddler:"repo_clone"       xorm:"repo_clone"`
-	Branch     string `json:"default_branch,omitempty" meddler:"repo_branch"      xorm:"repo_branch"`
-	Timeout    int64  `json:"timeout,omitempty"        meddler:"repo_timeout"     xorm:"repo_timeout"`
-	Visibility string `json:"visibility"               meddler:"repo_visibility"  xorm:"repo_visibility"`
-	IsPrivate  bool   `json:"private"                  meddler:"repo_private"     xorm:"repo_private"`
-	IsTrusted  bool   `json:"trusted"                  meddler:"repo_trusted"     xorm:"repo_trusted"`
-	IsStarred  bool   `json:"starred,omitempty"        meddler:"-"                xorm:"-"`
-	IsGated    bool   `json:"gated"                    meddler:"repo_gated"       xorm:"repo_gated"`
-	IsActive   bool   `json:"active"                   meddler:"repo_active"      xorm:"repo_active"`
-	AllowPull  bool   `json:"allow_pr"                 meddler:"repo_allow_pr"    xorm:"repo_allow_pr"`
+	ID         int64  `json:"id,omitempty"             xorm:"pk autoincr 'repo_id'"`
+	UserID     int64  `json:"-"                        xorm:"repo_user_id"`
+	Owner      string `json:"owner"                    xorm:"repo_owner"`
+	Name       string `json:"name"                     xorm:"repo_name"`
+	FullName   string `json:"full_name"                xorm:"repo_full_name"`
+	Avatar     string `json:"avatar_url,omitempty"     xorm:"repo_avatar"`
+	Link       string `json:"link_url,omitempty"       xorm:"repo_link"`
+	Kind       string `json:"scm,omitempty"            xorm:"repo_scm"`
+	Clone      string `json:"clone_url,omitempty"      xorm:"repo_clone"`
+	Branch     string `json:"default_branch,omitempty" xorm:"repo_branch"`
+	Timeout    int64  `json:"timeout,omitempty"        xorm:"repo_timeout"`
+	Visibility string `json:"visibility"               xorm:"repo_visibility"`
+	IsPrivate  bool   `json:"private"                  xorm:"repo_private"`
+	IsTrusted  bool   `json:"trusted"                  xorm:"repo_trusted"`
+	IsStarred  bool   `json:"starred,omitempty"        xorm:"-"`
+	IsGated    bool   `json:"gated"                    xorm:"repo_gated"`
+	IsActive   bool   `json:"active"                   xorm:"repo_active"`
+	AllowPull  bool   `json:"allow_pr"                 xorm:"repo_allow_pr"`
 	// Counter is used as index to determine new build numbers
-	Counter int    `json:"last_build"               meddler:"repo_counter"     xorm:"repo_counter"`
-	Config  string `json:"config_file"              meddler:"repo_config_path" xorm:"repo_config_path"`
-	Hash    string `json:"-"                        meddler:"repo_hash"        xorm:"repo_hash"`
-	Perm    *Perm  `json:"-"                        meddler:"-"                xorm:"-"`
+	Counter int    `json:"last_build"                  xorm:"repo_counter"`
+	Config  string `json:"config_file"                 xorm:"repo_config_path"`
+	Hash    string `json:"-"                           xorm:"repo_hash"`
+	Perm    *Perm  `json:"-"                           xorm:"-"`
 }
 
 // TableName return database table name for xorm
