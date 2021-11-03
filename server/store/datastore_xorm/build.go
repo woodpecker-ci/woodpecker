@@ -106,8 +106,10 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 		return err
 	}
 
-	if _, err := sess.InsertMulti(procList); err != nil {
-		return err
+	if len(procList) != 0 {
+		if _, err := sess.InsertMulti(procList); err != nil {
+			return err
+		}
 	}
 
 	return sess.Commit()
