@@ -49,7 +49,7 @@ type Build struct {
 	Reviewed     int64    `json:"reviewed_at"   meddler:"build_reviewed"  xorm:"build_reviewed"`
 	Procs        []*Proc  `json:"procs,omitempty" meddler:"-"             xorm:"-"`
 	Files        []*File  `json:"files,omitempty" meddler:"-"             xorm:"-"`
-	ChangedFiles []string `json:"changed_files,omitempty" meddler:"changed_files,json" xorm:"-"` // TODO: Xorm and json
+	ChangedFiles []string `json:"changed_files,omitempty" meddler:"changed_files,json" xorm:"json 'changed_files''"`
 }
 
 // TableName return database table name for xorm

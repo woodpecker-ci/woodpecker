@@ -44,7 +44,7 @@ type Proc struct {
 	Stopped  int64             `json:"end_time,omitempty"   meddler:"proc_stopped"      xorm:"proc_stopped"`
 	Machine  string            `json:"machine,omitempty"    meddler:"proc_machine"      xorm:"proc_machine"`
 	Platform string            `json:"platform,omitempty"   meddler:"proc_platform"     xorm:"proc_platform"`
-	Environ  map[string]string `json:"environ,omitempty"    meddler:"proc_environ,json" xorm:"-"` // TODO: Xorm and json
+	Environ  map[string]string `json:"environ,omitempty"    meddler:"proc_environ,json" xorm:"json 'proc_environ'"`
 	Children []*Proc           `json:"children,omitempty"   meddler:"-"                 xorm:"-"`
 }
 

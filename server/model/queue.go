@@ -27,9 +27,9 @@ import (
 type Task struct {
 	ID           string            `meddler:"task_id"                xorm:"task_id"` // xorm pk autoincr  ?
 	Data         []byte            `meddler:"task_data"              xorm:"task_data"`
-	Labels       map[string]string `meddler:"task_labels,json"       xorm:"-"` // TODO: Xorm and json
-	Dependencies []string          `meddler:"task_dependencies,json" xorm:"-"` // TODO: Xorm and json
-	RunOn        []string          `meddler:"task_run_on,json"       xorm:"-"` // TODO: Xorm and json
+	Labels       map[string]string `meddler:"task_labels,json"       xorm:"json 'task_labels'"`
+	Dependencies []string          `meddler:"task_dependencies,json" xorm:"json 'task_dependencies'"`
+	RunOn        []string          `meddler:"task_run_on,json"       xorm:"json 'task_run_on'"`
 }
 
 // TableName return database table name for xorm
