@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datastore_meddler
+package datastore_xorm
 
 import (
 	"testing"
@@ -21,7 +21,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	s := newTest()
+	s := newTest(t)
 	defer func() {
 		s.Exec("delete from repos")
 		s.Exec("delete from builds")
