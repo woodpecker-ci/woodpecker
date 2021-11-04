@@ -329,11 +329,9 @@ func TestRepoListLatest(t *testing.T) {
 }
 
 func TestRepoCount(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store := newTestStore(t, new(model.Repo))
 	defer func() {
 		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
 	}()
 
 	repo1 := &model.Repo{
@@ -358,7 +356,6 @@ func TestRepoCount(t *testing.T) {
 	store.CreateRepo(repo2)
 	store.CreateRepo(repo3)
 
-	store.engine.Exec("ANALYZE")
 	count, _ := store.GetRepoCount()
 	if got, want := count, int64(2); got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)

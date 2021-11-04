@@ -34,7 +34,7 @@ func (s storage) GetUserList() ([]*model.User, error) {
 }
 
 func (s storage) GetUserCount() (int64, error) {
-	return s.engine.Count(&model.User{})
+	return s.engine.Count(new(model.User))
 }
 
 func (s storage) CreateUser(user *model.User) error {

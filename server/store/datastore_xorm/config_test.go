@@ -17,6 +17,8 @@ package datastore_xorm
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -173,8 +175,12 @@ func TestConfigApproved(t *testing.T) {
 		return
 	}
 
-	if approved, err := store.ConfigFindApproved(conf); approved != false || err != nil {
-		t.Errorf("Want config not approved, when blocked or pending. %v", err)
+	approved, err := store.ConfigFindApproved(conf)
+	if !assert.NoError(t, err) {
+		return
+	}
+	if approved != false {
+		t.Errorf("Want config not approved, when blocked or pending.")
 		return
 	}
 

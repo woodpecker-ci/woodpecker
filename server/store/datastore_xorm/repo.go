@@ -39,7 +39,7 @@ func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, err
 }
 
 func (s storage) GetRepoCount() (int64, error) {
-	return s.engine.Count(&model.Repo{IsActive: true})
+	return s.engine.Where(builder.Eq{"repo_active": true}).Count(new(model.Repo))
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {

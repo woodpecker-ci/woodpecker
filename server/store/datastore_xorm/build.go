@@ -79,7 +79,7 @@ func (s storage) GetBuildList(repo *model.Repo, page int) ([]*model.Build, error
 }
 
 func (s storage) GetBuildCount() (int64, error) {
-	return s.engine.Count(&model.Build{})
+	return s.engine.Count(new(model.Build))
 }
 
 func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error {
