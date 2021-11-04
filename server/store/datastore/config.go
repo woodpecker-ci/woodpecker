@@ -15,8 +15,6 @@
 package datastore
 
 import (
-	"xorm.io/builder"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -41,13 +39,27 @@ func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 }
 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
-	return s.engine.Where("build_repo_id = ?", config.RepoID).
-		And(builder.In("build_id", builder.Expr( // TODO: use JOIN
-			`SELECT build_id
-  FROM build_config
-  WHERE build_config.config_id = ?`, config.ID))).
-		And(builder.In("build_status", "blocked", "pending")).
+	/* TODO: use builder (do not behave same as pure sql, fix that)
+	return s.engine.Table(new(model.Build)).
+		Join("INNER", "build_config", "builds.build_id = build_config.build_id" ).
+		Where(builder.Eq{"builds.build_repo_id": config.RepoID}).
+		And(builder.Eq{"build_config.config_id": config.ID}).
+		And(builder.In("builds.build_status", "blocked", "pending")).
 		Exist(new(model.Build))
+	*/
+
+	c, err := s.engine.SQL(`
+SELECT build_id FROM builds
+WHERE build_repo_id = ?
+AND build_id in (
+  SELECT build_id
+  FROM build_config
+  WHERE build_config.config_id = ?
+  )
+AND build_status NOT IN ('blocked', 'pending')
+LIMIT 1
+`, config.RepoID, config.ID).Count()
+	return c > 0, err
 }
 
 func (s storage) ConfigCreate(config *model.Config) error {

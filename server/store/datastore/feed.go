@@ -15,14 +15,13 @@
 package datastore
 
 import (
-	"xorm.io/builder"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: need test with meddler to validate xorm
+// TODO: need tests before converting to builder statement
 func (s storage) GetBuildQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
+	// TODO: use builder (do not behave same as pure sql, fix that)
 	err := s.engine.SQL(`
 SELECT
  repo_owner
@@ -53,10 +52,9 @@ WHERE b.build_repo_id = r.repo_id
 	return feed, err
 }
 
-// TODO: do not work as before
-// break woodpecker/server/store/datastore_xorm/users_test.go:240
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
+	// TODO: use builder (do not behave same as pure sql, fix that)
 	return feed, s.engine.SQL(`
 SELECT
  repo_owner
@@ -81,17 +79,18 @@ SELECT
 FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
 INNER JOIN builds ON builds.build_repo_id = repos.repo_id
-`).Where("perms.perm_user_id = ?", user.ID).
-		And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true})).
-		Desc("build_created").
-		Limit(perPage).
-		Find(&feed)
+WHERE perms.perm_user_id = ?
+  AND (perms.perm_push = ? OR perms.perm_admin = ?)
+ORDER BY build_id DESC
+LIMIT 50
+`, user.ID, true, true).Find(&feed)
 }
 
-// TODO: break feed_test.go:95
 func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	return feed, s.engine.SQL(`SELECT
+	// TODO: use builder (do not behave same as pure sql, fix that)
+	return feed, s.engine.SQL(`
+SELECT
  repo_owner
 ,repo_name
 ,repo_full_name
@@ -114,13 +113,14 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 FROM repos LEFT OUTER JOIN builds ON build_id = (
 	SELECT build_id FROM builds
 	WHERE builds.build_repo_id = repos.repo_id
+	ORDER BY build_id DESC
 	LIMIT 1
 )
-INNER JOIN perms ON perms.perm_repo_id = repos.repo_id`).
-		Where("perms.perm_user_id = ?", user.ID).
-		And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true})).
-		And(builder.Eq{"repos.repo_active": true}).
-		Asc("repo_full_name").
-		Desc("build_created").
+INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
+WHERE perms.perm_user_id = ?
+  AND (perms.perm_push = ? OR perms.perm_admin = ?)
+  AND repos.repo_active = ?
+ORDER BY repo_full_name ASC;
+`, user.ID, true, true, true).
 		Find(&feed)
 }
