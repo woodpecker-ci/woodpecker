@@ -18,9 +18,10 @@ package model
 // swagger:model build
 type Build struct {
 	ID           int64    `json:"id"                      xorm:"pk autoincr 'build_id'"`
-	RepoID       int64    `json:"-"                       xorm:"build_repo_id"`
+	RepoID       int64    `json:"-"                       xorm:"UNIQUE(s) INDEX 'build_repo_id'"`
+	Number       int      `json:"number"                  xorm:"UNIQUE(s) 'build_number'"`
+	Author       string   `json:"author"                  xorm:"INDEX 'build_author'"`
 	ConfigID     int64    `json:"-"                       xorm:"build_config_id"`
-	Number       int      `json:"number"                  xorm:"build_number"`
 	Parent       int      `json:"parent"                  xorm:"build_parent"`
 	Event        string   `json:"event"                   xorm:"build_event"`
 	Status       string   `json:"status"                  xorm:"build_status"`
@@ -39,7 +40,6 @@ type Build struct {
 	Message      string   `json:"message"                 xorm:"build_message"`
 	Timestamp    int64    `json:"timestamp"               xorm:"build_timestamp"`
 	Sender       string   `json:"sender"                  xorm:"build_sender"`
-	Author       string   `json:"author"                  xorm:"build_author"`
 	Avatar       string   `json:"author_avatar"           xorm:"build_avatar"`
 	Email        string   `json:"author_email"            xorm:"build_email"`
 	Link         string   `json:"link_url"                xorm:"build_link"`

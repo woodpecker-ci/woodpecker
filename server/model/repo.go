@@ -28,14 +28,14 @@ type Repo struct {
 	UserID     int64  `json:"-"                        xorm:"repo_user_id"`
 	Owner      string `json:"owner"                    xorm:"repo_owner"`
 	Name       string `json:"name"                     xorm:"repo_name"`
-	FullName   string `json:"full_name"                xorm:"repo_full_name"`
+	FullName   string `json:"full_name"                xorm:"UNIQUE 'repo_full_name'"`
 	Avatar     string `json:"avatar_url,omitempty"     xorm:"repo_avatar"`
 	Link       string `json:"link_url,omitempty"       xorm:"repo_link"`
 	Kind       string `json:"scm,omitempty"            xorm:"repo_scm"`
 	Clone      string `json:"clone_url,omitempty"      xorm:"repo_clone"`
 	Branch     string `json:"default_branch,omitempty" xorm:"repo_branch"`
 	Timeout    int64  `json:"timeout,omitempty"        xorm:"repo_timeout"`
-	Visibility string `json:"visibility"               xorm:"repo_visibility"`
+	Visibility string `json:"visibility"               xorm:"repo_visibility"` // CASE if !repo_private {'public'} else {'private'} // TODO: add func to check before insert and after load
 	IsPrivate  bool   `json:"private"                  xorm:"repo_private"`
 	IsTrusted  bool   `json:"trusted"                  xorm:"repo_trusted"`
 	IsStarred  bool   `json:"starred,omitempty"        xorm:"-"`
@@ -43,7 +43,7 @@ type Repo struct {
 	IsActive   bool   `json:"active"                   xorm:"repo_active"`
 	AllowPull  bool   `json:"allow_pr"                 xorm:"repo_allow_pr"`
 	// Counter is used as index to determine new build numbers
-	Counter int    `json:"last_build"                  xorm:"repo_counter"`
+	Counter int    `json:"last_build"                  xorm:"NOT NULL 'repo_counter'"`
 	Config  string `json:"config_file"                 xorm:"repo_config_path"`
 	Hash    string `json:"-"                           xorm:"repo_hash"`
 	Perm    *Perm  `json:"-"                           xorm:"-"`

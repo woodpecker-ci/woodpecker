@@ -25,8 +25,8 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string            `xorm:"task_id"` // TODO: xorm pk autoincr (need migration?)
-	Data         []byte            `xorm:"task_data"`
+	ID           string            `xorm:"PK AUTOINCR 'task_id'"`
+	Data         []byte            `xorm:"'task_data'"` //MEDIUMBLOB
 	Labels       map[string]string `xorm:"json 'task_labels'"`
 	Dependencies []string          `xorm:"json 'task_dependencies'"`
 	RunOn        []string          `xorm:"json 'task_run_on'"`

@@ -51,8 +51,8 @@ type RegistryStore interface {
 // swagger:model registry
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-	RepoID   int64  `json:"-"        xorm:"registry_repo_id"`
-	Address  string `json:"address"  xorm:"registry_addr"`
+	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
+	Address  string `json:"address"  xorm:"UNIQUE(s) 'registry_addr'"`
 	Username string `json:"username" xorm:"registry_username"`
 	Password string `json:"password" xorm:"registry_password"`
 	Email    string `json:"email"    xorm:"registry_email"`

@@ -27,14 +27,14 @@ type ConfigStore interface {
 // Config represents a pipeline configuration.
 type Config struct {
 	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
-	RepoID int64  `json:"-"    xorm:"config_repo_id"`
-	Data   string `json:"data" xorm:"config_data"`
-	Hash   string `json:"hash" xorm:"config_hash"`
+	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
+	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
 	Name   string `json:"name" xorm:"config_name"`
+	Data   string `json:"data" xorm:"config_data"` //MEDIUMBLOB
 }
 
 // BuildConfig is the n:n relation between Build and Config
 type BuildConfig struct {
-	ConfigID int64 `json:"-"   xorm:"config_id"`
-	BuildID  int64 `json:"-"   xorm:"build_id"`
+	ConfigID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
+	BuildID  int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'build_id'"`
 }

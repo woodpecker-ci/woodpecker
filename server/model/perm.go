@@ -26,8 +26,8 @@ type PermStore interface {
 
 // Perm defines a repository permission for an individual user.
 type Perm struct {
-	UserID int64  `json:"-"      xorm:"perm_user_id"`
-	RepoID int64  `json:"-"      xorm:"perm_repo_id"`
+	UserID int64  `json:"-"      xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
+	RepoID int64  `json:"-"      xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
 	Repo   string `json:"-"      xorm:"-"` // TODO: better caching (use type *Repo)
 	Pull   bool   `json:"pull"   xorm:"perm_pull"`
 	Push   bool   `json:"push"   xorm:"perm_push"`

@@ -33,8 +33,8 @@ type SenderStore interface {
 
 type Sender struct {
 	ID     int64    `json:"-"      xorm:"pk autoincr 'sender_id'"`
-	RepoID int64    `json:"-"      xorm:"sender_repo_id"`
-	Login  string   `json:"login"  xorm:"sender_login"`
+	RepoID int64    `json:"-"      xorm:"UNIQUE(s) INDEX 'sender_repo_id'"`
+	Login  string   `json:"login"  xorm:"UNIQUE(s) 'sender_login'"`
 	Allow  bool     `json:"allow"  xorm:"sender_allow"`
 	Block  bool     `json:"block"  xorm:"sender_block"`
 	Branch []string `json:"branch" xorm:"-"`

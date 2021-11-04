@@ -48,8 +48,8 @@ type SecretStore interface {
 // swagger:model registry
 type Secret struct {
 	ID         int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	RepoID     int64    `json:"-"               xorm:"secret_repo_id"`
-	Name       string   `json:"name"            xorm:"secret_name"` // TODO: uniqe constrain (name&repoID)
+	RepoID     int64    `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name       string   `json:"name"            xorm:"UNIQUE(s) 'secret_name'"`
 	Value      string   `json:"value,omitempty" xorm:"secret_value"`
 	Images     []string `json:"image"           xorm:"json 'secret_images'"`
 	Events     []string `json:"event"           xorm:"json 'secret_events'"`

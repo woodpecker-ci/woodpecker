@@ -37,13 +37,13 @@ type User struct {
 	// Login is the username for this user.
 	//
 	// required: true
-	Login string `json:"login"  xorm:"user_login"`
+	Login string `json:"login"  xorm:"UNIQUE 'user_login'"`
 
 	// Token is the oauth2 token.
-	Token string `json:"-"  xorm:"user_token"`
+	Token string `json:"-"  xorm:"VARCHAR(1000) 'user_token'"`
 
 	// Secret is the oauth2 token secret.
-	Secret string `json:"-" xorm:"user_secret"`
+	Secret string `json:"-" xorm:"VARCHAR(1000) 'user_secret'"`
 
 	// Expiry is the token and secret expiration timestamp.
 	Expiry int64 `json:"-" xorm:"user_expiry"`
