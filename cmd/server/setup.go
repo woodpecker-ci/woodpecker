@@ -41,7 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
@@ -49,13 +49,13 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 
-	if datastore_xorm.SupportedDriver("sqlite3") {
+	if datastore.SupportedDriver("sqlite3") {
 		log.Info().Msgf("server has sqlite3 support")
 	} else {
 		log.Info().Msgf("server was build with no sqlite3 support!")
 	}
 
-	if !datastore_xorm.SupportedDriver(driver) {
+	if !datastore.SupportedDriver(driver) {
 		log.Fatal().Msgf("database driver '%s' not supported", driver)
 	}
 
@@ -72,7 +72,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		Config: datasource,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	return datastore_xorm.NewEngine(opts)
+	return datastore.NewEngine(opts)
 }
 
 // TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
