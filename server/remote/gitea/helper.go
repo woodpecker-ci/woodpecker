@@ -47,7 +47,7 @@ func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
 		Link:      from.HTMLURL,
 		IsPrivate: private,
 		Clone:     from.CloneURL,
-		Branch:    "master",
+		Branch:    from.DefaultBranch,
 	}
 }
 

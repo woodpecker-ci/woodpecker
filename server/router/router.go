@@ -30,7 +30,6 @@ import (
 
 // Load loads the router
 func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...gin.HandlerFunc) http.Handler {
-
 	e := gin.New()
 	e.Use(gin.Recovery())
 

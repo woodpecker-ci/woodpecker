@@ -25,7 +25,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -54,13 +54,13 @@ func loop(c *cli.Context) error {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
 
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.BoolT("debug") {
+	if c.Bool("debug") {
 		if c.IsSet("debug") {
 			log.Warn().Msg("--debug is deprecated, use --log-level instead")
 		}
@@ -79,8 +79,12 @@ func loop(c *cli.Context) error {
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
-	if c.BoolT("healthcheck") {
-		go http.ListenAndServe(":3000", nil)
+	if c.Bool("healthcheck") {
+		go func() {
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				log.Error().Msgf("can not listen on port 3000: %v", err)
+			}
+		}()
 	}
 
 	// TODO pass version information to grpc server

@@ -48,14 +48,20 @@ lint:
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/server
 
+frontend-dependencies:
+	(cd web/; yarn install --frozen-lockfile)
+
 test-agent:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
 
 test-server:
 	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
 
-test-frontend:
-	(cd web/; yarn; yarn run test)
+test-frontend: frontend-dependencies
+	(cd web/; yarn run lint)
+	(cd web/; yarn run formatcheck)
+	(cd web/; yarn run typecheck)
+	(cd web/; yarn run test)
 
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
@@ -121,6 +127,23 @@ release-checksums:
 	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
 
 release: release-frontend release-server release-agent release-cli
+
+bundle-prepare:
+	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+
+bundle-agent: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+
+bundle-server: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+
+bundle-cli: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+
+bundle: bundle-agent bundle-server bundle-cli
 
 .PHONY: version
 version:

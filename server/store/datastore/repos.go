@@ -54,8 +54,11 @@ func (db *datastore) DeleteRepo(repo *model.Repo) error {
 	return err
 }
 
-func (db *datastore) RepoList(user *model.User) ([]*model.Repo, error) {
+func (db *datastore) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 	stmt := sql.Lookup(db.driver, "repo-find-user")
+	if owned {
+		stmt = sql.Lookup(db.driver, "repo-find-user-owned")
+	}
 	data := []*model.Repo{}
 	err := meddler.QueryAll(db, &data, stmt, user.ID)
 	return data, err

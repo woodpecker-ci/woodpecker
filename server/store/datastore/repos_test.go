@@ -164,7 +164,75 @@ func TestRepoList(t *testing.T) {
 		{UserID: user.ID, Repo: repo2.FullName},
 	})
 
-	repos, err := s.RepoList(user)
+	repos, err := s.RepoList(user, false)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if got, want := len(repos), 2; got != want {
+		t.Errorf("Want %d repositories, got %d", want, got)
+	}
+	if got, want := repos[0].ID, repo1.ID; got != want {
+		t.Errorf("Want repository id %d, got %d", want, got)
+	}
+	if got, want := repos[1].ID, repo2.ID; got != want {
+		t.Errorf("Want repository id %d, got %d", want, got)
+	}
+}
+
+func TestOwnedRepoList(t *testing.T) {
+	s := newTest()
+	s.Exec("delete from repos")
+	s.Exec("delete from users")
+	s.Exec("delete from perms")
+
+	defer func() {
+		s.Exec("delete from repos")
+		s.Exec("delete from users")
+		s.Exec("delete from perms")
+		s.Close()
+	}()
+
+	user := &model.User{
+		Login: "joe",
+		Email: "foo@bar.com",
+		Token: "e42080dddf012c718e476da161d21ad5",
+	}
+	s.CreateUser(user)
+
+	repo1 := &model.Repo{
+		Owner:    "bradrydzewski",
+		Name:     "test",
+		FullName: "bradrydzewski/test",
+	}
+	repo2 := &model.Repo{
+		Owner:    "test",
+		Name:     "test",
+		FullName: "test/test",
+	}
+	repo3 := &model.Repo{
+		Owner:    "octocat",
+		Name:     "hello-world",
+		FullName: "octocat/hello-world",
+	}
+	repo4 := &model.Repo{
+		Owner:    "demo",
+		Name:     "demo",
+		FullName: "demo/demo",
+	}
+	s.CreateRepo(repo1)
+	s.CreateRepo(repo2)
+	s.CreateRepo(repo3)
+	s.CreateRepo(repo4)
+
+	s.PermBatch([]*model.Perm{
+		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
+		{UserID: user.ID, Repo: repo3.FullName},
+		{UserID: user.ID, Repo: repo4.FullName},
+	})
+
+	repos, err := s.RepoList(user, true)
 	if err != nil {
 		t.Error(err)
 		return
@@ -219,8 +287,8 @@ func TestRepoListLatest(t *testing.T) {
 	s.CreateRepo(repo3)
 
 	s.PermBatch([]*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName},
-		{UserID: user.ID, Repo: repo2.FullName},
+		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
 	})
 
 	build1 := &model.Build{
