@@ -15,8 +15,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
@@ -161,8 +161,8 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
-	engine, err := docker.NewEnv()
-	if err != nil {
+	engine := docker.New()
+	if err = engine.Load(); err != nil {
 		return err
 	}
 

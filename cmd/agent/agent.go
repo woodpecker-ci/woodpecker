@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"os"
 	"sync"
@@ -33,7 +32,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
@@ -141,9 +139,16 @@ func loop(c *cli.Context) error {
 				}
 
 				// new engine
-				engine, err := getBackendEngine(c)
+				engine, err := backend.FindEngine(c.String("backend-engine"))
 				if err != nil {
-					log.Error().Err(err).Msg("cannot create backend engine")
+					log.Error().Err(err).Msg("cannot find backend engine")
+					return
+				}
+
+				// load enginge (e.g. init api client)
+				err = engine.Load()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot load backend engine")
 					return
 				}
 
@@ -160,41 +165,6 @@ func loop(c *cli.Context) error {
 
 	wg.Wait()
 	return nil
-}
-
-func getBackendEngine(c *cli.Context) (backend.Engine, error) {
-	engines := make(map[string]backend.Engine)
-
-	// docker
-	engine, err := docker.NewEnv()
-	if err != nil {
-		return nil, err
-	}
-	engines[engine.Name()] = engine
-
-	// TODO: disabled for now as kubernetes backend has not been implemented yet
-	// kubernetes
-	// engine = kubernetes.New("", "", "")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// engines[engine.Name()] = engine
-
-	if c.String("backend-engine") == "auto-detect" {
-		for _, engine := range engines {
-			if engine.IsAvivable() {
-				return engine, nil
-			}
-		}
-
-		return nil, fmt.Errorf("Can't detect an avivable backend engine")
-	}
-
-	engine, ok := engines[c.String("backend-engine")]
-	if !ok {
-		return nil, fmt.Errorf("Backend engine not found")
-	}
-	return engine, nil
 }
 
 type credentials struct {

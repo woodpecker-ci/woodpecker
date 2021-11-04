@@ -8,11 +8,11 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 // returns a container configuration.
-func toConfig(proc *backend.Step) *container.Config {
+func toConfig(proc *types.Step) *container.Config {
 	config := &container.Config{
 		Image:        proc.Image,
 		Labels:       proc.Labels,
@@ -36,7 +36,7 @@ func toConfig(proc *backend.Step) *container.Config {
 }
 
 // returns a container host configuration.
-func toHostConfig(proc *backend.Step) *container.HostConfig {
+func toHostConfig(proc *types.Step) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   proc.CPUQuota,
@@ -149,7 +149,7 @@ func toDev(paths []string) []container.DeviceMapping {
 
 // helper function that serializes the auth configuration as JSON
 // base64 payload.
-func encodeAuthToBase64(authConfig backend.Auth) (string, error) {
+func encodeAuthToBase64(authConfig types.Auth) (string, error) {
 	buf, err := json.Marshal(authConfig)
 	if err != nil {
 		return "", err

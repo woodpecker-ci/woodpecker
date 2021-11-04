@@ -110,10 +110,10 @@ var flags = []cli.Flag{
 		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
 	},
-	cli.StringFlag{
-		EnvVar: "WOODPECKER_BACKEND",
-		Name:   "backend-engine",
-		Usage:  "backend engine to run pipelines on",
-		Value:  "auto-detect",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Name:    "backend-engine",
+		Usage:   "backend engine to run pipelines on",
+		Value:   "auto-detect",
 	},
 }

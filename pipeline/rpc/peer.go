@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 // ErrCancelled signals the pipeline is cancelled.

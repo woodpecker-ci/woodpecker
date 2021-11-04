@@ -1,33 +1,38 @@
 package backend
 
 import (
-	"context"
-	"io"
+	"fmt"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-// Engine defines a container orchestration backend and is used
-// to create and manage container resources.
-type Engine interface {
-	Name() string
+func FindEngine(engineName string) (types.Engine, error) {
+	engines := make(map[string]types.Engine)
 
-	IsAvivable() bool
+	// TODO: disabled for now as kubernetes backend has not been implemented yet
+	// kubernetes
+	// engine = kubernetes.New("", "", "")
+	// engines[engine.Name()] = engine
 
-	// Setup the pipeline environment.
-	Setup(context.Context, *Config) error
+	// docker
+	engine := docker.New()
+	engines[engine.Name()] = engine
 
-	// Exec start the pipeline step.
-	Exec(context.Context, *Step) error
+	if engineName == "auto-detect" {
+		for _, engine := range engines {
+			if engine.IsAvivable() {
+				return engine, nil
+			}
+		}
 
-	// Kill the pipeline step.
-	Kill(context.Context, *Step) error
+		return nil, fmt.Errorf("Can't detect an avivable backend engine")
+	}
 
-	// Wait for the pipeline step to complete and returns
-	// the completion results.
-	Wait(context.Context, *Step) (*State, error)
+	engine, ok := engines[engineName]
+	if !ok {
+		return nil, fmt.Errorf("Backend engine '%s' not found", engineName)
+	}
 
-	// Tail the pipeline step logs.
-	Tail(context.Context, *Step) (io.ReadCloser, error)
-
-	// Destroy the pipeline environment.
-	Destroy(context.Context, *Config) error
+	return engine, nil
 }
