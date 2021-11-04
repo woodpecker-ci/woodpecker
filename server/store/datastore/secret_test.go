@@ -21,10 +21,8 @@ import (
 )
 
 func TestSecretFind(t *testing.T) {
-	store := newTestStore(t, new(model.Secret))
-	defer func() {
-		store.engine.Exec("delete from secrets")
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	err := store.SecretCreate(&model.Secret{
 		RepoID: 1,
@@ -67,10 +65,8 @@ func TestSecretFind(t *testing.T) {
 }
 
 func TestSecretList(t *testing.T) {
-	store := newTestStore(t, new(model.Secret))
-	defer func() {
-		store.engine.Exec("delete from secrets")
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	store.SecretCreate(&model.Secret{
 		RepoID: 1,
@@ -94,10 +90,8 @@ func TestSecretList(t *testing.T) {
 }
 
 func TestSecretUpdate(t *testing.T) {
-	store := newTestStore(t, new(model.Secret))
-	defer func() {
-		store.engine.Exec("delete from secrets")
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	secret := &model.Secret{
 		RepoID: 1,
@@ -124,10 +118,8 @@ func TestSecretUpdate(t *testing.T) {
 }
 
 func TestSecretDelete(t *testing.T) {
-	store := newTestStore(t, new(model.Secret))
-	defer func() {
-		store.engine.Exec("delete from secrets")
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	secret := &model.Secret{
 		RepoID: 1,
@@ -151,10 +143,8 @@ func TestSecretDelete(t *testing.T) {
 }
 
 func TestSecretIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.Secret))
-	defer func() {
-		store.engine.Exec("delete from secrets")
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	if err := store.SecretCreate(&model.Secret{
 		RepoID: 1,

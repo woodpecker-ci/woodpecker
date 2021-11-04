@@ -23,7 +23,8 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	defer closer()
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {

@@ -21,10 +21,8 @@ import (
 )
 
 func TestProcFind(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	defer closer()
 
 	err := store.ProcCreate([]*model.Proc{
 		{
@@ -72,10 +70,8 @@ func TestProcFind(t *testing.T) {
 }
 
 func TestProcChild(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	defer closer()
 
 	err := store.ProcCreate([]*model.Proc{
 		{
@@ -113,10 +109,8 @@ func TestProcChild(t *testing.T) {
 }
 
 func TestProcList(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	defer closer()
 
 	err := store.ProcCreate([]*model.Proc{
 		{
@@ -157,10 +151,8 @@ func TestProcList(t *testing.T) {
 }
 
 func TestProcUpdate(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	defer closer()
 
 	proc := &model.Proc{
 		BuildID:  1,
@@ -195,10 +187,8 @@ func TestProcUpdate(t *testing.T) {
 }
 
 func TestProcIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	defer closer()
 
 	if err := store.ProcCreate([]*model.Proc{
 		{

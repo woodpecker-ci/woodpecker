@@ -21,12 +21,8 @@ import (
 )
 
 func TestRepoListLatest(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Build))
+	defer closer()
 
 	user := &model.User{
 		Login: "joe",

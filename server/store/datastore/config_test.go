@@ -23,13 +23,8 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	store := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from builds")
-		store.engine.Exec("delete from procs")
-		store.engine.Exec("delete from config")
-	}()
+	store, closer := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
+	defer closer()
 
 	var (
 		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
@@ -110,13 +105,8 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigApproved(t *testing.T) {
-	store := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from builds")
-		store.engine.Exec("delete from procs")
-		store.engine.Exec("delete from config")
-	}()
+	store, closer := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
+	defer closer()
 
 	repo := &model.Repo{
 		UserID:   1,
@@ -210,14 +200,8 @@ func TestConfigApproved(t *testing.T) {
 }
 
 func TestConfigIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.Config), new(model.Proc), new(model.Build), new(model.Repo))
-
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from builds")
-		store.engine.Exec("delete from procs")
-		store.engine.Exec("delete from config")
-	}()
+	store, closer := newTestStore(t, new(model.Config), new(model.Proc), new(model.Build), new(model.Repo))
+	defer closer()
 
 	var (
 		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"

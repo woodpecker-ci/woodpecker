@@ -21,10 +21,8 @@ import (
 )
 
 func TestSenderFind(t *testing.T) {
-	store := newTestStore(t, new(model.Sender))
-	defer func() {
-		store.engine.Exec("delete from senders")
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
 	err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
@@ -54,10 +52,8 @@ func TestSenderFind(t *testing.T) {
 }
 
 func TestSenderList(t *testing.T) {
-	store := newTestStore(t, new(model.Sender))
-	defer func() {
-		store.engine.Exec("delete from senders")
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
 	store.SenderCreate(&model.Sender{
 		RepoID: 1,
@@ -83,10 +79,8 @@ func TestSenderList(t *testing.T) {
 }
 
 func TestSenderUpdate(t *testing.T) {
-	store := newTestStore(t, new(model.Sender))
-	defer func() {
-		store.engine.Exec("delete from senders")
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
 	sender := &model.Sender{
 		RepoID: 1,
@@ -114,10 +108,8 @@ func TestSenderUpdate(t *testing.T) {
 }
 
 func TestSenderIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.Sender))
-	defer func() {
-		store.engine.Exec("delete from senders")
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
 	if err := store.SenderCreate(&model.Sender{
 		RepoID: 1,

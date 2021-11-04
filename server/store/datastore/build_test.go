@@ -31,7 +31,8 @@ func TestBuilds(t *testing.T) {
 		Name:     "test",
 	}
 
-	store := newTestStore(t, new(model.Repo), new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Repo), new(model.Proc), new(model.Build))
+	defer closer()
 
 	g := goblin.Goblin(t)
 	g.Describe("Builds", func() {
@@ -282,12 +283,8 @@ func TestBuilds(t *testing.T) {
 }
 
 func TestBuildIncrement(t *testing.T) {
-	store := newTestStore(t, new(model.Build), new(model.Repo))
-
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from builds")
-	}()
+	store, closer := newTestStore(t, new(model.Build), new(model.Repo))
+	defer closer()
 
 	repo := &model.Repo{
 		UserID:   1,

@@ -23,7 +23,9 @@ import (
 )
 
 func TestRepos(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Build))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Build))
+	defer closer()
+
 	g := goblin.Goblin(t)
 	g.Describe("Repo", func() {
 
@@ -118,16 +120,8 @@ func TestRepos(t *testing.T) {
 }
 
 func TestRepoList(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
-	store.engine.Exec("delete from repos")
-	store.engine.Exec("delete from users")
-	store.engine.Exec("delete from perms")
-
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	defer closer()
 
 	user := &model.User{
 		Login: "joe",
@@ -177,16 +171,8 @@ func TestRepoList(t *testing.T) {
 }
 
 func TestOwnedRepoList(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
-	store.engine.Exec("delete from repos")
-	store.engine.Exec("delete from users")
-	store.engine.Exec("delete from perms")
-
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	defer closer()
 
 	user := &model.User{
 		Login: "joe",
@@ -244,10 +230,8 @@ func TestOwnedRepoList(t *testing.T) {
 }
 
 func TestRepoCount(t *testing.T) {
-	store := newTestStore(t, new(model.Repo))
-	defer func() {
-		store.engine.Exec("delete from repos")
-	}()
+	store, closer := newTestStore(t, new(model.Repo))
+	defer closer()
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
@@ -278,12 +262,8 @@ func TestRepoCount(t *testing.T) {
 }
 
 func TestRepoBatch(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	defer closer()
 
 	repo := &model.Repo{
 		UserID:   1,
@@ -336,12 +316,8 @@ func TestRepoBatch(t *testing.T) {
 }
 
 func TestRepoCrud(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
-	defer func() {
-		store.engine.Exec("delete from repos")
-		store.engine.Exec("delete from users")
-		store.engine.Exec("delete from perms")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	defer closer()
 
 	repo := model.Repo{
 		UserID:   1,

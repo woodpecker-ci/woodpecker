@@ -23,10 +23,8 @@ import (
 )
 
 func TestLogCreateFind(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Logs))
-	defer func() {
-		store.engine.Exec("delete from logs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Logs))
+	defer closer()
 
 	proc := model.Proc{
 		ID: 1,
@@ -50,10 +48,8 @@ func TestLogCreateFind(t *testing.T) {
 }
 
 func TestLogUpdate(t *testing.T) {
-	store := newTestStore(t, new(model.Proc), new(model.Logs))
-	defer func() {
-		store.engine.Exec("delete from logs")
-	}()
+	store, closer := newTestStore(t, new(model.Proc), new(model.Logs))
+	defer closer()
 
 	proc := model.Proc{
 		ID: 1,

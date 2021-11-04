@@ -25,10 +25,8 @@ import (
 )
 
 func TestFileFind(t *testing.T) {
-	store := newTestStore(t, new(model.File), new(model.Proc))
-	defer func() {
-		store.engine.Exec("delete from files")
-	}()
+	store, closer := newTestStore(t, new(model.File), new(model.Proc))
+	defer closer()
 
 	if err := store.FileCreate(
 		&model.File{
@@ -80,10 +78,8 @@ func TestFileFind(t *testing.T) {
 }
 
 func TestFileList(t *testing.T) {
-	store := newTestStore(t, new(model.File), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from files")
-	}()
+	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	defer closer()
 
 	store.FileCreate(
 		&model.File{
@@ -118,10 +114,8 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.File), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from files")
-	}()
+	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	defer closer()
 
 	if err := store.FileCreate(
 		&model.File{
@@ -153,11 +147,8 @@ func TestFileIndexes(t *testing.T) {
 }
 
 func TestFileCascade(t *testing.T) {
-	store := newTestStore(t, new(model.File), new(model.Proc), new(model.Build))
-	defer func() {
-		store.engine.Exec("delete from procs")
-		store.engine.Exec("delete from files")
-	}()
+	store, closer := newTestStore(t, new(model.File), new(model.Proc), new(model.Build))
+	defer closer()
 
 	procOne := &model.Proc{
 		BuildID: 1,

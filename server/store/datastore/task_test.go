@@ -21,10 +21,8 @@ import (
 )
 
 func TestTaskList(t *testing.T) {
-	store := newTestStore(t, new(model.Task))
-	defer func() {
-		store.engine.Exec("delete from tasks")
-	}()
+	store, closer := newTestStore(t, new(model.Task))
+	defer closer()
 
 	store.TaskInsert(&model.Task{
 		ID:     "some_random_id",

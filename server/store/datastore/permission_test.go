@@ -21,11 +21,8 @@ import (
 )
 
 func TestPermFind(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
-	defer func() {
-		store.engine.Exec("delete from perms")
-		store.engine.Exec("delete from repos")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
+	defer closer()
 
 	user := &model.User{ID: 1}
 	repo := &model.Repo{
@@ -68,11 +65,8 @@ func TestPermFind(t *testing.T) {
 }
 
 func TestPermUpsert(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
-	defer func() {
-		store.engine.Exec("delete from perms")
-		store.engine.Exec("delete from repos")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
+	defer closer()
 
 	user := &model.User{ID: 1}
 	repo := &model.Repo{
@@ -150,11 +144,8 @@ func TestPermUpsert(t *testing.T) {
 }
 
 func TestPermDelete(t *testing.T) {
-	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
-	defer func() {
-		store.engine.Exec("delete from perms")
-		store.engine.Exec("delete from repos")
-	}()
+	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
+	defer closer()
 
 	user := &model.User{ID: 1}
 	repo := &model.Repo{

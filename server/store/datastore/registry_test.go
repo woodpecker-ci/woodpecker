@@ -21,10 +21,8 @@ import (
 )
 
 func TestRegistryFind(t *testing.T) {
-	store := newTestStore(t, new(model.Registry))
-	defer func() {
-		store.engine.Exec("delete from registry")
-	}()
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
 
 	err := store.RegistryCreate(&model.Registry{
 		RepoID:   1,
@@ -65,10 +63,8 @@ func TestRegistryFind(t *testing.T) {
 }
 
 func TestRegistryList(t *testing.T) {
-	store := newTestStore(t, new(model.Registry))
-	defer func() {
-		store.engine.Exec("delete from registry")
-	}()
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
 
 	store.RegistryCreate(&model.Registry{
 		RepoID:   1,
@@ -94,10 +90,8 @@ func TestRegistryList(t *testing.T) {
 }
 
 func TestRegistryUpdate(t *testing.T) {
-	store := newTestStore(t, new(model.Registry))
-	defer func() {
-		store.engine.Exec("delete from registry")
-	}()
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
 
 	registry := &model.Registry{
 		RepoID:   1,
@@ -125,10 +119,8 @@ func TestRegistryUpdate(t *testing.T) {
 }
 
 func TestRegistryIndexes(t *testing.T) {
-	store := newTestStore(t, new(model.Registry))
-	defer func() {
-		store.engine.Exec("delete from registry")
-	}()
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
 
 	if err := store.RegistryCreate(&model.Registry{
 		RepoID:   1,
