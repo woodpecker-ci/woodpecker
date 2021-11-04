@@ -151,9 +151,6 @@ func TestUsers(t *testing.T) {
 			store.CreateUser(&user2)
 			count, err := store.GetUserCount()
 			g.Assert(err).IsNil()
-			// TODO: check if below is still an issue
-			// we have to skip this check for postgres because it uses
-			// an estimate which may not be updated.
 			g.Assert(count).Equal(int64(2))
 		})
 

@@ -17,8 +17,6 @@ package datastore
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -100,7 +98,6 @@ func TestSenderUpdate(t *testing.T) {
 		t.Errorf("Unexpected error: insert sender: %s", err)
 		return
 	}
-	assert.EqualValues(t, 1, sender.ID)
 	sender.Allow = false
 	if err := store.SenderUpdate(sender); err != nil {
 		t.Errorf("Unexpected error: update sender: %s", err)

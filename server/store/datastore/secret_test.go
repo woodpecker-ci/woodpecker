@@ -17,7 +17,6 @@ package datastore
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -110,7 +109,6 @@ func TestSecretUpdate(t *testing.T) {
 		return
 	}
 	secret.Value = "qux"
-	assert.EqualValues(t, 1, secret.ID)
 	if err := store.SecretUpdate(secret); err != nil {
 		t.Errorf("Unexpected error: update secret: %s", err)
 		return
