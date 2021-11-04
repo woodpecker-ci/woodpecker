@@ -20,6 +20,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+// TODO: need test with meddler to validate xorm
 func (s storage) GetBuildQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.SQL(`
@@ -52,6 +53,8 @@ WHERE b.build_repo_id = r.repo_id
 	return feed, err
 }
 
+// TODO: do not work as before
+// break woodpecker/server/store/datastore_xorm/users_test.go:240
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	return feed, s.engine.SQL(`
@@ -85,6 +88,7 @@ INNER JOIN builds ON builds.build_repo_id = repos.repo_id
 		Find(&feed)
 }
 
+// TODO: break feed_test.go:95
 func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	return feed, s.engine.SQL(`SELECT
