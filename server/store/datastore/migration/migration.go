@@ -25,6 +25,13 @@ type migrations struct {
 }
 
 func Migrate(e *xorm.Engine) error {
+	if err := e.Sync2(new(migrations)); err != nil {
+		return err
+	}
+
+	// TODO: handle old instance
+
+	// create tables for new instance
 	if err := e.Sync2(
 		new(model.Agent),
 		new(model.Agent),
@@ -33,7 +40,6 @@ func Migrate(e *xorm.Engine) error {
 		new(model.Config),
 		new(model.File),
 		new(model.Logs),
-		new(migrations),
 		new(model.Perm),
 		new(model.Proc),
 		new(model.Registry),
