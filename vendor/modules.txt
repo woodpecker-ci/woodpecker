@@ -221,9 +221,6 @@ github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
 # github.com/russross/blackfriday/v2 v2.1.0
 github.com/russross/blackfriday/v2
-# github.com/russross/meddler v1.0.1
-## explicit
-github.com/russross/meddler
 # github.com/sirupsen/logrus v1.8.1
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.3.0
