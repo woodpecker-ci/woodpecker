@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-
-	"github.com/sirupsen/logrus"
 )
 
 type configFetcher struct {
@@ -29,13 +29,17 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 	}
 }
 
+// configFetchTimeout determine seconds the configFetcher wait until cancel fetch process
+var configFetchTimeout = 3 // seconds
+
 // Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
-	logrus.Tracef("Start Fetching config for '%s'", cf.repo.FullName)
+	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times, timeout is one second longer each time
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*time.Duration(i), strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
+		log.Trace().Msgf("%d try failed: %v", i, err)
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
 		}
@@ -45,18 +49,18 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 }
 
 // fetch config by timeout
-// TODO: dedupe code
+// TODO: deduplicate code
 func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
 	if len(config) > 0 {
-		logrus.Tracef("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
+		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
 			file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
 			if err == nil && len(file) != 0 {
-				logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+				log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 				return []*remote.FileMeta{{
 					Name: config,
 					Data: file,
@@ -67,14 +71,14 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		// or a folder
 		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
 		if err == nil && len(files) != 0 {
-			logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
+			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
 		}
 
 		return nil, fmt.Errorf("config '%s' not found: %s", config, err)
 	}
 
-	logrus.Tracef("ConfigFetch[%s]: user did not defined own config follow default procedure", cf.repo.FullName)
+	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config follow default procedure", cf.repo.FullName)
 	// no user defined config so try .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml
 
 	// test .woodpecker/ folder
@@ -83,14 +87,14 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
-		logrus.Tracef("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
+		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 		return files, nil
 	}
 
 	config = ".woodpecker.yml"
 	file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
-		logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
 			Name: config,
 			Data: file,
@@ -100,7 +104,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	config = ".drone.yml"
 	file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
-		logrus.Tracef("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
 			Name: config,
 			Data: file,

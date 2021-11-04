@@ -61,7 +61,7 @@ body:
         #   required: true
         - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
           required: true
-        - label: Read the [docs](https://woodpecker-ci.github.io/docs/intro).
+        - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
           required: true
         - label: Check that there isn't [already an issue](https://github.com/woodpecker-ci/woodpecker/issues) that reports the same bug to avoid creating a duplicate.
           required: true

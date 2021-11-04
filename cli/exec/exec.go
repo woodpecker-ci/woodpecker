@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
@@ -22,21 +24,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-
-	"github.com/urfave/cli"
 )
 
 // Command exports the exec command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
-	Action: func(c *cli.Context) {
-		if err := exec(c); err != nil {
-			log.Fatalln(err)
-		}
-	},
-	Flags: flags,
+	Action:    exec,
+	Flags:     append(common.GlobalFlags, flags...),
 }
 
 func exec(c *cli.Context) error {

@@ -17,9 +17,10 @@ package bitbucketserver
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
-	"net/http"
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns

@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/gogits/go-gogs-client"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
@@ -253,6 +254,12 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 // Deactivate is not supported by the Gogs driver.
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build

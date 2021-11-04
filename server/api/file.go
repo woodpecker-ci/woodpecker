@@ -21,12 +21,14 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // FileList gets a list file by build.
 func FileList(c *gin.Context) {
+	store_ := store.FromContext(c)
 	num, err := strconv.Atoi(c.Param("number"))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -34,13 +36,13 @@ func FileList(c *gin.Context) {
 	}
 
 	repo := session.Repo(c)
-	build, err := store.FromContext(c).GetBuildNumber(repo, num)
+	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	files, err := store.FromContext(c).FileList(build)
+	files, err := store_.FileList(build)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -52,6 +54,8 @@ func FileList(c *gin.Context) {
 // FileGet gets a file by process and name
 func FileGet(c *gin.Context) {
 	var (
+		store_ = store.FromContext(c)
+
 		repo = session.Repo(c)
 		name = strings.TrimPrefix(c.Param("file"), "/")
 		raw  = func() bool {
@@ -71,19 +75,19 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	build, err := store.FromContext(c).GetBuildNumber(repo, num)
+	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	proc, err := store.FromContext(c).ProcFind(build, pid)
+	proc, err := store_.ProcFind(build, pid)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	file, err := store.FromContext(c).FileFind(proc, name)
+	file, err := store_.FileFind(proc, name)
 	if err != nil {
 		c.String(404, "Error getting file %q. %s", name, err)
 		return
@@ -94,7 +98,7 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	rc, err := store.FromContext(c).FileRead(proc, file.Name)
+	rc, err := store_.FileRead(proc, file.Name)
 	if err != nil {
 		c.String(404, "Error getting file stream %q. %s", name, err)
 		return

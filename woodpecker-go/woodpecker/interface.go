@@ -1,6 +1,8 @@
 package woodpecker
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // Client is used to communicate with a Drone server.
 type Client interface {
@@ -125,4 +127,10 @@ type Client interface {
 
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
+
+	// LogLevel returns the current logging level
+	LogLevel() (*LogLevel, error)
+
+	// SetLogLevel sets the server's logging level
+	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 }

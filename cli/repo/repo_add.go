@@ -3,15 +3,18 @@ package repo
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoAddCmd = cli.Command{
+var repoAddCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "add a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoAdd,
+	Flags:     common.GlobalFlags,
 }
 
 func repoAdd(c *cli.Context) error {

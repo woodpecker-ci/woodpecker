@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
-
-	"golang.org/x/oauth2"
 )
 
 const (
@@ -274,6 +274,12 @@ func (c *Coding) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 // post-commit hooks matching the given link.
 func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return c.newClient(ctx, u).RemoveWebhook(r.Owner, r.Name, link)
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the post-commit hook from the Request body and returns the

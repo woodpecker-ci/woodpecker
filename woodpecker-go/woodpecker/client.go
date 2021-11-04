@@ -37,6 +37,7 @@ const (
 	pathBuildQueue     = "%s/api/builds"
 	pathQueue          = "%s/api/queue"
 	pathVersion        = "%s/version"
+	pathLogLevel       = "%s/api/log-level"
 )
 
 type client struct {
@@ -355,10 +356,27 @@ func (c *client) SecretDelete(owner, name, secret string) error {
 	return c.delete(uri)
 }
 
+// QueueInfo returns queue info
 func (c *client) QueueInfo() (*Info, error) {
 	out := new(Info)
 	uri := fmt.Sprintf(pathQueue+"/info", c.addr)
 	err := c.get(uri, out)
+	return out, err
+}
+
+// LogLevel returns the current logging level
+func (c *client) LogLevel() (*LogLevel, error) {
+	out := new(LogLevel)
+	uri := fmt.Sprintf(pathLogLevel, c.addr)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// SetLogLevel sets the logging level of the server
+func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
+	out := new(LogLevel)
+	uri := fmt.Sprintf(pathLogLevel, c.addr)
+	err := c.post(uri, in, out)
 	return out, err
 }
 

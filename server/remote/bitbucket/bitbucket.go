@@ -20,12 +20,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
-	"golang.org/x/oauth2"
 )
 
 // Bitbucket cloud endpoints.
@@ -33,6 +33,12 @@ const (
 	DefaultAPI = "https://api.bitbucket.org"
 	DefaultURL = "https://bitbucket.org"
 )
+
+// Opts are remote options for bitbucket
+type Opts struct {
+	Client string
+	Secret string
+}
 
 type config struct {
 	API    string
@@ -43,13 +49,14 @@ type config struct {
 
 // New returns a new remote Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
-func New(client, secret string) remote.Remote {
+func New(opts *Opts) (remote.Remote, error) {
 	return &config{
 		API:    DefaultAPI,
 		URL:    DefaultURL,
-		Client: client,
-		Secret: secret,
-	}
+		Client: opts.Client,
+		Secret: opts.Secret,
+	}, nil
+	// TODO: add checks
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -266,6 +273,12 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    "x-token-auth",
 		Password: u.Token,
 	}, nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and

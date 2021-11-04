@@ -5,23 +5,20 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userInfoCmd = cli.Command{
+var userInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show user details",
 	ArgsUsage: "<username>",
 	Action:    userInfo,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplUserInfo,
-		},
-	},
+	Flags: append(common.GlobalFlags,
+		common.FormatFlag(tmplUserInfo),
+	),
 }
 
 func userInfo(c *cli.Context) error {

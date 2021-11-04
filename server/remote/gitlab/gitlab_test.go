@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
-
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
 func load(config string) *Gitlab {

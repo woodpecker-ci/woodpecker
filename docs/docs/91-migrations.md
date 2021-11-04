@@ -38,6 +38,14 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
 
+- Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
+
+- Base path has moved from `/var/lib/drone` to `/var/lib/woodpecker`
+
+- Default SQLite database location has changed:
+  - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
+  - `drone.sqlite` -> `woodpecker.sqlite`
+
 - ...
 
 ## 0.14.0

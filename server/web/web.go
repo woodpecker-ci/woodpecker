@@ -22,12 +22,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Endpoint provides the website endpoints.
@@ -62,7 +62,7 @@ func (w *website) Register(mux *gin.Engine) {
 	h := http.FileServer(w.fs)
 	h = setupCache(h)
 	mux.GET("/favicon.svg", gin.WrapH(h))
-	mux.GET("/static/*filepath", gin.WrapH(h))
+	mux.GET("/assets/*filepath", gin.WrapH(h))
 	mux.NoRoute(gin.WrapF(w.handleIndex))
 }
 

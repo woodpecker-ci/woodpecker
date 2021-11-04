@@ -11,9 +11,9 @@ COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.
 EXPOSE 8000 9000 80 443
 
 ENV GODEBUG=netdns=go
-ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/drone/drone.sqlite
+ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3
-ENV XDG_CACHE_HOME=/var/lib/drone
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
 
 ADD dist/server/linux_amd64/woodpecker-server /bin/
 

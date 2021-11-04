@@ -3,22 +3,69 @@ clone:
     image: plugins/git:next
 
 pipeline:
+  web-deps:
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn install --frozen-lockfile
+    when:
+      path: "web/**"
+
+#  TODO: enable if we have enouth mem (~2g) to lint, cause an oom atm.
+#        For reviewers, please run localy to verify it passes
+#  web-lint:
+#    TODO: disabled group for now to prevent oom
+#    group: web-test
+#    image: node:16-alpine
+#    commands:
+#      - cd web/
+#      - yarn lint
+#    when:
+#      path: "web/**"
+
+  web-formatcheck:
+    group: web-test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn formatcheck
+    when:
+      path: "web/**"
+
+  web-typecheck:
+    group: web-test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn typecheck
+    when:
+      path: "web/**"
+
+  web-test:
+    group: web-test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn test
+    when:
+      path: "web/**"
+
+  web-build:
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn build
+    when:
+      path: "web/**"
+
   test:
     image: golang:1.16
     group: test
     commands:
       - make test
       - make vet
+      - make lint
       - make formatcheck
-
-  test-frontend:
-    image: node:10.17.0-stretch
-    group: test
-    commands:
-      - (cd web/; yarn install)
-      - (cd web/; yarn run lesshint)
-      - (cd web/; yarn run lint --quiet)
-      - make test-frontend
 
   test-postgres:
     image: golang:1.16
@@ -39,8 +86,9 @@ pipeline:
       - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
   build-frontend:
-    image: node:10.17.0-stretch
+    image: node:16-alpine
     commands:
+      - apk add make
       - make release-frontend
 
   build-server:
@@ -61,8 +109,17 @@ pipeline:
     commands:
       - make release-cli
 
+  build-deb-rpm:
+    group: bundle
+    image: golang:1.16
+    commands:
+      - make bundle
+    when:
+      event: [push, tag]
+      branch: master
+
   publish-server:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
@@ -74,7 +131,7 @@ pipeline:
       event: push
 
   publish-server-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
@@ -86,7 +143,7 @@ pipeline:
       event: push
 
   publish-agent:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
@@ -98,7 +155,7 @@ pipeline:
       event: push
 
   publish-agent-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
@@ -132,7 +189,7 @@ pipeline:
       event: push
 
   release-server:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
@@ -142,7 +199,7 @@ pipeline:
       event: tag
 
   release-server-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
@@ -152,7 +209,7 @@ pipeline:
       event: tag
 
   release-agent:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
@@ -162,7 +219,7 @@ pipeline:
       event: tag
 
   release-agent-alpine:
-    group: docker
+    group: bundle
     image: plugins/docker
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
@@ -204,6 +261,8 @@ pipeline:
     image: plugins/github-release
     files:
       - dist/*.tar.gz
+      - dist/*.deb
+      - dist/*.rpm
       - dist/checksums.txt
     title: ${CI_COMMIT_TAG##v}
     secrets:

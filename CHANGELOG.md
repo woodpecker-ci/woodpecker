@@ -1,3 +1,23 @@
+## [0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
+
+* BUGFIXES
+  * Add flag for not fetching permissions (FlatPermissions) (#491)
+  * Gitea use default branch (#480) (#482)
+  * Fix repo access (#476) (#477)
+* ENHANCEMENTS
+  * Use go embed for web files and remove httptreemux (#382) (#489)
+
+## [0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
+
+* BUGFIXES
+  * Fix sanitziePath (#326) (aa4fa9aab3)
+  * Fix json tag for `Pos` at struct `Line` (#422) (#424)
+  * Fix channel buffer used with signal.Notify (#421) (#423)
+* ENHANCEMENTS
+  * Support recursive glob for path conditions (#327) (#412)
+* TESTING
+  * Add TestPipelineName to procBuilder_test.go (#461) (#455)
+
 ## [0.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.1) - 2021-09-21
 
 * SECURITY

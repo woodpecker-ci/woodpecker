@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/theme"],
+  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*"],
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "esnext",
+    "jsx": "preserve"
+  }
+}

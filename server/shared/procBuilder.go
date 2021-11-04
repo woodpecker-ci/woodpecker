@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -241,7 +242,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 			),
 		),
 		compiler.WithProxy(),
-		compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
 	).Compile(parsed)
 }
