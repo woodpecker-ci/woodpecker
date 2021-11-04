@@ -21,11 +21,10 @@ import (
 )
 
 func TestPermFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
 	defer func() {
-		s.Exec("delete from perms")
-		s.Exec("delete from repos")
-		s.Close()
+		store.engine.Exec("delete from perms")
+		store.engine.Exec("delete from repos")
 	}()
 
 	user := &model.User{ID: 1}
@@ -35,9 +34,9 @@ func TestPermFind(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	s.CreateRepo(repo)
+	store.CreateRepo(repo)
 
-	err := s.PermUpsert(
+	err := store.PermUpsert(
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
@@ -52,7 +51,7 @@ func TestPermFind(t *testing.T) {
 		return
 	}
 
-	perm, err := s.PermFind(user, repo)
+	perm, err := store.PermFind(user, repo)
 	if err != nil {
 		t.Error(err)
 		return
@@ -69,11 +68,10 @@ func TestPermFind(t *testing.T) {
 }
 
 func TestPermUpsert(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
 	defer func() {
-		s.Exec("delete from perms")
-		s.Exec("delete from repos")
-		s.Close()
+		store.engine.Exec("delete from perms")
+		store.engine.Exec("delete from repos")
 	}()
 
 	user := &model.User{ID: 1}
@@ -83,9 +81,9 @@ func TestPermUpsert(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	s.CreateRepo(repo)
+	store.CreateRepo(repo)
 
-	err := s.PermUpsert(
+	err := store.PermUpsert(
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
@@ -100,7 +98,7 @@ func TestPermUpsert(t *testing.T) {
 		return
 	}
 
-	perm, err := s.PermFind(user, repo)
+	perm, err := store.PermFind(user, repo)
 	if err != nil {
 		t.Error(err)
 		return
@@ -120,7 +118,7 @@ func TestPermUpsert(t *testing.T) {
 	// using the insert or replace logic.
 	//
 
-	err = s.PermUpsert(
+	err = store.PermUpsert(
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
@@ -135,7 +133,7 @@ func TestPermUpsert(t *testing.T) {
 		return
 	}
 
-	perm, err = s.PermFind(user, repo)
+	perm, err = store.PermFind(user, repo)
 	if err != nil {
 		t.Error(err)
 		return
@@ -152,11 +150,10 @@ func TestPermUpsert(t *testing.T) {
 }
 
 func TestPermDelete(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
 	defer func() {
-		s.Exec("delete from perms")
-		s.Exec("delete from repos")
-		s.Close()
+		store.engine.Exec("delete from perms")
+		store.engine.Exec("delete from repos")
 	}()
 
 	user := &model.User{ID: 1}
@@ -166,9 +163,9 @@ func TestPermDelete(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	s.CreateRepo(repo)
+	store.CreateRepo(repo)
 
-	err := s.PermUpsert(
+	err := store.PermUpsert(
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
@@ -183,17 +180,17 @@ func TestPermDelete(t *testing.T) {
 		return
 	}
 
-	perm, err := s.PermFind(user, repo)
+	perm, err := store.PermFind(user, repo)
 	if err != nil {
 		t.Errorf("Unexpected error: select perm: %s", err)
 		return
 	}
-	err = s.PermDelete(perm)
+	err = store.PermDelete(perm)
 	if err != nil {
 		t.Errorf("Unexpected error: delete perm: %s", err)
 		return
 	}
-	_, err = s.PermFind(user, repo)
+	_, err = store.PermFind(user, repo)
 	if err == nil {
 		t.Errorf("Expect error: sql.ErrNoRows")
 		return

@@ -23,19 +23,16 @@ import (
 )
 
 func TestRepos(t *testing.T) {
-	db := openTest()
-	defer db.Close()
-
-	s := From(db)
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Build))
 	g := goblin.Goblin(t)
 	g.Describe("Repo", func() {
 
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			db.Exec("DELETE FROM builds")
-			db.Exec("DELETE FROM repos")
-			db.Exec("DELETE FROM users")
+			store.engine.Exec("DELETE FROM builds")
+			store.engine.Exec("DELETE FROM repos")
+			store.engine.Exec("DELETE FROM users")
 		})
 
 		g.It("Should Set a Repo", func() {
@@ -45,9 +42,9 @@ func TestRepos(t *testing.T) {
 				Owner:    "bradrydzewski",
 				Name:     "test",
 			}
-			err1 := s.CreateRepo(&repo)
-			err2 := s.UpdateRepo(&repo)
-			getrepo, err3 := s.GetRepo(repo.ID)
+			err1 := store.CreateRepo(&repo)
+			err2 := store.UpdateRepo(&repo)
+			getrepo, err3 := store.GetRepo(repo.ID)
 
 			g.Assert(err1 == nil).IsTrue()
 			g.Assert(err2 == nil).IsTrue()
@@ -62,7 +59,7 @@ func TestRepos(t *testing.T) {
 				Owner:    "bradrydzewski",
 				Name:     "test",
 			}
-			err := s.CreateRepo(&repo)
+			err := store.CreateRepo(&repo)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(repo.ID != 0).IsTrue()
 		})
@@ -74,8 +71,8 @@ func TestRepos(t *testing.T) {
 				Owner:    "bradrydzewski",
 				Name:     "test",
 			}
-			s.CreateRepo(&repo)
-			getrepo, err := s.GetRepo(repo.ID)
+			store.CreateRepo(&repo)
+			getrepo, err := store.GetRepo(repo.ID)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(repo.ID).Equal(getrepo.ID)
 			g.Assert(repo.UserID).Equal(getrepo.UserID)
@@ -90,8 +87,8 @@ func TestRepos(t *testing.T) {
 				Owner:    "bradrydzewski",
 				Name:     "test",
 			}
-			s.CreateRepo(&repo)
-			getrepo, err := s.GetRepoName(repo.FullName)
+			store.CreateRepo(&repo)
+			getrepo, err := store.GetRepoName(repo.FullName)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(repo.ID).Equal(getrepo.ID)
 			g.Assert(repo.UserID).Equal(getrepo.UserID)
@@ -112,8 +109,8 @@ func TestRepos(t *testing.T) {
 				Owner:    "bradrydzewski",
 				Name:     "test",
 			}
-			err1 := s.CreateRepo(&repo1)
-			err2 := s.CreateRepo(&repo2)
+			err1 := store.CreateRepo(&repo1)
+			err2 := store.CreateRepo(&repo2)
 			g.Assert(err1 == nil).IsTrue()
 			g.Assert(err2 == nil).IsFalse()
 		})
@@ -121,16 +118,15 @@ func TestRepos(t *testing.T) {
 }
 
 func TestRepoList(t *testing.T) {
-	s := newTest()
-	s.Exec("delete from repos")
-	s.Exec("delete from users")
-	s.Exec("delete from perms")
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store.engine.Exec("delete from repos")
+	store.engine.Exec("delete from users")
+	store.engine.Exec("delete from perms")
 
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	user := &model.User{
@@ -138,7 +134,7 @@ func TestRepoList(t *testing.T) {
 		Email: "foo@bar.com",
 		Token: "e42080dddf012c718e476da161d21ad5",
 	}
-	s.CreateUser(user)
+	store.CreateUser(user)
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
@@ -155,16 +151,16 @@ func TestRepoList(t *testing.T) {
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
 	}
-	s.CreateRepo(repo1)
-	s.CreateRepo(repo2)
-	s.CreateRepo(repo3)
+	store.CreateRepo(repo1)
+	store.CreateRepo(repo2)
+	store.CreateRepo(repo3)
 
-	s.PermBatch([]*model.Perm{
+	store.PermBatch([]*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName},
 		{UserID: user.ID, Repo: repo2.FullName},
 	})
 
-	repos, err := s.RepoList(user, false)
+	repos, err := store.RepoList(user, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -181,16 +177,15 @@ func TestRepoList(t *testing.T) {
 }
 
 func TestOwnedRepoList(t *testing.T) {
-	s := newTest()
-	s.Exec("delete from repos")
-	s.Exec("delete from users")
-	s.Exec("delete from perms")
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store.engine.Exec("delete from repos")
+	store.engine.Exec("delete from users")
+	store.engine.Exec("delete from perms")
 
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	user := &model.User{
@@ -198,7 +193,7 @@ func TestOwnedRepoList(t *testing.T) {
 		Email: "foo@bar.com",
 		Token: "e42080dddf012c718e476da161d21ad5",
 	}
-	s.CreateUser(user)
+	store.CreateUser(user)
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
@@ -220,19 +215,19 @@ func TestOwnedRepoList(t *testing.T) {
 		Name:     "demo",
 		FullName: "demo/demo",
 	}
-	s.CreateRepo(repo1)
-	s.CreateRepo(repo2)
-	s.CreateRepo(repo3)
-	s.CreateRepo(repo4)
+	store.CreateRepo(repo1)
+	store.CreateRepo(repo2)
+	store.CreateRepo(repo3)
+	store.CreateRepo(repo4)
 
-	s.PermBatch([]*model.Perm{
+	store.PermBatch([]*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
 		{UserID: user.ID, Repo: repo3.FullName},
 		{UserID: user.ID, Repo: repo4.FullName},
 	})
 
-	repos, err := s.RepoList(user, true)
+	repos, err := store.RepoList(user, true)
 	if err != nil {
 		t.Error(err)
 		return
@@ -249,12 +244,11 @@ func TestOwnedRepoList(t *testing.T) {
 }
 
 func TestRepoListLatest(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Build))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	user := &model.User{
@@ -262,7 +256,7 @@ func TestRepoListLatest(t *testing.T) {
 		Email: "foo@bar.com",
 		Token: "e42080dddf012c718e476da161d21ad5",
 	}
-	s.CreateUser(user)
+	store.CreateUser(user)
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
@@ -282,11 +276,11 @@ func TestRepoListLatest(t *testing.T) {
 		FullName: "octocat/hello-world",
 		IsActive: true,
 	}
-	s.CreateRepo(repo1)
-	s.CreateRepo(repo2)
-	s.CreateRepo(repo3)
+	store.CreateRepo(repo1)
+	store.CreateRepo(repo2)
+	store.CreateRepo(repo3)
 
-	s.PermBatch([]*model.Perm{
+	store.PermBatch([]*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
 	})
@@ -307,12 +301,12 @@ func TestRepoListLatest(t *testing.T) {
 		RepoID: repo3.ID,
 		Status: model.StatusError,
 	}
-	s.CreateBuild(build1)
-	s.CreateBuild(build2)
-	s.CreateBuild(build3)
-	s.CreateBuild(build4)
+	store.CreateBuild(build1)
+	store.CreateBuild(build2)
+	store.CreateBuild(build3)
+	store.CreateBuild(build4)
 
-	builds, err := s.RepoListLatest(user)
+	builds, err := store.RepoListLatest(user)
 	if err != nil {
 		t.Errorf("Unexpected error: repository list with latest build: %s", err)
 		return
@@ -335,12 +329,11 @@ func TestRepoListLatest(t *testing.T) {
 }
 
 func TestRepoCount(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	repo1 := &model.Repo{
@@ -361,24 +354,23 @@ func TestRepoCount(t *testing.T) {
 		FullName: "test/test-ui",
 		IsActive: false,
 	}
-	s.CreateRepo(repo1)
-	s.CreateRepo(repo2)
-	s.CreateRepo(repo3)
+	store.CreateRepo(repo1)
+	store.CreateRepo(repo2)
+	store.CreateRepo(repo3)
 
-	s.Exec("ANALYZE")
-	count, _ := s.GetRepoCount()
+	store.engine.Exec("ANALYZE")
+	count, _ := store.GetRepoCount()
 	if got, want := count, int64(2); got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
 }
 
 func TestRepoBatch(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	repo := &model.Repo{
@@ -388,13 +380,13 @@ func TestRepoBatch(t *testing.T) {
 		Name:     "bar",
 		IsActive: true,
 	}
-	err := s.CreateRepo(repo)
+	err := store.CreateRepo(repo)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = s.RepoBatch(
+	err = store.RepoBatch(
 		[]*model.Repo{
 			{
 				UserID:   1,
@@ -424,20 +416,19 @@ func TestRepoBatch(t *testing.T) {
 		return
 	}
 
-	s.Exec("ANALYZE")
-	count, _ := s.GetRepoCount()
+	store.engine.Exec("ANALYZE")
+	count, _ := store.GetRepoCount()
 	if got, want := count, int64(3); got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
 }
 
 func TestRepoCrud(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from users")
-		s.Exec("delete from perms")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from users")
+		store.engine.Exec("delete from perms")
 	}()
 
 	repo := model.Repo{
@@ -446,10 +437,10 @@ func TestRepoCrud(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	s.CreateRepo(&repo)
-	_, err1 := s.GetRepo(repo.ID)
-	err2 := s.DeleteRepo(&repo)
-	_, err3 := s.GetRepo(repo.ID)
+	store.CreateRepo(&repo)
+	_, err1 := store.GetRepo(repo.ID)
+	err2 := store.DeleteRepo(&repo)
+	_, err3 := store.GetRepo(repo.ID)
 	if err1 != nil {
 		t.Errorf("Unexpected error: select repository: %s", err1)
 	}

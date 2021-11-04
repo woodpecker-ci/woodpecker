@@ -23,22 +23,21 @@ import (
 )
 
 func TestLogCreateFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Logs))
 	defer func() {
-		s.Exec("delete from logs")
-		s.Close()
+		store.engine.Exec("delete from logs")
 	}()
 
 	proc := model.Proc{
 		ID: 1,
 	}
 	buf := bytes.NewBufferString("echo hi")
-	err := s.LogSave(&proc, buf)
+	err := store.LogSave(&proc, buf)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
-	rc, err := s.LogFind(&proc)
+	rc, err := store.LogFind(&proc)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
@@ -51,10 +50,9 @@ func TestLogCreateFind(t *testing.T) {
 }
 
 func TestLogUpdate(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Logs))
 	defer func() {
-		s.Exec("delete from logs")
-		s.Close()
+		store.engine.Exec("delete from logs")
 	}()
 
 	proc := model.Proc{
@@ -62,8 +60,8 @@ func TestLogUpdate(t *testing.T) {
 	}
 	buf1 := bytes.NewBufferString("echo hi")
 	buf2 := bytes.NewBufferString("echo allo?")
-	err1 := s.LogSave(&proc, buf1)
-	err2 := s.LogSave(&proc, buf2)
+	err1 := store.LogSave(&proc, buf1)
+	err2 := store.LogSave(&proc, buf2)
 	if err1 != nil {
 		t.Errorf("Unexpected error: log create: %s", err1)
 	}
@@ -71,7 +69,7 @@ func TestLogUpdate(t *testing.T) {
 		t.Errorf("Unexpected error: log update: %s", err2)
 	}
 
-	rc, err := s.LogFind(&proc)
+	rc, err := store.LogFind(&proc)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}

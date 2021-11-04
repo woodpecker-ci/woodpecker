@@ -21,13 +21,12 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	s := newTest(t)
+	store := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from builds")
-		s.Exec("delete from procs")
-		s.Exec("delete from config")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from builds")
+		store.engine.Exec("delete from procs")
+		store.engine.Exec("delete from config")
 	}()
 
 	var (
@@ -41,7 +40,7 @@ func TestConfig(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	if err := s.CreateRepo(repo); err != nil {
+	if err := store.CreateRepo(repo); err != nil {
 		t.Errorf("Unexpected error: insert repo: %s", err)
 		return
 	}
@@ -52,7 +51,7 @@ func TestConfig(t *testing.T) {
 		Hash:   hash,
 		Name:   "default",
 	}
-	if err := s.ConfigCreate(config); err != nil {
+	if err := store.ConfigCreate(config); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
@@ -62,12 +61,12 @@ func TestConfig(t *testing.T) {
 		Status: model.StatusRunning,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 	}
-	if err := s.CreateBuild(build); err != nil {
+	if err := store.CreateBuild(build); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
 
-	if err := s.BuildConfigCreate(
+	if err := store.BuildConfigCreate(
 		&model.BuildConfig{
 			ConfigID: config.ID,
 			BuildID:  build.ID,
@@ -77,7 +76,7 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	config, err := s.ConfigFindIdentical(repo.ID, hash)
+	config, err := store.ConfigFindIdentical(repo.ID, hash)
 	if err != nil {
 		t.Error(err)
 		return
@@ -98,7 +97,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Want config name %s, got %s", want, got)
 	}
 
-	loaded, err := s.ConfigsForBuild(build.ID)
+	loaded, err := store.ConfigsForBuild(build.ID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
@@ -109,13 +108,12 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigApproved(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from builds")
-		s.Exec("delete from procs")
-		s.Exec("delete from config")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from builds")
+		store.engine.Exec("delete from procs")
+		store.engine.Exec("delete from config")
 	}()
 
 	repo := &model.Repo{
@@ -124,7 +122,7 @@ func TestConfigApproved(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	if err := s.CreateRepo(repo); err != nil {
+	if err := store.CreateRepo(repo); err != nil {
 		t.Errorf("Unexpected error: insert repo: %s", err)
 		return
 	}
@@ -149,11 +147,11 @@ func TestConfigApproved(t *testing.T) {
 		}
 	)
 
-	if err := s.CreateBuild(buildBlocked); err != nil {
+	if err := store.CreateBuild(buildBlocked); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
-	if err := s.CreateBuild(buildPending); err != nil {
+	if err := store.CreateBuild(buildPending); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
@@ -162,7 +160,7 @@ func TestConfigApproved(t *testing.T) {
 		Data:   data,
 		Hash:   hash,
 	}
-	if err := s.ConfigCreate(conf); err != nil {
+	if err := store.ConfigCreate(conf); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
@@ -170,23 +168,23 @@ func TestConfigApproved(t *testing.T) {
 		ConfigID: conf.ID,
 		BuildID:  buildBlocked.ID,
 	}
-	if err := s.BuildConfigCreate(buildConfig); err != nil {
+	if err := store.BuildConfigCreate(buildConfig); err != nil {
 		t.Errorf("Unexpected error: insert build_config: %s", err)
 		return
 	}
 
-	if approved, err := s.ConfigFindApproved(conf); approved != false || err != nil {
+	if approved, err := store.ConfigFindApproved(conf); approved != false || err != nil {
 		t.Errorf("Want config not approved, when blocked or pending. %v", err)
 		return
 	}
 
-	s.CreateBuild(buildRunning)
+	store.CreateBuild(buildRunning)
 	conf2 := &model.Config{
 		RepoID: repo.ID,
 		Data:   data,
 		Hash:   "xxx",
 	}
-	if err := s.ConfigCreate(conf2); err != nil {
+	if err := store.ConfigCreate(conf2); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
@@ -194,25 +192,25 @@ func TestConfigApproved(t *testing.T) {
 		ConfigID: conf2.ID,
 		BuildID:  buildRunning.ID,
 	}
-	if err := s.BuildConfigCreate(buildConfig2); err != nil {
+	if err := store.BuildConfigCreate(buildConfig2); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
 
-	if approved, err := s.ConfigFindApproved(conf2); approved != true || err != nil {
+	if approved, err := store.ConfigFindApproved(conf2); approved != true || err != nil {
 		t.Errorf("Want config approved, when running. %v", err)
 		return
 	}
 }
 
 func TestConfigIndexes(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Config), new(model.Proc), new(model.Build), new(model.Repo))
+
 	defer func() {
-		s.Exec("delete from repos")
-		s.Exec("delete from builds")
-		s.Exec("delete from procs")
-		s.Exec("delete from config")
-		s.Close()
+		store.engine.Exec("delete from repos")
+		store.engine.Exec("delete from builds")
+		store.engine.Exec("delete from procs")
+		store.engine.Exec("delete from config")
 	}()
 
 	var (
@@ -220,7 +218,7 @@ func TestConfigIndexes(t *testing.T) {
 		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
 	)
 
-	if err := s.ConfigCreate(
+	if err := store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
 			Data:   data,
@@ -232,7 +230,7 @@ func TestConfigIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate sha
-	if err := s.ConfigCreate(
+	if err := store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
 			Data:   data,

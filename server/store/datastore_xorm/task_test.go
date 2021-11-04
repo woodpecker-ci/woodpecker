@@ -21,19 +21,18 @@ import (
 )
 
 func TestTaskList(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Task))
 	defer func() {
-		s.Exec("delete from tasks")
-		s.Close()
+		store.engine.Exec("delete from tasks")
 	}()
 
-	s.TaskInsert(&model.Task{
+	store.TaskInsert(&model.Task{
 		ID:     "some_random_id",
 		Data:   []byte("foo"),
 		Labels: map[string]string{"foo": "bar"},
 	})
 
-	list, err := s.TaskList()
+	list, err := store.TaskList()
 	if err != nil {
 		t.Error(err)
 		return
@@ -49,13 +48,13 @@ func TestTaskList(t *testing.T) {
 		t.Errorf("Want task data %s, got %s", want, string(got))
 	}
 
-	err = s.TaskDelete("some_random_id")
+	err = store.TaskDelete("some_random_id")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	list, err = s.TaskList()
+	list, err = store.TaskList()
 	if err != nil {
 		t.Error(err)
 		return

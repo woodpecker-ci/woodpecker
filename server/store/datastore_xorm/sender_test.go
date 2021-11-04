@@ -21,13 +21,12 @@ import (
 )
 
 func TestSenderFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Sender))
 	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
+		store.engine.Exec("delete from senders")
 	}()
 
-	err := s.SenderCreate(&model.Sender{
+	err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
@@ -38,7 +37,7 @@ func TestSenderFind(t *testing.T) {
 		return
 	}
 
-	sender, err := s.SenderFind(&model.Repo{ID: 1}, "octocat")
+	sender, err := store.SenderFind(&model.Repo{ID: 1}, "octocat")
 	if err != nil {
 		t.Error(err)
 		return
@@ -55,26 +54,25 @@ func TestSenderFind(t *testing.T) {
 }
 
 func TestSenderList(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Sender))
 	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
+		store.engine.Exec("delete from senders")
 	}()
 
-	s.SenderCreate(&model.Sender{
+	store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
 		Block:  false,
 	})
-	s.SenderCreate(&model.Sender{
+	store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "defunkt",
 		Allow:  true,
 		Block:  false,
 	})
 
-	list, err := s.SenderList(&model.Repo{ID: 1})
+	list, err := store.SenderList(&model.Repo{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
@@ -85,10 +83,9 @@ func TestSenderList(t *testing.T) {
 }
 
 func TestSenderUpdate(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Sender))
 	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
+		store.engine.Exec("delete from senders")
 	}()
 
 	sender := &model.Sender{
@@ -97,16 +94,16 @@ func TestSenderUpdate(t *testing.T) {
 		Allow:  true,
 		Block:  false,
 	}
-	if err := s.SenderCreate(sender); err != nil {
+	if err := store.SenderCreate(sender); err != nil {
 		t.Errorf("Unexpected error: insert sender: %s", err)
 		return
 	}
 	sender.Allow = false
-	if err := s.SenderUpdate(sender); err != nil {
+	if err := store.SenderUpdate(sender); err != nil {
 		t.Errorf("Unexpected error: update sender: %s", err)
 		return
 	}
-	updated, err := s.SenderFind(&model.Repo{ID: 1}, "octocat")
+	updated, err := store.SenderFind(&model.Repo{ID: 1}, "octocat")
 	if err != nil {
 		t.Error(err)
 		return
@@ -117,13 +114,12 @@ func TestSenderUpdate(t *testing.T) {
 }
 
 func TestSenderIndexes(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Sender))
 	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
+		store.engine.Exec("delete from senders")
 	}()
 
-	if err := s.SenderCreate(&model.Sender{
+	if err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
@@ -134,7 +130,7 @@ func TestSenderIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate name
-	if err := s.SenderCreate(&model.Sender{
+	if err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,

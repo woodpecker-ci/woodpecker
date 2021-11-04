@@ -21,13 +21,12 @@ import (
 )
 
 func TestProcFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Build))
 	defer func() {
-		s.Exec("delete from procs")
-		s.Close()
+		store.engine.Exec("delete from procs")
 	}()
 
-	err := s.ProcCreate([]*model.Proc{
+	err := store.ProcCreate([]*model.Proc{
 		{
 			BuildID:  1000,
 			PID:      1,
@@ -47,7 +46,7 @@ func TestProcFind(t *testing.T) {
 		return
 	}
 
-	proc, err := s.ProcFind(&model.Build{ID: 1000}, 1)
+	proc, err := store.ProcFind(&model.Build{ID: 1000}, 1)
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,13 +72,12 @@ func TestProcFind(t *testing.T) {
 }
 
 func TestProcChild(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Build))
 	defer func() {
-		s.Exec("delete from procs")
-		s.Close()
+		store.engine.Exec("delete from procs")
 	}()
 
-	err := s.ProcCreate([]*model.Proc{
+	err := store.ProcCreate([]*model.Proc{
 		{
 			BuildID: 1,
 			PID:     1,
@@ -100,7 +98,7 @@ func TestProcChild(t *testing.T) {
 		t.Errorf("Unexpected error: insert procs: %s", err)
 		return
 	}
-	proc, err := s.ProcChild(&model.Build{ID: 1}, 1, "build")
+	proc, err := store.ProcChild(&model.Build{ID: 1}, 1, "build")
 	if err != nil {
 		t.Error(err)
 		return
@@ -115,13 +113,12 @@ func TestProcChild(t *testing.T) {
 }
 
 func TestProcList(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Build))
 	defer func() {
-		s.Exec("delete from procs")
-		s.Close()
+		store.engine.Exec("delete from procs")
 	}()
 
-	err := s.ProcCreate([]*model.Proc{
+	err := store.ProcCreate([]*model.Proc{
 		{
 			BuildID: 2,
 			PID:     1,
@@ -149,7 +146,7 @@ func TestProcList(t *testing.T) {
 		t.Errorf("Unexpected error: insert procs: %s", err)
 		return
 	}
-	procs, err := s.ProcList(&model.Build{ID: 1})
+	procs, err := store.ProcList(&model.Build{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
@@ -160,10 +157,9 @@ func TestProcList(t *testing.T) {
 }
 
 func TestProcUpdate(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Build))
 	defer func() {
-		s.Exec("delete from procs")
-		s.Close()
+		store.engine.Exec("delete from procs")
 	}()
 
 	proc := &model.Proc{
@@ -179,16 +175,16 @@ func TestProcUpdate(t *testing.T) {
 		Platform: "linux/amd64",
 		Environ:  map[string]string{"GOLANG": "tip"},
 	}
-	if err := s.ProcCreate([]*model.Proc{proc}); err != nil {
+	if err := store.ProcCreate([]*model.Proc{proc}); err != nil {
 		t.Errorf("Unexpected error: insert proc: %s", err)
 		return
 	}
 	proc.State = "running"
-	if err := s.ProcUpdate(proc); err != nil {
+	if err := store.ProcUpdate(proc); err != nil {
 		t.Errorf("Unexpected error: update proc: %s", err)
 		return
 	}
-	updated, err := s.ProcFind(&model.Build{ID: 1}, 1)
+	updated, err := store.ProcFind(&model.Build{ID: 1}, 1)
 	if err != nil {
 		t.Error(err)
 		return
@@ -199,13 +195,12 @@ func TestProcUpdate(t *testing.T) {
 }
 
 func TestProcIndexes(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Proc), new(model.Build))
 	defer func() {
-		s.Exec("delete from procs")
-		s.Close()
+		store.engine.Exec("delete from procs")
 	}()
 
-	if err := s.ProcCreate([]*model.Proc{
+	if err := store.ProcCreate([]*model.Proc{
 		{
 			BuildID: 1,
 			PID:     1,
@@ -220,7 +215,7 @@ func TestProcIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate pid
-	if err := s.ProcCreate([]*model.Proc{
+	if err := store.ProcCreate([]*model.Proc{
 		{
 			BuildID: 1,
 			PID:     1,
@@ -234,7 +229,7 @@ func TestProcIndexes(t *testing.T) {
 	}
 
 	// // fail due to duplicate process name
-	// if err := s.ProcCreate([]*model.Proc{
+	// if err := store.ProcCreate([]*model.Proc{
 	// 	{
 	// 		BuildID: 1,
 	// 		PID:     2,

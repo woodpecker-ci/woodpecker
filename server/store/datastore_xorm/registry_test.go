@@ -21,13 +21,12 @@ import (
 )
 
 func TestRegistryFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Registry))
 	defer func() {
-		s.Exec("delete from registry")
-		s.Close()
+		store.engine.Exec("delete from registry")
 	}()
 
-	err := s.RegistryCreate(&model.Registry{
+	err := store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "foo",
@@ -40,7 +39,7 @@ func TestRegistryFind(t *testing.T) {
 		return
 	}
 
-	registry, err := s.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
+	registry, err := store.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
 	if err != nil {
 		t.Error(err)
 		return
@@ -66,26 +65,25 @@ func TestRegistryFind(t *testing.T) {
 }
 
 func TestRegistryList(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Registry))
 	defer func() {
-		s.Exec("delete from registry")
-		s.Close()
+		store.engine.Exec("delete from registry")
 	}()
 
-	s.RegistryCreate(&model.Registry{
+	store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "foo",
 		Password: "bar",
 	})
-	s.RegistryCreate(&model.Registry{
+	store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "foo.docker.io",
 		Username: "foo",
 		Password: "bar",
 	})
 
-	list, err := s.RegistryList(&model.Repo{ID: 1})
+	list, err := store.RegistryList(&model.Repo{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
@@ -96,10 +94,9 @@ func TestRegistryList(t *testing.T) {
 }
 
 func TestRegistryUpdate(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Registry))
 	defer func() {
-		s.Exec("delete from registry")
-		s.Close()
+		store.engine.Exec("delete from registry")
 	}()
 
 	registry := &model.Registry{
@@ -108,16 +105,16 @@ func TestRegistryUpdate(t *testing.T) {
 		Username: "foo",
 		Password: "bar",
 	}
-	if err := s.RegistryCreate(registry); err != nil {
+	if err := store.RegistryCreate(registry); err != nil {
 		t.Errorf("Unexpected error: insert registry: %s", err)
 		return
 	}
 	registry.Password = "qux"
-	if err := s.RegistryUpdate(registry); err != nil {
+	if err := store.RegistryUpdate(registry); err != nil {
 		t.Errorf("Unexpected error: update registry: %s", err)
 		return
 	}
-	updated, err := s.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
+	updated, err := store.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
 	if err != nil {
 		t.Error(err)
 		return
@@ -128,13 +125,12 @@ func TestRegistryUpdate(t *testing.T) {
 }
 
 func TestRegistryIndexes(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.Registry))
 	defer func() {
-		s.Exec("delete from registry")
-		s.Close()
+		store.engine.Exec("delete from registry")
 	}()
 
-	if err := s.RegistryCreate(&model.Registry{
+	if err := store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "foo",
@@ -145,7 +141,7 @@ func TestRegistryIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate addr
-	if err := s.RegistryCreate(&model.Registry{
+	if err := store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "baz",

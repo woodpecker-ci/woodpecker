@@ -23,8 +23,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	s := newTest()
-	defer s.Close()
+	store := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc))
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {
@@ -32,10 +31,10 @@ func TestUsers(t *testing.T) {
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			s.Exec("DELETE FROM users")
-			s.Exec("DELETE FROM repos")
-			s.Exec("DELETE FROM builds")
-			s.Exec("DELETE FROM procs")
+			store.engine.Exec("DELETE FROM users")
+			store.engine.Exec("DELETE FROM repos")
+			store.engine.Exec("DELETE FROM builds")
+			store.engine.Exec("DELETE FROM procs")
 		})
 
 		g.It("Should Update a User", func() {
@@ -44,9 +43,9 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			err1 := s.CreateUser(&user)
-			err2 := s.UpdateUser(&user)
-			getuser, err3 := s.GetUser(user.ID)
+			err1 := store.CreateUser(&user)
+			err2 := store.UpdateUser(&user)
+			getuser, err3 := store.GetUser(user.ID)
 			g.Assert(err1 == nil).IsTrue()
 			g.Assert(err2 == nil).IsTrue()
 			g.Assert(err3 == nil).IsTrue()
@@ -59,7 +58,7 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			err := s.CreateUser(&user)
+			err := store.CreateUser(&user)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(user.ID != 0).IsTrue()
 		})
@@ -74,8 +73,8 @@ func TestUsers(t *testing.T) {
 				Active: true,
 			}
 
-			s.CreateUser(&user)
-			getuser, err := s.GetUser(user.ID)
+			store.CreateUser(&user)
+			getuser, err := store.GetUser(user.ID)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
@@ -92,8 +91,8 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user)
-			getuser, err := s.GetUserLogin(user.Login)
+			store.CreateUser(&user)
+			getuser, err := store.GetUserLogin(user.Login)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
@@ -110,8 +109,8 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "ab20g0ddaf012c744e136da16aa21ad9",
 			}
-			err1 := s.CreateUser(&user1)
-			err2 := s.CreateUser(&user2)
+			err1 := store.CreateUser(&user1)
+			err2 := store.CreateUser(&user2)
 			g.Assert(err1 == nil).IsTrue()
 			g.Assert(err2 == nil).IsFalse()
 		})
@@ -127,9 +126,9 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user1)
-			s.CreateUser(&user2)
-			users, err := s.GetUserList()
+			store.CreateUser(&user1)
+			store.CreateUser(&user2)
+			users, err := store.GetUserList()
 			g.Assert(err == nil).IsTrue()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
@@ -148,19 +147,18 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user1)
-			s.CreateUser(&user2)
-			count, err := s.GetUserCount()
+			store.CreateUser(&user1)
+			store.CreateUser(&user2)
+			count, err := store.GetUserCount()
 			g.Assert(err == nil).IsTrue()
-			if s.driver != "postgres" {
-				// we have to skip this check for postgres because it uses
-				// an estimate which may not be updated.
-				g.Assert(count).Equal(int64(2))
-			}
+			// TODO: check if below is still an issue
+			// we have to skip this check for postgres because it uses
+			// an estimate which may not be updated.
+			g.Assert(count).Equal(int64(2))
 		})
 
 		g.It("Should Get a User Count Zero", func() {
-			count, err := s.GetUserCount()
+			count, err := store.GetUserCount()
 			g.Assert(err == nil).IsTrue()
 			g.Assert(count).Equal(int64(0))
 		})
@@ -171,10 +169,10 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user)
-			_, err1 := s.GetUser(user.ID)
-			err2 := s.DeleteUser(&user)
-			_, err3 := s.GetUser(user.ID)
+			store.CreateUser(&user)
+			_, err1 := store.GetUser(user.ID)
+			err2 := store.DeleteUser(&user)
+			_, err3 := store.GetUser(user.ID)
 			g.Assert(err1 == nil).IsTrue()
 			g.Assert(err2 == nil).IsTrue()
 			g.Assert(err3 == nil).IsFalse()
@@ -186,7 +184,7 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(user)
+			store.CreateUser(user)
 
 			repo1 := &model.Repo{
 				Owner:    "bradrydzewski",
@@ -206,11 +204,11 @@ func TestUsers(t *testing.T) {
 				FullName: "octocat/hello-world",
 				IsActive: true,
 			}
-			s.CreateRepo(repo1)
-			s.CreateRepo(repo2)
-			s.CreateRepo(repo3)
+			store.CreateRepo(repo1)
+			store.CreateRepo(repo2)
+			store.CreateRepo(repo3)
 
-			s.PermBatch([]*model.Perm{
+			store.PermBatch([]*model.Perm{
 				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
 			})
@@ -231,12 +229,12 @@ func TestUsers(t *testing.T) {
 				RepoID: repo3.ID,
 				Status: model.StatusSuccess,
 			}
-			s.CreateBuild(build1)
-			s.CreateBuild(build2)
-			s.CreateBuild(build3)
-			s.CreateBuild(build4)
+			store.CreateBuild(build1)
+			store.CreateBuild(build2)
+			store.CreateBuild(build3)
+			store.CreateBuild(build4)
 
-			builds, err := s.UserFeed(user)
+			builds, err := store.UserFeed(user)
 			g.Assert(err == nil).IsTrue()
 			g.Assert(len(builds)).Equal(3)
 			g.Assert(builds[0].FullName).Equal(repo2.FullName)

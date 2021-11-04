@@ -19,17 +19,18 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestFileFind(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.File), new(model.Proc))
 	defer func() {
-		s.Exec("delete from files")
-		s.Close()
+		store.engine.Exec("delete from files")
 	}()
 
-	if err := s.FileCreate(
+	if err := store.FileCreate(
 		&model.File{
 			BuildID: 2,
 			ProcID:  1,
@@ -43,7 +44,7 @@ func TestFileFind(t *testing.T) {
 		return
 	}
 
-	file, err := s.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	file, err := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
@@ -67,7 +68,7 @@ func TestFileFind(t *testing.T) {
 		t.Errorf("Want file size %d, got %d", want, got)
 	}
 
-	rc, err := s.FileRead(&model.Proc{ID: 1}, "hello.txt")
+	rc, err := store.FileRead(&model.Proc{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
@@ -79,13 +80,12 @@ func TestFileFind(t *testing.T) {
 }
 
 func TestFileList(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.File), new(model.Build))
 	defer func() {
-		s.Exec("delete from files")
-		s.Close()
+		store.engine.Exec("delete from files")
 	}()
 
-	s.FileCreate(
+	store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -95,7 +95,7 @@ func TestFileList(t *testing.T) {
 		},
 		bytes.NewBufferString("hello world"),
 	)
-	s.FileCreate(
+	store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -106,7 +106,7 @@ func TestFileList(t *testing.T) {
 		bytes.NewBufferString("hola mundo"),
 	)
 
-	files, err := s.FileList(&model.Build{ID: 1})
+	files, err := store.FileList(&model.Build{ID: 1})
 	if err != nil {
 		t.Errorf("Unexpected error: select files: %s", err)
 		return
@@ -118,13 +118,12 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileIndexes(t *testing.T) {
-	s := newTest()
+	store := newTestStore(t, new(model.File), new(model.Build))
 	defer func() {
-		s.Exec("delete from files")
-		s.Close()
+		store.engine.Exec("delete from files")
 	}()
 
-	if err := s.FileCreate(
+	if err := store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -139,7 +138,7 @@ func TestFileIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate file name
-	if err := s.FileCreate(
+	if err := store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -153,46 +152,50 @@ func TestFileIndexes(t *testing.T) {
 	}
 }
 
-// func TestFileCascade(t *testing.T) {
-// 	s := newTest()
-// 	defer s.Close()
-//
-//
-// 	err1 := s.ProcCreate([]*model.Proc{
-// 		{
-// 			BuildID: 1,
-// 			PID:     1,
-// 			PGID:    1,
-// 			Name:    "build",
-// 			State:   "success",
-// 		},
-// 	})
-// 	err2 := s.FileCreate(
-// 		&model.File{
-// 			BuildID: 1,
-// 			ProcID:  1,
-// 			Name:    "hello.txt",
-// 			Mime:    "text/plain",
-// 			Size:    11,
-// 		},
-// 		bytes.NewBufferString("hello world"),
-// 	)
-//
-// 	if err1 != nil {
-// 		t.Errorf("Unexpected error: cannot insert proc: %s", err1)
-// 	} else if err2 != nil {
-// 		t.Errorf("Unexpected error: cannot insert file: %s", err2)
-// 	}
-//
-// 	if _, err3 := s.ProcFind(&model.Build{ID: 1}, 1); err3 != nil {
-// 		t.Errorf("Unexpected error: cannot get inserted proc: %s", err3)
-// 	}
-//
-// 	db.Exec("delete from procs where proc_id = 1")
-//
-// 	file, err4 := s.FileFind(&model.Proc{ID: 1}, "hello.txt")
-// 	if err4 == nil {
-// 		t.Errorf("Expected no rows in result set error")
-// 		t.Log(file)
-// 	}
-// }
+func TestFileCascade(t *testing.T) {
+	store := newTestStore(t, new(model.File), new(model.Proc), new(model.Build))
+	defer func() {
+		store.engine.Exec("delete from procs")
+		store.engine.Exec("delete from files")
+	}()
+
+	procOne := &model.Proc{
+		BuildID: 1,
+		PID:     1,
+		PGID:    1,
+		Name:    "build",
+		State:   "success",
+	}
+	err1 := store.ProcCreate([]*model.Proc{procOne})
+	assert.EqualValues(t, int64(1), procOne.ID)
+
+	err2 := store.FileCreate(
+		&model.File{
+			BuildID: 1,
+			ProcID:  1,
+			Name:    "hello.txt",
+			Mime:    "text/plain",
+			Size:    11,
+		},
+		bytes.NewBufferString("hello world"),
+	)
+
+	if err1 != nil {
+		t.Errorf("Unexpected error: cannot insert proc: %s", err1)
+	} else if err2 != nil {
+		t.Errorf("Unexpected error: cannot insert file: %s", err2)
+	}
+
+	if _, err3 := store.ProcFind(&model.Build{ID: 1}, 1); err3 != nil {
+		t.Errorf("Unexpected error: cannot get inserted proc: %s", err3)
+	}
+
+	err := store.ProcClear(&model.Build{ID: 1, Procs: []*model.Proc{procOne}})
+	assert.NoError(t, err)
+
+	file, err4 := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	if err4 == nil {
+		t.Errorf("Expected no rows in result set error")
+		t.Log(file)
+	}
+}
