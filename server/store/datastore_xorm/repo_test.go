@@ -46,9 +46,9 @@ func TestRepos(t *testing.T) {
 			err2 := store.UpdateRepo(&repo)
 			getrepo, err3 := store.GetRepo(repo.ID)
 
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNil()
 			g.Assert(repo.ID).Equal(getrepo.ID)
 		})
 
@@ -60,7 +60,7 @@ func TestRepos(t *testing.T) {
 				Name:     "test",
 			}
 			err := store.CreateRepo(&repo)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(repo.ID != 0).IsTrue()
 		})
 
@@ -73,7 +73,7 @@ func TestRepos(t *testing.T) {
 			}
 			store.CreateRepo(&repo)
 			getrepo, err := store.GetRepo(repo.ID)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(repo.ID).Equal(getrepo.ID)
 			g.Assert(repo.UserID).Equal(getrepo.UserID)
 			g.Assert(repo.Owner).Equal(getrepo.Owner)
@@ -89,7 +89,7 @@ func TestRepos(t *testing.T) {
 			}
 			store.CreateRepo(&repo)
 			getrepo, err := store.GetRepoName(repo.FullName)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(repo.ID).Equal(getrepo.ID)
 			g.Assert(repo.UserID).Equal(getrepo.UserID)
 			g.Assert(repo.Owner).Equal(getrepo.Owner)
@@ -111,7 +111,7 @@ func TestRepos(t *testing.T) {
 			}
 			err1 := store.CreateRepo(&repo1)
 			err2 := store.CreateRepo(&repo2)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			g.Assert(err2 == nil).IsFalse()
 		})
 	})

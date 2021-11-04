@@ -57,13 +57,13 @@ func TestBuilds(t *testing.T) {
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
 			err := store.CreateBuild(&build)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(build.ID != 0).IsTrue()
 			g.Assert(build.Number).Equal(1)
 			g.Assert(build.Commit).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
 
 			count, err := store.GetBuildCount()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(count > 0).IsTrue()
 			fmt.Println("GOT COUNT", count)
 		})
@@ -76,12 +76,12 @@ func TestBuilds(t *testing.T) {
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
 			err := store.CreateBuild(&build)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			build.Status = model.StatusRunning
 			err1 := store.UpdateBuild(&build)
 			getbuild, err2 := store.GetBuild(build.ID)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
 			g.Assert(build.ID).Equal(getbuild.ID)
 			g.Assert(build.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build.Status).Equal(getbuild.Status)
@@ -94,9 +94,9 @@ func TestBuilds(t *testing.T) {
 				Status: model.StatusSuccess,
 			}
 			err := store.CreateBuild(&build, []*model.Proc{}...)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			getbuild, err := store.GetBuild(build.ID)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(build.ID).Equal(getbuild.ID)
 			g.Assert(build.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build.Status).Equal(getbuild.Status)
@@ -112,11 +112,11 @@ func TestBuilds(t *testing.T) {
 				Status: model.StatusPending,
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			getbuild, err3 := store.GetBuildNumber(&model.Repo{ID: 1}, build2.Number)
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -134,11 +134,11 @@ func TestBuilds(t *testing.T) {
 				Ref:    "refs/pull/6",
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			getbuild, err3 := store.GetBuildRef(&model.Repo{ID: 1}, "refs/pull/6")
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -157,11 +157,11 @@ func TestBuilds(t *testing.T) {
 				Ref:    "refs/pull/6",
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			getbuild, err3 := store.GetBuildRef(&model.Repo{ID: 1}, "refs/pull/6")
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -182,11 +182,11 @@ func TestBuilds(t *testing.T) {
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			getbuild, err3 := store.GetBuildCommit(&model.Repo{ID: 1}, build2.Commit, build2.Branch)
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -212,9 +212,9 @@ func TestBuilds(t *testing.T) {
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
 			getbuild, err3 := store.GetBuildLast(&model.Repo{ID: 1}, build2.Branch)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -243,13 +243,13 @@ func TestBuilds(t *testing.T) {
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			err3 := store.CreateBuild(build3, []*model.Proc{}...)
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			getbuild, err4 := store.GetBuildLastBefore(&model.Repo{ID: 1}, build3.Branch, build3.ID)
-			g.Assert(err4 == nil).IsTrue()
+			g.Assert(err4).IsNil()
 			g.Assert(build2.ID).Equal(getbuild.ID)
 			g.Assert(build2.RepoID).Equal(getbuild.RepoID)
 			g.Assert(build2.Number).Equal(getbuild.Number)
@@ -268,11 +268,11 @@ func TestBuilds(t *testing.T) {
 				Status: model.StatusSuccess,
 			}
 			err1 := store.CreateBuild(build1, []*model.Proc{}...)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			err2 := store.CreateBuild(build2, []*model.Proc{}...)
-			g.Assert(err2 == nil).IsTrue()
+			g.Assert(err2).IsNil()
 			builds, err3 := store.GetBuildList(&model.Repo{ID: 1}, 1)
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err3).IsNil()
 			g.Assert(len(builds)).Equal(2)
 			g.Assert(builds[0].ID).Equal(build2.ID)
 			g.Assert(builds[0].RepoID).Equal(build2.RepoID)

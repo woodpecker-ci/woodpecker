@@ -46,9 +46,9 @@ func TestUsers(t *testing.T) {
 			err1 := store.CreateUser(&user)
 			err2 := store.UpdateUser(&user)
 			getuser, err3 := store.GetUser(user.ID)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 		})
 
@@ -59,7 +59,7 @@ func TestUsers(t *testing.T) {
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
 			err := store.CreateUser(&user)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID != 0).IsTrue()
 		})
 
@@ -75,7 +75,7 @@ func TestUsers(t *testing.T) {
 
 			store.CreateUser(&user)
 			getuser, err := store.GetUser(user.ID)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
 			g.Assert(user.Token).Equal(getuser.Token)
@@ -93,7 +93,7 @@ func TestUsers(t *testing.T) {
 			}
 			store.CreateUser(&user)
 			getuser, err := store.GetUserLogin(user.Login)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
 		})
@@ -111,7 +111,7 @@ func TestUsers(t *testing.T) {
 			}
 			err1 := store.CreateUser(&user1)
 			err2 := store.CreateUser(&user2)
-			g.Assert(err1 == nil).IsTrue()
+			g.Assert(err1).IsNil()
 			g.Assert(err2 == nil).IsFalse()
 		})
 
@@ -129,7 +129,7 @@ func TestUsers(t *testing.T) {
 			store.CreateUser(&user1)
 			store.CreateUser(&user2)
 			users, err := store.GetUserList()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
 			g.Assert(users[0].Email).Equal(user1.Email)
