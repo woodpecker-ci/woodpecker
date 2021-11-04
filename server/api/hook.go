@@ -403,7 +403,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 		task.DepStatus = make(map[string]string)
 
 		if item.Proc.ID == 0 {
-			log.Error().Msgf("procID is 0: '%v'", *item)
+			log.Error().Msgf("cancle queueBuild, procID has no valid ID '0'")
 			return
 		}
 		task.Data, _ = json.Marshal(rpc.Pipeline{
