@@ -74,7 +74,7 @@ pipeline:
       - WOODPECKER_DATABASE_DRIVER=postgres
       - WOODPECKER_DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
   test-mysql:
     image: golang:1.16
@@ -83,7 +83,7 @@ pipeline:
       - WOODPECKER_DATABASE_DRIVER=mysql
       - WOODPECKER_DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
     commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm
+      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
   build-frontend:
     image: node:16-alpine
