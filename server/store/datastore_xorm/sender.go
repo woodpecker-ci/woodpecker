@@ -38,7 +38,7 @@ func (s storage) SenderCreate(sender *model.Sender) error {
 }
 
 func (s storage) SenderUpdate(sender *model.Sender) error {
-	_, err := s.engine.ID(sender.ID).Update(sender)
+	_, err := s.engine.ID(sender.ID).AllCols().Update(sender)
 	return err
 }
 

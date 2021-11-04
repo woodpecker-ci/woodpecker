@@ -38,7 +38,7 @@ func (s storage) SecretCreate(secret *model.Secret) error {
 }
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).Update(secret)
+	_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
 	return err
 }
 

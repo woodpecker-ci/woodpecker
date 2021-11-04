@@ -95,6 +95,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		if exist {
 			if _, err := sess.
 				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+				AllCols().
 				Update(repos[i]); err != nil {
 				return err
 			}

@@ -38,7 +38,7 @@ func (s storage) RegistryCreate(registry *model.Registry) error {
 }
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {
-	_, err := s.engine.ID(registry.ID).Update(registry)
+	_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
 	return err
 }
 

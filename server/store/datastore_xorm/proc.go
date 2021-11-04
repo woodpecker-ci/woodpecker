@@ -63,7 +63,7 @@ func (s storage) ProcCreate(procs []*model.Proc) error {
 }
 
 func (s storage) ProcUpdate(proc *model.Proc) error {
-	_, err := s.engine.ID(proc.ID).Update(proc)
+	_, err := s.engine.ID(proc.ID).AllCols().Update(proc)
 	return err
 }
 
