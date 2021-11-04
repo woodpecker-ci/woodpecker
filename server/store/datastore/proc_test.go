@@ -227,22 +227,6 @@ func TestProcIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")
 	}
-
-	// // fail due to duplicate process name
-	// if err := store.ProcCreate([]*model.Proc{
-	// 	{
-	// 		BuildID: 1,
-	// 		PID:     2,
-	// 		PPID:    1,
-	// 		PGID:    1,
-	// 		State:   "success",
-	// 		Name:    "build",
-	// 	},
-	// }); err == nil {
-	// 	t.Errorf("Unexpected error: duplicate name")
-	// }
 }
 
-// func TestProcCascade(t *testing.T) {
-//
-// }
+// TODO: func TestProcCascade(t *testing.T) {}
