@@ -54,7 +54,7 @@ func (s storage) UpdateRepo(repo *model.Repo) error {
 }
 
 func (s storage) DeleteRepo(repo *model.Repo) error {
-	_, err := s.engine.ID(repo.ID).Delete(repo)
+	_, err := s.engine.ID(repo.ID).Delete(new(model.Repo))
 	// TODO: delete related within a session
 	return err
 }

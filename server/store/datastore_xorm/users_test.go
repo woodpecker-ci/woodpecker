@@ -23,7 +23,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc))
+	store := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {
@@ -150,7 +150,7 @@ func TestUsers(t *testing.T) {
 			store.CreateUser(&user1)
 			store.CreateUser(&user2)
 			count, err := store.GetUserCount()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			// TODO: check if below is still an issue
 			// we have to skip this check for postgres because it uses
 			// an estimate which may not be updated.
@@ -159,23 +159,23 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Get a User Count Zero", func() {
 			count, err := store.GetUserCount()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(count).Equal(int64(0))
 		})
 
 		g.It("Should Del a User", func() {
-			user := model.User{
+			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			store.CreateUser(&user)
-			_, err1 := store.GetUser(user.ID)
-			err2 := store.DeleteUser(&user)
+			store.CreateUser(user)
+			user, err1 := store.GetUser(user.ID)
+			g.Assert(err1).IsNil()
+			err2 := store.DeleteUser(user)
+			g.Assert(err2).IsNil()
 			_, err3 := store.GetUser(user.ID)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsFalse()
+			g.Assert(err3).IsNotNil()
 		})
 
 		g.It("Should get the Build feed for a User", func() {
@@ -235,7 +235,7 @@ func TestUsers(t *testing.T) {
 			store.CreateBuild(build4)
 
 			builds, err := store.UserFeed(user)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(builds)).Equal(3)
 			g.Assert(builds[0].FullName).Equal(repo2.FullName)
 			g.Assert(builds[1].FullName).Equal(repo1.FullName)
