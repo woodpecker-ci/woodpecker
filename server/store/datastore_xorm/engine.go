@@ -29,11 +29,7 @@ var _ store.Store = &storage{}
 
 const perPage = 50
 
-func init() {
-	store.RegisterAdapter(newEngine, "xorm")
-}
-
-func newEngine(opts *store.Opts) (store.Store, error) {
+func NewEngine(opts *store.Opts) (store.Store, error) {
 	engine, err := xorm.NewEngine(opts.Driver, opts.Config)
 	if err != nil {
 		return nil, err

@@ -14,33 +14,8 @@
 
 package store
 
-import (
-	"fmt"
-)
-
 // Opts are options for a new database connection
 type Opts struct {
-	Driver  string
-	Config  string
-	Adapter string
-}
-
-var storeCreators map[string]func(opts *Opts) (Store, error)
-
-// New creates a database connection for the given driver and datasource
-// and returns a new Store.
-func New(opts *Opts) (Store, error) {
-	if fn, ok := storeCreators[opts.Adapter]; ok {
-		return fn(opts)
-	}
-	return nil, fmt.Errorf("adapter '%s' not found", opts.Adapter)
-}
-
-func init() {
-	storeCreators = make(map[string]func(opts *Opts) (Store, error))
-}
-
-// RegisterAdapter register a store backend
-func RegisterAdapter(fn func(opts *Opts) (Store, error), name string) {
-	storeCreators[name] = fn
+	Driver string
+	Config string
 }

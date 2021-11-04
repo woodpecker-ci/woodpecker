@@ -17,7 +17,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -60,7 +59,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Msgf("database driver '%s' not supported", driver)
 	}
 
-	if strings.ToLower(driver) == "sqlite3" {
+	if driver == "sqlite3" {
 		if new, err := fallbackSqlite3File(datasource); err != nil {
 			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
 		} else {
@@ -69,12 +68,11 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	}
 
 	opts := &store.Opts{
-		Driver:  driver,
-		Config:  datasource,
-		Adapter: "xorm",
+		Driver: driver,
+		Config: datasource,
 	}
-	log.Trace().Msgf("setup datastore: %#v", opts)
-	return store.New(opts)
+	log.Trace().Msgf("setup datastore: %#v", *opts)
+	return datastore_xorm.NewEngine(opts)
 }
 
 // TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
