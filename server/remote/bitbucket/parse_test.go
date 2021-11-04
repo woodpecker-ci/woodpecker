@@ -36,9 +36,9 @@ func Test_parser(t *testing.T) {
 			req.Header.Set(hookEvent, "issue:created")
 
 			r, b, err := parseHook(req)
-			g.Assert(r == nil).IsTrue()
-			g.Assert(b == nil).IsTrue()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(r).IsNil()
+			g.Assert(b).IsNil()
+			g.Assert(err).IsNil()
 		})
 
 		g.Describe("Given a pull request hook payload", func() {
@@ -50,7 +50,7 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPullCreated)
 
 				_, _, err := parseHook(req)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 
 			g.It("Should return nil if not open", func() {
@@ -60,9 +60,9 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPullCreated)
 
 				r, b, err := parseHook(req)
-				g.Assert(r == nil).IsTrue()
-				g.Assert(b == nil).IsTrue()
-				g.Assert(err == nil).IsTrue()
+				g.Assert(r).IsNil()
+				g.Assert(b).IsNil()
+				g.Assert(err).IsNil()
 			})
 
 			g.It("Should return pull request details", func() {
@@ -72,7 +72,7 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPullCreated)
 
 				r, b, err := parseHook(req)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("user_name/repo_name")
 				g.Assert(b.Commit).Equal("ce5965ddd289")
 			})
@@ -87,7 +87,7 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				_, _, err := parseHook(req)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 
 			g.It("Should return nil if missing commit sha", func() {
@@ -97,9 +97,9 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				r, b, err := parseHook(req)
-				g.Assert(r == nil).IsTrue()
-				g.Assert(b == nil).IsTrue()
-				g.Assert(err == nil).IsTrue()
+				g.Assert(r).IsNil()
+				g.Assert(b).IsNil()
+				g.Assert(err).IsNil()
 			})
 
 			g.It("Should return push details", func() {
@@ -109,7 +109,7 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				r, b, err := parseHook(req)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("user_name/repo_name")
 				g.Assert(b.Commit).Equal("709d658dc5b6d6afcd46049c2f332ee3f515a67d")
 			})
