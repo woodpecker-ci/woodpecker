@@ -16,8 +16,34 @@ package migration
 
 import (
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+type migrations struct {
+	Name string
+}
+
 func Migrate(e *xorm.Engine) error {
+	if err := e.Sync2(
+		new(model.Agent),
+		new(model.Agent),
+		new(model.Build),
+		new(model.BuildConfig),
+		new(model.Config),
+		new(model.File),
+		new(model.Logs),
+		new(migrations),
+		new(model.Perm),
+		new(model.Proc),
+		new(model.Registry),
+		new(model.Repo),
+		new(model.Secret),
+		new(model.Sender),
+		new(model.Task),
+		new(model.User),
+	); err != nil {
+		return err
+	}
 	return nil
 }
