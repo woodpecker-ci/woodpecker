@@ -47,9 +47,9 @@ func TestUsers(t *testing.T) {
 			err1 := s.CreateUser(&user)
 			err2 := s.UpdateUser(&user)
 			getuser, err3 := s.GetUser(user.ID)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 		})
 
@@ -60,7 +60,7 @@ func TestUsers(t *testing.T) {
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
 			err := s.CreateUser(&user)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID != 0).IsTrue()
 		})
 
@@ -76,7 +76,7 @@ func TestUsers(t *testing.T) {
 
 			s.CreateUser(&user)
 			getuser, err := s.GetUser(user.ID)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
 			g.Assert(user.Token).Equal(getuser.Token)
@@ -94,7 +94,7 @@ func TestUsers(t *testing.T) {
 			}
 			s.CreateUser(&user)
 			getuser, err := s.GetUserLogin(user.Login)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
 		})
@@ -112,8 +112,8 @@ func TestUsers(t *testing.T) {
 			}
 			err1 := s.CreateUser(&user1)
 			err2 := s.CreateUser(&user2)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsFalse()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNotNil()
 		})
 
 		g.It("Should Get a User List", func() {
@@ -130,7 +130,7 @@ func TestUsers(t *testing.T) {
 			s.CreateUser(&user1)
 			s.CreateUser(&user2)
 			users, err := s.GetUserList()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
 			g.Assert(users[0].Email).Equal(user1.Email)
@@ -151,7 +151,7 @@ func TestUsers(t *testing.T) {
 			s.CreateUser(&user1)
 			s.CreateUser(&user2)
 			count, err := s.GetUserCount()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			if s.driver != "postgres" {
 				// we have to skip this check for postgres because it uses
 				// an estimate which may not be updated.
@@ -161,7 +161,7 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Get a User Count Zero", func() {
 			count, err := s.GetUserCount()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(count).Equal(0)
 		})
 
@@ -175,9 +175,9 @@ func TestUsers(t *testing.T) {
 			_, err1 := s.GetUser(user.ID)
 			err2 := s.DeleteUser(&user)
 			_, err3 := s.GetUser(user.ID)
-			g.Assert(err1 == nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsFalse()
+			g.Assert(err1).IsNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNotNil()
 		})
 
 		g.It("Should get the Build feed for a User", func() {
@@ -237,7 +237,7 @@ func TestUsers(t *testing.T) {
 			s.CreateBuild(build4)
 
 			builds, err := s.UserFeed(user)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(builds)).Equal(3)
 			g.Assert(builds[0].FullName).Equal(repo2.FullName)
 			g.Assert(builds[1].FullName).Equal(repo1.FullName)
