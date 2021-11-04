@@ -22,5 +22,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// TODO: use for checks where we atm just assume sqlite3 support
-const SupportSqlite3 = false
+// Supported database drivers
+const (
+	DriverMysql    = "mysql"
+	DriverPostgres = "postgres"
+)
+
+func SupportedDriver(driver string) bool {
+	switch driver {
+	case DriverMysql, DriverPostgres:
+		return true
+	default:
+		return false
+	}
+}

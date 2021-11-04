@@ -23,4 +23,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const SupportSqlite3 = true
+// Supported database drivers
+const (
+	DriverSqlite   = "sqlite3"
+	DriverMysql    = "mysql"
+	DriverPostgres = "postgres"
+)
+
+func SupportedDriver(driver string) bool {
+	switch driver {
+	case DriverMysql, DriverPostgres, DriverSqlite:
+		return true
+	default:
+		return false
+	}
+}

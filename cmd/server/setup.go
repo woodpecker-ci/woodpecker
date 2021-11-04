@@ -42,13 +42,23 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	_ "github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore_xorm"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
+
+	if datastore_xorm.SupportedDriver("sqlite3") {
+		log.Info().Msgf("server has sqlite3 support")
+	} else {
+		log.Info().Msgf("server was build with no sqlite3 support!")
+	}
+
+	if !datastore_xorm.SupportedDriver(driver) {
+		log.Fatal().Msgf("database driver '%s' not supported", driver)
+	}
 
 	if strings.ToLower(driver) == "sqlite3" {
 		if new, err := fallbackSqlite3File(datasource); err != nil {
