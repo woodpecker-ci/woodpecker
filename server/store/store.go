@@ -163,4 +163,5 @@ type Store interface {
 	TaskDelete(string) error
 
 	Ping() error
+	Migrate() error
 }

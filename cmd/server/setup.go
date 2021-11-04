@@ -72,7 +72,16 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		Config: datasource,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	return datastore.NewEngine(opts)
+	store, err := datastore.NewEngine(opts)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not open storage")
+	}
+
+	if err := store.Migrate(); err != nil {
+		log.Fatal().Err(err).Msg("could not migrate storage")
+	}
+
+	return store, nil
 }
 
 // TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0

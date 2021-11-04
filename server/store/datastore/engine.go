@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
 
 	"xorm.io/xorm"
 )
@@ -43,4 +44,9 @@ func NewEngine(opts *store.Opts) (store.Store, error) {
 
 func (s storage) Ping() error {
 	return s.engine.Ping()
+}
+
+// Migrate old storage or init new one
+func (s storage) Migrate() error {
+	return migration.Migrate(s.engine)
 }
