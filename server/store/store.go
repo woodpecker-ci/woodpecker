@@ -30,7 +30,7 @@ type Store interface {
 	GetUserLogin(string) (*model.User, error)
 
 	// GetUserList gets a list of all users in the system.
-	// TODO: pagination & total (make GetUserCount deprecated)
+	// TODO: paginate
 	GetUserList() ([]*model.User, error)
 
 	// GetUserCount gets a count of all users in the system.
@@ -82,6 +82,7 @@ type Store interface {
 	GetBuildLastBefore(*model.Repo, string, int64) (*model.Build, error)
 
 	// GetBuildList gets a list of builds for the repository
+	// TODO: paginate
 	GetBuildList(*model.Repo, int) ([]*model.Build, error)
 
 	// GetBuildQueue gets a list of build in queue.
@@ -102,10 +103,10 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	// TODO: pagginate & use struct for options
+	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// TODO: only store activated repos ...
+	// RepoBatch TODO: only store activated repos ...
 	RepoBatch([]*model.Repo) error
 
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -118,10 +119,10 @@ type Store interface {
 	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
-	// TODO: rm and use ConfigCreate (let the store handle consistency)
 	BuildConfigCreate(*model.BuildConfig) error
 
 	SenderFind(*model.Repo, string) (*model.Sender, error)
+	// SenderList TODO: paginate
 	SenderList(*model.Repo) ([]*model.Sender, error)
 	SenderCreate(*model.Sender) error
 	SenderUpdate(*model.Sender) error
@@ -157,7 +158,7 @@ type Store interface {
 	FileRead(*model.Proc, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
-	// TODO: we need pagination & filter
+	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
