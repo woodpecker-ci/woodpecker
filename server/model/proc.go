@@ -38,7 +38,7 @@ type Proc struct {
 	PGID     int               `json:"pgid"                 xorm:"proc_pgid"`
 	Name     string            `json:"name"                 xorm:"proc_name"`
 	State    string            `json:"state"                xorm:"proc_state"`
-	Error    string            `json:"error,omitempty"      xorm:"proc_error"`
+	Error    string            `json:"error,omitempty"      xorm:"VARCHAR(500) proc_error"`
 	ExitCode int               `json:"exit_code"            xorm:"proc_exit_code"`
 	Started  int64             `json:"start_time,omitempty" xorm:"proc_started"`
 	Stopped  int64             `json:"end_time,omitempty"   xorm:"proc_stopped"`

@@ -60,7 +60,7 @@ func TestBuilds(t *testing.T) {
 			err := store.CreateBuild(&build)
 			g.Assert(err).IsNil()
 			g.Assert(build.ID != 0).IsTrue()
-			g.Assert(build.Number).Equal(1)
+			g.Assert(build.Number).Equal(int64(1))
 			g.Assert(build.Commit).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
 
 			count, err := store.GetBuildCount()
@@ -301,7 +301,7 @@ func TestBuildIncrement(t *testing.T) {
 	}
 	repo, _ = store.GetRepo(repo.ID)
 
-	if got, want := repo.Counter, 1; got != want {
+	if got, want := repo.Counter, int64(1); got != want {
 		t.Errorf("Want repository counter incremented to %d, got %d", want, got)
 	}
 
@@ -310,7 +310,7 @@ func TestBuildIncrement(t *testing.T) {
 	}
 	repo, _ = store.GetRepo(repo.ID)
 
-	if got, want := repo.Counter, 2; got != want {
+	if got, want := repo.Counter, int64(2); got != want {
 		t.Errorf("Want repository counter incremented to %d, got %d", want, got)
 	}
 }

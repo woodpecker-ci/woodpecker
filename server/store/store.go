@@ -67,7 +67,7 @@ type Store interface {
 	GetBuild(int64) (*model.Build, error)
 
 	// GetBuildNumber gets a build by number.
-	GetBuildNumber(*model.Repo, int) (*model.Build, error)
+	GetBuildNumber(*model.Repo, int64) (*model.Build, error)
 
 	// GetBuildRef gets a build by its ref.
 	GetBuildRef(*model.Repo, string) (*model.Build, error)

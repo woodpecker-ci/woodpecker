@@ -34,7 +34,6 @@ func Migrate(e *xorm.Engine) error {
 	// create tables for new instance
 	if err := e.Sync2(
 		new(model.Agent),
-		new(model.Agent),
 		new(model.Build),
 		new(model.BuildConfig),
 		new(model.Config),

@@ -40,10 +40,10 @@ type User struct {
 	Login string `json:"login"  xorm:"UNIQUE 'user_login'"`
 
 	// Token is the oauth2 token.
-	Token string `json:"-"  xorm:"VARCHAR(1000) 'user_token'"`
+	Token string `json:"-"  xorm:"TEXT 'user_token'"`
 
 	// Secret is the oauth2 token secret.
-	Secret string `json:"-" xorm:"VARCHAR(1000) 'user_secret'"`
+	Secret string `json:"-" xorm:"TEXT 'user_secret'"`
 
 	// Expiry is the token and secret expiration timestamp.
 	Expiry int64 `json:"-" xorm:"user_expiry"`
@@ -51,10 +51,10 @@ type User struct {
 	// Email is the email address for this user.
 	//
 	// required: true
-	Email string `json:"email" xorm:"user_email"`
+	Email string `json:"email" xorm:" varchar(500) 'user_email'"`
 
 	// the avatar url for this user.
-	Avatar string `json:"avatar_url" xorm:"user_avatar"`
+	Avatar string `json:"avatar_url" xorm:" varchar(500) 'user_avatar'"`
 
 	// Activate indicates the user is active in the system.
 	Active bool `json:"active" xorm:"user_active"`
@@ -69,7 +69,7 @@ type User struct {
 	Admin bool `json:"admin,omitempty" xorm:"-"`
 
 	// Hash is a unique token used to sign tokens.
-	Hash string `json:"-" xorm:"user_hash"`
+	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
 
 	// DEPRECATED Admin indicates the user is a system administrator.
 	XAdmin bool `json:"-" xorm:"user_admin"`

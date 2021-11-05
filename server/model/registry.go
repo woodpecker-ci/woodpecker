@@ -52,11 +52,11 @@ type RegistryStore interface {
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
 	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) 'registry_addr'"`
-	Username string `json:"username" xorm:"registry_username"`
-	Password string `json:"password" xorm:"registry_password"`
-	Email    string `json:"email"    xorm:"registry_email"`
-	Token    string `json:"token"    xorm:"registry_token"`
+	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
+	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
+	Password string `json:"password" xorm:"TEXT 'registry_password'"`
+	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
+	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
 }
 
 // Validate validates the registry information.

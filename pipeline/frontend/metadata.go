@@ -38,7 +38,7 @@ type (
 
 	// Build defines runtime metadata for a build.
 	Build struct {
-		Number   int    `json:"number,omitempty"`
+		Number   int64  `json:"number,omitempty"`
 		Created  int64  `json:"created,omitempty"`
 		Started  int64  `json:"started,omitempty"`
 		Finished int64  `json:"finished,omitempty"`
@@ -49,7 +49,7 @@ type (
 		Target   string `json:"target,omitempty"`
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
-		Parent   int    `json:"parent,omitempty"`
+		Parent   int64  `json:"parent,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -103,8 +103,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_REMOTE":               m.Repo.Remote,
 		"CI_REMOTE_URL":                m.Repo.Remote,
 		"CI_REPO_PRIVATE":              strconv.FormatBool(m.Repo.Private),
-		"CI_BUILD_NUMBER":              strconv.Itoa(m.Curr.Number),
-		"CI_PARENT_BUILD_NUMBER":       strconv.Itoa(m.Curr.Parent),
+		"CI_BUILD_NUMBER":              strconv.FormatInt(m.Curr.Number, 10),
+		"CI_PARENT_BUILD_NUMBER":       strconv.FormatInt(m.Curr.Parent, 10),
 		"CI_BUILD_CREATED":             strconv.FormatInt(m.Curr.Created, 10),
 		"CI_BUILD_STARTED":             strconv.FormatInt(m.Curr.Started, 10),
 		"CI_BUILD_FINISHED":            strconv.FormatInt(m.Curr.Finished, 10),
@@ -121,7 +121,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR_NAME":        m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":       m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR":      m.Curr.Commit.Author.Avatar,
-		"CI_PREV_BUILD_NUMBER":         strconv.Itoa(m.Prev.Number),
+		"CI_PREV_BUILD_NUMBER":         strconv.FormatInt(m.Prev.Number, 10),
 		"CI_PREV_BUILD_CREATED":        strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_BUILD_STARTED":        strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":       strconv.FormatInt(m.Prev.Finished, 10),

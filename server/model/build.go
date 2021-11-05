@@ -19,10 +19,10 @@ package model
 type Build struct {
 	ID           int64    `json:"id"                      xorm:"pk autoincr 'build_id'"`
 	RepoID       int64    `json:"-"                       xorm:"UNIQUE(s) INDEX 'build_repo_id'"`
-	Number       int      `json:"number"                  xorm:"UNIQUE(s) 'build_number'"`
+	Number       int64    `json:"number"                  xorm:"UNIQUE(s) 'build_number'"`
 	Author       string   `json:"author"                  xorm:"INDEX 'build_author'"`
 	ConfigID     int64    `json:"-"                       xorm:"build_config_id"`
-	Parent       int      `json:"parent"                  xorm:"build_parent"`
+	Parent       int64    `json:"parent"                  xorm:"build_parent"`
 	Event        string   `json:"event"                   xorm:"build_event"`
 	Status       string   `json:"status"                  xorm:"build_status"`
 	Error        string   `json:"error"                   xorm:"build_error"`

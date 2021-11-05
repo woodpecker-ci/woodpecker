@@ -44,7 +44,7 @@ func TestConfig(t *testing.T) {
 
 	config := &model.Config{
 		RepoID: repo.ID,
-		Data:   data,
+		Data:   []byte(data),
 		Hash:   hash,
 		Name:   "default",
 	}
@@ -84,7 +84,7 @@ func TestConfig(t *testing.T) {
 	if got, want := config.RepoID, repo.ID; got != want {
 		t.Errorf("Want config repo id %d, got %d", want, got)
 	}
-	if got, want := config.Data, data; got != want {
+	if got, want := string(config.Data), data; got != want {
 		t.Errorf("Want config data %s, got %s", want, got)
 	}
 	if got, want := config.Hash, hash; got != want {
@@ -149,7 +149,7 @@ func TestConfigApproved(t *testing.T) {
 	}
 	conf := &model.Config{
 		RepoID: repo.ID,
-		Data:   data,
+		Data:   []byte(data),
 		Hash:   hash,
 	}
 	if err := store.ConfigCreate(conf); err != nil {
@@ -177,7 +177,7 @@ func TestConfigApproved(t *testing.T) {
 	store.CreateBuild(buildRunning)
 	conf2 := &model.Config{
 		RepoID: repo.ID,
-		Data:   data,
+		Data:   []byte(data),
 		Hash:   "xxx",
 	}
 	if err := store.ConfigCreate(conf2); err != nil {
@@ -211,7 +211,7 @@ func TestConfigIndexes(t *testing.T) {
 	if err := store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
-			Data:   data,
+			Data:   []byte(data),
 			Hash:   hash,
 		},
 	); err != nil {
@@ -223,7 +223,7 @@ func TestConfigIndexes(t *testing.T) {
 	if err := store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
-			Data:   data,
+			Data:   []byte(data),
 			Hash:   hash,
 		},
 	); err == nil {

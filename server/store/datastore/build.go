@@ -25,7 +25,7 @@ func (s storage) GetBuild(id int64) (*model.Build, error) {
 	return build, wrapGet(s.engine.ID(id).Get(build))
 }
 
-func (s storage) GetBuildNumber(repo *model.Repo, num int) (*model.Build, error) {
+func (s storage) GetBuildNumber(repo *model.Repo, num int64) (*model.Build, error) {
 	build := &model.Build{
 		RepoID: repo.ID,
 		Number: num,

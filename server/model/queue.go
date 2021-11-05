@@ -23,26 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
-// Task defines scheduled pipeline Task.
-type Task struct {
-	ID           string            `xorm:"PK UNIQUE 'task_id'"`
-	Data         []byte            `xorm:"'task_data'"` // TODO: ensure >= MEDIUMBLOB
-	Labels       map[string]string `xorm:"json 'task_labels'"`
-	Dependencies []string          `xorm:"json 'task_dependencies'"`
-	RunOn        []string          `xorm:"json 'task_run_on'"`
-}
-
-// TableName return database table name for xorm
-func (Task) TableName() string {
-	return "tasks"
-}
-
-// TaskStore defines storage for scheduled Tasks.
-type TaskStore interface {
-	TaskList() ([]*Task, error)
-	TaskInsert(*Task) error
-	TaskDelete(string) error
-}
+// TODO: move code to "github.com/woodpecker-ci/woodpecker/server/queue"
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.

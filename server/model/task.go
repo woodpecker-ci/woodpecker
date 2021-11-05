@@ -14,18 +14,23 @@
 
 package model
 
-// TODO: check if it is actually used or just some relict from the past
+// TaskStore defines storage for scheduled Tasks.
+type TaskStore interface {
+	TaskList() ([]*Task, error)
+	TaskInsert(*Task) error
+	TaskDelete(string) error
+}
 
-type Agent struct {
-	ID       int64  `xorm:"pk autoincr 'agent_id'"`
-	Addr     string `xorm:"UNIQUE VARCHAR(250) 'agent_addr'"`
-	Platform string `xorm:"VARCHAR(500) 'agent_platform'"`
-	Capacity int64  `xorm:"agent_capacity"`
-	Created  int64  `xorm:"created 'agent_created'"`
-	Updated  int64  `xorm:"updated 'agent_updated'"`
+// Task defines scheduled pipeline Task.
+type Task struct {
+	ID           string            `xorm:"PK UNIQUE 'task_id'"`
+	Data         []byte            `xorm:"'task_data'"`
+	Labels       map[string]string `xorm:"json 'task_labels'"`
+	Dependencies []string          `xorm:"json 'task_dependencies'"`
+	RunOn        []string          `xorm:"json 'task_run_on'"`
 }
 
 // TableName return database table name for xorm
-func (Agent) TableName() string {
-	return "agents"
+func (Task) TableName() string {
+	return "tasks"
 }

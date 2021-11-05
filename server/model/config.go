@@ -28,9 +28,9 @@ type ConfigStore interface {
 type Config struct {
 	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
 	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
-	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
+	Hash   string `json:"hash" xorm:"UNIQUE(s) INDEX 'config_hash'"`
 	Name   string `json:"name" xorm:"config_name"`
-	Data   string `json:"data" xorm:"config_data"` //MEDIUMBLOB
+	Data   []byte `json:"data" xorm:"config_data"`
 }
 
 // BuildConfig is the n:n relation between Build and Config
