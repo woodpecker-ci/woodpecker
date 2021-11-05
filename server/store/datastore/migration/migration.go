@@ -21,18 +21,23 @@ import (
 )
 
 type migrations struct {
-	Name string
+	Name string `xorm:"UNIQUE"`
 }
 
-func Migrate(e *xorm.Engine) error {
-	if err := e.Sync2(new(migrations)); err != nil {
+type task struct {
+	name string
+	fn   func(sess *xorm.Session) error
+}
+
+// initNew create tables for new instance
+func initNew(e *xorm.Engine) error {
+	sess := e.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	// TODO: handle old instance
-
-	// create tables for new instance
-	if err := e.Sync2(
+	if err := sess.Sync2(
 		new(model.Agent),
 		new(model.Build),
 		new(model.BuildConfig),
@@ -50,5 +55,77 @@ func Migrate(e *xorm.Engine) error {
 	); err != nil {
 		return err
 	}
-	return nil
+
+	if _, err := sess.Insert(&migrations{"xorm"}); err != nil {
+		return err
+	}
+
+	return sess.Commit()
+}
+
+func Migrate(e *xorm.Engine) error {
+	if err := e.Sync2(new(migrations)); err != nil {
+		return err
+	}
+
+	// check if we have a fresh installation or need to check for migrations
+	c, err := e.Count(new(migrations))
+	if err != nil {
+		return err
+	}
+
+	if c == 0 {
+		return initNew(e)
+	}
+
+	// handle old instance
+	noLegacy, err := e.Exist(&migrations{"xorm"})
+	if err != nil {
+		return err
+	}
+	if !noLegacy {
+		if err := runTasks(e, legacyMigrations); err != nil {
+			return err
+		}
+	}
+
+	return runTasks(e, migrationTasks)
+}
+
+// APPEND NEW MIGRATIONS
+var migrationTasks = []task{
+	{
+		name: "xorm",
+		fn:   xormTask,
+	},
+}
+
+func runTasks(e *xorm.Engine, tasks []task) error {
+	sess := e.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	for _, task := range tasks {
+		exist, err := sess.Exist(&migrations{task.name})
+		if err != nil {
+			return err
+		}
+		if exist {
+			continue
+		}
+
+		if task.fn != nil {
+			if err := task.fn(sess); err != nil {
+				return err
+			}
+		}
+
+		if _, err := sess.Insert(&migrations{task.name}); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
 }
