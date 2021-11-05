@@ -17,6 +17,8 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -66,18 +68,18 @@ func TestRegistryList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()
 
-	store.RegistryCreate(&model.Registry{
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "foo",
 		Password: "bar",
-	})
-	store.RegistryCreate(&model.Registry{
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "foo.docker.io",
 		Username: "foo",
 		Password: "bar",
-	})
+	}))
 
 	list, err := store.RegistryList(&model.Repo{ID: 1})
 	if err != nil {

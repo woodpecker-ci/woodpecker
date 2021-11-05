@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -69,25 +70,20 @@ func TestSecretList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()
 
-	store.SecretCreate(&model.Secret{
+	assert.NoError(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "bar",
-	})
-	store.SecretCreate(&model.Secret{
+	}))
+	assert.NoError(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "baz",
 		Value:  "qux",
-	})
+	}))
 
 	list, err := store.SecretList(&model.Repo{ID: 1})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(list), 2; got != want {
-		t.Errorf("Want %d secrets, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, list, 2)
 }
 
 func TestSecretUpdate(t *testing.T) {

@@ -174,7 +174,7 @@ func TestConfigApproved(t *testing.T) {
 		return
 	}
 
-	store.CreateBuild(buildRunning)
+	assert.NoError(t, store.CreateBuild(buildRunning))
 	conf2 := &model.Config{
 		RepoID: repo.ID,
 		Data:   []byte(data),

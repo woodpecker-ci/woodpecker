@@ -81,7 +81,7 @@ func TestFileList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.File), new(model.Build))
 	defer closer()
 
-	store.FileCreate(
+	assert.NoError(t, store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -90,8 +90,8 @@ func TestFileList(t *testing.T) {
 			Size:    11,
 		},
 		bytes.NewBufferString("hello world"),
-	)
-	store.FileCreate(
+	))
+	assert.NoError(t, store.FileCreate(
 		&model.File{
 			BuildID: 1,
 			ProcID:  1,
@@ -100,7 +100,7 @@ func TestFileList(t *testing.T) {
 			Size:    11,
 		},
 		bytes.NewBufferString("hola mundo"),
-	)
+	))
 
 	files, err := store.FileList(&model.Build{ID: 1})
 	if err != nil {

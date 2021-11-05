@@ -17,6 +17,8 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -24,11 +26,11 @@ func TestTaskList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Task))
 	defer closer()
 
-	store.TaskInsert(&model.Task{
+	assert.NoError(t, store.TaskInsert(&model.Task{
 		ID:     "some_random_id",
 		Data:   []byte("foo"),
 		Labels: map[string]string{"foo": "bar"},
-	})
+	}))
 
 	list, err := store.TaskList()
 	if err != nil {

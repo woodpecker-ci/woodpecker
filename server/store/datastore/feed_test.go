@@ -17,6 +17,8 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -29,7 +31,7 @@ func TestRepoListLatest(t *testing.T) {
 		Email: "foo@bar.com",
 		Token: "e42080dddf012c718e476da161d21ad5",
 	}
-	store.CreateUser(user)
+	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
 		Owner:    "bradrydzewski",
@@ -49,14 +51,14 @@ func TestRepoListLatest(t *testing.T) {
 		FullName: "octocat/hello-world",
 		IsActive: true,
 	}
-	store.CreateRepo(repo1)
-	store.CreateRepo(repo2)
-	store.CreateRepo(repo3)
+	assert.NoError(t, store.CreateRepo(repo1))
+	assert.NoError(t, store.CreateRepo(repo2))
+	assert.NoError(t, store.CreateRepo(repo3))
 
-	store.PermBatch([]*model.Perm{
+	assert.NoError(t, store.PermBatch([]*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
-	})
+	}))
 
 	build1 := &model.Build{
 		RepoID: repo1.ID,
@@ -74,10 +76,10 @@ func TestRepoListLatest(t *testing.T) {
 		RepoID: repo3.ID,
 		Status: model.StatusError,
 	}
-	store.CreateBuild(build1)
-	store.CreateBuild(build2)
-	store.CreateBuild(build3)
-	store.CreateBuild(build4)
+	assert.NoError(t, store.CreateBuild(build1))
+	assert.NoError(t, store.CreateBuild(build2))
+	assert.NoError(t, store.CreateBuild(build3))
+	assert.NoError(t, store.CreateBuild(build4))
 
 	builds, err := store.RepoListLatest(user)
 	if err != nil {

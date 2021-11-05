@@ -57,18 +57,18 @@ func TestSenderList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Sender))
 	defer closer()
 
-	store.SenderCreate(&model.Sender{
+	assert.NoError(t, store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
 		Block:  false,
-	})
-	store.SenderCreate(&model.Sender{
+	}))
+	assert.NoError(t, store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "defunkt",
 		Allow:  true,
 		Block:  false,
-	})
+	}))
 
 	list, err := store.SenderList(&model.Repo{ID: 1})
 	if err != nil {
@@ -101,13 +101,8 @@ func TestSenderUpdate(t *testing.T) {
 		return
 	}
 	updated, err := store.SenderFind(&model.Repo{ID: 1}, "octocat")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := updated.Allow, false; got != want {
-		t.Errorf("Want allow value %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.False(t, updated.Allow)
 }
 
 func TestSenderIndexes(t *testing.T) {

@@ -17,6 +17,8 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -31,7 +33,7 @@ func TestPermFind(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	store.CreateRepo(repo)
+	assert.NoError(t, store.CreateRepo(repo))
 
 	err := store.PermUpsert(
 		&model.Perm{
@@ -75,7 +77,7 @@ func TestPermUpsert(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	store.CreateRepo(repo)
+	assert.NoError(t, store.CreateRepo(repo))
 
 	err := store.PermUpsert(
 		&model.Perm{
@@ -154,7 +156,7 @@ func TestPermDelete(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	store.CreateRepo(repo)
+	assert.NoError(t, store.CreateRepo(repo))
 
 	err := store.PermUpsert(
 		&model.Perm{

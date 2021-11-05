@@ -37,18 +37,22 @@ func TestBuilds(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Builds", func() {
 		g.Before(func() {
-			store.engine.Exec("DELETE FROM repos")
-			store.CreateRepo(repo)
+			_, err := store.engine.Exec("DELETE FROM repos")
+			g.Assert(err).IsNil()
+			g.Assert(store.CreateRepo(repo)).IsNil()
 		})
 		g.After(func() {
-			store.engine.Exec("DELETE FROM repos")
+			_, err := store.engine.Exec("DELETE FROM repos")
+			g.Assert(err).IsNil()
 		})
 
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			store.engine.Exec("DELETE FROM builds")
-			store.engine.Exec("DELETE FROM procs")
+			_, err := store.engine.Exec("DELETE FROM builds")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM procs")
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should Post a Build", func() {

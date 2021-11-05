@@ -23,7 +23,7 @@ type Feed struct {
 	Name     string `json:"name"                    xorm:"repo_name"`
 	FullName string `json:"full_name"               xorm:"repo_full_name"`
 
-	Number   int    `json:"number,omitempty"        xorm:"build_number"`
+	Number   int64  `json:"number,omitempty"        xorm:"build_number"`
 	Event    string `json:"event,omitempty"         xorm:"build_event"`
 	Status   string `json:"status,omitempty"        xorm:"build_status"`
 	Created  int64  `json:"created_at,omitempty"    xorm:"build_created"`
