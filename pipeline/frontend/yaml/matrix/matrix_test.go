@@ -27,13 +27,13 @@ func TestMatrix(t *testing.T) {
 
 		g.It("Should return empty array if no matrix", func() {
 			axis, err := ParseString("")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(axis) == 0).IsTrue()
 		})
 
 		g.It("Should return included axis", func() {
 			axis, err := ParseString(fakeMatrixInclude)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(len(axis)).Equal(2)
 			g.Assert(axis[0]["go_version"]).Equal("1.5")
 			g.Assert(axis[1]["go_version"]).Equal("1.6")
