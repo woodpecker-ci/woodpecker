@@ -365,7 +365,6 @@ func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *mod
 // cloning Gitea repositories. The netrc will use the global machine account
 // when configured.
 func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	// TODO: only return password if needed (repo != public)
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
