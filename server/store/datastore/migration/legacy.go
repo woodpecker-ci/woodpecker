@@ -14,6 +14,8 @@
 
 package migration
 
+import "xorm.io/xorm"
+
 var legacyMigrations = []task{
 	{
 		name: "create-table-users",
@@ -85,7 +87,9 @@ var legacyMigrations = []task{
 	},
 	{
 		name: "create-table-agents",
-		fn:   nil,
+		fn: func(sess *xorm.Session) error {
+			return sess.Sync2(new(legacyAgent))
+		},
 	},
 	{
 		name: "create-table-senders",
@@ -219,4 +223,13 @@ var legacyMigrations = []task{
 		name: "update-table-set-users-token-and-secret-length",
 		fn:   nil,
 	},
+}
+
+type legacyAgent struct {
+	ID       int64  `xorm:"pk autoincr 'agent_id'"`
+	Addr     string `xorm:"UNIQUE VARCHAR(250) 'agent_addr'"`
+	Platform string `xorm:"VARCHAR(500) 'agent_platform'"`
+	Capacity int64  `xorm:"agent_capacity"`
+	Created  int64  `xorm:"created 'agent_created'"`
+	Updated  int64  `xorm:"updated 'agent_updated'"`
 }
