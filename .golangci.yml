@@ -1,20 +1,10 @@
 linters-settings:
-  misspell:
-    locale: US
+  gofmt:
+    simplify: false
 
 linters:
+  disable-all: true
   enable:
-    - deadcode
-    - errcheck
+    - gofmt
     - goimports
-    - gosimple
     - govet
-    - ineffassign
-    - misspell
-    - revive
-    - staticcheck
-    - structcheck
-    - typecheck
-    - unused
-    - varcheck
-    - whitespace
