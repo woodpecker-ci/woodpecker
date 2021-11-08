@@ -15,10 +15,21 @@
 package migration
 
 import (
+	"fmt"
+	"reflect"
+
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
+
+// APPEND NEW MIGRATIONS
+var migrationTasks = []task{
+	{
+		name: "xorm",
+		fn:   nil,
+	},
+}
 
 type migrations struct {
 	Name string `xorm:"UNIQUE"`
@@ -37,22 +48,7 @@ func initNew(e *xorm.Engine) error {
 		return err
 	}
 
-	if err := sess.Sync2(
-		new(model.Agent),
-		new(model.Build),
-		new(model.BuildConfig),
-		new(model.Config),
-		new(model.File),
-		new(model.Logs),
-		new(model.Perm),
-		new(model.Proc),
-		new(model.Registry),
-		new(model.Repo),
-		new(model.Secret),
-		new(model.Sender),
-		new(model.Task),
-		new(model.User),
-	); err != nil {
+	if err := syncAll(sess); err != nil {
 		return err
 	}
 
@@ -84,20 +80,24 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 	if !noLegacy {
-		if err := runTasks(e, legacyMigrations); err != nil {
+		if err := legacyMigrations(e); err != nil {
 			return err
 		}
 	}
 
-	return runTasks(e, migrationTasks)
-}
+	if err := runTasks(e, migrationTasks); err != nil {
+		return err
+	}
 
-// APPEND NEW MIGRATIONS
-var migrationTasks = []task{
-	{
-		name: "xorm",
-		fn:   xormTask,
-	},
+	sess := e.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+	if err := syncAll(sess); err != nil {
+		return err
+	}
+	return sess.Commit()
 }
 
 func runTasks(e *xorm.Engine, tasks []task) error {
@@ -128,4 +128,28 @@ func runTasks(e *xorm.Engine, tasks []task) error {
 	}
 
 	return sess.Commit()
+}
+
+func syncAll(sess *xorm.Session) error {
+	for _, bean := range []interface{}{
+		new(model.Agent),
+		new(model.Build),
+		new(model.BuildConfig),
+		new(model.Config),
+		new(model.File),
+		new(model.Logs),
+		new(model.Perm),
+		new(model.Proc),
+		new(model.Registry),
+		new(model.Repo),
+		new(model.Secret),
+		new(model.Sender),
+		new(model.Task),
+		new(model.User),
+	} {
+		if err := sess.Sync2(bean); err != nil {
+			return fmt.Errorf("sync2 error '%s': %v", reflect.TypeOf(bean), err)
+		}
+	}
+	return nil
 }

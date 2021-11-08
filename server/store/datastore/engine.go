@@ -50,3 +50,7 @@ func (s storage) Ping() error {
 func (s storage) Migrate() error {
 	return migration.Migrate(s.engine)
 }
+
+func (s storage) Close() error {
+	return s.engine.Close()
+}

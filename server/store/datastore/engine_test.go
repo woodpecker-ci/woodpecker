@@ -17,6 +17,7 @@ package datastore
 import (
 	"os"
 	"testing"
+
 	"xorm.io/xorm"
 
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,10 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 			engine: engine,
 		}, func() {
 			if err := engine.DropTables(tables...); err != nil {
+				t.Error(err)
+				t.FailNow()
+			}
+			if err := engine.Close(); err != nil {
 				t.Error(err)
 				t.FailNow()
 			}

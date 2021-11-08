@@ -14,222 +14,158 @@
 
 package migration
 
-import "xorm.io/xorm"
+import (
+	"fmt"
+	"github.com/rs/zerolog/log"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
+)
 
-var legacyMigrations = []task{
-	{
-		name: "create-table-users",
-		fn:   nil,
-	},
-	{
-		name: "create-table-repos",
-		fn:   nil,
-	},
-	{
-		name: "create-table-builds",
-		fn:   nil,
-	},
-	{
-		name: "create-index-builds-repo",
-		fn:   nil,
-	},
-	{
-		name: "create-index-builds-author",
-		fn:   nil,
-	},
-	{
-		name: "create-table-procs",
-		fn:   nil,
-	},
-	{
-		name: "create-index-procs-build",
-		fn:   nil,
-	},
-	{
-		name: "create-table-logs",
-		fn:   nil,
-	},
-	{
-		name: "create-table-files",
-		fn:   nil,
-	},
-	{
-		name: "create-index-files-builds",
-		fn:   nil,
-	},
-	{
-		name: "create-index-files-procs",
-		fn:   nil,
-	},
-	{
-		name: "create-table-secrets",
-		fn:   nil,
-	},
-	{
-		name: "create-index-secrets-repo",
-		fn:   nil,
-	},
-	{
-		name: "create-table-registry",
-		fn:   nil,
-	},
-	{
-		name: "create-index-registry-repo",
-		fn:   nil,
-	},
-	{
-		name: "create-table-config",
-		fn:   nil,
-	},
-	{
-		name: "create-table-tasks",
-		fn:   nil,
-	},
-	{
-		name: "create-table-agents",
-		fn: func(sess *xorm.Session) error {
-			return sess.Sync2(new(legacyAgent))
-		},
-	},
-	{
-		name: "create-table-senders",
-		fn:   nil,
-	},
-	{
-		name: "create-index-sender-repos",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-repo-visibility",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-visibility",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-repo-seq",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-seq",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-seq-default",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-repo-active",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-active",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-user-synced",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-user-synced",
-		fn:   nil,
-	},
-	{
-		name: "create-table-perms",
-		fn:   nil,
-	},
-	{
-		name: "create-index-perms-repo",
-		fn:   nil,
-	},
-	{
-		name: "create-index-perms-user",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-file-pid",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-file-meta-passed",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-file-meta-failed",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-file-meta-skipped",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-update-file-meta",
-		fn:   nil,
-	},
-	{
-		name: "create-table-build-config",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-config-name",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-config-name",
-		fn:   nil,
-	},
-	{
-		name: "populate-build-config",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-task-dependencies",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-task-run-on",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-add-repo-fallback",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-fallback",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-repo-fallback-again",
-		fn:   nil,
-	},
-	{
-		name: "add-builds-changed_files-column",
-		fn:   nil,
-	},
-	{
-		name: "update-builds-set-changed_files",
-		fn:   nil,
-	},
-	{
-		name: "alter-table-drop-repo-fallback",
-		fn:   nil,
-	},
-	{
-		name: "drop-allow-push-tags-deploys-columns",
-		fn:   nil,
-	},
-	{
-		name: "update-table-set-users-token-and-secret-length",
-		fn:   nil,
-	},
+func legacyMigrations(e *xorm.Engine) error {
+	sess := e.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	// make sure we have required migrations - else fail and point to last major version
+	for _, mig := range []string{
+		// users
+		"create-table-users",
+		"update-table-set-users-token-and-secret-length",
+		// repos
+		"create-table-repos",
+		"alter-table-add-repo-visibility",
+		"update-table-set-repo-visibility",
+		"alter-table-add-repo-seq",
+		"update-table-set-repo-seq",
+		"update-table-set-repo-seq-default",
+		"alter-table-add-repo-active",
+		"update-table-set-repo-active",
+		"alter-table-add-repo-fallback", // needed to drop col
+		// builds
+		"create-table-builds",
+		"create-index-builds-repo",
+		"create-index-builds-author",
+		// procs
+		"create-table-procs",
+		"create-index-procs-build",
+		// files
+		"create-table-files",
+		"create-index-files-builds",
+		"create-index-files-procs",
+		"alter-table-add-file-pid",
+		"alter-table-add-file-meta-passed",
+		"alter-table-add-file-meta-failed",
+		"alter-table-add-file-meta-skipped",
+		"alter-table-update-file-meta",
+		// secrets
+		"create-table-secrets",
+		"create-index-secrets-repo",
+		// registry
+		"create-table-registry",
+		"create-index-registry-repo",
+		// senders
+		"create-table-senders",
+		"create-index-sender-repos",
+		// perms
+		"create-table-perms",
+		"create-index-perms-repo",
+		"create-index-perms-user",
+		// build_config
+		"create-table-build-config",
+		"populate-build-config",
+
+		// v0.15 only
+		"alter-table-drop-repo-fallback",
+		"drop-allow-push-tags-deploys-columns",
+	} {
+		exist, err := sess.Exist(&migrations{mig})
+		if err != nil {
+			return fmt.Errorf("test migration existence: %v", err)
+		}
+		if !exist {
+			log.Error().Msgf("migration step '%s' missing, please upgrade to last stable v0.14.x version first", mig)
+			return fmt.Errorf("legacy migration step missing")
+		}
+	}
+
+	{ // recreate build_config
+		type BuildConfig struct {
+			ConfigID int64 `xorm:"UNIQUE(s) NOT NULL 'config_id'"`
+			BuildID  int64 `xorm:"UNIQUE(s) NOT NULL 'build_id'"`
+		}
+		if err := renameTable(sess, "build_config", "old_build_config"); err != nil {
+			return err
+		}
+		if err := sess.Sync2(new(BuildConfig)); err != nil {
+			return err
+		}
+		if _, err := sess.Exec("INSERT INTO build_config (config_id, build_id) SELECT config_id,build_id FROM old_build_config;"); err != nil {
+			return fmt.Errorf("unable to set copy data in to temp table %s. Error: %v", "old_build_config", err)
+		}
+		if err := sess.DropTable("old_build_config"); err != nil {
+			return fmt.Errorf("could not drop table '%s': %v", "old_build_config", err)
+		}
+	}
+
+	dialect := sess.Engine().Dialect().URI().DBType
+	switch dialect {
+	case schemas.MYSQL:
+		if err := legacyDropMysqlIndexes(sess); err != nil {
+			return err
+		}
+	case schemas.SQLITE:
+		if err := legacyDropSQLiteIndexes(sess); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("dialect '%s' not supported", dialect)
+	}
+
+	log.Trace().Msg("legacy migration done")
+	return sess.Commit()
 }
 
-type legacyAgent struct {
-	ID       int64  `xorm:"pk autoincr 'agent_id'"`
-	Addr     string `xorm:"UNIQUE VARCHAR(250) 'agent_addr'"`
-	Platform string `xorm:"VARCHAR(500) 'agent_platform'"`
-	Capacity int64  `xorm:"agent_capacity"`
-	Created  int64  `xorm:"created 'agent_created'"`
-	Updated  int64  `xorm:"updated 'agent_updated'"`
+func legacyDropMysqlIndexes(sess *xorm.Session) error {
+	for _, exec := range []string{
+		"DROP INDEX IF EXISTS build_number ON builds;",
+		"DROP INDEX IF EXISTS ix_build_repo ON builds;",
+		"DROP INDEX IF EXISTS ix_build_author ON builds;",
+		"DROP INDEX IF EXISTS proc_build_ix ON procs;",
+		"DROP INDEX IF EXISTS file_build_ix ON files;",
+		"DROP INDEX IF EXISTS file_proc_ix  ON files;",
+		"DROP INDEX IF EXISTS ix_secrets_repo  ON secrets;",
+		"DROP INDEX IF EXISTS ix_registry_repo ON registry;",
+		"DROP INDEX IF EXISTS sender_repo_ix ON senders;",
+		"DROP INDEX IF EXISTS ix_perms_repo ON perms;",
+		"DROP INDEX IF EXISTS ix_perms_user ON perms;",
+	} {
+		if _, err := sess.Exec(exec); err != nil {
+			return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+		}
+	}
+	return nil
+}
+
+func legacyDropSQLiteIndexes(sess *xorm.Session) error {
+	for _, exec := range []string{
+
+		"DROP INDEX IF EXISTS build_number ON builds;",
+		"DROP INDEX IF EXISTS ix_build_repo ON builds;",
+		"DROP INDEX IF EXISTS ix_build_author ON builds;",
+		"DROP INDEX IF EXISTS proc_build_ix ON procs;",
+		"DROP INDEX IF EXISTS file_build_ix ON files;",
+		"DROP INDEX IF EXISTS file_proc_ix  ON files;",
+		"DROP INDEX IF EXISTS ix_secrets_repo  ON secrets;",
+		"DROP INDEX IF EXISTS ix_registry_repo ON registry;",
+		"DROP INDEX IF EXISTS sender_repo_ix ON senders;",
+		"DROP INDEX IF EXISTS ix_perms_repo ON perms;",
+		"DROP INDEX IF EXISTS ix_perms_user ON perms;",
+	} {
+		if _, err := sess.Exec(exec); err != nil {
+			return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+		}
+	}
+	return nil
 }
