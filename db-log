@@ -63,3 +63,63 @@
 [xorm] [warn]  2021/11/10 22:28:53.046266 Table users has column  but struct has not related field
 
 
+{"level":"trace","time":"2021-11-11T00:34:19+01:00","message":"setup datastore: store.Opts{Driver:\"postgres\", Config:\"postgres://postgres:myPassword@localhost:5432/oo?sslmode=disable\"}"}
+{"level":"trace","time":"2021-11-11T00:34:19+01:00","message":"legacy migration done"}
+[xorm] [warn]  2021/11/11 00:34:19.497902 Table agents column agent_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.497935 Table agents column agent_capacity db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.497941 Table agents column agent_created db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.497947 Table agents column agent_updated db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521681 Table builds column build_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.521696 Table builds column build_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521717 Table builds column build_number db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521723 Table builds column build_config_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521730 Table builds column build_parent db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521741 Table builds column build_enqueued db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521746 Table builds column build_created db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521752 Table builds column build_started db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521757 Table builds column build_finished db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521783 Table builds column build_timestamp db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521796 Table builds column build_reviewed db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.521802 Table builds column changed_files db type is TEXT, struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.548679 Table config column config_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.548692 Table config column config_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.548703 Table config column config_name db type is TEXT, struct type is VARCHAR(255)
+[xorm] [warn]  2021/11/11 00:34:19.564277 Table files column file_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.564329 Table files column file_build_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.564338 Table files column file_proc_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.564364 Table files column file_time db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.581258 Table logs column log_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.581286 Table logs column log_job_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.589849 Table perms column perm_user_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.589863 Table perms column perm_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.589873 Table perms column perm_synced db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.612026 Table procs column proc_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.612070 Table procs column proc_build_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.612085 Table procs column proc_started db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.612092 Table procs column proc_stopped db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.612117 Table procs column proc_environ db type is VARCHAR(2000), struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.628032 Table registry column registry_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.628046 Table registry column registry_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [info]  2021/11/11 00:34:19.628059 Table registry column registry_password change type from VARCHAR(8000) to TEXT
+[xorm] [info]  2021/11/11 00:34:19.628507 Table registry column registry_token change type from VARCHAR(2000) to TEXT
+[xorm] [warn]  2021/11/11 00:34:19.655375 Table repos column repo_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.655389 Table repos column repo_user_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.655403 Table repos column repo_timeout db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.655416 Table repos column repo_counter db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.655422 Table repos Column repo_counter db default is , struct default is 0
+[xorm] [warn]  2021/11/11 00:34:19.655427 Table repos Column repo_counter db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/11 00:34:19.671833 Table secrets column secret_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.671847 Table secrets column secret_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.671855 Table secrets column secret_value db type is BYTEA, struct type is TEXT
+[xorm] [warn]  2021/11/11 00:34:19.671860 Table secrets column secret_images db type is VARCHAR(2000), struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.671863 Table secrets column secret_events db type is VARCHAR(2000), struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.695290 Table senders column sender_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [warn]  2021/11/11 00:34:19.695309 Table senders column sender_repo_id db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.710486 Table tasks column task_labels db type is BYTEA, struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.710501 Table tasks column task_dependencies db type is BYTEA, struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.710509 Table tasks column task_run_on db type is BYTEA, struct type is JSON
+[xorm] [warn]  2021/11/11 00:34:19.729218 Table users column user_id db type is SERIAL, struct type is BIGSERIAL
+[xorm] [info]  2021/11/11 00:34:19.729235 Table users column user_token change type from VARCHAR(1000) to TEXT
+[xorm] [info]  2021/11/11 00:34:19.729595 Table users column user_secret change type from VARCHAR(1000) to TEXT
+[xorm] [warn]  2021/11/11 00:34:19.729807 Table users column user_expiry db type is INTEGER, struct type is BIGINT
+[xorm] [warn]  2021/11/11 00:34:19.729817 Table users column user_synced db type is INTEGER, struct type is BIGINT

@@ -115,8 +115,8 @@ func legacyMigrations(e *xorm.Engine) error {
 		if err := legacyDropMysqlIndexes(sess); err != nil {
 			return err
 		}
-	case schemas.SQLITE:
-		if err := legacyDropSQLiteIndexes(sess); err != nil {
+	case schemas.SQLITE, schemas.POSTGRES:
+		if err := legacyDropSQLitePostgresIndexes(sess); err != nil {
 			return err
 		}
 	default:
@@ -148,7 +148,7 @@ func legacyDropMysqlIndexes(sess *xorm.Session) error {
 	return nil
 }
 
-func legacyDropSQLiteIndexes(sess *xorm.Session) error {
+func legacyDropSQLitePostgresIndexes(sess *xorm.Session) error {
 	for _, exec := range []string{
 		"DROP INDEX IF EXISTS ix_build_status_running;",
 		"DROP INDEX IF EXISTS ix_build_repo;",
