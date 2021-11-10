@@ -75,10 +75,6 @@ func legacyMigrations(e *xorm.Engine) error {
 		// build_config
 		"create-table-build-config",
 		"populate-build-config",
-
-		// v0.15 only
-		"alter-table-drop-repo-fallback",
-		"drop-allow-push-tags-deploys-columns",
 	} {
 		exist, err := sess.Exist(&migrations{mig})
 		if err != nil {
@@ -121,6 +117,27 @@ func legacyMigrations(e *xorm.Engine) error {
 		}
 	default:
 		return fmt.Errorf("dialect '%s' not supported", dialect)
+	}
+
+	{ // TODO: new migration infra
+		exist, err := sess.Exist(&migrations{"alter-table-drop-repo-fallback"})
+		if err != nil {
+			return err
+		}
+		if !exist {
+			if err := dropTableColumns(sess, "repos", "repo_fallback"); err != nil {
+				return err
+			}
+		}
+		exist, err = sess.Exist(&migrations{"drop-allow-push-tags-deploys-columns"})
+		if err != nil {
+			return err
+		}
+		if !exist {
+			if err := dropTableColumns(sess, "repos", "repo_allow_deploys", "repo_allow_tags"); err != nil {
+				return err
+			}
+		}
 	}
 
 	log.Trace().Msg("legacy migration done")
