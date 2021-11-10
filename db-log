@@ -1,0 +1,65 @@
+{"level":"trace","time":"2021-11-10T22:28:53+01:00","message":"setup datastore: store.Opts{Driver:\"sqlite3\", Config:\"test.db\"}"}
+[xorm] [warn]  2021/11/10 22:28:53.016494 Table migrations column name db type is VARCHAR(255), struct type is TEXT
+[xorm] [warn]  2021/11/10 22:28:53.023472 Table migrations has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.023485 Table migrations has column UNIQUE(name) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.023487 Table migrations has column  but struct has not related field
+{"level":"trace","time":"2021-11-10T22:28:53+01:00","message":"legacy migration done"}
+[xorm] [warn]  2021/11/10 22:28:53.039487 Table agents Column agent_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.039714 Table agents has column UNIQUE(agent_addr) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.039722 Table agents has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.040134 Table builds Column build_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.040176 Table builds column build_signed db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.040198 Table builds column build_verified db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.040405 Table builds has column UNIQUE(build_number,build_repo_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.040413 Table builds has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.040878 Table config Column config_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.040995 Table config has column UNIQUE(config_hash,config_repo_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.041001 Table config has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.041274 Table files Column file_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.041482 Table files has column UNIQUE(file_proc_id,file_name) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.041489 Table files has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.041720 Table logs Column log_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.041800 Table logs has column UNIQUE(log_job_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.041806 Table logs has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.042047 Table perms column perm_pull db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.042054 Table perms column perm_push db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.042058 Table perms column perm_admin db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.042487 Table perms has column UNIQUE(perm_user_id,perm_repo_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.042494 Table perms has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.042815 Table procs Column proc_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.042934 Table procs has column UNIQUE(proc_build_id,proc_pid) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.042942 Table procs has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.043194 Table registry Column registry_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.043470 Table registry has column UNIQUE(registry_addr,registry_repo_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.043478 Table registry has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.043904 Table repos Column repo_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.043933 Table repos column repo_private db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.043946 Table repos column repo_trusted db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.043953 Table repos column repo_gated db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.043959 Table repos column repo_active db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.043966 Table repos column repo_allow_pr db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.043983 Table repos Column repo_counter db default is , struct default is 0
+[xorm] [warn]  2021/11/10 22:28:53.043991 Table repos Column repo_counter db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.044207 Table repos has column UNIQUE(repo_full_name) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.044219 Table repos has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.044570 Table secrets Column secret_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.044590 Table secrets column secret_skip_verify db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.044598 Table secrets column secret_conceal db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.044817 Table secrets has column UNIQUE(secret_name,secret_repo_id) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.044833 Table secrets has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.045180 Table senders Column sender_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.045215 Table senders column sender_allow db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.045223 Table senders column sender_block db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.045435 Table senders has column UNIQUE(sender_repo_id,sender_login) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.045451 Table senders has column  but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.045747 Table tasks Column task_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.045756 Table tasks column task_labels db type is BLOB, struct type is TEXT
+[xorm] [warn]  2021/11/10 22:28:53.045762 Table tasks column task_dependencies db type is BLOB, struct type is TEXT
+[xorm] [warn]  2021/11/10 22:28:53.045768 Table tasks column task_run_on db type is BLOB, struct type is TEXT
+[xorm] [warn]  2021/11/10 22:28:53.046078 Table users Column user_id db nullable is true, struct nullable is false
+[xorm] [warn]  2021/11/10 22:28:53.046090 Table users column user_active db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.046098 Table users column user_admin db type is BOOLEAN, struct type is INTEGER
+[xorm] [warn]  2021/11/10 22:28:53.046259 Table users has column UNIQUE(user_login) but struct has not related field
+[xorm] [warn]  2021/11/10 22:28:53.046266 Table users has column  but struct has not related field
+
+

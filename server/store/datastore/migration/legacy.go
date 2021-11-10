@@ -150,18 +150,17 @@ func legacyDropMysqlIndexes(sess *xorm.Session) error {
 
 func legacyDropSQLiteIndexes(sess *xorm.Session) error {
 	for _, exec := range []string{
-
-		"DROP INDEX IF EXISTS build_number ON builds;",
-		"DROP INDEX IF EXISTS ix_build_repo ON builds;",
-		"DROP INDEX IF EXISTS ix_build_author ON builds;",
-		"DROP INDEX IF EXISTS proc_build_ix ON procs;",
-		"DROP INDEX IF EXISTS file_build_ix ON files;",
-		"DROP INDEX IF EXISTS file_proc_ix  ON files;",
-		"DROP INDEX IF EXISTS ix_secrets_repo  ON secrets;",
-		"DROP INDEX IF EXISTS ix_registry_repo ON registry;",
-		"DROP INDEX IF EXISTS sender_repo_ix ON senders;",
-		"DROP INDEX IF EXISTS ix_perms_repo ON perms;",
-		"DROP INDEX IF EXISTS ix_perms_user ON perms;",
+		"DROP INDEX IF EXISTS ix_build_status_running;",
+		"DROP INDEX IF EXISTS ix_build_repo;",
+		"DROP INDEX IF EXISTS ix_build_author;",
+		"DROP INDEX IF EXISTS proc_build_ix;",
+		"DROP INDEX IF EXISTS file_build_ix;",
+		"DROP INDEX IF EXISTS file_proc_ix;",
+		"DROP INDEX IF EXISTS ix_secrets_repo;",
+		"DROP INDEX IF EXISTS ix_registry_repo;",
+		"DROP INDEX IF EXISTS sender_repo_ix;",
+		"DROP INDEX IF EXISTS ix_perms_repo;",
+		"DROP INDEX IF EXISTS ix_perms_user;",
 	} {
 		if _, err := sess.Exec(exec); err != nil {
 			return fmt.Errorf("exec: '%s' failed: %v", exec, err)
