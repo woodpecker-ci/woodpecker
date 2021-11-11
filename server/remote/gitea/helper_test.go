@@ -33,7 +33,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse push hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("refs/heads/master")
 			g.Assert(hook.After).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
@@ -57,7 +57,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse tag hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPushTag)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("v1.0.0")
 			g.Assert(hook.Sha).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Repo.Name).Equal("hello-world")
@@ -73,7 +73,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse pull_request hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, err := parsePullRequest(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Action).Equal("opened")
 			g.Assert(hook.Number).Equal(int64(1))
 
