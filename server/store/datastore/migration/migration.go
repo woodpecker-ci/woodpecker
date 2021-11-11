@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -25,10 +26,9 @@ import (
 
 // APPEND NEW MIGRATIONS
 var migrationTasks = []task{
-	{
-		name: "xorm",
-		fn:   nil,
-	},
+	legacy2Xorm,
+	alterTableReposDropFallback,
+	alterTableReposDropAllowDeploysAllowTags,
 }
 
 type migrations struct {
@@ -41,22 +41,19 @@ type task struct {
 }
 
 // initNew create tables for new instance
-func initNew(e *xorm.Engine) error {
-	sess := e.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
+func initNew(sess *xorm.Session) error {
 	if err := syncAll(sess); err != nil {
 		return err
 	}
 
-	if _, err := sess.Insert(&migrations{"xorm"}); err != nil {
-		return err
+	// dummy run migrations
+	for _, task := range migrationTasks {
+		if _, err := sess.Insert(&migrations{task.name}); err != nil {
+			return err
+		}
 	}
 
-	return sess.Commit()
+	return nil
 }
 
 func Migrate(e *xorm.Engine) error {
@@ -64,55 +61,45 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
+	sess := e.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
 	// check if we have a fresh installation or need to check for migrations
-	c, err := e.Count(new(migrations))
+	c, err := sess.Count(new(migrations))
 	if err != nil {
 		return err
 	}
 
 	if c == 0 {
-		return initNew(e)
-	}
-
-	// handle old instance
-	noLegacy, err := e.Exist(&migrations{"xorm"})
-	if err != nil {
-		return err
-	}
-	if !noLegacy {
-		if err := legacyMigrations(e); err != nil {
+		if err := initNew(sess); err != nil {
 			return err
 		}
+		return sess.Commit()
 	}
 
-	if err := runTasks(e, migrationTasks); err != nil {
+	if err := runTasks(sess, migrationTasks); err != nil {
 		return err
 	}
 
-	sess := e.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
 	if err := syncAll(sess); err != nil {
 		return err
 	}
+
 	return sess.Commit()
 }
 
-func runTasks(e *xorm.Engine, tasks []task) error {
-	sess := e.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
+func runTasks(sess *xorm.Session, tasks []task) error {
 	for _, task := range tasks {
+		log.Trace().Msgf("start migration task '%s'", task.name)
 		exist, err := sess.Exist(&migrations{task.name})
 		if err != nil {
 			return err
 		}
 		if exist {
+			log.Trace().Msgf("migration task '%s' exist", task.name)
 			continue
 		}
 
@@ -120,14 +107,16 @@ func runTasks(e *xorm.Engine, tasks []task) error {
 			if err := task.fn(sess); err != nil {
 				return err
 			}
+			log.Info().Msgf("migration task '%s' done", task.name)
+		} else {
+			log.Trace().Msgf("skip migration task '%s'", task.name)
 		}
 
 		if _, err := sess.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
 	}
-
-	return sess.Commit()
+	return nil
 }
 
 func syncAll(sess *xorm.Session) error {

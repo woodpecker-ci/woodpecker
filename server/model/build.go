@@ -24,7 +24,7 @@ type Build struct {
 	ConfigID     int64    `json:"-"                       xorm:"build_config_id"`
 	Parent       int64    `json:"parent"                  xorm:"build_parent"`
 	Event        string   `json:"event"                   xorm:"build_event"`
-	Status       string   `json:"status"                  xorm:"build_status"`
+	Status       string   `json:"status"                  xorm:"INDEX 'build_status'"`
 	Error        string   `json:"error"                   xorm:"build_error"`
 	Enqueued     int64    `json:"enqueued_at"             xorm:"build_enqueued"`
 	Created      int64    `json:"created_at"              xorm:"build_created"`
