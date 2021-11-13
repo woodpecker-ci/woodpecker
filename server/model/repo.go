@@ -35,8 +35,8 @@ type Repo struct {
 	Branch     string `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
 	Kind       string `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"` // TODO: rename to `SCMKind`
 	Timeout    int64  `json:"timeout,omitempty"        xorm:"repo_timeout"`
-	Visibility string `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"` // CASE if !repo_private {'public'} else {'private'} // TODO: add func to check before insert and after load
-	IsPrivate  bool   `json:"private"                  xorm:"repo_private"`
+	Visibility string `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"`
+	IsPrivate  bool   `json:"private"                  xorm:"repo_private"` // TODO: Rename to `IsSCMPrivate` 
 	IsTrusted  bool   `json:"trusted"                  xorm:"repo_trusted"`
 	IsStarred  bool   `json:"starred,omitempty"        xorm:"-"`
 	IsGated    bool   `json:"gated"                    xorm:"repo_gated"`
