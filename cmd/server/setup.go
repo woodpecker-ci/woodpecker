@@ -74,11 +74,11 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open storage")
+		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
 	if err := store.Migrate(); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate storage")
+		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
 	return store, nil
