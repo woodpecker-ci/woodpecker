@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,44 +15,61 @@
 package datastore
 
 import (
-	gosql "database/sql"
-
-	"github.com/russross/meddler"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
-	stmt := sql.Lookup(db.driver, "config-find-id")
-	var configs = []*model.Config{}
-	err := meddler.QueryAll(db, &configs, stmt, buildID)
-	return configs, err
+func (s storage) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
+	configs := make([]*model.Config, 0, perPage)
+	return configs, s.engine.
+		Table("config").
+		Join("LEFT", "build_config", "config.config_id = build_config.config_id").
+		Where("build_config.build_id = ?", buildID).
+		Find(&configs)
 }
 
-func (db *datastore) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
-	stmt := sql.Lookup(db.driver, "config-find-repo-hash")
-	conf := new(model.Config)
-	err := meddler.QueryRow(db, conf, stmt, repoID, hash)
-	return conf, err
-}
-
-func (db *datastore) ConfigFindApproved(config *model.Config) (bool, error) {
-	var dest int64
-	stmt := sql.Lookup(db.driver, "config-find-approved")
-	err := db.DB.QueryRow(stmt, config.RepoID, config.ID).Scan(&dest)
-	if err == gosql.ErrNoRows {
-		return false, nil
-	} else if err != nil {
-		return false, err
+func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
+	conf := &model.Config{
+		RepoID: repoID,
+		Hash:   hash,
 	}
-	return true, nil
+	if err := wrapGet(s.engine.Get(conf)); err != nil {
+		return nil, err
+	}
+	return conf, nil
 }
 
-func (db *datastore) ConfigCreate(config *model.Config) error {
-	return meddler.Insert(db, "config", config)
+func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
+	/* TODO: use builder (do not behave same as pure sql, fix that)
+	return s.engine.Table(new(model.Build)).
+		Join("INNER", "build_config", "builds.build_id = build_config.build_id" ).
+		Where(builder.Eq{"builds.build_repo_id": config.RepoID}).
+		And(builder.Eq{"build_config.config_id": config.ID}).
+		And(builder.In("builds.build_status", "blocked", "pending")).
+		Exist(new(model.Build))
+	*/
+
+	c, err := s.engine.SQL(`
+SELECT build_id FROM builds
+WHERE build_repo_id = ?
+AND build_id in (
+  SELECT build_id
+  FROM build_config
+  WHERE build_config.config_id = ?
+  )
+AND build_status NOT IN ('blocked', 'pending')
+LIMIT 1
+`, config.RepoID, config.ID).Count()
+	return c > 0, err
 }
 
-func (db *datastore) BuildConfigCreate(buildConfig *model.BuildConfig) error {
-	return meddler.Insert(db, "build_config", buildConfig)
+func (s storage) ConfigCreate(config *model.Config) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(config)
+	return err
+}
+
+func (s storage) BuildConfigCreate(config *model.BuildConfig) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(config)
+	return err
 }

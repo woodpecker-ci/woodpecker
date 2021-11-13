@@ -138,7 +138,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	// // parse the build number and job sequence number from
 	// // the repquest parameter.
-	buildn, _ := strconv.Atoi(c.Param("build"))
+	buildn, _ := strconv.ParseInt(c.Param("build"), 10, 64)
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
 	build, err := store_.GetBuildNumber(repo, buildn)

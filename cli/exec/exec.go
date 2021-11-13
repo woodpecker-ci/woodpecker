@@ -188,8 +188,8 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Private: c.Bool("repo-private"),
 		},
 		Curr: frontend.Build{
-			Number:   c.Int("build-number"),
-			Parent:   c.Int("parent-build-number"),
+			Number:   c.Int64("build-number"),
+			Parent:   c.Int64("parent-build-number"),
 			Created:  c.Int64("build-created"),
 			Started:  c.Int64("build-started"),
 			Finished: c.Int64("build-finished"),
@@ -211,7 +211,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			},
 		},
 		Prev: frontend.Build{
-			Number:   c.Int("prev-build-number"),
+			Number:   c.Int64("prev-build-number"),
 			Created:  c.Int64("prev-build-created"),
 			Started:  c.Int64("prev-build-started"),
 			Finished: c.Int64("prev-build-finished"),
