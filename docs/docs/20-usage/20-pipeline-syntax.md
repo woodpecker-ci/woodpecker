@@ -159,9 +159,11 @@ Woodpecker provides the ability to store named parameters external to the Yaml c
 
 For more details check the [secrets docs](/docs/usage/secrets/).
 
-## Step `when` - Conditional Execution
+## Step `when` - Step Conditional Execution
 
 Woodpecker supports defining conditional pipeline steps in the `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
+
+This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See (Pipeline when)[#Pipeline-when]
 
 ### `branch`
 
@@ -357,9 +359,12 @@ Woodpecker gives the ability to define Docker volumes in the Yaml. You can use t
 
 For more details check the [volumes docs](/docs/usage/volumes/).
 
-## `branches`
+## Pipeline Conditionals
 
-Woodpecker gives the ability to skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
+Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions. 
+
+### `branches`
+Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
 
 Example skipping a commit when the target branch is not master:
 
@@ -426,6 +431,63 @@ pipeline:
 
 +branches:
 +  exclude: [ develop, feature/* ]
+```
+
+
+### `when`
+
+If required, Woodpecker can be made to skip whole pipelines based on `when`. This could be utilised to ensure compliance that only certain jobs run on certain agents (regional restrictions). Or targeting architectures.
+
+This is achieved by ensuring the `when` block is on the root level. Rather than 
+
+See (when)[] above to understand all the different types of conditions that can be used.
+
+> Note: You may need to set the agent environment settings, as these are not set automatically. See: [agent configuration](/docs/usage/agent-config) for more details.
+
+
+Example targeting a specific platform:
+
+```diff
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+   -when:
+      -platform: [ linux/arm* ]
+
++when:
++  platform: [ linux/arm* ]
+
+```
+
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. 
+Because we had our original `when` block underneath the `build` block, if it was run on the `linux/amd64` agent. It would have cloned the repository, and then skipped the build step. Resulting in a Successful build.
+
+Moving the when block to the root level will ensure that the whole pipeline will run be targeted to agents that match all of the conditions.
+
+This can be utilised in conjunction with other when blocks as well. 
+
+Example `when` pipeline & step block:
+
+```yml
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+
+  publish:
+    image: plugins/docker
+    repo: foo/bar
+   +when:
+    +tag: release*
+
++when:
++  platform: [ linux/arm* ]
+
 ```
 
 ## `workspace`
