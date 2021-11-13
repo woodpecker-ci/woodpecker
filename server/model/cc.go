@@ -50,7 +50,7 @@ func NewCC(r *Repo, b *Build, link string) *CCProjects {
 		b.Status != StatusRunning {
 		proj.Activity = "Sleeping"
 		proj.LastBuildTime = time.Unix(b.Started, 0).Format(time.RFC3339)
-		proj.LastBuildLabel = strconv.Itoa(b.Number)
+		proj.LastBuildLabel = strconv.FormatInt(b.Number, 10)
 	}
 
 	// ensure the last build Status accepts a valid

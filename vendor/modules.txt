@@ -100,6 +100,16 @@ github.com/go-playground/validator/v10
 # github.com/go-sql-driver/mysql v1.6.0
 ## explicit
 github.com/go-sql-driver/mysql
+# github.com/goccy/go-json v0.7.4
+github.com/goccy/go-json
+github.com/goccy/go-json/internal/decoder
+github.com/goccy/go-json/internal/encoder
+github.com/goccy/go-json/internal/encoder/vm
+github.com/goccy/go-json/internal/encoder/vm_color
+github.com/goccy/go-json/internal/encoder/vm_color_indent
+github.com/goccy/go-json/internal/encoder/vm_indent
+github.com/goccy/go-json/internal/errors
+github.com/goccy/go-json/internal/runtime
 # github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 ## explicit
 github.com/gogits/go-gogs-client
@@ -114,31 +124,28 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+github.com/golang/snappy
 # github.com/google/go-github/v39 v39.2.0
 ## explicit
 github.com/google/go-github/v39/github
 # github.com/google/go-querystring v1.1.0
 github.com/google/go-querystring/query
-# github.com/gorilla/mux v1.7.3
-## explicit
 # github.com/gorilla/securecookie v1.1.1
 ## explicit
 github.com/gorilla/securecookie
 # github.com/hashicorp/go-cleanhttp v0.5.2
 ## explicit
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-retryablehttp v0.7.0
-## explicit
+# github.com/hashicorp/go-retryablehttp v0.6.8
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-version v1.3.0
-## explicit
+# github.com/hashicorp/go-version v1.2.1
 github.com/hashicorp/go-version
 # github.com/joho/godotenv v1.4.0
 ## explicit
 github.com/joho/godotenv
 github.com/joho/godotenv/autoload
-# github.com/json-iterator/go v1.1.12
-## explicit
+# github.com/json-iterator/go v1.1.11
 github.com/json-iterator/go
 # github.com/kr/pretty v0.3.0
 ## explicit
@@ -152,8 +159,7 @@ github.com/leodido/go-urn
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# github.com/mattn/go-isatty v0.0.14
-## explicit
+# github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-sqlite3 v1.14.9
 ## explicit
@@ -171,7 +177,7 @@ github.com/moby/term
 github.com/moby/term/windows
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
-# github.com/modern-go/reflect2 v1.0.2
+# github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
 # github.com/morikuni/aec v1.0.0
 ## explicit
@@ -215,9 +221,6 @@ github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
 # github.com/russross/blackfriday/v2 v2.1.0
 github.com/russross/blackfriday/v2
-# github.com/russross/meddler v1.0.1
-## explicit
-github.com/russross/meddler
 # github.com/sirupsen/logrus v1.8.1
 github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.3.0
@@ -227,6 +230,19 @@ github.com/stretchr/objx
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
+# github.com/syndtr/goleveldb v1.0.0
+github.com/syndtr/goleveldb/leveldb
+github.com/syndtr/goleveldb/leveldb/cache
+github.com/syndtr/goleveldb/leveldb/comparer
+github.com/syndtr/goleveldb/leveldb/errors
+github.com/syndtr/goleveldb/leveldb/filter
+github.com/syndtr/goleveldb/leveldb/iterator
+github.com/syndtr/goleveldb/leveldb/journal
+github.com/syndtr/goleveldb/leveldb/memdb
+github.com/syndtr/goleveldb/leveldb/opt
+github.com/syndtr/goleveldb/leveldb/storage
+github.com/syndtr/goleveldb/leveldb/table
+github.com/syndtr/goleveldb/leveldb/util
 # github.com/tevino/abool v1.2.0
 ## explicit
 github.com/tevino/abool
@@ -234,8 +250,6 @@ github.com/tevino/abool
 ## explicit
 # github.com/ugorji/go/codec v1.2.6
 github.com/ugorji/go/codec
-# github.com/urfave/cli v1.22.5
-github.com/urfave/cli
 # github.com/urfave/cli/v2 v2.3.0
 ## explicit
 github.com/urfave/cli/v2
@@ -243,11 +257,6 @@ github.com/urfave/cli/v2
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
-# github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
-## explicit
-github.com/woodpecker-ci/togo
-github.com/woodpecker-ci/togo/parser
-github.com/woodpecker-ci/togo/template
 # github.com/xanzy/go-gitlab v0.51.1
 ## explicit
 github.com/xanzy/go-gitlab
@@ -410,7 +419,26 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v2 v2.4.0
+## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 ## explicit
 gopkg.in/yaml.v3
+# xorm.io/builder v0.3.9
+## explicit
+xorm.io/builder
+# xorm.io/xorm v1.2.5
+## explicit
+xorm.io/xorm
+xorm.io/xorm/caches
+xorm.io/xorm/contexts
+xorm.io/xorm/convert
+xorm.io/xorm/core
+xorm.io/xorm/dialects
+xorm.io/xorm/internal/json
+xorm.io/xorm/internal/statements
+xorm.io/xorm/internal/utils
+xorm.io/xorm/log
+xorm.io/xorm/names
+xorm.io/xorm/schemas
+xorm.io/xorm/tags
