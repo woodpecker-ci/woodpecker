@@ -17,6 +17,8 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -24,7 +26,7 @@ func TestProcFind(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
 	defer closer()
 
-	err := store.ProcCreate([]*model.Proc{
+	procs := []*model.Proc{
 		{
 			BuildID:  1000,
 			PID:      1,
@@ -38,35 +40,16 @@ func TestProcFind(t *testing.T) {
 			Platform: "linux/amd64",
 			Environ:  map[string]string{"GOLANG": "tip"},
 		},
-	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert procs: %s", err)
-		return
 	}
+	assert.NoError(t, store.ProcCreate(procs))
+	assert.EqualValues(t, 1, procs[0].ID)
+	assert.Error(t, store.ProcCreate(procs))
 
 	proc, err := store.ProcFind(&model.Build{ID: 1000}, 1)
-	if err != nil {
-		t.Error(err)
+	if !assert.NoError(t, err) {
 		return
 	}
-	if got, want := proc.BuildID, int64(1000); got != want {
-		t.Errorf("Want proc fk %d, got %d", want, got)
-	}
-	if got, want := proc.ID, int64(1); got != want {
-		t.Errorf("Want proc pk %d, got %d", want, got)
-	}
-	if got, want := proc.PID, 1; got != want {
-		t.Errorf("Want proc ppid %d, got %d", want, got)
-	}
-	if got, want := proc.PPID, 2; got != want {
-		t.Errorf("Want proc ppid %d, got %d", want, got)
-	}
-	if got, want := proc.PGID, 3; got != want {
-		t.Errorf("Want proc pgid %d, got %d", want, got)
-	}
-	if got, want := proc.Name, "build"; got != want {
-		t.Errorf("Want proc name %s, got %s", want, got)
-	}
+	assert.Equal(t, procs[0], proc)
 }
 
 func TestProcChild(t *testing.T) {
