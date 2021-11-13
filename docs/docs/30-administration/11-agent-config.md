@@ -1,45 +1,92 @@
 # Agent configuration
 
-Agent configuration has the following command line variables that can be overridden via environmental variables
+Agents configuration has the following command line variables that can be overridden via environmental variables.
 
-- "WOODPECKER_SERVER",
-  - Usage:   "server address",
-  - Value:   "localhost:9000",
-- "WOODPECKER_USERNAME"
-  - Usage:   "auth username",
-  - Value:   "x-oauth-basic",
-- "WOODPECKER_AGENT_SECRET"
-  - Usage:   "server-agent shared password",        Value:   ""
-- "WOODPECKER_DEBUG"
-  - Usage:   "enable agent debug mode",
-  - Value:   true,
-- "WOODPECKER_LOG_LEVEL"
-  - Usage:   "set logging level",
-        "WOODPECKER_DEBUG_PRETTY"
-  - Usage:   "enable pretty-printed debug output",
-- "WOODPECKER_DEBUG_NOCOLOR"
-  - Usage:   "disable colored debug output",
-  - Value:   true,
-- "WOODPECKER_HOSTNAME"
-  - Usage:   "agent hostname",
-        "WOODPECKER_PLATFORM"
-  - Usage:   "restrict builds by platform conditions",
-  - Value:   "linux/amd64",
-- "WOODPECKER_FILTER"
-  - Usage:   "filter expression to restrict builds by label",
-- "WOODPECKER_MAX_PROCS"
-  - Usage:   "agent parallel builds",
-  - Value:   1,
-- "WOODPECKER_HEALTHCHECK"
-  - Usage:   "enable healthcheck endpoint",
-  - Value:   true,
-- "WOODPECKER_KEEPALIVE_TIME"
-  - Usage:   "after a duration of this time of no activity, the agent pings the server to check if the transport is still alive",
-- "WOODPECKER_KEEPALIVE_TIMEOUT"
-  - Usage:   "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
-  - Value:   time.Second * 20,
-- "WOODPECKER_GRPC_SECURE"
-  - Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport", 	
-- "WOODPECKER_GRPC_VERIFY"
-  - Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-  - Value:   true,
+```yaml
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-agent:
+  [...]
+  environment:
+    - WOODPECKER_SERVER=localhost:9000
+    - WOODPECKER_AGENT_SECRET=""
+
+```
+
+## Filtering agents
+
+When building your pipelines as long as you have set the platform or filter, builds can be made to only run code on certain agents. 
+
+```
+- WOODPECKER_HOSTNAME=mycompany-ci-01.example.com
+- WOODPECKER_PLATFORM=linux/amd64
+- WOODPECKER_FILTER=???
+```
+
+### Filter on Platform
+
+Only want certain pipelines or steps to run on certain platforms? Such as arm vs amd64? 
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-agent:
+  [...]
+  environment:
+    - WOODPECKER_SERVER=localhost:9000
+    - WOODPECKER_AGENT_SECRET=""
++   - WOODPECKER_PLATFORM=linux/arm64
+```
+
+```yaml
+# .woodpecker.yml
+pipeline:
+  build:
+   image: golang
+   commands:
+     - go build
+     - go test
+  when:
+    platform: linux/amd64
+
+
+  testing:
+   image: golang
+   commands:
+     - go build
+     - go test
+  when:
+    platform: linux/arm*
+
+
+```
+
+See [Conditionals Pipeline](usage/pipeline-syntax#step-when---conditional-execution) syntax for more
+
+
+## All agent configuration options
+
+Here is the full list of configuration options and their default variables. 
+
+```yaml
+    - WOODPECKER_SERVER=localhost:9000
+    - WOODPECKER_AGENT_SECRET=""
+    - WOODPECKER_USERNAME=x-oauth-basic
+    - WOODPECKER_DEBUG=true
+    - WOODPECKER_LOG_LEVEL=""
+    - WOODPECKER_DEBUG_PRETTY=""
+    - WOODPECKER_DEBUG_NOCOLOR=true
+    - WOODPECKER_HOSTNAME=""
+    - WOODPECKER_PLATFORM="linux/amd64"
+    - WOODPECKER_FILTER=""
+    - WOODPECKER_MAX_PROCS=1
+    - WOODPECKER_HEALTHCHECK=true
+    - WOODPECKER_KEEPALIVE_TIME=10
+    - WOODPECKER_KEEPALIVE_TIMEOUT=time.Second * 20
+    - WOODPECKER_GRPC_SECURE=""
+    - WOODPECKER_GRPC_VERIFY=true
+```
