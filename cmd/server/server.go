@@ -108,6 +108,11 @@ func loop(c *cli.Context) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
+	defer func() {
+		if err := store_.Close(); err != nil {
+			log.Error().Err(err).Msg("could not close store")
+		}
+	}()
 
 	setupEvilGlobals(c, store_, remote_)
 

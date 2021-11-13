@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,36 +15,34 @@
 package datastore
 
 import (
-	"github.com/russross/meddler"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) SenderFind(repo *model.Repo, login string) (*model.Sender, error) {
-	stmt := sql.Lookup(db.driver, "sender-find-repo-login")
-	data := new(model.Sender)
-	err := meddler.QueryRow(db, data, stmt, repo.ID, login)
-	return data, err
+func (s storage) SenderFind(repo *model.Repo, login string) (*model.Sender, error) {
+	sender := &model.Sender{
+		RepoID: repo.ID,
+		Login:  login,
+	}
+	return sender, wrapGet(s.engine.Get(sender))
 }
 
-func (db *datastore) SenderList(repo *model.Repo) ([]*model.Sender, error) {
-	stmt := sql.Lookup(db.driver, "sender-find-repo")
-	data := []*model.Sender{}
-	err := meddler.QueryAll(db, &data, stmt, repo.ID)
-	return data, err
+func (s storage) SenderList(repo *model.Repo) ([]*model.Sender, error) {
+	senders := make([]*model.Sender, 0, perPage)
+	return senders, s.engine.Where("sender_repo_id = ?", repo.ID).Find(&senders)
 }
 
-func (db *datastore) SenderCreate(sender *model.Sender) error {
-	return meddler.Insert(db, "senders", sender)
+func (s storage) SenderCreate(sender *model.Sender) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(sender)
+	return err
 }
 
-func (db *datastore) SenderUpdate(sender *model.Sender) error {
-	return meddler.Update(db, "senders", sender)
+func (s storage) SenderUpdate(sender *model.Sender) error {
+	_, err := s.engine.ID(sender.ID).AllCols().Update(sender)
+	return err
 }
 
-func (db *datastore) SenderDelete(sender *model.Sender) error {
-	stmt := sql.Lookup(db.driver, "sender-delete")
-	_, err := db.Exec(stmt, sender.ID)
+func (s storage) SenderDelete(sender *model.Sender) error {
+	_, err := s.engine.ID(sender.ID).Delete(new(model.Sender))
 	return err
 }

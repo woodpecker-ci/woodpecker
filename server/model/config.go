@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@ package model
 // ConfigStore persists pipeline configuration to storage.
 type ConfigStore interface {
 	ConfigsForBuild(buildID int64) ([]*Config, error)
-	ConfigFindIdentical(repoID int64, sha string) (*Config, error)
+	ConfigFindIdentical(repoID int64, hash string) (*Config, error)
 	ConfigFindApproved(*Config) (bool, error)
 	ConfigCreate(*Config) error
 	BuildConfigCreate(*BuildConfig) error
@@ -25,15 +26,15 @@ type ConfigStore interface {
 
 // Config represents a pipeline configuration.
 type Config struct {
-	ID     int64  `json:"-"    meddler:"config_id,pk"`
-	RepoID int64  `json:"-"    meddler:"config_repo_id"`
-	Data   string `json:"data" meddler:"config_data"`
-	Hash   string `json:"hash" meddler:"config_hash"`
-	Name   string `json:"name" meddler:"config_name"`
+	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
+	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
+	Hash   string `json:"hash" xorm:"UNIQUE(s) INDEX 'config_hash'"`
+	Name   string `json:"name" xorm:"config_name"`
+	Data   []byte `json:"data" xorm:"config_data"`
 }
 
 // BuildConfig is the n:n relation between Build and Config
 type BuildConfig struct {
-	ConfigID int64 `json:"-"    meddler:"config_id"`
-	BuildID  int64 `json:"-"    meddler:"build_id"`
+	ConfigID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
+	BuildID  int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'build_id'"`
 }
