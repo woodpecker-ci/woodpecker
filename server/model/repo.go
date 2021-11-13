@@ -33,7 +33,7 @@ type Repo struct {
 	Link       string `json:"link_url,omitempty"       xorm:"varchar(1000) 'repo_link'"`
 	Clone      string `json:"clone_url,omitempty"      xorm:"varchar(1000) 'repo_clone'"`
 	Branch     string `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
-	Kind       string `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"`
+	Kind       string `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"` // TODO: rename to `SCMKind`
 	Timeout    int64  `json:"timeout,omitempty"        xorm:"repo_timeout"`
 	Visibility string `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"` // CASE if !repo_private {'public'} else {'private'} // TODO: add func to check before insert and after load
 	IsPrivate  bool   `json:"private"                  xorm:"repo_private"`
