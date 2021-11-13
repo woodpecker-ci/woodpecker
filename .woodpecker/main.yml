@@ -124,8 +124,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
     secrets: [docker_username, docker_password]
-    # TODO: only release as next after 0.15.0 got released
-    tag: [next, latest]
+    tag: [next]
     when:
       branch: master
       event: push
@@ -136,8 +135,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
     secrets: [ docker_username, docker_password ]
-    # TODO: only release as next-alpine after 0.15.0 got released
-    tag: [next-alpine, latest-alpine]
+    tag: [next-alpine]
     when:
       branch: master
       event: push
@@ -148,8 +146,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    # TODO: only release as next after 0.15.0 got released
-    tag: [next, latest]
+    tag: [next]
     when:
       branch: master
       event: push
@@ -160,8 +157,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    # TODO: only release as next-alpine after 0.15.0 got released
-    tag: [next-alpine, latest-alpine]
+    tag: [next-alpine]
     when:
       branch: master
       event: push
