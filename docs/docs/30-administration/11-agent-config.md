@@ -1,6 +1,23 @@
 # Agent configuration
 
-Agents configuration has the following command line variables that can be overridden via environmental variables.
+Agents are configured by the command line or environement variables. At the minimum you need the following information:
+
+```yaml
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-agent:
+  [...]
+  environment:
++   - WOODPECKER_SERVER=localhost:9000
++   - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
+
+```
+
+## Processes per agent
+
+By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parellel processing on a per-agent basis.
 
 ```yaml
 # docker-compose.yml
@@ -11,8 +28,8 @@ services:
   [...]
   environment:
     - WOODPECKER_SERVER=localhost:9000
-    - WOODPECKER_AGENT_SECRET=""
-
+    - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
++    - WOODPECKER_MAX_PROCS=4
 ```
 
 ## Filtering agents
