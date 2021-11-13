@@ -163,7 +163,7 @@ For more details check the [secrets docs](/docs/usage/secrets/).
 
 Woodpecker supports defining conditional pipeline steps in the `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
 
-This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See (Pipeline when)[#Pipeline-when]
+This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See (Pipeline when)[#Pipeline Conditionals] below.
 
 ### `branch`
 
@@ -440,7 +440,7 @@ If required, Woodpecker can be made to skip whole pipelines based on `when`. Thi
 
 This is achieved by ensuring the `when` block is on the root level. Rather than 
 
-See (when)[] above to understand all the different types of conditions that can be used.
+See (when)[#step-when---step-conditional-execution] above to understand all the different types of conditions that can be used.
 
 > Note: You may need to set the agent environment settings, as these are not set automatically. See: [agent configuration](/docs/usage/agent-config) for more details.
 
