@@ -17,8 +17,6 @@ package datastore
 import (
 	"fmt"
 
-	"xorm.io/xorm"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -31,26 +29,19 @@ func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, erro
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
+	if len(perm.Repo) == 0 && perm.RepoID == 0 {
+		return fmt.Errorf("could not determine repo for permission: %v", perm)
+	}
+
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	if err := s.permUpsert(sess, perm); err != nil {
-		return err
-	}
-
-	return sess.Commit()
-}
-
-func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if len(perm.Repo) == 0 && perm.RepoID == 0 {
-		return fmt.Errorf("could not determine repo for permission: %v", perm)
-	}
-
-	// lookup repo based on name if possible
-	if perm.RepoID == 0 && len(perm.Repo) != 0 {
+	// lookup repo based on name if possible (preserve old behaviour)
+	// TODO: check if needed
+	if len(perm.Repo) != 0 {
 		if r, err := s.getRepoName(sess, perm.Repo); err != nil {
 			return err
 		} else {
@@ -71,7 +62,20 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 		// only Insert set auto created ID back to object
 		_, err = sess.Insert(perm)
 	}
-	return err
+	if err != nil {
+		return err
+	}
+
+	return sess.Commit()
+}
+
+func (s storage) PermBatch(perms []*model.Perm) error {
+	for i := range perms {
+		if err := s.PermUpsert(perms[i]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s storage) PermDelete(perm *model.Perm) error {

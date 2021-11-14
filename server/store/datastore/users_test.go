@@ -213,12 +213,10 @@ func TestUsers(t *testing.T) {
 			g.Assert(store.CreateRepo(repo2)).IsNil()
 			g.Assert(store.CreateRepo(repo3)).IsNil()
 
-			for _, perm := range []*model.Perm{
+			g.Assert(store.PermBatch([]*model.Perm{
 				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
-			} {
-				g.Assert(store.PermUpsert(perm)).IsNil()
-			}
+			})).IsNil()
 
 			build1 := &model.Build{
 				RepoID: repo1.ID,

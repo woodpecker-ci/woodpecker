@@ -16,7 +16,6 @@ package shared
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -71,28 +70,33 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	remoteRepos := make([]*model.Repo, 0, len(repos))
+	var remoteRepos []*model.Repo
+	var perms []*model.Perm
+
 	for _, repo := range repos {
 		if s.Match(repo) {
-			repo.Perm = &model.Perm{
+			remoteRepos = append(remoteRepos, repo)
+			perm := model.Perm{
 				UserID: user.ID,
-				RepoID: repo.ID,
 				Repo:   repo.FullName,
+				Pull:   true,
 				Synced: unix,
 			}
 			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
-			if err != nil {
-				return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+			if err == nil && remotePerm != nil {
+				perm.Push = remotePerm.Push
+				perm.Admin = remotePerm.Admin
 			}
-			repo.Perm.Pull = remotePerm.Pull
-			repo.Perm.Push = remotePerm.Push
-			repo.Perm.Admin = remotePerm.Admin
-
-			remoteRepos = append(remoteRepos, repo)
+			perms = append(perms, &perm)
 		}
 	}
 
 	err = s.Store.RepoBatch(remoteRepos)
+	if err != nil {
+		return err
+	}
+
+	err = s.Store.PermBatch(perms)
 	if err != nil {
 		return err
 	}

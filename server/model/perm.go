@@ -19,6 +19,7 @@ package model
 type PermStore interface {
 	PermFind(user *User, repo *Repo) (*Perm, error)
 	PermUpsert(perm *Perm) error
+	PermBatch(perms []*Perm) error
 	PermDelete(perm *Perm) error
 	PermFlush(user *User, before int64) error
 }

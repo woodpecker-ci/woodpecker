@@ -74,8 +74,6 @@ func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 		Find(&repos)
 }
 
-// RepoBatch Sync batch of repos (with permissions) to store (create if not exist else update)
-// TODO: only store activated repos ...
 func (s storage) RepoBatch(repos []*model.Repo) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
@@ -88,14 +86,12 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			log.Debug().Msgf("skip insert/update repo: %#v", repos[i])
 			continue
 		}
-
 		exist, err := sess.
 			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
 			Exist(new(model.Repo))
 		if err != nil {
 			return err
 		}
-
 		if exist {
 			if _, err := sess.
 				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
@@ -113,14 +109,6 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		} else {
 			// only Insert on single object ref set auto created ID back to object
 			if _, err := sess.Insert(repos[i]); err != nil {
-				return err
-			}
-		}
-
-		if repos[i].Perm != nil {
-			repos[i].Perm.RepoID = repos[i].ID
-			repos[i].Perm.Repo = repos[i].FullName
-			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}
 		}
