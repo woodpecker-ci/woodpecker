@@ -337,11 +337,12 @@ func TestRepoBatch(t *testing.T) {
 	}
 	assert.NoError(t, store.RepoBatch([]*model.Repo{repo}))
 	assert.EqualValues(t, repos[0].ID, repo.ID)
+	_, err := store.engine.ID(repo.ID).Get(repo)
+	assert.NoError(t, err)
 	assert.True(t, repo.IsActive)
 
 	allRepos := make([]*model.Repo, 0, 4)
-	err := store.engine.Find(&allRepos)
-	assert.NoError(t, err)
+	assert.NoError(t, store.engine.Find(&allRepos))
 	assert.Len(t, allRepos, 4)
 
 	count, err := store.GetRepoCount()
