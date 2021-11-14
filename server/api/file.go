@@ -29,7 +29,7 @@ import (
 // FileList gets a list file by build.
 func FileList(c *gin.Context) {
 	store_ := store.FromContext(c)
-	num, err := strconv.Atoi(c.Param("number"))
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -63,7 +63,7 @@ func FileGet(c *gin.Context) {
 		}()
 	)
 
-	num, err := strconv.Atoi(c.Param("number"))
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return

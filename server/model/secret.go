@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,14 +47,19 @@ type SecretStore interface {
 // Secret represents a secret variable, such as a password or token.
 // swagger:model registry
 type Secret struct {
-	ID         int64    `json:"id"              meddler:"secret_id,pk"`
-	RepoID     int64    `json:"-"               meddler:"secret_repo_id"`
-	Name       string   `json:"name"            meddler:"secret_name"`
-	Value      string   `json:"value,omitempty" meddler:"secret_value"`
-	Images     []string `json:"image"           meddler:"secret_images,json"`
-	Events     []string `json:"event"           meddler:"secret_events,json"`
-	SkipVerify bool     `json:"-"               meddler:"secret_skip_verify"`
-	Conceal    bool     `json:"-"               meddler:"secret_conceal"`
+	ID         int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	RepoID     int64    `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name       string   `json:"name"            xorm:"UNIQUE(s) INDEX 'secret_name'"`
+	Value      string   `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images     []string `json:"image"           xorm:"json 'secret_images'"`
+	Events     []string `json:"event"           xorm:"json 'secret_events'"`
+	SkipVerify bool     `json:"-"               xorm:"secret_skip_verify"`
+	Conceal    bool     `json:"-"               xorm:"secret_conceal"`
+}
+
+// TableName return database table name for xorm
+func (Secret) TableName() string {
+	return "secrets"
 }
 
 // Match returns true if an image and event match the restricted list.

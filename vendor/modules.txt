@@ -173,6 +173,16 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
+# github.com/goccy/go-json v0.7.4
+github.com/goccy/go-json
+github.com/goccy/go-json/internal/decoder
+github.com/goccy/go-json/internal/encoder
+github.com/goccy/go-json/internal/encoder/vm
+github.com/goccy/go-json/internal/encoder/vm_color
+github.com/goccy/go-json/internal/encoder/vm_color_indent
+github.com/goccy/go-json/internal/encoder/vm_indent
+github.com/goccy/go-json/internal/errors
+github.com/goccy/go-json/internal/runtime
 # github.com/gofrs/flock v0.8.1
 github.com/gofrs/flock
 # github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
@@ -189,6 +199,8 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+github.com/golang/snappy
 # github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2
 github.com/golangci/check/cmd/structcheck
 github.com/golangci/check/cmd/varcheck
@@ -274,11 +286,9 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-multierror v1.1.1
 github.com/hashicorp/go-multierror
-# github.com/hashicorp/go-retryablehttp v0.7.0
-## explicit
+# github.com/hashicorp/go-retryablehttp v0.6.8
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-version v1.3.0
-## explicit
+# github.com/hashicorp/go-version v1.2.1
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
@@ -303,8 +313,7 @@ github.com/jirfag/go-printf-func-name/pkg/analyzer
 ## explicit
 github.com/joho/godotenv
 github.com/joho/godotenv/autoload
-# github.com/json-iterator/go v1.1.12
-## explicit
+# github.com/json-iterator/go v1.1.11
 github.com/json-iterator/go
 # github.com/julz/importas v0.0.0-20210419104244-841f0c0fe66d
 github.com/julz/importas
@@ -343,8 +352,7 @@ github.com/maratori/testpackage/pkg/testpackage
 github.com/matoous/godox
 # github.com/mattn/go-colorable v0.1.8
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.14
-## explicit
+# github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.9
 github.com/mattn/go-runewidth
@@ -377,7 +385,7 @@ github.com/moby/term
 github.com/moby/term/windows
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
-# github.com/modern-go/reflect2 v1.0.2
+# github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
 # github.com/moricho/tparallel v0.2.1
 github.com/moricho/tparallel
@@ -461,9 +469,6 @@ github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
 # github.com/russross/blackfriday/v2 v2.1.0
 github.com/russross/blackfriday/v2
-# github.com/russross/meddler v1.0.1
-## explicit
-github.com/russross/meddler
 # github.com/ryancurrah/gomodguard v1.2.3
 github.com/ryancurrah/gomodguard
 # github.com/ryanrolds/sqlclosecheck v0.3.0
@@ -508,6 +513,19 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
+# github.com/syndtr/goleveldb v1.0.0
+github.com/syndtr/goleveldb/leveldb
+github.com/syndtr/goleveldb/leveldb/cache
+github.com/syndtr/goleveldb/leveldb/comparer
+github.com/syndtr/goleveldb/leveldb/errors
+github.com/syndtr/goleveldb/leveldb/filter
+github.com/syndtr/goleveldb/leveldb/iterator
+github.com/syndtr/goleveldb/leveldb/journal
+github.com/syndtr/goleveldb/leveldb/memdb
+github.com/syndtr/goleveldb/leveldb/opt
+github.com/syndtr/goleveldb/leveldb/storage
+github.com/syndtr/goleveldb/leveldb/table
+github.com/syndtr/goleveldb/leveldb/util
 # github.com/tdakkota/asciicheck v0.0.0-20200416200610-e657995f937b
 github.com/tdakkota/asciicheck
 # github.com/tetafro/godot v1.4.9
@@ -531,8 +549,6 @@ github.com/ugorji/go/codec
 github.com/ultraware/funlen
 # github.com/ultraware/whitespace v0.0.4
 github.com/ultraware/whitespace
-# github.com/urfave/cli v1.22.5
-github.com/urfave/cli
 # github.com/urfave/cli/v2 v2.3.0
 ## explicit
 github.com/urfave/cli/v2
@@ -542,11 +558,6 @@ github.com/uudashr/gocognit
 ## explicit
 github.com/woodpecker-ci/expr
 github.com/woodpecker-ci/expr/parse
-# github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
-## explicit
-github.com/woodpecker-ci/togo
-github.com/woodpecker-ci/togo/parser
-github.com/woodpecker-ci/togo/template
 # github.com/xanzy/go-gitlab v0.51.1
 ## explicit
 github.com/xanzy/go-gitlab
@@ -823,3 +834,21 @@ mvdan.cc/interfacer/check
 mvdan.cc/lint
 # mvdan.cc/unparam v0.0.0-20210104141923-aac4ce9116a7
 mvdan.cc/unparam/check
+# xorm.io/builder v0.3.9
+## explicit
+xorm.io/builder
+# xorm.io/xorm v1.2.5
+## explicit
+xorm.io/xorm
+xorm.io/xorm/caches
+xorm.io/xorm/contexts
+xorm.io/xorm/convert
+xorm.io/xorm/core
+xorm.io/xorm/dialects
+xorm.io/xorm/internal/json
+xorm.io/xorm/internal/statements
+xorm.io/xorm/internal/utils
+xorm.io/xorm/log
+xorm.io/xorm/names
+xorm.io/xorm/schemas
+xorm.io/xorm/tags

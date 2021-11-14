@@ -27,13 +27,9 @@ require (
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
-	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/joho/godotenv v1.4.0
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0
 	github.com/lib/pq v1.10.3
-	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/moby/moby v20.10.10+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
@@ -41,14 +37,12 @@ require (
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.25.0
-	github.com/russross/meddler v1.0.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
-	github.com/woodpecker-ci/togo v0.0.0-20211018210511-a36120f299b0
 	github.com/xanzy/go-gitlab v0.51.1
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
@@ -64,4 +58,6 @@ require (
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	xorm.io/builder v0.3.9
+	xorm.io/xorm v1.2.5
 )
