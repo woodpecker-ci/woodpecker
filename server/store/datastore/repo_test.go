@@ -279,33 +279,44 @@ func TestRepoBatch(t *testing.T) {
 		return
 	}
 
-	if !assert.NoError(t, store.RepoBatch(
-		[]*model.Repo{
-			{
-				UserID:   1,
-				FullName: "foo/bar",
-				Owner:    "foo",
-				Name:     "bar",
-				IsActive: true,
-			},
-			{
-				UserID:   1,
-				FullName: "bar/baz",
-				Owner:    "bar",
-				Name:     "baz",
-				IsActive: true,
-			},
-			{
-				UserID:   1,
-				FullName: "baz/qux",
-				Owner:    "baz",
-				Name:     "qux",
-				IsActive: true,
-			},
+	repos := []*model.Repo{
+		{
+			UserID:   1,
+			FullName: "foo/bar",
+			Owner:    "foo",
+			Name:     "bar",
+			IsActive: true,
 		},
-	)) {
+		{
+			UserID:   1,
+			FullName: "bar/baz",
+			Owner:    "bar",
+			Name:     "baz",
+			IsActive: true,
+		},
+		{
+			UserID:   1,
+			FullName: "baz/qux",
+			Owner:    "baz",
+			Name:     "qux",
+			IsActive: true,
+		},
+		{
+			UserID:   0, // not activated repos do hot have a user id assigned
+			FullName: "baz/notes",
+			Owner:    "baz",
+			Name:     "notes",
+			IsActive: false,
+		},
+	}
+	if !assert.NoError(t, store.RepoBatch(repos)) {
 		return
 	}
+
+	allRepos := make([]*model.Repo, 0, 4)
+	err := store.engine.Find(&allRepos)
+	assert.NoError(t, err)
+	assert.Len(t, allRepos, 4)
 
 	count, err := store.GetRepoCount()
 	assert.NoError(t, err)
