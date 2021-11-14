@@ -187,9 +187,6 @@ func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, er
 
 func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for k, v := range axis {
 		environ[k] = v
 	}

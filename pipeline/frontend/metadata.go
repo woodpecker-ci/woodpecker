@@ -102,10 +102,9 @@ func (m *Metadata) Environ() map[string]string {
 		repoName     string
 		sourceBranch string
 		targetBranch string
-
-		repoParts   = strings.Split(m.Repo.Name, "/")
-		branchParts = strings.Split(m.Curr.Commit.Refspec, ":")
 	)
+
+	repoParts := strings.Split(m.Repo.Name, "/")
 	if len(repoParts) == 2 {
 		repoOwner = repoParts[0]
 		repoName = repoParts[1]
@@ -113,6 +112,7 @@ func (m *Metadata) Environ() map[string]string {
 		repoName = m.Repo.Name
 	}
 
+	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
 	if len(branchParts) == 2 {
 		sourceBranch = branchParts[0]
 		targetBranch = branchParts[1]
@@ -186,12 +186,19 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_VERSION": version.Version,
 
 		// DEPRECATED
+		"CI_ARCH":                    m.Sys.Arch,                           // use CI_SYSTEM_ARCH
+		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
 		"CI_REMOTE_URL":              m.Repo.Remote,                        // use CI_REPO_REMOTE
+		"CI_REPO_BRANCH":             m.Repo.Branch,                        // use CI_REPO_DEFAULT_BRANCH
 		"CI_PARENT_BUILD_NUMBER":     strconv.FormatInt(m.Curr.Parent, 10), // use CI_BUILD_PARENT
 		"CI_BUILD_TARGET":            m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
+		"CI_DEPLOY_TO":               m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
 		"CI_COMMIT_AUTHOR_NAME":      m.Curr.Commit.Author.Name,            // use CI_COMMIT_AUTHOR
 		"CI_PREV_COMMIT_AUTHOR_NAME": m.Prev.Commit.Author.Name,            // use CI_PREV_COMMIT_AUTHOR
 		"CI_SYSTEM":                  m.Sys.Name,                           // use CI_SYSTEM_NAME
+		"CI_BRANCH":                  m.Curr.Commit.Branch,                 // use CI_COMMIT_BRANCH
+		"CI_SOURCE_BRANCH":           sourceBranch,                         // use CI_COMMIT_SOURCE_BRANCH
+		"CI_TARGET_BRANCH":           targetBranch,                         // use CI_COMMIT_TARGET_BRANCH
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
