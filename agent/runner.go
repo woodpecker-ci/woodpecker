@@ -173,13 +173,19 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		loglogger.Debug().Msg("log stream copied")
 
-		file := &rpc.File{}
-		file.Mime = "application/json+logs"
-		file.Proc = proc.Alias
-		file.Name = "logs.json"
-		file.Data, _ = json.Marshal(logstream.Lines())
-		file.Size = len(file.Data)
-		file.Time = time.Now().Unix()
+		data, err := json.Marshal(logstream.Lines())
+		if err != nil {
+			loglogger.Err(err).Msg("could not marshal logstream")
+		}
+
+		file := &rpc.File{
+			Mime: "application/json+logs",
+			Proc: proc.Alias,
+			Name: "logs.json",
+			Data: data,
+			Size: len(data),
+			Time: time.Now().Unix(),
+		}
 
 		loglogger.Debug().
 			Msg("log stream uploading")
