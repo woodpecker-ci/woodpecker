@@ -153,10 +153,12 @@ func TestRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
-	assert.NoError(t, store.PermBatch([]*model.Perm{
+	for _, perm := range []*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName},
 		{UserID: user.ID, Repo: repo2.FullName},
-	}))
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
 
 	repos, err := store.RepoList(user, false)
 	if err != nil {
@@ -210,12 +212,14 @@ func TestOwnedRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 	assert.NoError(t, store.CreateRepo(repo4))
 
-	assert.NoError(t, store.PermBatch([]*model.Perm{
+	for _, perm := range []*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
 		{UserID: user.ID, Repo: repo3.FullName},
 		{UserID: user.ID, Repo: repo4.FullName},
-	}))
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
 
 	repos, err := store.RepoList(user, true)
 	if err != nil {
