@@ -36,8 +36,9 @@ type migrations struct {
 }
 
 type task struct {
-	name string
-	fn   func(sess *xorm.Session) error
+	name       string
+	dependency []string
+	fn         func(sess *xorm.Session) error
 }
 
 // initNew create tables for new instance
@@ -92,15 +93,29 @@ func Migrate(e *xorm.Engine) error {
 }
 
 func runTasks(sess *xorm.Session, tasks []task) error {
+	// cache migrations in db
+	migCache := make(map[string]bool)
+	var migList []*migrations
+	if err := sess.Find(&migList); err != nil {
+		return err
+	}
+	for i := range migList {
+		migCache[migList[i].Name] = true
+	}
+
 	for _, task := range tasks {
 		log.Trace().Msgf("start migration task '%s'", task.name)
-		exist, err := sess.Exist(&migrations{task.name})
-		if err != nil {
-			return err
-		}
-		if exist {
+		if migCache[task.name] {
 			log.Trace().Msgf("migration task '%s' exist", task.name)
 			continue
+		}
+
+		for i := range task.dependency {
+			if !migCache[task.dependency[i]] {
+				err := fmt.Errorf("migration '%s' depends on not executed migration '%s'", task.name, task.dependency[i])
+				log.Err(err)
+				return err
+			}
 		}
 
 		if task.fn != nil {
@@ -115,6 +130,7 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 		if _, err := sess.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
+		migCache[task.name] = true
 	}
 	return nil
 }
