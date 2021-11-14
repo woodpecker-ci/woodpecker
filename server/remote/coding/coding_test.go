@@ -70,13 +70,13 @@ func Test_coding(t *testing.T) {
 				w := httptest.NewRecorder()
 				r, _ := http.NewRequest("GET", "", nil)
 				_, err := c.Login(ctx, w, r)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(w.Code).Equal(http.StatusSeeOther)
 			})
 			g.It("Should return authenticated user", func() {
 				r, _ := http.NewRequest("GET", "?code=code", nil)
 				u, err := c.Login(ctx, nil, r)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(u.Login).Equal(fakeUser.Login)
 				g.Assert(u.Token).Equal(fakeUser.Token)
 				g.Assert(u.Secret).Equal(fakeUser.Secret)
@@ -86,19 +86,19 @@ func Test_coding(t *testing.T) {
 		g.Describe("Given an access token", func() {
 			g.It("Should return the anthenticated user", func() {
 				login, err := c.Auth(ctx, fakeUser.Token, fakeUser.Secret)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(login).Equal(fakeUser.Login)
 			})
 			g.It("Should handle a failure to resolve user", func() {
 				_, err := c.Auth(ctx, fakeUserNotFound.Token, fakeUserNotFound.Secret)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Given a refresh token", func() {
 			g.It("Should return a refresh access token", func() {
 				ok, err := c.Refresh(ctx, fakeUserRefresh)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(ok).IsTrue()
 				g.Assert(fakeUserRefresh.Token).Equal("VDZupx0usVRV4oOd1FCu4xUxgk8SY0TK")
 				g.Assert(fakeUserRefresh.Secret).Equal("BenBQq7TWZ7Cp0aUM47nQjTz2QHNmTWcPctB609n")
@@ -112,7 +112,7 @@ func Test_coding(t *testing.T) {
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
 				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
 				g.Assert(repo.Link).Equal(s.URL + fakeRepo.Link)
@@ -123,49 +123,49 @@ func Test_coding(t *testing.T) {
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("When requesting repository permissions", func() {
 			g.It("Should authorize admin access for project owner", func() {
 				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_owner")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize admin access for project admin", func() {
 				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_admin")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize read access for project member", func() {
 				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_member")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize no access for project guest", func() {
 				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_guest")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsFalse()
 				g.Assert(perm.Push).IsFalse()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("When downloading a file", func() {
 			g.It("Should return file for specified build", func() {
 				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
 		})
@@ -178,7 +178,7 @@ func Test_coding(t *testing.T) {
 					Password: "password",
 				})
 				netrc, err := remote.Netrc(fakeUser, nil)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal("someuser")
 				g.Assert(netrc.Password).Equal("password")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
@@ -188,7 +188,7 @@ func Test_coding(t *testing.T) {
 					Machine: "git.coding.net",
 				})
 				netrc, err := remote.Netrc(fakeUser, nil)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
@@ -198,22 +198,22 @@ func Test_coding(t *testing.T) {
 		g.Describe("When activating a repository", func() {
 			g.It("Should create the hook", func() {
 				err := c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 			g.It("Should update the hook when exists", func() {
 				err := c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.2")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 		})
 
 		g.Describe("When deactivating a repository", func() {
 			g.It("Should successfully remove hook", func() {
 				err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.3")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 			g.It("Should successfully deactivate when hook already removed", func() {
 				err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.4")
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 		})
 
@@ -225,7 +225,7 @@ func Test_coding(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				r, _, err := c.Hook(req)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("demo1/test1")
 			})
 		})

@@ -47,7 +47,7 @@ func TestBoolTrue(t *testing.T) {
 				in := []byte("abc") // string value should fail parse
 				out := BoolTrue{}
 				err := yaml.Unmarshal(in, &out)
-				g.Assert(err != nil).IsTrue("expects error")
+				g.Assert(err).IsNotNil("expects error")
 			})
 		})
 	})

@@ -40,7 +40,7 @@ type (
 
 	// Build defines runtime metadata for a build.
 	Build struct {
-		Number   int    `json:"number,omitempty"`
+		Number   int64  `json:"number,omitempty"`
 		Created  int64  `json:"created,omitempty"`
 		Started  int64  `json:"started,omitempty"`
 		Finished int64  `json:"finished,omitempty"`
@@ -51,7 +51,7 @@ type (
 		Target   string `json:"target,omitempty"`
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
-		Parent   int    `json:"parent,omitempty"`
+		Parent   int64  `json:"parent,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.

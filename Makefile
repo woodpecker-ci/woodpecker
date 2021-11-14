@@ -69,7 +69,7 @@ test-lib:
 test: test-lib test-agent test-server
 
 build-frontend:
-	(cd web/; yarn; yarn build)
+	(cd web/; yarn install --frozen-lockfile; yarn build)
 
 build-server: build-frontend
 	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server

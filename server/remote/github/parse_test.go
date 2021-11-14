@@ -37,18 +37,18 @@ func Test_parser(t *testing.T) {
 			req.Header.Set(hookEvent, "issues")
 
 			r, b, err := parseHook(req, false)
-			g.Assert(r == nil).IsTrue()
-			g.Assert(b == nil).IsTrue()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(r).IsNil()
+			g.Assert(b).IsNil()
+			g.Assert(err).IsNil()
 		})
 
 		g.Describe("given a push hook", func() {
 			g.It("should skip when action is deleted", func() {
 				raw := []byte(fixtures.HookPushDeleted)
 				r, b, err := parsePushHook(raw)
-				g.Assert(r == nil).IsTrue()
-				g.Assert(b == nil).IsTrue()
-				g.Assert(err == nil).IsTrue()
+				g.Assert(r).IsNil()
+				g.Assert(b).IsNil()
+				g.Assert(err).IsNil()
 			})
 			g.It("should extract repository and build details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
@@ -57,9 +57,9 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				r, b, err := parseHook(req, false)
-				g.Assert(err == nil).IsTrue()
-				g.Assert(r != nil).IsTrue()
-				g.Assert(b != nil).IsTrue()
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
 				expectedFiles := []string{"CHANGELOG.md", "app/controller/application.rb"}
 				g.Assert(b.ChangedFiles).Equal(expectedFiles)
@@ -70,16 +70,16 @@ func Test_parser(t *testing.T) {
 			g.It("should skip when action is not open or sync", func() {
 				raw := []byte(fixtures.HookPullRequestInvalidAction)
 				r, b, err := parsePullHook(raw, false)
-				g.Assert(r == nil).IsTrue()
-				g.Assert(b == nil).IsTrue()
-				g.Assert(err == nil).IsTrue()
+				g.Assert(r).IsNil()
+				g.Assert(b).IsNil()
+				g.Assert(err).IsNil()
 			})
 			g.It("should skip when state is not open", func() {
 				raw := []byte(fixtures.HookPullRequestInvalidState)
 				r, b, err := parsePullHook(raw, false)
-				g.Assert(r == nil).IsTrue()
-				g.Assert(b == nil).IsTrue()
-				g.Assert(err == nil).IsTrue()
+				g.Assert(r).IsNil()
+				g.Assert(b).IsNil()
+				g.Assert(err).IsNil()
 			})
 			g.It("should extract repository and build details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPullRequest)
@@ -88,9 +88,9 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookPull)
 
 				r, b, err := parseHook(req, false)
-				g.Assert(err == nil).IsTrue()
-				g.Assert(r != nil).IsTrue()
-				g.Assert(b != nil).IsTrue()
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPull)
 			})
 		})
@@ -103,9 +103,9 @@ func Test_parser(t *testing.T) {
 				req.Header.Set(hookEvent, hookDeploy)
 
 				r, b, err := parseHook(req, false)
-				g.Assert(err == nil).IsTrue()
-				g.Assert(r != nil).IsTrue()
-				g.Assert(b != nil).IsTrue()
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventDeploy)
 			})
 		})

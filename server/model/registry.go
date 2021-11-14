@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,13 +50,13 @@ type RegistryStore interface {
 // Registry represents a docker registry with credentials.
 // swagger:model registry
 type Registry struct {
-	ID       int64  `json:"id"       meddler:"registry_id,pk"`
-	RepoID   int64  `json:"-"        meddler:"registry_repo_id"`
-	Address  string `json:"address"  meddler:"registry_addr"`
-	Username string `json:"username" meddler:"registry_username"`
-	Password string `json:"password" meddler:"registry_password"`
-	Email    string `json:"email"    meddler:"registry_email"`
-	Token    string `json:"token"    meddler:"registry_token"`
+	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
+	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
+	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
+	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
+	Password string `json:"password" xorm:"TEXT 'registry_password'"`
+	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
+	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
 }
 
 // Validate validates the registry information.

@@ -63,8 +63,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 }
 
 func (r *Runner) Run(ctx context.Context) error {
-	log.Debug().
-		Msg("request next execution")
+	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(ctx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)

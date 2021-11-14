@@ -21,3 +21,18 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 )
+
+// Supported database drivers
+const (
+	DriverMysql    = "mysql"
+	DriverPostgres = "postgres"
+)
+
+func SupportedDriver(driver string) bool {
+	switch driver {
+	case DriverMysql, DriverPostgres:
+		return true
+	default:
+		return false
+	}
+}
