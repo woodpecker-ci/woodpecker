@@ -111,8 +111,8 @@ func TestWithMetadata(t *testing.T) {
 	if !reflect.DeepEqual(compiler.metadata, metadata) {
 		t.Errorf("WithMetadata must set compiler the metadata")
 	}
-	if compiler.env["CI_REPO"] != metadata.Repo.Name {
-		t.Errorf("WithMetadata must set CI_REPO")
+	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
+		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
 	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
 		t.Errorf("WithMetadata must set CI_REPO_LINK")
