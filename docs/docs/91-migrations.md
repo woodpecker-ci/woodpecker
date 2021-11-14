@@ -26,15 +26,20 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `CI_*` prefix replaces `DRONE_*`
   - `CI` value is now `woodpecker`
   - `DRONE=true` has been removed
-  - Use `CI_REPO_DEFAULT_BRANCH` instead of `DRONE_REPO_BRANCH`
-  - Use `CI_COMMIT_BRANCH`, `CI_COMMIT_SOURCE_BRANCH` and `CI_COMMIT_TARGET_BRANCH` instead of `DRONE_BRANCH`, `DRONE_TARGET_BRANCH` and `DRONE_SOURCE_BRANCH` variables
-  - Use `CI_COMMIT_AUTHOR` instead of `DRONE_COMMIT_AUTHOR_NAME`
-  - Use `CI_COMMIT_TAG` instead of `DRONE_TAG`
-  - Use `CI_COMMIT_PULL_REQUEST` instead of `DRONE_PULL_REQUEST`
-  - Use `CI_BUILD_DEPLOY_TARGET` instead of `DRONE_DEPLOY_TO`
-  - Use `CI_REPO_REMOTE` instead of `DRONE_REMOTE_URL`
-  - Use `CI_AGENT_ARCH` instead of `DRONE_ARCH`
-  - Use `CI_COMMIT_SHA` instead of `DRONE_COMMIT`
+  - Some variables got deprecated and will be removed in future versions. Please migrate to the new names. Same applies for `DRONE_` of them.
+    - CI_ARCH => use CI_SYSTEM_ARCH
+    - CI_COMMIT => CI_COMMIT_SHA
+    - CI_REMOTE_URL => use CI_REPO_REMOTE
+    - CI_REPO_BRANCH => use CI_REPO_DEFAULT_BRANCH
+    - CI_PARENT_BUILD_NUMBER => use CI_BUILD_PARENT
+    - CI_BUILD_TARGET => use CI_BUILD_DEPLOY_TARGET
+    - CI_DEPLOY_TO => use CI_BUILD_DEPLOY_TARGET
+    - CI_COMMIT_AUTHOR_NAME => use CI_COMMIT_AUTHOR
+    - CI_PREV_COMMIT_AUTHOR_NAME => use CI_PREV_COMMIT_AUTHOR
+    - CI_SYSTEM => use CI_SYSTEM_NAME
+    - CI_BRANCH => use CI_COMMIT_BRANCH
+    - CI_SOURCE_BRANCH => use CI_COMMIT_SOURCE_BRANCH
+    - CI_TARGET_BRANCH => use CI_COMMIT_TARGET_BRANCH
 
   For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
 

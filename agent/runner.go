@@ -17,10 +17,8 @@ package agent
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -33,7 +31,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // TODO: Implement log streaming.
@@ -277,10 +274,8 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		// TODO(anbraten): move to helper function and update by changing metadata and exporting again
-		state.Pipeline.Step.Environment["CI_AGENT_HOST"] = r.hostname
-		state.Pipeline.Step.Environment["CI_AGENT_ARCH"] = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
-		state.Pipeline.Step.Environment["CI_AGENT_VERSION"] = version.Version
+		// TODO: find better way to update this state
+		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
