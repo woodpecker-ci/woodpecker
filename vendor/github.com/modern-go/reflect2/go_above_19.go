@@ -6,9 +6,6 @@ import (
 	"unsafe"
 )
 
-//go:linkname resolveTypeOff reflect.resolveTypeOff
-func resolveTypeOff(rtype unsafe.Pointer, off int32) unsafe.Pointer
-
 //go:linkname makemap reflect.makemap
 func makemap(rtype unsafe.Pointer, cap int) (m unsafe.Pointer)
 
