@@ -155,8 +155,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_TAG":           "", // will be set if event is tag
 		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
 
-		"CI_BUILD_NUMBER":        strconv.Itoa(m.Curr.Number),
-		"CI_BUILD_PARENT":        strconv.Itoa(m.Curr.Parent),
+		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
+		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
 		"CI_BUILD_EVENT":         m.Curr.Event,
 		"CI_BUILD_LINK":          m.Curr.Link,
 		"CI_BUILD_DEPLOY_TARGET": m.Curr.Target,
@@ -180,8 +180,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
 		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
 
-		"CI_PREV_BUILD_NUMBER":        strconv.Itoa(m.Prev.Number),
-		"CI_PREV_BUILD_PARENT":        strconv.Itoa(m.Prev.Parent),
+		"CI_PREV_BUILD_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
+		"CI_PREV_BUILD_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_BUILD_EVENT":         m.Prev.Event,
 		"CI_PREV_BUILD_LINK":          m.Prev.Link,
 		"CI_PREV_BUILD_DEPLOY_TARGET": m.Prev.Target,
