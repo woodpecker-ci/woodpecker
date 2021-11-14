@@ -28,7 +28,7 @@ type ConfigStore interface {
 type Config struct {
 	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
 	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
-	Hash   string `json:"hash" xorm:"UNIQUE(s) INDEX 'config_hash'"`
+	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
 	Name   string `json:"name" xorm:"config_name"`
 	Data   []byte `json:"data" xorm:"config_data"`
 }
