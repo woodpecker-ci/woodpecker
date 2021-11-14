@@ -35,11 +35,13 @@ const (
 	StatusDeclined = "declined"
 )
 
+type SCMKind string
+
 const (
-	RepoGit      = "git"
-	RepoHg       = "hg"
-	RepoFossil   = "fossil"
-	RepoPerforce = "perforce"
+	RepoGit      SCMKind = "git"
+	RepoHg       SCMKind = "hg"
+	RepoFossil   SCMKind = "fossil"
+	RepoPerforce SCMKind = "perforce"
 )
 
 const (
