@@ -186,12 +186,12 @@ func TestPipelineName(t *testing.T) {
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: []*remote.FileMeta{
-			&remote.FileMeta{Name: ".woodpecker/lint.yml", Data: []byte(`
+			{Name: ".woodpecker/lint.yml", Data: []byte(`
 pipeline:
   build:
     image: scratch
 `)},
-			&remote.FileMeta{Name: ".woodpecker/.test.yml", Data: []byte(`
+			{Name: ".woodpecker/.test.yml", Data: []byte(`
 pipeline:
   build:
     image: scratch
