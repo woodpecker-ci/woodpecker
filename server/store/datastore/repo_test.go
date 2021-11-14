@@ -302,7 +302,7 @@ func TestRepoBatch(t *testing.T) {
 			IsActive: true,
 		},
 		{
-			UserID:   1,
+			UserID:   0, // not activated repos do hot have a user id assigned
 			FullName: "baz/notes",
 			Owner:    "baz",
 			Name:     "notes",
@@ -312,12 +312,11 @@ func TestRepoBatch(t *testing.T) {
 	if !assert.NoError(t, store.RepoBatch(repos)) {
 		return
 	}
-	for i := range repos {
-		assert.EqualValues(t, i+1, repos[i].ID, "repo do not got an id: %#v", repos[i])
-	}
-	result, err := store.RepoList(&model.User{ID: 1}, true)
+
+	allRepos := make([]*model.Repo, 0, 4)
+	err := store.engine.Find(&allRepos)
 	assert.NoError(t, err)
-	assert.Len(t, result, 4)
+	assert.Len(t, allRepos, 4)
 
 	count, err := store.GetRepoCount()
 	assert.NoError(t, err)
