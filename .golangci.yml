@@ -1,9 +1,12 @@
 linters-settings:
+  gofmt:
+    simplify: false
   misspell:
     locale: US
 
 linters:
   enable:
+    - gofmt
     - deadcode
     - errcheck
     - goimports

@@ -25,9 +25,6 @@ vendor:
 	go mod tidy
 	go mod vendor
 
-formatcheck:
-	@([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR) | head)" ]) || (echo "Source is unformatted"; exit 1)
-
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
@@ -36,13 +33,9 @@ clean:
 	go clean -i ./...
 	rm -rf build
 
-.PHONY: vet
-vet:
-	@echo "Running go vet..."
-	@go vet $(GO_PACKAGES)
-
 .PHONY: lint
 lint:
+	@echo "Running golangci-lint"
 	go run vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
 	@echo "Running zerolog linter"
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
@@ -70,7 +63,7 @@ test-lib:
 test: test-lib test-agent test-server
 
 build-frontend:
-	(cd web/; yarn; yarn build)
+	(cd web/; yarn install --frozen-lockfile; yarn build)
 
 build-server: build-frontend
 	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
