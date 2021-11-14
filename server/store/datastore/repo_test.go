@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"testing"
+	"time"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
@@ -290,6 +291,12 @@ func TestRepoBatch(t *testing.T) {
 			Owner:    "foo",
 			Name:     "bar",
 			IsActive: true,
+			Perm: &model.Perm{
+				Pull:   true,
+				Push:   true,
+				Admin:  true,
+				Synced: time.Now().Unix(),
+			},
 		},
 		{
 			UserID:   1,
@@ -316,6 +323,21 @@ func TestRepoBatch(t *testing.T) {
 	if !assert.NoError(t, store.RepoBatch(repos)) {
 		return
 	}
+
+	repo := &model.Repo{
+		FullName: "foo/bar",
+		Owner:    "foo",
+		Name:     "bar",
+		Perm: &model.Perm{
+			Pull:   true,
+			Push:   true,
+			Admin:  false,
+			Synced: time.Now().Unix(),
+		},
+	}
+	assert.NoError(t, store.RepoBatch([]*model.Repo{repo}))
+	assert.EqualValues(t, repos[0].ID, repo.ID)
+	assert.True(t, repo.IsActive)
 
 	allRepos := make([]*model.Repo, 0, 4)
 	err := store.engine.Find(&allRepos)

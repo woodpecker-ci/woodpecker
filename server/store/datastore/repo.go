@@ -112,6 +112,8 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		}
 
 		if repos[i].Perm != nil {
+			repos[i].Perm.RepoID = repos[i].ID
+			repos[i].Perm.Repo = repos[i].FullName
 			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}
