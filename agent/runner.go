@@ -93,27 +93,22 @@ func (r *Runner) Run(ctx context.Context) error {
 		Str("id", work.ID).
 		Logger()
 
-	logger.Debug().
-		Msg("received execution")
+	logger.Debug().Msg("received execution")
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
 	cancelled := abool.New()
 	go func() {
-		logger.Debug().
-			Msg("listen for cancel signal")
+		logger.Debug().Msg("listen for cancel signal")
 
 		if werr := r.client.Wait(ctx, work.ID); werr != nil {
 			cancelled.SetTo(true)
-			logger.Warn().
-				Err(werr).
-				Msg("cancel signal received")
+			logger.Warn().Err(werr).Msg("cancel signal received")
 
 			cancel()
 		} else {
-			logger.Debug().
-				Msg("stop listening for cancel signal")
+			logger.Debug().Msg("stop listening for cancel signal")
 		}
 	}()
 
@@ -121,13 +116,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		for {
 			select {
 			case <-ctx.Done():
-				logger.Debug().
-					Msg("pipeline done")
+				logger.Debug().Msg("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
-				logger.Debug().
-					Msg("pipeline lease renewed")
+				logger.Debug().Msg("pipeline lease renewed")
 
 				r.client.Extend(ctx, work.ID)
 			}
@@ -139,9 +132,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	err = r.client.Init(ctxmeta, work.ID, state)
 	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("pipeline initialization failed")
+		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
@@ -189,11 +180,10 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		loglogger.Debug().Msg("log stream uploading")
 		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().
-				Err(serr).
-				Msg("log stream upload error")
+			loglogger.Error().Err(serr).Msg("log stream upload error")
+		} else {
+			loglogger.Debug().Msg("log stream upload complete")
 		}
-		loglogger.Debug().Msg("log stream upload complete")
 
 		defer func() {
 			loglogger.Debug().Msg("log stream closed")
@@ -220,7 +210,6 @@ func (r *Runner) Run(ctx context.Context) error {
 			Time: time.Now().Unix(),
 			Meta: make(map[string]string),
 		}
-
 		for key, value := range part.Header() {
 			file.Meta[key] = value[0]
 		}
@@ -261,8 +250,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			Finished: time.Now().Unix(),
 		}
 		defer func() {
-			proclogger.Debug().
-				Msg("update step status")
+			proclogger.Debug().Msg("update step status")
 
 			if uerr := r.client.Update(ctxmeta, work.ID, procState); uerr != nil {
 				proclogger.Debug().
@@ -270,8 +258,7 @@ func (r *Runner) Run(ctx context.Context) error {
 					Msg("update step status error")
 			}
 
-			proclogger.Debug().
-				Msg("update step status complete")
+			proclogger.Debug().Msg("update step status complete")
 		}()
 		if state.Process.Exited {
 			return nil
@@ -331,13 +318,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("pipeline complete")
 
-	logger.Debug().
-		Msg("uploading logs")
+	logger.Debug().Msg("uploading logs")
 
 	uploads.Wait()
 
-	logger.Debug().
-		Msg("uploading logs complete")
+	logger.Debug().Msg("uploading logs complete")
 
 	logger.Debug().
 		Str("error", state.Error).
@@ -346,11 +331,9 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	err = r.client.Done(ctxmeta, work.ID, state)
 	if err != nil {
-		logger.Error().Err(err).
-			Msg("updating pipeline status failed")
+		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
-		logger.Debug().
-			Msg("updating pipeline status complete")
+		logger.Debug().Msg("updating pipeline status complete")
 	}
 
 	return nil
