@@ -110,14 +110,14 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_BUILD_CREATED`        | previous build created unix timestamp                                                        |
 | `CI_PREV_BUILD_STARTED`        | previous build started unix timestamp                                                        |
 | `CI_PREV_BUILD_FINISHED`       | previous build finished unix timestamp                                                       |
-|                                |                                                                                              |
+|                                | &emsp;                                                                                             |
 | `CI_WORKSPACE`                 | Path of the workspace where source code gets cloned to                                       |
 |                                | **System**                                                                                   |
 | `CI_SYSTEM_NAME`               | name of the ci system: `woodpecker`                                                          |
 | `CI_SYSTEM_LINK`               | link to ci system                                                                            |
 | `CI_SYSTEM_HOST`               | hostname of ci server                                                                        |
 | `CI_SYSTEM_VERSION`            | version of the server                                                                        |
-|                                | **Internal** Please don't use!                                                               |
+|                                | **Internal** - Please don't use!                                                               |
 | `CI_SCRIPT`                    | Internal script path. Used to call pipeline step commands.                                   |
 | `CI_NETRC_USERNAME`            | Credentials for private repos to be able to clone data. (Only available for specific images) |
 | `CI_NETRC_PASSWORD`            | Credentials for private repos to be able to clone data. (Only available for specific images) |
