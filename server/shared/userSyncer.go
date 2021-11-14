@@ -79,11 +79,11 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 			perm := model.Perm{
 				UserID: user.ID,
 				Repo:   repo.FullName,
-				Pull:   true,
 				Synced: unix,
 			}
 			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
 			if err == nil && remotePerm != nil {
+				perm.Pull = remotePerm.Pull
 				perm.Push = remotePerm.Push
 				perm.Admin = remotePerm.Admin
 			}
