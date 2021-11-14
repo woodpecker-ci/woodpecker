@@ -26,7 +26,7 @@ vendor:
 	go mod vendor
 
 format:
-	@gofmt -w ${GOFILES_NOVENDOR}
+	@gofmt -s -w ${GOFILES_NOVENDOR}
 
 .PHONY: clean
 clean:
@@ -36,7 +36,7 @@ clean:
 .PHONY: lint
 lint:
 	@echo "Running golangci-lint"
-	go run vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run
+	go run vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run --timeout 5m
 	@echo "Running zerolog linter"
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
