@@ -26,7 +26,7 @@ vendor:
 	go mod vendor
 
 format:
-	@gofmt -w ${GOFILES_NOVENDOR}
+	@gofmt -s -w ${GOFILES_NOVENDOR}
 
 .PHONY: clean
 clean:
