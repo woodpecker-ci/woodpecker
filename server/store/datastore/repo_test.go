@@ -153,10 +153,12 @@ func TestRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
-	assert.NoError(t, store.PermBatch([]*model.Perm{
+	for _, perm := range []*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName},
 		{UserID: user.ID, Repo: repo2.FullName},
-	}))
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
 
 	repos, err := store.RepoList(user, false)
 	if err != nil {
@@ -210,12 +212,14 @@ func TestOwnedRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 	assert.NoError(t, store.CreateRepo(repo4))
 
-	assert.NoError(t, store.PermBatch([]*model.Perm{
+	for _, perm := range []*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
 		{UserID: user.ID, Repo: repo3.FullName},
 		{UserID: user.ID, Repo: repo4.FullName},
-	}))
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
 
 	repos, err := store.RepoList(user, true)
 	if err != nil {
@@ -313,9 +317,19 @@ func TestRepoBatch(t *testing.T) {
 		return
 	}
 
-	allRepos := make([]*model.Repo, 0, 4)
-	err := store.engine.Find(&allRepos)
+	repo := &model.Repo{
+		FullName: "foo/bar",
+		Owner:    "foo",
+		Name:     "bar",
+	}
+	assert.NoError(t, store.RepoBatch([]*model.Repo{repo}))
+	assert.EqualValues(t, repos[0].ID, repo.ID)
+	_, err := store.engine.ID(repo.ID).Get(repo)
 	assert.NoError(t, err)
+	assert.True(t, repo.IsActive)
+
+	allRepos := make([]*model.Repo, 0, 4)
+	assert.NoError(t, store.engine.Find(&allRepos))
 	assert.Len(t, allRepos, 4)
 
 	count, err := store.GetRepoCount()
