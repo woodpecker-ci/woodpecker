@@ -83,7 +83,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 
 	for i := range repos {
 		if repos[i].UserID == 0 || len(repos[i].Owner) == 0 || len(repos[i].Name) == 0 || len(repos[i].FullName) == 0 {
-			log.Debug().Msgf("skip insert/update repo: %v", repos[i])
+			log.Debug().Msgf("skip insert/update repo: %#v", repos[i])
 			continue
 		}
 		exist, err := sess.
