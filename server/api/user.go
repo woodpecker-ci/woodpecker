@@ -93,7 +93,10 @@ func GetRepos(c *gin.Context) {
 	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 		user.Synced = time.Now().Unix()
-		store_.UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Err(err).Msgf("update user '%s'", user.Login)
+			return
+		}
 
 		config := ToConfig(c)
 

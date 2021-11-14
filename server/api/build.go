@@ -62,7 +62,7 @@ func GetBuild(c *gin.Context) {
 	}
 
 	repo := session.Repo(c)
-	num, err := strconv.Atoi(c.Param("number"))
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -103,7 +103,7 @@ func GetBuildLogs(c *gin.Context) {
 
 	// parse the build number and job sequence number from
 	// the request parameter.
-	num, _ := strconv.Atoi(c.Params.ByName("number"))
+	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
 	name := c.Params.ByName("proc")
 
@@ -137,7 +137,7 @@ func GetProcLogs(c *gin.Context) {
 
 	// parse the build number and job sequence number from
 	// the request parameter.
-	num, _ := strconv.Atoi(c.Params.ByName("number"))
+	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
 
 	build, err := store_.GetBuildNumber(repo, num)
@@ -168,7 +168,7 @@ func GetProcLogs(c *gin.Context) {
 func DeleteBuild(c *gin.Context) {
 	store_ := store.FromContext(c)
 	repo := session.Repo(c)
-	num, _ := strconv.Atoi(c.Params.ByName("number"))
+	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
@@ -250,9 +250,7 @@ func PostApproval(c *gin.Context) {
 		store_  = store.FromContext(c)
 		repo    = session.Repo(c)
 		user    = session.User(c)
-		num, _  = strconv.Atoi(
-			c.Params.ByName("number"),
-		)
+		num, _  = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	)
 
 	build, err := store_.GetBuildNumber(repo, num)
@@ -307,7 +305,7 @@ func PostApproval(c *gin.Context) {
 
 	var yamls []*remote.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	b := shared.ProcBuilder{
@@ -360,9 +358,7 @@ func PostDecline(c *gin.Context) {
 
 		repo   = session.Repo(c)
 		user   = session.User(c)
-		num, _ = strconv.Atoi(
-			c.Params.ByName("number"),
-		)
+		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	)
 
 	build, err := store_.GetBuildNumber(repo, num)
@@ -404,7 +400,7 @@ func PostBuild(c *gin.Context) {
 	store_ := store.FromContext(c)
 	repo := session.Repo(c)
 
-	num, err := strconv.Atoi(c.Param("number"))
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -519,7 +515,7 @@ func PostBuild(c *gin.Context) {
 
 	var yamls []*remote.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: []byte(y.Data), Name: y.Name})
+		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	b := shared.ProcBuilder{
@@ -565,7 +561,7 @@ func DeleteBuildLogs(c *gin.Context) {
 
 	repo := session.Repo(c)
 	user := session.User(c)
-	num, _ := strconv.Atoi(c.Params.ByName("number"))
+	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {

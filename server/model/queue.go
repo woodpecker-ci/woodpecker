@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,21 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
-// Task defines scheduled pipeline Task.
-type Task struct {
-	ID           string            `meddler:"task_id"`
-	Data         []byte            `meddler:"task_data"`
-	Labels       map[string]string `meddler:"task_labels,json"`
-	Dependencies []string          `meddler:"task_dependencies,json"`
-	RunOn        []string          `meddler:"task_run_on,json"`
-}
-
-// TaskStore defines storage for scheduled Tasks.
-type TaskStore interface {
-	TaskList() ([]*Task, error)
-	TaskInsert(*Task) error
-	TaskDelete(string) error
-}
+// TODO: move code to "github.com/woodpecker-ci/woodpecker/server/queue"
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.

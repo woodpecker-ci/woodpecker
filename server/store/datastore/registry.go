@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,36 +15,34 @@
 package datastore
 
 import (
-	"github.com/russross/meddler"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
-	stmt := sql.Lookup(db.driver, "registry-find-repo-addr")
-	data := new(model.Registry)
-	err := meddler.QueryRow(db, data, stmt, repo.ID, addr)
-	return data, err
+func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
+	reg := &model.Registry{
+		RepoID:  repo.ID,
+		Address: addr,
+	}
+	return reg, wrapGet(s.engine.Get(reg))
 }
 
-func (db *datastore) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
-	stmt := sql.Lookup(db.driver, "registry-find-repo")
-	data := []*model.Registry{}
-	err := meddler.QueryAll(db, &data, stmt, repo.ID)
-	return data, err
+func (s storage) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+	regs := make([]*model.Registry, 0, perPage)
+	return regs, s.engine.Where("registry_repo_id = ?", repo.ID).Find(&regs)
 }
 
-func (db *datastore) RegistryCreate(registry *model.Registry) error {
-	return meddler.Insert(db, "registry", registry)
+func (s storage) RegistryCreate(registry *model.Registry) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(registry)
+	return err
 }
 
-func (db *datastore) RegistryUpdate(registry *model.Registry) error {
-	return meddler.Update(db, "registry", registry)
+func (s storage) RegistryUpdate(registry *model.Registry) error {
+	_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
+	return err
 }
 
-func (db *datastore) RegistryDelete(registry *model.Registry) error {
-	stmt := sql.Lookup(db.driver, "registry-delete")
-	_, err := db.Exec(stmt, registry.ID)
+func (s storage) RegistryDelete(registry *model.Registry) error {
+	_, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
 	return err
 }
