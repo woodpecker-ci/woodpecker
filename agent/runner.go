@@ -187,22 +187,16 @@ func (r *Runner) Run(ctx context.Context) error {
 			Time: time.Now().Unix(),
 		}
 
-		loglogger.Debug().
-			Msg("log stream uploading")
-
+		loglogger.Debug().Msg("log stream uploading")
 		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
 			loglogger.Error().
 				Err(serr).
 				Msg("log stream upload error")
 		}
-
-		loglogger.Debug().
-			Msg("log stream upload complete")
+		loglogger.Debug().Msg("log stream upload complete")
 
 		defer func() {
-			loglogger.Debug().
-				Msg("log stream closed")
-
+			loglogger.Debug().Msg("log stream closed")
 			uploads.Done()
 		}()
 
@@ -212,14 +206,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		file = &rpc.File{}
-		file.Mime = part.Header().Get("Content-Type")
-		file.Proc = proc.Alias
-		file.Name = part.FileName()
-		file.Data, _ = ioutil.ReadAll(limitedPart)
-		file.Size = len(file.Data)
-		file.Time = time.Now().Unix()
-		file.Meta = map[string]string{}
+		data, err = ioutil.ReadAll(limitedPart)
+		if err != nil {
+			loglogger.Err(err).Msg("could not read limited part")
+		}
+
+		file = &rpc.File{
+			Mime: part.Header().Get("Content-Type"),
+			Proc: proc.Alias,
+			Name: part.FileName(),
+			Data: data,
+			Size: len(data),
+			Time: time.Now().Unix(),
+			Meta: make(map[string]string),
+		}
 
 		for key, value := range part.Header() {
 			file.Meta[key] = value[0]
