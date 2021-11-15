@@ -1,6 +1,6 @@
 linters-settings:
   gofmt:
-    simplify: false
+    simplify: true
   misspell:
     locale: US
 
