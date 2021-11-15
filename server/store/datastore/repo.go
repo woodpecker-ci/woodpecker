@@ -74,7 +74,7 @@ func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 		Find(&repos)
 }
 
-// RepoBatch Sync batch of repos (with permissions) to store (create if not exist else update)
+// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
 // TODO: only store activated repos ...
 func (s storage) RepoBatch(repos []*model.Repo) error {
 	sess := s.engine.NewSession()
