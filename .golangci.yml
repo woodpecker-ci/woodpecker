@@ -10,6 +10,7 @@ linters:
     - govet
     - deadcode
     - gosimple
+    - typecheck
 
 run:
   timeout: 5m
