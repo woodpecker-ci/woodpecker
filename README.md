@@ -11,6 +11,7 @@
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg">
   </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fwoodpecker-ci%2Fwoodpecker?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fwoodpecker-ci%2Fwoodpecker.svg?type=shield"/></a>
   <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
   </a>
@@ -28,6 +29,9 @@
   </a>
 </p>
 <br/>
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fwoodpecker-ci%2Fwoodpecker.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fwoodpecker-ci%2Fwoodpecker?ref=badge_large)
 
 # Woodpecker
 
