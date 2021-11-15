@@ -20,7 +20,8 @@ func IfInstr(b *ssa.BasicBlock) *ssa.If {
 }
 
 // Phi returns phi values which are contained in the block b.
-func Phi(b *ssa.BasicBlock) (phis []*ssa.Phi) {
+func Phi(b *ssa.BasicBlock) []*ssa.Phi {
+	var phis []*ssa.Phi
 	for _, instr := range b.Instrs {
 		if phi, ok := instr.(*ssa.Phi); ok {
 			phis = append(phis, phi)
@@ -29,7 +30,7 @@ func Phi(b *ssa.BasicBlock) (phis []*ssa.Phi) {
 			break
 		}
 	}
-	return
+	return phis
 }
 
 // Returns returns a slice of *ssa.Return in the function.
@@ -54,9 +55,13 @@ func Returns(v ssa.Value) []*ssa.Return {
 
 func returnsInBlock(b *ssa.BasicBlock, done map[*ssa.BasicBlock]bool) (rets []*ssa.Return) {
 	if done[b] {
-		return
+		return nil
 	}
 	done[b] = true
+
+	if b.Index != 0 && len(b.Preds) == 0 {
+		return nil
+	}
 
 	if len(b.Instrs) != 0 {
 		switch instr := b.Instrs[len(b.Instrs)-1].(type) {
@@ -68,7 +73,8 @@ func returnsInBlock(b *ssa.BasicBlock, done map[*ssa.BasicBlock]bool) (rets []*s
 	for _, s := range b.Succs {
 		rets = append(rets, returnsInBlock(s, done)...)
 	}
-	return
+
+	return rets
 }
 
 // BinOp returns binary operator values which are contained in the block b.

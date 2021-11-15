@@ -12,6 +12,7 @@ linters:
     - gosimple
     - typecheck
     - errcheck
+    - bidichk
 
 run:
   timeout: 5m

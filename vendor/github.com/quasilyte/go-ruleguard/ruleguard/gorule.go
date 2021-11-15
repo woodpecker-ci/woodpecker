@@ -3,7 +3,6 @@ package ruleguard
 import (
 	"fmt"
 	"go/ast"
-	"go/token"
 	"go/types"
 	"regexp"
 
@@ -15,7 +14,7 @@ import (
 type goRuleSet struct {
 	universal *scopedGoRuleSet
 
-	groups map[string]token.Position // To handle redefinitions
+	groups map[string]*GoRuleGroup // To handle redefinitions
 }
 
 type scopedGoRuleSet struct {
@@ -31,8 +30,7 @@ type goCommentRule struct {
 }
 
 type goRule struct {
-	group      string
-	filename   string
+	group      *GoRuleGroup
 	line       int
 	pat        *gogrep.Pattern
 	msg        string
@@ -62,9 +60,12 @@ type filterParams struct {
 
 	importer *goImporter
 
-	match matchData
+	match    matchData
+	nodePath *nodePath
 
 	nodeText func(n ast.Node) []byte
+
+	deadcode bool
 
 	// varname is set only for custom filters before bytecode function is called.
 	varname string
@@ -97,29 +98,21 @@ func (params *filterParams) typeofNode(n ast.Node) types.Type {
 	return types.Typ[types.Invalid]
 }
 
-func cloneRuleSet(rset *goRuleSet) *goRuleSet {
-	out, err := mergeRuleSets([]*goRuleSet{rset})
-	if err != nil {
-		panic(err) // Should never happen
-	}
-	return out
-}
-
 func mergeRuleSets(toMerge []*goRuleSet) (*goRuleSet, error) {
 	out := &goRuleSet{
 		universal: &scopedGoRuleSet{},
-		groups:    make(map[string]token.Position),
+		groups:    make(map[string]*GoRuleGroup),
 	}
 
 	for _, x := range toMerge {
 		out.universal = appendScopedRuleSet(out.universal, x.universal)
-		for group, pos := range x.groups {
-			if prevPos, ok := out.groups[group]; ok {
-				newRef := fmt.Sprintf("%s:%d", pos.Filename, pos.Line)
-				oldRef := fmt.Sprintf("%s:%d", prevPos.Filename, prevPos.Line)
-				return nil, fmt.Errorf("%s: redefinition of %s(), previously defined at %s", newRef, group, oldRef)
+		for groupName, group := range x.groups {
+			if prevGroup, ok := out.groups[groupName]; ok {
+				newRef := fmt.Sprintf("%s:%d", group.Filename, group.Line)
+				oldRef := fmt.Sprintf("%s:%d", prevGroup.Filename, prevGroup.Line)
+				return nil, fmt.Errorf("%s: redefinition of %s(), previously defined at %s", newRef, groupName, oldRef)
 			}
-			out.groups[group] = pos
+			out.groups[groupName] = group
 		}
 	}
 

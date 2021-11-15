@@ -85,8 +85,9 @@ func (nom namedOccurrenceMap) checkStatement(stmt ast.Stmt, ifPos token.Pos) {
 			nom.checkExpression(a, ifPos)
 		}
 	case *ast.ExprStmt:
-		if callExpr, ok := v.X.(*ast.CallExpr); ok {
-			nom.checkExpression(callExpr, ifPos)
+		switch v.X.(type) {
+		case *ast.CallExpr, *ast.UnaryExpr:
+			nom.checkExpression(v.X, ifPos)
 		}
 	case *ast.ForStmt:
 		for _, el := range v.Body.List {
@@ -157,12 +158,11 @@ func (nom namedOccurrenceMap) checkStatement(stmt ast.Stmt, ifPos token.Pos) {
 			}
 
 			for _, c := range clauses.Body {
-				if est, ok := c.(*ast.ExprStmt); ok {
-					nom.checkExpression(est.X, ifPos)
-				}
-
 				switch v := c.(type) {
 				case *ast.AssignStmt:
+					for _, el := range v.Lhs {
+						nom.checkExpression(el, ifPos)
+					}
 					for _, el := range v.Rhs {
 						nom.checkExpression(el, ifPos)
 					}
@@ -171,6 +171,28 @@ func (nom namedOccurrenceMap) checkStatement(stmt ast.Stmt, ifPos token.Pos) {
 				}
 			}
 		}
+	case *ast.SelectStmt:
+		for _, el := range v.Body.List {
+			clause := el.(*ast.CommClause)
+
+			nom.checkStatement(clause.Comm, ifPos)
+
+			for _, c := range clause.Body {
+				switch v := c.(type) {
+				case *ast.AssignStmt:
+					for _, el := range v.Lhs {
+						nom.checkExpression(el, ifPos)
+					}
+					for _, el := range v.Rhs {
+						nom.checkExpression(el, ifPos)
+					}
+				case *ast.ExprStmt:
+					nom.checkExpression(v.X, ifPos)
+				}
+			}
+		}
+	case *ast.LabeledStmt:
+		nom.checkStatement(v.Stmt, ifPos)
 	}
 }
 
@@ -190,7 +212,7 @@ func (nom namedOccurrenceMap) checkExpression(candidate ast.Expr, ifPos token.Po
 	case *ast.CompositeLit:
 		for _, el := range v.Elts {
 			switch v := el.(type) {
-			case *ast.Ident:
+			case *ast.Ident, *ast.CompositeLit:
 				nom.checkExpression(v, ifPos)
 			case *ast.KeyValueExpr:
 				nom.checkExpression(v.Key, ifPos)
@@ -217,6 +239,8 @@ func (nom namedOccurrenceMap) checkExpression(candidate ast.Expr, ifPos token.Po
 				}
 			}
 		}
+	case *ast.StarExpr:
+		nom.checkExpression(v.X, ifPos)
 	case *ast.IndexExpr:
 		nom.checkExpression(v.X, ifPos)
 		switch index := v.Index.(type) {

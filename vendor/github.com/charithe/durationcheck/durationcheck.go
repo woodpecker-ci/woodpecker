@@ -150,6 +150,9 @@ func isAcceptableNestedExpr(pass *analysis.Pass, n ast.Expr) bool {
 	case *ast.Ident:
 		return isAcceptableIdent(pass, e)
 	case *ast.CallExpr:
+		if isAcceptableCast(pass, e) {
+			return true
+		}
 		t := pass.TypesInfo.TypeOf(e)
 		return !isDuration(t)
 	case *ast.SelectorExpr:

@@ -3,8 +3,9 @@ package commentmap
 import (
 	"reflect"
 
-	"github.com/gostaticanalysis/comment"
 	"golang.org/x/tools/go/analysis"
+
+	"github.com/gostaticanalysis/comment"
 )
 
 var Analyzer = &analysis.Analyzer{
