@@ -9,7 +9,10 @@ linters:
     - goimports
     - govet
     - deadcode
+    - gosimple
 
+run:
+  timeout: 5m
 
 issues:
   exclude-rules:

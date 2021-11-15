@@ -105,9 +105,9 @@ func (r *Runtime) execAll(procs []*backend.Step) <-chan error {
 
 func (r *Runtime) exec(proc *backend.Step) error {
 	switch {
-	case r.err != nil && proc.OnFailure == false:
+	case r.err != nil && !proc.OnFailure:
 		return nil
-	case r.err == nil && proc.OnSuccess == false:
+	case r.err == nil && !proc.OnSuccess:
 		return nil
 	}
 

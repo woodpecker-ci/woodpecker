@@ -83,7 +83,7 @@ func HandleAuth(c *gin.Context) {
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
 			teams, terr := remote.Teams(c, tmpuser)
-			if terr != nil || config.IsMember(teams) == false {
+			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
@@ -120,7 +120,7 @@ func HandleAuth(c *gin.Context) {
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
 		teams, terr := remote.Teams(c, u)
-		if terr != nil || config.IsMember(teams) == false {
+		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
 			return

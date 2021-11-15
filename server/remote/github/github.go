@@ -270,9 +270,9 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	for i := 0; i < len(data); i++ {
 		select {
-		case err, _ := <-errc:
+		case err := <-errc:
 			errors = append(errors, err)
-		case fileMeta, _ := <-fc:
+		case fileMeta := <-fc:
 			files = append(files, fileMeta)
 		}
 	}
@@ -464,7 +464,7 @@ func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *mode
 	return err
 }
 
-var reDeploy = regexp.MustCompile(".+/deployments/(\\d+)")
+var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 func deploymentStatus(ctx context.Context, client *github.Client, r *model.Repo, b *model.Build, link string) error {
 	matches := reDeploy.FindStringSubmatch(b.Link)
