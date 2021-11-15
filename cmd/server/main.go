@@ -20,13 +20,14 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func main() {
-	godotenv.Load(".env")
+	log.Error().Err(godotenv.Load(".env"))
 	app := cli.NewApp()
 	app.Name = "woodpecker-server"
 	app.Version = version.String()

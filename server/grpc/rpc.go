@@ -373,7 +373,9 @@ func isMultiPipeline(procs []*model.Proc) bool {
 func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	entry := new(logging.Entry)
 	entry.Data, _ = json.Marshal(line)
-	s.logger.Write(c, id, entry)
+	if err := s.logger.Write(c, id, entry); err != nil {
+		log.Error().Err(err).Msgf("rpc server could not write to logger")
+	}
 	return nil
 }
 

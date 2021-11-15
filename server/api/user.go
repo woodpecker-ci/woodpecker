@@ -47,7 +47,10 @@ func GetFeed(c *gin.Context) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 
 		user.Synced = time.Now().Unix()
-		store_.UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Error().Err(err).Msg("UpdateUser")
+			return
+		}
 
 		config := ToConfig(c)
 

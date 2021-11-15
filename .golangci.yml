@@ -11,6 +11,7 @@ linters:
     - deadcode
     - gosimple
     - typecheck
+    - errcheck
 
 run:
   timeout: 5m

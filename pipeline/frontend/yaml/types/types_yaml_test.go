@@ -16,7 +16,7 @@ type StructStringorInt struct {
 func TestStringorIntYaml(t *testing.T) {
 	for _, str := range []string{`{foo: 10}`, `{foo: "10"}`} {
 		s := StructStringorInt{}
-		yaml.Unmarshal([]byte(str), &s)
+		assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
 
 		assert.Equal(t, StringorInt(10), s.Foo)
 
@@ -24,7 +24,7 @@ func TestStringorIntYaml(t *testing.T) {
 		assert.Nil(t, err)
 
 		s2 := StructStringorInt{}
-		yaml.Unmarshal(d, &s2)
+		assert.NoError(t, yaml.Unmarshal(d, &s2))
 
 		assert.Equal(t, StringorInt(10), s2.Foo)
 	}
@@ -38,7 +38,7 @@ func TestStringorsliceYaml(t *testing.T) {
 	str := `{foo: [bar, baz]}`
 
 	s := StructStringorslice{}
-	yaml.Unmarshal([]byte(str), &s)
+	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
 
 	assert.Equal(t, Stringorslice{"bar", "baz"}, s.Foo)
 
@@ -46,7 +46,7 @@ func TestStringorsliceYaml(t *testing.T) {
 	assert.Nil(t, err)
 
 	s2 := StructStringorslice{}
-	yaml.Unmarshal(d, &s2)
+	assert.NoError(t, yaml.Unmarshal(d, &s2))
 
 	assert.Equal(t, Stringorslice{"bar", "baz"}, s2.Foo)
 }
@@ -60,7 +60,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	str := `{foos: [bar=baz, far=faz]}`
 
 	s := StructSliceorMap{}
-	yaml.Unmarshal([]byte(str), &s)
+	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
 
 	assert.Equal(t, SliceorMap{"bar": "baz", "far": "faz"}, s.Foos)
 
@@ -68,7 +68,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	assert.Nil(t, err)
 
 	s2 := StructSliceorMap{}
-	yaml.Unmarshal(d, &s2)
+	assert.NoError(t, yaml.Unmarshal(d, &s2))
 
 	assert.Equal(t, SliceorMap{"bar": "baz", "far": "faz"}, s2.Foos)
 }
@@ -95,7 +95,7 @@ func TestStr2SliceOrMapPtrMap(t *testing.T) {
 	assert.Nil(t, err)
 
 	s2 := map[string]*StructSliceorMap{}
-	yaml.Unmarshal(d, &s2)
+	assert.NoError(t, yaml.Unmarshal(d, &s2))
 
 	assert.Equal(t, s, s2)
 }

@@ -122,7 +122,9 @@ func (r *Runner) Run(ctx context.Context) error {
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
 
-				r.client.Extend(ctx, work.ID)
+				if err := r.client.Extend(ctx, work.ID); err != nil {
+					log.Error().Err(err).Msg("extending pipeline deadline failed")
+				}
 			}
 		}
 	}()

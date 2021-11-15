@@ -174,15 +174,23 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			e.client.ContainerKill(noContext, step.Name, "9")
-			e.client.ContainerRemove(noContext, step.Name, removeOpts)
+			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
+				return err
+			}
+			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
+				return err
+			}
 		}
 	}
 	for _, v := range conf.Volumes {
-		e.client.VolumeRemove(noContext, v.Name, true)
+		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
+			return err
+		}
 	}
 	for _, n := range conf.Networks {
-		e.client.NetworkRemove(noContext, n.Name)
+		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
+			return err
+		}
 	}
 	return nil
 }

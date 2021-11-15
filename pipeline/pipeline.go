@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
@@ -55,7 +56,9 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 // Run starts the runtime and waits for it to complete.
 func (r *Runtime) Run() error {
 	defer func() {
-		r.engine.Destroy(r.ctx, r.spec)
+		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
+			log.Error().Err(err).Msg("could not destroy engine")
+		}
 	}()
 
 	r.started = time.Now().Unix()

@@ -3,6 +3,7 @@ package yaml
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -142,7 +143,7 @@ func TestConstraint(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraint(test.conf)
+		c := parseConstraint(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
@@ -250,7 +251,7 @@ func TestConstraintList(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraintPath(test.conf)
+		c := parseConstraintPath(t, test.conf)
 		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
@@ -366,7 +367,7 @@ func TestConstraintMap(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraintMap(test.conf)
+		c := parseConstraintMap(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
@@ -454,7 +455,7 @@ func TestConstraints(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraints(test.conf)
+		c := parseConstraints(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
@@ -462,26 +463,26 @@ func TestConstraints(t *testing.T) {
 	}
 }
 
-func parseConstraints(s string) *Constraints {
+func parseConstraints(t *testing.T, s string) *Constraints {
 	c := &Constraints{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraint(s string) *Constraint {
+func parseConstraint(t *testing.T, s string) *Constraint {
 	c := &Constraint{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintMap(s string) *ConstraintMap {
+func parseConstraintMap(t *testing.T, s string) *ConstraintMap {
 	c := &ConstraintMap{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintPath(s string) *ConstraintPath {
+func parseConstraintPath(t *testing.T, s string) *ConstraintPath {
 	c := &ConstraintPath{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

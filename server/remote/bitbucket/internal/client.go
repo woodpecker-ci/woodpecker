@@ -212,7 +212,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 	// error response.
 	if resp.StatusCode > http.StatusPartialContent {
 		err := Error{}
-		json.NewDecoder(resp.Body).Decode(&err)
+		_ = json.NewDecoder(resp.Body).Decode(&err)
 		err.Status = resp.StatusCode
 		return nil, err
 	}

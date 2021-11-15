@@ -52,7 +52,9 @@ func EventStreamSSE(c *gin.Context) {
 	}
 
 	// ping the client
-	io.WriteString(rw, ": ping\n\n")
+	if _, err := io.WriteString(rw, ": ping\n\n"); err != nil {
+		log.Error().Err(err).Msgf("could not ping to event stream")
+	}
 	flusher.Flush()
 
 	log.Debug().Msg("user feed: connection opened")
@@ -174,7 +176,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		// TODO remove global variable
-		server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
+		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
 			defer func() {
 				recover() // fix #2480
 			}()
@@ -187,8 +189,13 @@ func LogStreamSSE(c *gin.Context) {
 				}
 			}
 		})
+		if err != nil {
+			log.Error().Err(err).Msg("tail of logs failed")
+		}
 
-		io.WriteString(rw, "event: error\ndata: eof\n\n")
+		if _, err := io.WriteString(rw, "event: error\ndata: eof\n\n"); err != nil {
+			log.Error().Err(err).Msgf("can not write to event")
+		}
 
 		cancel()
 	}()

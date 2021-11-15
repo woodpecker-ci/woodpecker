@@ -40,7 +40,9 @@ func WithTaskStore(q queue.Queue, s TaskStore) queue.Queue {
 			DepStatus:    make(map[string]string),
 		})
 	}
-	q.PushAtOnce(context.Background(), toEnqueue)
+	if err := q.PushAtOnce(context.Background(), toEnqueue); err != nil {
+		log.Error().Err(err).Msg("PushAtOnce failed")
+	}
 	return &persistentQueue{q, s}
 }
 
@@ -103,18 +105,20 @@ func (q *persistentQueue) Poll(c context.Context, f queue.Filter) (*queue.Task, 
 func (q *persistentQueue) Evict(c context.Context, id string) error {
 	err := q.Queue.Evict(c, id)
 	if err == nil {
-		q.store.TaskDelete(id)
+		return q.store.TaskDelete(id)
 	}
 	return err
 }
 
 // Evict removes a pending task from the queue.
 func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
-	err := q.Queue.EvictAtOnce(c, ids)
-	if err == nil {
-		for _, id := range ids {
-			q.store.TaskDelete(id)
+	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := q.store.TaskDelete(id); err != nil {
+			return err
 		}
 	}
-	return err
+	return nil
 }
