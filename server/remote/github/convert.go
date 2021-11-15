@@ -115,18 +115,6 @@ func convertPerm(from *github.Repository) *model.Perm {
 	}
 }
 
-// convertTeamPerm is a helper function used to convert a GitHub organization
-// permissions to the common Woodpecker permissions structure.
-func convertTeamPerm(from *github.Membership) *model.Perm {
-	admin := false
-	if *from.Role == "admin" {
-		admin = true
-	}
-	return &model.Perm{
-		Admin: admin,
-	}
-}
-
 // convertRepoList is a helper function used to convert a GitHub repository
 // list to the common Woodpecker repository structure.
 func convertRepoList(from []*github.Repository, private bool) []*model.Repo {

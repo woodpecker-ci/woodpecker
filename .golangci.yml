@@ -8,3 +8,11 @@ linters:
     - gofmt
     - goimports
     - govet
+    - deadcode
+
+
+issues:
+  exclude-rules:
+    - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
+      linters:
+        - deadcode

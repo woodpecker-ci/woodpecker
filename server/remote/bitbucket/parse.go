@@ -28,13 +28,7 @@ const (
 	hookPush        = "repo:push"
 	hookPullCreated = "pullrequest:created"
 	hookPullUpdated = "pullrequest:updated"
-
-	changeBranch      = "branch"
-	changeNamedBranch = "named_branch"
-
-	stateMerged   = "MERGED"
-	stateDeclined = "DECLINED"
-	stateOpen     = "OPEN"
+	stateOpen       = "OPEN"
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
