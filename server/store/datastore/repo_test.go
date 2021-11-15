@@ -292,6 +292,7 @@ func TestRepoBatch(t *testing.T) {
 			Name:     "bar",
 			IsActive: true,
 			Perm: &model.Perm{
+				UserID: 1,
 				Pull:   true,
 				Push:   true,
 				Admin:  true,
@@ -324,11 +325,17 @@ func TestRepoBatch(t *testing.T) {
 		return
 	}
 
+	// check DB state
+	perm, err := store.PermFind(&model.User{ID: 1}, repos[0])
+	assert.NoError(t, err)
+	assert.True(t, perm.Admin)
+
 	repo := &model.Repo{
 		FullName: "foo/bar",
 		Owner:    "foo",
 		Name:     "bar",
 		Perm: &model.Perm{
+			UserID: 1,
 			Pull:   true,
 			Push:   true,
 			Admin:  false,
@@ -338,9 +345,13 @@ func TestRepoBatch(t *testing.T) {
 	assert.NoError(t, store.RepoBatch([]*model.Repo{repo}))
 	assert.EqualValues(t, repos[0].ID, repo.ID)
 
-	_, err := store.engine.ID(repo.ID).Get(repo)
+	// check current DB state
+	_, err = store.engine.ID(repo.ID).Get(repo)
 	assert.NoError(t, err)
 	assert.True(t, repo.IsActive)
+	perm, err = store.PermFind(&model.User{ID: 1}, repos[0])
+	assert.NoError(t, err)
+	assert.False(t, perm.Admin)
 
 	allRepos := make([]*model.Repo, 0, 4)
 	assert.NoError(t, store.engine.Find(&allRepos))

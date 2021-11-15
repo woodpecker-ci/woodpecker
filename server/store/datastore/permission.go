@@ -45,7 +45,7 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if len(perm.Repo) == 0 && perm.RepoID == 0 {
+	if perm.RepoID == 0 && len(perm.Repo) == 0 {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
