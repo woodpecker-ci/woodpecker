@@ -88,12 +88,14 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			log.Debug().Msgf("skip insert/update repo: %#v", repos[i])
 			continue
 		}
+
 		exist, err := sess.
 			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
 			Exist(new(model.Repo))
 		if err != nil {
 			return err
 		}
+
 		if exist {
 			if _, err := sess.
 				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
@@ -108,15 +110,14 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			if err != nil {
 				return err
 			}
-
-			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
-				return err
-			}
 		} else {
 			// only Insert on single object ref set auto created ID back to object
 			if _, err := sess.Insert(repos[i]); err != nil {
 				return err
 			}
+		}
+
+		if repos[i].Perm != nil {
 			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}
