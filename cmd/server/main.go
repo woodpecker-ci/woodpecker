@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	log.Error().Err(godotenv.Load(".env"))
+	log.Error().Err(godotenv.Load(".env")).Msg("load godotenv failed")
 	app := cli.NewApp()
 	app.Name = "woodpecker-server"
 	app.Version = version.String()

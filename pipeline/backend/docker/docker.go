@@ -12,6 +12,7 @@ import (
 	"github.com/moby/moby/pkg/jsonmessage"
 	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
@@ -80,7 +81,9 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 			defer responseBody.Close()
 
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
+			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+			}
 		}
 		// fix for drone/drone#1917
 		if perr != nil && proc.AuthConfig.Password != "" {
@@ -98,7 +101,9 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		}
 		defer responseBody.Close()
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
+		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+		}
 
 		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
 	}
@@ -162,11 +167,12 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 	}
 	rc, wc := io.Pipe()
 
+	// de multiplex 'logs' who contains two streams, previously multiplexed together using StdWriter
 	go func() {
-		stdcopy.StdCopy(wc, wc, logs)
-		logs.Close()
-		wc.Close()
-		rc.Close()
+		_, _ = stdcopy.StdCopy(wc, wc, logs)
+		_ = logs.Close()
+		_ = wc.Close()
+		_ = rc.Close()
 	}()
 	return rc, nil
 }

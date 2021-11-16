@@ -139,7 +139,7 @@ func (r *Runtime) exec(proc *backend.Step) error {
 
 		go func() {
 			if err := r.logger.Log(proc, multipart.New(rc)); err != nil {
-				log.Error().Err(err)
+				log.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
 		}()

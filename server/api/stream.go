@@ -122,7 +122,7 @@ func EventStreamSSE(c *gin.Context) {
 
 func logWriteStringErr(_ int, err error) {
 	if err != nil {
-		log.Error().Err(err).Caller(1)
+		log.Error().Err(err).Caller(1).Msg("fail to write string")
 	}
 }
 

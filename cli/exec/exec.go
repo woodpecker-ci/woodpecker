@@ -260,8 +260,7 @@ var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reade
 		return err
 	}
 
-	logstream := NewLineWriter(proc.Alias)
-	io.Copy(logstream, part)
-
-	return nil
+	logStream := NewLineWriter(proc.Alias)
+	_, err = io.Copy(logStream, part)
+	return err
 })

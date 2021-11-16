@@ -243,7 +243,7 @@ func RepairRepo(c *gin.Context) {
 	)
 
 	if err := remote_.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err)
+		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
 	if err := remote_.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())

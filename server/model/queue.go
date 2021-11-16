@@ -18,6 +18,7 @@ package model
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/queue"
@@ -53,35 +54,43 @@ type persistentQueue struct {
 
 // Push pushes a task to the tail of this queue.
 func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
-	q.store.TaskInsert(&Task{
+	if err := q.store.TaskInsert(&Task{
 		ID:           task.ID,
 		Data:         task.Data,
 		Labels:       task.Labels,
 		Dependencies: task.Dependencies,
 		RunOn:        task.RunOn,
-	})
+	}); err != nil {
+		return err
+	}
 	err := q.Queue.Push(c, task)
 	if err != nil {
-		q.store.TaskDelete(task.ID)
+		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
+			err = errors.Wrapf(err, "delete task '%s' failed", task.ID)
+		}
 	}
 	return err
 }
 
-// Push pushes multiple tasks to the tail of this queue.
+// PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) error {
 	for _, task := range tasks {
-		q.store.TaskInsert(&Task{
+		if err := q.store.TaskInsert(&Task{
 			ID:           task.ID,
 			Data:         task.Data,
 			Labels:       task.Labels,
 			Dependencies: task.Dependencies,
 			RunOn:        task.RunOn,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 	err := q.Queue.PushAtOnce(c, tasks)
 	if err != nil {
 		for _, task := range tasks {
-			q.store.TaskDelete(task.ID)
+			if err := q.store.TaskDelete(task.ID); err != nil {
+				return err
+			}
 		}
 	}
 	return err

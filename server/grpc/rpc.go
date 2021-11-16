@@ -81,7 +81,9 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
 		} else {
-			s.Done(c, task.ID, rpc.State{})
+			if err := s.Done(c, task.ID, rpc.State{}); err != nil {
+				log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
+			}
 		}
 	}
 }
@@ -151,7 +153,9 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Repo:  *repo,
 		Build: *build,
 	})
-	s.pubsub.Publish(c, "topic/events", message)
+	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+		log.Error().Err(err).Msg("can not publish proc list to")
+	}
 
 	return nil
 }
@@ -279,7 +283,9 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Repo:  *repo,
 			Build: *build,
 		})
-		s.pubsub.Publish(c, "topic/events", message)
+		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+			log.Error().Err(err).Msg("can not publish proc list to")
+		}
 	}()
 
 	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)

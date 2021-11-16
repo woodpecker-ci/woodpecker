@@ -61,7 +61,7 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "text/json")
 	if _, err := counter.WriteTo(w); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("handleStats")
 	}
 }
 

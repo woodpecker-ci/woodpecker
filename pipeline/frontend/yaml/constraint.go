@@ -164,8 +164,8 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	out2 := map[string]string{}
 
-	unmarshal(&out1)
-	unmarshal(&out2)
+	_ = unmarshal(&out1)
+	_ = unmarshal(&out2)
 
 	c.Include = out1.Include
 	c.Exclude = out1.Exclude
