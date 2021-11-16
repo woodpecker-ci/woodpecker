@@ -19,12 +19,13 @@ func _() {
 	_ = x[opFunc-8]
 	_ = x[opStructNoSeq-9]
 	_ = x[opStruct-10]
-	_ = x[opNamed-11]
+	_ = x[opAnyInterface-11]
+	_ = x[opNamed-12]
 }
 
-const _patternOp_name = "opBuiltinTypeopPointeropVaropVarSeqopSliceopArrayopMapopChanopFuncopStructNoSeqopStructopNamed"
+const _patternOp_name = "opBuiltinTypeopPointeropVaropVarSeqopSliceopArrayopMapopChanopFuncopStructNoSeqopStructopAnyInterfaceopNamed"
 
-var _patternOp_index = [...]uint8{0, 13, 22, 27, 35, 42, 49, 54, 60, 66, 79, 87, 94}
+var _patternOp_index = [...]uint8{0, 13, 22, 27, 35, 42, 49, 54, 60, 66, 79, 87, 101, 108}
 
 func (i patternOp) String() string {
 	if i < 0 || i >= patternOp(len(_patternOp_index)-1) {

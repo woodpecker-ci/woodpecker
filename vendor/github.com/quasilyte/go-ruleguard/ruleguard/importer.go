@@ -2,15 +2,13 @@ package ruleguard
 
 import (
 	"fmt"
-	"go/ast"
+	"go/build"
 	"go/importer"
-	"go/parser"
 	"go/token"
 	"go/types"
-	"path/filepath"
 	"runtime"
 
-	"github.com/quasilyte/go-ruleguard/internal/golist"
+	"github.com/quasilyte/go-ruleguard/internal/xsrcimporter"
 )
 
 // goImporter is a `types.Importer` that tries to load a package no matter what.
@@ -23,7 +21,8 @@ type goImporter struct {
 	defaultImporter types.Importer
 	srcImporter     types.Importer
 
-	fset *token.FileSet
+	fset         *token.FileSet
+	buildContext *build.Context
 
 	debugImports bool
 	debugPrint   func(string)
@@ -33,17 +32,20 @@ type goImporterConfig struct {
 	fset         *token.FileSet
 	debugImports bool
 	debugPrint   func(string)
+	buildContext *build.Context
 }
 
 func newGoImporter(state *engineState, config goImporterConfig) *goImporter {
-	return &goImporter{
+	imp := &goImporter{
 		state:           state,
 		fset:            config.fset,
 		debugImports:    config.debugImports,
 		debugPrint:      config.debugPrint,
 		defaultImporter: importer.Default(),
-		srcImporter:     importer.ForCompiler(config.fset, "source", nil),
+		buildContext:    config.buildContext,
 	}
+	imp.initSourceImporter()
+	return imp
 }
 
 func (imp *goImporter) Import(path string) (*types.Package, error) {
@@ -54,8 +56,8 @@ func (imp *goImporter) Import(path string) (*types.Package, error) {
 		return pkg, nil
 	}
 
-	pkg, err1 := imp.srcImporter.Import(path)
-	if err1 == nil {
+	pkg, srcErr := imp.srcImporter.Import(path)
+	if srcErr == nil {
 		imp.state.AddCachedPackage(path, pkg)
 		if imp.debugImports {
 			imp.debugPrint(fmt.Sprintf(`imported "%s" from source importer`, path))
@@ -63,8 +65,8 @@ func (imp *goImporter) Import(path string) (*types.Package, error) {
 		return pkg, nil
 	}
 
-	pkg, err2 := imp.defaultImporter.Import(path)
-	if err2 == nil {
+	pkg, defaultErr := imp.defaultImporter.Import(path)
+	if defaultErr == nil {
 		imp.state.AddCachedPackage(path, pkg)
 		if imp.debugImports {
 			imp.debugPrint(fmt.Sprintf(`imported "%s" from %s importer`, path, runtime.Compiler))
@@ -72,45 +74,22 @@ func (imp *goImporter) Import(path string) (*types.Package, error) {
 		return pkg, nil
 	}
 
-	// Fallback to `go list` as a last resort.
-	pkg, err3 := imp.golistImport(path)
-	if err3 == nil {
-		imp.state.AddCachedPackage(path, pkg)
-		if imp.debugImports {
-			imp.debugPrint(fmt.Sprintf(`imported "%s" from golist importer`, path))
-		}
-		return pkg, nil
-	}
-
 	if imp.debugImports {
 		imp.debugPrint(fmt.Sprintf(`failed to import "%s":`, path))
-		imp.debugPrint(fmt.Sprintf("  source importer: %v", err1))
-		imp.debugPrint(fmt.Sprintf("  %s importer: %v", runtime.Compiler, err2))
-		imp.debugPrint(fmt.Sprintf("  golist importer: %v", err3))
+		imp.debugPrint(fmt.Sprintf("  %s importer: %v", runtime.Compiler, defaultErr))
+		imp.debugPrint(fmt.Sprintf("  source importer: %v", srcErr))
+		imp.debugPrint(fmt.Sprintf("  GOROOT=%q GOPATH=%q", imp.buildContext.GOROOT, imp.buildContext.GOPATH))
 	}
 
-	return nil, err2
+	return nil, defaultErr
 }
 
-func (imp *goImporter) golistImport(path string) (*types.Package, error) {
-	golistPkg, err := golist.JSON(path)
-	if err != nil {
-		return nil, err
-	}
-
-	files := make([]*ast.File, 0, len(golistPkg.GoFiles))
-	for _, filename := range golistPkg.GoFiles {
-		fullname := filepath.Join(golistPkg.Dir, filename)
-		f, err := parser.ParseFile(imp.fset, fullname, nil, 0)
-		if err != nil {
-			return nil, err
+func (imp *goImporter) initSourceImporter() {
+	if imp.buildContext == nil {
+		if imp.debugImports {
+			imp.debugPrint("using build.Default context")
 		}
-		files = append(files, f)
+		imp.buildContext = &build.Default
 	}
-
-	// TODO: do we want to assign imp as importer for this nested typecherker?
-	// Otherwise it won't be able to resolve imports.
-	var typecheker types.Config
-	var info types.Info
-	return typecheker.Check(path, imp.fset, files, &info)
+	imp.srcImporter = xsrcimporter.New(imp.buildContext, imp.fset)
 }

@@ -91,10 +91,7 @@ func (f *File) IsUntypedConst(expr ast.Expr) (defType string, ok bool) {
 }
 
 func (f *File) isMain() bool {
-	if f.AST.Name.Name == "main" {
-		return true
-	}
-	return false
+	return f.AST.Name.Name == "main"
 }
 
 const directiveSpecifyDisableReason = "specify-disable-reason"

@@ -48,12 +48,36 @@ func (r *subprocess) Match(n ast.Node, c *gosec.Context) (*gosec.Issue, error) {
 		for _, arg := range args {
 			if ident, ok := arg.(*ast.Ident); ok {
 				obj := c.Info.ObjectOf(ident)
-				if _, ok := obj.(*types.Var); ok && !gosec.TryResolve(ident, c) {
-					return gosec.NewIssue(c, n, r.ID(), "Subprocess launched with variable", gosec.Medium, gosec.High), nil
+
+				// need to cast and check whether it is for a variable ?
+				_, variable := obj.(*types.Var)
+
+				// .. indeed it is a variable then processing is different than a normal
+				// field assignment
+				if variable {
+					switch ident.Obj.Decl.(type) {
+					case *ast.AssignStmt:
+						_, assignment := ident.Obj.Decl.(*ast.AssignStmt)
+						if variable && assignment {
+							if !gosec.TryResolve(ident, c) {
+								return gosec.NewIssue(c, n, r.ID(), "Subprocess launched with variable", gosec.Medium, gosec.High), nil
+							}
+						}
+					case *ast.Field:
+						_, field := ident.Obj.Decl.(*ast.Field)
+						if variable && field {
+							// check if the variable exist in the scope
+							vv, vvok := obj.(*types.Var)
+
+							if vvok && vv.Parent().Lookup(ident.Name) == nil {
+								return gosec.NewIssue(c, n, r.ID(), "Subprocess launched with variable", gosec.Medium, gosec.High), nil
+							}
+						}
+					}
 				}
 			} else if !gosec.TryResolve(arg, c) {
 				// the arg is not a constant or a variable but instead a function call or os.Args[i]
-				return gosec.NewIssue(c, n, r.ID(), "Subprocess launched with function call as argument or cmd arguments", gosec.Medium, gosec.High), nil
+				return gosec.NewIssue(c, n, r.ID(), "Subprocess launched with a potential tainted input or cmd arguments", gosec.Medium, gosec.High), nil
 			}
 		}
 	}
@@ -81,5 +105,7 @@ func NewSubproc(id string, conf gosec.Config) (gosec.Rule, []ast.Node) {
 	rule.Add("syscall", "Exec")
 	rule.Add("syscall", "ForkExec")
 	rule.Add("syscall", "StartProcess")
+	rule.Add("golang.org/x/sys/execabs", "Command")
+	rule.Add("golang.org/x/sys/execabs", "CommandContext")
 	return rule, []ast.Node{(*ast.CallExpr)(nil)}
 }

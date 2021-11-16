@@ -21,11 +21,11 @@ func (w *stmtListWalker) WalkFile(f *ast.File) {
 		ast.Inspect(decl.Body, func(x ast.Node) bool {
 			switch x := x.(type) {
 			case *ast.BlockStmt:
-				w.visitor.VisitStmtList(x.List)
+				w.visitor.VisitStmtList(x, x.List)
 			case *ast.CaseClause:
-				w.visitor.VisitStmtList(x.Body)
+				w.visitor.VisitStmtList(x, x.Body)
 			case *ast.CommClause:
-				w.visitor.VisitStmtList(x.Body)
+				w.visitor.VisitStmtList(x, x.Body)
 			}
 			return !w.visitor.skipChilds()
 		})

@@ -8,3 +8,7 @@ linters:
     - gofmt
     - goimports
     - govet
+    - bidichk
+
+run:
+  timeout: 5m

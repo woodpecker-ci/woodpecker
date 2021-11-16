@@ -1,10 +1,10 @@
-// Copyright 2020 Ryo Nakao <nakabonne@gmail.com>.
+// Copyright 2020 Ryo Nakao <ryo@nakao.dev>.
 //
 // All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package nestif provides an API to detect deeply nested if statements.
+// Package nestif provides an API to detect complex nested if statements.
 package nestif
 
 import (
@@ -133,7 +133,7 @@ func (c *Checker) makeMessage(complexity int, cond ast.Expr, fset *token.FileSet
 	if err := p.Fprint(b, fset, cond); err != nil {
 		c.debug("failed to convert condition into string: %v", err)
 	}
-	return fmt.Sprintf("`if %s` is deeply nested (complexity: %d)", b.String(), complexity)
+	return fmt.Sprintf("`if %s` has complex nested blocks (complexity: %d)", b.String(), complexity)
 }
 
 // DebugMode makes it possible to emit debug logs.
