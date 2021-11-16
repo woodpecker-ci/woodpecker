@@ -251,18 +251,24 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	from, err := remote_.Repo(c, user, repo.Owner, repo.Name)
-	if err == nil {
-		repo.Name = from.Name
-		repo.Owner = from.Owner
-		repo.FullName = from.FullName
-		repo.Avatar = from.Avatar
-		repo.Link = from.Link
-		repo.Clone = from.Clone
-		repo.IsPrivate = from.IsPrivate
-		if repo.IsPrivate != from.IsPrivate {
-			repo.ResetVisibility()
-		}
-		store_.UpdateRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	repo.Name = from.Name
+	repo.Owner = from.Owner
+	repo.FullName = from.FullName
+	repo.Avatar = from.Avatar
+	repo.Link = from.Link
+	repo.Clone = from.Clone
+	repo.IsPrivate = from.IsPrivate
+	if repo.IsPrivate != from.IsPrivate {
+		repo.ResetVisibility()
+	}
+	if err := store_.UpdateRepo(repo); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 
 	c.Writer.WriteHeader(http.StatusOK)
@@ -277,19 +283,19 @@ func MoveRepo(c *gin.Context) {
 	to, exists := c.GetQuery("to")
 	if !exists {
 		err := fmt.Errorf("Missing required to query value")
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	owner, name, errParse := model.ParseRepo(to)
 	if errParse != nil {
-		c.AbortWithError(http.StatusInternalServerError, errParse)
+		_ = c.AbortWithError(http.StatusInternalServerError, errParse)
 		return
 	}
 
 	from, err := remote_.Repo(c, user, owner, name)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	if !from.Perm.Admin {
