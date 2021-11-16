@@ -2,6 +2,16 @@ package analysisutil
 
 import "golang.org/x/tools/go/ssa"
 
+// InspectFuncs inspects functions.
+func InspectFuncs(funcs []*ssa.Function, f func(i int, instr ssa.Instruction) bool) {
+	for _, fun := range funcs {
+		if len(fun.Blocks) == 0 {
+			continue
+		}
+		new(instrInspector).block(fun.Blocks[0], 0, f)
+	}
+}
+
 // InspectInstr inspects from i-th instruction of start block to succsessor blocks.
 func InspectInstr(start *ssa.BasicBlock, i int, f func(i int, instr ssa.Instruction) bool) {
 	new(instrInspector).block(start, i, f)

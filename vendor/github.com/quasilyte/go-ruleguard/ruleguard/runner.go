@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/printer"
 	"io/ioutil"
 	"path/filepath"
@@ -22,24 +23,46 @@ type rulesRunner struct {
 	ctx   *RunContext
 	rules *goRuleSet
 
+	gogrepState gogrep.MatcherState
+
 	importer *goImporter
 
 	filename string
 	src      []byte
 
+	// nodePath is a stack of ast.Nodes we visited to this point.
+	// When we enter a new node, it's placed on the top of the stack.
+	// When we leave that node, it's popped.
+	// The stack is a slice that is allocated only once and reused
+	// for the lifetime of the runner.
+	// The only overhead it has is a slice append and pop operations
+	// that are quire cheap.
+	//
+	// Note: we need this path to get a Node.Parent() for `$$` matches.
+	// So it's used to climb up the tree there.
+	// For named submatches we can't use it as the node can be located
+	// deeper into the tree than the current node.
+	// In those cases we need a more complicated algorithm.
+	nodePath nodePath
+
 	filterParams filterParams
 }
 
-func newRulesRunner(ctx *RunContext, state *engineState, rules *goRuleSet) *rulesRunner {
+func newRulesRunner(ctx *RunContext, buildContext *build.Context, state *engineState, rules *goRuleSet) *rulesRunner {
 	importer := newGoImporter(state, goImporterConfig{
 		fset:         ctx.Fset,
 		debugImports: ctx.DebugImports,
 		debugPrint:   ctx.DebugPrint,
+		buildContext: buildContext,
 	})
+	gogrepState := gogrep.NewMatcherState()
+	gogrepState.Types = ctx.Types
 	rr := &rulesRunner{
-		ctx:      ctx,
-		importer: importer,
-		rules:    rules,
+		ctx:         ctx,
+		importer:    importer,
+		rules:       rules,
+		gogrepState: gogrepState,
+		nodePath:    newNodePath(),
 		filterParams: filterParams{
 			env:      state.env.GetEvalEnv(),
 			importer: importer,
@@ -47,6 +70,7 @@ func newRulesRunner(ctx *RunContext, state *engineState, rules *goRuleSet) *rule
 		},
 	}
 	rr.filterParams.nodeText = rr.nodeText
+	rr.filterParams.nodePath = &rr.nodePath
 	return rr
 }
 
@@ -93,19 +117,22 @@ func (rr *rulesRunner) fileBytes() []byte {
 }
 
 func (rr *rulesRunner) run(f *ast.File) error {
-	// TODO(quasilyte): run local rules as well.
+	// If it's not empty then we're leaking memory.
+	// For every Push() there should be a Pop() call.
+	if rr.nodePath.Len() != 0 {
+		panic("internal error: node path is not empty")
+	}
 
 	rr.filename = rr.ctx.Fset.Position(f.Pos()).Filename
 	rr.filterParams.filename = rr.filename
 	rr.collectImports(f)
 
 	if rr.rules.universal.categorizedNum != 0 {
-		ast.Inspect(f, func(n ast.Node) bool {
-			if n == nil {
-				return false
-			}
+		var inspector astWalker
+		inspector.nodePath = &rr.nodePath
+		inspector.filterParams = &rr.filterParams
+		inspector.Walk(f, func(n ast.Node) {
 			rr.runRules(n)
-			return true
 		})
 	}
 
@@ -183,7 +210,7 @@ func (rr *rulesRunner) runRules(n ast.Node) {
 	tag := nodetag.FromNode(n)
 	for _, rule := range rr.rules.universal.rulesByTag[tag] {
 		matched := false
-		rule.pat.MatchNode(n, func(m gogrep.MatchData) {
+		rule.pat.MatchNode(&rr.gogrepState, n, func(m gogrep.MatchData) {
 			matched = rr.handleMatch(rule, m)
 		})
 		if matched {
@@ -193,13 +220,13 @@ func (rr *rulesRunner) runRules(n ast.Node) {
 }
 
 func (rr *rulesRunner) reject(rule goRule, reason string, m matchData) {
-	if rule.group != rr.ctx.Debug {
+	if rule.group.Name != rr.ctx.Debug {
 		return // This rule is not being debugged
 	}
 
 	pos := rr.ctx.Fset.Position(m.Node().Pos())
 	rr.ctx.DebugPrint(fmt.Sprintf("%s:%d: [%s:%d] rejected by %s",
-		pos.Filename, pos.Line, filepath.Base(rule.filename), rule.line, reason))
+		pos.Filename, pos.Line, filepath.Base(rule.group.Filename), rule.line, reason))
 
 	values := make([]gogrep.CapturedNode, len(m.CaptureList()))
 	copy(values, m.CaptureList())
@@ -261,9 +288,8 @@ func (rr *rulesRunner) handleCommentMatch(rule goCommentRule, m commentMatchData
 		}
 	}
 	info := GoRuleInfo{
-		Group:    rule.base.group,
-		Filename: rule.base.filename,
-		Line:     rule.base.line,
+		Group: rule.base.group,
+		Line:  rule.base.line,
 	}
 	rr.ctx.Report(info, node, message, suggestion)
 	return true
@@ -293,9 +319,8 @@ func (rr *rulesRunner) handleMatch(rule goRule, m gogrep.MatchData) bool {
 		}
 	}
 	info := GoRuleInfo{
-		Group:    rule.group,
-		Filename: rule.filename,
-		Line:     rule.line,
+		Group: rule.group,
+		Line:  rule.line,
 	}
 	rr.ctx.Report(info, node, message, suggestion)
 	return true

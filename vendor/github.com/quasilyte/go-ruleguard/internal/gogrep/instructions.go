@@ -21,6 +21,7 @@ const (
 	ifaceValue             // Extra values only; value is stored in program.ifaces
 	tokenValue             // token.Token
 	chandirValue           // ast.CharDir
+	intValue               // int
 )
 
 type program struct {
@@ -54,6 +55,12 @@ func formatProgram(p *program) []string {
 
 		info := operationInfoTable[inst.op]
 		for i := 0; i < info.NumArgs; i++ {
+			if i == info.SliceIndex {
+				for j := 0; j < int(inst.value); j++ {
+					walk(depth + 1)
+				}
+				continue
+			}
 			if !info.VariadicMap.IsSet(i) {
 				walk(depth + 1)
 				continue
@@ -88,6 +95,8 @@ func formatInstruction(p *program, inst instruction) string {
 		}
 	case tokenValue:
 		parts = append(parts, token.Token(inst.value).String())
+	case intValue:
+		parts = append(parts, fmt.Sprint(inst.value))
 	}
 
 	switch info.ExtraValueKind {

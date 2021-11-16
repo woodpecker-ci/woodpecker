@@ -131,6 +131,30 @@ func HasField(s *types.Struct, f *types.Var) bool {
 	return false
 }
 
+// Field returns field of the struct type.
+// If the type is not struct or has not the field,
+// Field returns -1, nil.
+// If the type is a named type or a pointer type,
+// Field calls itself recursively with
+// an underlying type or an element type of pointer.
+func Field(t types.Type, name string) (int, *types.Var) {
+	switch t := t.(type) {
+	case *types.Pointer:
+		return Field(t.Elem(), name)
+	case *types.Named:
+		return Field(t.Underlying(), name)
+	case *types.Struct:
+		for i := 0; i < t.NumFields(); i++ {
+			f := t.Field(i)
+			if f.Name() == name {
+				return i, f
+			}
+		}
+	}
+
+	return -1, nil
+}
+
 func TypesInfo(info ...*types.Info) *types.Info {
 	if len(info) == 0 {
 		return nil
@@ -198,11 +222,7 @@ func mergeTypesInfo(i1, i2 *types.Info) {
 }
 
 // Under returns the most bottom underlying type.
+// Deprecated: (types.Type).Underlying returns same value of it.
 func Under(t types.Type) types.Type {
-	switch t := t.(type) {
-	case *types.Named:
-		return Under(t.Underlying())
-	default:
-		return t
-	}
+	return t.Underlying()
 }

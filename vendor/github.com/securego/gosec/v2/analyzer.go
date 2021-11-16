@@ -43,6 +43,8 @@ const LoadMode = packages.NeedName |
 	packages.NeedTypesInfo |
 	packages.NeedSyntax
 
+var generatedCodePattern = regexp.MustCompile(`^// Code generated .* DO NOT EDIT\.$`)
+
 // The Context is populated with data parsed from the source code as it is scanned.
 // It is passed through to all rule functions as they are called. Rules may use
 // this data in conjunction withe the encountered AST node.
@@ -70,36 +72,44 @@ type Metrics struct {
 // Analyzer object is the main object of gosec. It has methods traverse an AST
 // and invoke the correct checking rules as on each node as required.
 type Analyzer struct {
-	ignoreNosec bool
-	ruleset     RuleSet
-	context     *Context
-	config      Config
-	logger      *log.Logger
-	issues      []*Issue
-	stats       *Metrics
-	errors      map[string][]Error // keys are file paths; values are the golang errors in those files
-	tests       bool
+	ignoreNosec      bool
+	ruleset          RuleSet
+	context          *Context
+	config           Config
+	logger           *log.Logger
+	issues           []*Issue
+	stats            *Metrics
+	errors           map[string][]Error // keys are file paths; values are the golang errors in those files
+	tests            bool
+	excludeGenerated bool
+	showIgnored      bool
 }
 
 // NewAnalyzer builds a new analyzer.
-func NewAnalyzer(conf Config, tests bool, logger *log.Logger) *Analyzer {
+func NewAnalyzer(conf Config, tests bool, excludeGenerated bool, logger *log.Logger) *Analyzer {
 	ignoreNoSec := false
 	if enabled, err := conf.IsGlobalEnabled(Nosec); err == nil {
 		ignoreNoSec = enabled
+	}
+	showIgnored := false
+	if enabled, err := conf.IsGlobalEnabled(ShowIgnored); err == nil {
+		showIgnored = enabled
 	}
 	if logger == nil {
 		logger = log.New(os.Stderr, "[gosec]", log.LstdFlags)
 	}
 	return &Analyzer{
-		ignoreNosec: ignoreNoSec,
-		ruleset:     make(RuleSet),
-		context:     &Context{},
-		config:      conf,
-		logger:      logger,
-		issues:      make([]*Issue, 0, 16),
-		stats:       &Metrics{},
-		errors:      make(map[string][]Error),
-		tests:       tests,
+		ignoreNosec:      ignoreNoSec,
+		showIgnored:      showIgnored,
+		ruleset:          make(RuleSet),
+		context:          &Context{},
+		config:           conf,
+		logger:           logger,
+		issues:           make([]*Issue, 0, 16),
+		stats:            &Metrics{},
+		errors:           make(map[string][]Error),
+		tests:            tests,
+		excludeGenerated: excludeGenerated,
 	}
 }
 
@@ -139,7 +149,7 @@ func (gosec *Analyzer) Process(buildTags []string, packagePaths ...string) error
 			if pkg.Name != "" {
 				err := gosec.ParseErrors(pkg)
 				if err != nil {
-					return fmt.Errorf("parsing errors in pkg %q: %v", pkg.Name, err)
+					return fmt.Errorf("parsing errors in pkg %q: %w", pkg.Name, err)
 				}
 				gosec.Check(pkg)
 			}
@@ -163,7 +173,7 @@ func (gosec *Analyzer) load(pkgPath string, conf *packages.Config) ([]*packages.
 	buildD.BuildTags = conf.BuildFlags
 	basePackage, err := buildD.ImportDir(pkgPath, build.ImportComment)
 	if err != nil {
-		return []*packages.Package{}, fmt.Errorf("importing dir %q: %v", pkgPath, err)
+		return []*packages.Package{}, fmt.Errorf("importing dir %q: %w", pkgPath, err)
 	}
 
 	var packageFiles []string
@@ -175,7 +185,7 @@ func (gosec *Analyzer) load(pkgPath string, conf *packages.Config) ([]*packages.
 	}
 
 	if gosec.tests {
-		testsFiles := []string{}
+		testsFiles := make([]string, 0)
 		testsFiles = append(testsFiles, basePackage.TestGoFiles...)
 		testsFiles = append(testsFiles, basePackage.XTestGoFiles...)
 		for _, filename := range testsFiles {
@@ -187,7 +197,7 @@ func (gosec *Analyzer) load(pkgPath string, conf *packages.Config) ([]*packages.
 	conf.BuildFlags = nil
 	pkgs, err := packages.Load(conf, packageFiles...)
 	if err != nil {
-		return []*packages.Package{}, fmt.Errorf("loading files from package %q: %v", pkgPath, err)
+		return []*packages.Package{}, fmt.Errorf("loading files from package %q: %w", pkgPath, err)
 	}
 	return pkgs, nil
 }
@@ -202,6 +212,11 @@ func (gosec *Analyzer) Check(pkg *packages.Package) {
 		if filepath.Ext(checkedFile) != ".go" {
 			continue
 		}
+		if gosec.excludeGenerated && isGeneratedFile(file) {
+			gosec.logger.Println("Ignoring generated file:", checkedFile)
+			continue
+		}
+
 		gosec.logger.Println("Checking file:", checkedFile)
 		gosec.context.FileSet = pkg.Fset
 		gosec.context.Config = gosec.config
@@ -219,6 +234,17 @@ func (gosec *Analyzer) Check(pkg *packages.Package) {
 	}
 }
 
+func isGeneratedFile(file *ast.File) bool {
+	for _, comment := range file.Comments {
+		for _, row := range comment.List {
+			if generatedCodePattern.MatchString(row.Text) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // ParseErrors parses the errors from given package
 func (gosec *Analyzer) ParseErrors(pkg *packages.Package) error {
 	if len(pkg.Errors) == 0 {
@@ -231,13 +257,13 @@ func (gosec *Analyzer) ParseErrors(pkg *packages.Package) error {
 		var line int
 		if len(parts) > 1 {
 			if line, err = strconv.Atoi(parts[1]); err != nil {
-				return fmt.Errorf("parsing line: %v", err)
+				return fmt.Errorf("parsing line: %w", err)
 			}
 		}
 		var column int
 		if len(parts) > 2 {
 			if column, err = strconv.Atoi(parts[2]); err != nil {
-				return fmt.Errorf("parsing column: %v", err)
+				return fmt.Errorf("parsing column: %w", err)
 			}
 		}
 		msg := strings.TrimSpace(pkgErr.Msg)
@@ -259,7 +285,7 @@ func (gosec *Analyzer) AppendError(file string, err error) {
 	if r.MatchString(err.Error()) {
 		return
 	}
-	errors := []Error{}
+	errors := make([]Error, 0)
 	if ferrs, ok := gosec.errors[file]; ok {
 		errors = ferrs
 	}
@@ -344,9 +370,8 @@ func (gosec *Analyzer) Visit(n ast.Node) ast.Visitor {
 	gosec.context.Imports.TrackImport(n)
 
 	for _, rule := range gosec.ruleset.RegisteredFor(n) {
-		if _, ok := ignores[rule.ID()]; ok {
-			continue
-		}
+		_, ignored := ignores[rule.ID()]
+
 		issue, err := rule.Match(n, gosec.context)
 		if err != nil {
 			file, line := GetLocation(n, gosec.context)
@@ -354,8 +379,15 @@ func (gosec *Analyzer) Visit(n ast.Node) ast.Visitor {
 			gosec.logger.Printf("Rule error: %v => %s (%s:%d)\n", reflect.TypeOf(rule), err, file, line)
 		}
 		if issue != nil {
-			gosec.issues = append(gosec.issues, issue)
-			gosec.stats.NumFound++
+			if gosec.showIgnored {
+				issue.NoSec = ignored
+			}
+			if !ignored || !gosec.showIgnored {
+				gosec.stats.NumFound++
+			}
+			if !ignored || gosec.showIgnored || gosec.ignoreNosec {
+				gosec.issues = append(gosec.issues, issue)
+			}
 		}
 	}
 	return gosec

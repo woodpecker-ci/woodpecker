@@ -42,7 +42,7 @@ const (
 	// Initializing expression is always nil.
 	NameParam NameKind = iota
 	// NameVar is var or ":=" declared name.
-	// Initizlizing expression may be nil for var-declared names
+	// Initializing expression may be nil for var-declared names
 	// without explicit initializing expression.
 	NameVar
 	// NameConst is const-declared name.

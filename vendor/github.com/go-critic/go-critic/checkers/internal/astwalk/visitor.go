@@ -36,7 +36,7 @@ type (
 	// introduced by case clauses and alike.
 	StmtListVisitor interface {
 		walkerEvents
-		VisitStmtList([]ast.Stmt)
+		VisitStmtList(ast.Node, []ast.Stmt)
 	}
 
 	// StmtVisitor visits every statement inside function body.

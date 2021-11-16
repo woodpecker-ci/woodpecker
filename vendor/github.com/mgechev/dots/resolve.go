@@ -29,7 +29,7 @@ func flatten(arr [][]string) []string {
 // The final result is the set of all files from the selected directories subtracted with
 // the files in the skip slice.
 func Resolve(includePatterns, skipPatterns []string) ([]string, error) {
-	skip, err := resolvePatterns(skipPatterns)
+	skip, err := resolvePatternsIgnoringErrors(skipPatterns)
 	filter := newPathFilter(flatten(skip))
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func Resolve(includePatterns, skipPatterns []string) ([]string, error) {
 // the files in the skip slice. The difference between `Resolve` and `ResolvePackages`
 // is that `ResolvePackages` preserves the package structure in the nested slices.
 func ResolvePackages(includePatterns, skipPatterns []string) ([][]string, error) {
-	skip, err := resolvePatterns(skipPatterns)
+	skip, err := resolvePatternsIgnoringErrors(skipPatterns)
 	filter := newPathFilter(flatten(skip))
 	if err != nil {
 		return nil, err
@@ -130,6 +130,18 @@ func resolvePatterns(patterns []string) ([][]string, error) {
 		f, err := resolvePattern(pattern)
 		if err != nil {
 			return nil, err
+		}
+		files = append(files, f...)
+	}
+	return files, nil
+}
+
+func resolvePatternsIgnoringErrors(patterns []string) ([][]string, error) {
+	var files [][]string
+	for _, pattern := range patterns {
+		f, err := resolvePattern(pattern)
+		if err != nil {
+			continue
 		}
 		files = append(files, f...)
 	}
