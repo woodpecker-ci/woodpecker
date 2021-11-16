@@ -138,8 +138,10 @@ func (r *Runtime) exec(proc *backend.Step) error {
 		}
 
 		go func() {
-			r.logger.Log(proc, multipart.New(rc))
-			rc.Close()
+			if err := r.logger.Log(proc, multipart.New(rc)); err != nil {
+				log.Error().Err(err)
+			}
+			_ = rc.Close()
 		}()
 	}
 

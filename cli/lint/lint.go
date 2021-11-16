@@ -43,7 +43,7 @@ func lint(c *cli.Context) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			lintFile(path)
+			_ = lintFile(path)
 			fmt.Println("")
 			return nil
 		}

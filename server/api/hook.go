@@ -82,7 +82,7 @@ func PostHook(c *gin.Context) {
 	tmpRepo, build, err := remote_.Hook(c.Request)
 	if err != nil {
 		log.Error().Msgf("failure to parse hook. %s", err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 		return
 	}
 	if build == nil {
@@ -107,12 +107,12 @@ func PostHook(c *gin.Context) {
 	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
 		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if !repo.IsActive {
 		log.Error().Msgf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
-		c.AbortWithError(204, err)
+		_ = c.AbortWithError(204, err)
 		return
 	}
 
@@ -122,7 +122,7 @@ func PostHook(c *gin.Context) {
 	})
 	if err != nil {
 		log.Error().Msgf("failure to parse token from hook for %s. %s", repo.FullName, err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 		return
 	}
 	if parsed.Text != repo.FullName {
@@ -139,7 +139,7 @@ func PostHook(c *gin.Context) {
 
 	if build.Event == model.EventPull && !repo.AllowPull {
 		log.Info().Msgf("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
-		c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
+		_, _ = c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
 		c.Writer.WriteHeader(204)
 		return
 	}
@@ -147,7 +147,7 @@ func PostHook(c *gin.Context) {
 	user, err := store_.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -171,14 +171,14 @@ func PostHook(c *gin.Context) {
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		log.Error().Msgf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	filtered, err := branchFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		log.Error().Msgf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 	}
 	if filtered {
 		c.String(200, "Branch does not match restrictions defined in yaml")
@@ -202,7 +202,7 @@ func PostHook(c *gin.Context) {
 	err = store_.CreateBuild(build, build.Procs...)
 	if err != nil {
 		log.Error().Msgf("failure to save commit for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -211,7 +211,7 @@ func PostHook(c *gin.Context) {
 		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
 			log.Error().Msgf("failure to find or persist build config for %s. %s", repo.FullName, err)
-			c.AbortWithError(500, err)
+			_ = c.AbortWithError(500, err)
 			return
 		}
 	}

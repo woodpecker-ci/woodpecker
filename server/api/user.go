@@ -141,7 +141,7 @@ func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)
@@ -161,7 +161,7 @@ func DeleteToken(c *gin.Context) {
 
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)

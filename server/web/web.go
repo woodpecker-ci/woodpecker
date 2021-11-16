@@ -89,7 +89,7 @@ func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 
-	w.tmpl.Execute(rw, params)
+	_ = w.tmpl.Execute(rw, params)
 }
 
 func setupCache(h http.Handler) http.Handler {

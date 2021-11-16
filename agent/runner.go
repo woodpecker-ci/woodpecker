@@ -161,12 +161,14 @@ func (r *Runner) Run(ctx context.Context) error {
 		loglogger.Debug().Msg("log stream opened")
 
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logstream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
-		io.Copy(logstream, limitedPart)
+		logStream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
+		if _, err := io.Copy(logStream, limitedPart); err != nil {
+			log.Error().Err(err).Msg("copy limited logStream part")
+		}
 
 		loglogger.Debug().Msg("log stream copied")
 
-		data, err := json.Marshal(logstream.Lines())
+		data, err := json.Marshal(logStream.Lines())
 		if err != nil {
 			loglogger.Err(err).Msg("could not marshal logstream")
 		}

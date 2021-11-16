@@ -105,7 +105,7 @@ func PatchRepo(c *gin.Context) {
 
 	in := new(model.RepoPatch)
 	if err := c.Bind(in); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
@@ -144,7 +144,7 @@ func PatchRepo(c *gin.Context) {
 
 	err := store_.UpdateRepo(repo)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -159,7 +159,7 @@ func ChownRepo(c *gin.Context) {
 
 	err := store_.UpdateRepo(repo)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, repo)
@@ -181,7 +181,7 @@ func GetRepoBranches(c *gin.Context) {
 
 	branches, err := r.Branches(c, user, repo)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -201,20 +201,20 @@ func DeleteRepo(c *gin.Context) {
 
 	err := store_.UpdateRepo(repo)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	if remove {
 		err := store_.DeleteRepo(repo)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 	}
 
 	if err := remote_.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(200, repo)
@@ -316,7 +316,7 @@ func MoveRepo(c *gin.Context) {
 
 	errStore := store_.UpdateRepo(repo)
 	if errStore != nil {
-		c.AbortWithError(http.StatusInternalServerError, errStore)
+		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
 		return
 	}
 

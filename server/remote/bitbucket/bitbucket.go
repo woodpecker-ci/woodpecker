@@ -239,7 +239,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	if err != nil {
 		return err
 	}
-	c.Deactivate(ctx, u, r, link)
+	_ = c.Deactivate(ctx, u, r, link)
 
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,

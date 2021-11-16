@@ -19,7 +19,6 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,7 +41,7 @@ func GetBuilds(c *gin.Context) {
 	repo := session.Repo(c)
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
@@ -64,13 +63,13 @@ func GetBuild(c *gin.Context) {
 	repo := session.Repo(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	files, _ := store_.FileList(build)
@@ -109,26 +108,28 @@ func GetBuildLogs(c *gin.Context) {
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	proc, err := store_.ProcChild(build, ppid, name)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	rc, err := store_.LogFind(proc)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	defer rc.Close()
 
 	c.Header("Content-Type", "application/json")
-	io.Copy(c.Writer, rc)
+	if _, err := io.Copy(c.Writer, rc); err != nil {
+		log.Error().Err(err).Msg("could not copy log to http response")
+	}
 }
 
 func GetProcLogs(c *gin.Context) {
@@ -142,26 +143,28 @@ func GetProcLogs(c *gin.Context) {
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	proc, err := store_.ProcFind(build, pid)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	rc, err := store_.LogFind(proc)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	defer rc.Close()
 
 	c.Header("Content-Type", "application/json")
-	io.Copy(c.Writer, rc)
+	if _, err := io.Copy(c.Writer, rc); err != nil {
+		log.Error().Err(err).Msg("could not copy log to http response")
+	}
 }
 
 // DeleteBuild cancels a build
@@ -203,9 +206,19 @@ func DeleteBuild(c *gin.Context) {
 			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
 		}
 	}
-	server.Config.Services.Queue.EvictAtOnce(context.Background(), procToEvict)
-	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToEvict, queue.ErrCancel)
-	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToCancel, queue.ErrCancel)
+
+	if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
 	// Then update the DB status for pending builds
 	// Running ones will be set when the agents stop on the cancel signal
@@ -437,9 +450,13 @@ func PostBuild(c *gin.Context) {
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the job.
 	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, _ := refresher.Refresh(c, user)
-		if ok {
-			store_.UpdateUser(user)
+		ok, err := refresher.Refresh(c, user)
+		if err != nil {
+			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+		} else if ok {
+			if err := store_.UpdateUser(user); err != nil {
+				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+			}
 		}
 	}
 
@@ -447,14 +464,14 @@ func PostBuild(c *gin.Context) {
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	netrc, err := remote_.Netrc(user, repo)
 	if err != nil {
 		log.Error().Msgf("failure to generate netrc for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -485,7 +502,7 @@ func PostBuild(c *gin.Context) {
 	err = persistBuildConfigs(configs, build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to persist build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -581,7 +598,7 @@ func DeleteBuildLogs(c *gin.Context) {
 
 	procs, err := store_.ProcList(build)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 

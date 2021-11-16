@@ -163,32 +163,32 @@ func GetLoginToken(c *gin.Context) {
 	in := &tokenPayload{}
 	err := c.Bind(in)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	login, err := remote.Auth(c, in.Access, in.Refresh)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	user, err := store_.GetUserLogin(login)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	token := token.New(token.SessToken, user.Login)
-	tokenstr, err := token.SignExpires(user.Hash, exp)
+	newToken := token.New(token.SessToken, user.Login)
+	tokenStr, err := newToken.SignExpires(user.Hash, exp)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, &tokenPayload{
-		Access:  tokenstr,
+		Access:  tokenStr,
 		Expires: exp - time.Now().Unix(),
 	})
 }

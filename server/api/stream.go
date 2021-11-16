@@ -80,7 +80,8 @@ func EventStreamSSE(c *gin.Context) {
 	go func() {
 		err := server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
 			defer func() {
-				recover() // fix #2480
+				obj := recover() // fix #2480 // TODO: check if it's still needed
+				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
 			}()
 			name := m.Labels["repo"]
 			priv := m.Labels["private"]
@@ -185,7 +186,8 @@ func LogStreamSSE(c *gin.Context) {
 		// TODO remove global variable
 		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
 			defer func() {
-				recover() // fix #2480
+				obj := recover() // fix #2480 // TODO: check if it's still needed
+				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
 			}()
 			for _, entry := range entries {
 				select {

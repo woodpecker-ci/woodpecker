@@ -418,9 +418,14 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, _ := refresher.Refresh(ctx, user)
-			if ok {
-				s.store.UpdateUser(user)
+			ok, err := refresher.Refresh(ctx, user)
+			if err != nil {
+				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+			} else if ok {
+				if err := s.store.UpdateUser(user); err != nil {
+					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+				}
+
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
@@ -443,7 +448,9 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 		Repo:  *repo,
 		Build: *build,
 	})
-	s.pubsub.Publish(c, "topic/events", message)
+	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
+	}
 }
 
 func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
