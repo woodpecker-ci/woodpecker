@@ -120,12 +120,6 @@ func EventStreamSSE(c *gin.Context) {
 	}
 }
 
-func logWriteStringErr(_ int, err error) {
-	if err != nil {
-		log.Error().Err(err).Caller(1).Msg("fail to write string")
-	}
-}
-
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -234,9 +228,7 @@ func LogStreamSSE(c *gin.Context) {
 		case buf, ok := <-logc:
 			if ok {
 				if id > last {
-					if _, err := io.WriteString(rw, "id: "+strconv.Itoa(id)); err != nil {
-
-					}
+					logWriteStringErr(io.WriteString(rw, "id: "+strconv.Itoa(id)))
 					logWriteStringErr(io.WriteString(rw, "\n"))
 					logWriteStringErr(io.WriteString(rw, "data: "))
 					logWriteStringErr(rw.Write(buf))
@@ -246,5 +238,11 @@ func LogStreamSSE(c *gin.Context) {
 				id++
 			}
 		}
+	}
+}
+
+func logWriteStringErr(_ int, err error) {
+	if err != nil {
+		log.Error().Err(err).Caller(1).Msg("fail to write string")
 	}
 }
