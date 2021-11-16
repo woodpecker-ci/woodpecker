@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -241,9 +242,10 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	_ = remote_.Deactivate(c, user, repo, host)
-	err = remote_.Activate(c, user, repo, link)
-	if err != nil {
+	if err := remote_.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err)
+	}
+	if err := remote_.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())
 		return
 	}
@@ -328,10 +330,10 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	// TODO: check if we should handle that error
-	remote_.Deactivate(c, user, repo, host)
-	err = remote_.Activate(c, user, repo, link)
-	if err != nil {
+	if err := remote_.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
+	}
+	if err := remote_.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())
 		return
 	}

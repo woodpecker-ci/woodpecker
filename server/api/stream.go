@@ -52,9 +52,7 @@ func EventStreamSSE(c *gin.Context) {
 	}
 
 	// ping the client
-	if _, err := io.WriteString(rw, ": ping\n\n"); err != nil {
-		log.Error().Err(err).Msgf("could not ping to event stream")
-	}
+	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 	flusher.Flush()
 
 	log.Debug().Msg("user feed: connection opened")
@@ -80,7 +78,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
+		err := server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
 			defer func() {
 				recover() // fix #2480
 			}()
@@ -95,6 +93,9 @@ func EventStreamSSE(c *gin.Context) {
 				}
 			}
 		})
+		if err != nil {
+			log.Error().Err(err).Msg("Subscribe failed")
+		}
 		cancel()
 	}()
 
@@ -105,16 +106,22 @@ func EventStreamSSE(c *gin.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(time.Second * 30):
-			io.WriteString(rw, ": ping\n\n")
+			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-eventc:
 			if ok {
-				io.WriteString(rw, "data: ")
-				rw.Write(buf)
-				io.WriteString(rw, "\n\n")
+				logWriteStringErr(io.WriteString(rw, "data: "))
+				logWriteStringErr(rw.Write(buf))
+				logWriteStringErr(io.WriteString(rw, "\n\n"))
 				flusher.Flush()
 			}
 		}
+	}
+}
+
+func logWriteStringErr(_ int, err error) {
+	if err != nil {
+		log.Error().Err(err).Caller(1)
 	}
 }
 
@@ -132,7 +139,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	io.WriteString(rw, ": ping\n\n")
+	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 	flusher.Flush()
 
 	repo := session.Repo(c)
@@ -146,18 +153,18 @@ func LogStreamSSE(c *gin.Context) {
 	build, err := store_.GetBuildNumber(repo, buildn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get build number: %v", err)
-		io.WriteString(rw, "event: error\ndata: build not found\n\n")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: build not found\n\n"))
 		return
 	}
 	proc, err := store_.ProcFind(build, jobn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get proc number: %v", err)
-		io.WriteString(rw, "event: error\ndata: process not found\n\n")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
 	if proc.State != model.StatusRunning {
 		log.Debug().Msg("stream not found.")
-		io.WriteString(rw, "event: error\ndata: stream not found\n\n")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
 		return
 	}
 
@@ -193,9 +200,7 @@ func LogStreamSSE(c *gin.Context) {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
 
-		if _, err := io.WriteString(rw, "event: error\ndata: eof\n\n"); err != nil {
-			log.Error().Err(err).Msgf("can not write to event")
-		}
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: eof\n\n"))
 
 		cancel()
 	}()
@@ -222,16 +227,18 @@ func LogStreamSSE(c *gin.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(time.Second * 30):
-			io.WriteString(rw, ": ping\n\n")
+			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
 		case buf, ok := <-logc:
 			if ok {
 				if id > last {
-					io.WriteString(rw, "id: "+strconv.Itoa(id))
-					io.WriteString(rw, "\n")
-					io.WriteString(rw, "data: ")
-					rw.Write(buf)
-					io.WriteString(rw, "\n\n")
+					if _, err := io.WriteString(rw, "id: "+strconv.Itoa(id)); err != nil {
+
+					}
+					logWriteStringErr(io.WriteString(rw, "\n"))
+					logWriteStringErr(io.WriteString(rw, "data: "))
+					logWriteStringErr(rw.Write(buf))
+					logWriteStringErr(io.WriteString(rw, "\n\n"))
 					flusher.Flush()
 				}
 				id++
