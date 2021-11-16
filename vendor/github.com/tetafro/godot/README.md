@@ -39,7 +39,7 @@ defaults are used:
 #   all          - for all comments.
 scope: declarations
 
-# List pf regexps for excluding particular comment lines from check.
+# List of regexps for excluding particular comment lines from check.
 exclude:
 
 # Check periods at the end of sentences.

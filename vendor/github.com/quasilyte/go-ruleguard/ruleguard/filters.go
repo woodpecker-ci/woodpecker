@@ -6,11 +6,12 @@ import (
 	"go/token"
 	"go/types"
 	"path/filepath"
-	"regexp"
 
+	"github.com/quasilyte/go-ruleguard/internal/gogrep"
 	"github.com/quasilyte/go-ruleguard/internal/xtypes"
 	"github.com/quasilyte/go-ruleguard/nodetag"
 	"github.com/quasilyte/go-ruleguard/ruleguard/quasigo"
+	"github.com/quasilyte/go-ruleguard/ruleguard/textmatch"
 	"github.com/quasilyte/go-ruleguard/ruleguard/typematch"
 )
 
@@ -18,6 +19,15 @@ const filterSuccess = matchFilterResult("")
 
 func filterFailure(reason string) matchFilterResult {
 	return matchFilterResult(reason)
+}
+
+func exprListFilterApply(src string, list gogrep.ExprSlice, fn func(ast.Expr) bool) matchFilterResult {
+	for i := 0; i < list.Len(); i++ {
+		if !fn(list.At(i).(ast.Expr)) {
+			return filterFailure(src)
+		}
+	}
+	return filterSuccess
 }
 
 func makeNotFilter(src string, x matchFilter) filterFunc {
@@ -47,6 +57,15 @@ func makeOrFilter(lhs, rhs matchFilter) filterFunc {
 	}
 }
 
+func makeDeadcodeFilter(src string) filterFunc {
+	return func(params *filterParams) matchFilterResult {
+		if params.deadcode {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
 func makeFileImportsFilter(src, pkgPath string) filterFunc {
 	return func(params *filterParams) matchFilterResult {
 		_, imported := params.imports[pkgPath]
@@ -57,7 +76,7 @@ func makeFileImportsFilter(src, pkgPath string) filterFunc {
 	}
 }
 
-func makeFilePkgPathMatchesFilter(src string, re *regexp.Regexp) filterFunc {
+func makeFilePkgPathMatchesFilter(src string, re textmatch.Pattern) filterFunc {
 	return func(params *filterParams) matchFilterResult {
 		pkgPath := params.ctx.Pkg.Path()
 		if re.MatchString(pkgPath) {
@@ -67,7 +86,7 @@ func makeFilePkgPathMatchesFilter(src string, re *regexp.Regexp) filterFunc {
 	}
 }
 
-func makeFileNameMatchesFilter(src string, re *regexp.Regexp) filterFunc {
+func makeFileNameMatchesFilter(src string, re textmatch.Pattern) filterFunc {
 	return func(params *filterParams) matchFilterResult {
 		if re.MatchString(filepath.Base(params.filename)) {
 			return filterSuccess
@@ -78,6 +97,12 @@ func makeFileNameMatchesFilter(src string, re *regexp.Regexp) filterFunc {
 
 func makePureFilter(src, varname string) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return isPure(params.ctx.Types, x)
+			})
+		}
+
 		n := params.subExpr(varname)
 		if isPure(params.ctx.Types, n) {
 			return filterSuccess
@@ -88,6 +113,12 @@ func makePureFilter(src, varname string) filterFunc {
 
 func makeConstFilter(src, varname string) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return isConstant(params.ctx.Types, x)
+			})
+		}
+
 		n := params.subExpr(varname)
 		if isConstant(params.ctx.Types, n) {
 			return filterSuccess
@@ -96,8 +127,30 @@ func makeConstFilter(src, varname string) filterFunc {
 	}
 }
 
+func makeConstSliceFilter(src, varname string) filterFunc {
+	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return isConstantSlice(params.ctx.Types, x)
+			})
+		}
+
+		n := params.subExpr(varname)
+		if isConstantSlice(params.ctx.Types, n) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
 func makeAddressableFilter(src, varname string) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return isAddressable(params.ctx.Types, x)
+			})
+		}
+
 		n := params.subExpr(varname)
 		if isAddressable(params.ctx.Types, n) {
 			return filterSuccess
@@ -122,6 +175,12 @@ func makeCustomVarFilter(src, varname string, fn *quasigo.Func) filterFunc {
 
 func makeTypeImplementsFilter(src, varname string, iface *types.Interface) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return xtypes.Implements(params.typeofNode(x), iface)
+			})
+		}
+
 		typ := params.typeofNode(params.subExpr(varname))
 		if xtypes.Implements(typ, iface) {
 			return filterSuccess
@@ -133,6 +192,11 @@ func makeTypeImplementsFilter(src, varname string, iface *types.Interface) filte
 func makeTypeIsFilter(src, varname string, underlying bool, pat *typematch.Pattern) filterFunc {
 	if underlying {
 		return func(params *filterParams) matchFilterResult {
+			if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+				return exprListFilterApply(src, list, func(x ast.Expr) bool {
+					return pat.MatchIdentical(params.typeofNode(x).Underlying())
+				})
+			}
 			typ := params.typeofNode(params.subExpr(varname)).Underlying()
 			if pat.MatchIdentical(typ) {
 				return filterSuccess
@@ -140,7 +204,13 @@ func makeTypeIsFilter(src, varname string, underlying bool, pat *typematch.Patte
 			return filterFailure(src)
 		}
 	}
+
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return pat.MatchIdentical(params.typeofNode(x))
+			})
+		}
 		typ := params.typeofNode(params.subExpr(varname))
 		if pat.MatchIdentical(typ) {
 			return filterSuccess
@@ -151,6 +221,12 @@ func makeTypeIsFilter(src, varname string, underlying bool, pat *typematch.Patte
 
 func makeTypeConvertibleToFilter(src, varname string, dstType types.Type) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return types.ConvertibleTo(params.typeofNode(x), dstType)
+			})
+		}
+
 		typ := params.typeofNode(params.subExpr(varname))
 		if types.ConvertibleTo(typ, dstType) {
 			return filterSuccess
@@ -161,6 +237,12 @@ func makeTypeConvertibleToFilter(src, varname string, dstType types.Type) filter
 
 func makeTypeAssignableToFilter(src, varname string, dstType types.Type) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				return types.AssignableTo(params.typeofNode(x), dstType)
+			})
+		}
+
 		typ := params.typeofNode(params.subExpr(varname))
 		if types.AssignableTo(typ, dstType) {
 			return filterSuccess
@@ -169,8 +251,54 @@ func makeTypeAssignableToFilter(src, varname string, dstType types.Type) filterF
 	}
 }
 
+func makeLineFilter(src, varname string, op token.Token, rhsVarname string) filterFunc {
+	// TODO(quasilyte): add variadic support.
+	return func(params *filterParams) matchFilterResult {
+		line1 := params.ctx.Fset.Position(params.subNode(varname).Pos()).Line
+		line2 := params.ctx.Fset.Position(params.subNode(rhsVarname).Pos()).Line
+		lhsValue := constant.MakeInt64(int64(line1))
+		rhsValue := constant.MakeInt64(int64(line2))
+		if constant.Compare(lhsValue, op, rhsValue) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
+func makeGoVersionFilter(src string, op token.Token, version GoVersion) filterFunc {
+	return func(params *filterParams) matchFilterResult {
+		if params.ctx.GoVersion.IsAny() {
+			return filterSuccess
+		}
+		if versionCompare(params.ctx.GoVersion, op, version) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
+func makeLineConstFilter(src, varname string, op token.Token, rhsValue constant.Value) filterFunc {
+	// TODO(quasilyte): add variadic support.
+	return func(params *filterParams) matchFilterResult {
+		n := params.subNode(varname)
+		lhsValue := constant.MakeInt64(int64(params.ctx.Fset.Position(n.Pos()).Line))
+		if constant.Compare(lhsValue, op, rhsValue) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
 func makeTypeSizeConstFilter(src, varname string, op token.Token, rhsValue constant.Value) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				typ := params.typeofNode(x)
+				lhsValue := constant.MakeInt64(params.ctx.Sizes.Sizeof(typ))
+				return constant.Compare(lhsValue, op, rhsValue)
+			})
+		}
+
 		typ := params.typeofNode(params.subExpr(varname))
 		lhsValue := constant.MakeInt64(params.ctx.Sizes.Sizeof(typ))
 		if constant.Compare(lhsValue, op, rhsValue) {
@@ -182,6 +310,13 @@ func makeTypeSizeConstFilter(src, varname string, op token.Token, rhsValue const
 
 func makeValueIntConstFilter(src, varname string, op token.Token, rhsValue constant.Value) filterFunc {
 	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				lhsValue := intValueOf(params.ctx.Types, x)
+				return lhsValue != nil && constant.Compare(lhsValue, op, rhsValue)
+			})
+		}
+
 		lhsValue := intValueOf(params.ctx.Types, params.subExpr(varname))
 		if lhsValue == nil {
 			return filterFailure(src) // The value is unknown
@@ -194,6 +329,7 @@ func makeValueIntConstFilter(src, varname string, op token.Token, rhsValue const
 }
 
 func makeValueIntFilter(src, varname string, op token.Token, rhsVarname string) filterFunc {
+	// TODO(quasilyte): add variadic support.
 	return func(params *filterParams) matchFilterResult {
 		lhsValue := intValueOf(params.ctx.Types, params.subExpr(varname))
 		if lhsValue == nil {
@@ -211,6 +347,7 @@ func makeValueIntFilter(src, varname string, op token.Token, rhsVarname string) 
 }
 
 func makeTextConstFilter(src, varname string, op token.Token, rhsValue constant.Value) filterFunc {
+	// TODO(quasilyte): add variadic support.
 	return func(params *filterParams) matchFilterResult {
 		s := params.nodeText(params.subNode(varname))
 		lhsValue := constant.MakeString(string(s))
@@ -222,6 +359,7 @@ func makeTextConstFilter(src, varname string, op token.Token, rhsValue constant.
 }
 
 func makeTextFilter(src, varname string, op token.Token, rhsVarname string) filterFunc {
+	// TODO(quasilyte): add variadic support.
 	return func(params *filterParams) matchFilterResult {
 		s1 := params.nodeText(params.subNode(varname))
 		lhsValue := constant.MakeString(string(s1))
@@ -235,7 +373,8 @@ func makeTextFilter(src, varname string, op token.Token, rhsVarname string) filt
 	}
 }
 
-func makeTextMatchesFilter(src, varname string, re *regexp.Regexp) filterFunc {
+func makeTextMatchesFilter(src, varname string, re textmatch.Pattern) filterFunc {
+	// TODO(quasilyte): add variadic support.
 	return func(params *filterParams) matchFilterResult {
 		if re.Match(params.nodeText(params.subNode(varname))) {
 			return filterSuccess
@@ -244,24 +383,104 @@ func makeTextMatchesFilter(src, varname string, re *regexp.Regexp) filterFunc {
 	}
 }
 
-func makeNodeIsFilter(src, varname string, tag nodetag.Value) filterFunc {
-	// TODO: add comment nodes support?
+func makeRootParentNodeIsFilter(src string, tag nodetag.Value) filterFunc {
 	return func(params *filterParams) matchFilterResult {
-		n := params.subExpr(varname)
-		var matched bool
-		switch tag {
-		case nodetag.Expr:
-			_, matched = n.(ast.Expr)
-		case nodetag.Stmt:
-			_, matched = n.(ast.Stmt)
-		case nodetag.Node:
-			_, matched = n.(ast.Node)
-		default:
-			matched = (tag == nodetag.FromNode(n))
-		}
-		if matched {
+		parent := params.nodePath.Parent()
+		if nodeIs(parent, tag) {
 			return filterSuccess
 		}
 		return filterFailure(src)
 	}
+}
+
+func makeNodeIsFilter(src, varname string, tag nodetag.Value) filterFunc {
+	// TODO(quasilyte): add comment nodes support?
+	// TODO(quasilyte): add variadic support.
+	return func(params *filterParams) matchFilterResult {
+		n := params.subNode(varname)
+		if nodeIs(n, tag) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
+func makeObjectIsFilter(src, varname, objectName string) filterFunc {
+	var predicate func(types.Object) bool
+	switch objectName {
+	case "Func":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Func)
+			return ok
+		}
+	case "Var":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Var)
+			return ok
+		}
+	case "Const":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Const)
+			return ok
+		}
+	case "TypeName":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.TypeName)
+			return ok
+		}
+	case "Label":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Label)
+			return ok
+		}
+	case "PkgName":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.PkgName)
+			return ok
+		}
+	case "Builtin":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Builtin)
+			return ok
+		}
+	case "Nil":
+		predicate = func(x types.Object) bool {
+			_, ok := x.(*types.Nil)
+			return ok
+		}
+	}
+
+	return func(params *filterParams) matchFilterResult {
+		if list, ok := params.subNode(varname).(gogrep.ExprSlice); ok {
+			return exprListFilterApply(src, list, func(x ast.Expr) bool {
+				ident := identOf(x)
+				return ident != nil && predicate(params.ctx.Types.ObjectOf(ident))
+			})
+		}
+
+		ident := identOf(params.subExpr(varname))
+		if ident == nil {
+			return filterFailure(src)
+		}
+		object := params.ctx.Types.ObjectOf(ident)
+		if predicate(object) {
+			return filterSuccess
+		}
+		return filterFailure(src)
+	}
+}
+
+func nodeIs(n ast.Node, tag nodetag.Value) bool {
+	var matched bool
+	switch tag {
+	case nodetag.Expr:
+		_, matched = n.(ast.Expr)
+	case nodetag.Stmt:
+		_, matched = n.(ast.Stmt)
+	case nodetag.Node:
+		matched = true
+	default:
+		matched = (tag == nodetag.FromNode(n))
+	}
+	return matched
 }

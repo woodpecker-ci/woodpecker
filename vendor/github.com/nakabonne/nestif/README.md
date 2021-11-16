@@ -2,15 +2,21 @@
 
 [![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/nakabonne/nestif)
 
-Reports deeply nested if statements in Go code, by calculating its complexities based on the rules defined by the [Cognitive Complexity white paper by G. Ann Campbell](https://www.sonarsource.com/docs/CognitiveComplexity.pdf).
+Reports complex nested if statements in Go code, by calculating its complexities based on the rules defined by the [Cognitive Complexity white paper by G. Ann Campbell](https://www.sonarsource.com/docs/CognitiveComplexity.pdf).
 
 It helps you find if statements that make your code hard to read, and clarifies which parts to refactor.
 
 ## Installation
 
+### By go get
+
 ```
 go get github.com/nakabonne/nestif/cmd/nestif
 ```
+
+### By golangci-lint
+
+`nestif` is already integrated with [golangci-lint](https://github.com/golangci/golangci-lint). Please refer to the instructions there and enable it.
 
 ## Usage
 

@@ -59,6 +59,7 @@ const (
 
 	StmtList // gogrep stmt list
 	ExprList // gogrep expr list
+	DeclList // gogrep decl list
 
 	Node // ast.Node
 	Expr // ast.Expr

@@ -110,6 +110,7 @@ type LintersSettings struct {
 	Gosimple         StaticCheckSettings
 	Govet            GovetSettings
 	Ifshort          IfshortSettings
+	Ireturn          IreturnSettings
 	ImportAs         ImportAsSettings
 	Lll              LllSettings
 	Makezero         MakezeroSettings
@@ -117,6 +118,8 @@ type LintersSettings struct {
 	Misspell         MisspellSettings
 	Nakedret         NakedretSettings
 	Nestif           NestifSettings
+	NilNil           NilNilSettings
+	Nlreturn         NlreturnSettings
 	NoLintLint       NoLintLintSettings
 	Prealloc         PreallocSettings
 	Predeclared      PredeclaredSettings
@@ -129,9 +132,11 @@ type LintersSettings struct {
 	Tagliatelle      TagliatelleSettings
 	Testpackage      TestpackageSettings
 	Thelper          ThelperSettings
+	Tenv             TenvSettings
 	Unparam          UnparamSettings
 	Unused           StaticCheckSettings
 	Varcheck         VarCheckSettings
+	Varnamelen       VarnamelenSettings
 	Whitespace       WhitespaceSettings
 	Wrapcheck        WrapcheckSettings
 	WSL              WSLSettings
@@ -184,6 +189,11 @@ type ExhaustiveSettings struct {
 
 type ExhaustiveStructSettings struct {
 	StructPatterns []string `mapstructure:"struct-patterns"`
+}
+
+type IreturnSettings struct {
+	Allow  []string `mapstructure:"allow"`
+	Reject []string `mapstructure:"reject"`
 }
 
 type ForbidigoSettings struct {
@@ -285,9 +295,12 @@ type GoModGuardSettings struct {
 }
 
 type GoSecSettings struct {
-	Includes []string
-	Excludes []string
-	Config   map[string]interface{} `mapstructure:"config"`
+	Includes         []string
+	Excludes         []string
+	Severity         string
+	Confidence       string
+	ExcludeGenerated bool                   `mapstructure:"exclude-generated"`
+	Config           map[string]interface{} `mapstructure:"config"`
 }
 
 type GovetSettings struct {
@@ -352,6 +365,14 @@ type NakedretSettings struct {
 
 type NestifSettings struct {
 	MinComplexity int `mapstructure:"min-complexity"`
+}
+
+type NilNilSettings struct {
+	CheckedTypes []string `mapstructure:"checked-types"`
+}
+
+type NlreturnSettings struct {
+	BlockSize int `mapstructure:"block-size"`
 }
 
 type NoLintLintSettings struct {
@@ -447,6 +468,10 @@ type ThelperSettings struct {
 	} `mapstructure:"tb"`
 }
 
+type TenvSettings struct {
+	All bool `mapstructure:"all"`
+}
+
 type UnparamSettings struct {
 	CheckExported bool `mapstructure:"check-exported"`
 	Algo          string
@@ -454,6 +479,14 @@ type UnparamSettings struct {
 
 type VarCheckSettings struct {
 	CheckExportedFields bool `mapstructure:"exported-fields"`
+}
+
+type VarnamelenSettings struct {
+	MaxDistance   int      `mapstructure:"max-distance"`
+	MinNameLength int      `mapstructure:"min-name-length"`
+	CheckReceiver bool     `mapstructure:"check-receiver"`
+	CheckReturn   bool     `mapstructure:"check-return"`
+	IgnoreNames   []string `mapstructure:"ignore-names"`
 }
 
 type WhitespaceSettings struct {
@@ -479,8 +512,20 @@ type WSLSettings struct {
 	ForceCaseTrailingWhitespaceLimit int  `mapstructure:"force-case-trailing-whitespace"`
 }
 
+// CustomLinterSettings encapsulates the meta-data of a private linter.
+// For example, a private linter may be added to the golangci config file as shown below.
+//
+// linters-settings:
+//  custom:
+//    example:
+//      path: /example.so
+//      description: The description of the linter
+//      original-url: github.com/golangci/example-linter
 type CustomLinterSettings struct {
-	Path        string
+	// Path to a plugin *.so file that implements the private linter.
+	Path string
+	// Description describes the purpose of the private linter.
 	Description string
+	// The URL containing the source code for the private linter.
 	OriginalURL string `mapstructure:"original-url"`
 }

@@ -23,7 +23,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.1.0
-	github.com/golangci/golangci-lint v1.42.1
+	github.com/golangci/golangci-lint v1.43.0
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -51,7 +51,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/genproto v0.0.0-20211027162914-98a5263abeca // indirect
 	google.golang.org/grpc v1.41.0

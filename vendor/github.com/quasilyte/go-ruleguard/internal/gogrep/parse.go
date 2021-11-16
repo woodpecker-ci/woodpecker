@@ -137,21 +137,7 @@ func parseDetectingNode(fset *token.FileSet, src string) (ast.Node, *ast.File, e
 	}
 	var mainErr error
 
-	// first try as a whole file
-	if f, err := parser.ParseFile(fset, "", src, 0); err == nil && noBadNodes(f) {
-		return f, f, nil
-	}
-
-	// then as a single declaration, or many
-	asDecl := execTmpl(tmplDecl, src)
-	if f, err := parser.ParseFile(fset, "", asDecl, 0); err == nil && noBadNodes(f) {
-		if len(f.Decls) == 1 {
-			return f.Decls[0], f, nil
-		}
-		return f, f, nil
-	}
-
-	// then as a block; otherwise blocks might be mistaken for composite
+	// try as a block; otherwise blocks might be mistaken for composite
 	// literals further below
 	asBlock := execTmpl(tmplBlock, src)
 	if f, err := parser.ParseFile(fset, "", asBlock, 0); err == nil && noBadNodes(f) {
@@ -170,7 +156,7 @@ func parseDetectingNode(fset *token.FileSet, src string) (ast.Node, *ast.File, e
 		if len(cl.Elts) == 1 {
 			return cl.Elts[0], f, nil
 		}
-		return exprSlice(cl.Elts), f, nil
+		return ExprSlice(cl.Elts), f, nil
 	}
 
 	// then try as statements
@@ -189,6 +175,20 @@ func parseDetectingNode(fset *token.FileSet, src string) (ast.Node, *ast.File, e
 	// template.
 	mainErr = subPosOffsets(err, posOffset{1, 1, 22})
 
+	// try as a single declaration, or many
+	asDecl := execTmpl(tmplDecl, src)
+	if f, err := parser.ParseFile(fset, "", asDecl, 0); err == nil && noBadNodes(f) {
+		if len(f.Decls) == 1 {
+			return f.Decls[0], f, nil
+		}
+		return declSlice(f.Decls), f, nil
+	}
+
+	// try as a whole file
+	if f, err := parser.ParseFile(fset, "", src, 0); err == nil && noBadNodes(f) {
+		return f, f, nil
+	}
+
 	// type expressions not yet picked up, for e.g. chans and interfaces
 	if typ, f, err := parseType(fset, src); err == nil && noBadNodes(f) {
 		return typ, f, nil
@@ -200,6 +200,7 @@ func parseDetectingNode(fset *token.FileSet, src string) (ast.Node, *ast.File, e
 		vs := f.Decls[0].(*ast.GenDecl).Specs[0].(*ast.ValueSpec)
 		return vs, f, nil
 	}
+
 	return nil, nil, mainErr
 }
 

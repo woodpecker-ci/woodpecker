@@ -42,7 +42,8 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		var rangeNode ast.Node
 
 		// Check runs for test functions only
-		if !isTestFunction(funcDecl) {
+		isTest, testVar := isTestFunction(funcDecl)
+		if !isTest {
 			return
 		}
 
@@ -53,16 +54,19 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				ast.Inspect(v, func(n ast.Node) bool {
 					// Check if the test method is calling t.parallel
 					if !funcHasParallelMethod {
-						funcHasParallelMethod = methodParallelIsCalledInTestFunction(n)
+						funcHasParallelMethod = methodParallelIsCalledInTestFunction(n, testVar)
 					}
 
 					// Check if the t.Run within the test function is calling t.parallel
-					if methodRunIsCalledInTestFunction(n) {
+					if methodRunIsCalledInTestFunction(n, testVar) {
+						// n is a call to t.Run; find out the name of the subtest's *testing.T parameter.
+						innerTestVar := getRunCallbackParameterName(n)
+
 						hasParallel := false
 						numberOfTestRun++
 						ast.Inspect(v, func(p ast.Node) bool {
 							if !hasParallel {
-								hasParallel = methodParallelIsCalledInTestFunction(p)
+								hasParallel = methodParallelIsCalledInTestFunction(p, innerTestVar)
 							}
 							return true
 						})
@@ -81,12 +85,15 @@ func run(pass *analysis.Pass) (interface{}, error) {
 					// nolint: gocritic
 					switch r := n.(type) {
 					case *ast.ExprStmt:
-						if methodRunIsCalledInRangeStatement(r.X) {
+						if methodRunIsCalledInRangeStatement(r.X, testVar) {
+							// r.X is a call to t.Run; find out the name of the subtest's *testing.T parameter.
+							innerTestVar := getRunCallbackParameterName(r.X)
+
 							rangeStatementOverTestCasesExists = true
 							testRunLoopIdentifier = methodRunFirstArgumentObjectName(r.X)
 
 							if !rangeStatementHasParallelMethod {
-								rangeStatementHasParallelMethod = methodParallelIsCalledInMethodRun(r.X)
+								rangeStatementHasParallelMethod = methodParallelIsCalledInMethodRun(r.X, innerTestVar)
 							}
 						}
 					}
@@ -165,7 +172,7 @@ func getLeftAndRightIdentifier(s ast.Stmt) (string, string) {
 	return leftIdentifier, rightIdentifier
 }
 
-func methodParallelIsCalledInMethodRun(node ast.Node) bool {
+func methodParallelIsCalledInMethodRun(node ast.Node, testVar string) bool {
 	var methodParallelCalled bool
 	// nolint: gocritic
 	switch callExp := node.(type) {
@@ -174,7 +181,7 @@ func methodParallelIsCalledInMethodRun(node ast.Node) bool {
 			if !methodParallelCalled {
 				ast.Inspect(arg, func(n ast.Node) bool {
 					if !methodParallelCalled {
-						methodParallelCalled = methodParallelIsCalledInRunMethod(n)
+						methodParallelCalled = methodParallelIsCalledInRunMethod(n, testVar)
 						return true
 					}
 					return false
@@ -185,30 +192,59 @@ func methodParallelIsCalledInMethodRun(node ast.Node) bool {
 	return methodParallelCalled
 }
 
-func methodParallelIsCalledInRunMethod(node ast.Node) bool {
-	return exprCallHasMethod(node, "Parallel")
+func methodParallelIsCalledInRunMethod(node ast.Node, testVar string) bool {
+	return exprCallHasMethod(node, testVar, "Parallel")
 }
 
-func methodParallelIsCalledInTestFunction(node ast.Node) bool {
-	return exprCallHasMethod(node, "Parallel")
+func methodParallelIsCalledInTestFunction(node ast.Node, testVar string) bool {
+	return exprCallHasMethod(node, testVar, "Parallel")
 }
 
-func methodRunIsCalledInRangeStatement(node ast.Node) bool {
-	return exprCallHasMethod(node, "Run")
+func methodRunIsCalledInRangeStatement(node ast.Node, testVar string) bool {
+	return exprCallHasMethod(node, testVar, "Run")
 }
 
-func methodRunIsCalledInTestFunction(node ast.Node) bool {
-	return exprCallHasMethod(node, "Run")
+func methodRunIsCalledInTestFunction(node ast.Node, testVar string) bool {
+	return exprCallHasMethod(node, testVar, "Run")
 }
-func exprCallHasMethod(node ast.Node, methodName string) bool {
+func exprCallHasMethod(node ast.Node, receiverName, methodName string) bool {
 	// nolint: gocritic
 	switch n := node.(type) {
 	case *ast.CallExpr:
 		if fun, ok := n.Fun.(*ast.SelectorExpr); ok {
-			return fun.Sel.Name == methodName
+			if receiver, ok := fun.X.(*ast.Ident); ok {
+				return receiver.Name == receiverName && fun.Sel.Name == methodName
+			}
 		}
 	}
 	return false
+}
+
+// In an expression of the form t.Run(x, func(q *testing.T) {...}), return the
+// value "q". In _most_ code, the name is probably t, but we shouldn't just
+// assume.
+func getRunCallbackParameterName(node ast.Node) string {
+	if n, ok := node.(*ast.CallExpr); ok {
+		if len(n.Args) < 2 {
+			// We want argument #2, but this call doesn't have two
+			// arguments. Maybe it's not really t.Run.
+			return ""
+		}
+		funcArg := n.Args[1]
+		if fun, ok := funcArg.(*ast.FuncLit); ok {
+			if len(fun.Type.Params.List) < 1 {
+				// Subtest function doesn't have any parameters.
+				return ""
+			}
+			firstArg := fun.Type.Params.List[0]
+			// We'll assume firstArg.Type is *testing.T.
+			if len(firstArg.Names) < 1 {
+				return ""
+			}
+			return firstArg.Names[0].Name
+		}
+	}
+	return ""
 }
 
 // Gets the object name `tc` from method t.Run(tc.Foo, func(t *testing.T)
@@ -227,18 +263,19 @@ func methodRunFirstArgumentObjectName(node ast.Node) string {
 	return ""
 }
 
-// Checks if the function has the param type *testing.T)
-func isTestFunction(funcDecl *ast.FuncDecl) bool {
+// Checks if the function has the param type *testing.T; if it does, then the
+// parameter name is returned, too.
+func isTestFunction(funcDecl *ast.FuncDecl) (bool, string) {
 	testMethodPackageType := "testing"
 	testMethodStruct := "T"
 	testPrefix := "Test"
 
 	if !strings.HasPrefix(funcDecl.Name.Name, testPrefix) {
-		return false
+		return false, ""
 	}
 
 	if funcDecl.Type.Params != nil && len(funcDecl.Type.Params.List) != 1 {
-		return false
+		return false, ""
 	}
 
 	param := funcDecl.Type.Params.List[0]
@@ -246,11 +283,11 @@ func isTestFunction(funcDecl *ast.FuncDecl) bool {
 		if selectExpr, ok := starExp.X.(*ast.SelectorExpr); ok {
 			if selectExpr.Sel.Name == testMethodStruct {
 				if s, ok := selectExpr.X.(*ast.Ident); ok {
-					return s.Name == testMethodPackageType
+					return s.Name == testMethodPackageType, param.Names[0].Name
 				}
 			}
 		}
 	}
 
-	return false
+	return false, ""
 }

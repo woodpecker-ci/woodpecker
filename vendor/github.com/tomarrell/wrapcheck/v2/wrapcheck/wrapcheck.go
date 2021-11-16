@@ -6,6 +6,7 @@ import (
 	"go/types"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/gobwas/glob"
@@ -33,7 +34,7 @@ type WrapcheckConfig struct {
 	// allows you to specify functions that wrapcheck will not report as
 	// unwrapped.
 	//
-	// For example, an ingoredSig of `[]string{"errors.New("}` will ignore errors
+	// For example, an ignoreSig of `[]string{"errors.New("}` will ignore errors
 	// returned from the stdlib package error's function:
 	//
 	//   `func errors.New(message string) error`
@@ -44,6 +45,20 @@ type WrapcheckConfig struct {
 	// sigs. To achieve the same behaviour as default, you should add the default
 	// list to your config.
 	IgnoreSigs []string `mapstructure:"ignoreSigs" yaml:"ignoreSigs"`
+
+	// IgnoreSigRegexps defines a list of regular expressions which if matched
+	// to the signature of the function call returning the error, will be ignored. This
+	// allows you to specify functions that wrapcheck will not report as
+	// unwrapped.
+	//
+	// For example, an ignoreSigRegexp of `[]string{"\.New.*Err\("}`` will ignore errors
+	// returned from any signture whose method name starts with "New" and ends with "Err"
+	// due to the signature matching the regular expression `\.New.*Err\(`.
+	//
+	// Note that this is similar to the ignoreSigs configuration, but provides
+	// slightly more flexibility in defining rules by which signtures will be
+	// ignored.
+	IgnoreSigRegexps []string `mapstructure:"ignoreSigRegexps" yaml:"ignoreSigRegexps"`
 
 	// IgnorePackageGlobs defines a list of globs which, if matching the package
 	// of the function returning the error, will ignore the error when doing
@@ -62,6 +77,7 @@ type WrapcheckConfig struct {
 func NewDefaultConfig() WrapcheckConfig {
 	return WrapcheckConfig{
 		IgnoreSigs:         DefaultIgnoreSigs,
+		IgnoreSigRegexps:   []string{},
 		IgnorePackageGlobs: []string{},
 	}
 }
@@ -206,6 +222,8 @@ func reportUnwrapped(pass *analysis.Pass, call *ast.CallExpr, tokenPos token.Pos
 	fnSig := pass.TypesInfo.ObjectOf(sel.Sel).String()
 	if contains(cfg.IgnoreSigs, fnSig) {
 		return
+	} else if containsMatch(cfg.IgnoreSigRegexps, fnSig) {
+		return
 	}
 
 	// Check if the underlying type of the "x" in x.y.z is an interface, as
@@ -310,6 +328,22 @@ func prevErrAssign(pass *analysis.Pass, file *ast.File, returnIdent *ast.Ident) 
 func contains(slice []string, el string) bool {
 	for _, s := range slice {
 		if strings.Contains(el, s) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsMatch(slice []string, el string) bool {
+	for _, s := range slice {
+		re, err := regexp.Compile(s)
+		if err != nil {
+			log.Printf("unable to parse regexp: %s\n", s)
+			os.Exit(1)
+		}
+
+		if re.MatchString(el) {
 			return true
 		}
 	}

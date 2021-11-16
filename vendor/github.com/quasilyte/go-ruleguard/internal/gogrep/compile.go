@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+
+	"github.com/quasilyte/go-ruleguard/internal/stdinfo"
 )
 
 type compileError string
@@ -16,9 +18,13 @@ type compiler struct {
 	ifaceIndexes  map[interface{}]uint8
 	strict        bool
 	fset          *token.FileSet
+
+	info *PatternInfo
+
+	insideStmtList bool
 }
 
-func (c *compiler) Compile(fset *token.FileSet, root ast.Node, strict bool) (p *program, err error) {
+func (c *compiler) Compile(fset *token.FileSet, root ast.Node, info *PatternInfo, strict bool) (p *program, err error) {
 	defer func() {
 		if err != nil {
 			return
@@ -34,6 +40,7 @@ func (c *compiler) Compile(fset *token.FileSet, root ast.Node, strict bool) (p *
 		panic(rv) // Not our panic
 	}()
 
+	c.info = info
 	c.fset = fset
 	c.strict = strict
 	c.prog = &program{
@@ -62,6 +69,12 @@ func (c *compiler) toUint8(n ast.Node, v int) uint8 {
 		panic(c.errorf(n, "implementation error: %v can't be converted to uint8", v))
 	}
 	return uint8(v)
+}
+
+func (c *compiler) internVar(n ast.Node, s string) uint8 {
+	c.info.Vars[s] = struct{}{}
+	index := c.internString(n, s)
+	return index
 }
 
 func (c *compiler) internString(n ast.Node, s string) uint8 {
@@ -112,7 +125,9 @@ func (c *compiler) compileNode(n ast.Node) {
 		c.compileValueSpec(n)
 	case stmtSlice:
 		c.compileStmtSlice(n)
-	case exprSlice:
+	case declSlice:
+		c.compileDeclSlice(n)
+	case ExprSlice:
 		c.compileExprSlice(n)
 	default:
 		panic(c.errorf(n, "compileNode: unexpected %T", n))
@@ -137,6 +152,28 @@ func (c *compiler) compileOptExpr(n ast.Expr) {
 	c.compileExpr(n)
 }
 
+func (c *compiler) compileOptFieldList(n *ast.FieldList) {
+	if len(n.List) == 1 {
+		if ident, ok := n.List[0].Type.(*ast.Ident); ok && isWildName(ident.Name) && len(n.List[0].Names) == 0 {
+			// `func (...) $*result` - result could be anything
+			// `func (...) $result`  - result is a field list of 1 element
+			info := decodeWildName(ident.Name)
+			if info.Seq {
+				c.compileWildIdent(ident, true)
+			} else if info.Name == "_" {
+				c.emitInstOp(opFieldNode)
+			} else {
+				c.emitInst(instruction{
+					op:         opNamedFieldNode,
+					valueIndex: c.internVar(n, info.Name),
+				})
+			}
+			return
+		}
+	}
+	c.compileFieldList(n)
+}
+
 func (c *compiler) compileFieldList(n *ast.FieldList) {
 	c.emitInstOp(opFieldList)
 	for _, x := range n.List {
@@ -148,6 +185,10 @@ func (c *compiler) compileFieldList(n *ast.FieldList) {
 func (c *compiler) compileField(n *ast.Field) {
 	switch {
 	case len(n.Names) == 0:
+		if ident, ok := n.Type.(*ast.Ident); ok && isWildName(ident.Name) {
+			c.compileWildIdent(ident, false)
+			return
+		}
 		c.emitInstOp(opUnnamedField)
 	case len(n.Names) == 1:
 		name := n.Names[0]
@@ -172,6 +213,12 @@ func (c *compiler) compileField(n *ast.Field) {
 
 func (c *compiler) compileValueSpec(spec *ast.ValueSpec) {
 	switch {
+	case spec.Type == nil && len(spec.Values) == 0:
+		if isWildName(spec.Names[0].String()) {
+			c.compileIdent(spec.Names[0])
+			return
+		}
+		c.emitInstOp(opValueSpec)
 	case spec.Type == nil:
 		c.emitInstOp(opValueInitSpec)
 	case len(spec.Values) == 0:
@@ -240,6 +287,10 @@ func (c *compiler) compileFuncDecl(n *ast.FuncDecl) {
 }
 
 func (c *compiler) compileGenDecl(n *ast.GenDecl) {
+	if c.insideStmtList {
+		c.emitInstOp(opDeclStmt)
+	}
+
 	switch n.Tok {
 	case token.CONST, token.VAR:
 		c.emitInstOp(pickOp(n.Tok == token.CONST, opConstDecl, opVarDecl))
@@ -279,6 +330,10 @@ func (c *compiler) compileExpr(n ast.Expr) {
 		c.compileParenExpr(n)
 	case *ast.SliceExpr:
 		c.compileSliceExpr(n)
+	case *ast.StructType:
+		c.compileStructType(n)
+	case *ast.InterfaceType:
+		c.compileInterfaceType(n)
 	case *ast.FuncType:
 		c.compileFuncType(n)
 	case *ast.ArrayType:
@@ -360,10 +415,10 @@ func (c *compiler) compileWildIdent(n *ast.Ident, optional bool) {
 		inst.op = pickOp(optional, opOptNode, opNodeSeq)
 	case info.Name != "_" && !info.Seq:
 		inst.op = opNamedNode
-		inst.valueIndex = c.internString(n, info.Name)
+		inst.valueIndex = c.internVar(n, info.Name)
 	default:
 		inst.op = pickOp(optional, opNamedOptNode, opNamedNodeSeq)
-		inst.valueIndex = c.internString(n, info.Name)
+		inst.valueIndex = c.internVar(n, info.Name)
 	}
 	c.prog.insts = append(c.prog.insts, inst)
 }
@@ -380,17 +435,81 @@ func (c *compiler) compileIdent(n *ast.Ident) {
 	})
 }
 
+func (c *compiler) compileExprMembers(list []ast.Expr) {
+	isSimple := len(list) <= 255
+	if isSimple {
+		for _, x := range list {
+			if decodeWildNode(x).Seq {
+				isSimple = false
+				break
+			}
+		}
+	}
+
+	if isSimple {
+		c.emitInst(instruction{
+			op:    opSimpleArgList,
+			value: uint8(len(list)),
+		})
+		for _, x := range list {
+			c.compileExpr(x)
+		}
+	} else {
+		c.emitInstOp(opArgList)
+		for _, x := range list {
+			c.compileExpr(x)
+		}
+		c.emitInstOp(opEnd)
+	}
+}
+
 func (c *compiler) compileCallExpr(n *ast.CallExpr) {
-	op := opCallExpr
+	canBeVariadic := func(n *ast.CallExpr) bool {
+		if len(n.Args) == 0 {
+			return false
+		}
+		lastArg, ok := n.Args[len(n.Args)-1].(*ast.Ident)
+		if !ok {
+			return false
+		}
+		return isWildName(lastArg.Name) && decodeWildName(lastArg.Name).Seq
+	}
+
+	op := opNonVariadicCallExpr
 	if n.Ellipsis.IsValid() {
 		op = opVariadicCallExpr
+	} else if canBeVariadic(n) {
+		op = opCallExpr
 	}
+
 	c.emitInstOp(op)
-	c.compileExpr(n.Fun)
-	for _, arg := range n.Args {
-		c.compileExpr(arg)
+	c.compileSymbol(n.Fun)
+	c.compileExprMembers(n.Args)
+}
+
+// compileSymbol is mostly like a normal compileExpr, but it's used
+// in places where we can find a type/function symbol.
+//
+// For example, in function call expressions a called function expression
+// can look like `fmt.Sprint`. It will be compiled as a special
+// selector expression that requires `fmt` to be a package as opposed
+// to only check that it's an identifier with "fmt" value.
+func (c *compiler) compileSymbol(fn ast.Expr) {
+	if e, ok := fn.(*ast.SelectorExpr); ok {
+		if ident, ok := e.X.(*ast.Ident); ok && stdinfo.Packages[ident.Name] != "" {
+			c.emitInst(instruction{
+				op:         opSimpleSelectorExpr,
+				valueIndex: c.internString(e.Sel, e.Sel.String()),
+			})
+			c.emitInst(instruction{
+				op:         opStdlibPkg,
+				valueIndex: c.internString(ident, ident.Name),
+			})
+			return
+		}
 	}
-	c.emitInstOp(opEnd)
+
+	c.compileExpr(fn)
 }
 
 func (c *compiler) compileUnaryExpr(n *ast.UnaryExpr) {
@@ -415,34 +534,44 @@ func (c *compiler) compileSliceExpr(n *ast.SliceExpr) {
 	switch {
 	case n.Low == nil && n.High == nil && !n.Slice3:
 		c.emitInstOp(opSliceExpr)
-		c.compileExpr(n.X)
+		c.compileOptExpr(n.X)
 	case n.Low != nil && n.High == nil && !n.Slice3:
 		c.emitInstOp(opSliceFromExpr)
-		c.compileExpr(n.X)
-		c.compileExpr(n.Low)
+		c.compileOptExpr(n.X)
+		c.compileOptExpr(n.Low)
 	case n.Low == nil && n.High != nil && !n.Slice3:
 		c.emitInstOp(opSliceToExpr)
-		c.compileExpr(n.X)
-		c.compileExpr(n.High)
+		c.compileOptExpr(n.X)
+		c.compileOptExpr(n.High)
 	case n.Low != nil && n.High != nil && !n.Slice3:
 		c.emitInstOp(opSliceFromToExpr)
-		c.compileExpr(n.X)
-		c.compileExpr(n.Low)
-		c.compileExpr(n.High)
+		c.compileOptExpr(n.X)
+		c.compileOptExpr(n.Low)
+		c.compileOptExpr(n.High)
 	case n.Low == nil && n.Slice3:
 		c.emitInstOp(opSliceToCapExpr)
-		c.compileExpr(n.X)
-		c.compileExpr(n.High)
-		c.compileExpr(n.Max)
+		c.compileOptExpr(n.X)
+		c.compileOptExpr(n.High)
+		c.compileOptExpr(n.Max)
 	case n.Low != nil && n.Slice3:
 		c.emitInstOp(opSliceFromToCapExpr)
-		c.compileExpr(n.X)
-		c.compileExpr(n.Low)
-		c.compileExpr(n.High)
-		c.compileExpr(n.Max)
+		c.compileOptExpr(n.X)
+		c.compileOptExpr(n.Low)
+		c.compileOptExpr(n.High)
+		c.compileOptExpr(n.Max)
 	default:
 		panic(c.errorf(n, "unexpected slice expr"))
 	}
+}
+
+func (c *compiler) compileStructType(n *ast.StructType) {
+	c.emitInstOp(opStructType)
+	c.compileOptFieldList(n.Fields)
+}
+
+func (c *compiler) compileInterfaceType(n *ast.InterfaceType) {
+	c.emitInstOp(opInterfaceType)
+	c.compileOptFieldList(n.Methods)
 }
 
 func (c *compiler) compileFuncType(n *ast.FuncType) {
@@ -452,9 +581,9 @@ func (c *compiler) compileFuncType(n *ast.FuncType) {
 	} else {
 		c.emitInstOp(opFuncType)
 	}
-	c.compileFieldList(n.Params)
+	c.compileOptFieldList(n.Params)
 	if !void {
-		c.compileFieldList(n.Results)
+		c.compileOptFieldList(n.Results)
 	}
 }
 
@@ -648,15 +777,17 @@ func (c *compiler) compileIfStmt(n *ast.IfStmt) {
 			return
 		}
 		// Named $* is harder and slower.
-		c.prog.insts = append(c.prog.insts, instruction{
-			op:         pickOp(n.Else == nil, opIfNamedOptStmt, opIfNamedOptElseStmt),
-			valueIndex: c.internString(ident, info.Name),
-		})
-		c.compileStmt(n.Body)
-		if n.Else != nil {
-			c.compileStmt(n.Else)
+		if info.Seq {
+			c.prog.insts = append(c.prog.insts, instruction{
+				op:         pickOp(n.Else == nil, opIfNamedOptStmt, opIfNamedOptElseStmt),
+				valueIndex: c.internVar(ident, info.Name),
+			})
+			c.compileStmt(n.Body)
+			if n.Else != nil {
+				c.compileStmt(n.Else)
+			}
+			return
 		}
-		return
 	}
 
 	switch {
@@ -948,15 +1079,26 @@ func (c *compiler) compileSendStmt(n *ast.SendStmt) {
 	c.compileExpr(n.Value)
 }
 
-func (c *compiler) compileStmtSlice(stmts stmtSlice) {
-	c.emitInstOp(opMultiStmt)
-	for _, n := range stmts {
-		c.compileStmt(n)
+func (c *compiler) compileDeclSlice(decls declSlice) {
+	c.emitInstOp(opMultiDecl)
+	for _, n := range decls {
+		c.compileDecl(n)
 	}
 	c.emitInstOp(opEnd)
 }
 
-func (c *compiler) compileExprSlice(exprs exprSlice) {
+func (c *compiler) compileStmtSlice(stmts stmtSlice) {
+	c.emitInstOp(opMultiStmt)
+	insideStmtList := c.insideStmtList
+	c.insideStmtList = true
+	for _, n := range stmts {
+		c.compileStmt(n)
+	}
+	c.insideStmtList = insideStmtList
+	c.emitInstOp(opEnd)
+}
+
+func (c *compiler) compileExprSlice(exprs ExprSlice) {
 	c.emitInstOp(opMultiExpr)
 	for _, n := range exprs {
 		c.compileExpr(n)
