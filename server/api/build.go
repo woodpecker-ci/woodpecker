@@ -225,7 +225,7 @@ func DeleteBuild(c *gin.Context) {
 
 	killedBuild, err := shared.UpdateToStatusKilled(store_, *build)
 	if err != nil {
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -234,11 +234,13 @@ func DeleteBuild(c *gin.Context) {
 	if build.Status == model.StatusPending {
 		procs, err = store_.ProcList(killedBuild)
 		if err != nil {
-			c.AbortWithError(404, err)
+			_ = c.AbortWithError(404, err)
 			return
 		}
 		killedBuild.Procs = model.Tree(procs)
-		publishToTopic(c, killedBuild, repo, model.Cancelled)
+		if err := publishToTopic(c, killedBuild, repo, model.Cancelled); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
+		}
 	}
 
 	c.String(204, "")
@@ -255,7 +257,7 @@ func PostApproval(c *gin.Context) {
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if build.Status != model.StatusBlocked {
@@ -267,7 +269,7 @@ func PostApproval(c *gin.Context) {
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
@@ -347,8 +349,12 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 func PostDecline(c *gin.Context) {
@@ -363,7 +369,7 @@ func PostDecline(c *gin.Context) {
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if build.Status != model.StatusBlocked {
@@ -402,21 +408,21 @@ func PostBuild(c *gin.Context) {
 
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	user, err := store_.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
 		log.Error().Msgf("failure to get build %d. %s", num, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
@@ -552,8 +558,12 @@ func PostBuild(c *gin.Context) {
 	}
 	c.JSON(202, build)
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 func DeleteBuildLogs(c *gin.Context) {
@@ -565,7 +575,7 @@ func DeleteBuildLogs(c *gin.Context) {
 
 	build, err := store_.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 

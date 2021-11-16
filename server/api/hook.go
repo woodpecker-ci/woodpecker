@@ -288,8 +288,12 @@ func PostHook(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 // TODO: parse yaml once and not for each filter function
@@ -367,7 +371,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 }
 
 // publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) {
+func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) error {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -381,10 +385,10 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 		Repo:  *repo,
 		Build: buildCopy,
 	})
-	server.Config.Services.Pubsub.Publish(c, "topic/events", message)
+	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) {
+func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) error {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
 		if item.Proc.State == model.StatusSkipped {
@@ -408,10 +412,12 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 			Timeout: repo.Timeout,
 		})
 
-		server.Config.Services.Logs.Open(context.Background(), task.ID)
+		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
+			return err
+		}
 		tasks = append(tasks, task)
 	}
-	server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
 func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {
