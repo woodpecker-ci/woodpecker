@@ -55,10 +55,12 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
-	assert.NoError(t, store.PermBatch([]*model.Perm{
+	for _, perm := range []*model.Perm{
 		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
-	}))
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
 
 	build1 := &model.Build{
 		RepoID: repo1.ID,
