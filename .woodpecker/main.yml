@@ -63,9 +63,7 @@ pipeline:
     group: test
     commands:
       - make test
-      - make vet
       - make lint
-      - make formatcheck
 
   test-postgres:
     image: golang:1.16
