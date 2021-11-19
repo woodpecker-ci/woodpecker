@@ -15,6 +15,12 @@ services:
 
 ```
 
+The following are automatically set and can be overridden:
+
+- WOODPECKER_HOSTNAME if not set, becomes the OS' hostname
+- WOODPECKER_PLATFORM if not set, is the architecture eg: `linux/amd64`
+- WOODPECKER_MAX_PROCS if not set, defaults to 1
+
 ## Processes per agent
 
 By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parellel processing on a per-agent basis.
@@ -39,7 +45,7 @@ When building your pipelines as long as you have set the platform or filter, bui
 ```
 - WOODPECKER_HOSTNAME=mycompany-ci-01.example.com
 - WOODPECKER_PLATFORM=linux/amd64
-- WOODPECKER_FILTER=???
+- WOODPECKER_FILTER=
 ```
 
 ### Filter on Platform
@@ -93,7 +99,6 @@ Here is the full list of configuration options and their default variables.
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET=""
     - WOODPECKER_USERNAME=x-oauth-basic
-    - WOODPECKER_DEBUG=true
     - WOODPECKER_LOG_LEVEL=""
     - WOODPECKER_DEBUG_PRETTY=""
     - WOODPECKER_DEBUG_NOCOLOR=true
