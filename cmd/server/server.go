@@ -49,7 +49,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
 
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
