@@ -442,7 +442,7 @@ This is achieved by ensuring the `when` block is on the root level. Rather than
 
 See [when](#step-when---step-conditional-execution) above to understand all the different types of conditions that can be used.
 
-> Note: You may need to set the agent environment settings, as these are not set automatically. See: [agent configuration](/docs/usage/agent-config) for more details.
+> Note: You may need to set the agent environment settings, as these are not set automatically. See: [agent configuration](/docs/administration/agent-config) for more details.
 
 
 Example targeting a specific platform:
