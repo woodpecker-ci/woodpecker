@@ -77,6 +77,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 
 func PostHook(c *gin.Context) {
 	remote_ := remote.FromContext(c)
+	store_ := store.FromContext(c)
 
 	tmpRepo, build, err := remote_.Hook(c.Request)
 	if err != nil {
@@ -103,7 +104,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := store.GetRepoOwnerName(c, tmpRepo.Owner, tmpRepo.Name)
+	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
 		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
 		c.AbortWithError(404, err)
@@ -143,7 +144,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	user, err := store.GetUser(c, repo.UserID)
+	user, err := store_.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
@@ -158,7 +159,7 @@ func PostHook(c *gin.Context) {
 		if err != nil {
 			log.Error().Msgf("failed to refresh oauth2 token: %s", err)
 		} else if ok {
-			if err := store.UpdateUser(c, user); err != nil {
+			if err := store_.UpdateUser(user); err != nil {
 				log.Error().Msgf("error while updating user: %s", err)
 				// move forward
 			}
@@ -198,7 +199,7 @@ func PostHook(c *gin.Context) {
 		build.Status = model.StatusBlocked
 	}
 
-	err = store.CreateBuild(c, build, build.Procs...)
+	err = store_.CreateBuild(build, build.Procs...)
 	if err != nil {
 		log.Error().Msgf("failure to save commit for %s. %s", repo.FullName, err)
 		c.AbortWithError(500, err)
@@ -246,7 +247,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// get the previous build so that we can send status change notifications
-	last, _ := store.GetBuildLastBefore(c, repo, build.Branch, build.ID)
+	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
 
 	b := shared.ProcBuilder{
 		Repo:  repo,
@@ -261,21 +262,21 @@ func PostHook(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = shared.UpdateToStatusError(store.FromContext(c), *build, err); err != nil {
+		if _, err = shared.UpdateToStatusError(store_, *build, err); err != nil {
 			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store.FromContext(c).ProcCreate(build.Procs)
+	err = store_.ProcCreate(build.Procs)
 	if err != nil {
 		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
 
 	defer func() {
 		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
+			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
 				err = remote_.Status(c, user, repo, build, uri, item.Proc)
 			} else {
@@ -339,7 +340,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 	if err != nil {
 		conf = &model.Config{
 			RepoID: build.RepoID,
-			Data:   string(remoteYamlConfig.Data),
+			Data:   remoteYamlConfig.Data,
 			Hash:   sha,
 			Name:   shared.SanitizePath(remoteYamlConfig.Name),
 		}

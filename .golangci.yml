@@ -1,0 +1,14 @@
+linters-settings:
+  gofmt:
+    simplify: true
+
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - bidichk
+
+run:
+  timeout: 5m

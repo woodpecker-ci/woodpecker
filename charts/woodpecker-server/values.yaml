@@ -20,7 +20,7 @@ extraSecretNamesForEnvFrom:
 persistentVolume:
   enabled: true
   size: 10Gi
-  mountPath: "/var/lib/drone"
+  mountPath: "/var/lib/woodpecker"
   storageClass: "gp2"
 
 imagePullSecrets: []

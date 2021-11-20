@@ -225,6 +225,12 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return client.CreateHook(r.Owner, r.Name, link)
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)

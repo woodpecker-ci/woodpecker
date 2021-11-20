@@ -35,7 +35,7 @@ Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment va
 Woodpecker writes the certificates to the below directory:
 
 ```
-/var/lib/drone/golang-autocert
+/var/lib/woodpecker/golang-autocert
 ```
 
 ### Certificate Updates

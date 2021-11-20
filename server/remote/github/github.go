@@ -505,6 +505,22 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return err
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client := c.newClientToken(ctx, u.Token)
+
+	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range githubBranches {
+		branches = append(branches, *branch.Name)
+	}
+	return branches, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {

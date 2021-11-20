@@ -16,13 +16,14 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -45,12 +46,111 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	opts := &datastore.Opts{
-		Driver: c.String("driver"),
-		Config: c.String("datasource"),
+	datasource := c.String("datasource")
+	driver := c.String("driver")
+
+	if driver == "sqlite3" {
+		if datastore.SupportedDriver("sqlite3") {
+			log.Debug().Msgf("server has sqlite3 support")
+		} else {
+			log.Debug().Msgf("server was build with no sqlite3 support!")
+		}
 	}
-	log.Trace().Msgf("setup datastore: %#v", opts)
-	return datastore.New(opts)
+
+	if !datastore.SupportedDriver(driver) {
+		log.Fatal().Msgf("database driver '%s' not supported", driver)
+	}
+
+	if driver == "sqlite3" {
+		if new, err := fallbackSqlite3File(datasource); err != nil {
+			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
+		} else {
+			datasource = new
+		}
+	}
+
+	opts := &store.Opts{
+		Driver: driver,
+		Config: datasource,
+	}
+	log.Trace().Msgf("setup datastore: %#v", *opts)
+	store, err := datastore.NewEngine(opts)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not open datastore")
+	}
+
+	if err := store.Migrate(); err != nil {
+		log.Fatal().Err(err).Msg("could not migrate datastore")
+	}
+
+	return store, nil
+}
+
+// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: add it to the "how to migrate from drone docs"
+func fallbackSqlite3File(path string) (string, error) {
+	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
+	const dockerDefaultDir = "/var/lib/woodpecker/drone.sqlite"
+	const dockerOldPath = "/var/lib/drone/drone.sqlite"
+	const standaloneDefault = "woodpecker.sqlite"
+	const standaloneOld = "drone.sqlite"
+
+	// custom location was set, use that one
+	if path != dockerDefaultPath && path != standaloneDefault {
+		return path, nil
+	}
+
+	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite")
+	_, err := os.Stat(dockerDefaultPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		return dockerDefaultPath, nil
+	}
+
+	// file is at new default("woodpecker.sqlite")
+	_, err = os.Stat(standaloneDefault)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		return standaloneDefault, nil
+	}
+
+	// woodpecker run in standalone mode, file is in same folder but not renamed
+	_, err = os.Stat(standaloneOld)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		// rename in same folder should be fine as it should be same docker volume
+		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", standaloneOld, standaloneDefault)
+		return standaloneDefault, os.Rename(standaloneOld, standaloneDefault)
+	}
+
+	// file is in new folder but not renamed
+	_, err = os.Stat(dockerDefaultDir)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+	if err == nil {
+		// rename in same folder should be fine as it should be same docker volume
+		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", dockerDefaultDir, dockerDefaultPath)
+		return dockerDefaultPath, os.Rename(dockerDefaultDir, dockerDefaultPath)
+	}
+
+	// file is still at old location
+	_, err = os.Stat(dockerOldPath)
+	if err == nil {
+		// TODO: use log.Fatal()... in next version
+		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
+		return dockerOldPath, nil
+	}
+
+	// file does not exist at all
+	log.Warn().Msgf("no sqlite3 file found, will create one at '%s'", path)
+	return path, nil
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
@@ -180,7 +280,7 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		Password:    c.String("github-git-password"),
 		PrivateMode: c.Bool("github-private-mode"),
 		SkipVerify:  c.Bool("github-skip-verify"),
-		MergeRef:    c.BoolT("github-merge-ref"),
+		MergeRef:    c.Bool("github-merge-ref"),
 	}
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)

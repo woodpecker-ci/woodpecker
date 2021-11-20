@@ -63,7 +63,7 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parseHook(r)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
@@ -102,7 +102,7 @@ func Test_hook(t *testing.T) {
 				Kind:     model.RepoGit,
 			}
 			actual, err := convertRepository(repository)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actual).Equal(repo)
 		})
 
@@ -130,16 +130,16 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.PushHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
 
 		g.It("Should parse delete branch push hook", func() {
 			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.DeleteBranchPushHook))
-			g.Assert(err == nil).IsTrue()
-			g.Assert(actualRepo == nil).IsTrue()
-			g.Assert(actualBuild == nil).IsTrue()
+			g.Assert(err).IsNil()
+			g.Assert(actualRepo).IsNil()
+			g.Assert(actualBuild).IsNil()
 		})
 
 		g.It("Should parse pull request hook", func() {
@@ -167,7 +167,7 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parsePullRequestHook([]byte(fixtures.PullRequestHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
@@ -197,7 +197,7 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})

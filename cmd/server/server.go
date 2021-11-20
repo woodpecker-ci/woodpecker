@@ -29,7 +29,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -55,7 +55,7 @@ func loop(c *cli.Context) error {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
@@ -108,6 +108,11 @@ func loop(c *cli.Context) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
+	defer func() {
+		if err := store_.Close(); err != nil {
+			log.Error().Err(err).Msg("could not close store")
+		}
+	}()
 
 	setupEvilGlobals(c, store_, remote_)
 

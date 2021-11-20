@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
-	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
@@ -27,16 +27,12 @@ import (
 )
 
 // Command exports the exec command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
-	Action: func(c *cli.Context) {
-		if err := exec(c); err != nil {
-			log.Fatal().Err(err).Msg("")
-		}
-	},
-	Flags: flags,
+	Action:    exec,
+	Flags:     append(common.GlobalFlags, flags...),
 }
 
 func exec(c *cli.Context) error {
@@ -192,8 +188,8 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Private: c.Bool("repo-private"),
 		},
 		Curr: frontend.Build{
-			Number:   c.Int("build-number"),
-			Parent:   c.Int("parent-build-number"),
+			Number:   c.Int64("build-number"),
+			Parent:   c.Int64("parent-build-number"),
 			Created:  c.Int64("build-created"),
 			Started:  c.Int64("build-started"),
 			Finished: c.Int64("build-finished"),
@@ -215,7 +211,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			},
 		},
 		Prev: frontend.Build{
-			Number:   c.Int("prev-build-number"),
+			Number:   c.Int64("prev-build-number"),
 			Created:  c.Int64("prev-build-created"),
 			Started:  c.Int64("prev-build-started"),
 			Finished: c.Int64("prev-build-finished"),
