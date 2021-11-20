@@ -181,21 +181,21 @@ func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
-				return err
+				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
 			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
-				return err
+				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
 	}
 	for _, v := range conf.Volumes {
 		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
-			return err
+			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
 		}
 	}
 	for _, n := range conf.Networks {
 		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
-			return err
+			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
 		}
 	}
 	return nil
