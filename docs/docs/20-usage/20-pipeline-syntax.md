@@ -299,7 +299,7 @@ Woodpecker provides the ability to store named parameters external to the Yaml c
 
 For more details check the [secrets docs](/docs/usage/secrets/).
 
-### `when` - Conditional Step Execution
+### `when` - Conditional Execution
 
 Woodpecker supports defining conditional pipeline steps in the `when` block.
 
