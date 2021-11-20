@@ -153,6 +153,14 @@ pipeline:
 
 ```
 
+### Skip Commits
+
+Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
+
+```diff
+git commit -m "updated README [CI SKIP]"
+```
+
 
 ## `services`
 
@@ -333,7 +341,7 @@ pipeline:
 
 In the above example, the `frontend` and `backend` steps are executed in parallel. The pipeline runner will not execute the `publish` step until the group completes.
 
-## Step `volumes`
+### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
 
@@ -500,12 +508,4 @@ services:
     image: docker:dind
     command: [ "--storage-driver=vfs", "--tls=false" ]
 +   privileged: true
-```
-
-## Skip Commits
-
-Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
-
-```diff
-git commit -m "updated README [CI SKIP]"
 ```
