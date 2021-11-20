@@ -66,7 +66,7 @@ func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
 	err := q.Queue.Push(c, task)
 	if err != nil {
 		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
-			err = errors.Wrapf(err, "delete task '%s' failed", task.ID)
+			err = errors.Wrapf(err, "delete task '%s' failed: %v", task.ID, err2)
 		}
 	}
 	return err
@@ -74,6 +74,7 @@ func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) error {
+	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
 		if err := q.store.TaskInsert(&Task{
 			ID:           task.ID,
