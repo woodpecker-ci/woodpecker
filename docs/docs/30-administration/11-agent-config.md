@@ -88,7 +88,7 @@ pipeline:
 
 ```
 
-See [Conditionals Pipeline](usage/pipeline-syntax#step-when---conditional-execution) syntax for more
+See [Conditionals Pipeline](/docs/usage/pipeline-syntax#step-when---conditional-execution) syntax for more
 
 
 ## All agent configuration options
