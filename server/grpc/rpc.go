@@ -144,7 +144,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
+			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
 	message.Data, _ = json.Marshal(model.Event{
@@ -272,7 +272,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
-				"private": strconv.FormatBool(repo.IsPrivate),
+				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
 		message.Data, _ = json.Marshal(model.Event{
@@ -434,7 +434,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
+			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
 	message.Data, _ = json.Marshal(model.Event{

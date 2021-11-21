@@ -79,7 +79,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("default")
 			g.Assert(string(to.Kind)).Equal(from.Scm)
-			g.Assert(to.IsPrivate).Equal(from.IsPrivate)
+			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.Html.Href)
 			g.Assert(to.Link).Equal(from.Links.Html.Href)
 		})

@@ -48,7 +48,7 @@ func PostRepo(c *gin.Context) {
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
-		if repo.IsPrivate {
+		if repo.IsSCMPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
 	}
@@ -256,8 +256,8 @@ func RepairRepo(c *gin.Context) {
 		repo.Avatar = from.Avatar
 		repo.Link = from.Link
 		repo.Clone = from.Clone
-		repo.IsPrivate = from.IsPrivate
-		if repo.IsPrivate != from.IsPrivate {
+		repo.IsSCMPrivate = from.IsSCMPrivate
+		if repo.IsSCMPrivate != from.IsSCMPrivate {
 			repo.ResetVisibility()
 		}
 		store_.UpdateRepo(repo)
@@ -301,8 +301,8 @@ func MoveRepo(c *gin.Context) {
 	repo.Avatar = from.Avatar
 	repo.Link = from.Link
 	repo.Clone = from.Clone
-	repo.IsPrivate = from.IsPrivate
-	if repo.IsPrivate != from.IsPrivate {
+	repo.IsSCMPrivate = from.IsSCMPrivate
+	if repo.IsSCMPrivate != from.IsSCMPrivate {
 		repo.ResetVisibility()
 	}
 

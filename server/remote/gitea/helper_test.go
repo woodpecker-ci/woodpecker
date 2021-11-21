@@ -216,7 +216,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Link).Equal(from.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)
-			g.Assert(repo.IsPrivate).Equal(from.Private)
+			g.Assert(repo.IsSCMPrivate).Equal(from.Private)
 		})
 
 		g.It("Should correct a malformed avatar url", func() {

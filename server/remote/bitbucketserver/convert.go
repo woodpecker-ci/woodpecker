@@ -74,12 +74,12 @@ func convertDesc(status string) string {
 func convertRepo(from *internal.Repo) *model.Repo {
 
 	repo := model.Repo{
-		Name:      from.Slug,
-		Owner:     from.Project.Key,
-		Branch:    "master",
-		Kind:      model.RepoGit,
-		IsPrivate: true, // Since we have to use Netrc it has to always be private :/
-		FullName:  fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
+		Name:         from.Slug,
+		Owner:        from.Project.Key,
+		Branch:       "master",
+		Kind:         model.RepoGit,
+		IsSCMPrivate: true, // Since we have to use Netrc it has to always be private :/
+		FullName:     fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 	}
 
 	for _, item := range from.Links.Clone {

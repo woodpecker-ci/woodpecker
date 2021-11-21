@@ -77,15 +77,15 @@ func convertDesc(status string) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		Clone:     cloneLink(from),
-		Owner:     strings.Split(from.FullName, "/")[0],
-		Name:      strings.Split(from.FullName, "/")[1],
-		FullName:  from.FullName,
-		Link:      from.Links.Html.Href,
-		IsPrivate: from.IsPrivate,
-		Avatar:    from.Owner.Links.Avatar.Href,
-		Kind:      model.SCMKind(from.Scm),
-		Branch:    "master",
+		Clone:        cloneLink(from),
+		Owner:        strings.Split(from.FullName, "/")[0],
+		Name:         strings.Split(from.FullName, "/")[1],
+		FullName:     from.FullName,
+		Link:         from.Links.Html.Href,
+		IsSCMPrivate: from.IsPrivate,
+		Avatar:       from.Owner.Links.Avatar.Href,
+		Kind:         model.SCMKind(from.Scm),
+		Branch:       "master",
 	}
 	if repo.Kind == model.RepoHg {
 		repo.Branch = "default"

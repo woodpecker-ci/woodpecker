@@ -24,24 +24,24 @@ import (
 //
 // swagger:model repo
 type Repo struct {
-	ID         int64       `json:"id,omitempty"             xorm:"pk autoincr 'repo_id'"`
-	UserID     int64       `json:"-"                        xorm:"repo_user_id"`
-	Owner      string      `json:"owner"                    xorm:"UNIQUE(name) 'repo_owner'"`
-	Name       string      `json:"name"                     xorm:"UNIQUE(name) 'repo_name'"`
-	FullName   string      `json:"full_name"                xorm:"UNIQUE 'repo_full_name'"`
-	Avatar     string      `json:"avatar_url,omitempty"     xorm:"varchar(500) 'repo_avatar'"`
-	Link       string      `json:"link_url,omitempty"       xorm:"varchar(1000) 'repo_link'"`
-	Clone      string      `json:"clone_url,omitempty"      xorm:"varchar(1000) 'repo_clone'"`
-	Branch     string      `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
-	Kind       SCMKind     `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"` // TODO: rename to `SCMKind`
-	Timeout    int64       `json:"timeout,omitempty"        xorm:"repo_timeout"`
-	Visibility RepoVisibly `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"`
-	IsPrivate  bool        `json:"private"                  xorm:"repo_private"` // TODO: Rename to `IsSCMPrivate`
-	IsTrusted  bool        `json:"trusted"                  xorm:"repo_trusted"`
-	IsStarred  bool        `json:"starred,omitempty"        xorm:"-"`
-	IsGated    bool        `json:"gated"                    xorm:"repo_gated"`
-	IsActive   bool        `json:"active"                   xorm:"repo_active"`
-	AllowPull  bool        `json:"allow_pr"                 xorm:"repo_allow_pr"`
+	ID           int64       `json:"id,omitempty"             xorm:"pk autoincr 'repo_id'"`
+	UserID       int64       `json:"-"                        xorm:"repo_user_id"`
+	Owner        string      `json:"owner"                    xorm:"UNIQUE(name) 'repo_owner'"`
+	Name         string      `json:"name"                     xorm:"UNIQUE(name) 'repo_name'"`
+	FullName     string      `json:"full_name"                xorm:"UNIQUE 'repo_full_name'"`
+	Avatar       string      `json:"avatar_url,omitempty"     xorm:"varchar(500) 'repo_avatar'"`
+	Link         string      `json:"link_url,omitempty"       xorm:"varchar(1000) 'repo_link'"`
+	Clone        string      `json:"clone_url,omitempty"      xorm:"varchar(1000) 'repo_clone'"`
+	Branch       string      `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
+	Kind         SCMKind     `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"` // TODO: rename to `SCMKind`
+	Timeout      int64       `json:"timeout,omitempty"        xorm:"repo_timeout"`
+	Visibility   RepoVisibly `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"`
+	IsSCMPrivate bool        `json:"private"                  xorm:"repo_private"`
+	IsTrusted    bool        `json:"trusted"                  xorm:"repo_trusted"`
+	IsStarred    bool        `json:"starred,omitempty"        xorm:"-"`
+	IsGated      bool        `json:"gated"                    xorm:"repo_gated"`
+	IsActive     bool        `json:"active"                   xorm:"repo_active"`
+	AllowPull    bool        `json:"allow_pr"                 xorm:"repo_allow_pr"`
 	// Counter is used as index to determine new build numbers
 	Counter int64  `json:"last_build"                  xorm:"NOT NULL DEFAULT 0 'repo_counter'"`
 	Config  string `json:"config_file"                 xorm:"varchar(500) 'repo_config_path'"`
@@ -56,7 +56,7 @@ func (Repo) TableName() string {
 
 func (r *Repo) ResetVisibility() {
 	r.Visibility = VisibilityPublic
-	if r.IsPrivate {
+	if r.IsSCMPrivate {
 		r.Visibility = VisibilityPrivate
 	}
 }
@@ -80,14 +80,14 @@ func (r *Repo) Update(from *Repo) {
 	r.Kind = from.Kind
 	r.Clone = from.Clone
 	r.Branch = from.Branch
-	if from.IsPrivate != r.IsPrivate {
-		if from.IsPrivate {
+	if from.IsSCMPrivate != r.IsSCMPrivate {
+		if from.IsSCMPrivate {
 			r.Visibility = VisibilityPrivate
 		} else {
 			r.Visibility = VisibilityPublic
 		}
 	}
-	r.IsPrivate = from.IsPrivate
+	r.IsSCMPrivate = from.IsSCMPrivate
 }
 
 // RepoPatch represents a repository patch object.

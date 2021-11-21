@@ -39,15 +39,15 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
-		Kind:      model.RepoGit,
-		Name:      name,
-		Owner:     from.Owner.UserName,
-		FullName:  from.FullName,
-		Avatar:    avatar,
-		Link:      from.HTMLURL,
-		IsPrivate: private,
-		Clone:     from.CloneURL,
-		Branch:    from.DefaultBranch,
+		Kind:         model.RepoGit,
+		Name:         name,
+		Owner:        from.Owner.UserName,
+		FullName:     from.FullName,
+		Avatar:       avatar,
+		Link:         from.HTMLURL,
+		IsSCMPrivate: private,
+		Clone:        from.CloneURL,
+		Branch:       from.DefaultBranch,
 	}
 }
 

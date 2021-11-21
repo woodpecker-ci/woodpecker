@@ -50,7 +50,7 @@ Repo: {{ .Name }}
 Type: {{ .Kind }}
 Config: {{ .Config }}
 Visibility: {{ .Visibility }}
-Private: {{ .IsPrivate }}
+Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
 Remote: {{ .Clone }}

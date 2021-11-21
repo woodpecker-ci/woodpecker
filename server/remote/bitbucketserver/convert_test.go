@@ -54,7 +54,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("master")
 			g.Assert(to.Kind).Equal(model.RepoGit)
-			g.Assert(to.IsPrivate).Equal(true)
+			g.Assert(to.IsSCMPrivate).Equal(true)
 			g.Assert(to.Clone).Equal("https://server.org/foo/bar.git")
 			g.Assert(to.Link).Equal("https://server.org/foo/bar")
 		})

@@ -233,7 +233,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 				b.Netrc.Password,
 				b.Netrc.Machine,
 			),
-			b.Repo.IsPrivate,
+			b.Repo.IsSCMPrivate,
 		),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
@@ -298,7 +298,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name:    repo.FullName,
 			Link:    repo.Link,
 			Remote:  repo.Clone,
-			Private: repo.IsPrivate,
+			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
 		Curr: frontend.Build{
