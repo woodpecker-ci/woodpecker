@@ -112,9 +112,7 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 
 		for i := range task.dependency {
 			if !migCache[task.dependency[i]] {
-				err := fmt.Errorf("migration '%s' depends on not executed migration '%s'", task.name, task.dependency[i])
-				log.Err(err)
-				return err
+				return fmt.Errorf("migration '%s' depends on not executed migration '%s'", task.name, task.dependency[i])
 			}
 		}
 
