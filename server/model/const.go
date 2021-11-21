@@ -35,6 +35,7 @@ const (
 	StatusDeclined = "declined"
 )
 
+// SCMKind represent different version control systems
 type SCMKind string
 
 const (
@@ -44,8 +45,11 @@ const (
 	RepoPerforce SCMKind = "perforce"
 )
 
+// RepoVisibly represent to wat state a repo in woodpecker is visible to others
+type RepoVisibly string
+
 const (
-	VisibilityPublic   = "public"
-	VisibilityPrivate  = "private"
-	VisibilityInternal = "internal"
+	VisibilityPublic   RepoVisibly = "public"
+	VisibilityPrivate  RepoVisibly = "private"
+	VisibilityInternal RepoVisibly = "internal"
 )

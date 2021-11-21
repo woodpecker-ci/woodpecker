@@ -39,7 +39,7 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 		Link:       repo_.WebURL,
 		Clone:      repo_.HTTPURLToRepo,
 		Branch:     repo_.DefaultBranch,
-		Visibility: string(repo_.Visibility),
+		Visibility: model.RepoVisibly(repo_.Visibility),
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
