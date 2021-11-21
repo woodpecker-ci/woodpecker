@@ -153,6 +153,21 @@ pipeline:
 
 ```
 
+### `platform`
+
+To configure your pipeline to select an agent with a specific platform, you can use `platform` key.
+```diff
+
++platform: linux/arm64
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
+
 ### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
