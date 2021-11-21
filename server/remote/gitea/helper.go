@@ -39,7 +39,7 @@ func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
-		Kind:         model.RepoGit,
+		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,
 		FullName:     from.FullName,

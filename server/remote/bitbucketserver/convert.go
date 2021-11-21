@@ -77,7 +77,7 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		Name:         from.Slug,
 		Owner:        from.Project.Key,
 		Branch:       "master",
-		Kind:         model.RepoGit,
+		SCMKind:      model.RepoGit,
 		IsSCMPrivate: true, // Since we have to use Netrc it has to always be private :/
 		FullName:     fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 	}

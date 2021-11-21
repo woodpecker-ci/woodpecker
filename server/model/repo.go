@@ -33,7 +33,7 @@ type Repo struct {
 	Link         string      `json:"link_url,omitempty"       xorm:"varchar(1000) 'repo_link'"`
 	Clone        string      `json:"clone_url,omitempty"      xorm:"varchar(1000) 'repo_clone'"`
 	Branch       string      `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
-	Kind         SCMKind     `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"` // TODO: rename to `SCMKind`
+	SCMKind      SCMKind     `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"`
 	Timeout      int64       `json:"timeout,omitempty"        xorm:"repo_timeout"`
 	Visibility   RepoVisibly `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"`
 	IsSCMPrivate bool        `json:"private"                  xorm:"repo_private"`
@@ -77,7 +77,7 @@ func ParseRepo(str string) (user, repo string, err error) {
 func (r *Repo) Update(from *Repo) {
 	r.Avatar = from.Avatar
 	r.Link = from.Link
-	r.Kind = from.Kind
+	r.SCMKind = from.SCMKind
 	r.Clone = from.Clone
 	r.Branch = from.Branch
 	if from.IsSCMPrivate != r.IsSCMPrivate {

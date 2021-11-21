@@ -84,10 +84,10 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		Link:         from.Links.Html.Href,
 		IsSCMPrivate: from.IsPrivate,
 		Avatar:       from.Owner.Links.Avatar.Href,
-		Kind:         model.SCMKind(from.Scm),
+		SCMKind:      model.SCMKind(from.Scm),
 		Branch:       "master",
 	}
-	if repo.Kind == model.RepoHg {
+	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
 	}
 	return &repo

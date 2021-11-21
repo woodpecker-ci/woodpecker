@@ -141,7 +141,7 @@ func convertRepository(repo *Repository) (*model.Repo, error) {
 		Name:     repo.Name,
 		FullName: projectFullName(repo.Owner.GlobalKey, repo.Name),
 		Link:     repo.WebURL,
-		Kind:     model.RepoGit,
+		SCMKind:  model.RepoGit,
 	}, nil
 }
 

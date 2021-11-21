@@ -92,7 +92,7 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 		IsSCMPrivate: *from.Private,
 		Clone:        *from.CloneURL,
 		Avatar:       *from.Owner.AvatarURL,
-		Kind:         model.RepoGit,
+		SCMKind:      model.RepoGit,
 		Branch:       defaultBranch,
 		Perm:         convertPerm(from),
 	}
@@ -167,7 +167,7 @@ func convertRepoHook(from *webhook) *model.Repo {
 		IsSCMPrivate: from.Repo.Private,
 		Clone:        from.Repo.CloneURL,
 		Branch:       from.Repo.DefaultBranch,
-		Kind:         model.RepoGit,
+		SCMKind:      model.RepoGit,
 	}
 	if repo.Branch == "" {
 		repo.Branch = defaultBranch
