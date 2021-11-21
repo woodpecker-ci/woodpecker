@@ -21,18 +21,19 @@ const (
 	EventDeploy = "deployment"
 )
 
-// TODO: type StatusValue string
+// StatusValue represent pipeline states woodpecker know
+type StatusValue string
 
 const (
-	StatusSkipped  = "skipped"
-	StatusPending  = "pending"
-	StatusRunning  = "running"
-	StatusSuccess  = "success"
-	StatusFailure  = "failure"
-	StatusKilled   = "killed"
-	StatusError    = "error"
-	StatusBlocked  = "blocked"
-	StatusDeclined = "declined"
+	StatusSkipped  StatusValue = "skipped"
+	StatusPending  StatusValue = "pending"
+	StatusRunning  StatusValue = "running"
+	StatusSuccess  StatusValue = "success"
+	StatusFailure  StatusValue = "failure"
+	StatusKilled   StatusValue = "killed"
+	StatusError    StatusValue = "error"
+	StatusBlocked  StatusValue = "blocked"
+	StatusDeclined StatusValue = "declined"
 )
 
 // SCMKind represent different version control systems

@@ -43,7 +43,7 @@ const (
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return statusPending
@@ -56,7 +56,7 @@ func convertStatus(status string) string {
 
 // convertDesc is a helper function used to convert a Woodpecker status to a
 // Bitbucket status description.
-func convertDesc(status string) string {
+func convertDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return descPending
