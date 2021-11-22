@@ -1,5 +1,5 @@
 <template>
-  <ListItem v-if="build" clickable class="p-0">
+  <ListItem v-if="build" clickable class="p-0 w-full">
     <div class="flex items-center mr-4">
       <div
         class="min-h-full w-3"
@@ -17,14 +17,16 @@
       </div>
     </div>
 
-    <div class="flex w-full py-2 px-4">
-      <div class="flex items-center"><img class="w-8" :src="build.author_avatar" /></div>
+    <div class="flex py-2 px-4 flex-grow min-w-0">
+      <div class="flex items-center flex-shrink-0"><img class="w-8" :src="build.author_avatar" /></div>
 
-      <div class="ml-4 flex items-center mx-4">
-        <span class="text-gray-600 dark:text-gray-500">{{ message }}</span>
+      <div class="ml-4 flex items-center mx-4 min-w-0">
+        <span class="text-gray-600 dark:text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">{{
+          message
+        }}</span>
       </div>
 
-      <div class="flex ml-auto text-gray-500 py-2">
+      <div class="flex ml-auto text-gray-500 py-2 flex-shrink-0">
         <div class="flex flex-col space-y-2 w-42">
           <div class="flex space-x-2 items-center">
             <Icon v-if="build.event === 'pull_request'" name="pull_request" />
