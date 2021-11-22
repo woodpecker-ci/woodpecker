@@ -375,7 +375,7 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
+			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
 	buildCopy := *build

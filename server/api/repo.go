@@ -49,7 +49,7 @@ func PostRepo(c *gin.Context) {
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
-		if repo.IsPrivate {
+		if repo.IsSCMPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
 	}
@@ -131,8 +131,8 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
-		case model.VisibilityInternal, model.VisibilityPrivate, model.VisibilityPublic:
-			repo.Visibility = *in.Visibility
+		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
+			repo.Visibility = model.RepoVisibly(*in.Visibility)
 		default:
 			c.String(400, "Invalid visibility type")
 			return
@@ -262,8 +262,8 @@ func RepairRepo(c *gin.Context) {
 	repo.Avatar = from.Avatar
 	repo.Link = from.Link
 	repo.Clone = from.Clone
-	repo.IsPrivate = from.IsPrivate
-	if repo.IsPrivate != from.IsPrivate {
+	repo.IsSCMPrivate = from.IsSCMPrivate
+	if repo.IsSCMPrivate != from.IsSCMPrivate {
 		repo.ResetVisibility()
 	}
 	if err := store_.UpdateRepo(repo); err != nil {
@@ -309,8 +309,8 @@ func MoveRepo(c *gin.Context) {
 	repo.Avatar = from.Avatar
 	repo.Link = from.Link
 	repo.Clone = from.Clone
-	repo.IsPrivate = from.IsPrivate
-	if repo.IsPrivate != from.IsPrivate {
+	repo.IsSCMPrivate = from.IsSCMPrivate
+	if repo.IsSCMPrivate != from.IsSCMPrivate {
 		repo.ResetVisibility()
 	}
 

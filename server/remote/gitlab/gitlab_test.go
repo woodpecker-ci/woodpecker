@@ -97,7 +97,7 @@ func Test_Gitlab(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
-				assert.True(t, _repo.IsPrivate)
+				assert.True(t, _repo.IsSCMPrivate)
 			})
 
 			g.It("Should return error, when repo not exist", func() {

@@ -91,13 +91,13 @@ func TestRepoListLatest(t *testing.T) {
 	if got, want := len(builds), 2; got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
-	if got, want := builds[0].Status, model.StatusRunning; want != got {
+	if got, want := builds[0].Status, string(model.StatusRunning); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
 	if got, want := builds[0].FullName, repo1.FullName; want != got {
 		t.Errorf("Want repository name %s, got %s", want, got)
 	}
-	if got, want := builds[1].Status, model.StatusKilled; want != got {
+	if got, want := builds[1].Status, string(model.StatusKilled); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
 	if got, want := builds[1].FullName, repo2.FullName; want != got {

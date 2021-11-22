@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package queue
 
 import (
 	"context"
@@ -21,18 +21,16 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO: move code to "github.com/woodpecker-ci/woodpecker/server/queue"
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.
-func WithTaskStore(q queue.Queue, s TaskStore) queue.Queue {
+func WithTaskStore(q Queue, s model.TaskStore) Queue {
 	tasks, _ := s.TaskList()
-	var toEnqueue []*queue.Task
+	var toEnqueue []*Task
 	for _, task := range tasks {
-		toEnqueue = append(toEnqueue, &queue.Task{
+		toEnqueue = append(toEnqueue, &Task{
 			ID:           task.ID,
 			Data:         task.Data,
 			Labels:       task.Labels,
@@ -48,13 +46,13 @@ func WithTaskStore(q queue.Queue, s TaskStore) queue.Queue {
 }
 
 type persistentQueue struct {
-	queue.Queue
-	store TaskStore
+	Queue
+	store model.TaskStore
 }
 
 // Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
-	if err := q.store.TaskInsert(&Task{
+func (q *persistentQueue) Push(c context.Context, task *Task) error {
+	if err := q.store.TaskInsert(&model.Task{
 		ID:           task.ID,
 		Data:         task.Data,
 		Labels:       task.Labels,
@@ -73,10 +71,10 @@ func (q *persistentQueue) Push(c context.Context, task *queue.Task) error {
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
-func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) error {
+func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
 	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
-		if err := q.store.TaskInsert(&Task{
+		if err := q.store.TaskInsert(&model.Task{
 			ID:           task.ID,
 			Data:         task.Data,
 			Labels:       task.Labels,
@@ -98,7 +96,7 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*queue.Task) err
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *persistentQueue) Poll(c context.Context, f queue.Filter) (*queue.Task, error) {
+func (q *persistentQueue) Poll(c context.Context, f Filter) (*Task, error) {
 	task, err := q.Queue.Poll(c, f)
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
@@ -120,7 +118,7 @@ func (q *persistentQueue) Evict(c context.Context, id string) error {
 	return err
 }
 
-// Evict removes a pending task from the queue.
+// EvictAtOnce removes a pending task from the queue.
 func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
 	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
 		return err
