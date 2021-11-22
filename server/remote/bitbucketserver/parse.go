@@ -36,7 +36,7 @@ func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Build, erro
 		Owner:    hook.Repository.Project.Key,
 		FullName: fmt.Sprintf("%s/%s", hook.Repository.Project.Key, hook.Repository.Slug),
 		Branch:   "master",
-		Kind:     model.RepoGit,
+		SCMKind:  model.RepoGit,
 	}
 
 	return repo, build, nil

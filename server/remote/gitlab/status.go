@@ -31,7 +31,7 @@ const (
 )
 
 // getStatus is a helper that converts a Woodpecker status to a Gitlab status.
-func getStatus(status string) gitlab.BuildStateValue {
+func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
 		return gitlab.Pending
@@ -50,7 +50,7 @@ func getStatus(status string) gitlab.BuildStateValue {
 
 // getDesc is a helper function that generates a description
 // message for the build based on the status.
-func getDesc(status string) string {
+func getDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:
 		return DescPending
