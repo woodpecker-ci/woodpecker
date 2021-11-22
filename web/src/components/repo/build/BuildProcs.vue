@@ -7,7 +7,14 @@
 
     <div class="flex flex-col w-3/12 text-gray-200 dark:text-gray-400">
       <div v-for="proc in build.procs" :key="proc.id">
-        <div class="p-4 pb-1">{{ proc.name }}</div>
+        <div class="p-4 pb-1">
+          {{ proc.name }}
+          <ul>
+            <li v-for="env in Object.entries(proc.environ)" :key="env[0]">
+              {{ env[0] }} = {{ env[1] }}
+            </li>
+          </ul>
+        </div>
         <div
           v-for="job in proc.children"
           :key="job.pid"
