@@ -23,5 +23,4 @@ var alterTableReposDropFallback = task{
 	fn: func(sess *xorm.Session) error {
 		return dropTableColumns(sess, "repos", "repo_fallback")
 	},
-	dependency: []string{"xorm"},
 }

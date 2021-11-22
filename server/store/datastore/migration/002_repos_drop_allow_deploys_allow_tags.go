@@ -26,5 +26,4 @@ var alterTableReposDropAllowDeploysAllowTags = task{
 			"repo_allow_tags",
 		)
 	},
-	dependency: []string{"xorm"},
 }
