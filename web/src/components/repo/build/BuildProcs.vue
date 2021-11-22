@@ -7,13 +7,28 @@
 
     <div class="flex flex-col w-3/12 text-gray-200 dark:text-gray-400">
       <div v-for="proc in build.procs" :key="proc.id">
-        <div class="p-4 pb-1">
-          {{ proc.name }}
-          <ul>
-            <li v-for="env in Object.entries(proc.environ)" :key="env[0]">
-              {{ env[0] }} = {{ env[1] }}
-            </li>
-          </ul>
+        <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
+          <span>{{ proc.name }}</span>
+          <div v-if="proc.environ" class="text-xs">
+            <div v-for="(value, key) in proc.environ" :key="key">
+              <span
+                class="
+                  pl-2
+                  pr-1
+                  py-0.5
+                  bg-gray-800
+                  dark:bg-gray-600
+                  border-2 border-gray-800
+                  dark:border-gray-600
+                  rounded-l-full
+                "
+                >{{ key }}</span
+              >
+              <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">{{
+                value
+              }}</span>
+            </div>
+          </div>
         </div>
         <div
           v-for="job in proc.children"
