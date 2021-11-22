@@ -49,7 +49,7 @@ const (
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // GitHub commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped:
 		return statusPending
@@ -64,7 +64,7 @@ func convertStatus(status string) string {
 
 // convertDesc is a helper function used to convert a Woodpecker status to a
 // GitHub status description.
-func convertDesc(status string) string {
+func convertDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return descPending
@@ -85,22 +85,22 @@ func convertDesc(status string) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository, private bool) *model.Repo {
 	repo := &model.Repo{
-		Owner:     *from.Owner.Login,
-		Name:      *from.Name,
-		FullName:  *from.FullName,
-		Link:      *from.HTMLURL,
-		IsPrivate: *from.Private,
-		Clone:     *from.CloneURL,
-		Avatar:    *from.Owner.AvatarURL,
-		Kind:      model.RepoGit,
-		Branch:    defaultBranch,
-		Perm:      convertPerm(from),
+		Owner:        *from.Owner.Login,
+		Name:         *from.Name,
+		FullName:     *from.FullName,
+		Link:         *from.HTMLURL,
+		IsSCMPrivate: *from.Private,
+		Clone:        *from.CloneURL,
+		Avatar:       *from.Owner.AvatarURL,
+		SCMKind:      model.RepoGit,
+		Branch:       defaultBranch,
+		Perm:         convertPerm(from),
 	}
 	if from.DefaultBranch != nil {
 		repo.Branch = *from.DefaultBranch
 	}
 	if private {
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	}
 	return repo
 }
@@ -160,14 +160,14 @@ func convertTeam(from *github.Organization) *model.Team {
 // from a webhook and convert to the common Woodpecker repository structure.
 func convertRepoHook(from *webhook) *model.Repo {
 	repo := &model.Repo{
-		Owner:     from.Repo.Owner.Login,
-		Name:      from.Repo.Name,
-		FullName:  from.Repo.FullName,
-		Link:      from.Repo.HTMLURL,
-		IsPrivate: from.Repo.Private,
-		Clone:     from.Repo.CloneURL,
-		Branch:    from.Repo.DefaultBranch,
-		Kind:      model.RepoGit,
+		Owner:        from.Repo.Owner.Login,
+		Name:         from.Repo.Name,
+		FullName:     from.Repo.FullName,
+		Link:         from.Repo.HTMLURL,
+		IsSCMPrivate: from.Repo.Private,
+		Clone:        from.Repo.CloneURL,
+		Branch:       from.Repo.DefaultBranch,
+		SCMKind:      model.RepoGit,
 	}
 	if repo.Branch == "" {
 		repo.Branch = defaultBranch

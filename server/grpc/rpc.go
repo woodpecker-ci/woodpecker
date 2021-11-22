@@ -144,7 +144,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
+			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
 	message.Data, _ = json.Marshal(model.Event{
@@ -272,7 +272,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
-				"private": strconv.FormatBool(repo.IsPrivate),
+				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
 		message.Data, _ = json.Marshal(model.Event{
@@ -349,11 +349,11 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.notify(c, repo, build, procs)
 
 	if build.Status == model.StatusSuccess || build.Status == model.StatusFailure {
-		s.buildCount.WithLabelValues(repo.FullName, build.Branch, build.Status, "total").Inc()
-		s.buildTime.WithLabelValues(repo.FullName, build.Branch, build.Status, "total").Set(float64(build.Finished - build.Started))
+		s.buildCount.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Inc()
+		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Set(float64(build.Finished - build.Started))
 	}
 	if isMultiPipeline(procs) {
-		s.buildTime.WithLabelValues(repo.FullName, build.Branch, proc.State, proc.Name).Set(float64(proc.Stopped - proc.Started))
+		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(proc.State), proc.Name).Set(float64(proc.Stopped - proc.Started))
 	}
 
 	return nil
@@ -398,7 +398,7 @@ func isThereRunningStage(procs []*model.Proc) bool {
 	return false
 }
 
-func buildStatus(procs []*model.Proc) string {
+func buildStatus(procs []*model.Proc) model.StatusValue {
 	status := model.StatusSuccess
 
 	for _, p := range procs {
@@ -434,7 +434,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsPrivate),
+			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
 	message.Data, _ = json.Marshal(model.Event{
