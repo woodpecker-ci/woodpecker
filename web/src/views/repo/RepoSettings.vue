@@ -1,7 +1,7 @@
 <template>
   <FluidContainer>
     <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" @click="$router.back()" />
+      <IconButton icon="back" @click="goBack" />
       <h1 class="text-xl ml-2 text-gray-500">Settings</h1>
     </div>
 
@@ -39,6 +39,7 @@ import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useNotifications from '~/compositions/useNotifications';
+import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { RepoPermissions } from '~/lib/api/types';
 
 export default defineComponent({
@@ -71,6 +72,10 @@ export default defineComponent({
         await router.replace({ name: 'home' });
       }
     });
+
+    return {
+      goBack: useRouteBackOrDefault({ name: 'repo' }),
+    };
   },
 });
 </script>
