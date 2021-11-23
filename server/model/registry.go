@@ -32,7 +32,7 @@ type RegistryService interface {
 	RegistryDelete(*Repo, string) error
 }
 
-// RegistryService defines a service for managing registries.
+// ReadOnlyRegistryService defines a service for managing registries.
 type ReadOnlyRegistryService interface {
 	RegistryFind(*Repo, string) (*Registry, error)
 	RegistryList(*Repo) ([]*Registry, error)
