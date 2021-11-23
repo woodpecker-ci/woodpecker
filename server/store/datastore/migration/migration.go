@@ -104,11 +104,12 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 	}
 
 	for _, task := range tasks {
-		log.Trace().Msgf("start migration task '%s'", task.name)
 		if migCache[task.name] {
-			log.Trace().Msgf("migration task '%s' exist", task.name)
+			log.Trace().Msgf("migration task '%s' already applied", task.name)
 			continue
 		}
+
+		log.Trace().Msgf("start migration task '%s'", task.name)
 
 		if task.fn != nil {
 			if err := task.fn(sess); err != nil {
