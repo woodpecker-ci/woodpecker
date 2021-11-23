@@ -47,7 +47,10 @@ func GetFeed(c *gin.Context) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 
 		user.Synced = time.Now().Unix()
-		store_.UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Error().Err(err).Msg("UpdateUser")
+			return
+		}
 
 		config := ToConfig(c)
 
@@ -138,7 +141,7 @@ func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)
@@ -158,7 +161,7 @@ func DeleteToken(c *gin.Context) {
 
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)

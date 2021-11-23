@@ -8,7 +8,17 @@ linters:
     - gofmt
     - goimports
     - govet
+    - deadcode
+    - gosimple
+    - typecheck
+    - errcheck
     - bidichk
 
 run:
   timeout: 5m
+
+issues:
+  exclude-rules:
+    - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
+      linters:
+        - deadcode

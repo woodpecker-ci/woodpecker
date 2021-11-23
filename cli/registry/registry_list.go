@@ -49,7 +49,9 @@ func registryList(c *cli.Context) error {
 		return err
 	}
 	for _, registry := range list {
-		tmpl.Execute(os.Stdout, registry)
+		if err := tmpl.Execute(os.Stdout, registry); err != nil {
+			return err
+		}
 	}
 	return nil
 }
