@@ -3,9 +3,7 @@ package rowserr
 import (
 	"go/ast"
 	"go/types"
-	"strconv"
 
-	"github.com/gostaticanalysis/analysisutil"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/buildssa"
 	"golang.org/x/tools/go/ssa"
@@ -29,11 +27,12 @@ const (
 )
 
 type runner struct {
-	pass     *analysis.Pass
-	rowsTyp  *types.Pointer
-	rowsObj  types.Object
-	skipFile map[*ast.File]bool
-	sqlPkgs  []string
+	pass          *analysis.Pass
+	rowsTyp       *types.Pointer
+	rowsInterface *types.Interface
+	rowsObj       types.Object
+	skipFile      map[*ast.File]bool
+	sqlPkgs       []string
 }
 
 func NewRun(pkgs ...string) func(pass *analysis.Pass) (interface{}, error) {
@@ -66,7 +65,6 @@ func (r runner) run(pass *analysis.Pass, pkgPath string) {
 		// skip checking
 		return
 	}
-
 	r.rowsObj = rowsType.Object()
 	if r.rowsObj == nil {
 		// skip checking
@@ -78,15 +76,15 @@ func (r runner) run(pass *analysis.Pass, pkgPath string) {
 		return
 	}
 
+	rowsInterface, ok := r.rowsObj.Type().Underlying().(*types.Interface)
+	if ok {
+		r.rowsInterface = rowsInterface
+	}
+
 	r.rowsTyp = types.NewPointer(resNamed)
 	r.skipFile = map[*ast.File]bool{}
 
 	for _, f := range funcs {
-		if r.noImportedDBSQL(f) {
-			// skip this
-			continue
-		}
-
 		// skip if the function is just referenced
 		var isRefFunc bool
 
@@ -139,10 +137,6 @@ func (r *runner) errCallMissing(b *ssa.BasicBlock, i int) (ret bool) {
 					switch c := aref.(type) {
 					case *ssa.MakeClosure:
 						f := c.Fn.(*ssa.Function)
-						if r.noImportedDBSQL(f) {
-							// skip this
-							continue
-						}
 						called := r.isClosureCalled(c)
 						if r.calledInFunc(f, called) {
 							return true
@@ -203,17 +197,18 @@ func (r *runner) getCallReturnsRow(instr ssa.Instruction) (*ssa.Call, bool) {
 	}
 
 	res := call.Call.Signature().Results()
-	flag := false
 
 	for i := 0; i < res.Len(); i++ {
-		flag = flag || types.Identical(res.At(i).Type(), r.rowsTyp)
+		typeToCheck := res.At(i).Type()
+		if types.Identical(typeToCheck, r.rowsTyp) {
+			return call, true
+		}
+		if r.rowsInterface != nil && types.Implements(typeToCheck, r.rowsInterface) {
+			return call, true
+		}
 	}
 
-	if !flag {
-		return nil, false
-	}
-
-	return call, true
+	return nil, false
 }
 
 func (r *runner) getRowsVal(instr ssa.Instruction) (ssa.Value, bool) {
@@ -222,8 +217,14 @@ func (r *runner) getRowsVal(instr ssa.Instruction) (ssa.Value, bool) {
 		if len(instr.Call.Args) == 1 && types.Identical(instr.Call.Args[0].Type(), r.rowsTyp) {
 			return instr.Call.Args[0], true
 		}
+		if len(instr.Call.Args) == 1 && r.rowsInterface != nil && types.Implements(instr.Call.Args[0].Type(), r.rowsInterface) {
+			return instr.Call.Args[0], true
+		}
 	case ssa.Value:
 		if types.Identical(instr.Type(), r.rowsTyp) {
+			return instr, true
+		}
+		if r.rowsInterface != nil && types.Implements(instr.Type(), r.rowsInterface) {
 			return instr, true
 		}
 	default:
@@ -250,8 +251,14 @@ func (r *runner) isErrCall(ccall ssa.Instruction) bool {
 		if ccall.Call.Value != nil && ccall.Call.Value.Name() == errMethod {
 			return true
 		}
+		if ccall.Call.Method != nil && ccall.Call.Method.Name() == errMethod {
+			return true
+		}
 	case *ssa.Call:
 		if ccall.Call.Value != nil && ccall.Call.Value.Name() == errMethod {
+			return true
+		}
+		if ccall.Call.Method != nil && ccall.Call.Method.Name() == errMethod {
 			return true
 		}
 	}
@@ -268,40 +275,6 @@ func (r *runner) isClosureCalled(c *ssa.MakeClosure) bool {
 	}
 
 	return false
-}
-
-func (r *runner) noImportedDBSQL(f *ssa.Function) (ret bool) {
-	obj := f.Object()
-	if obj == nil {
-		return false
-	}
-
-	file := analysisutil.File(r.pass, obj.Pos())
-	if file == nil {
-		return false
-	}
-
-	if skip, has := r.skipFile[file]; has {
-		return skip
-	}
-	defer func() {
-		r.skipFile[file] = ret
-	}()
-
-	for _, impt := range file.Imports {
-		path, err := strconv.Unquote(impt.Path.Value)
-		if err != nil {
-			continue
-		}
-		path = analysisutil.RemoveVendor(path)
-		for _, pkg := range r.sqlPkgs {
-			if pkg == path {
-				return false
-			}
-		}
-	}
-
-	return true
 }
 
 func (r *runner) calledInFunc(f *ssa.Function, called bool) bool {

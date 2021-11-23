@@ -7,22 +7,25 @@ Duration Check
 
 A Go linter to detect cases where two `time.Duration` values are being multiplied in possibly erroneous ways.
 
-For example, consider the following (highly contrived) function:
+Consider the following (highly contrived) code:
 
 ```go
-func waitFor(someDuration time.Duration) {
-    timeToWait := someDuration * time.Second
-    time.Sleep(timeToWait)
+func waitForSeconds(someDuration time.Duration) {
+	timeToWait := someDuration * time.Second
+	fmt.Printf("Waiting for %s\n", timeToWait)
+}
+
+func main() {
+	waitForSeconds(5) // waits for 5 seconds
+	waitForSeconds(5 * time.Second) // waits for 1388888h 53m 20s
 }
 ```
 
-Although the above code would compile without any errors, its runtime behaviour would almost certainly be incorrect. 
-A caller would reasonably expect `waitFor(5 * time.Seconds)` to wait for ~5 seconds but they would actually end up 
-waiting for ~1,388,889 hours.
+Both invocations of the function are syntactically correct but the second one is probably not what most people want.
+In this contrived example it is quite easy to spot the mistake. However, if the incorrect `waitForSeconds` invocation is
+nested deep within a complex piece of code that runs in the background, the mistake could go unnoticed for months (which
+is exactly what happened in a production backend system of fairly well-known software service). 
 
-The above example is just for illustration purposes only. The problem is glaringly obvious in such a simple function 
-and even the greenest Gopher would discover the issue immediately. However, imagine a much more complicated function 
-with many more lines and it is not inconceivable that such logic errors could go unnoticed. 
 
 See the [test cases](testdata/src/a/a.go) for more examples of the types of errors detected by the linter.
 

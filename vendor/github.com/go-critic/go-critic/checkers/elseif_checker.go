@@ -59,7 +59,7 @@ func (c *elseifChecker) VisitStmt(stmt ast.Stmt) {
 		if balanced && c.skipBalanced {
 			return // Configured to skip balanced statements
 		}
-		if innerIfStmt.Else != nil {
+		if innerIfStmt.Else != nil || innerIfStmt.Init != nil {
 			return
 		}
 		c.warn(stmt.Else)

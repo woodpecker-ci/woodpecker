@@ -82,7 +82,7 @@ func (r *AddConstantRule) Apply(file *lint.File, arguments lint.Arguments) []lin
 		failures = append(failures, failure)
 	}
 
-	w := lintAddConstantRule{onFailure: onFailure, strLits: make(map[string]int, 0), strLitLimit: strLitLimit, whiteLst: whiteList}
+	w := lintAddConstantRule{onFailure: onFailure, strLits: make(map[string]int), strLitLimit: strLitLimit, whiteLst: whiteList}
 
 	ast.Walk(w, file.AST)
 

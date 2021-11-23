@@ -17,7 +17,7 @@ func (r *EmptyBlockRule) Apply(file *lint.File, _ lint.Arguments) []lint.Failure
 		failures = append(failures, failure)
 	}
 
-	w := lintEmptyBlock{make(map[*ast.BlockStmt]bool, 0), onFailure}
+	w := lintEmptyBlock{make(map[*ast.BlockStmt]bool), onFailure}
 	ast.Walk(w, file.AST)
 	return failures
 }

@@ -76,10 +76,12 @@ func (w *lintTimeNames) Visit(node ast.Node) ast.Visitor {
 // timeSuffixes is a list of name suffixes that imply a time unit.
 // This is not an exhaustive list.
 var timeSuffixes = []string{
-	"Sec", "Secs", "Seconds",
+	"Hour", "Hours",
+	"Min", "Mins", "Minutes", "Minute",
+	"Sec", "Secs", "Seconds", "Second",
 	"Msec", "Msecs",
-	"Milli", "Millis", "Milliseconds",
-	"Usec", "Usecs", "Microseconds",
+	"Milli", "Millis", "Milliseconds", "Millisecond",
+	"Usec", "Usecs", "Microseconds", "Microsecond",
 	"MS", "Ms",
 }
 

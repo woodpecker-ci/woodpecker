@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"runtime"
@@ -200,9 +200,6 @@ func initFlagSet(fs *pflag.FlagSet, cfg *config.Config, m *lintersdb.Manager, is
 	fs.StringSliceVarP(&lc.Enable, "enable", "E", nil, wh("Enable specific linter"))
 	fs.StringSliceVarP(&lc.Disable, "disable", "D", nil, wh("Disable specific linter"))
 	fs.BoolVar(&lc.EnableAll, "enable-all", false, wh("Enable all linters"))
-	if err := fs.MarkHidden("enable-all"); err != nil {
-		panic(err)
-	}
 
 	fs.BoolVar(&lc.DisableAll, "disable-all", false, wh("Disable all linters"))
 	fs.StringSliceVarP(&lc.Presets, "presets", "p", nil,
@@ -233,6 +230,8 @@ func initFlagSet(fs *pflag.FlagSet, cfg *config.Config, m *lintersdb.Manager, is
 		wh("Show only new issues created after git revision `REV`"))
 	fs.StringVar(&ic.DiffPatchFilePath, "new-from-patch", "",
 		wh("Show only new issues created in git patch with file path `PATH`"))
+	fs.BoolVar(&ic.WholeFiles, "whole-files", false,
+		wh("Show issues in any part of update files (requires new-from-rev or new-from-patch)"))
 	fs.BoolVar(&ic.NeedFix, "fix", false, "Fix found issues (if it's supported by the linter)")
 }
 
@@ -324,6 +323,7 @@ func fixSlicesFlags(fs *pflag.FlagSet) {
 	})
 }
 
+// runAnalysis executes the linters that have been enabled in the configuration.
 func (e *Executor) runAnalysis(ctx context.Context, args []string) ([]result.Issue, error) {
 	e.cfg.Run.Args = args
 
@@ -388,7 +388,7 @@ func (e *Executor) runAndPrint(ctx context.Context, args []string) error {
 
 	if !logutils.HaveDebugTag("linters_output") {
 		// Don't allow linters and loader to print anything
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 		savedStdout, savedStderr := e.setOutputToDevNull()
 		defer func() {
 			os.Stdout, os.Stderr = savedStdout, savedStderr
@@ -445,6 +445,7 @@ func (e *Executor) createPrinter() (printers.Printer, error) {
 	return p, nil
 }
 
+// executeRun executes the 'run' CLI command, which runs the linters.
 func (e *Executor) executeRun(_ *cobra.Command, args []string) {
 	needTrackResources := e.cfg.Run.IsVerbose || e.cfg.Run.PrintResourcesUsage
 	trackResourcesEndCh := make(chan struct{})

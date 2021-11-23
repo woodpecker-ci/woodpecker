@@ -6,7 +6,7 @@ import (
 	"github.com/quasilyte/go-ruleguard/internal/golist"
 )
 
-func findBundleFiles(pkgPath string) ([]string, error) {
+func findBundleFiles(pkgPath string) ([]string, error) { // nolint
 	pkg, err := golist.JSON(pkgPath)
 	if err != nil {
 		return nil, err

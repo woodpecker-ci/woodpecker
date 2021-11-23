@@ -5,6 +5,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPubsub(t *testing.T) {
@@ -22,12 +24,12 @@ func TestPubsub(t *testing.T) {
 	)
 
 	broker := New()
-	broker.Create(ctx, testTopic)
+	assert.NoError(t, broker.Create(ctx, testTopic))
 	go func() {
-		broker.Subscribe(ctx, testTopic, func(message Message) { wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(message Message) { wg.Done() }))
 	}()
 	go func() {
-		broker.Subscribe(ctx, testTopic, func(message Message) { wg.Done() })
+		assert.NoError(t, broker.Subscribe(ctx, testTopic, func(message Message) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
@@ -38,7 +40,7 @@ func TestPubsub(t *testing.T) {
 
 	wg.Add(2)
 	go func() {
-		broker.Publish(ctx, testTopic, testMessage)
+		assert.NoError(t, broker.Publish(ctx, testTopic, testMessage))
 	}()
 
 	wg.Wait()
@@ -80,9 +82,9 @@ func TestSubscriptionClosed(t *testing.T) {
 	)
 
 	broker := New()
-	broker.Create(context.Background(), testTopic)
+	assert.NoError(t, broker.Create(context.Background(), testTopic))
 	go func() {
-		broker.Subscribe(context.Background(), testTopic, testCallback)
+		assert.NoError(t, broker.Subscribe(context.Background(), testTopic, testCallback))
 		wg.Done()
 	}()
 
@@ -93,7 +95,7 @@ func TestSubscriptionClosed(t *testing.T) {
 	}
 
 	wg.Add(1)
-	broker.Remove(context.Background(), testTopic)
+	assert.NoError(t, broker.Remove(context.Background(), testTopic))
 	wg.Wait()
 
 	if _, ok := broker.(*publisher).topics[testTopic]; ok {

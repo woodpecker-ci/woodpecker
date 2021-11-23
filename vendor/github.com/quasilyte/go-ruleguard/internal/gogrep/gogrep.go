@@ -3,13 +3,14 @@ package gogrep
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 
 	"github.com/quasilyte/go-ruleguard/nodetag"
 )
 
 func IsEmptyNodeSlice(n ast.Node) bool {
-	if list, ok := n.(nodeSlice); ok {
-		return list.len() == 0
+	if list, ok := n.(NodeSlice); ok {
+		return list.Len() == 0
 	}
 	return false
 }
@@ -26,11 +27,34 @@ type CapturedNode struct {
 }
 
 func (data MatchData) CapturedByName(name string) (ast.Node, bool) {
+	if name == "$$" {
+		return data.Node, true
+	}
 	return findNamed(data.Capture, name)
+}
+
+type MatcherState struct {
+	Types *types.Info
+
+	// node values recorded by name, excluding "_" (used only by the
+	// actual matching phase)
+	capture []CapturedNode
+
+	pc int
+}
+
+func NewMatcherState() MatcherState {
+	return MatcherState{
+		capture: make([]CapturedNode, 0, 8),
+	}
 }
 
 type Pattern struct {
 	m *matcher
+}
+
+type PatternInfo struct {
+	Vars map[string]struct{}
 }
 
 func (p *Pattern) NodeTag() nodetag.Value {
@@ -38,8 +62,8 @@ func (p *Pattern) NodeTag() nodetag.Value {
 }
 
 // MatchNode calls cb if n matches a pattern.
-func (p *Pattern) MatchNode(n ast.Node, cb func(MatchData)) {
-	p.m.MatchNode(n, cb)
+func (p *Pattern) MatchNode(state *MatcherState, n ast.Node, cb func(MatchData)) {
+	p.m.MatchNode(state, n, cb)
 }
 
 // Clone creates a pattern copy.
@@ -47,20 +71,26 @@ func (p *Pattern) Clone() *Pattern {
 	clone := *p
 	clone.m = &matcher{}
 	*clone.m = *p.m
-	clone.m.capture = make([]CapturedNode, 0, 8)
 	return &clone
 }
 
-func Compile(fset *token.FileSet, src string, strict bool) (*Pattern, error) {
+func Compile(fset *token.FileSet, src string, strict bool) (*Pattern, PatternInfo, error) {
+	info := newPatternInfo()
 	n, err := parseExpr(fset, src)
 	if err != nil {
-		return nil, err
+		return nil, info, err
 	}
 	var c compiler
-	prog, err := c.Compile(fset, n, strict)
+	prog, err := c.Compile(fset, n, &info, strict)
 	if err != nil {
-		return nil, err
+		return nil, info, err
 	}
 	m := newMatcher(prog)
-	return &Pattern{m: m}, nil
+	return &Pattern{m: m}, info, nil
+}
+
+func newPatternInfo() PatternInfo {
+	return PatternInfo{
+		Vars: map[string]struct{}{},
+	}
 }

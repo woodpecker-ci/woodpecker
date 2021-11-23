@@ -58,18 +58,20 @@ func checkCommentForPeriod(c comment) *Issue {
 		return nil
 	}
 
-	// Shift position by the length of comment's special symbols: /* or //
-	isBlock := strings.HasPrefix(c.lines[0], "/*")
-	if (isBlock && pos.line == 1) || !isBlock {
-		pos.column += 2
-	}
+	// Shift position to its real value. `c.text` doesn't contain comment's
+	// special symbols: /* or //, and line indentations inside. It also
+	// contains */ in the end in case of block comment.
+	pos.column += strings.Index(
+		c.lines[pos.line-1],
+		strings.Split(c.text, "\n")[pos.line-1],
+	)
 
 	iss := Issue{
 		Pos: token.Position{
 			Filename: c.start.Filename,
 			Offset:   c.start.Offset,
 			Line:     pos.line + c.start.Line - 1,
-			Column:   pos.column + c.start.Column - 1,
+			Column:   pos.column,
 		},
 		Message: noPeriodMessage,
 	}
@@ -77,9 +79,13 @@ func checkCommentForPeriod(c comment) *Issue {
 	// Make a replacement. Use `pos.line` to get an original line from
 	// attached lines. Use `iss.Pos.Column` because it's a position in
 	// the original line.
-	original := []rune(c.lines[pos.line-1])
-	iss.Replacement = string(original[:iss.Pos.Column-1]) + "." +
-		string(original[iss.Pos.Column-1:])
+	original := c.lines[pos.line-1]
+	if len(original) < iss.Pos.Column-1 {
+		// This should never happen. Avoid panics, skip this check.
+		return nil
+	}
+	iss.Replacement = original[:iss.Pos.Column-1] + "." +
+		original[iss.Pos.Column-1:]
 
 	// Save replacement to raw lines to be able to combine it with
 	// further replacements
@@ -115,12 +121,18 @@ func checkCommentForCapital(c comment) []Issue {
 			Message: noCapitalMessage,
 		}
 
-		// Make a replacement. Use `pos.line` to get an original line from
+		// Make a replacement. Use `pos.original` to get an original original from
 		// attached lines. Use `iss.Pos.Column` because it's a position in
-		// the original line.
-		rep := []rune(c.lines[pos.line-1])
-		rep[iss.Pos.Column-1] = unicode.ToTitle(rep[iss.Pos.Column-1])
-		iss.Replacement = string(rep)
+		// the original original.
+		original := c.lines[pos.line-1]
+		col := byteToRuneColumn(original, iss.Pos.Column) - 1
+		rep := string(unicode.ToTitle([]rune(original)[col])) // capital letter
+		if len(original) < iss.Pos.Column-1+len(rep) {
+			// This should never happen. Avoid panics, skip this check.
+			continue
+		}
+		iss.Replacement = original[:iss.Pos.Column-1] + rep +
+			original[iss.Pos.Column-1+len(rep):]
 
 		// Save replacement to raw lines to be able to combine it with
 		// further replacements
@@ -158,14 +170,14 @@ func checkPeriod(comment string) (pos position, ok bool) {
 		return position{}, true
 	}
 
-	pos.column = len([]rune(line)) + 1
+	pos.column = len(line) + 1
 	return pos, false
 }
 
 // checkCapital checks that each sentense of the text starts with
 // a capital letter.
 // NOTE: First letter is not checked in declaration comments, because they
-// can describe unexported functions, which start from small letter.
+// can describe unexported functions, which start with small letter.
 func checkCapital(comment string, skipFirst bool) (pp []position) {
 	// Remove common abbreviations from the comment
 	for _, abbr := range abbreviations {
@@ -209,7 +221,10 @@ func checkCapital(comment string, skipFirst bool) (pp []position) {
 			continue
 		}
 		if state == endOfSentence && unicode.IsLower(r) {
-			pp = append(pp, position{line: pos.line, column: pos.column})
+			pp = append(pp, position{
+				line:   pos.line,
+				column: runeToByteColumn(comment, pos.column),
+			})
 		}
 		state = empty
 	}
@@ -266,4 +281,23 @@ func hasSuffix(s string, suffixes []string) bool {
 		}
 	}
 	return false
+}
+
+// The following two functions convert byte and rune indexes.
+//
+// Example:
+//   text:  a b c Ш e f
+//   runes: 1 2 3 4 5 6
+//   bytes: 0 1 2 3 5 6
+// The reason of the difference is that the size of "Ш" is 2 bytes.
+// NOTE: Works only for 1-based indexes (line columns).
+
+// byteToRuneColumn converts byte index inside the string to rune index.
+func byteToRuneColumn(s string, i int) int {
+	return len([]rune(s[:i-1])) + 1
+}
+
+// runeToByteColumn converts rune index inside the string to byte index.
+func runeToByteColumn(s string, i int) int {
+	return len(string([]rune(s)[:i-1])) + 1
 }

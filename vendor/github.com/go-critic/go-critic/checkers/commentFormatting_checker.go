@@ -26,6 +26,7 @@ func init() {
 			`^//nolint\b`,        // e.g.: nolint
 			`^//line /.*:\d+`,    // e.g.: line /path/to/file:123
 			`^//export \w+$`,     // e.g.: export Foo
+			`^//[/+#-]+.*$`,      // e.g.: vertical breaker /////////////
 		}
 		pat := "(?m)" + strings.Join(parts, "|")
 		pragmaRE := regexp.MustCompile(pat)

@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
@@ -67,12 +69,14 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		detached = true
 	}
 
-	if detached == false || len(container.Commands) != 0 {
+	if !detached || len(container.Commands) != 0 {
 		workingdir = path.Join(c.base, c.path)
 	}
 
-	if detached == false {
-		paramsToEnv(container.Vargs, environment)
+	if !detached {
+		if err := paramsToEnv(container.Vargs, environment); err != nil {
+			log.Error().Err(err).Msg("paramsToEnv")
+		}
 	}
 
 	if len(container.Commands) != 0 {

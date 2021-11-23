@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-critic/go-critic/checkers/internal/astwalk"
 	"github.com/go-critic/go-critic/framework/linter"
+	"github.com/go-toolsmith/astp"
 )
 
 func init() {
@@ -32,11 +33,18 @@ type unnecessaryBlockChecker struct {
 	ctx *linter.CheckerContext
 }
 
-func (c *unnecessaryBlockChecker) VisitStmtList(statements []ast.Stmt) {
+func (c *unnecessaryBlockChecker) VisitStmtList(x ast.Node, statements []ast.Stmt) {
 	// Using StmtListVisitor instead of StmtVisitor makes it easier to avoid
 	// false positives on IfStmt, RangeStmt, ForStmt and alike.
 	// We only inspect BlockStmt inside statement lists, so this method is not
 	// called for IfStmt itself, for example.
+
+	if (astp.IsCaseClause(x) || astp.IsCommClause(x)) && len(statements) == 1 {
+		if _, ok := statements[0].(*ast.BlockStmt); ok {
+			c.ctx.Warn(statements[0], "case statement doesn't require a block statement")
+			return
+		}
+	}
 
 	for _, stmt := range statements {
 		stmt, ok := stmt.(*ast.BlockStmt)

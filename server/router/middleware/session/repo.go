@@ -104,7 +104,10 @@ func SetPerm() gin.HandlerFunc {
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store_.PermUpsert(perm)
+					if err := store_.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package nlreturn
 
 import (
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -13,13 +14,20 @@ const (
 	linterDoc  = `Linter requires a new line before return and branch statements except when the return is alone inside a statement group (such as an if statement) to increase code clarity.`
 )
 
+var blockSize int
+
 // NewAnalyzer returns a new nlreturn analyzer.
 func NewAnalyzer() *analysis.Analyzer {
-	return &analysis.Analyzer{
+	a := &analysis.Analyzer{
 		Name: linterName,
 		Doc:  linterDoc,
 		Run:  run,
 	}
+
+	a.Flags.Init("nlreturn", flag.ExitOnError)
+	a.Flags.IntVar(&blockSize, "block-size", 1, "set block size that is still ok")
+
+	return a
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -45,7 +53,8 @@ func inspectBlock(pass *analysis.Pass, block []ast.Stmt) {
 	for i, stmt := range block {
 		switch stmt.(type) {
 		case *ast.BranchStmt, *ast.ReturnStmt:
-			if i == 0 {
+
+			if i == 0 || line(pass, stmt.Pos())-line(pass, block[0].Pos()) < blockSize {
 				return
 			}
 

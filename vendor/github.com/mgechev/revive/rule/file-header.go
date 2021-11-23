@@ -42,9 +42,9 @@ func (r *FileHeaderRule) Apply(file *lint.File, arguments lint.Arguments) []lint
 	comment := ""
 	for _, c := range g.List {
 		text := c.Text
-		if multiRegexp.Match([]byte(text)) {
+		if multiRegexp.MatchString(text) {
 			text = text[2 : len(text)-2]
-		} else if singleRegexp.Match([]byte(text)) {
+		} else if singleRegexp.MatchString(text) {
 			text = text[2:]
 		}
 		comment += text
@@ -55,7 +55,7 @@ func (r *FileHeaderRule) Apply(file *lint.File, arguments lint.Arguments) []lint
 		panic(err.Error())
 	}
 
-	if !regex.Match([]byte(comment)) {
+	if !regex.MatchString(comment) {
 		return failure
 	}
 	return nil

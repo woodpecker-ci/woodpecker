@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -67,8 +68,6 @@ func (w *website) Register(mux *gin.Engine) {
 }
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(200)
-
 	var csrf string
 	var user, _ = ToUser(r.Context())
 	if user != nil {
@@ -89,7 +88,13 @@ func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 
-	w.tmpl.Execute(rw, params)
+	if err := w.tmpl.Execute(rw, params); err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Error().Err(err).Msg("execute template")
+		return
+	}
+
+	rw.WriteHeader(200)
 }
 
 func setupCache(h http.Handler) http.Handler {
