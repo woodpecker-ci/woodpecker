@@ -104,9 +104,10 @@ export type BuildProc = {
   name: string;
   state: BuildStatus;
   exit_code: number;
-  start_time: number;
-  end_time: number;
-  machine: string;
+  environ?: Record<string, string>;
+  start_time?: number;
+  end_time?: number;
+  machine?: string;
   children?: BuildProc[];
 };
 
