@@ -30,7 +30,7 @@ type appendCombineChecker struct {
 	ctx *linter.CheckerContext
 }
 
-func (c *appendCombineChecker) VisitStmtList(list []ast.Stmt) {
+func (c *appendCombineChecker) VisitStmtList(_ ast.Node, list []ast.Stmt) {
 	var cause ast.Node // First append
 	var slice ast.Expr // Slice being appended to
 	chain := 0         // How much appends in a row we've seen

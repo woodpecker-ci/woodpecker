@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/model"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -97,8 +99,8 @@ func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string, exitStatus string) error {
-	return q.finished([]string{id}, exitStatus, nil)
+func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+	return q.finished([]string{id}, string(exitStatus), nil)
 }
 
 // Error signals that the item is done executing with error.

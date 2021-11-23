@@ -164,7 +164,7 @@ func TestProcUpdate(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if got, want := updated.State, "running"; got != want {
+	if got, want := updated.State, model.StatusRunning; got != want {
 		t.Errorf("Want proc name %s, got %s", want, got)
 	}
 }

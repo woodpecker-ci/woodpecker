@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
@@ -56,7 +57,9 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 // Run starts the runtime and waits for it to complete.
 func (r *Runtime) Run() error {
 	defer func() {
-		r.engine.Destroy(r.ctx, r.spec)
+		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
+			log.Error().Err(err).Msg("could not destroy engine")
+		}
 	}()
 
 	r.started = time.Now().Unix()
@@ -106,9 +109,9 @@ func (r *Runtime) execAll(procs []*backend.Step) <-chan error {
 
 func (r *Runtime) exec(proc *backend.Step) error {
 	switch {
-	case r.err != nil && proc.OnFailure == false:
+	case r.err != nil && !proc.OnFailure:
 		return nil
-	case r.err == nil && proc.OnSuccess == false:
+	case r.err == nil && !proc.OnSuccess:
 		return nil
 	}
 
@@ -143,8 +146,10 @@ func (r *Runtime) exec(proc *backend.Step) error {
 		}
 
 		go func() {
-			r.logger.Log(proc, multipart.New(rc))
-			rc.Close()
+			if err := r.logger.Log(proc, multipart.New(rc)); err != nil {
+				log.Error().Err(err).Msg("process logging failed")
+			}
+			_ = rc.Close()
 		}()
 	}
 

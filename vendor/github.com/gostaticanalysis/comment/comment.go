@@ -123,25 +123,30 @@ func (maps Maps) IgnoreLine(fset *token.FileSet, line int, check string) bool {
 
 // hasIgnoreCheck returns true if the provided CommentGroup starts with a comment
 // of the form "//lint:ignore Check1[,Check2,...,CheckN] reason" and one of the
-// checks matches the provided check. The *ast.CommentGroup is checked directly
-// rather than using "cg.Text()" because, starting in Go 1.15, the "cg.Text()" call
-// no longer returns directive-style comments (see https://github.com/golang/go/issues/37974).
+// checks matches the provided check.
+//
+// The *ast.CommentGroup is checked directly rather than using "cg.Text()" because,
+// starting in Go 1.15, the "cg.Text()" call no longer returns directive-style
+// comments (see https://github.com/golang/go/issues/37974).
 func hasIgnoreCheck(cg *ast.CommentGroup, check string) bool {
-	if !strings.HasPrefix(cg.List[0].Text, "//") {
-		return false
-	}
+	for _, list := range cg.List {
+		if !strings.HasPrefix(list.Text, "//") {
+			continue
+		}
 
-	s := strings.TrimSpace(cg.List[0].Text[2:])
-	txt := strings.Split(s, " ")
-	if len(txt) < 3 || txt[0] != "lint:ignore" {
-		return false
-	}
+		s := strings.TrimSpace(list.Text[2:]) // list.Text[2:]: trim "//"
+		txt := strings.Split(s, " ")
+		if len(txt) < 3 || txt[0] != "lint:ignore" {
+			continue
+		}
 
-	checks := strings.Split(txt[1], ",")
-	for i := range checks {
-		if check == checks[i] {
-			return true
+		checks := strings.Split(txt[1], ",") // txt[1]: trim "lint:ignore"
+		for i := range checks {
+			if check == checks[i] {
+				return true
+			}
 		}
 	}
+
 	return false
 }

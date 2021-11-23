@@ -210,7 +210,7 @@ func (m *Metadata) Environ() map[string]string {
 	return params
 }
 
-var pullRegexp = regexp.MustCompile("\\d+")
+var pullRegexp = regexp.MustCompile(`\d+`)
 
 func (m *Metadata) SetPlatform(platform string) {
 	if platform == "" {

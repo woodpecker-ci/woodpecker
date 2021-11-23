@@ -48,6 +48,8 @@ func (w *typeExprWalker) visit(x ast.Expr) bool {
 
 func (w *typeExprWalker) walk(x ast.Node) bool {
 	switch x := x.(type) {
+	case *ast.ChanType:
+		return w.visit(x)
 	case *ast.ParenExpr:
 		if typep.IsTypeExpr(w.info, x.X) {
 			return w.visit(x)

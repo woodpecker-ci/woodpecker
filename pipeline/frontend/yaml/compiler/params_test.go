@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParamsToEnv(t *testing.T) {
@@ -28,7 +29,7 @@ func TestParamsToEnv(t *testing.T) {
 		"PLUGIN_COMPLEX": `[{"name":"Jack"},{"name":"Jill"}]`,
 	}
 	got := map[string]string{}
-	paramsToEnv(from, got)
+	assert.NoError(t, paramsToEnv(from, got))
 
 	if !reflect.DeepEqual(want, got) {
 		t.Errorf("Problem converting plugin parameters to environment variables")
