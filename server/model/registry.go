@@ -44,7 +44,7 @@ type RegistryStore interface {
 	RegistryList(*Repo) ([]*Registry, error)
 	RegistryCreate(*Registry) error
 	RegistryUpdate(*Registry) error
-	RegistryDelete(*Registry) error
+	RegistryDelete(repo *Repo, addr string) error
 }
 
 // Registry represents a docker registry with credentials.
