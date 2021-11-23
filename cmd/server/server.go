@@ -49,7 +49,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
 
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
@@ -224,7 +224,9 @@ func loop(c *cli.Context) error {
 	}
 
 	dir := cacheDir()
-	os.MkdirAll(dir, 0700)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
 
 	manager := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -259,7 +261,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
+		log.Error().Err(err).Msg("could not create pubsub service")
+	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Senders = sender.New(v, v)

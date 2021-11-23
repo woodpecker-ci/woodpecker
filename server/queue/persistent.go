@@ -18,6 +18,7 @@ package queue
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -38,7 +39,9 @@ func WithTaskStore(q Queue, s model.TaskStore) Queue {
 			DepStatus:    make(map[string]string),
 		})
 	}
-	q.PushAtOnce(context.Background(), toEnqueue)
+	if err := q.PushAtOnce(context.Background(), toEnqueue); err != nil {
+		log.Error().Err(err).Msg("PushAtOnce failed")
+	}
 	return &persistentQueue{q, s}
 }
 
@@ -49,35 +52,44 @@ type persistentQueue struct {
 
 // Push pushes a task to the tail of this queue.
 func (q *persistentQueue) Push(c context.Context, task *Task) error {
-	q.store.TaskInsert(&model.Task{
+	if err := q.store.TaskInsert(&model.Task{
 		ID:           task.ID,
 		Data:         task.Data,
 		Labels:       task.Labels,
 		Dependencies: task.Dependencies,
 		RunOn:        task.RunOn,
-	})
+	}); err != nil {
+		return err
+	}
 	err := q.Queue.Push(c, task)
 	if err != nil {
-		q.store.TaskDelete(task.ID)
+		if err2 := q.store.TaskDelete(task.ID); err2 != nil {
+			err = errors.Wrapf(err, "delete task '%s' failed: %v", task.ID, err2)
+		}
 	}
 	return err
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
+	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
-		q.store.TaskInsert(&model.Task{
+		if err := q.store.TaskInsert(&model.Task{
 			ID:           task.ID,
 			Data:         task.Data,
 			Labels:       task.Labels,
 			Dependencies: task.Dependencies,
 			RunOn:        task.RunOn,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 	err := q.Queue.PushAtOnce(c, tasks)
 	if err != nil {
 		for _, task := range tasks {
-			q.store.TaskDelete(task.ID)
+			if err := q.store.TaskDelete(task.ID); err != nil {
+				return err
+			}
 		}
 	}
 	return err
@@ -101,18 +113,20 @@ func (q *persistentQueue) Poll(c context.Context, f Filter) (*Task, error) {
 func (q *persistentQueue) Evict(c context.Context, id string) error {
 	err := q.Queue.Evict(c, id)
 	if err == nil {
-		q.store.TaskDelete(id)
+		return q.store.TaskDelete(id)
 	}
 	return err
 }
 
 // EvictAtOnce removes a pending task from the queue.
 func (q *persistentQueue) EvictAtOnce(c context.Context, ids []string) error {
-	err := q.Queue.EvictAtOnce(c, ids)
-	if err == nil {
-		for _, id := range ids {
-			q.store.TaskDelete(id)
+	if err := q.Queue.EvictAtOnce(c, ids); err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := q.store.TaskDelete(id); err != nil {
+			return err
 		}
 	}
-	return err
+	return nil
 }
