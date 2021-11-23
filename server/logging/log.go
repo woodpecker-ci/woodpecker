@@ -132,17 +132,15 @@ func (l *log) Snapshot(c context.Context, path string, w io.Writer) error {
 		return ErrNotFound
 	}
 	s.Lock()
+	defer s.Unlock()
 	for _, entry := range s.list {
 		if _, err := w.Write(entry.Data); err != nil {
-			s.Unlock()
 			return err
 		}
 		if _, err := w.Write(cr); err != nil {
-			s.Unlock()
 			return err
 		}
 	}
-	s.Unlock()
 	return nil
 }
 
