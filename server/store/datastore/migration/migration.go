@@ -25,6 +25,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
+// they are executed in order and if one fail woodpecker try to rollback and quit
 var migrationTasks = []task{
 	legacy2Xorm,
 	alterTableReposDropFallback,
@@ -92,16 +93,23 @@ func Migrate(e *xorm.Engine) error {
 }
 
 func runTasks(sess *xorm.Session, tasks []task) error {
+	// cache migrations in db
+	migCache := make(map[string]bool)
+	var migList []*migrations
+	if err := sess.Find(&migList); err != nil {
+		return err
+	}
+	for i := range migList {
+		migCache[migList[i].Name] = true
+	}
+
 	for _, task := range tasks {
-		log.Trace().Msgf("start migration task '%s'", task.name)
-		exist, err := sess.Exist(&migrations{task.name})
-		if err != nil {
-			return err
-		}
-		if exist {
-			log.Trace().Msgf("migration task '%s' exist", task.name)
+		if migCache[task.name] {
+			log.Trace().Msgf("migration task '%s' already applied", task.name)
 			continue
 		}
+
+		log.Trace().Msgf("start migration task '%s'", task.name)
 
 		if task.fn != nil {
 			if err := task.fn(sess); err != nil {
@@ -115,6 +123,7 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 		if _, err := sess.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
+		migCache[task.name] = true
 	}
 	return nil
 }
