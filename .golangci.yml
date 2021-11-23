@@ -1,6 +1,8 @@
 linters-settings:
   gofmt:
     simplify: true
+  misspell:
+    locale: US
 
 linters:
   disable-all: true
@@ -13,6 +15,7 @@ linters:
     - typecheck
     - errcheck
     - bidichk
+    - misspell
 
 run:
   timeout: 5m

@@ -157,12 +157,12 @@ func run(c *cli.Context) error {
 			log.Err(err).Msg("")
 			return err
 		}
-		auther := &authorizer{
+		authorizer := &authorizer{
 			password: c.String("agent-secret"),
 		}
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(auther.streamInterceptor),
-			grpc.UnaryInterceptor(auther.unaryIntercaptor),
+			grpc.StreamInterceptor(authorizer.streamInterceptor),
+			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
