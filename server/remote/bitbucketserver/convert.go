@@ -72,7 +72,6 @@ func convertDesc(status model.StatusValue) string {
 // convertRepo is a helper function used to convert a Bitbucket server repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
-
 	repo := model.Repo{
 		Name:         from.Slug,
 		Owner:        from.Project.Key,
@@ -98,7 +97,6 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		}
 	}
 	return &repo
-
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push

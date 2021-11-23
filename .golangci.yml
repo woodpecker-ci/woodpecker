@@ -13,6 +13,7 @@ linters:
     - typecheck
     - errcheck
     - bidichk
+    - whitespace
 
 run:
   timeout: 5m

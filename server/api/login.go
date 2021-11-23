@@ -71,7 +71,6 @@ func HandleAuth(c *gin.Context) {
 	// get the user from the database
 	u, err := store_.GetUserLogin(tmpuser.Login)
 	if err != nil {
-
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)

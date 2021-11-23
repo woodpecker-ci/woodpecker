@@ -13,7 +13,6 @@ func TestParse(t *testing.T) {
 
 	g.Describe("Parser", func() {
 		g.Describe("Given a yaml file", func() {
-
 			g.It("Should unmarshal a string", func() {
 				out, err := ParseString(sampleYaml)
 				if err != nil {
