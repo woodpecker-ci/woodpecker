@@ -16,6 +16,7 @@ linters:
     - errcheck
     - bidichk
     - misspell
+    - whitespace
 
 run:
   timeout: 5m

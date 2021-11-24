@@ -38,7 +38,6 @@ func Test_bitbucket(t *testing.T) {
 	g := goblin.Goblin(t)
 	ctx := context.Background()
 	g.Describe("Bitbucket client", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -269,7 +268,6 @@ func Test_bitbucket(t *testing.T) {
 			g.Assert(err).IsNil()
 			g.Assert(r.FullName).Equal("user_name/repo_name")
 		})
-
 	})
 }
 

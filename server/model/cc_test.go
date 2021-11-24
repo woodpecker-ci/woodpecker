@@ -22,10 +22,8 @@ import (
 )
 
 func TestCC(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("CC", func() {
-
 		g.It("Should create a project", func() {
 			now := time.Now().Unix()
 			now_fmt := time.Unix(now, 0).Format(time.RFC3339)
