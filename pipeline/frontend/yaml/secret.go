@@ -15,7 +15,7 @@ type (
 	}
 )
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *Secrets) UnmarshalYAML(value *yaml.Node) error {
 	y, _ := yaml.Marshal(value)
 

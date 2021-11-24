@@ -13,7 +13,7 @@ import (
 // StringorInt represents a string or an integer.
 type StringorInt int64
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *StringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
@@ -39,7 +39,7 @@ func (s *StringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // the String supports notations like 10m for then Megabyte of memory
 type MemStringorInt int64
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *MemStringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
@@ -62,10 +62,10 @@ func (s *MemStringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error 
 }
 
 // Stringorslice represents
-// Using engine-api Strslice and augment it with YAML marshalling stuff. a string or an array of strings.
+// Using engine-api Strslice and augment it with YAML marshaling stuff. a string or an array of strings.
 type Stringorslice strslice.StrSlice
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *Stringorslice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var stringType string
 	if err := unmarshal(&stringType); err == nil {
@@ -89,7 +89,7 @@ func (s *Stringorslice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // SliceorMap represents a slice or a map of strings.
 type SliceorMap map[string]string
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (s *SliceorMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {

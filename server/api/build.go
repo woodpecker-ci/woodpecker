@@ -251,7 +251,7 @@ func DeleteBuild(c *gin.Context) {
 			return
 		}
 		killedBuild.Procs = model.Tree(procs)
-		if err := publishToTopic(c, killedBuild, repo, model.Cancelled); err != nil {
+		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 	}
