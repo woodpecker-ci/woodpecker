@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -352,7 +353,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := server.Config.Services.Queue.Info(nil)
+			stats := server.Config.Services.Queue.Info(context.TODO())
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))

@@ -496,7 +496,7 @@ func TestWaitingVsPending(t *testing.T) {
 	}
 
 	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
-	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	_, _ = q.Poll(noContext, func(*Task) bool { return true })
 
 	info = q.Info(noContext)
 	if info.Stats.WaitingOnDeps != 0 {
