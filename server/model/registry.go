@@ -15,7 +15,10 @@
 
 package model
 
-import "errors"
+import (
+	"errors"
+	"net/url"
+)
 
 var (
 	errRegistryAddressInvalid  = errors.New("Invalid Registry Address")
@@ -68,9 +71,10 @@ func (r *Registry) Validate() error {
 		return errRegistryUsernameInvalid
 	case len(r.Password) == 0:
 		return errRegistryPasswordInvalid
-	default:
-		return nil
 	}
+
+	_, err := url.Parse(r.Address)
+	return err
 }
 
 // Copy makes a copy of the registry without the password.

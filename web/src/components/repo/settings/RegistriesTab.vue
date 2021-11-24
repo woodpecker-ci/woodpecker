@@ -35,6 +35,7 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
         <InputField label="Address">
+          <!-- TODO: check input field Address is a valid address -->
           <TextField v-model="selectedRegistry.address" placeholder="Registry Address (e.g. docker.io)" required />
         </InputField>
 
