@@ -26,10 +26,8 @@ import (
 )
 
 func Test_parser(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("GitHub parser", func() {
-
 		g.It("should ignore unsupported hook events", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			req, _ := http.NewRequest("POST", "/hook", buf)
@@ -109,6 +107,5 @@ func Test_parser(t *testing.T) {
 				g.Assert(b.Event).Equal(model.EventDeploy)
 			})
 		})
-
 	})
 }

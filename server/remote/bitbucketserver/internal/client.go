@@ -103,7 +103,6 @@ func (c *Client) FindCurrentUser() (*User, error) {
 	}
 
 	return &user, nil
-
 }
 
 func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
@@ -178,7 +177,6 @@ func (c *Client) CreateHook(owner string, name string, callBackLink string) erro
 			return err
 		}
 		hooks = hookSettingsToArray(hookSettings)
-
 	}
 	if !stringInSlice(callBackLink, hooks) {
 		hooks = append(hooks, callBackLink)
@@ -195,13 +193,11 @@ func (c *Client) CreateStatus(revision string, status *BuildStatus) error {
 }
 
 func (c *Client) DeleteHook(owner string, name string, link string) error {
-
 	hookSettings, err := c.GetHooks(owner, name)
 	if err != nil {
 		return err
 	}
 	putHooks := filter(hookSettingsToArray(hookSettings), func(item string) bool {
-
 		return !strings.Contains(item, link)
 	})
 	putHookSettings := arrayToHookSettings(putHooks)

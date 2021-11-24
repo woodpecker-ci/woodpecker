@@ -139,7 +139,6 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	var uploads sync.WaitGroup
 	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
-
 		loglogger := logger.With().
 			Str("image", proc.Image).
 			Str("stage", proc.Alias).

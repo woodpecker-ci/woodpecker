@@ -7,10 +7,8 @@ import (
 )
 
 func TestMatrix(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Calculate matrix", func() {
-
 		axis, _ := ParseString(fakeMatrix)
 
 		g.It("Should calculate permutations", func() {

@@ -37,7 +37,6 @@ func Test_coding(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Coding", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -229,7 +228,6 @@ func Test_coding(t *testing.T) {
 				g.Assert(r.FullName).Equal("demo1/test1")
 			})
 		})
-
 	})
 }
 

@@ -129,7 +129,6 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	return convertUser(user, accessToken), nil
-
 }
 
 // Auth is not supported by the Stash driver.

@@ -454,5 +454,4 @@ func TestSanitizePath(t *testing.T) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}
-
 }

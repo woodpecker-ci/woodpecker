@@ -91,7 +91,6 @@ type SliceorMap map[string]string
 
 // UnmarshalYAML implements the Unmarshaller interface.
 func (s *SliceorMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
-
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {
 		parts := map[string]string{}
