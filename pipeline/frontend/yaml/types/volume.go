@@ -42,7 +42,7 @@ func (v Volumes) MarshalYAML() (interface{}, error) {
 	return vs, nil
 }
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (v *Volumes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var sliceType []interface{}
 	if err := unmarshal(&sliceType); err == nil {

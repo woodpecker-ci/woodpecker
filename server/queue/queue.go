@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	// ErrCancel indicates the task was cancelled.
-	ErrCancel = errors.New("queue: task cancelled")
+	// ErrCancel indicates the task was canceled.
+	ErrCancel = errors.New("queue: task canceled")
 
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")

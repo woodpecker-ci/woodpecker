@@ -431,7 +431,6 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 				if err := s.store.UpdateUser(user); err != nil {
 					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 				}
-
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
