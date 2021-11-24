@@ -6,9 +6,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 )
 
-// ErrCanceled signals the pipeline is canceled.
-// var ErrCanceled = errors.New("canceled")
-
 type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
