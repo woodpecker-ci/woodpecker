@@ -305,6 +305,7 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 
 func setupTree(c *cli.Context) *gin.Engine {
 	tree := gin.New()
+	tree.UseRawPath = true
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),

@@ -270,26 +270,19 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		state.Pipeline.Step.Environment["DRONE_MACHINE"] = r.hostname
+		// TODO: find better way to update this state
+		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "failure"
 		}
 		return nil
 	})
@@ -344,10 +337,10 @@ func (r *Runner) Run(ctx context.Context) error {
 
 // extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_REPO"]
+	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
 // extract build number from the configuration
 func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_BUILD_NUMBER"]
+	return config.Stages[0].Steps[0].Environment["CI_BUILD_NUMBER"]
 }
