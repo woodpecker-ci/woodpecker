@@ -137,7 +137,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
+	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
 	}
 

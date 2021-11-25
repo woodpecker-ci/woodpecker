@@ -266,12 +266,11 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	var files []*remote.FileMeta
-	var errors []error
 
 	for i := 0; i < len(data); i++ {
 		select {
 		case err := <-errc:
-			errors = append(errors, err)
+			return nil, err
 		case fileMeta := <-fc:
 			files = append(files, fileMeta)
 		}
