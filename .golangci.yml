@@ -19,6 +19,7 @@ linters:
     - whitespace
     - staticcheck
     - structcheck
+    - varcheck
 
 run:
   timeout: 5m
