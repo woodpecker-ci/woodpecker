@@ -116,7 +116,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      const registryAddress = encodeURI(_registry.address).replaceAll('/', '%2F');
+      const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: 'Registry credentials deleted', type: 'success' });
       await loadRegistries();
