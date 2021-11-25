@@ -141,13 +141,13 @@ func TestWithNetrc(t *testing.T) {
 			"github.com",
 		),
 	)
-	if compiler.env["CI_NETRC_USERNAME"] != "octocat" {
+	if compiler.cloneEnv["CI_NETRC_USERNAME"] != "octocat" {
 		t.Errorf("WithNetrc should set CI_NETRC_USERNAME")
 	}
-	if compiler.env["CI_NETRC_PASSWORD"] != "password" {
+	if compiler.cloneEnv["CI_NETRC_PASSWORD"] != "password" {
 		t.Errorf("WithNetrc should set CI_NETRC_PASSWORD")
 	}
-	if compiler.env["CI_NETRC_MACHINE"] != "github.com" {
+	if compiler.cloneEnv["CI_NETRC_MACHINE"] != "github.com" {
 		t.Errorf("WithNetrc should set CI_NETRC_MACHINE")
 	}
 }
