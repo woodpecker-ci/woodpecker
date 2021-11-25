@@ -22,7 +22,6 @@ var buildQueueCmd = &cli.Command{
 }
 
 func buildQueue(c *cli.Context) error {
-
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
@@ -44,7 +43,9 @@ func buildQueue(c *cli.Context) error {
 	}
 
 	for _, build := range builds {
-		tmpl.Execute(os.Stdout, build)
+		if err := tmpl.Execute(os.Stdout, build); err != nil {
+			return err
+		}
 	}
 	return nil
 }

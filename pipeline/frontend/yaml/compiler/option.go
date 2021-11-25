@@ -60,11 +60,6 @@ func WithMetadata(metadata frontend.Metadata) Option {
 		for k, v := range metadata.Environ() {
 			compiler.env[k] = v
 		}
-		// TODO this is present for backward compatibility and should
-		// be removed in a future version.
-		for k, v := range metadata.EnvironDrone() {
-			compiler.env[k] = v
-		}
 	}
 }
 

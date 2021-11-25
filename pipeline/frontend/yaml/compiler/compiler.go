@@ -168,7 +168,6 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			name := fmt.Sprintf("%s_services_%d", c.prefix, i)
 			step := c.createProcess(name, container, "services")
 			stage.Steps = append(stage.Steps, step)
-
 		}
 		config.Stages = append(config.Stages, stage)
 	}

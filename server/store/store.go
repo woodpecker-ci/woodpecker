@@ -20,6 +20,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+// TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
+
 type Store interface {
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
@@ -28,10 +30,11 @@ type Store interface {
 	GetUserLogin(string) (*model.User, error)
 
 	// GetUserList gets a list of all users in the system.
+	// TODO: paginate
 	GetUserList() ([]*model.User, error)
 
 	// GetUserCount gets a count of all users in the system.
-	GetUserCount() (int, error)
+	GetUserCount() (int64, error)
 
 	// CreateUser creates a new user account.
 	CreateUser(*model.User) error
@@ -49,7 +52,7 @@ type Store interface {
 	GetRepoName(string) (*model.Repo, error)
 
 	// GetRepoCount gets a count of all repositories in the system.
-	GetRepoCount() (int, error)
+	GetRepoCount() (int64, error)
 
 	// CreateRepo creates a new repository.
 	CreateRepo(*model.Repo) error
@@ -64,7 +67,7 @@ type Store interface {
 	GetBuild(int64) (*model.Build, error)
 
 	// GetBuildNumber gets a build by number.
-	GetBuildNumber(*model.Repo, int) (*model.Build, error)
+	GetBuildNumber(*model.Repo, int64) (*model.Build, error)
 
 	// GetBuildRef gets a build by its ref.
 	GetBuildRef(*model.Repo, string) (*model.Build, error)
@@ -79,13 +82,14 @@ type Store interface {
 	GetBuildLastBefore(*model.Repo, string, int64) (*model.Build, error)
 
 	// GetBuildList gets a list of builds for the repository
+	// TODO: paginate
 	GetBuildList(*model.Repo, int) ([]*model.Build, error)
 
 	// GetBuildQueue gets a list of build in queue.
 	GetBuildQueue() ([]*model.Feed, error)
 
 	// GetBuildCount gets a count of all builds in the system.
-	GetBuildCount() (int, error)
+	GetBuildCount() (int64, error)
 
 	// CreateBuild creates a new build and jobs.
 	CreateBuild(*model.Build, ...*model.Proc) error
@@ -99,23 +103,25 @@ type Store interface {
 
 	UserFeed(*model.User) ([]*model.Feed, error)
 
+	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
-	RepoListLatest(user *model.User) ([]*model.Feed, error)
+	RepoListLatest(*model.User) ([]*model.Feed, error)
+	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
 	RepoBatch([]*model.Repo) error
 
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
-	PermBatch(perms []*model.Perm) error
 	PermDelete(perm *model.Perm) error
 	PermFlush(user *model.User, before int64) error
 
 	ConfigsForBuild(buildID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, sha string) (*model.Config, error)
+	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
 
 	SenderFind(*model.Repo, string) (*model.Sender, error)
+	// SenderList TODO: paginate
 	SenderList(*model.Repo) ([]*model.Sender, error)
 	SenderCreate(*model.Sender) error
 	SenderUpdate(*model.Sender) error
@@ -131,7 +137,7 @@ type Store interface {
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(*model.Registry) error
+	RegistryDelete(repo *model.Repo, addr string) error
 
 	ProcLoad(int64) (*model.Proc, error)
 	ProcFind(*model.Build, int) (*model.Proc, error)
@@ -142,6 +148,8 @@ type Store interface {
 	ProcClear(*model.Build) error
 
 	LogFind(*model.Proc) (io.ReadCloser, error)
+	// TODO: since we do ReadAll in any case a ioReader is not the best idear
+	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Proc, io.Reader) error
 
 	FileList(*model.Build) ([]*model.File, error)
@@ -149,9 +157,12 @@ type Store interface {
 	FileRead(*model.Proc, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
+	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
 
 	Ping() error
+	Close() error
+	Migrate() error
 }

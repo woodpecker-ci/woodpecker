@@ -12,6 +12,9 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
 
+- From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
+  If you used `latest` before to try pre-release features you should switch to `next` after this release.
+
 - Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
   Additionally some alternative namings have been removed to simplify maintenance:
   - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
@@ -19,8 +22,26 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
   - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
 
-- From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
-  If you used `latest` before to try pre-release features you should switch to `next` after this release.
+- Dropped support for `DRONE_*` environment variables in pipeline steps. Pipeline meta-data can be accessed with `CI_*` variables.
+  - `CI_*` prefix replaces `DRONE_*`
+  - `CI` value is now `woodpecker`
+  - `DRONE=true` has been removed
+  - Some variables got deprecated and will be removed in future versions. Please migrate to the new names. Same applies for `DRONE_` of them.
+    - CI_ARCH => use CI_SYSTEM_ARCH
+    - CI_COMMIT => CI_COMMIT_SHA
+    - CI_REMOTE_URL => use CI_REPO_REMOTE
+    - CI_REPO_BRANCH => use CI_REPO_DEFAULT_BRANCH
+    - CI_PARENT_BUILD_NUMBER => use CI_BUILD_PARENT
+    - CI_BUILD_TARGET => use CI_BUILD_DEPLOY_TARGET
+    - CI_DEPLOY_TO => use CI_BUILD_DEPLOY_TARGET
+    - CI_COMMIT_AUTHOR_NAME => use CI_COMMIT_AUTHOR
+    - CI_PREV_COMMIT_AUTHOR_NAME => use CI_PREV_COMMIT_AUTHOR
+    - CI_SYSTEM => use CI_SYSTEM_NAME
+    - CI_BRANCH => use CI_COMMIT_BRANCH
+    - CI_SOURCE_BRANCH => use CI_COMMIT_SOURCE_BRANCH
+    - CI_TARGET_BRANCH => use CI_COMMIT_TARGET_BRANCH
+
+  For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
 
 - Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
 

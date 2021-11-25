@@ -104,7 +104,10 @@ func SetPerm() gin.HandlerFunc {
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store_.PermUpsert(perm)
+					if err := store_.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
 				}
 			}
 		}
@@ -129,7 +132,6 @@ func SetPerm() gin.HandlerFunc {
 		if user != nil {
 			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
-
 		} else {
 			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 		}
@@ -178,7 +180,6 @@ func MustPush(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		log.Debug().Msgf("User %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
-
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		log.Debug().Msgf("Guest denied write access to %s %s",

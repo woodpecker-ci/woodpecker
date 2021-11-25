@@ -24,9 +24,9 @@ func New() Publisher {
 
 func (p *publisher) Create(c context.Context, dest string) error {
 	p.Lock()
-	t, ok := p.topics[dest]
+	_, ok := p.topics[dest]
 	if !ok {
-		t = newTopic(dest)
+		t := newTopic(dest)
 		p.topics[dest] = t
 	}
 	p.Unlock()

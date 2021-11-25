@@ -15,9 +15,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -50,7 +50,19 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 
-	if strings.ToLower(driver) == "sqlite3" {
+	if driver == "sqlite3" {
+		if datastore.SupportedDriver("sqlite3") {
+			log.Debug().Msgf("server has sqlite3 support")
+		} else {
+			log.Debug().Msgf("server was build with no sqlite3 support!")
+		}
+	}
+
+	if !datastore.SupportedDriver(driver) {
+		log.Fatal().Msgf("database driver '%s' not supported", driver)
+	}
+
+	if driver == "sqlite3" {
 		if new, err := fallbackSqlite3File(datasource); err != nil {
 			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
 		} else {
@@ -58,12 +70,21 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		}
 	}
 
-	opts := &datastore.Opts{
+	opts := &store.Opts{
 		Driver: driver,
 		Config: datasource,
 	}
-	log.Trace().Msgf("setup datastore: %#v", opts)
-	return datastore.New(opts)
+	log.Trace().Msgf("setup datastore: %#v", *opts)
+	store, err := datastore.NewEngine(opts)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not open datastore")
+	}
+
+	if err := store.Migrate(); err != nil {
+		log.Fatal().Err(err).Msg("could not migrate datastore")
+	}
+
+	return store, nil
 }
 
 // TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
@@ -134,7 +155,7 @@ func fallbackSqlite3File(path string) (string, error) {
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return model.WithTaskStore(queue.New(), s)
+	return queue.WithTaskStore(queue.New(), s)
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
@@ -284,6 +305,7 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 
 func setupTree(c *cli.Context) *gin.Engine {
 	tree := gin.New()
+	tree.UseRawPath = true
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),
@@ -332,7 +354,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := server.Config.Services.Queue.Info(nil)
+			stats := server.Config.Services.Queue.Info(context.TODO())
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))

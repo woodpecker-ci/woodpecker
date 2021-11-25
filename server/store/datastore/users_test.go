@@ -23,19 +23,22 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	s := newTest()
-	defer s.Close()
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	defer closer()
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {
-
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			s.Exec("DELETE FROM users")
-			s.Exec("DELETE FROM repos")
-			s.Exec("DELETE FROM builds")
-			s.Exec("DELETE FROM procs")
+			_, err := store.engine.Exec("DELETE FROM users")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM repos")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM builds")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM procs")
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should Update a User", func() {
@@ -44,9 +47,9 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			err1 := s.CreateUser(&user)
-			err2 := s.UpdateUser(&user)
-			getuser, err3 := s.GetUser(user.ID)
+			err1 := store.CreateUser(&user)
+			err2 := store.UpdateUser(&user)
+			getuser, err3 := store.GetUser(user.ID)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
 			g.Assert(err3).IsNil()
@@ -59,13 +62,13 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			err := s.CreateUser(&user)
+			err := store.CreateUser(&user)
 			g.Assert(err).IsNil()
 			g.Assert(user.ID != 0).IsTrue()
 		})
 
 		g.It("Should Get a User", func() {
-			user := model.User{
+			user := &model.User{
 				Login:  "joe",
 				Token:  "f0b461ca586c27872b43a0685cbc2847",
 				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
@@ -74,8 +77,8 @@ func TestUsers(t *testing.T) {
 				Active: true,
 			}
 
-			s.CreateUser(&user)
-			getuser, err := s.GetUser(user.ID)
+			g.Assert(store.CreateUser(user)).IsNil()
+			getuser, err := store.GetUser(user.ID)
 			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
@@ -87,13 +90,13 @@ func TestUsers(t *testing.T) {
 		})
 
 		g.It("Should Get a User By Login", func() {
-			user := model.User{
+			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user)
-			getuser, err := s.GetUserLogin(user.Login)
+			g.Assert(store.CreateUser(user))
+			getuser, err := store.GetUserLogin(user.Login)
 			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getuser.ID)
 			g.Assert(user.Login).Equal(getuser.Login)
@@ -110,10 +113,10 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "ab20g0ddaf012c744e136da16aa21ad9",
 			}
-			err1 := s.CreateUser(&user1)
-			err2 := s.CreateUser(&user2)
+			err1 := store.CreateUser(&user1)
+			err2 := store.CreateUser(&user2)
 			g.Assert(err1).IsNil()
-			g.Assert(err2).IsNotNil()
+			g.Assert(err2 == nil).IsFalse()
 		})
 
 		g.It("Should Get a User List", func() {
@@ -121,15 +124,16 @@ func TestUsers(t *testing.T) {
 				Login: "jane",
 				Email: "foo@bar.com",
 				Token: "ab20g0ddaf012c744e136da16aa21ad9",
+				Hash:  "A",
 			}
 			user2 := model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user1)
-			s.CreateUser(&user2)
-			users, err := s.GetUserList()
+			g.Assert(store.CreateUser(&user1)).IsNil()
+			g.Assert(store.CreateUser(&user2)).IsNil()
+			users, err := store.GetUserList()
 			g.Assert(err).IsNil()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
@@ -142,41 +146,39 @@ func TestUsers(t *testing.T) {
 				Login: "jane",
 				Email: "foo@bar.com",
 				Token: "ab20g0ddaf012c744e136da16aa21ad9",
+				Hash:  "A",
 			}
 			user2 := model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
+				Hash:  "B",
 			}
-			s.CreateUser(&user1)
-			s.CreateUser(&user2)
-			count, err := s.GetUserCount()
+			g.Assert(store.CreateUser(&user1)).IsNil()
+			g.Assert(store.CreateUser(&user2)).IsNil()
+			count, err := store.GetUserCount()
 			g.Assert(err).IsNil()
-			if s.driver != "postgres" {
-				// we have to skip this check for postgres because it uses
-				// an estimate which may not be updated.
-				g.Assert(count).Equal(2)
-			}
+			g.Assert(count).Equal(int64(2))
 		})
 
 		g.It("Should Get a User Count Zero", func() {
-			count, err := s.GetUserCount()
+			count, err := store.GetUserCount()
 			g.Assert(err).IsNil()
-			g.Assert(count).Equal(0)
+			g.Assert(count).Equal(int64(0))
 		})
 
 		g.It("Should Del a User", func() {
-			user := model.User{
+			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(&user)
-			_, err1 := s.GetUser(user.ID)
-			err2 := s.DeleteUser(&user)
-			_, err3 := s.GetUser(user.ID)
+			g.Assert(store.CreateUser(user)).IsNil()
+			user, err1 := store.GetUser(user.ID)
 			g.Assert(err1).IsNil()
+			err2 := store.DeleteUser(user)
 			g.Assert(err2).IsNil()
+			_, err3 := store.GetUser(user.ID)
 			g.Assert(err3).IsNotNil()
 		})
 
@@ -186,7 +188,7 @@ func TestUsers(t *testing.T) {
 				Email: "foo@bar.com",
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
-			s.CreateUser(user)
+			g.Assert(store.CreateUser(user)).IsNil()
 
 			repo1 := &model.Repo{
 				Owner:    "bradrydzewski",
@@ -206,14 +208,16 @@ func TestUsers(t *testing.T) {
 				FullName: "octocat/hello-world",
 				IsActive: true,
 			}
-			s.CreateRepo(repo1)
-			s.CreateRepo(repo2)
-			s.CreateRepo(repo3)
+			g.Assert(store.CreateRepo(repo1)).IsNil()
+			g.Assert(store.CreateRepo(repo2)).IsNil()
+			g.Assert(store.CreateRepo(repo3)).IsNil()
 
-			s.PermBatch([]*model.Perm{
+			for _, perm := range []*model.Perm{
 				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
-			})
+			} {
+				g.Assert(store.PermUpsert(perm)).IsNil()
+			}
 
 			build1 := &model.Build{
 				RepoID: repo1.ID,
@@ -231,12 +235,12 @@ func TestUsers(t *testing.T) {
 				RepoID: repo3.ID,
 				Status: model.StatusSuccess,
 			}
-			s.CreateBuild(build1)
-			s.CreateBuild(build2)
-			s.CreateBuild(build3)
-			s.CreateBuild(build4)
+			g.Assert(store.CreateBuild(build1)).IsNil()
+			g.Assert(store.CreateBuild(build2)).IsNil()
+			g.Assert(store.CreateBuild(build3)).IsNil()
+			g.Assert(store.CreateBuild(build4)).IsNil()
 
-			builds, err := s.UserFeed(user)
+			builds, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
 			g.Assert(len(builds)).Equal(3)
 			g.Assert(builds[0].FullName).Equal(repo2.FullName)

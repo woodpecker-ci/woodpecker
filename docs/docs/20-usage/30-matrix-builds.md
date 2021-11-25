@@ -60,8 +60,8 @@ Example Yaml file after injecting the matrix parameters:
 ```diff
 pipeline:
   build:
--   image: golang:1.4
-+   image: golang:${GO_VERSION}
+-   image: golang:${GO_VERSION}
++   image: golang:1.4
     commands:
       - go get
       - go build
@@ -72,8 +72,8 @@ pipeline:
 
 services:
   database:
--   image: mysql:5.5
-+   image: ${DATABASE}
+-   image: ${DATABASE}
++   image: mysql:5.5
 ```
 
 ## Examples
