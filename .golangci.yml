@@ -18,7 +18,9 @@ linters:
     - misspell
     - whitespace
     - staticcheck
+    - structcheck
     - varcheck
+
 run:
   timeout: 5m
 
