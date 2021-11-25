@@ -27,12 +27,9 @@ import (
 )
 
 func Test_hook(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Coding hook", func() {
-
 		g.It("Should parse hook", func() {
-
 			reader := ioutil.NopCloser(strings.NewReader(fixtures.PushHook))
 			r := &http.Request{
 				Header: map[string][]string{
@@ -107,7 +104,6 @@ func Test_hook(t *testing.T) {
 		})
 
 		g.It("Should parse push hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test1",
@@ -143,7 +139,6 @@ func Test_hook(t *testing.T) {
 		})
 
 		g.It("Should parse pull request hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test2",
@@ -173,7 +168,6 @@ func Test_hook(t *testing.T) {
 		})
 
 		g.It("Should parse merge request hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test1",
@@ -201,6 +195,5 @@ func Test_hook(t *testing.T) {
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
-
 	})
 }

@@ -38,7 +38,6 @@ func Test_github(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("GitHub", func() {
-
 		g.After(func() {
 			s.Close()
 		})

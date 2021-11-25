@@ -38,7 +38,6 @@ func Test_gitea(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
-
 		g.After(func() {
 			s.Close()
 		})

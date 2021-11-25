@@ -28,7 +28,6 @@ func TestUsers(t *testing.T) {
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {
-
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {

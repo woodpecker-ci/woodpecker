@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -304,6 +305,7 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 
 func setupTree(c *cli.Context) *gin.Engine {
 	tree := gin.New()
+	tree.UseRawPath = true
 	web.New(
 		web.WithSync(time.Hour*72),
 		web.WithDocs(c.String("docs")),
@@ -352,7 +354,7 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := server.Config.Services.Queue.Info(nil)
+			stats := server.Config.Services.Queue.Info(context.TODO())
 			pendingJobs.Set(float64(stats.Stats.Pending))
 			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
 			runningJobs.Set(float64(stats.Stats.Running))

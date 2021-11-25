@@ -12,7 +12,7 @@ import (
 	"syscall"
 )
 
-// WithContextFunc returns a copy of parent context that is cancelled when
+// WithContextFunc returns a copy of parent context that is canceled when
 // an os interrupt signal is received. The callback function f is invoked
 // before cancellation.
 func WithContextFunc(ctx context.Context, f func()) context.Context {

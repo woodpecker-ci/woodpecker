@@ -190,9 +190,9 @@ func convertPushHook(from *webhook) *model.Build {
 	if len(build.Author) == 0 {
 		build.Author = from.Head.Author.Username
 	}
-	if len(build.Email) == 0 {
-		// default to gravatar?
-	}
+	// if len(build.Email) == 0 {
+	// TODO: default to gravatar?
+	// }
 	if strings.HasPrefix(build.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!

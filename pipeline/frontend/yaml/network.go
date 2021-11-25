@@ -20,7 +20,7 @@ type (
 	}
 )
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (n *Networks) UnmarshalYAML(value *yaml.Node) error {
 	networks := map[string]Network{}
 	err := value.Decode(&networks)

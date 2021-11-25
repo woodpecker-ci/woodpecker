@@ -35,6 +35,7 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
         <InputField label="Address">
+          <!-- TODO: check input field Address is a valid address -->
           <TextField v-model="selectedRegistry.address" placeholder="Registry Address (e.g. docker.io)" required />
         </InputField>
 
@@ -115,7 +116,8 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, _registry.address);
+      const registryAddress = encodeURIComponent(_registry.address);
+      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: 'Registry credentials deleted', type: 'success' });
       await loadRegistries();
     });

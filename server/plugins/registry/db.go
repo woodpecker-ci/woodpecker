@@ -30,9 +30,5 @@ func (b *db) RegistryUpdate(repo *model.Repo, in *model.Registry) error {
 }
 
 func (b *db) RegistryDelete(repo *model.Repo, addr string) error {
-	registry, err := b.RegistryFind(repo, addr)
-	if err != nil {
-		return err
-	}
-	return b.store.RegistryDelete(registry)
+	return b.store.RegistryDelete(repo, addr)
 }

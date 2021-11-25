@@ -411,13 +411,13 @@ func TestFifoCancel(t *testing.T) {
 	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
-	assert.NoError(t, q.Error(noContext, task1.ID, fmt.Errorf("cancelled")))
-	assert.NoError(t, q.Error(noContext, task2.ID, fmt.Errorf("cancelled")))
-	assert.NoError(t, q.Error(noContext, task3.ID, fmt.Errorf("cancelled")))
+	assert.NoError(t, q.Error(noContext, task1.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(noContext, task2.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(noContext, task3.ID, fmt.Errorf("canceled")))
 
 	info := q.Info(noContext)
 	if len(info.Pending) != 0 {
-		t.Errorf("All pipelines should be cancelled")
+		t.Errorf("All pipelines should be canceled")
 		return
 	}
 }
@@ -496,7 +496,9 @@ func TestWaitingVsPending(t *testing.T) {
 	}
 
 	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
-	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	got, err := q.Poll(noContext, func(*Task) bool { return true })
+	assert.NoError(t, err)
+	assert.EqualValues(t, task2, got)
 
 	info = q.Info(noContext)
 	if info.Stats.WaitingOnDeps != 0 {

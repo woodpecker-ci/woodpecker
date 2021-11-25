@@ -149,9 +149,9 @@ func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	if err != nil {
 		return nil, err
 	}
-	if info.State.Running {
-		// todo
-	}
+	// if info.State.Running {
+	// TODO
+	// }
 
 	return &backend.State{
 		Exited:    true,
