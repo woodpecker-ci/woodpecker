@@ -115,6 +115,9 @@ func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
 		log.Err(err).Msg("")
 	}
 	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
 	repo := Repo{}
 	err = json.Unmarshal(contents, &repo)
 	if err != nil {
@@ -184,6 +187,9 @@ func (c *Client) CreateHook(owner string, name string, callBackLink string) erro
 
 	putHookSettings := arrayToHookSettings(hooks)
 	hookBytes, err := json.Marshal(putHookSettings)
+	if err != nil {
+		return err
+	}
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
@@ -202,6 +208,9 @@ func (c *Client) DeleteHook(owner string, name string, link string) error {
 	})
 	putHookSettings := arrayToHookSettings(putHooks)
 	hookBytes, err := json.Marshal(putHookSettings)
+	if err != nil {
+		return err
+	}
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
