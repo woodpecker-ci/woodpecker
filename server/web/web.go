@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/web"
@@ -64,8 +65,9 @@ func (w *website) Register(mux *gin.Engine) {
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(200)
-
-	rw.Write(w.data)
+	if _, err := rw.Write(w.data); err != nil {
+		log.Error().Err(err).Msg("can not write index.html")
+	}
 }
 
 func setupCache(h http.Handler) http.Handler {
