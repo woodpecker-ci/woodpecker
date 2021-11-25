@@ -120,7 +120,6 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		// we are switching from gin to httpservermux|treemux,
 		webUIServe = setupTree(c).ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
