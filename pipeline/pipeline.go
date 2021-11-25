@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -124,6 +125,13 @@ func (r *Runtime) exec(proc *backend.Step) error {
 			return nil
 		} else if err != nil {
 			return err
+		}
+	}
+
+	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
+	for key, value := range proc.Environment {
+		if strings.HasPrefix(key, "CI_") {
+			proc.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
 		}
 	}
 

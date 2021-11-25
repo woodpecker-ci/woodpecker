@@ -62,8 +62,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	// TODO: This is here for backward compatibility and will eventually be removed.
-	environment["DRONE_WORKSPACE"] = path.Join(c.base, c.path)
 
 	if section == "services" || container.Detached {
 		detached = true

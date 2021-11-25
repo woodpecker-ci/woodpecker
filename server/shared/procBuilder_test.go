@@ -41,13 +41,13 @@ bbb`,
 pipeline:
   xxx:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		}}
 
