@@ -137,7 +137,7 @@ type Store interface {
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(*model.Registry) error
+	RegistryDelete(repo *model.Repo, addr string) error
 
 	ProcLoad(int64) (*model.Proc, error)
 	ProcFind(*model.Build, int) (*model.Proc, error)

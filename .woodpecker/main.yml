@@ -192,7 +192,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server
     secrets: [docker_username, docker_password]
-    tag: [latest, "${DRONE_TAG}"]
+    tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
 
@@ -202,7 +202,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-server
     dockerfile: docker/Dockerfile.server.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
 
@@ -212,7 +212,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent
     secrets: [docker_username, docker_password]
-    tag: [latest, "${DRONE_TAG}"]
+    tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
 
@@ -222,7 +222,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-agent
     dockerfile: docker/Dockerfile.agent.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
 
@@ -232,7 +232,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-cli
     dockerfile: docker/Dockerfile.cli
     secrets: [docker_username, docker_password]
-    tag: [latest, "${DRONE_TAG}"]
+    tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
 
@@ -242,7 +242,7 @@ pipeline:
     repo: woodpeckerci/woodpecker-cli
     dockerfile: docker/Dockerfile.cli.alpine
     secrets: [ docker_username, docker_password ]
-    tag: [latest-alpine, "${DRONE_TAG}-alpine"]
+    tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
 
@@ -262,7 +262,7 @@ pipeline:
       - dist/*.deb
       - dist/*.rpm
       - dist/checksums.txt
-    title: ${DRONE_TAG##v}
+    title: ${CI_COMMIT_TAG##v}
     secrets:
       - source: github_token
         target: github_release_api_key

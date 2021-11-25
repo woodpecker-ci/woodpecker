@@ -115,18 +115,6 @@ func convertPerm(from *github.Repository) *model.Perm {
 	}
 }
 
-// convertTeamPerm is a helper function used to convert a GitHub organization
-// permissions to the common Woodpecker permissions structure.
-func convertTeamPerm(from *github.Membership) *model.Perm {
-	admin := false
-	if *from.Role == "admin" {
-		admin = true
-	}
-	return &model.Perm{
-		Admin: admin,
-	}
-}
-
 // convertRepoList is a helper function used to convert a GitHub repository
 // list to the common Woodpecker repository structure.
 func convertRepoList(from []*github.Repository, private bool) []*model.Repo {
@@ -202,9 +190,9 @@ func convertPushHook(from *webhook) *model.Build {
 	if len(build.Author) == 0 {
 		build.Author = from.Head.Author.Username
 	}
-	if len(build.Email) == 0 {
-		// default to gravatar?
-	}
+	// if len(build.Email) == 0 {
+	// TODO: default to gravatar?
+	// }
 	if strings.HasPrefix(build.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!

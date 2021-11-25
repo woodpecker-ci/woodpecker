@@ -62,9 +62,8 @@ func (w *website) Register(mux *gin.Engine) {
 }
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(200)
-
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	rw.WriteHeader(200)
 
 	rw.Write(w.data)
 }

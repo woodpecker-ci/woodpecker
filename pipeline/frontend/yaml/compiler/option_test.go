@@ -3,6 +3,7 @@ package compiler
 import (
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -111,7 +112,8 @@ func TestWithMetadata(t *testing.T) {
 	if !reflect.DeepEqual(compiler.metadata, metadata) {
 		t.Errorf("WithMetadata must set compiler the metadata")
 	}
-	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
+
+	if compiler.env["CI_REPO_NAME"] != strings.Split(metadata.Repo.Name, "/")[1] {
 		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
 	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
@@ -139,13 +141,13 @@ func TestWithNetrc(t *testing.T) {
 			"github.com",
 		),
 	)
-	if compiler.env["CI_NETRC_USERNAME"] != "octocat" {
+	if compiler.cloneEnv["CI_NETRC_USERNAME"] != "octocat" {
 		t.Errorf("WithNetrc should set CI_NETRC_USERNAME")
 	}
-	if compiler.env["CI_NETRC_PASSWORD"] != "password" {
+	if compiler.cloneEnv["CI_NETRC_PASSWORD"] != "password" {
 		t.Errorf("WithNetrc should set CI_NETRC_PASSWORD")
 	}
-	if compiler.env["CI_NETRC_MACHINE"] != "github.com" {
+	if compiler.cloneEnv["CI_NETRC_MACHINE"] != "github.com" {
 		t.Errorf("WithNetrc should set CI_NETRC_MACHINE")
 	}
 }

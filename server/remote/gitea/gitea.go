@@ -118,7 +118,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		return nil, nil
 	}
 
-	token, err := config.Exchange(oauth2.NoContext, code)
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}

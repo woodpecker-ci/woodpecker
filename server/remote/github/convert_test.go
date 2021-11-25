@@ -24,10 +24,8 @@ import (
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("GitHub converter", func() {
-
 		g.It("should convert passing status", func() {
 			g.Assert(convertStatus(model.StatusSuccess)).Equal(statusSuccess)
 		})

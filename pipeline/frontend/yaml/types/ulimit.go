@@ -21,7 +21,7 @@ func (u Ulimits) MarshalYAML() (interface{}, error) {
 	return ulimitMap, nil
 }
 
-// UnmarshalYAML implements the Unmarshaller interface.
+// UnmarshalYAML implements the Unmarshaler interface.
 func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	ulimits := make(map[string]Ulimit)
 

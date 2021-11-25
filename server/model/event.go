@@ -18,10 +18,10 @@ package model
 type EventType string
 
 const (
-	Enqueued  EventType = "enqueued"
-	Started   EventType = "started"
-	Finished  EventType = "finished"
-	Cancelled EventType = "cancelled"
+	Enqueued EventType = "enqueued"
+	Started  EventType = "started"
+	Finished EventType = "finished"
+	Canceled EventType = "canceled"
 )
 
 // Event represents a build event.

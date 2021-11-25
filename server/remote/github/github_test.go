@@ -38,7 +38,6 @@ func Test_github(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("GitHub", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -150,11 +149,6 @@ var (
 		Token: "cfcd2084",
 	}
 
-	fakeUserNoRepos = &model.User{
-		Login: "octocat",
-		Token: "repos_not_found",
-	}
-
 	fakeRepo = &model.Repo{
 		Owner:        "octocat",
 		Name:         "Hello-World",
@@ -169,9 +163,5 @@ var (
 		Owner:    "test_name",
 		Name:     "repo_not_found",
 		FullName: "test_name/repo_not_found",
-	}
-
-	fakeBuild = &model.Build{
-		Commit: "9ecad50",
 	}
 )

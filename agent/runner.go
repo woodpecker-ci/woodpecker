@@ -98,12 +98,12 @@ func (r *Runner) Run(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
-	cancelled := abool.New()
+	canceled := abool.New()
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
 		if werr := r.client.Wait(ctx, work.ID); werr != nil {
-			cancelled.SetTo(true)
+			canceled.SetTo(true)
 			logger.Warn().Err(werr).Msg("cancel signal received")
 
 			cancel()
@@ -122,7 +122,9 @@ func (r *Runner) Run(ctx context.Context) error {
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
 
-				r.client.Extend(ctx, work.ID)
+				if err := r.client.Extend(ctx, work.ID); err != nil {
+					log.Error().Err(err).Msg("extending pipeline deadline failed")
+				}
 			}
 		}
 	}()
@@ -137,7 +139,6 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	var uploads sync.WaitGroup
 	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
-
 		loglogger := logger.With().
 			Str("image", proc.Image).
 			Str("stage", proc.Alias).
@@ -159,12 +160,14 @@ func (r *Runner) Run(ctx context.Context) error {
 		loglogger.Debug().Msg("log stream opened")
 
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logstream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
-		io.Copy(logstream, limitedPart)
+		logStream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
+		if _, err := io.Copy(logStream, limitedPart); err != nil {
+			log.Error().Err(err).Msg("copy limited logStream part")
+		}
 
 		loglogger.Debug().Msg("log stream copied")
 
-		data, err := json.Marshal(logstream.Lines())
+		data, err := json.Marshal(logStream.Lines())
 		if err != nil {
 			loglogger.Err(err).Msg("could not marshal logstream")
 		}
@@ -267,26 +270,19 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		state.Pipeline.Step.Environment["DRONE_MACHINE"] = r.hostname
+		// TODO: find better way to update this state
+		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "failure"
 		}
 		return nil
 	})
@@ -308,7 +304,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}
-		if cancelled.IsSet() {
+		if canceled.IsSet() {
 			state.ExitCode = 137
 		}
 	}
@@ -341,10 +337,10 @@ func (r *Runner) Run(ctx context.Context) error {
 
 // extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_REPO"]
+	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
 // extract build number from the configuration
 func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_BUILD_NUMBER"]
+	return config.Stages[0].Steps[0].Environment["CI_BUILD_NUMBER"]
 }

@@ -41,7 +41,9 @@ func repoSync(c *cli.Context) error {
 		if org != "" && org != repo.Owner {
 			continue
 		}
-		tmpl.Execute(os.Stdout, repo)
+		if err := tmpl.Execute(os.Stdout, repo); err != nil {
+			return err
+		}
 	}
 	return nil
 }
