@@ -89,12 +89,6 @@ func WithUser(c context.Context, user *model.User) context.Context {
 	return context.WithValue(c, userKey, user)
 }
 
-// ToUser returns a user from the context.
-func ToUser(c context.Context) (*model.User, bool) {
-	user, ok := c.Value(userKey).(*model.User)
-	return user, ok
-}
-
 type key int
 
 const userKey key = 0
