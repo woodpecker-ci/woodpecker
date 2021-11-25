@@ -21,10 +21,8 @@ import (
 )
 
 func TestSecret(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Secret", func() {
-
 		g.It("should match event", func() {
 			secret := Secret{}
 			secret.Events = []string{"pull_request"}

@@ -25,10 +25,8 @@ import (
 )
 
 func Test_parser(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket parser", func() {
-
 		g.It("Should ignore unsupported hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			req, _ := http.NewRequest("POST", "/hook", buf)
@@ -42,7 +40,6 @@ func Test_parser(t *testing.T) {
 		})
 
 		g.Describe("Given a pull request hook payload", func() {
-
 			g.It("Should return err when malformed", func() {
 				buf := bytes.NewBufferString("[]")
 				req, _ := http.NewRequest("POST", "/hook", buf)
@@ -79,7 +76,6 @@ func Test_parser(t *testing.T) {
 		})
 
 		g.Describe("Given a push hook payload", func() {
-
 			g.It("Should return err when malformed", func() {
 				buf := bytes.NewBufferString("[]")
 				req, _ := http.NewRequest("POST", "/hook", buf)

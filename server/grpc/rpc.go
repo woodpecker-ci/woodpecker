@@ -137,7 +137,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
+	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
 	}
 
@@ -431,7 +431,6 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 				if err := s.store.UpdateUser(user); err != nil {
 					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 				}
-
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)

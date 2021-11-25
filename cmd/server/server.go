@@ -50,7 +50,6 @@ import (
 )
 
 func run(c *cli.Context) error {
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -151,18 +150,17 @@ func run(c *cli.Context) error {
 
 	// start the grpc server
 	g.Go(func() error {
-
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
 			log.Err(err).Msg("")
 			return err
 		}
-		auther := &authorizer{
+		authorizer := &authorizer{
 			password: c.String("agent-secret"),
 		}
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(auther.streamInterceptor),
-			grpc.UnaryInterceptor(auther.unaryIntercaptor),
+			grpc.StreamInterceptor(authorizer.streamInterceptor),
+			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
@@ -252,7 +250,6 @@ func run(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
-
 	// storage
 	server.Config.Storage.Files = v
 	server.Config.Storage.Config = v
