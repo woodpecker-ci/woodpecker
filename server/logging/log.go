@@ -31,7 +31,6 @@ type stream struct {
 	list []*Entry
 	subs map[*subscriber]struct{}
 	done chan struct{}
-	wait sync.WaitGroup
 }
 
 type log struct {

@@ -21,7 +21,6 @@ const (
 type entry struct {
 	item     *Task
 	done     chan bool
-	retry    int
 	error    error
 	deadline time.Time
 }
