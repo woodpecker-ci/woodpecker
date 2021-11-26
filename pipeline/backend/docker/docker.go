@@ -17,28 +17,31 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-type engine struct {
+type docker struct {
 	client client.APIClient
 }
 
+// make sure docker implements Engine
+var _ backend.Engine = &docker{}
+
 // New returns a new Docker Engine.
 func New() backend.Engine {
-	return &engine{
+	return &docker{
 		client: nil,
 	}
 }
 
-func (e *engine) Name() string {
+func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *engine) IsAvivable() bool {
+func (e *docker) IsAvailable() bool {
 	_, err := os.Stat("/.dockerenv")
 	return os.IsNotExist(err)
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *engine) Load() error {
+func (e *docker) Load() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
@@ -48,7 +51,7 @@ func (e *engine) Load() error {
 	return nil
 }
 
-func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:       vol.Name,
@@ -73,7 +76,7 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
+func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 	config := toConfig(proc)
 	hostConfig := toHostConfig(proc)
 
@@ -144,11 +147,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
 
-func (e *engine) Kill(_ context.Context, proc *backend.Step) error {
-	return e.client.ContainerKill(noContext, proc.Name, "9")
-}
-
-func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
+func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
 	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
 	select {
 	case <-wait:
@@ -170,7 +169,7 @@ func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
+func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
 	logs, err := e.client.ContainerLogs(ctx, proc.Name, logsOpts)
 	if err != nil {
 		return nil, err
@@ -187,7 +186,7 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 	return rc, nil
 }
 
-func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
