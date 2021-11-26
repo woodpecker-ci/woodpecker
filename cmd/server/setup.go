@@ -20,7 +20,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
@@ -43,7 +42,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
-	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -177,8 +175,8 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
 
-// SetupRemote helper function to setup the remote from the CLI arguments.
-func SetupRemote(c *cli.Context) (remote.Remote, error) {
+// setupRemote helper function to setup the remote from the CLI arguments.
+func setupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
 	case c.Bool("github"):
 		return setupGithub(c)
@@ -302,18 +300,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	log.Trace().Msgf("Remote (coding) opts: %#v", opts)
 	return coding.New(opts)
 }
-
-func setupTree(c *cli.Context) *gin.Engine {
-	tree := gin.New()
-	tree.UseRawPath = true
-	web.New(
-		web.WithSync(time.Hour*72),
-		web.WithDocs(c.String("docs")),
-	).Register(tree)
-	return tree
-}
-
-func before(c *cli.Context) error { return nil }
 
 func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{

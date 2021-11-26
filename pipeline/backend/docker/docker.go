@@ -14,28 +14,38 @@ import (
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 type engine struct {
 	client client.APIClient
 }
 
-// New returns a new Docker Engine using the given client.
-func New(cli client.APIClient) backend.Engine {
+// New returns a new Docker Engine.
+func New() backend.Engine {
 	return &engine{
-		client: cli,
+		client: nil,
 	}
 }
 
-// NewEnv returns a new Docker Engine using the client connection
-// environment variables.
-func NewEnv() (backend.Engine, error) {
+func (e *engine) Name() string {
+	return "docker"
+}
+
+func (e *engine) IsAvivable() bool {
+	_, err := os.Stat("/.dockerenv")
+	return os.IsNotExist(err)
+}
+
+// Load new client for Docker Engine using environment variables.
+func (e *engine) Load() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return New(cli), nil
+	e.client = cli
+
+	return nil
 }
 
 func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
