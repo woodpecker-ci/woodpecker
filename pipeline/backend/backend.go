@@ -7,8 +7,12 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func FindEngine(engineName string) (types.Engine, error) {
-	engines := make(map[string]types.Engine)
+var (
+	engines map[string]types.Engine
+)
+
+func init() {
+	engines = make(map[string]types.Engine)
 
 	// TODO: disabled for now as kubernetes backend has not been implemented yet
 	// kubernetes
@@ -18,7 +22,9 @@ func FindEngine(engineName string) (types.Engine, error) {
 	// docker
 	engine := docker.New()
 	engines[engine.Name()] = engine
+}
 
+func FindEngine(engineName string) (types.Engine, error) {
 	if engineName == "auto-detect" {
 		for _, engine := range engines {
 			if engine.IsAvivable() {
