@@ -31,6 +31,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// TODO: system wide default timeout and max timeout
+const defaultTimeout = 60 // 1 hour default build time
+const maxTimeout = defaultTimeout * 2
+
 func PostRepo(c *gin.Context) {
 	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
@@ -54,7 +58,10 @@ func PostRepo(c *gin.Context) {
 	}
 
 	if repo.Timeout == 0 {
-		repo.Timeout = 60 // 1 hour default build time
+		repo.Timeout = defaultTimeout
+	}
+	if repo.Timeout > maxTimeout {
+		repo.Timeout = maxTimeout
 	}
 
 	if repo.Hash == "" {
@@ -108,8 +115,12 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if (in.IsTrusted != nil || in.Timeout != nil) && !user.Admin {
-		c.String(403, "Insufficient privileges")
+	if in.Timeout != nil && *in.Timeout > maxTimeout && !user.Admin {
+		c.String(http.StatusForbidden, "timeout is higher than max timeout on this instance")
+	}
+	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
+		log.Trace().Msgf("user '%s' want to change repo settings who require instance permissions", user.Login)
+		c.String(http.StatusForbidden, "Insufficient privileges")
 		return
 	}
 
