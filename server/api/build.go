@@ -261,7 +261,7 @@ func DeleteBuild(c *gin.Context) {
 
 func PostApproval(c *gin.Context) {
 	var (
-		remote_ = remote.FromContext(c)
+		remote_ = server.Config.Services.Remote
 		store_  = store.FromContext(c)
 		repo    = session.Repo(c)
 		user    = session.User(c)
@@ -372,7 +372,7 @@ func PostApproval(c *gin.Context) {
 
 func PostDecline(c *gin.Context) {
 	var (
-		remote_ = remote.FromContext(c)
+		remote_ = server.Config.Services.Remote
 		store_  = store.FromContext(c)
 
 		repo   = session.Repo(c)
@@ -415,7 +415,7 @@ func GetBuildQueue(c *gin.Context) {
 
 // PostBuild restarts a build
 func PostBuild(c *gin.Context) {
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 	repo := session.Repo(c)
 

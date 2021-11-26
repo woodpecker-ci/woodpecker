@@ -24,6 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 var Config = struct {
@@ -35,6 +36,7 @@ var Config = struct {
 		Secrets    model.SecretService
 		Registries model.RegistryService
 		Environ    model.EnvironService
+		Remote     remote.Remote
 	}
 	Storage struct {
 		// Users  model.UserStore

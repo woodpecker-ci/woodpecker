@@ -26,14 +26,13 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
 func PostRepo(c *gin.Context) {
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
@@ -177,7 +176,7 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	r := remote.FromContext(c)
+	r := server.Config.Services.Remote
 
 	branches, err := r.Branches(c, user, repo)
 	if err != nil {
@@ -190,7 +189,7 @@ func GetRepoBranches(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 
 	repo := session.Repo(c)
@@ -221,7 +220,7 @@ func DeleteRepo(c *gin.Context) {
 }
 
 func RepairRepo(c *gin.Context) {
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -275,7 +274,7 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)

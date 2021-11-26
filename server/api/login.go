@@ -25,7 +25,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -55,7 +54,7 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := remote.Login(c, c.Writer, c.Request)
+	tmpuser, err := server.Config.Services.Remote.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(303, "/login?error=oauth_error")
@@ -81,7 +80,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := remote.Teams(c, tmpuser)
+			teams, terr := server.Config.Services.Remote.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
@@ -118,7 +117,7 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := remote.Teams(c, u)
+		teams, terr := server.Config.Services.Remote.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
@@ -166,7 +165,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	login, err := remote.Auth(c, in.Access, in.Refresh)
+	login, err := server.Config.Services.Remote.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

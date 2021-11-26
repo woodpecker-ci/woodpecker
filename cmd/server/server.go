@@ -98,7 +98,7 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	remote_, err := SetupRemote(c)
+	remote_, err := setupRemote(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
@@ -142,7 +142,6 @@ func run(c *cli.Context) error {
 		middleware.Version,
 		middleware.Config(c),
 		middleware.Store(c, store_),
-		middleware.Remote(remote_),
 	)
 
 	var g errgroup.Group
@@ -252,6 +251,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// storage
 	server.Config.Storage.Files = v
 	server.Config.Storage.Config = v
+
+	// remote
+	server.Config.Services.Remote = r
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)

@@ -76,7 +76,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 }
 
 func PostHook(c *gin.Context) {
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 	store_ := store.FromContext(c)
 
 	tmpRepo, build, err := remote_.Hook(c.Request)

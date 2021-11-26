@@ -175,8 +175,8 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Filesystem(c.StringSlice("environment"))
 }
 
-// SetupRemote helper function to setup the remote from the CLI arguments.
-func SetupRemote(c *cli.Context) (remote.Remote, error) {
+// setupRemote helper function to setup the remote from the CLI arguments.
+func setupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
 	case c.Bool("github"):
 		return setupGithub(c)
