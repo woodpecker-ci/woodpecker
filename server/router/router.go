@@ -28,7 +28,7 @@ import (
 )
 
 // Load loads the router
-func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...gin.HandlerFunc) http.Handler {
+func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.Handler {
 	e := gin.New()
 	e.UseRawPath = true
 	e.Use(gin.Recovery())
@@ -45,9 +45,7 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 	e.Use(session.SetUser())
 	e.Use(token.Refresh)
 
-	e.NoRoute(func(c *gin.Context) {
-		serveHTTP(c.Writer, c.Request)
-	})
+	e.NoRoute(gin.WrapF(noRouteHandler))
 
 	e.GET("/logout", api.GetLogout)
 	e.GET("/login", api.HandleLogin)
