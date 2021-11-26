@@ -39,7 +39,6 @@ func New() *gin.Engine {
 	h := http.FileServer(web.HttpFS())
 	e.GET("/favicon.svg", gin.WrapH(h))
 	e.GET("/assets/*filepath", gin.WrapH(h))
-	e.GET("/web-config.js", config)
 
 	e.NoRoute(handleIndex)
 
