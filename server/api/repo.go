@@ -59,8 +59,7 @@ func PostRepo(c *gin.Context) {
 
 	if repo.Timeout == 0 {
 		repo.Timeout = defaultTimeout
-	}
-	if repo.Timeout > maxTimeout {
+	} else if repo.Timeout > maxTimeout {
 		repo.Timeout = maxTimeout
 	}
 
