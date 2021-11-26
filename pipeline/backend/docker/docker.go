@@ -36,8 +36,8 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable() bool {
-	_, err := os.Stat("/.dockerenv")
-	return os.IsNotExist(err)
+	_, err := os.Stat("/var/run/docker.sock")
+	return err == nil
 }
 
 // Load new client for Docker Engine using environment variables.
