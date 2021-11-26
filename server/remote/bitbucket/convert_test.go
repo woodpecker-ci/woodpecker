@@ -26,10 +26,8 @@ import (
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket converter", func() {
-
 		g.It("should convert passing status", func() {
 			g.Assert(convertStatus(model.StatusSuccess)).Equal(statusSuccess)
 		})
@@ -78,8 +76,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("default")
-			g.Assert(to.Kind).Equal(from.Scm)
-			g.Assert(to.IsPrivate).Equal(from.IsPrivate)
+			g.Assert(string(to.SCMKind)).Equal(from.Scm)
+			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.Html.Href)
 			g.Assert(to.Link).Equal(from.Links.Html.Href)
 		})

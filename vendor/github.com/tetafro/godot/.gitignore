@@ -1,4 +1,5 @@
 /dist/
+/tmp/
 /vendor/
 /godot
 /profile.out

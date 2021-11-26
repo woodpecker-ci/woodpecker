@@ -31,6 +31,9 @@ type Checker struct {
 	// RevisionFrom check revision starting at, leave blank for auto detection
 	// ignored if patch is set.
 	RevisionFrom string
+	// WholeFiles indicates that the user wishes to see all issues that comes up
+	// anywhere in any file that has been changed in this revision or patch.
+	WholeFiles bool
 	// RevisionTo checks revision finishing at, leave blank for auto detection
 	// ignored if patch is set.
 	RevisionTo string
@@ -111,6 +114,10 @@ func (c Checker) IsNewIssue(i InputIssue) (hunkPos int, isNew bool) {
 	fchanges, ok := c.changes[i.FilePath()]
 	if !ok { // file wasn't changed
 		return 0, false
+	}
+
+	if c.WholeFiles {
+		return i.Line(), true
 	}
 
 	var (

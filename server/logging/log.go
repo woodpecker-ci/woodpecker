@@ -31,7 +31,6 @@ type stream struct {
 	list []*Entry
 	subs map[*subscriber]struct{}
 	done chan struct{}
-	wait sync.WaitGroup
 }
 
 type log struct {
@@ -132,11 +131,15 @@ func (l *log) Snapshot(c context.Context, path string, w io.Writer) error {
 		return ErrNotFound
 	}
 	s.Lock()
+	defer s.Unlock()
 	for _, entry := range s.list {
-		w.Write(entry.Data)
-		w.Write(cr)
+		if _, err := w.Write(entry.Data); err != nil {
+			return err
+		}
+		if _, err := w.Write(cr); err != nil {
+			return err
+		}
 	}
-	s.Unlock()
 	return nil
 }
 

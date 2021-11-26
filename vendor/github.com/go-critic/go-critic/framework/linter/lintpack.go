@@ -87,6 +87,10 @@ type CheckerInfo struct {
 	// Note is an optional caution message or advice.
 	Note string
 
+	// EmbeddedRuleguard tells whether this checker is auto-generated
+	// from the embedded ruleguard rules.
+	EmbeddedRuleguard bool
+
 	// Collection establishes a checker-to-collection relationship.
 	Collection *CheckerCollection
 }
@@ -126,6 +130,14 @@ func (c *Checker) Check(f *ast.File) []Warning {
 	return c.ctx.warnings
 }
 
+// QuickFix is our analysis.TextEdit; we're using it here to avoid
+// direct analysis package dependency for now.
+type QuickFix struct {
+	From        token.Pos
+	To          token.Pos
+	Replacement []byte
+}
+
 // Warning represents issue that is found by checker.
 type Warning struct {
 	// Node is an AST node that caused warning to trigger.
@@ -134,6 +146,19 @@ type Warning struct {
 
 	// Text is warning message without source location info.
 	Text string
+
+	// Suggestion is a quick fix for a given problem.
+	// QuickFix is analysis.TextEdit and can be used to
+	// construct an analysis.SuggestedFix object.
+	//
+	// For convenience, there is Warning.HasQuickFix() method
+	// that reports whether Suggestion has something meaningful.
+	Suggestion QuickFix
+}
+
+// HasQuickFix reports whether this warning has a suggested fix.
+func (warn Warning) HasQuickFix() bool {
+	return warn.Suggestion.Replacement != nil
 }
 
 // NewChecker returns initialized checker identified by an info.
@@ -152,6 +177,9 @@ type Context struct {
 	// SizesInfo carries alignment and type size information.
 	// Arch-dependent.
 	SizesInfo types.Sizes
+
+	// GoVersion is a target Go version.
+	GoVersion GoVersion
 
 	// FileSet is a file set that was used during the program loading.
 	FileSet *token.FileSet
@@ -192,6 +220,19 @@ func NewContext(fset *token.FileSet, sizes types.Sizes) *Context {
 		SizesInfo: sizes,
 		TypesInfo: &types.Info{},
 	}
+}
+
+// SetGoVersion adjust the target Go language version.
+//
+// The format is like "1.5", "1.8", etc.
+// It's permitted to have "go" prefix (e.g. "go1.5").
+//
+// Empty string (the default) means that we make no
+// Go version assumptions and (like gocritic does) behave
+// like all features are available. To make gocritic
+// more conservative, the upper Go version level should be adjusted.
+func (c *Context) SetGoVersion(version string) {
+	c.GoVersion = parseGoVersion(version)
 }
 
 // SetPackageInfo sets package-related metadata.
@@ -236,6 +277,15 @@ func (ctx *CheckerContext) Warn(node ast.Node, format string, args ...interface{
 	ctx.warnings = append(ctx.warnings, Warning{
 		Text: ctx.printer.Sprintf(format, args...),
 		Node: node,
+	})
+}
+
+// WarnFixable emits a warning with a fix suggestion provided by the caller.
+func (ctx *CheckerContext) WarnFixable(node ast.Node, fix QuickFix, format string, args ...interface{}) {
+	ctx.warnings = append(ctx.warnings, Warning{
+		Text:       ctx.printer.Sprintf(format, args...),
+		Node:       node,
+		Suggestion: fix,
 	})
 }
 

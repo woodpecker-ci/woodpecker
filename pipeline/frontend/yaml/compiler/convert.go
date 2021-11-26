@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
@@ -60,19 +62,19 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	// TODO: This is here for backward compatibility and will eventually be removed.
-	environment["DRONE_WORKSPACE"] = path.Join(c.base, c.path)
 
 	if section == "services" || container.Detached {
 		detached = true
 	}
 
-	if detached == false || len(container.Commands) != 0 {
+	if !detached || len(container.Commands) != 0 {
 		workingdir = path.Join(c.base, c.path)
 	}
 
-	if detached == false {
-		paramsToEnv(container.Vargs, environment)
+	if !detached {
+		if err := paramsToEnv(container.Vargs, environment); err != nil {
+			log.Error().Err(err).Msg("paramsToEnv")
+		}
 	}
 
 	if len(container.Commands) != 0 {

@@ -105,30 +105,6 @@ func getFormatters() map[string]lint.Formatter {
 
 // GetLintingRules yields the linting rules that must be applied by the linter
 func GetLintingRules(config *lint.Config) ([]lint.Rule, error) {
-	if config.EnableAllRules {
-		return getAllRules(config)
-	}
-
-	return getEnabledRules(config)
-}
-
-// getAllRules yields the list of all available rules except those disabled by configuration
-func getAllRules(config *lint.Config) ([]lint.Rule, error) {
-	lintingRules := []lint.Rule{}
-	for _, r := range allRules {
-		ruleConf := config.Rules[r.Name()]
-		if ruleConf.Disabled {
-			continue // skip disabled rules
-		}
-
-		lintingRules = append(lintingRules, r)
-	}
-
-	return lintingRules, nil
-}
-
-// getEnabledRules yields the list of rules that are enabled by configuration
-func getEnabledRules(config *lint.Config) ([]lint.Rule, error) {
 	rulesMap := map[string]lint.Rule{}
 	for _, r := range allRules {
 		rulesMap[r.Name()] = r
@@ -165,9 +141,27 @@ func parseConfig(path string) (*lint.Config, error) {
 }
 
 func normalizeConfig(config *lint.Config) {
+	const defaultConfidence = 0.8
 	if config.Confidence == 0 {
-		config.Confidence = 0.8
+		config.Confidence = defaultConfidence
 	}
+
+	if len(config.Rules) == 0 {
+		config.Rules = map[string]lint.RuleConfig{}
+	}
+	if config.EnableAllRules {
+		// Add to the configuration all rules not yet present in it
+		for _, rule := range allRules {
+			ruleName := rule.Name()
+			_, alreadyInConf := config.Rules[ruleName]
+			if alreadyInConf {
+				continue
+			}
+			// Add the rule with an empty conf for
+			config.Rules[ruleName] = lint.RuleConfig{}
+		}
+	}
+
 	severity := config.Severity
 	if severity != "" {
 		for k, v := range config.Rules {

@@ -27,6 +27,7 @@ const (
 	opFunc
 	opStructNoSeq
 	opStruct
+	opAnyInterface
 	opNamed
 )
 
@@ -313,6 +314,16 @@ func parseExpr(ctx *Context, e ast.Expr) *pattern {
 		if len(e.Methods.List) == 0 {
 			return &pattern{op: opBuiltinType, value: efaceType}
 		}
+		if len(e.Methods.List) == 1 {
+			p := parseExpr(ctx, e.Methods.List[0].Type)
+			if p == nil {
+				return nil
+			}
+			if p.op != opVarSeq {
+				return nil
+			}
+			return &pattern{op: opAnyInterface}
+		}
 	}
 
 	return nil
@@ -524,6 +535,10 @@ func (p *Pattern) matchIdentical(sub *pattern, typ types.Type) bool {
 			return false
 		}
 		return true
+
+	case opAnyInterface:
+		_, ok := typ.(*types.Interface)
+		return ok
 
 	default:
 		return false

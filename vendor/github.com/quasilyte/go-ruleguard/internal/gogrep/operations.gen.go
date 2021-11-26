@@ -33,464 +33,513 @@ const (
 	// ValueIndex: strings | wildcard name
 	opNamedOptNode operation = 6
 
+	// Tag: Node
+	opFieldNode operation = 7
+
+	// Tag: Node
+	// ValueIndex: strings | wildcard name
+	opNamedFieldNode operation = 8
+
 	// Tag: StmtList
 	// Args: stmts...
 	// Example: f(); g()
-	opMultiStmt operation = 7
+	opMultiStmt operation = 9
 
 	// Tag: ExprList
 	// Args: exprs...
 	// Example: f(), g()
-	opMultiExpr operation = 8
+	opMultiExpr operation = 10
+
+	// Tag: DeclList
+	// Args: exprs...
+	// Example: f(), g()
+	opMultiDecl operation = 11
 
 	// Tag: Unknown
-	opEnd operation = 9
+	opEnd operation = 12
 
 	// Tag: BasicLit
 	// ValueIndex: ifaces | parsed literal value
-	opBasicLit operation = 10
+	opBasicLit operation = 13
 
 	// Tag: BasicLit
 	// ValueIndex: strings | raw literal value
-	opStrictIntLit operation = 11
+	opStrictIntLit operation = 14
 
 	// Tag: BasicLit
 	// ValueIndex: strings | raw literal value
-	opStrictFloatLit operation = 12
+	opStrictFloatLit operation = 15
 
 	// Tag: BasicLit
 	// ValueIndex: strings | raw literal value
-	opStrictCharLit operation = 13
+	opStrictCharLit operation = 16
 
 	// Tag: BasicLit
 	// ValueIndex: strings | raw literal value
-	opStrictStringLit operation = 14
+	opStrictStringLit operation = 17
 
 	// Tag: BasicLit
 	// ValueIndex: strings | raw literal value
-	opStrictComplexLit operation = 15
+	opStrictComplexLit operation = 18
 
 	// Tag: Ident
 	// ValueIndex: strings | ident name
-	opIdent operation = 16
+	opIdent operation = 19
+
+	// Tag: Ident
+	// ValueIndex: strings | package name
+	opStdlibPkg operation = 20
 
 	// Tag: IndexExpr
 	// Args: x expr
-	opIndexExpr operation = 17
+	opIndexExpr operation = 21
 
 	// Tag: SliceExpr
 	// Args: x
-	opSliceExpr operation = 18
+	opSliceExpr operation = 22
 
 	// Tag: SliceExpr
 	// Args: x from
 	// Example: x[from:]
-	opSliceFromExpr operation = 19
+	opSliceFromExpr operation = 23
 
 	// Tag: SliceExpr
 	// Args: x to
 	// Example: x[:to]
-	opSliceToExpr operation = 20
+	opSliceToExpr operation = 24
 
 	// Tag: SliceExpr
 	// Args: x from to
 	// Example: x[from:to]
-	opSliceFromToExpr operation = 21
+	opSliceFromToExpr operation = 25
 
 	// Tag: SliceExpr
 	// Args: x from cap
 	// Example: x[:from:cap]
-	opSliceToCapExpr operation = 22
+	opSliceToCapExpr operation = 26
 
 	// Tag: SliceExpr
 	// Args: x from to cap
 	// Example: x[from:to:cap]
-	opSliceFromToCapExpr operation = 23
+	opSliceFromToCapExpr operation = 27
 
 	// Tag: FuncLit
 	// Args: type block
-	opFuncLit operation = 24
+	opFuncLit operation = 28
 
 	// Tag: CompositeLit
 	// Args: elts...
 	// Example: {elts...}
-	opCompositeLit operation = 25
+	opCompositeLit operation = 29
 
 	// Tag: CompositeLit
 	// Args: typ elts...
 	// Example: typ{elts...}
-	opTypedCompositeLit operation = 26
+	opTypedCompositeLit operation = 30
 
 	// Tag: SelectorExpr
 	// Args: x
 	// ValueIndex: strings | selector name
-	opSimpleSelectorExpr operation = 27
+	opSimpleSelectorExpr operation = 31
 
 	// Tag: SelectorExpr
 	// Args: x sel
-	opSelectorExpr operation = 28
+	opSelectorExpr operation = 32
 
 	// Tag: TypeAssertExpr
 	// Args: x typ
-	opTypeAssertExpr operation = 29
+	opTypeAssertExpr operation = 33
 
 	// Tag: TypeAssertExpr
 	// Args: x
-	opTypeSwitchAssertExpr operation = 30
+	opTypeSwitchAssertExpr operation = 34
+
+	// Tag: StructType
+	// Args: fields
+	opStructType operation = 35
+
+	// Tag: StructType
+	// Args: fields
+	opInterfaceType operation = 36
 
 	// Tag: FuncType
 	// Args: params
-	opVoidFuncType operation = 31
+	opVoidFuncType operation = 37
 
 	// Tag: FuncType
 	// Args: params results
-	opFuncType operation = 32
+	opFuncType operation = 38
 
 	// Tag: ArrayType
 	// Args: length elem
-	opArrayType operation = 33
+	opArrayType operation = 39
 
 	// Tag: ArrayType
 	// Args: elem
-	opSliceType operation = 34
+	opSliceType operation = 40
 
 	// Tag: MapType
 	// Args: key value
-	opMapType operation = 35
+	opMapType operation = 41
 
 	// Tag: ChanType
 	// Args: value
 	// Value: ast.ChanDir | channel direction
-	opChanType operation = 36
+	opChanType operation = 42
 
 	// Tag: KeyValueExpr
 	// Args: key value
-	opKeyValueExpr operation = 37
+	opKeyValueExpr operation = 43
 
 	// Tag: Ellipsis
-	opEllipsis operation = 38
+	opEllipsis operation = 44
 
 	// Tag: Ellipsis
 	// Args: type
-	opTypedEllipsis operation = 39
+	opTypedEllipsis operation = 45
 
 	// Tag: StarExpr
 	// Args: x
-	opStarExpr operation = 40
+	opStarExpr operation = 46
 
 	// Tag: UnaryExpr
 	// Args: x
 	// Value: token.Token | unary operator
-	opUnaryExpr operation = 41
+	opUnaryExpr operation = 47
 
 	// Tag: BinaryExpr
 	// Args: x y
 	// Value: token.Token | binary operator
-	opBinaryExpr operation = 42
+	opBinaryExpr operation = 48
 
 	// Tag: ParenExpr
 	// Args: x
-	opParenExpr operation = 43
+	opParenExpr operation = 49
+
+	// Tag: Unknown
+	// Args: exprs...
+	// Example: 1, 2, 3
+	opArgList operation = 50
+
+	// Tag: Unknown
+	// Like ArgList, but pattern contains no $*
+	// Args: exprs[]
+	// Example: 1, 2, 3
+	// Value: int | slice len
+	opSimpleArgList operation = 51
 
 	// Tag: CallExpr
-	// Args: fn args...
+	// Args: fn args
 	// Example: f(1, xs...)
-	opVariadicCallExpr operation = 44
+	opVariadicCallExpr operation = 52
 
 	// Tag: CallExpr
-	// Args: fn args...
+	// Args: fn args
 	// Example: f(1, xs)
-	opCallExpr operation = 45
+	opNonVariadicCallExpr operation = 53
+
+	// Tag: CallExpr
+	// Args: fn args
+	// Example: f(1, xs) or f(1, xs...)
+	opCallExpr operation = 54
 
 	// Tag: AssignStmt
 	// Args: lhs rhs
 	// Example: lhs := rhs()
 	// Value: token.Token | ':=' or '='
-	opAssignStmt operation = 46
+	opAssignStmt operation = 55
 
 	// Tag: AssignStmt
 	// Args: lhs... rhs...
 	// Example: lhs1, lhs2 := rhs()
 	// Value: token.Token | ':=' or '='
-	opMultiAssignStmt operation = 47
+	opMultiAssignStmt operation = 56
 
 	// Tag: BranchStmt
 	// Args: x
 	// Value: token.Token | branch kind
-	opBranchStmt operation = 48
+	opBranchStmt operation = 57
 
 	// Tag: BranchStmt
 	// Args: x
 	// Value: token.Token | branch kind
 	// ValueIndex: strings | label name
-	opSimpleLabeledBranchStmt operation = 49
+	opSimpleLabeledBranchStmt operation = 58
 
 	// Tag: BranchStmt
 	// Args: label x
 	// Value: token.Token | branch kind
-	opLabeledBranchStmt operation = 50
+	opLabeledBranchStmt operation = 59
 
 	// Tag: LabeledStmt
 	// Args: x
 	// ValueIndex: strings | label name
-	opSimpleLabeledStmt operation = 51
+	opSimpleLabeledStmt operation = 60
 
 	// Tag: LabeledStmt
 	// Args: label x
-	opLabeledStmt operation = 52
+	opLabeledStmt operation = 61
 
 	// Tag: BlockStmt
 	// Args: body...
-	opBlockStmt operation = 53
+	opBlockStmt operation = 62
 
 	// Tag: ExprStmt
 	// Args: x
-	opExprStmt operation = 54
+	opExprStmt operation = 63
 
 	// Tag: GoStmt
 	// Args: x
-	opGoStmt operation = 55
+	opGoStmt operation = 64
 
 	// Tag: DeferStmt
 	// Args: x
-	opDeferStmt operation = 56
+	opDeferStmt operation = 65
 
 	// Tag: SendStmt
 	// Args: ch value
-	opSendStmt operation = 57
+	opSendStmt operation = 66
 
 	// Tag: EmptyStmt
-	opEmptyStmt operation = 58
+	opEmptyStmt operation = 67
 
 	// Tag: IncDecStmt
 	// Args: x
 	// Value: token.Token | '++' or '--'
-	opIncDecStmt operation = 59
+	opIncDecStmt operation = 68
 
 	// Tag: ReturnStmt
 	// Args: results...
-	opReturnStmt operation = 60
+	opReturnStmt operation = 69
 
 	// Tag: IfStmt
 	// Args: cond block
 	// Example: if cond {}
-	opIfStmt operation = 61
+	opIfStmt operation = 70
 
 	// Tag: IfStmt
 	// Args: init cond block
 	// Example: if init; cond {}
-	opIfInitStmt operation = 62
+	opIfInitStmt operation = 71
 
 	// Tag: IfStmt
 	// Args: cond block else
 	// Example: if cond {} else ...
-	opIfElseStmt operation = 63
+	opIfElseStmt operation = 72
 
 	// Tag: IfStmt
 	// Args: init cond block else
 	// Example: if init; cond {} else ...
-	opIfInitElseStmt operation = 64
+	opIfInitElseStmt operation = 73
 
 	// Tag: IfStmt
 	// Args: block
 	// Example: if $*x {}
 	// ValueIndex: strings | wildcard name
-	opIfNamedOptStmt operation = 65
+	opIfNamedOptStmt operation = 74
 
 	// Tag: IfStmt
 	// Args: block else
 	// Example: if $*x {} else ...
 	// ValueIndex: strings | wildcard name
-	opIfNamedOptElseStmt operation = 66
+	opIfNamedOptElseStmt operation = 75
 
 	// Tag: SwitchStmt
 	// Args: body...
 	// Example: switch {}
-	opSwitchStmt operation = 67
+	opSwitchStmt operation = 76
 
 	// Tag: SwitchStmt
 	// Args: tag body...
 	// Example: switch tag {}
-	opSwitchTagStmt operation = 68
+	opSwitchTagStmt operation = 77
 
 	// Tag: SwitchStmt
 	// Args: init body...
 	// Example: switch init; {}
-	opSwitchInitStmt operation = 69
+	opSwitchInitStmt operation = 78
 
 	// Tag: SwitchStmt
 	// Args: init tag body...
 	// Example: switch init; tag {}
-	opSwitchInitTagStmt operation = 70
+	opSwitchInitTagStmt operation = 79
 
 	// Tag: SelectStmt
 	// Args: body...
-	opSelectStmt operation = 71
+	opSelectStmt operation = 80
 
 	// Tag: TypeSwitchStmt
 	// Args: x block
 	// Example: switch x.(type) {}
-	opTypeSwitchStmt operation = 72
+	opTypeSwitchStmt operation = 81
 
 	// Tag: TypeSwitchStmt
 	// Args: init x block
 	// Example: switch init; x.(type) {}
-	opTypeSwitchInitStmt operation = 73
+	opTypeSwitchInitStmt operation = 82
 
 	// Tag: CaseClause
 	// Args: values... body...
-	opCaseClause operation = 74
+	opCaseClause operation = 83
 
 	// Tag: CaseClause
 	// Args: body...
-	opDefaultCaseClause operation = 75
+	opDefaultCaseClause operation = 84
 
 	// Tag: CommClause
 	// Args: comm body...
-	opCommClause operation = 76
+	opCommClause operation = 85
 
 	// Tag: CommClause
 	// Args: body...
-	opDefaultCommClause operation = 77
+	opDefaultCommClause operation = 86
 
 	// Tag: ForStmt
 	// Args: blocl
 	// Example: for {}
-	opForStmt operation = 78
+	opForStmt operation = 87
 
 	// Tag: ForStmt
 	// Args: post block
 	// Example: for ; ; post {}
-	opForPostStmt operation = 79
+	opForPostStmt operation = 88
 
 	// Tag: ForStmt
 	// Args: cond block
 	// Example: for ; cond; {}
-	opForCondStmt operation = 80
+	opForCondStmt operation = 89
 
 	// Tag: ForStmt
 	// Args: cond post block
 	// Example: for ; cond; post {}
-	opForCondPostStmt operation = 81
+	opForCondPostStmt operation = 90
 
 	// Tag: ForStmt
 	// Args: init block
 	// Example: for init; ; {}
-	opForInitStmt operation = 82
+	opForInitStmt operation = 91
 
 	// Tag: ForStmt
 	// Args: init post block
 	// Example: for init; ; post {}
-	opForInitPostStmt operation = 83
+	opForInitPostStmt operation = 92
 
 	// Tag: ForStmt
 	// Args: init cond block
 	// Example: for init; cond; {}
-	opForInitCondStmt operation = 84
+	opForInitCondStmt operation = 93
 
 	// Tag: ForStmt
 	// Args: init cond post block
 	// Example: for init; cond; post {}
-	opForInitCondPostStmt operation = 85
+	opForInitCondPostStmt operation = 94
 
 	// Tag: RangeStmt
 	// Args: x block
 	// Example: for range x {}
-	opRangeStmt operation = 86
+	opRangeStmt operation = 95
 
 	// Tag: RangeStmt
 	// Args: key x block
 	// Example: for key := range x {}
 	// Value: token.Token | ':=' or '='
-	opRangeKeyStmt operation = 87
+	opRangeKeyStmt operation = 96
 
 	// Tag: RangeStmt
 	// Args: key value x block
 	// Example: for key, value := range x {}
 	// Value: token.Token | ':=' or '='
-	opRangeKeyValueStmt operation = 88
+	opRangeKeyValueStmt operation = 97
 
 	// Tag: Unknown
 	// Args: fields...
-	opFieldList operation = 89
+	opFieldList operation = 98
 
 	// Tag: Unknown
 	// Args: typ
 	// Example: type
-	opUnnamedField operation = 90
+	opUnnamedField operation = 99
 
 	// Tag: Unknown
 	// Args: typ
 	// Example: name type
 	// ValueIndex: strings | field name
-	opSimpleField operation = 91
+	opSimpleField operation = 100
 
 	// Tag: Unknown
 	// Args: name typ
 	// Example: $name type
-	opField operation = 92
+	opField operation = 101
 
 	// Tag: Unknown
 	// Args: names... typ
 	// Example: name1, name2 type
-	opMultiField operation = 93
+	opMultiField operation = 102
+
+	// Tag: ValueSpec
+	// Args: value
+	opValueSpec operation = 103
 
 	// Tag: ValueSpec
 	// Args: lhs... rhs...
 	// Example: lhs = rhs
-	opValueInitSpec operation = 94
+	opValueInitSpec operation = 104
 
 	// Tag: ValueSpec
 	// Args: lhs... type rhs...
 	// Example: lhs typ = rhs
-	opTypedValueInitSpec operation = 95
+	opTypedValueInitSpec operation = 105
 
 	// Tag: ValueSpec
 	// Args: lhs... type
 	// Example: lhs typ
-	opTypedValueSpec operation = 96
+	opTypedValueSpec operation = 106
 
 	// Tag: TypeSpec
 	// Args: name type
 	// Example: name type
-	opTypeSpec operation = 97
+	opTypeSpec operation = 107
 
 	// Tag: TypeSpec
 	// Args: name type
 	// Example: name = type
-	opTypeAliasSpec operation = 98
+	opTypeAliasSpec operation = 108
 
 	// Tag: FuncDecl
 	// Args: name type block
-	opFuncDecl operation = 99
+	opFuncDecl operation = 109
 
 	// Tag: FuncDecl
 	// Args: recv name type block
-	opMethodDecl operation = 100
+	opMethodDecl operation = 110
 
 	// Tag: FuncDecl
 	// Args: name type
-	opFuncProtoDecl operation = 101
+	opFuncProtoDecl operation = 111
 
 	// Tag: FuncDecl
 	// Args: recv name type
-	opMethodProtoDecl operation = 102
+	opMethodProtoDecl operation = 112
+
+	// Tag: DeclStmt
+	// Args: decl
+	opDeclStmt operation = 113
 
 	// Tag: GenDecl
 	// Args: valuespecs...
-	opConstDecl operation = 103
+	opConstDecl operation = 114
 
 	// Tag: GenDecl
 	// Args: valuespecs...
-	opVarDecl operation = 104
+	opVarDecl operation = 115
 
 	// Tag: GenDecl
 	// Args: typespecs...
-	opTypeDecl operation = 105
+	opTypeDecl operation = 116
 
 	// Tag: File
 	// Args: name
-	opEmptyPackage operation = 106
+	opEmptyPackage operation = 117
 )
 
 type operationInfo struct {
@@ -499,6 +548,7 @@ type operationInfo struct {
 	ValueKind      valueKind
 	ExtraValueKind valueKind
 	VariadicMap    bitmap64
+	SliceIndex     int
 }
 
 var operationInfoTable = [256]operationInfo{
@@ -510,6 +560,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opNamedNode: {
 		Tag:            nodetag.Node,
@@ -517,6 +568,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opNodeSeq: {
 		Tag:            nodetag.Unknown,
@@ -524,6 +576,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opNamedNodeSeq: {
 		Tag:            nodetag.Unknown,
@@ -531,6 +584,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opOptNode: {
 		Tag:            nodetag.Unknown,
@@ -538,6 +592,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opNamedOptNode: {
 		Tag:            nodetag.Unknown,
@@ -545,6 +600,23 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opFieldNode: {
+		Tag:            nodetag.Node,
+		NumArgs:        0,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opNamedFieldNode: {
+		Tag:            nodetag.Node,
+		NumArgs:        0,
+		ValueKind:      emptyValue,
+		ExtraValueKind: stringValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMultiStmt: {
 		Tag:            nodetag.StmtList,
@@ -552,6 +624,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opMultiExpr: {
 		Tag:            nodetag.ExprList,
@@ -559,6 +632,15 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
+	},
+	opMultiDecl: {
+		Tag:            nodetag.DeclList,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opEnd: {
 		Tag:            nodetag.Unknown,
@@ -566,6 +648,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opBasicLit: {
 		Tag:            nodetag.BasicLit,
@@ -573,6 +656,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: ifaceValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStrictIntLit: {
 		Tag:            nodetag.BasicLit,
@@ -580,6 +664,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStrictFloatLit: {
 		Tag:            nodetag.BasicLit,
@@ -587,6 +672,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStrictCharLit: {
 		Tag:            nodetag.BasicLit,
@@ -594,6 +680,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStrictStringLit: {
 		Tag:            nodetag.BasicLit,
@@ -601,6 +688,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStrictComplexLit: {
 		Tag:            nodetag.BasicLit,
@@ -608,6 +696,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIdent: {
 		Tag:            nodetag.Ident,
@@ -615,6 +704,15 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opStdlibPkg: {
+		Tag:            nodetag.Ident,
+		NumArgs:        0,
+		ValueKind:      emptyValue,
+		ExtraValueKind: stringValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIndexExpr: {
 		Tag:            nodetag.IndexExpr,
@@ -622,6 +720,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -629,6 +728,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceFromExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -636,6 +736,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceToExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -643,6 +744,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceFromToExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -650,6 +752,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceToCapExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -657,6 +760,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceFromToCapExpr: {
 		Tag:            nodetag.SliceExpr,
@@ -664,6 +768,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opFuncLit: {
 		Tag:            nodetag.FuncLit,
@@ -671,6 +776,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opCompositeLit: {
 		Tag:            nodetag.CompositeLit,
@@ -678,6 +784,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opTypedCompositeLit: {
 		Tag:            nodetag.CompositeLit,
@@ -685,6 +792,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    2, // 10
+		SliceIndex:     -1,
 	},
 	opSimpleSelectorExpr: {
 		Tag:            nodetag.SelectorExpr,
@@ -692,6 +800,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSelectorExpr: {
 		Tag:            nodetag.SelectorExpr,
@@ -699,6 +808,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opTypeAssertExpr: {
 		Tag:            nodetag.TypeAssertExpr,
@@ -706,6 +816,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opTypeSwitchAssertExpr: {
 		Tag:            nodetag.TypeAssertExpr,
@@ -713,6 +824,23 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opStructType: {
+		Tag:            nodetag.StructType,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opInterfaceType: {
+		Tag:            nodetag.StructType,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opVoidFuncType: {
 		Tag:            nodetag.FuncType,
@@ -720,6 +848,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opFuncType: {
 		Tag:            nodetag.FuncType,
@@ -727,6 +856,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opArrayType: {
 		Tag:            nodetag.ArrayType,
@@ -734,6 +864,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSliceType: {
 		Tag:            nodetag.ArrayType,
@@ -741,6 +872,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMapType: {
 		Tag:            nodetag.MapType,
@@ -748,6 +880,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opChanType: {
 		Tag:            nodetag.ChanType,
@@ -755,6 +888,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      chandirValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opKeyValueExpr: {
 		Tag:            nodetag.KeyValueExpr,
@@ -762,6 +896,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opEllipsis: {
 		Tag:            nodetag.Ellipsis,
@@ -769,6 +904,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opTypedEllipsis: {
 		Tag:            nodetag.Ellipsis,
@@ -776,6 +912,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opStarExpr: {
 		Tag:            nodetag.StarExpr,
@@ -783,6 +920,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opUnaryExpr: {
 		Tag:            nodetag.UnaryExpr,
@@ -790,6 +928,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opBinaryExpr: {
 		Tag:            nodetag.BinaryExpr,
@@ -797,6 +936,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opParenExpr: {
 		Tag:            nodetag.ParenExpr,
@@ -804,20 +944,47 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opArgList: {
+		Tag:            nodetag.Unknown,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    1, // 1
+		SliceIndex:     -1,
+	},
+	opSimpleArgList: {
+		Tag:            nodetag.Unknown,
+		NumArgs:        1,
+		ValueKind:      intValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     0,
 	},
 	opVariadicCallExpr: {
 		Tag:            nodetag.CallExpr,
 		NumArgs:        2,
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
-		VariadicMap:    2, // 10
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opNonVariadicCallExpr: {
+		Tag:            nodetag.CallExpr,
+		NumArgs:        2,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opCallExpr: {
 		Tag:            nodetag.CallExpr,
 		NumArgs:        2,
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
-		VariadicMap:    2, // 10
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opAssignStmt: {
 		Tag:            nodetag.AssignStmt,
@@ -825,6 +992,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMultiAssignStmt: {
 		Tag:            nodetag.AssignStmt,
@@ -832,6 +1000,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    3, // 11
+		SliceIndex:     -1,
 	},
 	opBranchStmt: {
 		Tag:            nodetag.BranchStmt,
@@ -839,6 +1008,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSimpleLabeledBranchStmt: {
 		Tag:            nodetag.BranchStmt,
@@ -846,6 +1016,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opLabeledBranchStmt: {
 		Tag:            nodetag.BranchStmt,
@@ -853,6 +1024,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSimpleLabeledStmt: {
 		Tag:            nodetag.LabeledStmt,
@@ -860,6 +1032,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opLabeledStmt: {
 		Tag:            nodetag.LabeledStmt,
@@ -867,6 +1040,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opBlockStmt: {
 		Tag:            nodetag.BlockStmt,
@@ -874,6 +1048,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opExprStmt: {
 		Tag:            nodetag.ExprStmt,
@@ -881,6 +1056,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opGoStmt: {
 		Tag:            nodetag.GoStmt,
@@ -888,6 +1064,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opDeferStmt: {
 		Tag:            nodetag.DeferStmt,
@@ -895,6 +1072,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSendStmt: {
 		Tag:            nodetag.SendStmt,
@@ -902,6 +1080,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opEmptyStmt: {
 		Tag:            nodetag.EmptyStmt,
@@ -909,6 +1088,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIncDecStmt: {
 		Tag:            nodetag.IncDecStmt,
@@ -916,6 +1096,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opReturnStmt: {
 		Tag:            nodetag.ReturnStmt,
@@ -923,6 +1104,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opIfStmt: {
 		Tag:            nodetag.IfStmt,
@@ -930,6 +1112,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIfInitStmt: {
 		Tag:            nodetag.IfStmt,
@@ -937,6 +1120,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIfElseStmt: {
 		Tag:            nodetag.IfStmt,
@@ -944,6 +1128,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIfInitElseStmt: {
 		Tag:            nodetag.IfStmt,
@@ -951,6 +1136,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIfNamedOptStmt: {
 		Tag:            nodetag.IfStmt,
@@ -958,6 +1144,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opIfNamedOptElseStmt: {
 		Tag:            nodetag.IfStmt,
@@ -965,6 +1152,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSwitchStmt: {
 		Tag:            nodetag.SwitchStmt,
@@ -972,6 +1160,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opSwitchTagStmt: {
 		Tag:            nodetag.SwitchStmt,
@@ -979,6 +1168,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    2, // 10
+		SliceIndex:     -1,
 	},
 	opSwitchInitStmt: {
 		Tag:            nodetag.SwitchStmt,
@@ -986,6 +1176,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    2, // 10
+		SliceIndex:     -1,
 	},
 	opSwitchInitTagStmt: {
 		Tag:            nodetag.SwitchStmt,
@@ -993,6 +1184,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    4, // 100
+		SliceIndex:     -1,
 	},
 	opSelectStmt: {
 		Tag:            nodetag.SelectStmt,
@@ -1000,6 +1192,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opTypeSwitchStmt: {
 		Tag:            nodetag.TypeSwitchStmt,
@@ -1007,6 +1200,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opTypeSwitchInitStmt: {
 		Tag:            nodetag.TypeSwitchStmt,
@@ -1014,6 +1208,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opCaseClause: {
 		Tag:            nodetag.CaseClause,
@@ -1021,6 +1216,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    3, // 11
+		SliceIndex:     -1,
 	},
 	opDefaultCaseClause: {
 		Tag:            nodetag.CaseClause,
@@ -1028,6 +1224,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opCommClause: {
 		Tag:            nodetag.CommClause,
@@ -1035,6 +1232,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    2, // 10
+		SliceIndex:     -1,
 	},
 	opDefaultCommClause: {
 		Tag:            nodetag.CommClause,
@@ -1042,6 +1240,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opForStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1049,6 +1248,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForPostStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1056,6 +1256,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForCondStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1063,6 +1264,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForCondPostStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1070,6 +1272,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForInitStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1077,6 +1280,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForInitPostStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1084,6 +1288,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForInitCondStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1091,6 +1296,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opForInitCondPostStmt: {
 		Tag:            nodetag.ForStmt,
@@ -1098,6 +1304,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opRangeStmt: {
 		Tag:            nodetag.RangeStmt,
@@ -1105,6 +1312,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opRangeKeyStmt: {
 		Tag:            nodetag.RangeStmt,
@@ -1112,6 +1320,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opRangeKeyValueStmt: {
 		Tag:            nodetag.RangeStmt,
@@ -1119,6 +1328,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      tokenValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opFieldList: {
 		Tag:            nodetag.Unknown,
@@ -1126,6 +1336,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opUnnamedField: {
 		Tag:            nodetag.Unknown,
@@ -1133,6 +1344,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opSimpleField: {
 		Tag:            nodetag.Unknown,
@@ -1140,6 +1352,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: stringValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opField: {
 		Tag:            nodetag.Unknown,
@@ -1147,6 +1360,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMultiField: {
 		Tag:            nodetag.Unknown,
@@ -1154,6 +1368,15 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
+	},
+	opValueSpec: {
+		Tag:            nodetag.ValueSpec,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opValueInitSpec: {
 		Tag:            nodetag.ValueSpec,
@@ -1161,6 +1384,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    3, // 11
+		SliceIndex:     -1,
 	},
 	opTypedValueInitSpec: {
 		Tag:            nodetag.ValueSpec,
@@ -1168,6 +1392,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    5, // 101
+		SliceIndex:     -1,
 	},
 	opTypedValueSpec: {
 		Tag:            nodetag.ValueSpec,
@@ -1175,6 +1400,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opTypeSpec: {
 		Tag:            nodetag.TypeSpec,
@@ -1182,6 +1408,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opTypeAliasSpec: {
 		Tag:            nodetag.TypeSpec,
@@ -1189,6 +1416,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opFuncDecl: {
 		Tag:            nodetag.FuncDecl,
@@ -1196,6 +1424,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMethodDecl: {
 		Tag:            nodetag.FuncDecl,
@@ -1203,6 +1432,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opFuncProtoDecl: {
 		Tag:            nodetag.FuncDecl,
@@ -1210,6 +1440,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opMethodProtoDecl: {
 		Tag:            nodetag.FuncDecl,
@@ -1217,6 +1448,15 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
+	},
+	opDeclStmt: {
+		Tag:            nodetag.DeclStmt,
+		NumArgs:        1,
+		ValueKind:      emptyValue,
+		ExtraValueKind: emptyValue,
+		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 	opConstDecl: {
 		Tag:            nodetag.GenDecl,
@@ -1224,6 +1464,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opVarDecl: {
 		Tag:            nodetag.GenDecl,
@@ -1231,6 +1472,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opTypeDecl: {
 		Tag:            nodetag.GenDecl,
@@ -1238,6 +1480,7 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    1, // 1
+		SliceIndex:     -1,
 	},
 	opEmptyPackage: {
 		Tag:            nodetag.File,
@@ -1245,5 +1488,6 @@ var operationInfoTable = [256]operationInfo{
 		ValueKind:      emptyValue,
 		ExtraValueKind: emptyValue,
 		VariadicMap:    0, // 0
+		SliceIndex:     -1,
 	},
 }

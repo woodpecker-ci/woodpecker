@@ -39,7 +39,7 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 		Link:       repo_.WebURL,
 		Clone:      repo_.HTTPURLToRepo,
 		Branch:     repo_.DefaultBranch,
-		Visibility: string(repo_.Visibility),
+		Visibility: model.RepoVisibly(repo_.Visibility),
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -51,9 +51,9 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 	}
 
 	if g.PrivateMode {
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	} else {
-		repo.IsPrivate = !repo_.Public
+		repo.IsSCMPrivate = !repo_.Public
 	}
 
 	return repo, nil
@@ -149,11 +149,11 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
-		repo.IsPrivate = false
+		repo.IsSCMPrivate = false
 	}
 
 	build.Event = model.EventPush
@@ -194,11 +194,11 @@ func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
-		repo.IsPrivate = false
+		repo.IsSCMPrivate = false
 	}
 
 	build.Event = model.EventTag

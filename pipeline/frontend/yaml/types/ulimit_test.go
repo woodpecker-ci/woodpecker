@@ -49,7 +49,6 @@ func TestMarshalUlimit(t *testing.T) {
 	}
 
 	for _, ulimit := range ulimits {
-
 		bytes, err := yaml.Marshal(ulimit.ulimits)
 
 		assert.Nil(t, err)

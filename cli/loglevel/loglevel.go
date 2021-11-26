@@ -35,11 +35,14 @@ func logLevel(c *cli.Context) error {
 		ll, err = client.SetLogLevel(&woodpecker.LogLevel{
 			Level: lvl.String(),
 		})
+		if err != nil {
+			return err
+		}
 	} else {
 		ll, err = client.LogLevel()
-	}
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Info().Msgf("Logging level: %s", ll.Level)

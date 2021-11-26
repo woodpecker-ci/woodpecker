@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Identifies the type of line in the logs.
@@ -78,7 +80,9 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Time: int64(time.Since(w.now).Seconds()),
 		Type: LineStdout,
 	}
-	w.peer.Log(context.Background(), w.id, line)
+	if err := w.peer.Log(context.Background(), w.id, line); err != nil {
+		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%s'", w.id)
+	}
 	w.num++
 
 	// for _, part := range bytes.Split(p, []byte{'\n'}) {

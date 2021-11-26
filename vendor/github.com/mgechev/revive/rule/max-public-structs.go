@@ -63,7 +63,6 @@ func (w *lintMaxPublicStructs) Visit(n ast.Node) ast.Visitor {
 		if strings.ToUpper(first) == first {
 			w.current++
 		}
-		break
 	}
 	return w
 }
