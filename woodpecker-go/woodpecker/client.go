@@ -15,7 +15,6 @@ import (
 
 const (
 	pathSelf           = "%s/api/user"
-	pathFeed           = "%s/api/user/feed"
 	pathRepos          = "%s/api/user/repos"
 	pathRepo           = "%s/api/repos/%s/%s"
 	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
@@ -26,7 +25,6 @@ const (
 	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
-	pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
@@ -36,8 +34,11 @@ const (
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
 	pathQueue          = "%s/api/queue"
-	pathVersion        = "%s/version"
 	pathLogLevel       = "%s/api/log-level"
+	// TODO: implement endpoints
+	// pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
+	// pathFeed           = "%s/api/user/feed"
+	// pathVersion        = "%s/version"
 )
 
 type client struct {

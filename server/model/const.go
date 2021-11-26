@@ -21,29 +21,36 @@ const (
 	EventDeploy = "deployment"
 )
 
-// TODO: type StatusValue string
+// StatusValue represent pipeline states woodpecker know
+type StatusValue string
 
 const (
-	StatusSkipped  = "skipped"
-	StatusPending  = "pending"
-	StatusRunning  = "running"
-	StatusSuccess  = "success"
-	StatusFailure  = "failure"
-	StatusKilled   = "killed"
-	StatusError    = "error"
-	StatusBlocked  = "blocked"
-	StatusDeclined = "declined"
+	StatusSkipped  StatusValue = "skipped"
+	StatusPending  StatusValue = "pending"
+	StatusRunning  StatusValue = "running"
+	StatusSuccess  StatusValue = "success"
+	StatusFailure  StatusValue = "failure"
+	StatusKilled   StatusValue = "killed"
+	StatusError    StatusValue = "error"
+	StatusBlocked  StatusValue = "blocked"
+	StatusDeclined StatusValue = "declined"
 )
 
-const (
-	RepoGit      = "git"
-	RepoHg       = "hg"
-	RepoFossil   = "fossil"
-	RepoPerforce = "perforce"
-)
+// SCMKind represent different version control systems
+type SCMKind string
 
 const (
-	VisibilityPublic   = "public"
-	VisibilityPrivate  = "private"
-	VisibilityInternal = "internal"
+	RepoGit      SCMKind = "git"
+	RepoHg       SCMKind = "hg"
+	RepoFossil   SCMKind = "fossil"
+	RepoPerforce SCMKind = "perforce"
+)
+
+// RepoVisibly represent to wat state a repo in woodpecker is visible to others
+type RepoVisibly string
+
+const (
+	VisibilityPublic   RepoVisibly = "public"
+	VisibilityPrivate  RepoVisibly = "private"
+	VisibilityInternal RepoVisibly = "internal"
 )

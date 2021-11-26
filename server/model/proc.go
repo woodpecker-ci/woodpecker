@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,21 +31,26 @@ type ProcStore interface {
 // Proc represents a process in the build pipeline.
 // swagger:model proc
 type Proc struct {
-	ID       int64             `json:"id"                   meddler:"proc_id,pk"`
-	BuildID  int64             `json:"build_id"             meddler:"proc_build_id"`
-	PID      int               `json:"pid"                  meddler:"proc_pid"`
-	PPID     int               `json:"ppid"                 meddler:"proc_ppid"`
-	PGID     int               `json:"pgid"                 meddler:"proc_pgid"`
-	Name     string            `json:"name"                 meddler:"proc_name"`
-	State    string            `json:"state"                meddler:"proc_state"`
-	Error    string            `json:"error,omitempty"      meddler:"proc_error"`
-	ExitCode int               `json:"exit_code"            meddler:"proc_exit_code"`
-	Started  int64             `json:"start_time,omitempty" meddler:"proc_started"`
-	Stopped  int64             `json:"end_time,omitempty"   meddler:"proc_stopped"`
-	Machine  string            `json:"machine,omitempty"    meddler:"proc_machine"`
-	Platform string            `json:"platform,omitempty"   meddler:"proc_platform"`
-	Environ  map[string]string `json:"environ,omitempty"    meddler:"proc_environ,json"`
-	Children []*Proc           `json:"children,omitempty"   meddler:"-"`
+	ID       int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
+	BuildID  int64             `json:"build_id"             xorm:"UNIQUE(s) INDEX 'proc_build_id'"`
+	PID      int               `json:"pid"                  xorm:"UNIQUE(s) 'proc_pid'"`
+	PPID     int               `json:"ppid"                 xorm:"proc_ppid"`
+	PGID     int               `json:"pgid"                 xorm:"proc_pgid"`
+	Name     string            `json:"name"                 xorm:"proc_name"`
+	State    StatusValue       `json:"state"                xorm:"proc_state"`
+	Error    string            `json:"error,omitempty"      xorm:"VARCHAR(500) proc_error"`
+	ExitCode int               `json:"exit_code"            xorm:"proc_exit_code"`
+	Started  int64             `json:"start_time,omitempty" xorm:"proc_started"`
+	Stopped  int64             `json:"end_time,omitempty"   xorm:"proc_stopped"`
+	Machine  string            `json:"machine,omitempty"    xorm:"proc_machine"`
+	Platform string            `json:"platform,omitempty"   xorm:"proc_platform"`
+	Environ  map[string]string `json:"environ,omitempty"    xorm:"json 'proc_environ'"`
+	Children []*Proc           `json:"children,omitempty"   xorm:"-"`
+}
+
+// TableName return database table name for xorm
+func (Proc) TableName() string {
+	return "procs"
 }
 
 // Running returns true if the process state is pending or running.

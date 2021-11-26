@@ -78,7 +78,9 @@ func buildList(c *cli.Context) error {
 		if status != "" && build.Status != status {
 			continue
 		}
-		tmpl.Execute(os.Stdout, build)
+		if err := tmpl.Execute(os.Stdout, build); err != nil {
+			return err
+		}
 		count++
 	}
 	return nil

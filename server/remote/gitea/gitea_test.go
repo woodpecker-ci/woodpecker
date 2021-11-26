@@ -38,7 +38,6 @@ func Test_gitea(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -63,7 +62,7 @@ func Test_gitea(t *testing.T) {
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
@@ -93,67 +92,67 @@ func Test_gitea(t *testing.T) {
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
 				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
-				g.Assert(repo.IsPrivate).IsTrue()
+				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
 				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
 				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Requesting a repository list", func() {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
 				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
 				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repos(ctx, fakeUserNoRepos)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.It("Should register repository hooks", func() {
 			err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should remove repository hooks", func() {
 			err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://localhost")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should return a repository file", func() {
 			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
 		g.It("Should return nil from send build status", func() {
 			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, "http://gitea.io", nil)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 		})
 
 		g.Describe("Given an authentication request", func() {

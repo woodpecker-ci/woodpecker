@@ -38,7 +38,6 @@ func Test_gogs(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gogs", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -61,7 +60,7 @@ func Test_gogs(t *testing.T) {
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
@@ -91,62 +90,62 @@ func Test_gogs(t *testing.T) {
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
 				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
-				g.Assert(repo.IsPrivate).IsTrue()
+				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
 				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
 				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Requesting a repository list", func() {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
 				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
 				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repos(ctx, fakeUserNoRepos)
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.It("Should register repositroy hooks", func() {
 			err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should return a repository file", func() {
 			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
 		g.It("Should return a repository file from a ref", func() {
 			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuildWithRef, ".woodpecker.yml")
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
@@ -167,9 +166,9 @@ func Test_gogs(t *testing.T) {
 			_, err1 := c.Auth(ctx, "octocat", "4vyW6b49Z")
 			err2 := c.Status(ctx, nil, nil, nil, "", nil)
 			err3 := c.Deactivate(ctx, nil, nil, "")
-			g.Assert(err1 != nil).IsTrue()
-			g.Assert(err2 == nil).IsTrue()
-			g.Assert(err3 == nil).IsTrue()
+			g.Assert(err1).IsNotNil()
+			g.Assert(err2).IsNil()
+			g.Assert(err3).IsNil()
 		})
 	})
 }

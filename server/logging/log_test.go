@@ -5,6 +5,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogging(t *testing.T) {
@@ -22,27 +24,27 @@ func TestLogging(t *testing.T) {
 	)
 
 	logger := New()
-	logger.Open(ctx, testPath)
+	assert.NoError(t, logger.Open(ctx, testPath))
 	go func() {
-		logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() })
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
 	}()
 	go func() {
-		logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() })
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
 
 	wg.Add(4)
 	go func() {
-		logger.Write(ctx, testPath, testEntry)
-		logger.Write(ctx, testPath, testEntry)
+		assert.NoError(t, logger.Write(ctx, testPath, testEntry))
+		assert.NoError(t, logger.Write(ctx, testPath, testEntry))
 	}()
 
 	wg.Wait()
 
 	wg.Add(1)
 	go func() {
-		logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() })
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)

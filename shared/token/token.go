@@ -82,7 +82,6 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 }
 
 func CheckCsrf(r *http.Request, fn SecretFunc) error {
-
 	// get and options requests are always
 	// enabled, without CSRF checks.
 	switch r.Method {
