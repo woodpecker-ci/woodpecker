@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
