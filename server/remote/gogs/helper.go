@@ -31,7 +31,7 @@ import (
 func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
-		from.HtmlUrl,
+		from.HTMLURL,
 		from.Owner.AvatarUrl,
 	)
 	private := from.Private
@@ -39,20 +39,20 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
-		Kind:      model.RepoGit,
-		Name:      name,
-		Owner:     from.Owner.UserName,
-		FullName:  from.FullName,
-		Avatar:    avatar,
-		Link:      from.HtmlUrl,
-		IsPrivate: private,
-		Clone:     from.CloneUrl,
-		Branch:    "master",
+		SCMKind:      model.RepoGit,
+		Name:         name,
+		Owner:        from.Owner.UserName,
+		FullName:     from.FullName,
+		Avatar:       avatar,
+		Link:         from.HTMLURL,
+		IsSCMPrivate: private,
+		Clone:        from.CloneURL,
+		Branch:       from.DefaultBranch,
 	}
 }
 
 // helper function that converts a Gogs permission to a Woodpecker permission.
-func toPerm(from gogs.Permission) *model.Perm {
+func toPerm(from *gogs.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
 		Push:  from.Push,

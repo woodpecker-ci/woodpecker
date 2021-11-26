@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,36 +15,34 @@
 package datastore
 
 import (
-	"github.com/russross/meddler"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
 )
 
-func (db *datastore) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
-	stmt := sql.Lookup(db.driver, "secret-find-repo-name")
-	data := new(model.Secret)
-	err := meddler.QueryRow(db, data, stmt, repo.ID, name)
-	return data, err
+func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
+	secret := &model.Secret{
+		RepoID: repo.ID,
+		Name:   name,
+	}
+	return secret, wrapGet(s.engine.Get(secret))
 }
 
-func (db *datastore) SecretList(repo *model.Repo) ([]*model.Secret, error) {
-	stmt := sql.Lookup(db.driver, "secret-find-repo")
-	data := []*model.Secret{}
-	err := meddler.QueryAll(db, &data, stmt, repo.ID)
-	return data, err
+func (s storage) SecretList(repo *model.Repo) ([]*model.Secret, error) {
+	secrets := make([]*model.Secret, 0, perPage)
+	return secrets, s.engine.Where("secret_repo_id = ?", repo.ID).Find(&secrets)
 }
 
-func (db *datastore) SecretCreate(secret *model.Secret) error {
-	return meddler.Insert(db, "secrets", secret)
+func (s storage) SecretCreate(secret *model.Secret) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(secret)
+	return err
 }
 
-func (db *datastore) SecretUpdate(secret *model.Secret) error {
-	return meddler.Update(db, "secrets", secret)
+func (s storage) SecretUpdate(secret *model.Secret) error {
+	_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
+	return err
 }
 
-func (db *datastore) SecretDelete(secret *model.Secret) error {
-	stmt := sql.Lookup(db.driver, "secret-delete")
-	_, err := db.Exec(stmt, secret.ID)
+func (s storage) SecretDelete(secret *model.Secret) error {
+	_, err := s.engine.ID(secret.ID).Delete(new(model.Secret))
 	return err
 }

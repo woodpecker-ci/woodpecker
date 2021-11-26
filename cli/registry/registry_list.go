@@ -4,28 +4,24 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryListCmd = cli.Command{
+var registryListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list registries",
 	ArgsUsage: "[repo/name]",
 	Action:    registryList,
-	Flags: []cli.Flag{
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplRegistryList,
-			Hidden: true,
-		},
-	},
+		common.FormatFlag(tmplRegistryList, true),
+	),
 }
 
 func registryList(c *cli.Context) error {
@@ -53,7 +49,9 @@ func registryList(c *cli.Context) error {
 		return err
 	}
 	for _, registry := range list {
-		tmpl.Execute(os.Stdout, registry)
+		if err := tmpl.Execute(os.Stdout, registry); err != nil {
+			return err
+		}
 	}
 	return nil
 }

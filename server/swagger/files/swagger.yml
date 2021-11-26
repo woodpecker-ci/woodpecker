@@ -377,7 +377,7 @@ paths:
         - accessToken: []
       responses:
         200:
-          description: Successfully cancelled the Job
+          description: Successfully canceled the Job
         404:
           description: |
             Unable to find the Repository or Job

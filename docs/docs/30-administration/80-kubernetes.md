@@ -95,7 +95,7 @@ spec:
             value: "xxx"
         volumeMounts:
           - name: sqlite-volume
-            mountPath: /var/lib/drone
+            mountPath: /var/lib/woodpecker
       volumes:
         - name: sqlite-volume
           persistentVolumeClaim:

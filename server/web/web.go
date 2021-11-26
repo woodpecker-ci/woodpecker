@@ -18,15 +18,13 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"html/template"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
-	"github.com/woodpecker-ci/woodpecker/version"
 	"github.com/woodpecker-ci/woodpecker/web"
 )
 
@@ -46,50 +44,30 @@ func New(opt ...Option) Endpoint {
 	return &website{
 		fs:   web.HttpFS(),
 		opts: opts,
-		tmpl: mustCreateTemplate(
-			string(web.MustLookup("index.html")),
-		),
+		data: web.MustLookup("index.html"),
 	}
 }
 
 type website struct {
 	opts *Options
 	fs   http.FileSystem
-	tmpl *template.Template
+	data []byte
 }
 
 func (w *website) Register(mux *gin.Engine) {
 	h := http.FileServer(w.fs)
 	h = setupCache(h)
 	mux.GET("/favicon.svg", gin.WrapH(h))
-	mux.GET("/static/*filepath", gin.WrapH(h))
+	mux.GET("/assets/*filepath", gin.WrapH(h))
 	mux.NoRoute(gin.WrapF(w.handleIndex))
 }
 
 func (w *website) handleIndex(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(200)
-
-	var csrf string
-	var user, _ = ToUser(r.Context())
-	if user != nil {
-		csrf, _ = token.New(
-			token.CsrfToken,
-			user.Login,
-		).Sign(user.Hash)
-	}
-	var syncing bool
-	if user != nil {
-		syncing = time.Unix(user.Synced, 0).Add(w.opts.sync).Before(time.Now())
-	}
-	params := map[string]interface{}{
-		"user":    user,
-		"csrf":    csrf,
-		"syncing": syncing,
-		"version": version.String(),
-	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
-
-	w.tmpl.Execute(rw, params)
+	rw.WriteHeader(200)
+	if _, err := rw.Write(w.data); err != nil {
+		log.Error().Err(err).Msg("can not write index.html")
+	}
 }
 
 func setupCache(h http.Handler) http.Handler {
@@ -109,12 +87,6 @@ func setupCache(h http.Handler) http.Handler {
 // WithUser returns a context with the current authenticated user.
 func WithUser(c context.Context, user *model.User) context.Context {
 	return context.WithValue(c, userKey, user)
-}
-
-// ToUser returns a user from the context.
-func ToUser(c context.Context) (*model.User, bool) {
-	user, ok := c.Value(userKey).(*model.User)
-	return user, ok
 }
 
 type key int

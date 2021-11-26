@@ -76,7 +76,7 @@ func createRepoHook(c *gin.Context) {
 			URL  string `json:"url"`
 		} `json:"config"`
 	}{}
-	c.BindJSON(&in)
+	_ = c.BindJSON(&in)
 	if in.Type != "gitea" ||
 		in.Conf.Type != "json" ||
 		in.Conf.URL != "http://localhost" {

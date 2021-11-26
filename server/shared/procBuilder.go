@@ -187,9 +187,6 @@ func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, er
 
 func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for k, v := range axis {
 		environ[k] = v
 	}
@@ -233,7 +230,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 				b.Netrc.Password,
 				b.Netrc.Machine,
 			),
-			b.Repo.IsPrivate,
+			b.Repo.IsSCMPrivate,
 		),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
@@ -245,7 +242,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 			),
 		),
 		compiler.WithProxy(),
-		compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
 	).Compile(parsed)
 }
@@ -298,7 +295,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name:    repo.FullName,
 			Link:    repo.Link,
 			Remote:  repo.Clone,
-			Private: repo.IsPrivate,
+			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
 		Curr: frontend.Build{
@@ -307,7 +304,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  build.Created,
 			Started:  build.Started,
 			Finished: build.Finished,
-			Status:   build.Status,
+			Status:   string(build.Status),
 			Event:    build.Event,
 			Link:     build.Link,
 			Target:   build.Deploy,
@@ -330,7 +327,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  last.Created,
 			Started:  last.Started,
 			Finished: last.Finished,
-			Status:   last.Status,
+			Status:   string(last.Status),
 			Event:    last.Event,
 			Link:     last.Link,
 			Target:   last.Deploy,

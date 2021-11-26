@@ -4,40 +4,37 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildListCmd = cli.Command{
+var buildListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show build history",
 	ArgsUsage: "<repo/name>",
 	Action:    buildList,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplBuildList,
-		},
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		common.FormatFlag(tmplBuildList),
+		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "event",
 			Usage: "event filter",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "status",
 			Usage: "status filter",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  "limit",
 			Usage: "limit the list size",
 			Value: 25,
 		},
-	},
+	),
 }
 
 func buildList(c *cli.Context) error {
@@ -81,7 +78,9 @@ func buildList(c *cli.Context) error {
 		if status != "" && build.Status != status {
 			continue
 		}
-		tmpl.Execute(os.Stdout, build)
+		if err := tmpl.Execute(os.Stdout, build); err != nil {
+			return err
+		}
 		count++
 	}
 	return nil

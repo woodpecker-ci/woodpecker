@@ -53,9 +53,11 @@ func Refresh(c *gin.Context) {
 	// attempts to refresh the access token. If the
 	// token is refreshed, we must also persist to the
 	// database.
-	ok, _ = refresher.Refresh(c, user)
-	if ok {
-		err := store.UpdateUser(c, user)
+	ok, err := refresher.Refresh(c, user)
+	if err != nil {
+		log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+	} else if ok {
+		err := store.FromContext(c).UpdateUser(user)
 		if err != nil {
 			// we only log the error at this time. not sure
 			// if we really want to fail the request, do we?

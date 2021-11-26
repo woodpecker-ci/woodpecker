@@ -3,16 +3,18 @@ package repo
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoRemoveCmd = cli.Command{
+var repoRemoveCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a repository",
 	ArgsUsage: "<repo/name>",
 	Action:    repoRemove,
+	Flags:     common.GlobalFlags,
 }
 
 func repoRemove(c *cli.Context) error {

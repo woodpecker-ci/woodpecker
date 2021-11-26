@@ -42,7 +42,7 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.GetUserLogin(c, t.Text)
+			user, err = store.FromContext(c).GetUserLogin(t.Text)
 			return user.Hash, err
 		})
 		if err == nil {
@@ -78,7 +78,7 @@ func MustAdmin() gin.HandlerFunc {
 		case user == nil:
 			c.String(401, "User not authorized")
 			c.Abort()
-		case user.Admin == false:
+		case !user.Admin:
 			c.String(403, "User not authorized")
 			c.Abort()
 		default:
@@ -95,7 +95,7 @@ func MustRepoAdmin() gin.HandlerFunc {
 		case user == nil:
 			c.String(401, "User not authorized")
 			c.Abort()
-		case perm.Admin == false:
+		case !perm.Admin:
 			c.String(403, "User not authorized")
 			c.Abort()
 		default:
