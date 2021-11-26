@@ -42,7 +42,7 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
-func New() Queue {
+func New(ctx context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},

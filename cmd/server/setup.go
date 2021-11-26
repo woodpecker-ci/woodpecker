@@ -153,11 +153,11 @@ func fallbackSqlite3File(path string) (string, error) {
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(), s)
+	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	return secrets.New(s)
+	return secrets.New(c.Context, s)
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
