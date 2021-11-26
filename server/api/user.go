@@ -24,8 +24,8 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -38,7 +38,7 @@ func GetSelf(c *gin.Context) {
 
 func GetFeed(c *gin.Context) {
 	store_ := store.FromContext(c)
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -87,7 +87,7 @@ func GetFeed(c *gin.Context) {
 
 func GetRepos(c *gin.Context) {
 	store_ := store.FromContext(c)
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
