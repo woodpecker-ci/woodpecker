@@ -42,7 +42,7 @@ func PostRepo(c *gin.Context) {
 	repo := session.Repo(c)
 
 	if repo.IsActive {
-		c.String(409, "Repository is already active.")
+		c.String(http.StatusConflict, "Repository is already active.")
 		return
 	}
 
@@ -74,7 +74,7 @@ func PostRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -86,7 +86,7 @@ func PostRepo(c *gin.Context) {
 
 	err = remote_.Activate(c, user, repo, link)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -97,11 +97,11 @@ func PostRepo(c *gin.Context) {
 
 	err = store_.UpdateRepo(repo)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(200, repo)
+	c.JSON(http.StatusOK, repo)
 }
 
 func PatchRepo(c *gin.Context) {
@@ -144,7 +144,7 @@ func PatchRepo(c *gin.Context) {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
 			repo.Visibility = model.RepoVisibly(*in.Visibility)
 		default:
-			c.String(400, "Invalid visibility type")
+			c.String(http.StatusBadRequest, "Invalid visibility type")
 			return
 		}
 	}
