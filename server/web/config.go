@@ -29,7 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func WebConfig(c *gin.Context) {
+func config(c *gin.Context) {
 	user := session.User(c)
 
 	var csrf string

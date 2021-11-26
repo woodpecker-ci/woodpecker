@@ -25,7 +25,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
-	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 // Load loads the router
@@ -47,16 +46,8 @@ func Load(serveHTTP func(w http.ResponseWriter, r *http.Request), middleware ...
 	e.Use(token.Refresh)
 
 	e.NoRoute(func(c *gin.Context) {
-		req := c.Request.WithContext(
-			web.WithUser(
-				c.Request.Context(),
-				session.User(c),
-			),
-		)
-		serveHTTP(c.Writer, req)
+		serveHTTP(c.Writer, c.Request)
 	})
-
-	e.GET("/web-config.js", web.WebConfig)
 
 	e.GET("/logout", api.GetLogout)
 	e.GET("/login", api.HandleLogin)
