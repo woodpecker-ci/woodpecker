@@ -6,7 +6,7 @@ import (
 
 	"github.com/containers/podman/v3/pkg/specgen"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 // returns specgen.SpecGenerator container config

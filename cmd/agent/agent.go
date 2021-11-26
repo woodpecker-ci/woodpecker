@@ -155,7 +155,7 @@ func loop(c *cli.Context) error {
 				log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
 				r := agent.NewRunner(client, filter, hostname, counter, &engine)
-				if err := r.Run(ctx, c.BoolT("use-podman")); err != nil {
+				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}

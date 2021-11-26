@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 
 	"github.com/containers/podman/v3/pkg/bindings"
 	"github.com/containers/podman/v3/pkg/bindings/containers"
@@ -16,6 +16,36 @@ import (
 	"github.com/containers/podman/v3/pkg/domain/entities"
 )
 
+var (
+	noContext = context.Background()
+
+	startOpts = containers.StartOptions{}
+
+	removeOpts = containers.RemoveOptions{
+		Ignore:  new(bool),
+		Force:   new(bool),
+		Volumes: new(bool),
+	}
+
+	logsOpts = containers.LogOptions{
+		Follow: new(bool),
+		//Since:  new(string),
+		//Stderr: new(bool),
+		Stdout: new(bool),
+		//Tail:       new(string),
+		//Timestamps: new(bool),
+		//Until:      new(string),
+	}
+
+	killOpts = containers.KillOptions{
+		Signal: new(string),
+	}
+
+	volRemoveOpts = volumes.RemoveOptions{
+		Force: new(bool),
+	}
+)
+
 type engine struct {
 	conn   context.Context
 	socket string
@@ -23,10 +53,23 @@ type engine struct {
 
 // New returns a new Podman Engine using the given client.
 func New() backend.Engine {
-	ret := &engine{}
-	sock_dir := os.Getenv("XDG_RUNTIME_DIR")
-	ret.socket = "unix:" + sock_dir + "/podman/podman.sock"
+	return &engine{
+		conn:   nil,
+		socket: "unix:" + os.Getenv("XDG_RUNTIME_DIR") + "/podman/podman.sock",
+	}
+}
 
+func (e *engine) Name() string {
+	return "podman"
+}
+
+func (e *engine) IsAvivable() bool {
+	_, err := os.Stat("/run/.containerenv")
+	return os.IsNotExist(err)
+}
+
+// Load new client for podman Engine using environment variables.
+func (e *engine) Load() (err error) {
 	*removeOpts.Ignore = false
 	*removeOpts.Force = false
 	*removeOpts.Volumes = true
@@ -40,19 +83,14 @@ func New() backend.Engine {
 
 	*volRemoveOpts.Force = true
 
-	return ret
-}
-
-func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
-	var err error
 	e.conn, err = bindings.NewConnection(context.Background(), e.socket)
 	fmt.Printf("e.socket: %s\n", e.socket)
 	fmt.Printf("e.conn: %v\n", e.conn)
 	fmt.Printf("err: %v\n", err)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
+func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		r, err := volumes.Create(e.conn, entities.VolumeCreateOptions{
 			Name:    vol.Name,
@@ -221,33 +259,3 @@ func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 	}
 	return nil
 }
-
-var (
-	noContext = context.Background()
-
-	startOpts = containers.StartOptions{}
-
-	removeOpts = containers.RemoveOptions{
-		Ignore:  new(bool),
-		Force:   new(bool),
-		Volumes: new(bool),
-	}
-
-	logsOpts = containers.LogOptions{
-		Follow: new(bool),
-		//Since:  new(string),
-		//Stderr: new(bool),
-		Stdout: new(bool),
-		//Tail:       new(string),
-		//Timestamps: new(bool),
-		//Until:      new(string),
-	}
-
-	killOpts = containers.KillOptions{
-		Signal: new(string),
-	}
-
-	volRemoveOpts = volumes.RemoveOptions{
-		Force: new(bool),
-	}
-)

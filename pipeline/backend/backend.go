@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/podman"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
@@ -14,13 +15,19 @@ var (
 func init() {
 	engines = make(map[string]types.Engine)
 
+	var engine types.Engine
+
 	// TODO: disabled for now as kubernetes backend has not been implemented yet
 	// kubernetes
 	// engine = kubernetes.New("", "", "")
 	// engines[engine.Name()] = engine
 
+	// podman
+	engine = podman.New()
+	engines[engine.Name()] = engine
+
 	// docker
-	engine := docker.New()
+	engine = docker.New()
 	engines[engine.Name()] = engine
 }
 

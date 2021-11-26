@@ -95,23 +95,6 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().Msg("received execution")
 
-	/*
-		var engine backend.Engine
-		if usePodman == true {
-			engine = podman.New()
-		} else {
-			// new docker engine
-			engine, err = docker.NewEnv()
-			if err != nil {
-				logger.Error().
-					Err(err).
-					Msg("cannot create docker client")
-
-				return err
-			}
-		}
-	*/
-
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
