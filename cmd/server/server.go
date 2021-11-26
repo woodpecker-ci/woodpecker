@@ -45,8 +45,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/logger"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
 func run(c *cli.Context) error {
@@ -120,7 +120,7 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		webUIServe = setupTree(c).ServeHTTP
+		webUIServe = web.New().ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -138,7 +138,7 @@ func run(c *cli.Context) error {
 	// setup the server and start the listener
 	handler := router.Load(
 		webUIServe,
-		logger.Logger(time.RFC3339, true),
+		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
 		middleware.Store(c, store_),

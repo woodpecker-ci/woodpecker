@@ -35,10 +35,9 @@ func main() {
 	app.Usage = "woodpecker server"
 	app.Action = run
 	app.Flags = flags
-	app.Before = before
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
