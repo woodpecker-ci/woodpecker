@@ -20,6 +20,7 @@ linters:
     - staticcheck
     - structcheck
     - varcheck
+    - ineffassign
 
 run:
   timeout: 5m
