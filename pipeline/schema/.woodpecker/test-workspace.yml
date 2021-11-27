@@ -1,0 +1,9 @@
+workspace:
+  base: /go
+  path: src/github.com/octocat/hello-world
+
+pipeline:
+  build:
+    image: golang:latest
+    commands:
+      - go test

@@ -23,7 +23,7 @@ var (
 	readerRegisterLock sync.RWMutex
 )
 
-// RegisterLocalFile adds the given file to the file whitelist,
+// RegisterLocalFile adds the given file to the file allowlist,
 // so that it can be used by "LOAD DATA LOCAL INFILE <filepath>".
 // Alternatively you can allow the use of all local files with
 // the DSN parameter 'allowAllFiles=true'
@@ -45,7 +45,7 @@ func RegisterLocalFile(filePath string) {
 	fileRegisterLock.Unlock()
 }
 
-// DeregisterLocalFile removes the given filepath from the whitelist.
+// DeregisterLocalFile removes the given filepath from the allowlist.
 func DeregisterLocalFile(filePath string) {
 	fileRegisterLock.Lock()
 	delete(fileRegister, strings.Trim(filePath, `"`))
@@ -147,7 +147,8 @@ func (mc *mysqlConn) handleInFileRequest(name string) (err error) {
 	}
 
 	// send content packets
-	if err == nil {
+	// if packetSize == 0, the Reader contains no data
+	if err == nil && packetSize > 0 {
 		data := make([]byte, 4+packetSize)
 		var n int
 		for err == nil {
@@ -173,8 +174,7 @@ func (mc *mysqlConn) handleInFileRequest(name string) (err error) {
 
 	// read OK packet
 	if err == nil {
-		_, err = mc.readResultOK()
-		return err
+		return mc.readResultOK()
 	}
 
 	mc.readPacket()

@@ -1,0 +1,20 @@
+# docker build --rm  -f docker/Dockerfile.server -t woodpeckerci/woodpecker-server .
+
+# use golang image to copy ssl certs later
+FROM golang:1.16
+
+FROM scratch
+
+# copy certs from golang:1.16 image
+COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+EXPOSE 8000 9000 80 443
+
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
+ENV WOODPECKER_DATABASE_DRIVER=sqlite3
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+
+ADD dist/server/linux_amd64/woodpecker-server /bin/
+
+ENTRYPOINT ["/bin/woodpecker-server"]

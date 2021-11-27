@@ -65,6 +65,37 @@
 //     sampled := log.Sample(&zerolog.BasicSampler{N: 10})
 //     sampled.Info().Msg("will be logged every 10 messages")
 //
+// Log with contextual hooks:
+//
+//     // Create the hook:
+//     type SeverityHook struct{}
+//
+//     func (h SeverityHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+//          if level != zerolog.NoLevel {
+//              e.Str("severity", level.String())
+//          }
+//     }
+//
+//     // And use it:
+//     var h SeverityHook
+//     log := zerolog.New(os.Stdout).Hook(h)
+//     log.Warn().Msg("")
+//     // Output: {"level":"warn","severity":"warn"}
+//
+//
+// Caveats
+//
+// There is no fields deduplication out-of-the-box.
+// Using the same key multiple times creates new key in final JSON each time.
+//
+//     logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+//     logger.Info().
+//            Timestamp().
+//            Msg("dup")
+//     // Output: {"level":"info","time":1494567715,"time":1494567715,"message":"dup"}
+//
+// In this case, many consumers will take the last value,
+// but this is not guaranteed; check yours if in doubt.
 package zerolog
 
 import (
@@ -73,12 +104,10 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-
-	"github.com/rs/zerolog/internal/json"
 )
 
 // Level defines log levels.
-type Level uint8
+type Level int8
 
 const (
 	// DebugLevel defines debug log level.
@@ -93,33 +122,76 @@ const (
 	FatalLevel
 	// PanicLevel defines panic log level.
 	PanicLevel
+	// NoLevel defines an absent log level.
+	NoLevel
 	// Disabled disables the logger.
 	Disabled
+
+	// TraceLevel defines trace log level.
+	TraceLevel Level = -1
+	// Values less than TraceLevel are handled as numbers.
 )
 
 func (l Level) String() string {
 	switch l {
+	case TraceLevel:
+		return LevelTraceValue
 	case DebugLevel:
-		return "debug"
+		return LevelDebugValue
 	case InfoLevel:
-		return "info"
+		return LevelInfoValue
 	case WarnLevel:
-		return "warn"
+		return LevelWarnValue
 	case ErrorLevel:
-		return "error"
+		return LevelErrorValue
 	case FatalLevel:
-		return "fatal"
+		return LevelFatalValue
 	case PanicLevel:
-		return "panic"
+		return LevelPanicValue
+	case Disabled:
+		return "disabled"
+	case NoLevel:
+		return ""
 	}
-	return ""
+	return strconv.Itoa(int(l))
 }
 
-var disabledEvent = newEvent(levelWriterAdapter{ioutil.Discard}, 0, false)
+// ParseLevel converts a level string into a zerolog Level value.
+// returns an error if the input string does not match known values.
+func ParseLevel(levelStr string) (Level, error) {
+	switch levelStr {
+	case LevelFieldMarshalFunc(TraceLevel):
+		return TraceLevel, nil
+	case LevelFieldMarshalFunc(DebugLevel):
+		return DebugLevel, nil
+	case LevelFieldMarshalFunc(InfoLevel):
+		return InfoLevel, nil
+	case LevelFieldMarshalFunc(WarnLevel):
+		return WarnLevel, nil
+	case LevelFieldMarshalFunc(ErrorLevel):
+		return ErrorLevel, nil
+	case LevelFieldMarshalFunc(FatalLevel):
+		return FatalLevel, nil
+	case LevelFieldMarshalFunc(PanicLevel):
+		return PanicLevel, nil
+	case LevelFieldMarshalFunc(Disabled):
+		return Disabled, nil
+	case LevelFieldMarshalFunc(NoLevel):
+		return NoLevel, nil
+	}
+	i, err := strconv.Atoi(levelStr)
+	if err != nil {
+		return NoLevel, fmt.Errorf("Unknown Level String: '%s', defaulting to NoLevel", levelStr)
+	}
+	if i > 127 || i < -128 {
+		return NoLevel, fmt.Errorf("Out-Of-Bounds Level: '%d', defaulting to NoLevel", i)
+	}
+	return Level(i), nil
+}
 
 // A Logger represents an active logging object that generates lines
 // of JSON output to an io.Writer. Each logging operation makes a single
-// call to the Writer's Write method. There is no guaranty on access
+// call to the Writer's Write method. There is no guarantee on access
 // serialization to the Writer. If your Writer is not thread safe,
 // you may consider a sync wrapper.
 type Logger struct {
@@ -127,6 +199,8 @@ type Logger struct {
 	level   Level
 	sampler Sampler
 	context []byte
+	hooks   []Hook
+	stack   bool
 }
 
 // New creates a root logger with given output writer. If the output writer implements
@@ -134,7 +208,7 @@ type Logger struct {
 // one.
 //
 // Each logging operation makes a single call to the Writer's Write method. There is no
-// guaranty on access serialization to the Writer. If your Writer is not thread safe,
+// guarantee on access serialization to the Writer. If your Writer is not thread safe,
 // you may consider using sync wrapper.
 func New(w io.Writer) Logger {
 	if w == nil {
@@ -144,7 +218,7 @@ func New(w io.Writer) Logger {
 	if !ok {
 		lw = levelWriterAdapter{w}
 	}
-	return Logger{w: lw}
+	return Logger{w: lw, level: TraceLevel}
 }
 
 // Nop returns a disabled logger for which all operation are no-op.
@@ -157,8 +231,14 @@ func (l Logger) Output(w io.Writer) Logger {
 	l2 := New(w)
 	l2.level = l.level
 	l2.sampler = l.sampler
-	l2.context = make([]byte, len(l.context), cap(l.context))
-	copy(l2.context, l.context)
+	l2.stack = l.stack
+	if len(l.hooks) > 0 {
+		l2.hooks = append(l2.hooks, l.hooks...)
+	}
+	if l.context != nil {
+		l2.context = make([]byte, len(l.context), cap(l.context))
+		copy(l2.context, l.context)
+	}
 	return l2
 }
 
@@ -169,8 +249,9 @@ func (l Logger) With() Context {
 	if context != nil {
 		l.context = append(l.context, context...)
 	} else {
-		// first byte of context is presence of timestamp or not
-		l.context = append(l.context, 0)
+		// This is needed for AppendKey to not check len of input
+		// thus making it inlinable
+		l.context = enc.AppendBeginMarker(l.context)
 	}
 	return Context{l}
 }
@@ -183,7 +264,10 @@ func (l *Logger) UpdateContext(update func(c Context) Context) {
 		return
 	}
 	if cap(l.context) == 0 {
-		l.context = make([]byte, 1, 500) // first byte is timestamp flag
+		l.context = make([]byte, 0, 500)
+	}
+	if len(l.context) == 0 {
+		l.context = enc.AppendBeginMarker(l.context)
 	}
 	c := update(Context{*l})
 	l.context = c.l.context
@@ -195,61 +279,95 @@ func (l Logger) Level(lvl Level) Logger {
 	return l
 }
 
+// GetLevel returns the current Level of l.
+func (l Logger) GetLevel() Level {
+	return l.level
+}
+
 // Sample returns a logger with the s sampler.
 func (l Logger) Sample(s Sampler) Logger {
 	l.sampler = s
 	return l
 }
 
+// Hook returns a logger with the h Hook.
+func (l Logger) Hook(h Hook) Logger {
+	l.hooks = append(l.hooks, h)
+	return l
+}
+
+// Trace starts a new message with trace level.
+//
+// You must call Msg on the returned event in order to send the event.
+func (l *Logger) Trace() *Event {
+	return l.newEvent(TraceLevel, nil)
+}
+
 // Debug starts a new message with debug level.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Debug() *Event {
-	return l.newEvent(DebugLevel, true, nil)
+func (l *Logger) Debug() *Event {
+	return l.newEvent(DebugLevel, nil)
 }
 
 // Info starts a new message with info level.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Info() *Event {
-	return l.newEvent(InfoLevel, true, nil)
+func (l *Logger) Info() *Event {
+	return l.newEvent(InfoLevel, nil)
 }
 
 // Warn starts a new message with warn level.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Warn() *Event {
-	return l.newEvent(WarnLevel, true, nil)
+func (l *Logger) Warn() *Event {
+	return l.newEvent(WarnLevel, nil)
 }
 
 // Error starts a new message with error level.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Error() *Event {
-	return l.newEvent(ErrorLevel, true, nil)
+func (l *Logger) Error() *Event {
+	return l.newEvent(ErrorLevel, nil)
+}
+
+// Err starts a new message with error level with err as a field if not nil or
+// with info level if err is nil.
+//
+// You must call Msg on the returned event in order to send the event.
+func (l *Logger) Err(err error) *Event {
+	if err != nil {
+		return l.Error().Err(err)
+	}
+
+	return l.Info()
 }
 
 // Fatal starts a new message with fatal level. The os.Exit(1) function
-// is called by the Msg method.
+// is called by the Msg method, which terminates the program immediately.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Fatal() *Event {
-	return l.newEvent(FatalLevel, true, func(msg string) { os.Exit(1) })
+func (l *Logger) Fatal() *Event {
+	return l.newEvent(FatalLevel, func(msg string) { os.Exit(1) })
 }
 
-// Panic starts a new message with panic level. The message is also sent
-// to the panic function.
+// Panic starts a new message with panic level. The panic() function
+// is called by the Msg method, which stops the ordinary flow of a goroutine.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Panic() *Event {
-	return l.newEvent(PanicLevel, true, func(msg string) { panic(msg) })
+func (l *Logger) Panic() *Event {
+	return l.newEvent(PanicLevel, func(msg string) { panic(msg) })
 }
 
-// WithLevel starts a new message with level.
+// WithLevel starts a new message with level. Unlike Fatal and Panic
+// methods, WithLevel does not terminate the program or stop the ordinary
+// flow of a gourotine when used with their respective levels.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) WithLevel(level Level) *Event {
+func (l *Logger) WithLevel(level Level) *Event {
 	switch level {
+	case TraceLevel:
+		return l.Trace()
 	case DebugLevel:
 		return l.Debug()
 	case InfoLevel:
@@ -259,13 +377,15 @@ func (l Logger) WithLevel(level Level) *Event {
 	case ErrorLevel:
 		return l.Error()
 	case FatalLevel:
-		return l.Fatal()
+		return l.newEvent(FatalLevel, nil)
 	case PanicLevel:
-		return l.Panic()
+		return l.newEvent(PanicLevel, nil)
+	case NoLevel:
+		return l.Log()
 	case Disabled:
-		return disabledEvent
+		return nil
 	default:
-		panic("zerolog: WithLevel(): invalid level: " + strconv.Itoa(int(level)))
+		return l.newEvent(level, nil)
 	}
 }
 
@@ -273,25 +393,23 @@ func (l Logger) WithLevel(level Level) *Event {
 // will still disable events produced by this method.
 //
 // You must call Msg on the returned event in order to send the event.
-func (l Logger) Log() *Event {
-	// We use panic level with addLevelField=false to make Log passthrough all
-	// levels except Disabled.
-	return l.newEvent(PanicLevel, false, nil)
+func (l *Logger) Log() *Event {
+	return l.newEvent(NoLevel, nil)
 }
 
 // Print sends a log event using debug level and no extra field.
 // Arguments are handled in the manner of fmt.Print.
-func (l Logger) Print(v ...interface{}) {
+func (l *Logger) Print(v ...interface{}) {
 	if e := l.Debug(); e.Enabled() {
-		e.Msg(fmt.Sprint(v...))
+		e.CallerSkipFrame(1).Msg(fmt.Sprint(v...))
 	}
 }
 
 // Printf sends a log event using debug level and no extra field.
 // Arguments are handled in the manner of fmt.Printf.
-func (l Logger) Printf(format string, v ...interface{}) {
+func (l *Logger) Printf(format string, v ...interface{}) {
 	if e := l.Debug(); e.Enabled() {
-		e.Msg(fmt.Sprintf(format, v...))
+		e.CallerSkipFrame(1).Msg(fmt.Sprintf(format, v...))
 	}
 }
 
@@ -303,40 +421,33 @@ func (l Logger) Write(p []byte) (n int, err error) {
 		// Trim CR added by stdlog.
 		p = p[0 : n-1]
 	}
-	l.Log().Msg(string(p))
+	l.Log().CallerSkipFrame(1).Msg(string(p))
 	return
 }
 
-func (l Logger) newEvent(level Level, addLevelField bool, done func(string)) *Event {
+func (l *Logger) newEvent(level Level, done func(string)) *Event {
 	enabled := l.should(level)
 	if !enabled {
-		return disabledEvent
+		return nil
 	}
-	lvl := InfoLevel
-	if addLevelField {
-		lvl = level
-	}
-	e := newEvent(l.w, lvl, true)
+	e := newEvent(l.w, level)
 	e.done = done
-	if l.context != nil && len(l.context) > 0 && l.context[0] > 0 {
-		// first byte of context is ts flag
-		e.buf = json.AppendTime(json.AppendKey(e.buf, TimestampFieldName), TimestampFunc(), TimeFieldFormat)
-	}
-	if addLevelField {
-		e.Str(LevelFieldName, level.String())
+	e.ch = l.hooks
+	if level != NoLevel && LevelFieldName != "" {
+		e.Str(LevelFieldName, LevelFieldMarshalFunc(level))
 	}
 	if l.context != nil && len(l.context) > 1 {
-		if len(e.buf) > 1 {
-			e.buf = append(e.buf, ',')
-		}
-		e.buf = append(e.buf, l.context[1:]...)
+		e.buf = enc.AppendObjectData(e.buf, l.context)
+	}
+	if l.stack {
+		e.Stack()
 	}
 	return e
 }
 
 // should returns true if the log event should be logged.
-func (l Logger) should(lvl Level) bool {
-	if lvl < l.level || lvl < globalLevel() {
+func (l *Logger) should(lvl Level) bool {
+	if lvl < l.level || lvl < GlobalLevel() {
 		return false
 	}
 	if l.sampler != nil && !samplingDisabled() {

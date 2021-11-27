@@ -16,10 +16,12 @@
  *
  */
 
-// Package grpclog defines logging for grpc.
-package grpclog // import "google.golang.org/grpc/grpclog"
+package grpclog
+
+import "google.golang.org/grpc/internal/grpclog"
 
 // Logger mimics golang's standard Logger as an interface.
+//
 // Deprecated: use LoggerV2.
 type Logger interface {
 	Fatal(args ...interface{})
@@ -32,9 +34,10 @@ type Logger interface {
 
 // SetLogger sets the logger that is used in grpc. Call only from
 // init() functions.
+//
 // Deprecated: use SetLoggerV2.
 func SetLogger(l Logger) {
-	logger = &loggerWrapper{Logger: l}
+	grpclog.Logger = &loggerWrapper{Logger: l}
 }
 
 // loggerWrapper wraps Logger into a LoggerV2.

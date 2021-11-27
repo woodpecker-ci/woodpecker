@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "woodpecker-server.fullname" . }}
+  labels:
+    {{- include "woodpecker-server.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - protocol: TCP
+      name: http
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+    - protocol: TCP
+      name: grpc
+      port: 9000
+      targetPort: 9000
+  selector:
+    {{- include "woodpecker-server.selectorLabels" . | nindent 4 }}

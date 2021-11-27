@@ -1,46 +1,31 @@
 /*
  *
- * Copyright 2017, Google Inc.
- * All rights reserved.
+ * Copyright 2017 gRPC authors.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-/*
-Package grpclog defines logging for grpc.
-*/
-package grpclog // import "google.golang.org/grpc/grpclog"
+package grpclog
 
 import (
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
+
+	"google.golang.org/grpc/internal/grpclog"
 )
 
 // LoggerV2 does underlying logging work for grpclog.
@@ -64,13 +49,16 @@ type LoggerV2 interface {
 	// Errorf logs to ERROR log. Arguments are handled in the manner of fmt.Printf.
 	Errorf(format string, args ...interface{})
 	// Fatal logs to ERROR log. Arguments are handled in the manner of fmt.Print.
-	// This function should call os.Exit() with a non-zero exit code.
+	// gRPC ensures that all Fatal logs will exit with os.Exit(1).
+	// Implementations may also call os.Exit() with a non-zero exit code.
 	Fatal(args ...interface{})
 	// Fatalln logs to ERROR log. Arguments are handled in the manner of fmt.Println.
-	// This function should call os.Exit() with a non-zero exit code.
+	// gRPC ensures that all Fatal logs will exit with os.Exit(1).
+	// Implementations may also call os.Exit() with a non-zero exit code.
 	Fatalln(args ...interface{})
 	// Fatalf logs to ERROR log. Arguments are handled in the manner of fmt.Printf.
-	// This function should call os.Exit() with a non-zero exit code.
+	// gRPC ensures that all Fatal logs will exit with os.Exit(1).
+	// Implementations may also call os.Exit() with a non-zero exit code.
 	Fatalf(format string, args ...interface{})
 	// V reports whether verbosity level l is at least the requested verbose level.
 	V(l int) bool
@@ -79,7 +67,11 @@ type LoggerV2 interface {
 // SetLoggerV2 sets logger that is used in grpc to a V2 logger.
 // Not mutex-protected, should be called before any gRPC functions.
 func SetLoggerV2(l LoggerV2) {
-	logger = l
+	if _, ok := l.(*componentData); ok {
+		panic("cannot use component logger as grpclog logger")
+	}
+	grpclog.Logger = l
+	grpclog.DepthLogger, _ = l.(grpclog.DepthLoggerV2)
 }
 
 const (
@@ -104,6 +96,7 @@ var severityName = []string{
 // loggerT is the default logger used by grpclog.
 type loggerT struct {
 	m []*log.Logger
+	v int
 }
 
 // NewLoggerV2 creates a loggerV2 with the provided writers.
@@ -112,19 +105,44 @@ type loggerT struct {
 // Warning logs will be written to warningW and infoW.
 // Info logs will be written to infoW.
 func NewLoggerV2(infoW, warningW, errorW io.Writer) LoggerV2 {
+	return NewLoggerV2WithVerbosity(infoW, warningW, errorW, 0)
+}
+
+// NewLoggerV2WithVerbosity creates a loggerV2 with the provided writers and
+// verbosity level.
+func NewLoggerV2WithVerbosity(infoW, warningW, errorW io.Writer, v int) LoggerV2 {
 	var m []*log.Logger
 	m = append(m, log.New(infoW, severityName[infoLog]+": ", log.LstdFlags))
 	m = append(m, log.New(io.MultiWriter(infoW, warningW), severityName[warningLog]+": ", log.LstdFlags))
 	ew := io.MultiWriter(infoW, warningW, errorW) // ew will be used for error and fatal.
 	m = append(m, log.New(ew, severityName[errorLog]+": ", log.LstdFlags))
 	m = append(m, log.New(ew, severityName[fatalLog]+": ", log.LstdFlags))
-	return &loggerT{m: m}
+	return &loggerT{m: m, v: v}
 }
 
 // newLoggerV2 creates a loggerV2 to be used as default logger.
 // All logs are written to stderr.
 func newLoggerV2() LoggerV2 {
-	return NewLoggerV2(os.Stderr, ioutil.Discard, ioutil.Discard)
+	errorW := ioutil.Discard
+	warningW := ioutil.Discard
+	infoW := ioutil.Discard
+
+	logLevel := os.Getenv("GRPC_GO_LOG_SEVERITY_LEVEL")
+	switch logLevel {
+	case "", "ERROR", "error": // If env is unset, set level to ERROR.
+		errorW = os.Stderr
+	case "WARNING", "warning":
+		warningW = os.Stderr
+	case "INFO", "info":
+		infoW = os.Stderr
+	}
+
+	var v int
+	vLevel := os.Getenv("GRPC_GO_LOG_VERBOSITY_LEVEL")
+	if vl, err := strconv.Atoi(vLevel); err == nil {
+		v = vl
+	}
+	return NewLoggerV2WithVerbosity(infoW, warningW, errorW, v)
 }
 
 func (g *loggerT) Info(args ...interface{}) {
@@ -165,18 +183,39 @@ func (g *loggerT) Errorf(format string, args ...interface{}) {
 
 func (g *loggerT) Fatal(args ...interface{}) {
 	g.m[fatalLog].Fatal(args...)
+	// No need to call os.Exit() again because log.Logger.Fatal() calls os.Exit().
 }
 
 func (g *loggerT) Fatalln(args ...interface{}) {
 	g.m[fatalLog].Fatalln(args...)
+	// No need to call os.Exit() again because log.Logger.Fatal() calls os.Exit().
 }
 
 func (g *loggerT) Fatalf(format string, args ...interface{}) {
 	g.m[fatalLog].Fatalf(format, args...)
+	// No need to call os.Exit() again because log.Logger.Fatal() calls os.Exit().
 }
 
 func (g *loggerT) V(l int) bool {
-	// Returns true for all verbose level.
-	// TODO support verbose level in the default logger.
-	return true
+	return l <= g.v
+}
+
+// DepthLoggerV2 logs at a specified call frame. If a LoggerV2 also implements
+// DepthLoggerV2, the below functions will be called with the appropriate stack
+// depth set for trivial functions the logger may ignore.
+//
+// Experimental
+//
+// Notice: This type is EXPERIMENTAL and may be changed or removed in a
+// later release.
+type DepthLoggerV2 interface {
+	LoggerV2
+	// InfoDepth logs to INFO log at the specified depth. Arguments are handled in the manner of fmt.Print.
+	InfoDepth(depth int, args ...interface{})
+	// WarningDepth logs to WARNING log at the specified depth. Arguments are handled in the manner of fmt.Print.
+	WarningDepth(depth int, args ...interface{})
+	// ErrorDetph logs to ERROR log at the specified depth. Arguments are handled in the manner of fmt.Print.
+	ErrorDepth(depth int, args ...interface{})
+	// FatalDepth logs to FATAL log at the specified depth. Arguments are handled in the manner of fmt.Print.
+	FatalDepth(depth int, args ...interface{})
 }

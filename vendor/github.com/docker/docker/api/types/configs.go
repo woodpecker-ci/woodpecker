@@ -1,8 +1,9 @@
-package types
+package types // import "github.com/docker/docker/api/types"
 
 import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
+	specs "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 // configs holds structs used for internal communication between the
@@ -15,6 +16,7 @@ type ContainerCreateConfig struct {
 	Config           *container.Config
 	HostConfig       *container.HostConfig
 	NetworkingConfig *network.NetworkingConfig
+	Platform         *specs.Platform
 	AdjustCPUShares  bool
 }
 
@@ -23,19 +25,6 @@ type ContainerCreateConfig struct {
 // to perform.
 type ContainerRmConfig struct {
 	ForceRemove, RemoveVolume, RemoveLink bool
-}
-
-// ContainerCommitConfig contains build configs for commit operation,
-// and is used when making a commit with the current state of the container.
-type ContainerCommitConfig struct {
-	Pause   bool
-	Repo    string
-	Tag     string
-	Author  string
-	Comment string
-	// merge container config into commit config before commit
-	MergeConfigs bool
-	Config       *container.Config
 }
 
 // ExecConfig is a small subset of the Config struct that holds the configuration
@@ -50,6 +39,7 @@ type ExecConfig struct {
 	Detach       bool     // Execute in detach mode
 	DetachKeys   string   // Escape keys for detach
 	Env          []string // Environment variables
+	WorkingDir   string   // Working directory
 	Cmd          []string // Execution commands and args
 }
 
@@ -66,4 +56,11 @@ type PluginEnableConfig struct {
 // PluginDisableConfig holds arguments for plugin disable.
 type PluginDisableConfig struct {
 	ForceDisable bool
+}
+
+// NetworkListConfig stores the options available for listing networks
+type NetworkListConfig struct {
+	// TODO(@cpuguy83): naming is hard, this is pulled from what was being used in the router before moving here
+	Detailed bool
+	Verbose  bool
 }

@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Drone API
+  title: Woodpecker API
   license:
     name: Creative Commons 4.0 International
     url: "http://creativecommons.org/licenses/by/4.0/"
@@ -93,10 +93,7 @@ paths:
                 "timeout": 60,
                 "private": false,
                 "trusted": false,
-                "allow_pr": true,
-                "allow_push": true,
-                "allow_deploys": false,
-                "allow_tags": false
+                "allow_pr": true
               }
           required: true
       tags:
@@ -184,7 +181,7 @@ paths:
 
 
   #
-  # Repos Param Encryption Enpoint
+  # Repos Param Encryption Endpoint
   # TODO: properly add the input output schema
 
   /repos/{owner}/{name}/encrypt:
@@ -246,36 +243,6 @@ paths:
         404:
           description: |
             Unable to find the Repository in the database
-
-  /repos/{owner}/{name}/builds/{number}:
-    get:
-      parameters:
-        - name: owner
-          in: path
-          type: string
-          description: owner of the repository
-        - name: name
-          in: path
-          type: string
-          description: name of the repository
-        - name: number
-          in: path
-          type: integer
-          description: sequential build number
-      tags:
-        - Builds
-      summary: Get a build
-      description: Returns the repository build by number.
-      security:
-        - accessToken: []
-      responses:
-        200:
-          description: The build.
-          schema:
-            $ref: "#/definitions/Build"
-        404:
-          description: |
-            Unable to find the Repository or Build
 
 
   /repos/{owner}/{name}/builds/{number}:
@@ -410,7 +377,7 @@ paths:
         - accessToken: []
       responses:
         200:
-          description: Successfully cancelled the Job
+          description: Successfully canceled the Job
         404:
           description: |
             Unable to find the Repository or Job
@@ -633,7 +600,7 @@ definitions:
         description: The url for the avatar image.
         type: string
       admin:
-        description: Whether the account has administrative priviledges.
+        description: Whether the account has administrative privileges.
         type: boolean
       active:
         description: Whether the account is currently active.
@@ -655,10 +622,7 @@ definitions:
           "timeout": 60,
           "private": false,
           "trusted": false,
-          "allow_pr": true,
-          "allow_push": true,
-          "allow_deploys": false,
-          "allow_tags": false
+          "allow_pr": true
         }
     properties:
       id:
@@ -711,15 +675,6 @@ definitions:
         x-dart-type: Duration
       allow_pr:
         description: Whether pull requests should trigger a build.
-        type: boolean
-      allow_push:
-        description: Whether push events should trigger a build.
-        type: boolean
-      allow_deploys:
-        description: Whether deployment events should trigger a build.
-        type: boolean
-      allow_tags:
-        description: Whether tags should trigger a build.
         type: boolean
 
   Build:

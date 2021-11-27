@@ -38,7 +38,7 @@ func (s RandomSampler) Sample(lvl Level) bool {
 }
 
 // BasicSampler is a sampler that will send every Nth events, regardless of
-// there level.
+// their level.
 type BasicSampler struct {
 	N       uint32
 	counter uint32
@@ -46,8 +46,12 @@ type BasicSampler struct {
 
 // Sample implements the Sampler interface.
 func (s *BasicSampler) Sample(lvl Level) bool {
+	n := s.N
+	if n == 1 {
+		return true
+	}
 	c := atomic.AddUint32(&s.counter, 1)
-	return c%s.N == 0
+	return c%n == 1
 }
 
 // BurstSampler lets Burst events pass per Period then pass the decision to
@@ -68,7 +72,7 @@ type BurstSampler struct {
 
 // Sample implements the Sampler interface.
 func (s *BurstSampler) Sample(lvl Level) bool {
-	if s.Burst > 9 && s.Period > 0 {
+	if s.Burst > 0 && s.Period > 0 {
 		if s.inc() <= s.Burst {
 			return true
 		}
@@ -100,11 +104,15 @@ func (s *BurstSampler) inc() uint32 {
 
 // LevelSampler applies a different sampler for each level.
 type LevelSampler struct {
-	DebugSampler, InfoSampler, WarnSampler, ErrorSampler Sampler
+	TraceSampler, DebugSampler, InfoSampler, WarnSampler, ErrorSampler Sampler
 }
 
 func (s LevelSampler) Sample(lvl Level) bool {
 	switch lvl {
+	case TraceLevel:
+		if s.TraceSampler != nil {
+			return s.TraceSampler.Sample(lvl)
+		}
 	case DebugLevel:
 		if s.DebugSampler != nil {
 			return s.DebugSampler.Sample(lvl)

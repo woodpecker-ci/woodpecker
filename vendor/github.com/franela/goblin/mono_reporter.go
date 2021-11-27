@@ -24,3 +24,7 @@ func (self *Monochrome) WithCheck(text string) string {
 func (self *Monochrome) Green(text string) string {
 	return text
 }
+
+func (self *Monochrome) Yellow(text string) string {
+	return text
+}

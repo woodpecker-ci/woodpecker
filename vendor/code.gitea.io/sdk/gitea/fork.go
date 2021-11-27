@@ -10,29 +10,40 @@ import (
 	"fmt"
 )
 
+// ListForksOptions options for listing repository's forks
+type ListForksOptions struct {
+	ListOptions
+}
+
 // ListForks list a repository's forks
-func (c *Client) ListForks(user, repo string) ([]*Repository, error) {
-	forks := make([]*Repository, 10)
-	err := c.getParsedResponse("GET",
-		fmt.Sprintf("/repos/%s/%s/forks", user, repo),
+func (c *Client) ListForks(user string, repo string, opt ListForksOptions) ([]*Repository, *Response, error) {
+	if err := escapeValidatePathSegments(&user, &repo); err != nil {
+		return nil, nil, err
+	}
+	opt.setDefaults()
+	forks := make([]*Repository, opt.PageSize)
+	resp, err := c.getParsedResponse("GET",
+		fmt.Sprintf("/repos/%s/%s/forks?%s", user, repo, opt.getURLQuery().Encode()),
 		nil, nil, &forks)
-	return forks, err
+	return forks, resp, err
 }
 
 // CreateForkOption options for creating a fork
 type CreateForkOption struct {
+	// organization name, if forking into an organization
 	Organization *string `json:"organization"`
 }
 
 // CreateFork create a fork of a repository
-func (c *Client) CreateFork(user, repo string, form CreateForkOption) (*Repository, error) {
+func (c *Client) CreateFork(user, repo string, form CreateForkOption) (*Repository, *Response, error) {
+	if err := escapeValidatePathSegments(&user, &repo); err != nil {
+		return nil, nil, err
+	}
 	body, err := json.Marshal(form)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	fork := new(Repository)
-	err = c.getParsedResponse("POST",
-		fmt.Sprintf("/repos/%s/%s/forks", user, repo),
-		jsonHeader, bytes.NewReader(body), &fork)
-	return fork, err
+	resp, err := c.getParsedResponse("POST", fmt.Sprintf("/repos/%s/%s/forks", user, repo), jsonHeader, bytes.NewReader(body), &fork)
+	return fork, resp, err
 }

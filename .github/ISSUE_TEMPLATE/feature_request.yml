@@ -1,0 +1,47 @@
+# Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/feature_request.yml
+name: "\U0001F680 New feature proposal"
+description: Propose a new feature to be added to Woodpecker
+labels: ["pending:feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in the project and taking the time to fill out this feature report!
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Clear and concise description of the problem
+      description: "As a user of Woodpecker I want [goal / wish] so that [benefit]. If you intend to submit a PR for this issue, tell us in the description."
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-solution
+    attributes:
+      label: Suggested solution
+      description: "In web-ui / config we could provide following functionality..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Alternative
+      description: Clear and concise description of any alternative solutions or features you've considered.
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Any other context or screenshots about the feature request here.
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Validations
+      description: Before submitting the issue, please make sure you do the following
+      options:
+        # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
+        #   required: true
+        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
+          required: true
+        - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
+          required: true
+        - label: Check that there isn't already an [issue](https://github.com/woodpecker-ci/woodpecker/issues) that request the same feature to avoid creating a duplicate.
+          required: true

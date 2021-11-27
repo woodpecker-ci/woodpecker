@@ -1,23 +1,22 @@
-[![Build Status](https://travis-ci.org/franela/goblin.png?branch=master)](https://travis-ci.org/franela/goblin)
 Goblin
 ======
 
+[![Build Status](https://travis-ci.org/franela/goblin.svg)](https://travis-ci.org/franela/goblin)
+[![Go Reportcard](https://goreportcard.com/badge/github.com/franela/goblin)](https://goreportcard.com/report/github.com/franela/goblin)
+[![GoDoc](https://godoc.org/github.com/franela/goblin?status.svg)](https://godoc.org/github.com/franela/goblin)
+[![License](https://img.shields.io/github/license/franela/goblin.svg)](https://github.com/franela/goblin/blob/master/LICENSE.md)
+[![Release](https://img.shields.io/github/release/franela/goblin.svg)](https://github.com/franela/goblin/releases/latest)
+
+
+A [Mocha](http://mochajs.org/) like BDD testing framework written in Go that requires no additional dependencies. Requires no extensive documentation nor complicated steps to get it running.
+
 ![](https://github.com/marcosnils/goblin/blob/master/goblin_logo.jpg?raw=true)
-
-A [Mocha](http://visionmedia.github.io/mocha/) like BDD testing framework for Go
-
-No extensive documentation nor complicated steps to get it running
-
-Run tests as usual with `go test`
-
-Colorful reports and beautiful syntax
-
 
 Why Goblin?
 -----------
 
 Inspired by the flexibility and simplicity of Node BDD and frustrated by the
-rigorousness of Go way of testing, we wanted to bring a new tool to 
+rigorousness of Go way of testing, we wanted to bring a new tool to
 write self-describing and comprehensive code.
 
 
@@ -25,12 +24,15 @@ write self-describing and comprehensive code.
 What do I get with it?
 ----------------------
 
+- Run tests as usual with `go test`
+- Colorful reports and beautiful syntax
 - Preserve the exact same syntax and behaviour as Node's Mocha
 - Nest as many `Describe` and `It` blocks as you want
 - Use `Before`, `BeforeEach`, `After` and `AfterEach` for setup and teardown your tests
 - No need to remember confusing parameters in `Describe` and `It` blocks
 - Use a declarative and expressive language to write your tests
-- Plug different assertion libraries ([Gomega](https://github.com/onsi/gomega) supported so far)
+- Plug different assertion libraries
+ - [Gomega](https://github.com/onsi/gomega) (supported so far)
 - Skip your tests the same way as you would do in Mocha
 - Automatic terminal support for colored outputs
 - Two line setup is all you need to get up running
@@ -54,13 +56,20 @@ import (
 func Test(t *testing.T) {
     g := Goblin(t)
     g.Describe("Numbers", func() {
+        // Passing Test
         g.It("Should add two numbers ", func() {
             g.Assert(1+1).Equal(2)
         })
+        // Failing Test
         g.It("Should match equal numbers", func() {
             g.Assert(2).Equal(4)
         })
+        // Pending Test
         g.It("Should substract two numbers")
+        // Excluded Test
+        g.Xit("Should add two numbers ", func() {
+            g.Assert(3+1).Equal(4)
+        })
     })
 }
 ```
@@ -102,12 +111,12 @@ package foobar
 
 import (
     "testing"
-    . "github.com/franela/goblin"
+    goblin "github.com/franela/goblin"
     . "github.com/onsi/gomega"
 )
 
 func Test(t *testing.T) {
-    g := Goblin(t)
+    g := goblin.Goblin(t)
 
     //special hook for gomega
     RegisterFailHandler(func(m string, _ ...int) { g.Fail(m) })
@@ -121,7 +130,7 @@ func Test(t *testing.T) {
 ```
 
 
-FAQ:
+FAQ
 ----
 
 ### How do I run specific tests?
@@ -129,13 +138,12 @@ FAQ:
 If `-goblin.run=$REGES` is supplied to the `go test` command then only tests that match the supplied regex will run
 
 
-TODO:
+Contributing
 -----
 
-We do have a couple of [issues](https://github.com/franela/goblin/issues) pending we'll be addressing soon. But feel free to
-contribute and send us PRs (with tests please :smile:).
+We do have a couple of [issues](https://github.com/franela/goblin/issues) pending.  Feel free to contribute and send us PRs (with tests please :smile:).
 
-Contributions:
+Special Thanks
 ------------
 
 Special thanks to [Leandro Reox](https://github.com/leandroreox) (Leitan) for the goblin logo.

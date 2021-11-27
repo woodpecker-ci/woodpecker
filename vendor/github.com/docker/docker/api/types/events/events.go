@@ -1,6 +1,8 @@
-package events
+package events // import "github.com/docker/docker/api/types/events"
 
 const (
+	// BuilderEventType is the event type that the builder generates
+	BuilderEventType = "builder"
 	// ContainerEventType is the event type that containers generate
 	ContainerEventType = "container"
 	// DaemonEventType is the event type that daemon generate
@@ -13,6 +15,14 @@ const (
 	PluginEventType = "plugin"
 	// VolumeEventType is the event type that volumes generate
 	VolumeEventType = "volume"
+	// ServiceEventType is the event type that services generate
+	ServiceEventType = "service"
+	// NodeEventType is the event type that nodes generate
+	NodeEventType = "node"
+	// SecretEventType is the event type that secrets generate
+	SecretEventType = "secret"
+	// ConfigEventType is the event type that configs generate
+	ConfigEventType = "config"
 )
 
 // Actor describes something that generates events,
@@ -36,6 +46,8 @@ type Message struct {
 	Type   string
 	Action string
 	Actor  Actor
+	// Engine events are local scope. Cluster events are swarm scope.
+	Scope string `json:"scope,omitempty"`
 
 	Time     int64 `json:"time,omitempty"`
 	TimeNano int64 `json:"timeNano,omitempty"`

@@ -1,0 +1,7 @@
+branches: master
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go test

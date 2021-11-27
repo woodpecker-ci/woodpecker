@@ -1,0 +1,69 @@
+# Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml
+name: "\U0001F41E Bug report"
+description: Report an issue with Woodpecker
+labels: ["pending:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component of Woodpecker is affected by the issue?
+      multiple: true
+      options:
+        - server
+        - agent
+        - cli
+        - web-ui
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is. If you intend to submit a PR for this issue, tell us in the description. Thanks!
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: Output of `https://<your-woodpecker-instance>/version`
+      render: shell
+      placeholder: Version info, docker-compose config, Kubernetes manifests
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: |
+        Logs? Screenshots? Anything that will give us more context about the issue you are encountering!
+        Sometimes a picture is worth a thousand words, but please try not to insert an image of logs / text
+        and copy paste the text instead.
+
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Validations
+      description: Before submitting the issue, please make sure you do the following
+      options:
+        # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
+        #   required: true
+        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
+          required: true
+        - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
+          required: true
+        - label: Check that there isn't [already an issue](https://github.com/woodpecker-ci/woodpecker/issues) that reports the same bug to avoid creating a duplicate.
+          required: true
+        - label: Check that this is a concrete bug. For Q&A join our [Discord Chat Server](https://discord.gg/fcMQqSMXJy).
+          required: true

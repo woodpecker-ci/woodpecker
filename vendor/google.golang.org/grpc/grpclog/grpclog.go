@@ -1,127 +1,132 @@
 /*
  *
- * Copyright 2017, Google Inc.
- * All rights reserved.
+ * Copyright 2017 gRPC authors.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package grpclog
+// Package grpclog defines logging for grpc.
+//
+// All logs in transport and grpclb packages only go to verbose level 2.
+// All logs in other packages in grpc are logged in spite of the verbosity level.
+//
+// In the default logger,
+// severity level can be set by environment variable GRPC_GO_LOG_SEVERITY_LEVEL,
+// verbosity level can be set by GRPC_GO_LOG_VERBOSITY_LEVEL.
+package grpclog // import "google.golang.org/grpc/grpclog"
 
-import "os"
+import (
+	"os"
 
-var logger = newLoggerV2()
+	"google.golang.org/grpc/internal/grpclog"
+)
+
+func init() {
+	SetLoggerV2(newLoggerV2())
+}
 
 // V reports whether verbosity level l is at least the requested verbose level.
 func V(l int) bool {
-	return logger.V(l)
+	return grpclog.Logger.V(l)
 }
 
 // Info logs to the INFO log.
 func Info(args ...interface{}) {
-	logger.Info(args...)
+	grpclog.Logger.Info(args...)
 }
 
 // Infof logs to the INFO log. Arguments are handled in the manner of fmt.Printf.
 func Infof(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+	grpclog.Logger.Infof(format, args...)
 }
 
 // Infoln logs to the INFO log. Arguments are handled in the manner of fmt.Println.
 func Infoln(args ...interface{}) {
-	logger.Infoln(args...)
+	grpclog.Logger.Infoln(args...)
 }
 
 // Warning logs to the WARNING log.
 func Warning(args ...interface{}) {
-	logger.Warning(args...)
+	grpclog.Logger.Warning(args...)
 }
 
 // Warningf logs to the WARNING log. Arguments are handled in the manner of fmt.Printf.
 func Warningf(format string, args ...interface{}) {
-	logger.Warningf(format, args...)
+	grpclog.Logger.Warningf(format, args...)
 }
 
 // Warningln logs to the WARNING log. Arguments are handled in the manner of fmt.Println.
 func Warningln(args ...interface{}) {
-	logger.Warningln(args...)
+	grpclog.Logger.Warningln(args...)
 }
 
 // Error logs to the ERROR log.
 func Error(args ...interface{}) {
-	logger.Error(args...)
+	grpclog.Logger.Error(args...)
 }
 
 // Errorf logs to the ERROR log. Arguments are handled in the manner of fmt.Printf.
 func Errorf(format string, args ...interface{}) {
-	logger.Errorf(format, args...)
+	grpclog.Logger.Errorf(format, args...)
 }
 
 // Errorln logs to the ERROR log. Arguments are handled in the manner of fmt.Println.
 func Errorln(args ...interface{}) {
-	logger.Errorln(args...)
+	grpclog.Logger.Errorln(args...)
 }
 
 // Fatal logs to the FATAL log. Arguments are handled in the manner of fmt.Print.
 // It calls os.Exit() with exit code 1.
 func Fatal(args ...interface{}) {
-	logger.Fatal(args...)
+	grpclog.Logger.Fatal(args...)
+	// Make sure fatal logs will exit.
 	os.Exit(1)
 }
 
 // Fatalf logs to the FATAL log. Arguments are handled in the manner of fmt.Printf.
-// It calles os.Exit() with exit code 1.
+// It calls os.Exit() with exit code 1.
 func Fatalf(format string, args ...interface{}) {
-	logger.Fatalf(format, args...)
+	grpclog.Logger.Fatalf(format, args...)
+	// Make sure fatal logs will exit.
 	os.Exit(1)
 }
 
 // Fatalln logs to the FATAL log. Arguments are handled in the manner of fmt.Println.
 // It calle os.Exit()) with exit code 1.
 func Fatalln(args ...interface{}) {
-	logger.Fatalln(args...)
+	grpclog.Logger.Fatalln(args...)
+	// Make sure fatal logs will exit.
 	os.Exit(1)
 }
 
 // Print prints to the logger. Arguments are handled in the manner of fmt.Print.
+//
 // Deprecated: use Info.
 func Print(args ...interface{}) {
-	logger.Info(args...)
+	grpclog.Logger.Info(args...)
 }
 
 // Printf prints to the logger. Arguments are handled in the manner of fmt.Printf.
+//
 // Deprecated: use Infof.
 func Printf(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+	grpclog.Logger.Infof(format, args...)
 }
 
 // Println prints to the logger. Arguments are handled in the manner of fmt.Println.
+//
 // Deprecated: use Infoln.
 func Println(args ...interface{}) {
-	logger.Infoln(args...)
+	grpclog.Logger.Infoln(args...)
 }

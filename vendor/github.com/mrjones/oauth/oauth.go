@@ -56,7 +56,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	log "github.com/Sirupsen/logrus"
 )
 
 const (
@@ -137,6 +136,13 @@ type ServiceProvider struct {
 	AccessTokenUrl    string
 	HttpMethod        string
 	BodyHash          bool
+	IgnoreTimestamp   bool
+
+	// Enables non spec-compliant behavior:
+	// Allow parameters to be passed in the query string rather
+	// than the body.
+	// See https://github.com/mrjones/oauth/pull/63
+	SignQueryParams bool
 }
 
 func (sp *ServiceProvider) httpMethod() string {
@@ -383,11 +389,15 @@ func NewCustomRSAConsumer(consumerKey string, privateKey *rsa.PrivateKey,
 //      - err:
 //        Set only if there was an error, nil otherwise.
 func (c *Consumer) GetRequestTokenAndUrl(callbackUrl string) (rtoken *RequestToken, loginUrl string, err error) {
-	params := c.baseParams(c.consumerKey, c.AdditionalParams)
+	return c.GetRequestTokenAndUrlWithParams(callbackUrl, c.AdditionalParams)
+}
+
+func (c *Consumer) GetRequestTokenAndUrlWithParams(callbackUrl string, additionalParams map[string]string) (rtoken *RequestToken, loginUrl string, err error) {
+	params := c.baseParams(c.consumerKey, additionalParams)
 	if callbackUrl != "" {
 		params.Add(CALLBACK_PARAM, callbackUrl)
 	}
-	log.Info(fmt.Sprintf("method: %s url: %s authparams: %s",c.serviceProvider.httpMethod(),c.serviceProvider.RequestTokenUrl, params))
+
 	req := &request{
 		method:      c.serviceProvider.httpMethod(),
 		url:         c.serviceProvider.RequestTokenUrl,
@@ -436,12 +446,17 @@ func (c *Consumer) GetRequestTokenAndUrl(callbackUrl string) (rtoken *RequestTok
 //      - err:
 //        Set only if there was an error, nil otherwise.
 func (c *Consumer) AuthorizeToken(rtoken *RequestToken, verificationCode string) (atoken *AccessToken, err error) {
-	params := map[string]string{
-		VERIFIER_PARAM: verificationCode,
-		TOKEN_PARAM:    rtoken.Token,
-	}
+	return c.AuthorizeTokenWithParams(rtoken, verificationCode, c.AdditionalParams)
+}
 
-	return c.makeAccessTokenRequest(params, rtoken.Secret)
+func (c *Consumer) AuthorizeTokenWithParams(rtoken *RequestToken, verificationCode string, additionalParams map[string]string) (atoken *AccessToken, err error) {
+	params := map[string]string{
+		TOKEN_PARAM: rtoken.Token,
+	}
+	if verificationCode != "" {
+		params[VERIFIER_PARAM] = verificationCode
+	}
+	return c.makeAccessTokenRequestWithParams(params, rtoken.Secret, additionalParams)
 }
 
 // Use the service provider to refresh the AccessToken for a given session.
@@ -491,7 +506,11 @@ func (c *Consumer) RefreshToken(accessToken *AccessToken) (atoken *AccessToken, 
 //      - err:
 //        Set only if there was an error, nil otherwise.
 func (c *Consumer) makeAccessTokenRequest(params map[string]string, secret string) (atoken *AccessToken, err error) {
-	orderedParams := c.baseParams(c.consumerKey, c.AdditionalParams)
+	return c.makeAccessTokenRequestWithParams(params, secret, c.AdditionalParams)
+}
+
+func (c *Consumer) makeAccessTokenRequestWithParams(params map[string]string, secret string, additionalParams map[string]string) (atoken *AccessToken, err error) {
+	orderedParams := c.baseParams(c.consumerKey, additionalParams)
 	for key, value := range params {
 		orderedParams.Add(key, value)
 	}
@@ -657,8 +676,12 @@ func (c *Consumer) makeAuthorizedRequestReader(method string, urlString string, 
 
 	} else {
 		// TODO(mrjones): validate that we're not overrideing an exising body?
-		request.Body = ioutil.NopCloser(strings.NewReader(vals.Encode()))
 		request.ContentLength = int64(len(vals.Encode()))
+		if request.ContentLength == 0 {
+			request.Body = nil
+		} else {
+			request.Body = ioutil.NopCloser(strings.NewReader(vals.Encode()))
+		}
 	}
 
 	for k, vs := range c.AdditionalHeaders {
@@ -709,6 +732,9 @@ func (c *Consumer) makeAuthorizedRequestReader(method string, urlString string, 
 	rt := RoundTripper{consumer: c, token: token}
 
 	resp, err = rt.RoundTrip(request)
+	if err != nil {
+		return resp, err
+	}
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		defer resp.Body.Close()
@@ -761,56 +787,63 @@ func canonicalizeUrl(u *url.URL) string {
 	return buf.String()
 }
 
-func parseBody(request *http.Request) (map[string]string, error) {
-	userParams := map[string]string{}
+func getBody(request *http.Request) ([]byte, error) {
+	if request.Body == nil {
+		return nil, nil
+	}
+	defer request.Body.Close()
+	originalBody, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// We have to re-install the body (because we've ruined it by reading it).
+	if len(originalBody) > 0 {
+		request.Body = ioutil.NopCloser(bytes.NewReader(originalBody))
+	} else {
+		request.Body = nil
+	}
+	return originalBody, nil
+}
+
+func parseBody(request *http.Request) (map[string][]string, error) {
+	userParams := map[string][]string{}
 
 	// TODO(mrjones): factor parameter extraction into a separate method
 	if request.Header.Get("Content-Type") !=
 		"application/x-www-form-urlencoded" {
 		// Most of the time we get parameters from the query string:
 		for k, vs := range request.URL.Query() {
-			if len(vs) != 1 {
-				return nil, fmt.Errorf("Must have exactly one value per param")
-			}
-
-			userParams[k] = vs[0]
+			userParams[k] = vs
 		}
 	} else {
 		// x-www-form-urlencoded parameters come from the body instead:
-		defer request.Body.Close()
-		originalBody, err := ioutil.ReadAll(request.Body)
+		body, err := getBody(request)
 		if err != nil {
 			return nil, err
 		}
 
-		// If there was a body, we have to re-install it
-		// (because we've ruined it by reading it).
-		request.Body = ioutil.NopCloser(bytes.NewReader(originalBody))
-
-		params, err := url.ParseQuery(string(originalBody))
+		params, err := url.ParseQuery(string(body))
 		if err != nil {
 			return nil, err
 		}
 
 		for k, vs := range params {
-			if len(vs) != 1 {
-				return nil, fmt.Errorf("Must have exactly one value per param")
-			}
-
-			userParams[k] = vs[0]
+			userParams[k] = vs
 		}
 	}
 
 	return userParams, nil
 }
 
-func paramsToSortedPairs(params map[string]string) pairs {
+func paramsToSortedPairs(params map[string][]string) pairs {
 	// Sort parameters alphabetically
-	paramPairs := make(pairs, len(params))
-	i := 0
-	for key, value := range params {
-		paramPairs[i] = pair{key: key, value: value}
-		i++
+	paramPairs := pairs([]pair{})
+
+	for key, values := range params {
+		for _, value := range values {
+			paramPairs = append(paramPairs, pair{key: key, value: value})
+		}
 	}
 	sort.Sort(paramPairs)
 
@@ -823,24 +856,18 @@ func calculateBodyHash(request *http.Request, s signer) (string, error) {
 		return "", nil
 	}
 
-	var originalBody []byte
+	var body []byte
 
 	if request.Body != nil {
 		var err error
-
-		defer request.Body.Close()
-		originalBody, err = ioutil.ReadAll(request.Body)
+		body, err = getBody(request)
 		if err != nil {
 			return "", err
 		}
-
-		// If there was a body, we have to re-install it
-		// (because we've ruined it by reading it).
-		request.Body = ioutil.NopCloser(bytes.NewReader(originalBody))
 	}
 
 	h := s.HashFunc().New()
-	h.Write(originalBody)
+	h.Write(body)
 	rawSignature := h.Sum(nil)
 
 	return base64.StdEncoding.EncodeToString(rawSignature), nil
@@ -1093,7 +1120,10 @@ func (s *HMACSigner) Verify(message string, signature string) error {
 	}
 
 	if validSignature != signature {
-		return fmt.Errorf("signature did not match")
+		decodedSigniture, _ := url.QueryUnescape(signature)
+		if validSignature != decodedSigniture {
+			return fmt.Errorf("signature did not match")
+		}
 	}
 
 	return nil

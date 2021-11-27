@@ -3,6 +3,7 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 
@@ -22,7 +23,7 @@ func With() zerolog.Context {
 	return Logger.With()
 }
 
-// Level crestes a child logger with the minium accepted level set to level.
+// Level creates a child logger with the minimum accepted level set to level.
 func Level(level zerolog.Level) zerolog.Logger {
 	return Logger.Level(level)
 }
@@ -30,6 +31,26 @@ func Level(level zerolog.Level) zerolog.Logger {
 // Sample returns a logger with the s sampler.
 func Sample(s zerolog.Sampler) zerolog.Logger {
 	return Logger.Sample(s)
+}
+
+// Hook returns a logger with the h Hook.
+func Hook(h zerolog.Hook) zerolog.Logger {
+	return Logger.Hook(h)
+}
+
+// Err starts a new message with error level with err as a field if not nil or
+// with info level if err is nil.
+//
+// You must call Msg on the returned event in order to send the event.
+func Err(err error) *zerolog.Event {
+	return Logger.Err(err)
+}
+
+// Trace starts a new message with trace level.
+//
+// You must call Msg on the returned event in order to send the event.
+func Trace() *zerolog.Event {
+	return Logger.Trace()
 }
 
 // Debug starts a new message with debug level.
@@ -76,8 +97,15 @@ func Panic() *zerolog.Event {
 	return Logger.Panic()
 }
 
+// WithLevel starts a new message with level.
+//
+// You must call Msg on the returned event in order to send the event.
+func WithLevel(level zerolog.Level) *zerolog.Event {
+	return Logger.WithLevel(level)
+}
+
 // Log starts a new message with no level. Setting zerolog.GlobalLevel to
-// zerlog.Disabled will still disable events produced by this method.
+// zerolog.Disabled will still disable events produced by this method.
 //
 // You must call Msg on the returned event in order to send the event.
 func Log() *zerolog.Event {
@@ -87,13 +115,13 @@ func Log() *zerolog.Event {
 // Print sends a log event using debug level and no extra field.
 // Arguments are handled in the manner of fmt.Print.
 func Print(v ...interface{}) {
-	Logger.Print(v...)
+	Logger.Debug().CallerSkipFrame(1).Msg(fmt.Sprint(v...))
 }
 
 // Printf sends a log event using debug level and no extra field.
 // Arguments are handled in the manner of fmt.Printf.
 func Printf(format string, v ...interface{}) {
-	Logger.Printf(format, v...)
+	Logger.Debug().CallerSkipFrame(1).Msgf(format, v...)
 }
 
 // Ctx returns the Logger associated with the ctx. If no logger

@@ -1,16 +1,42 @@
-drone/drone
+### IDEs ###
+.idea/
+.vscode/
+!.vscode/launch.json
+
+### GO ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+### Frontend ###
+web/dist/**
+!web/dist/.gitkeep
+web/node_modules/
+web/*.log
+web/.env
+
+### Docker ###
+docker-compose.yml
+
+### Other ##
+# runetime or build relicts
 *.sqlite
-*.txt
 *.out
 /.env
-cmd/drone-server/.env
 extras/
-release/
-cli/release/
-
-kubeconfig.yaml
+/build/
+/dist/
 
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
-.idea/
-.vscode/
+
+docs/venv

@@ -1,4 +1,4 @@
-package types
+package types // import "github.com/docker/docker/api/types"
 
 import (
 	"errors"
@@ -16,38 +16,6 @@ import (
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/docker/go-connections/nat"
 )
-
-// ContainerChange contains response of Engine API:
-// GET "/containers/{name:.*}/changes"
-type ContainerChange struct {
-	Kind int
-	Path string
-}
-
-// ImageHistory contains response of Engine API:
-// GET "/images/{name:.*}/history"
-type ImageHistory struct {
-	ID        string `json:"Id"`
-	Created   int64
-	CreatedBy string
-	Tags      []string
-	Size      int64
-	Comment   string
-}
-
-// ImageDelete contains response of Engine API:
-// DELETE "/images/{name:.*}"
-type ImageDelete struct {
-	Untagged string `json:",omitempty"`
-	Deleted  string `json:",omitempty"`
-}
-
-// GraphDriverData returns Image's graph driver config info
-// when calling inspect command
-type GraphDriverData struct {
-	Name string
-	Data map[string]string
-}
 
 // RootFS returns Image's RootFS description including the layer IDs.
 type RootFS struct {
@@ -71,12 +39,19 @@ type ImageInspect struct {
 	Author          string
 	Config          *container.Config
 	Architecture    string
+	Variant         string `json:",omitempty"`
 	Os              string
 	OsVersion       string `json:",omitempty"`
 	Size            int64
 	VirtualSize     int64
 	GraphDriver     GraphDriverData
 	RootFS          RootFS
+	Metadata        ImageMetadata
+}
+
+// ImageMetadata contains engine-local data about the image
+type ImageMetadata struct {
+	LastTagTime time.Time `json:",omitempty"`
 }
 
 // Container contains response of Engine API:
@@ -125,23 +100,30 @@ type ContainerStats struct {
 	OSType string        `json:"ostype"`
 }
 
-// ContainerProcessList contains response of Engine API:
-// GET "/containers/{name:.*}/top"
-type ContainerProcessList struct {
-	Processes [][]string
-	Titles    []string
-}
-
 // Ping contains response of Engine API:
 // GET "/_ping"
 type Ping struct {
-	APIVersion   string
-	Experimental bool
+	APIVersion     string
+	OSType         string
+	Experimental   bool
+	BuilderVersion BuilderVersion
+}
+
+// ComponentVersion describes the version information for a specific component.
+type ComponentVersion struct {
+	Name    string
+	Version string
+	Details map[string]string `json:",omitempty"`
 }
 
 // Version contains response of Engine API:
 // GET "/version"
 type Version struct {
+	Platform   struct{ Name string } `json:",omitempty"`
+	Components []ComponentVersion    `json:",omitempty"`
+
+	// The following fields are deprecated, they relate to the Engine component and are kept for backwards compatibility
+
 	Version       string
 	APIVersion    string `json:"ApiVersion"`
 	MinAPIVersion string `json:"MinAPIVersion,omitempty"`
@@ -172,15 +154,17 @@ type Info struct {
 	Images             int
 	Driver             string
 	DriverStatus       [][2]string
-	SystemStatus       [][2]string
+	SystemStatus       [][2]string `json:",omitempty"` // SystemStatus is only propagated by the Swarm standalone API
 	Plugins            PluginsInfo
 	MemoryLimit        bool
 	SwapLimit          bool
-	KernelMemory       bool
+	KernelMemory       bool // Deprecated: kernel 5.4 deprecated kmem.limit_in_bytes
+	KernelMemoryTCP    bool
 	CPUCfsPeriod       bool `json:"CpuCfsPeriod"`
 	CPUCfsQuota        bool `json:"CpuCfsQuota"`
 	CPUShares          bool
 	CPUSet             bool
+	PidsLimit          bool
 	IPv4Forwarding     bool
 	BridgeNfIptables   bool
 	BridgeNfIP6tables  bool `json:"BridgeNfIp6tables"`
@@ -191,15 +175,18 @@ type Info struct {
 	SystemTime         string
 	LoggingDriver      string
 	CgroupDriver       string
+	CgroupVersion      string `json:",omitempty"`
 	NEventsListener    int
 	KernelVersion      string
 	OperatingSystem    string
+	OSVersion          string
 	OSType             string
 	Architecture       string
 	IndexServerAddress string
 	RegistryConfig     *registry.ServiceConfig
 	NCPU               int
 	MemTotal           int64
+	GenericResources   []swarm.GenericResource
 	DockerRootDir      string
 	HTTPProxy          string `json:"HttpProxy"`
 	HTTPSProxy         string `json:"HttpsProxy"`
@@ -208,26 +195,35 @@ type Info struct {
 	Labels             []string
 	ExperimentalBuild  bool
 	ServerVersion      string
-	ClusterStore       string
-	ClusterAdvertise   string
+	ClusterStore       string `json:",omitempty"` // Deprecated: host-discovery and overlay networks with external k/v stores are deprecated
+	ClusterAdvertise   string `json:",omitempty"` // Deprecated: host-discovery and overlay networks with external k/v stores are deprecated
 	Runtimes           map[string]Runtime
 	DefaultRuntime     string
 	Swarm              swarm.Info
 	// LiveRestoreEnabled determines whether containers should be kept
 	// running when the daemon is shutdown or upon daemon start if
 	// running containers are detected
-	LiveRestoreEnabled bool
-	Isolation          container.Isolation
-	InitBinary         string
-	ContainerdCommit   Commit
-	RuncCommit         Commit
-	InitCommit         Commit
-	SecurityOptions    []string
+	LiveRestoreEnabled  bool
+	Isolation           container.Isolation
+	InitBinary          string
+	ContainerdCommit    Commit
+	RuncCommit          Commit
+	InitCommit          Commit
+	SecurityOptions     []string
+	ProductLicense      string               `json:",omitempty"`
+	DefaultAddressPools []NetworkAddressPool `json:",omitempty"`
+	Warnings            []string
 }
 
 // KeyValue holds a key/value pair
 type KeyValue struct {
 	Key, Value string
+}
+
+// NetworkAddressPool is a temp struct used by Info struct
+type NetworkAddressPool struct {
+	Base string
+	Size int
 }
 
 // SecurityOpt contains the name and options of a security option
@@ -276,6 +272,8 @@ type PluginsInfo struct {
 	Network []string
 	// List of Authorization plugins registered
 	Authorization []string
+	// List of Log plugins registered
+	Log []string
 }
 
 // ExecStartCheck is a temp struct used by execStart
@@ -313,7 +311,7 @@ type Health struct {
 // ContainerState stores container's running state
 // it's part of ContainerJSONBase and will return by "inspect" command
 type ContainerState struct {
-	Status     string
+	Status     string // String representation of the container state. Can be one of "created", "running", "paused", "restarting", "removing", "exited", or "dead"
 	Running    bool
 	Paused     bool
 	Restarting bool
@@ -328,7 +326,7 @@ type ContainerState struct {
 }
 
 // ContainerNode stores information about the node that a container
-// is running on.  It's only available in Docker Swarm
+// is running on.  It's only used by the Docker Swarm standalone API
 type ContainerNode struct {
 	ID        string
 	IPAddress string `json:"IP"`
@@ -352,10 +350,11 @@ type ContainerJSONBase struct {
 	HostnamePath    string
 	HostsPath       string
 	LogPath         string
-	Node            *ContainerNode `json:",omitempty"`
+	Node            *ContainerNode `json:",omitempty"` // Node is only propagated by Docker Swarm standalone API
 	Name            string
 	RestartCount    int
 	Driver          string
+	Platform        string
 	MountLabel      string
 	ProcessLabel    string
 	AppArmorProfile string
@@ -429,19 +428,23 @@ type MountPoint struct {
 
 // NetworkResource is the body of the "get network" http response message
 type NetworkResource struct {
-	Name       string                      // Name is the requested name of the network
-	ID         string                      `json:"Id"` // ID uniquely identifies a network on a single machine
-	Created    time.Time                   // Created is the time the network created
-	Scope      string                      // Scope describes the level at which the network exists (e.g. `global` for cluster-wide or `local` for machine level)
-	Driver     string                      // Driver is the Driver name used to create the network (e.g. `bridge`, `overlay`)
-	EnableIPv6 bool                        // EnableIPv6 represents whether to enable IPv6
-	IPAM       network.IPAM                // IPAM is the network's IP Address Management
-	Internal   bool                        // Internal represents if the network is used internal only
-	Attachable bool                        // Attachable represents if the global scope is manually attachable by regular containers from workers in swarm mode.
-	Containers map[string]EndpointResource // Containers contains endpoints belonging to the network
-	Options    map[string]string           // Options holds the network specific options to use for when creating the network
-	Labels     map[string]string           // Labels holds metadata specific to the network being created
-	Peers      []network.PeerInfo          `json:",omitempty"` // List of peer nodes for an overlay network
+	Name       string                         // Name is the requested name of the network
+	ID         string                         `json:"Id"` // ID uniquely identifies a network on a single machine
+	Created    time.Time                      // Created is the time the network created
+	Scope      string                         // Scope describes the level at which the network exists (e.g. `swarm` for cluster-wide or `local` for machine level)
+	Driver     string                         // Driver is the Driver name used to create the network (e.g. `bridge`, `overlay`)
+	EnableIPv6 bool                           // EnableIPv6 represents whether to enable IPv6
+	IPAM       network.IPAM                   // IPAM is the network's IP Address Management
+	Internal   bool                           // Internal represents if the network is used internal only
+	Attachable bool                           // Attachable represents if the global scope is manually attachable by regular containers from workers in swarm mode.
+	Ingress    bool                           // Ingress indicates the network is providing the routing-mesh for the swarm cluster.
+	ConfigFrom network.ConfigReference        // ConfigFrom specifies the source which will provide the configuration for this network.
+	ConfigOnly bool                           // ConfigOnly networks are place-holder networks for network configurations to be used by other networks. ConfigOnly networks cannot be used directly to run containers or services.
+	Containers map[string]EndpointResource    // Containers contains endpoints belonging to the network
+	Options    map[string]string              // Options holds the network specific options to use for when creating the network
+	Labels     map[string]string              // Labels holds metadata specific to the network being created
+	Peers      []network.PeerInfo             `json:",omitempty"` // List of peer nodes for an overlay network
+	Services   map[string]network.ServiceInfo `json:",omitempty"`
 }
 
 // EndpointResource contains network resources allocated and used for a container in a network
@@ -455,12 +458,23 @@ type EndpointResource struct {
 
 // NetworkCreate is the expected body of the "create network" http request message
 type NetworkCreate struct {
+	// Check for networks with duplicate names.
+	// Network is primarily keyed based on a random ID and not on the name.
+	// Network name is strictly a user-friendly alias to the network
+	// which is uniquely identified using ID.
+	// And there is no guaranteed way to check for duplicates.
+	// Option CheckDuplicate is there to provide a best effort checking of any networks
+	// which has the same name but it is not guaranteed to catch all name collisions.
 	CheckDuplicate bool
 	Driver         string
+	Scope          string
 	EnableIPv6     bool
 	IPAM           *network.IPAM
 	Internal       bool
 	Attachable     bool
+	Ingress        bool
+	ConfigOnly     bool
+	ConfigFrom     *network.ConfigReference
 	Options        map[string]string
 	Labels         map[string]string
 }
@@ -489,6 +503,12 @@ type NetworkDisconnect struct {
 	Force     bool
 }
 
+// NetworkInspectOptions holds parameters to inspect network
+type NetworkInspectOptions struct {
+	Scope   string
+	Verbose bool
+}
+
 // Checkpoint represents the details of a checkpoint
 type Checkpoint struct {
 	Name string // Name is the name of the checkpoint
@@ -498,15 +518,27 @@ type Checkpoint struct {
 type Runtime struct {
 	Path string   `json:"path"`
 	Args []string `json:"runtimeArgs,omitempty"`
+
+	// This is exposed here only for internal use
+	// It is not currently supported to specify custom shim configs
+	Shim *ShimConfig `json:"-"`
+}
+
+// ShimConfig is used by runtime to configure containerd shims
+type ShimConfig struct {
+	Binary string
+	Opts   interface{}
 }
 
 // DiskUsage contains response of Engine API:
 // GET "/system/df"
 type DiskUsage struct {
-	LayersSize int64
-	Images     []*ImageSummary
-	Containers []*Container
-	Volumes    []*Volume
+	LayersSize  int64
+	Images      []*ImageSummary
+	Containers  []*Container
+	Volumes     []*Volume
+	BuildCache  []*BuildCache
+	BuilderSize int64 // deprecated
 }
 
 // ContainersPruneReport contains the response for Engine API:
@@ -526,7 +558,14 @@ type VolumesPruneReport struct {
 // ImagesPruneReport contains the response for Engine API:
 // POST "/images/prune"
 type ImagesPruneReport struct {
-	ImagesDeleted  []ImageDelete
+	ImagesDeleted  []ImageDeleteResponseItem
+	SpaceReclaimed uint64
+}
+
+// BuildCachePruneReport contains the response for Engine API:
+// POST "/build/prune"
+type BuildCachePruneReport struct {
+	CachesDeleted  []string
 	SpaceReclaimed uint64
 }
 
@@ -548,6 +587,18 @@ type SecretListOptions struct {
 	Filters filters.Args
 }
 
+// ConfigCreateResponse contains the information returned to a client
+// on the creation of a new config.
+type ConfigCreateResponse struct {
+	// ID is the id of the created config.
+	ID string
+}
+
+// ConfigListOptions holds parameters to list configs
+type ConfigListOptions struct {
+	Filters filters.Args
+}
+
 // PushResult contains the tag, manifest digest, and manifest size from the
 // push. It's used to signal this information to the trust code in the client
 // so it can sign the manifest if necessary.
@@ -555,4 +606,30 @@ type PushResult struct {
 	Tag    string
 	Digest string
 	Size   int
+}
+
+// BuildResult contains the image id of a successful build
+type BuildResult struct {
+	ID string
+}
+
+// BuildCache contains information about a build cache record
+type BuildCache struct {
+	ID          string
+	Parent      string
+	Type        string
+	Description string
+	InUse       bool
+	Shared      bool
+	Size        int64
+	CreatedAt   time.Time
+	LastUsedAt  *time.Time
+	UsageCount  int
+}
+
+// BuildCachePruneOptions hold parameters to prune the build cache
+type BuildCachePruneOptions struct {
+	All         bool
+	KeepStorage int64
+	Filters     filters.Args
 }

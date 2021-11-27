@@ -1,0 +1,55 @@
+# config for https://gitea.com/gitea/changelog to generate CHANGELOG.md
+
+# The full repository name
+repo: woodpecker-ci/woodpecker
+
+# Service type (gitea or github)
+service: github
+
+# Changelog groups and which labeled PRs to add to each group
+groups:
+  -
+    name: BREAKING
+    labels:
+      - breaking
+  -
+    name: FEATURES
+    labels:
+      - feature
+  -
+    name: SECURITY
+    labels:
+      - security
+  -
+    name: BUGFIXES
+    labels:
+      - bug
+  -
+    name: ENHANCEMENTS
+    labels:
+      - enhancement
+      - refactor
+      - ui
+  -
+    name: TESTING
+    labels:
+      - tests
+  -
+    name: TRANSLATION
+    labels:
+      - kind/translation
+  -
+    name: BUILD
+    labels:
+      - kind/build
+      - kind/lint
+  -
+    name: DOCUMENTATION
+    labels:
+      - documentation
+  -
+    name: MISC
+    default: true
+
+# regex indicating which labels to skip for the changelog
+skip-labels: skip-changelog|backport

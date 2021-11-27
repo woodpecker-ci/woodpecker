@@ -1,0 +1,129 @@
+{
+  "pipeline": [
+    {
+      "name": "pipeline_services",
+      "alias": "services",
+      "steps": [
+        {
+          "name": "pipeline_services_0",
+          "alias": "redis1",
+          "image": "redis:3.0",
+          "ports": [ 6379 ],
+          "detach": true,
+          "environment": {
+            "CI": "drone",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git"
+          },
+          "volumes": [
+            "pipeline_default:/go/src/github.com/drone/envsubst"
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": ["redis1"]
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        },
+        {
+          "name": "pipeline_services_1",
+          "alias": "redis2",
+          "image": "redis:3.0",
+          "ports": [ 6379 ],
+          "detach": true,
+          "environment": {
+            "CI": "drone",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git"
+          },
+          "volumes": [
+<<<<<<< HEAD:cncd/pipeline/samples/sample_7_redis/pipeline.json
+            "pipeline_default:/go/src/github.com/drone/envsubst"
+=======
+            "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+>>>>>>> master:pipeline/samples/sample_7_redis/pipeline.json
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": ["redis2"]
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        }
+      ]
+    },
+    {
+      "name": "pipeline_stage_0",
+      "alias": "build",
+      "steps": [
+        {
+          "name": "pipeline_step_0",
+          "alias": "build",
+          "image": "redis:3.0",
+          "working_dir": "/go/src/github.com/drone/envsubst",
+          "environment": {
+            "CI": "drone",
+            "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAp1bnNldCBEUk9ORV9ORVRSQ19VU0VSTkFNRQp1bnNldCBEUk9ORV9ORVRSQ19QQVNTV09SRAoKZWNobyArICJzbGVlcCAxIgpzbGVlcCAxCgplY2hvICsgInJlZGlzLWNsaSAtaCByZWRpczEgcGluZyIKcmVkaXMtY2xpIC1oIHJlZGlzMSBwaW5nCgplY2hvICsgInJlZGlzLWNsaSAtaCByZWRpczIgcGluZyIKcmVkaXMtY2xpIC1oIHJlZGlzMiBwaW5nCgplY2hvICsgInJlZGlzLWNsaSAtaCByZWRpczEgc2V0IEhFTExPIGhlbGxvIgpyZWRpcy1jbGkgLWggcmVkaXMxIHNldCBIRUxMTyBoZWxsbwoKZWNobyArICJyZWRpcy1jbGkgLWggcmVkaXMyIHNldCBIRUxMTyBob2xhIgpyZWRpcy1jbGkgLWggcmVkaXMyIHNldCBIRUxMTyBob2xhCgplY2hvICsgInJlZGlzLWNsaSAtaCByZWRpczEgZ2V0IEhFTExPIgpyZWRpcy1jbGkgLWggcmVkaXMxIGdldCBIRUxMTwoKZWNobyArICJyZWRpcy1jbGkgLWggcmVkaXMyIGdldCBIRUxMTyIKcmVkaXMtY2xpIC1oIHJlZGlzMiBnZXQgSEVMTE8KCg==",
+            "CI_SYSTEM": "pipec",
+            "CI_SYSTEM_ARCH": "linux/amd64",
+            "CI_SYSTEM_LINK": "https://github.com/cncd/pipec",
+            "CI_SYSTEM_NAME": "pipec",
+            "CI_WORKSPACE": "/go/src/github.com/drone/envsubst",
+            "DRONE": "true",
+            "CI_ARCH": "linux/amd64",
+            "CI_BUILD_LINK": "https://github.com/cncd/pipec//0",
+            "CI_REPO_SCM": "git",
+            "HOME": "/root",
+            "SHELL": "/bin/sh"
+          },
+          "entrypoint": ["/bin/sh", "-c"],
+          "command": ["echo $CI_SCRIPT | base64 -d | /bin/sh -e"],
+          "volumes": [
+<<<<<<< HEAD:cncd/pipeline/samples/sample_7_redis/pipeline.json
+            "pipeline_default:/go/src/github.com/drone/envsubst"
+=======
+            "/Users/bradrydzewski/code/src/github.com/woodpecker-ci/woodpecker/cncd/pipeline/samples/sample_7_redis:/go/src/github.com/drone/envsubst"
+>>>>>>> master:pipeline/samples/sample_7_redis/pipeline.json
+          ],
+          "networks": [
+            {
+              "name": "pipeline_default",
+              "aliases": ["build"]
+            }
+          ],
+          "on_success": true,
+          "auth_config": {}
+        }
+      ]
+    }
+  ],
+  "networks": [
+    {
+      "name": "pipeline_default",
+      "driver": "bridge"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "pipeline_default",
+      "driver": "local"
+    }
+  ],
+  "secrets": null
+}

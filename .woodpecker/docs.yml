@@ -1,0 +1,41 @@
+clone:
+  git:
+    image: plugins/git:next
+
+pipeline:
+  build:
+    image: node:14-alpine
+    commands:
+      - cd docs/
+      - yarn install --frozen-lockfile
+      - yarn build
+    when:
+      event: [push, pull_request]
+      path: "docs/**"
+
+  deploy:
+    image: alpine:3.14.2
+    secrets:
+      - BOT_PRIVATE_KEY
+    commands:
+      - apk add openssh-client git rsync
+      - mkdir -p $HOME/.ssh
+      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+      - chmod 0600 $HOME/.ssh/id_rsa
+      - git config --global user.email "woodpecker-bot@obermui.de"
+      - git config --global user.name "woodpecker-bot"
+      - git clone -b master --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
+      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
+      - cd /repo
+      - git add .
+      # exit successfully if nothing changed
+      - test -n "$(git status --porcelain)" || exit 0
+      - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
+      - git push
+    when:
+      event: push
+      branch: master
+      path: "docs/**"
+

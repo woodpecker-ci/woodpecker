@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Discussions
+    url: https://discord.gg/fcMQqSMXJy
+    about: Ask questions and discuss with other Woodpecker users.
+  - name: Frequently Asked Questions
+    url: https://woodpecker-ci.org/faq
+    about: Check the FAQs for common questions.
