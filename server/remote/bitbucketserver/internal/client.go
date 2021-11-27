@@ -296,19 +296,6 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 	return err
 }
 
-//Helper function to do delete on the hook
-func (c *Client) doDelete(url string) error {
-	request, err := http.NewRequestWithContext(c.ctx, "DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-	response, err := c.client.Do(request)
-	if response != nil {
-		defer response.Body.Close()
-	}
-	return err
-}
-
 //Helper function to get repos paginated
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
