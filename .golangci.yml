@@ -21,6 +21,7 @@ linters:
     - structcheck
     - varcheck
     - ineffassign
+    - unused
 
 run:
   timeout: 5m
@@ -30,3 +31,4 @@ issues:
     - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
       linters:
         - deadcode
+        - unused
