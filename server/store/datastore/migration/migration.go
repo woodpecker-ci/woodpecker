@@ -85,11 +85,11 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
-	if err := syncAll(sess); err != nil {
+	if err := sess.Commit(); err != nil {
 		return err
 	}
 
-	return sess.Commit()
+	return syncAll(e)
 }
 
 func runTasks(sess *xorm.Session, tasks []task) error {
@@ -128,7 +128,11 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 	return nil
 }
 
-func syncAll(sess *xorm.Session) error {
+type syncEngine interface {
+	Sync2(beans ...interface{}) error
+}
+
+func syncAll(sess syncEngine) error {
 	for _, bean := range []interface{}{
 		new(model.Agent),
 		new(model.Build),
