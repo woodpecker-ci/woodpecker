@@ -115,10 +115,10 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Timeout != nil && *in.Timeout > maxTimeout && !user.Admin {
-		c.String(http.StatusForbidden, "timeout is higher than max timeout on this instance")
+		c.Stringf(http.StatusForbidden, "Timeout is not allowed to be higher than max timeout (%dmin)", maxTimeout)
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' want to change repo settings who require instance permissions", user.Login)
+		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
 		c.String(http.StatusForbidden, "Insufficient privileges")
 		return
 	}
