@@ -31,7 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-// TODO: system wide default timeout and max timeout
+// TODO: make it set system wide via environment variables
 const defaultTimeout = 60 // 1 hour default build time
 const maxTimeout = defaultTimeout * 2
 
