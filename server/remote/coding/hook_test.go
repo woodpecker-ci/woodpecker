@@ -27,12 +27,9 @@ import (
 )
 
 func Test_hook(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Coding hook", func() {
-
 		g.It("Should parse hook", func() {
-
 			reader := ioutil.NopCloser(strings.NewReader(fixtures.PushHook))
 			r := &http.Request{
 				Header: map[string][]string{
@@ -46,7 +43,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
-				Kind:     model.RepoGit,
+				SCMKind:  model.RepoGit,
 			}
 
 			build := &model.Build{
@@ -63,7 +60,7 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parseHook(r)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
@@ -99,21 +96,20 @@ func Test_hook(t *testing.T) {
 				Name:     "test_project",
 				FullName: "kelvin/test_project",
 				Link:     "https://coding.net/u/kelvin/p/test_project",
-				Kind:     model.RepoGit,
+				SCMKind:  model.RepoGit,
 			}
 			actual, err := convertRepository(repository)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actual).Equal(repo)
 		})
 
 		g.It("Should parse push hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
-				Kind:     model.RepoGit,
+				SCMKind:  model.RepoGit,
 			}
 
 			build := &model.Build{
@@ -130,26 +126,25 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.PushHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
 
 		g.It("Should parse delete branch push hook", func() {
 			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.DeleteBranchPushHook))
-			g.Assert(err == nil).IsTrue()
-			g.Assert(actualRepo == nil).IsTrue()
-			g.Assert(actualBuild == nil).IsTrue()
+			g.Assert(err).IsNil()
+			g.Assert(actualRepo).IsNil()
+			g.Assert(actualBuild).IsNil()
 		})
 
 		g.It("Should parse pull request hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test2",
 				FullName: "demo1/test2",
 				Link:     "https://coding.net/u/demo1/p/test2",
-				Kind:     model.RepoGit,
+				SCMKind:  model.RepoGit,
 			}
 
 			build := &model.Build{
@@ -167,19 +162,18 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parsePullRequestHook([]byte(fixtures.PullRequestHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
 
 		g.It("Should parse merge request hook", func() {
-
 			repo := &model.Repo{
 				Owner:    "demo1",
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
-				Kind:     model.RepoGit,
+				SCMKind:  model.RepoGit,
 			}
 
 			build := &model.Build{
@@ -197,10 +191,9 @@ func Test_hook(t *testing.T) {
 			}
 
 			actualRepo, actualBuild, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualBuild).Equal(build)
 		})
-
 	})
 }

@@ -85,7 +85,7 @@ func Test_Gitlab(t *testing.T) {
 				client.HideArchives = false
 				_projects, err := client.Repos(ctx, &user)
 
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(len(_projects)).Equal(2)
 			})
 		})
@@ -97,7 +97,7 @@ func Test_Gitlab(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
-				assert.True(t, _repo.IsPrivate)
+				assert.True(t, _repo.IsSCMPrivate)
 			})
 
 			g.It("Should return error, when repo not exist", func() {
@@ -125,7 +125,7 @@ func Test_Gitlab(t *testing.T) {
 			g.It("Should return error, when repo is not exist", func() {
 				_, err := client.Perm(ctx, &user, "not-existed", "not-existed")
 
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
@@ -139,7 +139,7 @@ func Test_Gitlab(t *testing.T) {
 			g.It("Should be failed, when token not given", func() {
 				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test")
 
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
@@ -148,7 +148,7 @@ func Test_Gitlab(t *testing.T) {
 			g.It("Should be success", func() {
 				err := client.Deactivate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 		})
 

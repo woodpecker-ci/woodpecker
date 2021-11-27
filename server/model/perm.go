@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +19,24 @@ package model
 type PermStore interface {
 	PermFind(user *User, repo *Repo) (*Perm, error)
 	PermUpsert(perm *Perm) error
-	PermBatch(perms []*Perm) error
 	PermDelete(perm *Perm) error
 	PermFlush(user *User, before int64) error
 }
 
 // Perm defines a repository permission for an individual user.
 type Perm struct {
-	UserID int64  `json:"-"      meddler:"perm_user_id"`
-	RepoID int64  `json:"-"      meddler:"perm_repo_id"`
-	Repo   string `json:"-"      meddler:"-"`
-	Pull   bool   `json:"pull"   meddler:"perm_pull"`
-	Push   bool   `json:"push"   meddler:"perm_push"`
-	Admin  bool   `json:"admin"  meddler:"perm_admin"`
-	Synced int64  `json:"synced" meddler:"perm_synced"`
+	UserID  int64  `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
+	RepoID  int64  `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
+	Repo    string `json:"-"       xorm:"-"` // TODO: better caching (use type *Repo)
+	Pull    bool   `json:"pull"    xorm:"perm_pull"`
+	Push    bool   `json:"push"    xorm:"perm_push"`
+	Admin   bool   `json:"admin"   xorm:"perm_admin"`
+	Synced  int64  `json:"synced"  xorm:"perm_synced"`
+	Created int64  `json:"created" xorm:"created"`
+	Updated int64  `json:"updated" xorm:"updated"`
+}
+
+// TableName return database table name for xorm
+func (Perm) TableName() string {
+	return "perms"
 }

@@ -26,14 +26,12 @@ import (
 )
 
 func Test_parse(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
-
 		g.It("Should parse push hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("refs/heads/master")
 			g.Assert(hook.After).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
@@ -57,7 +55,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse tag hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPushTag)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("v1.0.0")
 			g.Assert(hook.Sha).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Repo.Name).Equal("hello-world")
@@ -73,7 +71,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse pull_request hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, err := parsePullRequest(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Action).Equal("opened")
 			g.Assert(hook.Number).Equal(int64(1))
 
@@ -108,7 +106,6 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Message).Equal(hook.Commits[0].Message)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(build.Author).Equal(hook.Sender.Login)
-
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {
@@ -146,7 +143,6 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Message).Equal(hook.PullRequest.Title)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(build.Author).Equal(hook.PullRequest.User.Username)
-
 		})
 
 		g.It("Should return a Repo struct from a pull_request hook", func() {
@@ -216,11 +212,10 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Link).Equal(from.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)
-			g.Assert(repo.IsPrivate).Equal(from.Private)
+			g.Assert(repo.IsSCMPrivate).Equal(from.Private)
 		})
 
 		g.It("Should correct a malformed avatar url", func() {
-
 			var urls = []struct {
 				Before string
 				After  string

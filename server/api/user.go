@@ -24,8 +24,8 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -38,7 +38,7 @@ func GetSelf(c *gin.Context) {
 
 func GetFeed(c *gin.Context) {
 	store_ := store.FromContext(c)
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -47,7 +47,10 @@ func GetFeed(c *gin.Context) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 
 		user.Synced = time.Now().Unix()
-		store_.UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Error().Err(err).Msg("UpdateUser")
+			return
+		}
 
 		config := ToConfig(c)
 
@@ -84,7 +87,7 @@ func GetFeed(c *gin.Context) {
 
 func GetRepos(c *gin.Context) {
 	store_ := store.FromContext(c)
-	remote_ := remote.FromContext(c)
+	remote_ := server.Config.Services.Remote
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
@@ -93,7 +96,10 @@ func GetRepos(c *gin.Context) {
 	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 		user.Synced = time.Now().Unix()
-		store_.UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Err(err).Msgf("update user '%s'", user.Login)
+			return
+		}
 
 		config := ToConfig(c)
 
@@ -135,7 +141,7 @@ func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)
@@ -155,7 +161,7 @@ func DeleteToken(c *gin.Context) {
 
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)

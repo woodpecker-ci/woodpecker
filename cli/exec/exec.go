@@ -72,9 +72,6 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for key, val := range metadata.Job.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
@@ -188,8 +185,8 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Private: c.Bool("repo-private"),
 		},
 		Curr: frontend.Build{
-			Number:   c.Int("build-number"),
-			Parent:   c.Int("parent-build-number"),
+			Number:   c.Int64("build-number"),
+			Parent:   c.Int64("parent-build-number"),
 			Created:  c.Int64("build-created"),
 			Started:  c.Int64("build-started"),
 			Finished: c.Int64("build-finished"),
@@ -211,7 +208,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			},
 		},
 		Prev: frontend.Build{
-			Number:   c.Int("prev-build-number"),
+			Number:   c.Int64("prev-build-number"),
 			Created:  c.Int64("prev-build-created"),
 			Started:  c.Int64("prev-build-started"),
 			Finished: c.Int64("prev-build-finished"),
@@ -260,8 +257,7 @@ var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reade
 		return err
 	}
 
-	logstream := NewLineWriter(proc.Alias)
-	io.Copy(logstream, part)
-
-	return nil
+	logStream := NewLineWriter(proc.Alias)
+	_, err = io.Copy(logStream, part)
+	return err
 })

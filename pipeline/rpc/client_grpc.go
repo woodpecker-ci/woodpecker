@@ -73,7 +73,9 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 	p.ID = res.GetPipeline().GetId()
 	p.Timeout = res.GetPipeline().GetTimeout()
 	p.Config = new(backend.Config)
-	json.Unmarshal(res.GetPipeline().GetPayload(), p.Config)
+	if err := json.Unmarshal(res.GetPipeline().GetPayload(), p.Config); err != nil {
+		log.Error().Err(err).Msgf("could not unmarshal pipeline config of '%s'", p.ID)
+	}
 	return p, nil
 }
 

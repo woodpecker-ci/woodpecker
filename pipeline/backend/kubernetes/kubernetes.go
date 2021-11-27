@@ -25,7 +25,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-type engine struct {
+type kube struct {
 	logs         *bytes.Buffer
 	namespace    string
 	storageClass string
@@ -35,7 +35,7 @@ type engine struct {
 
 // New returns a new Kubernetes Engine.
 func New(namespace, storageClass, volumeSize string) types.Engine {
-	return &engine{
+	return &kube{
 		logs:         new(bytes.Buffer),
 		namespace:    namespace,
 		storageClass: storageClass,
@@ -43,16 +43,16 @@ func New(namespace, storageClass, volumeSize string) types.Engine {
 	}
 }
 
-func (e *engine) Name() string {
+func (e *kube) Name() string {
 	return "kubernetes"
 }
 
-func (e *engine) IsAvivable() bool {
+func (e *kube) IsAvailable() bool {
 	host := os.Getenv("KUBERNETES_SERVICE_HOST")
 	return len(host) > 0
 }
 
-func (e *engine) Load() error {
+func (e *kube) Load() error {
 	var kubeClient kubernetes.Interface
 	_, err := rest.InClusterConfig()
 	if err != nil {
@@ -71,7 +71,7 @@ func (e *engine) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *engine) Setup(ctx context.Context, conf *types.Config) error {
+func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	e.logs.WriteString("Setting up Kubernetes primitives\n")
 
 	for _, vol := range conf.Volumes {
@@ -115,7 +115,7 @@ func (e *engine) Setup(ctx context.Context, conf *types.Config) error {
 }
 
 // Start the pipeline step.
-func (e *engine) Exec(ctx context.Context, step *types.Step) error {
+func (e *kube) Exec(ctx context.Context, step *types.Step) error {
 	e.logs.WriteString("Creating pod\n")
 	e.logs.WriteString(strings.Join(step.ExtraHosts, " ") + "\n")
 	pod := Pod(e.namespace, step)
@@ -123,15 +123,9 @@ func (e *engine) Exec(ctx context.Context, step *types.Step) error {
 	return err
 }
 
-// DEPRECATED
-// Kill the pipeline step.
-func (e *engine) Kill(context.Context, *types.Step) error {
-	return nil
-}
-
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *engine) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
 	podName := podName(step)
 
 	finished := make(chan bool)
@@ -181,7 +175,7 @@ func (e *engine) Wait(ctx context.Context, step *types.Step) (*types.State, erro
 }
 
 // Tail the pipeline step logs.
-func (e *engine) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
 	podName := podName(step)
 
 	up := make(chan bool)
@@ -240,7 +234,7 @@ func (e *engine) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, err
 }
 
 // Destroy the pipeline environment.
-func (e *engine) Destroy(ctx context.Context, conf *types.Config) error {
+func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
 	var gracePeriodSeconds int64 = 0 // immediately
 	dpb := metav1.DeletePropagationBackground
 

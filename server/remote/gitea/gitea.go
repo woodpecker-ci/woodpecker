@@ -118,7 +118,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		return nil, nil
 	}
 
-	token, err := config.Exchange(oauth2.NoContext, code)
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ const (
 
 // getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
-func getStatus(status string) gitea.StatusState {
+func getStatus(status model.StatusValue) gitea.StatusState {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
 		return gitea.StatusPending
@@ -493,7 +493,7 @@ func getStatus(status string) gitea.StatusState {
 
 // getDesc is a helper function that generates a description
 // message for the build based on the status.
-func getDesc(status string) string {
+func getDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:
 		return DescPending

@@ -12,32 +12,36 @@ import (
 	"github.com/moby/moby/pkg/jsonmessage"
 	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
+	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-type engine struct {
+type docker struct {
 	client client.APIClient
 }
 
+// make sure docker implements Engine
+var _ backend.Engine = &docker{}
+
 // New returns a new Docker Engine.
 func New() backend.Engine {
-	return &engine{
+	return &docker{
 		client: nil,
 	}
 }
 
-func (e *engine) Name() string {
+func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *engine) IsAvivable() bool {
-	_, err := os.Stat("/.dockerenv")
-	return os.IsNotExist(err)
+func (e *docker) IsAvailable() bool {
+	_, err := os.Stat("/var/run/docker.sock")
+	return err == nil
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *engine) Load() error {
+func (e *docker) Load() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
@@ -47,7 +51,7 @@ func (e *engine) Load() error {
 	return nil
 }
 
-func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:       vol.Name,
@@ -72,7 +76,7 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
+func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 	config := toConfig(proc)
 	hostConfig := toHostConfig(proc)
 
@@ -90,7 +94,9 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 			defer responseBody.Close()
 
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
+			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+			}
 		}
 		// fix for drone/drone#1917
 		if perr != nil && proc.AuthConfig.Password != "" {
@@ -108,7 +114,9 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		}
 		defer responseBody.Close()
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil)
+		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+		}
 
 		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
 	}
@@ -139,11 +147,7 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
 
-func (e *engine) Kill(_ context.Context, proc *backend.Step) error {
-	return e.client.ContainerKill(noContext, proc.Name, "9")
-}
-
-func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
+func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
 	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
 	select {
 	case <-wait:
@@ -154,9 +158,9 @@ func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	if err != nil {
 		return nil, err
 	}
-	if info.State.Running {
-		// todo
-	}
+	// if info.State.Running {
+	// TODO
+	// }
 
 	return &backend.State{
 		Exited:    true,
@@ -165,34 +169,43 @@ func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
+func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
 	logs, err := e.client.ContainerLogs(ctx, proc.Name, logsOpts)
 	if err != nil {
 		return nil, err
 	}
 	rc, wc := io.Pipe()
 
+	// de multiplex 'logs' who contains two streams, previously multiplexed together using StdWriter
 	go func() {
-		stdcopy.StdCopy(wc, wc, logs)
-		logs.Close()
-		wc.Close()
-		rc.Close()
+		_, _ = stdcopy.StdCopy(wc, wc, logs)
+		_ = logs.Close()
+		_ = wc.Close()
+		_ = rc.Close()
 	}()
 	return rc, nil
 }
 
-func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			e.client.ContainerKill(noContext, step.Name, "9")
-			e.client.ContainerRemove(noContext, step.Name, removeOpts)
+			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
+				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
+			}
+			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
+				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
+			}
 		}
 	}
 	for _, v := range conf.Volumes {
-		e.client.VolumeRemove(noContext, v.Name, true)
+		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
+			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
+		}
 	}
 	for _, n := range conf.Networks {
-		e.client.NetworkRemove(noContext, n.Name)
+		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
+			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
+		}
 	}
 	return nil
 }

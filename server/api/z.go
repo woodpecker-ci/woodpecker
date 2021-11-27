@@ -55,13 +55,13 @@ func SetLogLevel(c *gin.Context) {
 		LogLevel string `json:"log-level"`
 	}{}
 	if err := c.Bind(&logLevel); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	lvl, err := zerolog.ParseLevel(logLevel.LogLevel)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 

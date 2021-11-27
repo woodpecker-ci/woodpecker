@@ -79,7 +79,7 @@ func toHostConfig(proc *types.Step) *container.HostConfig {
 	}
 	config.Tmpfs = map[string]string{}
 	for _, path := range proc.Tmpfs {
-		if strings.Index(path, ":") == -1 {
+		if !strings.Contains(path, ":") {
 			config.Tmpfs[path] = ""
 			continue
 		}
@@ -89,9 +89,6 @@ func toHostConfig(proc *types.Step) *container.HostConfig {
 		}
 		config.Tmpfs[parts[0]] = parts[1]
 	}
-	// if proc.OomKillDisable {
-	// 	config.OomKillDisable = &proc.OomKillDisable
-	// }
 
 	return config
 }

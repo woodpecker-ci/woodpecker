@@ -1,3 +1,4 @@
+// Copyright 2021 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,33 +24,39 @@ import (
 //
 // swagger:model repo
 type Repo struct {
-	ID         int64  `json:"id,omitempty"             meddler:"repo_id,pk"`
-	UserID     int64  `json:"-"                        meddler:"repo_user_id"`
-	Owner      string `json:"owner"                    meddler:"repo_owner"`
-	Name       string `json:"name"                     meddler:"repo_name"`
-	FullName   string `json:"full_name"                meddler:"repo_full_name"`
-	Avatar     string `json:"avatar_url,omitempty"     meddler:"repo_avatar"`
-	Link       string `json:"link_url,omitempty"       meddler:"repo_link"`
-	Kind       string `json:"scm,omitempty"            meddler:"repo_scm"`
-	Clone      string `json:"clone_url,omitempty"      meddler:"repo_clone"`
-	Branch     string `json:"default_branch,omitempty" meddler:"repo_branch"`
-	Timeout    int64  `json:"timeout,omitempty"        meddler:"repo_timeout"`
-	Visibility string `json:"visibility"               meddler:"repo_visibility"`
-	IsPrivate  bool   `json:"private"                  meddler:"repo_private"`
-	IsTrusted  bool   `json:"trusted"                  meddler:"repo_trusted"`
-	IsStarred  bool   `json:"starred,omitempty"        meddler:"-"`
-	IsGated    bool   `json:"gated"                    meddler:"repo_gated"`
-	IsActive   bool   `json:"active"                   meddler:"repo_active"`
-	AllowPull  bool   `json:"allow_pr"                 meddler:"repo_allow_pr"`
-	Counter    int    `json:"last_build"               meddler:"repo_counter"`
-	Config     string `json:"config_file"              meddler:"repo_config_path"`
-	Hash       string `json:"-"                        meddler:"repo_hash"`
-	Perm       *Perm  `json:"-"                        meddler:"-"`
+	ID           int64       `json:"id,omitempty"             xorm:"pk autoincr 'repo_id'"`
+	UserID       int64       `json:"-"                        xorm:"repo_user_id"`
+	Owner        string      `json:"owner"                    xorm:"UNIQUE(name) 'repo_owner'"`
+	Name         string      `json:"name"                     xorm:"UNIQUE(name) 'repo_name'"`
+	FullName     string      `json:"full_name"                xorm:"UNIQUE 'repo_full_name'"`
+	Avatar       string      `json:"avatar_url,omitempty"     xorm:"varchar(500) 'repo_avatar'"`
+	Link         string      `json:"link_url,omitempty"       xorm:"varchar(1000) 'repo_link'"`
+	Clone        string      `json:"clone_url,omitempty"      xorm:"varchar(1000) 'repo_clone'"`
+	Branch       string      `json:"default_branch,omitempty" xorm:"varchar(500) 'repo_branch'"`
+	SCMKind      SCMKind     `json:"scm,omitempty"            xorm:"varchar(50) 'repo_scm'"`
+	Timeout      int64       `json:"timeout,omitempty"        xorm:"repo_timeout"`
+	Visibility   RepoVisibly `json:"visibility"               xorm:"varchar(10) 'repo_visibility'"`
+	IsSCMPrivate bool        `json:"private"                  xorm:"repo_private"`
+	IsTrusted    bool        `json:"trusted"                  xorm:"repo_trusted"`
+	IsStarred    bool        `json:"starred,omitempty"        xorm:"-"`
+	IsGated      bool        `json:"gated"                    xorm:"repo_gated"`
+	IsActive     bool        `json:"active"                   xorm:"repo_active"`
+	AllowPull    bool        `json:"allow_pr"                 xorm:"repo_allow_pr"`
+	// Counter is used as index to determine new build numbers
+	Counter int64  `json:"last_build"                  xorm:"NOT NULL DEFAULT 0 'repo_counter'"`
+	Config  string `json:"config_file"                 xorm:"varchar(500) 'repo_config_path'"`
+	Hash    string `json:"-"                           xorm:"varchar(500) 'repo_hash'"`
+	Perm    *Perm  `json:"-"                           xorm:"-"`
+}
+
+// TableName return database table name for xorm
+func (Repo) TableName() string {
+	return "repos"
 }
 
 func (r *Repo) ResetVisibility() {
 	r.Visibility = VisibilityPublic
-	if r.IsPrivate {
+	if r.IsSCMPrivate {
 		r.Visibility = VisibilityPrivate
 	}
 }
@@ -70,17 +77,17 @@ func ParseRepo(str string) (user, repo string, err error) {
 func (r *Repo) Update(from *Repo) {
 	r.Avatar = from.Avatar
 	r.Link = from.Link
-	r.Kind = from.Kind
+	r.SCMKind = from.SCMKind
 	r.Clone = from.Clone
 	r.Branch = from.Branch
-	if from.IsPrivate != r.IsPrivate {
-		if from.IsPrivate {
+	if from.IsSCMPrivate != r.IsSCMPrivate {
+		if from.IsSCMPrivate {
 			r.Visibility = VisibilityPrivate
 		} else {
 			r.Visibility = VisibilityPublic
 		}
 	}
-	r.IsPrivate = from.IsPrivate
+	r.IsSCMPrivate = from.IsSCMPrivate
 }
 
 // RepoPatch represents a repository patch object.
@@ -91,5 +98,5 @@ type RepoPatch struct {
 	Timeout      *int64  `json:"timeout,omitempty"`
 	Visibility   *string `json:"visibility,omitempty"`
 	AllowPull    *bool   `json:"allow_pr,omitempty"`
-	BuildCounter *int    `json:"build_counter,omitempty"`
+	BuildCounter *int64  `json:"build_counter,omitempty"`
 }

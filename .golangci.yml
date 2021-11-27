@@ -1,0 +1,32 @@
+linters-settings:
+  gofmt:
+    simplify: true
+  misspell:
+    locale: US
+
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - deadcode
+    - gosimple
+    - typecheck
+    - errcheck
+    - bidichk
+    - misspell
+    - whitespace
+    - staticcheck
+    - structcheck
+    - varcheck
+    - ineffassign
+
+run:
+  timeout: 5m
+
+issues:
+  exclude-rules:
+    - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
+      linters:
+        - deadcode
