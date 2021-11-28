@@ -41,13 +41,13 @@ func Repo(c *gin.Context) *model.Repo {
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			store_ = store.FromContext(c)
+			_store = store.FromContext(c)
 			owner  = c.Param("owner")
 			name   = c.Param("name")
 			user   = User(c)
 		)
 
-		repo, err := store_.GetRepoName(owner + "/" + name)
+		repo, err := _store.GetRepoName(owner + "/" + name)
 		if err == nil {
 			c.Set("repo", repo)
 			c.Next()
@@ -83,7 +83,7 @@ func Perm(c *gin.Context) *model.Perm {
 
 func SetPerm() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		store_ := store.FromContext(c)
+		_store := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
 		perm := new(model.Perm)
@@ -91,7 +91,7 @@ func SetPerm() gin.HandlerFunc {
 		switch {
 		case user != nil:
 			var err error
-			perm, err = store_.PermFind(user, repo)
+			perm, err = _store.PermFind(user, repo)
 			if err != nil {
 				log.Error().Msgf("Error fetching permission for %s %s. %s",
 					user.Login, repo.FullName, err)
@@ -103,7 +103,7 @@ func SetPerm() gin.HandlerFunc {
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					if err := store_.PermUpsert(perm); err != nil {
+					if err := _store.PermUpsert(perm); err != nil {
 						_ = c.AbortWithError(http.StatusInternalServerError, err)
 						return
 					}

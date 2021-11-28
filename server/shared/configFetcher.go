@@ -13,19 +13,19 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type configFetcher struct {
-	remote_ remote.Remote
-	user    *model.User
-	repo    *model.Repo
-	build   *model.Build
+type ConfigFetcher struct {
+	remote remote.Remote
+	user   *model.User
+	repo   *model.Repo
+	build  *model.Build
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *configFetcher {
-	return &configFetcher{
-		remote_: remote,
-		user:    user,
-		repo:    repo,
-		build:   build,
+func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *ConfigFetcher {
+	return &ConfigFetcher{
+		remote: remote,
+		user:   user,
+		repo:   repo,
+		build:  build,
 	}
 }
 
@@ -33,7 +33,7 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 var configFetchTimeout = 3 // seconds
 
 // Fetch pipeline config from source forge
-func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
+func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times, timeout is one second longer each time
@@ -50,7 +50,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 
 // fetch config by timeout
 // TODO: deduplicate code
-func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
+func (cf *ConfigFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
@@ -58,7 +58,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
-			file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+			file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 			if err == nil && len(file) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 				return []*remote.FileMeta{{
@@ -69,7 +69,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		}
 
 		// or a folder
-		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
+		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
 		if err == nil && len(files) != 0 {
 			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
@@ -84,7 +84,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	// test .woodpecker/ folder
 	// if folder is not supported we will get a "Not implemented" error and continue
 	config = ".woodpecker"
-	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
+	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
@@ -92,7 +92,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".woodpecker.yml"
-	file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
@@ -102,7 +102,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".drone.yml"
-	file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err = cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{

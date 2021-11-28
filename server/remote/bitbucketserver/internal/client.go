@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	currentUserId    = "%s/plugins/servlet/applinks/whoami"
+	currentUserID    = "%s/plugins/servlet/applinks/whoami"
 	pathUser         = "%s/rest/api/1.0/users/%s"
 	pathRepo         = "%s/rest/api/1.0/projects/%s/repos/%s"
 	pathRepos        = "%s/rest/api/1.0/repos?start=%s&limit=%s"
@@ -69,15 +69,15 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 }
 
 func (c *Client) FindCurrentUser() (*User, error) {
-	CurrentUserIdResponse, err := c.doGet(fmt.Sprintf(currentUserId, c.base))
-	if CurrentUserIdResponse != nil {
-		defer CurrentUserIdResponse.Body.Close()
+	CurrentUserIDResponse, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
+	if CurrentUserIDResponse != nil {
+		defer CurrentUserIDResponse.Body.Close()
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	bits, err := ioutil.ReadAll(CurrentUserIdResponse.Body)
+	bits, err := ioutil.ReadAll(CurrentUserIDResponse.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -299,8 +299,8 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 //Helper function to get repos paginated
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
-	requestUrl := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
-	response, err := c.doGet(requestUrl)
+	requestURL := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
+	response, err := c.doGet(requestURL)
 	if response != nil {
 		defer response.Body.Close()
 	}

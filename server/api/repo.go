@@ -36,8 +36,8 @@ const defaultTimeout = 60 // 1 hour default build time
 const maxTimeout = defaultTimeout * 2
 
 func PostRepo(c *gin.Context) {
-	remote_ := server.Config.Services.Remote
-	store_ := store.FromContext(c)
+	remote := server.Config.Services.Remote
+	store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
 
@@ -83,18 +83,18 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	err = remote_.Activate(c, user, repo, link)
+	err = remote.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	from, err := remote_.Repo(c, user, repo.Owner, repo.Name)
+	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
 	if err == nil {
 		repo.Update(from)
 	}
 
-	err = store_.UpdateRepo(repo)
+	err = store.UpdateRepo(repo)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +104,7 @@ func PostRepo(c *gin.Context) {
 }
 
 func PatchRepo(c *gin.Context) {
-	store_ := store.FromContext(c)
+	store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -151,7 +151,7 @@ func PatchRepo(c *gin.Context) {
 		repo.Counter = *in.BuildCounter
 	}
 
-	err := store_.UpdateRepo(repo)
+	err := store.UpdateRepo(repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -161,12 +161,12 @@ func PatchRepo(c *gin.Context) {
 }
 
 func ChownRepo(c *gin.Context) {
-	store_ := store.FromContext(c)
+	store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 	repo.UserID = user.ID
 
-	err := store_.UpdateRepo(repo)
+	err := store.UpdateRepo(repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -199,8 +199,8 @@ func GetRepoBranches(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
-	remote_ := server.Config.Services.Remote
-	store_ := store.FromContext(c)
+	remote := server.Config.Services.Remote
+	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -208,21 +208,21 @@ func DeleteRepo(c *gin.Context) {
 	repo.IsActive = false
 	repo.UserID = 0
 
-	err := store_.UpdateRepo(repo)
+	err := _store.UpdateRepo(repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	if remove {
-		err := store_.DeleteRepo(repo)
+		err := _store.DeleteRepo(repo)
 		if err != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 	}
 
-	if err := remote_.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -230,8 +230,8 @@ func DeleteRepo(c *gin.Context) {
 }
 
 func RepairRepo(c *gin.Context) {
-	remote_ := server.Config.Services.Remote
-	store_ := store.FromContext(c)
+	remote := server.Config.Services.Remote
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -251,15 +251,15 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote_.Deactivate(c, user, repo, host); err != nil {
+	if err := remote.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
-	if err := remote_.Activate(c, user, repo, link); err != nil {
+	if err := remote.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())
 		return
 	}
 
-	from, err := remote_.Repo(c, user, repo.Owner, repo.Name)
+	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -275,7 +275,7 @@ func RepairRepo(c *gin.Context) {
 	if repo.IsSCMPrivate != from.IsSCMPrivate {
 		repo.ResetVisibility()
 	}
-	if err := store_.UpdateRepo(repo); err != nil {
+	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -284,8 +284,8 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	remote_ := server.Config.Services.Remote
-	store_ := store.FromContext(c)
+	remote := server.Config.Services.Remote
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -302,7 +302,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote_.Repo(c, user, owner, name)
+	from, err := remote.Repo(c, user, owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -323,7 +323,7 @@ func MoveRepo(c *gin.Context) {
 		repo.ResetVisibility()
 	}
 
-	errStore := store_.UpdateRepo(repo)
+	errStore := _store.UpdateRepo(repo)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
 		return
@@ -345,10 +345,10 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote_.Deactivate(c, user, repo, host); err != nil {
+	if err := remote.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
-	if err := remote_.Activate(c, user, repo, link); err != nil {
+	if err := remote.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())
 		return
 	}

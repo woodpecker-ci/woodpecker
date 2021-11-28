@@ -45,11 +45,7 @@ func NamespaceFilter(namespaces map[string]bool) FilterFunc {
 		return noopFilter
 	}
 	return func(repo *model.Repo) bool {
-		if namespaces[repo.Owner] {
-			return true
-		} else {
-			return false
-		}
+		return namespaces[repo.Owner]
 	}
 }
 

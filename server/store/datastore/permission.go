@@ -51,11 +51,11 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 
 	// lookup repo based on name if possible
 	if perm.RepoID == 0 && len(perm.Repo) != 0 {
-		if r, err := s.getRepoName(sess, perm.Repo); err != nil {
+		r, err := s.getRepoName(sess, perm.Repo)
+		if err != nil {
 			return err
-		} else {
-			perm.RepoID = r.ID
 		}
+		perm.RepoID = r.ID
 	}
 
 	exist, err := sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).

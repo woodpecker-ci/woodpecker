@@ -234,14 +234,14 @@ func Test_bitbucket(t *testing.T) {
 		g.Describe("Given a list of hooks", func() {
 			g.It("Should return the matching hook", func() {
 				hooks := []*internal.Hook{
-					{Url: "http://127.0.0.1/hook"},
+					{URL: "http://127.0.0.1/hook"},
 				}
 				hook := matchingHooks(hooks, "http://127.0.0.1/")
 				g.Assert(hook).Equal(hooks[0])
 			})
 			g.It("Should handle no matches", func() {
 				hooks := []*internal.Hook{
-					{Url: "http://localhost/hook"},
+					{URL: "http://localhost/hook"},
 				}
 				hook := matchingHooks(hooks, "http://127.0.0.1/")
 				g.Assert(hook).IsNil()
