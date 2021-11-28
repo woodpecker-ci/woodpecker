@@ -111,13 +111,13 @@ var (
 	// result in your application obtaining a refresh token the
 	// first time your application exchanges an authorization
 	// code for a user.
-	AccessTypeOnline  = SetAuthURLParam("access_type", "online")
-	AccessTypeOffline = SetAuthURLParam("access_type", "offline")
+	AccessTypeOnline  AuthCodeOption = SetAuthURLParam("access_type", "online")
+	AccessTypeOffline AuthCodeOption = SetAuthURLParam("access_type", "offline")
 
 	// ApprovalForce forces the users to view the consent dialog
 	// and confirm the permissions request at the URL returned
 	// from AuthCodeURL, even if they've already done so.
-	ApprovalForce = SetAuthURLParam("prompt", "consent")
+	ApprovalForce AuthCodeOption = SetAuthURLParam("prompt", "consent")
 )
 
 // An AuthCodeOption is passed to Config.AuthCodeURL.
