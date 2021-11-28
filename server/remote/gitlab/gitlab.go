@@ -119,12 +119,12 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var _token, err = trans.Exchange(code)
+	var token, err = trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
 
-	client, err := newClient(g.URL, _token.AccessToken, g.SkipVerify)
+	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +138,8 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Login:  login.Username,
 		Email:  login.Email,
 		Avatar: login.AvatarURL,
-		Token:  _token.AccessToken,
-		Secret: _token.RefreshToken,
+		Token:  token.AccessToken,
+		Secret: token.RefreshToken,
 	}
 	if !strings.HasPrefix(user.Avatar, "http") {
 		user.Avatar = g.URL + "/" + login.AvatarURL
