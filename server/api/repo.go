@@ -37,7 +37,7 @@ const maxTimeout = defaultTimeout * 2
 
 func PostRepo(c *gin.Context) {
 	remote := server.Config.Services.Remote
-	store := store.FromContext(c)
+	_store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
 
@@ -94,7 +94,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	}
 
-	err = store.UpdateRepo(repo)
+	err = _store.UpdateRepo(repo)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +104,7 @@ func PostRepo(c *gin.Context) {
 }
 
 func PatchRepo(c *gin.Context) {
-	store := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -151,7 +151,7 @@ func PatchRepo(c *gin.Context) {
 		repo.Counter = *in.BuildCounter
 	}
 
-	err := store.UpdateRepo(repo)
+	err := _store.UpdateRepo(repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -161,12 +161,12 @@ func PatchRepo(c *gin.Context) {
 }
 
 func ChownRepo(c *gin.Context) {
-	store := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 	repo.UserID = user.ID
 
-	err := store.UpdateRepo(repo)
+	err := _store.UpdateRepo(repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
