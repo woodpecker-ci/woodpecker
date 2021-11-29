@@ -1,84 +1,10 @@
-clone:
-  git:
-    image: plugins/git:next
-
 pipeline:
-  web-deps:
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn install --frozen-lockfile
-    when:
-      path: "web/**"
-
-  web-lint:
-    group: web-test
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn lint
-    when:
-      path: "web/**"
-
-  web-formatcheck:
-    group: web-test
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn formatcheck
-    when:
-      path: "web/**"
-
-  web-typecheck:
-    group: web-test
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn typecheck
-    when:
-      path: "web/**"
-
-  web-test:
-    group: web-test
-    image: node:16-alpine
-    commands:
-      - cd web/
-      - yarn test
-    when:
-      path: "web/**"
-
   web-build:
     image: node:16-alpine
     commands:
       - cd web/
+      - yarn install --frozen-lockfile
       - yarn build
-    when:
-      path: "web/**"
-
-  test:
-    image: golang:1.16
-    group: test
-    commands:
-      - make test
-      - make lint
-
-  test-postgres:
-    image: golang:1.16
-    group: db-test
-    environment:
-      - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
-    commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
-
-  test-mysql:
-    image: golang:1.16
-    group: db-test
-    environment:
-      - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
-    commands:
-      - go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/datastore
 
   build-frontend:
     image: node:16-alpine
@@ -111,7 +37,7 @@ pipeline:
       - make bundle
     when:
       event: [push, tag]
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
 
   publish-server:
     group: bundle
@@ -122,7 +48,7 @@ pipeline:
     # TODO: only release as next after 0.15.0 got released
     tag: [next, latest]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-server-alpine:
@@ -134,7 +60,7 @@ pipeline:
     # TODO: only release as next-alpine after 0.15.0 got released
     tag: [next-alpine, latest-alpine]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-agent:
@@ -146,7 +72,7 @@ pipeline:
     # TODO: only release as next after 0.15.0 got released
     tag: [next, latest]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-agent-alpine:
@@ -158,7 +84,7 @@ pipeline:
     # TODO: only release as next-alpine after 0.15.0 got released
     tag: [next-alpine, latest-alpine]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-cli:
@@ -169,7 +95,7 @@ pipeline:
     secrets: [docker_username, docker_password]
     tag: [next]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-cli-alpine:
@@ -180,7 +106,7 @@ pipeline:
     secrets: [ docker_username, docker_password ]
     tag: [next-alpine]
     when:
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   release-server:
@@ -250,7 +176,7 @@ pipeline:
     when:
       event: tag
 
-  # TODO: upload build artifacts for pushes to master
+  # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
   release:
     image: plugins/github-release
@@ -268,3 +194,4 @@ pipeline:
 
 depends_on:
   - test
+  - web

@@ -1,52 +1,41 @@
-clone:
-  git:
-    image: plugins/git:next
-
 pipeline:
-  test-format:
+  lint:
     image: golang:1.16
     group: test
     commands:
-      - make vet
+      - make lint
+
+  formatcheck:
+    image: golang:1.16
+    group: test
+    commands:
       - make formatcheck
 
-  test-agent:
+  agent:
     image: golang:1.16
     group: test
     commands:
       - make test-agent
 
-  test-server:
+  server:
     image: golang:1.16
     group: test
     commands:
       - make test-server
 
-  test-cli:
+  cli:
     image: golang:1.16
     group: test
     commands:
       - make test-cli
 
-  test-lib:
+  lib:
     image: golang:1.16
     group: test
     commands:
       - make test-lib
 
-  lint-frontend:
-    image: node:10.17.0-stretch
-    group: test
-    commands:
-      - make lint-frontend
-
-  test-frontend:
-    image: node:10.17.0-stretch
-    group: test
-    commands:
-      - make test-frontend
-
-  test-sqlite:
+  sqlite:
     image: golang:1.16
     group: test
     environment:
@@ -54,7 +43,7 @@ pipeline:
     commands:
       - make test-server-datastore
 
-  test-postgres:
+  postgres:
     image: golang:1.16
     group: test
     environment:
@@ -63,7 +52,7 @@ pipeline:
     commands:
       - make test-server-datastore
 
-  test-mysql:
+  mysql:
     image: golang:1.16
     group: test
     environment:
