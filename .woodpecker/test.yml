@@ -2,6 +2,7 @@ pipeline:
   dummy-web:
     image: golang:1.16
     commands:
+      - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
 
   lint:
