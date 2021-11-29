@@ -12,7 +12,6 @@ pipeline:
       path: "web/**"
 
   web-lint:
-    TODO: disabled group for now to prevent oom
     group: web-test
     image: node:16-alpine
     commands:
