@@ -19,15 +19,14 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/mrjones/oauth"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket Server converter", func() {
-
 		g.It("should convert repository", func() {
 			from := &internal.Repo{
 				Slug: "hello-world",
@@ -52,8 +51,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("master")
-			g.Assert(to.Kind).Equal(model.RepoGit)
-			g.Assert(to.IsPrivate).Equal(true)
+			g.Assert(to.SCMKind).Equal(model.RepoGit)
+			g.Assert(to.IsSCMPrivate).Equal(true)
 			g.Assert(to.Clone).Equal("https://server.org/foo/bar.git")
 			g.Assert(to.Link).Equal("https://server.org/foo/bar")
 		})

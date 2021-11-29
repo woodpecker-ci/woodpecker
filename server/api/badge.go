@@ -20,11 +20,12 @@ package api
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -37,10 +38,8 @@ var (
 )
 
 func GetBadge(c *gin.Context) {
-	repo, err := store.GetRepoOwnerName(c,
-		c.Param("owner"),
-		c.Param("name"),
-	)
+	store_ := store.FromContext(c)
+	repo, err := store_.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
@@ -58,9 +57,9 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	build, err := store.GetBuildLast(c, repo, branch)
+	build, err := store_.GetBuildLast(repo, branch)
 	if err != nil {
-		log.Warning(err)
+		log.Warn().Err(err).Msg("")
 		c.String(200, badgeNone)
 		return
 	}
@@ -80,16 +79,14 @@ func GetBadge(c *gin.Context) {
 }
 
 func GetCC(c *gin.Context) {
-	repo, err := store.GetRepoOwnerName(c,
-		c.Param("owner"),
-		c.Param("name"),
-	)
+	store_ := store.FromContext(c)
+	repo, err := store_.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
 	}
 
-	builds, err := store.GetBuildList(c, repo, 1)
+	builds, err := store_.GetBuildList(repo, 1)
 	if err != nil || len(builds) == 0 {
 		c.AbortWithStatus(404)
 		return

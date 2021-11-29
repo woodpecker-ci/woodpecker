@@ -3,10 +3,9 @@ package coverage
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
-
 	"mime/multipart"
 	"net/textproto"
+	"strconv"
 )
 
 // MimeType used by coverage reports.

@@ -1,0 +1,14 @@
+clone:
+  git:
+    image: plugins/git:next
+    depth: 50
+    path: bitbucket.org/foo/bar
+    recursive: true
+    submodule_override:
+      my-module: https://github.com/octocat/my-module.git
+
+pipeline:
+  test:
+    image: alpine
+    commands:
+      - echo "test"

@@ -18,8 +18,9 @@
 *.out
 
 ### Frontend ###
-web/node_modules
-web/dist/files
+web/dist/**
+!web/dist/.gitkeep
+web/node_modules/
 web/*.log
 web/.env
 
@@ -32,14 +33,10 @@ docker-compose.yml
 *.out
 /.env
 extras/
-release/
 /build/
-cli/release/
+/dist/
 
 server/swagger/files/*.json
 server/swagger/swagger_gen.go
 
 docs/venv
-
-dist/
-node_modules/

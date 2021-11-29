@@ -1,0 +1,15 @@
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+
+  publish:
+    image: plugins/docker
+    repo: foo/bar
+    tags: latest
+
+  notify:
+    image: plugins/slack
+    channel: dev

@@ -17,88 +17,103 @@ package main
 import (
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var flags = []cli.Flag{
-	cli.StringFlag{
-		EnvVar: "DRONE_SERVER,WOODPECKER_SERVER",
-		Name:   "server",
-		Usage:  "drone server address",
-		Value:  "localhost:9000",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SERVER"},
+		Name:    "server",
+		Usage:   "server address",
+		Value:   "localhost:9000",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_USERNAME,WOODPECKER_USERNAME",
-		Name:   "username",
-		Usage:  "drone auth username",
-		Value:  "x-oauth-basic",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_USERNAME"},
+		Name:    "username",
+		Usage:   "auth username",
+		Value:   "x-oauth-basic",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_PASSWORD,DRONE_SECRET,WOODPECKER_PASSWORD,WOODPECKER_SECRET",
-		Name:   "password",
-		Usage:  "server-agent shared password",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
+		Name:    "password",
+		Usage:   "server-agent shared password",
 	},
-	cli.BoolTFlag{
-		EnvVar: "DRONE_DEBUG,WOODPECKER_DEBUG",
-		Name:   "debug",
-		Usage:  "enable agent debug mode",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG"},
+		Name:    "debug",
+		Usage:   "enable agent debug mode",
+		Value:   true,
 	},
-	cli.BoolFlag{
-		EnvVar: "DRONE_DEBUG_PRETTY,WOODPECKER_DEBUG_PRETTY",
-		Name:   "pretty",
-		Usage:  "enable pretty-printed debug output",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Name:    "log-level",
+		Usage:   "set logging level",
 	},
-	cli.BoolTFlag{
-		EnvVar: "DRONE_DEBUG_NOCOLOR,WOODPECKER_DEBUG_NOCOLOR",
-		Name:   "nocolor",
-		Usage:  "disable colored debug output",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
+		Name:    "pretty",
+		Usage:   "enable pretty-printed debug output",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_HOSTNAME,HOSTNAME,WOODPECKER_HOSTNAME,HOSTNAME",
-		Name:   "hostname",
-		Usage:  "agent hostname",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
+		Name:    "nocolor",
+		Usage:   "disable colored debug output",
+		Value:   true,
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_PLATFORM,WOODPECKER_PLATFORM",
-		Name:   "platform",
-		Usage:  "restrict builds by platform conditions",
-		Value:  "linux/amd64",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HOSTNAME"},
+		Name:    "hostname",
+		Usage:   "agent hostname",
 	},
-	cli.StringFlag{
-		EnvVar: "DRONE_FILTER,WOODPECKER_FILTER",
-		Name:   "filter",
-		Usage:  "filter expression to restrict builds by label",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_PLATFORM"},
+		Name:    "platform",
+		Usage:   "restrict builds by platform conditions",
+		Value:   "linux/amd64",
 	},
-	cli.IntFlag{
-		EnvVar: "DRONE_MAX_PROCS,WOODPECKER_MAX_PROCS",
-		Name:   "max-procs",
-		Usage:  "agent parallel builds",
-		Value:  1,
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_FILTER"},
+		Name:    "filter",
+		Usage:   "filter expression to restrict builds by label",
 	},
-	cli.BoolTFlag{
-		EnvVar: "DRONE_HEALTHCHECK,WOODPECKER_HEALTHCHECK",
-		Name:   "healthcheck",
-		Usage:  "enable healthcheck endpoint",
+	&cli.IntFlag{
+		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
+		Name:    "max-procs",
+		Usage:   "agent parallel builds",
+		Value:   1,
 	},
-	cli.DurationFlag{
-		EnvVar: "DRONE_KEEPALIVE_TIME,WOODPECKER_KEEPALIVE_TIME",
-		Name:   "keepalive-time",
-		Usage:  "after a duration of this time of no activity, the agent pings the server to check if the transport is still alive",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_HEALTHCHECK"},
+		Name:    "healthcheck",
+		Usage:   "enable healthcheck endpoint",
+		Value:   true,
 	},
-	cli.DurationFlag{
-		EnvVar: "DRONE_KEEPALIVE_TIMEOUT,WOODPECKER_KEEPALIVE_TIMEOUT",
-		Name:   "keepalive-timeout",
-		Usage:  "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
-		Value:  time.Second * 20,
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIME"},
+		Name:    "keepalive-time",
+		Usage:   "after a duration of this time of no activity, the agent pings the server to check if the transport is still alive",
 	},
-	cli.BoolFlag{
-		Name:   "secure-grpc",
-		Usage:  "should the connection to DRONE_SERVER be made using a secure transport",
-		EnvVar: "DRONE_GRPC_SECURE,WOODPECKER_GRPC_SECURE",
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIMEOUT"},
+		Name:    "keepalive-timeout",
+		Usage:   "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
+		Value:   time.Second * 20,
 	},
-	cli.BoolTFlag{
-		Name:   "skip-insecure-grpc",
-		Usage:  "should the grpc server certificate be verified, only valid when DRONE_GRPC_SECURE is true",
-		EnvVar: "DRONE_GRPC_VERIFY,WOODPECKER_GRPC_VERIFY",
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
+		Name:    "secure-grpc",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
+		Name:    "skip-insecure-grpc",
+		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
+		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Name:    "backend-engine",
+		Usage:   "backend engine to run pipelines on",
+		Value:   "auto-detect",
 	},
 }

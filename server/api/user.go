@@ -22,10 +22,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -37,32 +37,38 @@ func GetSelf(c *gin.Context) {
 }
 
 func GetFeed(c *gin.Context) {
+	store_ := store.FromContext(c)
+	remote_ := server.Config.Services.Remote
+
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
 
 	if time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now()) {
-		logrus.Debugf("sync begin: %s", user.Login)
+		log.Debug().Msgf("sync begin: %s", user.Login)
 
 		user.Synced = time.Now().Unix()
-		store.FromContext(c).UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Error().Err(err).Msg("UpdateUser")
+			return
+		}
 
 		config := ToConfig(c)
 
 		sync := shared.Syncer{
-			Remote: remote.FromContext(c),
-			Store:  store.FromContext(c),
-			Perms:  store.FromContext(c),
+			Remote: remote_,
+			Store:  store_,
+			Perms:  store_,
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
-		if err := sync.Sync(user); err != nil {
-			logrus.Debugf("sync error: %s: %s", user.Login, err)
+		if err := sync.Sync(c, user); err != nil {
+			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
-			logrus.Debugf("sync complete: %s", user.Login)
+			log.Debug().Msgf("sync complete: %s", user.Login)
 		}
 	}
 
 	if latest {
-		feed, err := store.FromContext(c).RepoListLatest(user)
+		feed, err := store_.RepoListLatest(user)
 		if err != nil {
 			c.String(500, "Error fetching feed. %s", err)
 		} else {
@@ -71,7 +77,7 @@ func GetFeed(c *gin.Context) {
 		return
 	}
 
-	feed, err := store.FromContext(c).UserFeed(user)
+	feed, err := store_.UserFeed(user)
 	if err != nil {
 		c.String(500, "Error fetching user feed. %s", err)
 		return
@@ -80,34 +86,38 @@ func GetFeed(c *gin.Context) {
 }
 
 func GetRepos(c *gin.Context) {
-	var (
-		user     = session.User(c)
-		all, _   = strconv.ParseBool(c.Query("all"))
-		flush, _ = strconv.ParseBool(c.Query("flush"))
-	)
+	store_ := store.FromContext(c)
+	remote_ := server.Config.Services.Remote
+
+	user := session.User(c)
+	all, _ := strconv.ParseBool(c.Query("all"))
+	flush, _ := strconv.ParseBool(c.Query("flush"))
 
 	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
-		logrus.Debugf("sync begin: %s", user.Login)
+		log.Debug().Msgf("sync begin: %s", user.Login)
 		user.Synced = time.Now().Unix()
-		store.FromContext(c).UpdateUser(user)
+		if err := store_.UpdateUser(user); err != nil {
+			log.Err(err).Msgf("update user '%s'", user.Login)
+			return
+		}
 
 		config := ToConfig(c)
 
 		sync := shared.Syncer{
-			Remote: remote.FromContext(c),
-			Store:  store.FromContext(c),
-			Perms:  store.FromContext(c),
+			Remote: remote_,
+			Store:  store_,
+			Perms:  store_,
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
-		if err := sync.Sync(user); err != nil {
-			logrus.Debugf("sync error: %s: %s", user.Login, err)
+		if err := sync.Sync(c, user); err != nil {
+			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
-			logrus.Debugf("sync complete: %s", user.Login)
+			log.Debug().Msgf("sync complete: %s", user.Login)
 		}
 	}
 
-	repos, err := store.FromContext(c).RepoList(user)
+	repos, err := store_.RepoList(user, true)
 	if err != nil {
 		c.String(500, "Error fetching repository list. %s", err)
 		return
@@ -131,25 +141,27 @@ func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)
 }
 
 func DeleteToken(c *gin.Context) {
+	store_ := store.FromContext(c)
+
 	user := session.User(c)
 	user.Hash = base32.StdEncoding.EncodeToString(
 		securecookie.GenerateRandomKey(32),
 	)
-	if err := store.UpdateUser(c, user); err != nil {
+	if err := store_.UpdateUser(user); err != nil {
 		c.String(500, "Error revoking tokens. %s", err)
 		return
 	}
 
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.String(http.StatusOK, tokenString)

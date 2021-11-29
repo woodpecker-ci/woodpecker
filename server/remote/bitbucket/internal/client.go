@@ -16,6 +16,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,7 +30,6 @@ import (
 
 const (
 	get  = "GET"
-	put  = "PUT"
 	post = "POST"
 	del  = "DELETE"
 )
@@ -50,19 +50,24 @@ const (
 type Client struct {
 	*http.Client
 	base string
+	ctx  context.Context
 }
 
-func NewClient(url string, client *http.Client) *Client {
-	return &Client{client, url}
+func NewClient(ctx context.Context, url string, client *http.Client) *Client {
+	return &Client{
+		Client: client,
+		base:   url,
+		ctx:    ctx,
+	}
 }
 
-func NewClientToken(url, client, secret string, token *oauth2.Token) *Client {
+func NewClientToken(ctx context.Context, url, client, secret string, token *oauth2.Token) *Client {
 	config := &oauth2.Config{
 		ClientID:     client,
 		ClientSecret: secret,
 		Endpoint:     bitbucket.Endpoint,
 	}
-	return NewClient(url, config.Client(oauth2.NoContext, token))
+	return NewClient(ctx, url, config.Client(ctx, token))
 }
 
 func (c *Client) FindCurrent() (*Account, error) {
@@ -172,7 +177,6 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
-
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
@@ -190,7 +194,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 	}
 
 	// creates a new http request to bitbucket.
-	req, err := http.NewRequest(method, uri.String(), buf)
+	req, err := http.NewRequestWithContext(c.ctx, method, uri.String(), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +212,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 	// error response.
 	if resp.StatusCode > http.StatusPartialContent {
 		err := Error{}
-		json.NewDecoder(resp.Body).Decode(&err)
+		_ = json.NewDecoder(resp.Body).Decode(&err)
 		err.Status = resp.StatusCode
 		return nil, err
 	}

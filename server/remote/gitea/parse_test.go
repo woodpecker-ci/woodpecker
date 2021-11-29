@@ -20,7 +20,8 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
 )
 
@@ -33,9 +34,9 @@ func Test_parser(t *testing.T) {
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, "issues")
 			r, b, err := parseHook(req)
-			g.Assert(r == nil).IsTrue()
-			g.Assert(b == nil).IsTrue()
-			g.Assert(err == nil).IsTrue()
+			g.Assert(r).IsNil()
+			g.Assert(b).IsNil()
+			g.Assert(err).IsNil()
 		})
 		g.Describe("given a push hook", func() {
 			g.It("should extract repository and build details", func() {
@@ -44,9 +45,9 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 				r, b, err := parseHook(req)
-				g.Assert(err == nil).IsTrue()
-				g.Assert(r != nil).IsTrue()
-				g.Assert(b != nil).IsTrue()
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
 				g.Assert(b.ChangedFiles).Equal([]string{"CHANGELOG.md", "app/controller/application.rb"})
 			})

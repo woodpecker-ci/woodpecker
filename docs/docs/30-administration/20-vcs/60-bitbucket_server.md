@@ -3,40 +3,25 @@
 Woodpecker comes with experimental support for Bitbucket Server, formerly known as Atlassian Stash. To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
 ```diff
+# docker-compose.yml
 version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
-    ports:
-      - 80:8000
-      - 9000
-    volumes:
-      - /var/lib/drone:/var/lib/drone/
-    restart: always
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - [...]
 +     - WOODPECKER_STASH=true
 +     - WOODPECKER_STASH_GIT_USERNAME=foo
 +     - WOODPECKER_STASH_GIT_PASSWORD=bar
 +     - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
 +     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
 +     - WOODPECKER_STASH_URL=http://stash.mycompany.com
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
     volumes:
 +     - /path/to/key.pem:/path/to/key.pem
 
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:latest
-    restart: always
-    depends_on:
-      - woodpecker-server
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+    [...]
 ```
 
 ## Private Key File
@@ -53,48 +38,52 @@ This stores the private RSA certificate in `key.pem`. The next command generates
 openssl rsa -in /etc/bitbucket/key.pem -pubout >> /etc/bitbucket/key.pub
 ```
 
-Please note that the private key file can be mounted into your Woodpecker conatiner at runtime or as an environment variable
+Please note that the private key file can be mounted into your Woodpecker container at runtime or as an environment variable
 
 Private key file mounted into your Woodpecker container at runtime as a volume.
 
 ```diff
-version: '2'
+# docker-compose.yml
+version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-    - WOODPECKER_OPEN=true
-    - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - [...]
       - WOODPECKER_STASH=true
       - WOODPECKER_STASH_GIT_USERNAME=foo
       - WOODPECKER_STASH_GIT_PASSWORD=bar
       - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
 +     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
       - WOODPECKER_STASH_URL=http://stash.mycompany.com
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 +  volumes:
 +     - /etc/bitbucket/key.pem:/etc/bitbucket/key.pem
+
+  woodpecker-agent:
+    [...]
 ```
 
 Private key as environment variable
 
 ```diff
+# docker-compose.yml
 version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-    - WOODPECKER_OPEN=true
-    - WOODPECKER_HOST=${WOODPECKER_HOST}
+      - [...]
       - WOODPECKER_STASH=true
       - WOODPECKER_STASH_GIT_USERNAME=foo
       - WOODPECKER_STASH_GIT_PASSWORD=bar
       - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
 +     - WOODPECKER_STASH_CONSUMER_RSA_STRING=contentOfPemKeyAsString
       - WOODPECKER_STASH_URL=http://stash.mycompany.com
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+
+  woodpecker-agent:
+    [...]
 ```
 
 ## Service Account
@@ -112,24 +101,18 @@ Please use http://woodpecker.mycompany.com/authorize as the Authorization callba
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
+```shell
+WOODPECKER_STASH=true # Set to true to enable the Bitbucket Server (Stash) driver
 
-`WOODPECKER_STASH=true`
-: Set to true to enable the Bitbucket Server (Stash) driver.
+WOODPECKER_STASH_URL # Bitbucket Server address.
 
-`WOODPECKER_STASH_URL`
-: Bitbucket Server address.
+WOODPECKER_STASH_CONSUMER_KEY=... # Bitbucket Server oauth1 consumer key
 
-`WOODPECKER_STASH_CONSUMER_KEY`
-: Bitbucket Server oauth1 consumer key
+WOODPECKER_STASH_CONSUMER_RSA=... # Bitbucket Server oauth1 private key file
 
-`WOODPECKER_STASH_CONSUMER_RSA`
-: Bitbucket Server oauth1 private key file
+WOODPECKER_STASH_CONSUMER_RSA_STRING=... # Bibucket Server oauth1 private key as a string
 
-`WOODPECKER_STASH_CONSUMER_RSA_STRING`
-: Bibucket Server oauth1 private key as a string
+WOODPECKER_STASH_GIT_USERNAME=... # Machine account username used to clone repositories
 
-`WOODPECKER_STASH_GIT_USERNAME`
-: Machine account username used to clone repositories.
-
-`WOODPECKER_STASH_GIT_PASSWORD`
-: Machine account password used to clone repositories.
+WOODPECKER_STASH_GIT_PASSWORD=... # Machine account password used to clone repositories
+```

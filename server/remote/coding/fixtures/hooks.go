@@ -25,7 +25,7 @@ const PushHook = `
                 "email": "demo1@gmail.com"
             },
             "web_url": "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
-            "short_message": "new file .drone.yml\n",
+            "short_message": "new file .woodpecker.yml\n",
             "sha": "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4"
         }
     ],

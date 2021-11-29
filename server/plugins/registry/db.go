@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type db struct {
@@ -30,9 +30,5 @@ func (b *db) RegistryUpdate(repo *model.Repo, in *model.Registry) error {
 }
 
 func (b *db) RegistryDelete(repo *model.Repo, addr string) error {
-	registry, err := b.RegistryFind(repo, addr)
-	if err != nil {
-		return err
-	}
-	return b.store.RegistryDelete(registry)
+	return b.store.RegistryDelete(repo, addr)
 }

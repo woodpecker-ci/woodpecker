@@ -1,17 +1,18 @@
 package shared_test
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestFetch(t *testing.T) {
@@ -211,12 +212,12 @@ func TestFetch(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &model.Repo{Owner: "laszlocph", Name: "drone-multipipeline", Config: tt.repoConfig}
+			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
 			dirs := map[string][]*remote.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &remote.FileMeta{
@@ -227,12 +228,12 @@ func TestFetch(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				r.On("Dir", mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors
-			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
+			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
@@ -240,7 +241,7 @@ func TestFetch(t *testing.T) {
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
-			files, err := configFetcher.Fetch()
+			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {

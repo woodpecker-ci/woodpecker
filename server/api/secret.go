@@ -17,11 +17,11 @@ package api
 import (
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
 // GetSecret gets the named secret from the database and writes

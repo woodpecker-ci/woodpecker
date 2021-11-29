@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 var (
-	// ErrCancel indicates the task was cancelled.
-	ErrCancel = errors.New("queue: task cancelled")
+	// ErrCancel indicates the task was canceled.
+	ErrCancel = errors.New("queue: task canceled")
 
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
@@ -134,7 +136,7 @@ type Queue interface {
 	// Push pushes a task to the tail of this queue.
 	Push(c context.Context, task *Task) error
 
-	// Push pushes a task to the tail of this queue.
+	// PushAtOnce pushes a task to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*Task) error
 
 	// Poll retrieves and removes a task head of this queue.
@@ -144,18 +146,18 @@ type Queue interface {
 	Extend(c context.Context, id string) error
 
 	// Done signals the task is complete.
-	Done(c context.Context, exitStatus string, id string) error
+	Done(c context.Context, id string, exitStatus model.StatusValue) error
 
 	// Error signals the task is complete with errors.
 	Error(c context.Context, id string, err error) error
 
-	// Error signals the task is complete with errors.
+	// ErrorAtOnce signals the task is complete with errors.
 	ErrorAtOnce(c context.Context, id []string, err error) error
 
 	// Evict removes a pending task from the queue.
 	Evict(c context.Context, id string) error
 
-	// Evict removes a pending task from the queue.
+	// EvictAtOnce removes a pending task from the queue.
 	EvictAtOnce(c context.Context, id []string) error
 
 	// Wait waits until the task is complete.
@@ -164,9 +166,9 @@ type Queue interface {
 	// Info returns internal queue information.
 	Info(c context.Context) InfoT
 
-	// Stops the queue from handing out new work items in Poll
+	// Pause stops the queue from handing out new work items in Poll
 	Pause()
 
-	// Starts the queue again, Poll returns new items
+	// Resume starts the queue again, Poll returns new items
 	Resume()
 }

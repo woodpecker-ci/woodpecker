@@ -3,9 +3,10 @@ package yaml
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 )
 
 func TestConstraint(t *testing.T) {
@@ -142,7 +143,7 @@ func TestConstraint(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraint(test.conf)
+		c := parseConstraint(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
@@ -250,7 +251,7 @@ func TestConstraintList(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraintPath(test.conf)
+		c := parseConstraintPath(t, test.conf)
 		got, want := c.Match(test.with, test.message), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
@@ -366,7 +367,7 @@ func TestConstraintMap(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraintMap(test.conf)
+		c := parseConstraintMap(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
@@ -410,13 +411,13 @@ func TestConstraints(t *testing.T) {
 		// },
 		// repo constraint
 		{
-			conf: "{ repo: drone/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			conf: "{ repo: owner/* }",
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
 			want: true,
 		},
 		{
 			conf: "{ repo: octocat/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "drone/drone"}},
+			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
 			want: false,
 		},
 		// ref constraint
@@ -443,18 +444,18 @@ func TestConstraints(t *testing.T) {
 		},
 		// instance constraint
 		{
-			conf: "{ instance: drone.io }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "drone.io"}},
+			conf: "{ instance: agent.tld }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "agent.tld"}},
 			want: true,
 		},
 		{
-			conf: "{ instance: drone.io }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "beta.drone.io"}},
+			conf: "{ instance: agent.tld }",
+			with: frontend.Metadata{Sys: frontend.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
 	}
 	for _, test := range testdata {
-		c := parseConstraints(test.conf)
+		c := parseConstraints(t, test.conf)
 		got, want := c.Match(test.with), test.want
 		if got != want {
 			t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
@@ -462,26 +463,26 @@ func TestConstraints(t *testing.T) {
 	}
 }
 
-func parseConstraints(s string) *Constraints {
+func parseConstraints(t *testing.T, s string) *Constraints {
 	c := &Constraints{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraint(s string) *Constraint {
+func parseConstraint(t *testing.T, s string) *Constraint {
 	c := &Constraint{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintMap(s string) *ConstraintMap {
+func parseConstraintMap(t *testing.T, s string) *ConstraintMap {
 	c := &ConstraintMap{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintPath(s string) *ConstraintPath {
+func parseConstraintPath(t *testing.T, s string) *ConstraintPath {
 	c := &ConstraintPath{}
-	yaml.Unmarshal([]byte(s), c)
+	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

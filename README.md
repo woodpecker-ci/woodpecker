@@ -122,13 +122,13 @@ pipeline:
 
 ## Documentation
 
-https://woodpecker-ci.github.io/
+https://woodpecker-ci.org/
 
 ## Who uses Woodpecker?
 
 Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it. 
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
 
 ## Contribution
 

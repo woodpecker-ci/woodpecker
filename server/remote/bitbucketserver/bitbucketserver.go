@@ -18,6 +18,7 @@ package bitbucketserver
 // quality or security standards expected of this project. Please use with caution.
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
@@ -29,7 +30,8 @@ import (
 	"strings"
 
 	"github.com/mrjones/oauth"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
 )
@@ -103,7 +105,7 @@ func New(opts Opts) (remote.Remote, error) {
 	return config, nil
 }
 
-func (c *Config) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
 		return nil, err
@@ -119,7 +121,7 @@ func (c *Config) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 		return nil, err
 	}
 
-	client := internal.NewClientWithToken(c.URL, c.Consumer, accessToken.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, accessToken.Token)
 
 	user, err := client.FindCurrentUser()
 	if err != nil {
@@ -127,16 +129,15 @@ func (c *Config) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 	}
 
 	return convertUser(user, accessToken), nil
-
 }
 
 // Auth is not supported by the Stash driver.
-func (*Config) Auth(token, secret string) (string, error) {
+func (*Config) Auth(ctx context.Context, token, secret string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
 
 // Teams is not supported by the Stash driver.
-func (*Config) Teams(u *model.User) ([]*model.Team, error) {
+func (*Config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	var teams []*model.Team
 	return teams, nil
 }
@@ -146,16 +147,16 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-func (c *Config) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	repo, err := internal.NewClientWithToken(c.URL, c.Consumer, u.Token).FindRepo(owner, name)
+func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
 	return convertRepo(repo), nil
 }
 
-func (c *Config) Repos(u *model.User) ([]*model.Repo, error) {
-	repos, err := internal.NewClientWithToken(c.URL, c.Consumer, u.Token).FindRepos()
+func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
 	if err != nil {
 		return nil, err
 	}
@@ -167,33 +168,33 @@ func (c *Config) Repos(u *model.User) ([]*model.Repo, error) {
 	return all, nil
 }
 
-func (c *Config) Perm(u *model.User, owner, repo string) (*model.Perm, error) {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+func (c *Config) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.FindRepoPerms(owner, repo)
 }
 
-func (c *Config) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
 }
 
-func (c *Config) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
-		Name:  fmt.Sprintf("Drone #%d - %s", b.Number, b.Branch),
-		Key:   "Drone",
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", b.Number, b.Branch),
+		Key:   "Woodpecker",
 		Url:   link,
 	}
 
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.CreateStatus(b.Commit, &status)
 }
@@ -217,14 +218,20 @@ func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
-func (c *Config) Activate(u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
 	return client.CreateHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Deactivate(u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(c.URL, c.Consumer, u.Token)
+// Branches returns the names of all branches for the named repository.
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
+}
+
+func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 

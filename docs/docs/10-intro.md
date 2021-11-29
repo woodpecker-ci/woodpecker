@@ -55,7 +55,7 @@ pipeline:
       - cat myfile
 ```
 
-## Plugins are straighforward
+## Plugins are straightforward
 
 - If you copy the same shell script from project to project
 - Pack it into a plugin instead

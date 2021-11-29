@@ -18,6 +18,7 @@
 package gitea
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -27,9 +28,30 @@ import (
 	"path/filepath"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"golang.org/x/oauth2"
+
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
+
+const (
+	authorizeTokenURL = "%s/login/oauth/authorize"
+	accessTokenURL    = "%s/login/oauth/access_token"
+	perPage           = 50
+)
+
+type Gitea struct {
+	URL          string
+	Context      string
+	Machine      string
+	ClientID     string
+	ClientSecret string
+	Username     string
+	Password     string
+	PrivateMode  bool
+	SkipVerify   bool
+}
 
 // Opts defines configuration options.
 type Opts struct {
@@ -43,72 +65,8 @@ type Opts struct {
 	SkipVerify  bool   // Skip ssl verification.
 }
 
-type client struct {
-	URL         string
-	Context     string
-	Machine     string
-	Username    string
-	Password    string
-	PrivateMode bool
-	SkipVerify  bool
-}
-
-const (
-	DescPending  = "the build is pending"
-	DescRunning  = "the build is running"
-	DescSuccess  = "the build was successful"
-	DescFailure  = "the build failed"
-	DescCanceled = "the build canceled"
-	DescBlocked  = "the build is pending approval"
-	DescDeclined = "the build was rejected"
-)
-
-// getStatus is a helper function that converts a Drone
-// status to a Gitea status.
-func getStatus(status string) gitea.StatusState {
-	switch status {
-	case model.StatusPending, model.StatusBlocked:
-		return gitea.StatusPending
-	case model.StatusRunning:
-		return gitea.StatusPending
-	case model.StatusSuccess:
-		return gitea.StatusSuccess
-	case model.StatusFailure, model.StatusError:
-		return gitea.StatusFailure
-	case model.StatusKilled:
-		return gitea.StatusFailure
-	case model.StatusDeclined:
-		return gitea.StatusWarning
-	default:
-		return gitea.StatusFailure
-	}
-}
-
-// getDesc is a helper function that generates a description
-// message for the build based on the status.
-func getDesc(status string) string {
-	switch status {
-	case model.StatusPending:
-		return DescPending
-	case model.StatusRunning:
-		return DescRunning
-	case model.StatusSuccess:
-		return DescSuccess
-	case model.StatusFailure, model.StatusError:
-		return DescFailure
-	case model.StatusKilled:
-		return DescCanceled
-	case model.StatusBlocked:
-		return DescBlocked
-	case model.StatusDeclined:
-		return DescDeclined
-	default:
-		return DescFailure
-	}
-}
-
-// New returns a Remote implementation that integrates with Gitea, an open
-// source Git service written in Go. See https://gitea.io/
+// New returns a Remote implementation that integrates with Gitea,
+// an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (remote.Remote, error) {
 	u, err := url.Parse(opts.URL)
 	if err != nil {
@@ -118,102 +76,154 @@ func New(opts Opts) (remote.Remote, error) {
 	if err == nil {
 		u.Host = host
 	}
-	return &client{
-		URL:         opts.URL,
-		Context:     opts.Context,
-		Machine:     u.Host,
-		Username:    opts.Username,
-		Password:    opts.Password,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
+	return &Gitea{
+		URL:          opts.URL,
+		Context:      opts.Context,
+		Machine:      u.Host,
+		ClientID:     opts.Client,
+		ClientSecret: opts.Secret,
+		Username:     opts.Username,
+		Password:     opts.Password,
+		PrivateMode:  opts.PrivateMode,
+		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
 
-// TODO: dont create a new client for each func
-
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
-func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	var (
-		username = req.FormValue("username")
-		password = req.FormValue("password")
-	)
+func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+	config := &oauth2.Config{
+		ClientID:     c.ClientID,
+		ClientSecret: c.ClientSecret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
+			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+		},
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.Host),
+	}
 
-	// if the username or password is empty we re-direct to the login screen.
-	if len(username) == 0 || len(password) == 0 {
-		http.Redirect(res, req, "/login/form", http.StatusSeeOther)
+	// get the OAuth errors
+	if err := req.FormValue("error"); err != "" {
+		return nil, &remote.AuthError{
+			Err:         err,
+			Description: req.FormValue("error_description"),
+			URI:         req.FormValue("error_uri"),
+		}
+	}
+
+	// get the OAuth code
+	code := req.FormValue("code")
+	if len(code) == 0 {
+		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
-	// Create Client with Basic Auth
-	client, err := c.newClientBasicAuth(username, password)
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
 
-	// since api does not return token secret, if drone token exists create new one
-	resp, err := client.DeleteAccessToken("drone")
-	if err != nil && !(resp != nil && resp.StatusCode == 404) {
-		return nil, err
-	}
-
-	token, _, terr := client.CreateAccessToken(
-		gitea.CreateAccessTokenOption{Name: "drone"},
-	)
-	if terr != nil {
-		return nil, terr
-	}
-	accessToken := token.Token
-
-	client, err = c.newClientToken(accessToken)
+	client, err := c.newClientToken(ctx, token.AccessToken)
 	if err != nil {
 		return nil, err
 	}
-	account, _, err := client.GetUserInfo(username)
+	account, _, err := client.GetMyUserInfo()
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.User{
-		Token:  accessToken,
+		Token:  token.AccessToken,
+		Secret: token.RefreshToken,
+		Expiry: token.Expiry.UTC().Unix(),
 		Login:  account.UserName,
 		Email:  account.Email,
 		Avatar: expandAvatar(c.URL, account.AvatarURL),
 	}, nil
 }
 
-// Auth is not supported by the Gitea driver.
-func (c *client) Auth(token, secret string) (string, error) {
-	return "", fmt.Errorf("Not Implemented")
+// Auth uses the Gitea oauth2 access token and refresh token to authenticate
+// a session and return the Gitea account login.
+func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) {
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return "", err
+	}
+	user, _, err := client.GetMyUserInfo()
+	if err != nil {
+		return "", err
+	}
+	return user.UserName, nil
+}
+
+// Refresh refreshes the Gitea oauth2 access token. If the token is
+// refreshed the user is updated and a true value is returned.
+func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
+	config := &oauth2.Config{
+		ClientID:     c.ClientID,
+		ClientSecret: c.ClientSecret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
+			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+		},
+	}
+	source := config.TokenSource(ctx, &oauth2.Token{RefreshToken: user.Secret})
+
+	token, err := source.Token()
+	if err != nil || len(token.AccessToken) == 0 {
+		return false, err
+	}
+
+	user.Token = token.AccessToken
+	user.Secret = token.RefreshToken
+	user.Expiry = token.Expiry.UTC().Unix()
+	return true, nil
 }
 
 // Teams is supported by the Gitea driver.
-func (c *client) Teams(u *model.User) ([]*model.Team, error) {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
-	if err != nil {
-		return nil, err
+	teams := make([]*model.Team, 0, perPage)
+
+	page := 1
+	for {
+		orgs, _, err := client.ListMyOrgs(
+			gitea.ListOrgsOptions{
+				ListOptions: gitea.ListOptions{
+					Page:     page,
+					PageSize: perPage,
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, org := range orgs {
+			teams = append(teams, toTeam(org, c.URL))
+		}
+
+		if len(orgs) < perPage {
+			break
+		}
+		page++
 	}
 
-	var teams []*model.Team
-	for _, org := range orgs {
-		teams = append(teams, toTeam(org, c.URL))
-	}
 	return teams, nil
 }
 
 // TeamPerm is not supported by the Gitea driver.
-func (c *client) TeamPerm(u *model.User, org string) (*model.Perm, error) {
+func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
 // Repo returns the named Gitea repository.
-func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -230,8 +240,10 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
-func (c *client) Repos(u *model.User) (repos []*model.Repo, err error) {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+	repos := make([]*model.Repo, 0, perPage)
+
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -243,39 +255,31 @@ func (c *client) Repos(u *model.User) (repos []*model.Repo, err error) {
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: 50, // Gitea SDK limit per page.
+					PageSize: perPage,
 				},
 			},
 		)
-
-		// Gitea SDK does not return error when asking for
-		// non existing repos page (empty list is returned)
-		// so this should be safe.
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
 
 		for _, repo := range all {
 			repos = append(repos, toRepo(repo, c.PrivateMode))
 		}
 
-		// Check if no more repos are available; we don't test len(all) < 50
-		// because of Gitea SDK bug https://gitea.com/gitea/go-sdk/issues/507.
-		if len(all) == 0 {
-			// Empty page returned - finish loop.
+		if len(all) < perPage {
 			break
-		} else {
-			// Last page was not empty so more repos may be available - continue loop.
-			page = page + 1
 		}
+		// Last page was not empty so more repos may be available - continue loop.
+		page++
 	}
 
 	return repos, nil
 }
 
 // Perm returns the user permissions for the named Gitea repository.
-func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -288,8 +292,8 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
-func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -298,10 +302,10 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return cfg, err
 }
 
-func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	var configs []*remote.FileMeta
 
-	client, err := c.newClientToken(u.Token)
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +321,7 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 	for _, e := range tree.Entries {
 		// Filter path matching pattern and type file (blob)
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
-			data, err := c.File(u, r, b, e.Path)
+			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
 			}
@@ -333,8 +337,8 @@ func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]
 }
 
 // Status is supported by the Gitea driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return err
 	}
@@ -360,7 +364,7 @@ func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link strin
 // Netrc returns a netrc file capable of authenticating Gitea requests and
 // cloning Gitea repositories. The netrc will use the global machine account
 // when configured.
-func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
@@ -377,20 +381,20 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Activate activates the repository by registering post-commit hooks with
 // the Gitea repository.
-func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
+func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
 		"secret":       r.Hash,
 		"content_type": "json",
 	}
 	hook := gitea.CreateHookOption{
-		Type:   "gitea",
+		Type:   gitea.HookTypeGitea,
 		Config: config,
 		Events: []string{"push", "create", "pull_request"},
 		Active: true,
 	}
 
-	client, err := c.newClientToken(u.Token)
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return err
 	}
@@ -400,8 +404,8 @@ func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
 
 // Deactivate deactives the repository be removing repository push hooks from
 // the Gitea repository.
-func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
-	client, err := c.newClientToken(u.Token)
+func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return err
 	}
@@ -420,47 +424,92 @@ func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
 	return nil
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range giteaBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Gitea) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
 // helper function to return the Gitea client with Token
-func (c *client) newClientToken(token string) (*gitea.Client, error) {
+func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
-	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient))
+	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
 }
 
-// helper function to return the Gitea client with Basic Auth
-func (c *client) newClientBasicAuth(username, password string) (*gitea.Client, error) {
-	httpClient := &http.Client{}
-	if c.SkipVerify {
-		httpClient.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
+const (
+	DescPending  = "the build is pending"
+	DescRunning  = "the build is running"
+	DescSuccess  = "the build was successful"
+	DescFailure  = "the build failed"
+	DescCanceled = "the build canceled"
+	DescBlocked  = "the build is pending approval"
+	DescDeclined = "the build was rejected"
+)
+
+// getStatus is a helper function that converts a Woodpecker
+// status to a Gitea status.
+func getStatus(status model.StatusValue) gitea.StatusState {
+	switch status {
+	case model.StatusPending, model.StatusBlocked:
+		return gitea.StatusPending
+	case model.StatusRunning:
+		return gitea.StatusPending
+	case model.StatusSuccess:
+		return gitea.StatusSuccess
+	case model.StatusFailure, model.StatusError:
+		return gitea.StatusFailure
+	case model.StatusKilled:
+		return gitea.StatusFailure
+	case model.StatusDeclined:
+		return gitea.StatusWarning
+	default:
+		return gitea.StatusFailure
 	}
-	return gitea.NewClient(c.URL, gitea.SetBasicAuth(username, password), gitea.SetHTTPClient(httpClient))
 }
 
-// helper function to return matching hooks.
-func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
-	link, err := url.Parse(rawurl)
-	if err != nil {
-		return nil
+// getDesc is a helper function that generates a description
+// message for the build based on the status.
+func getDesc(status model.StatusValue) string {
+	switch status {
+	case model.StatusPending:
+		return DescPending
+	case model.StatusRunning:
+		return DescRunning
+	case model.StatusSuccess:
+		return DescSuccess
+	case model.StatusFailure, model.StatusError:
+		return DescFailure
+	case model.StatusKilled:
+		return DescCanceled
+	case model.StatusBlocked:
+		return DescBlocked
+	case model.StatusDeclined:
+		return DescDeclined
+	default:
+		return DescFailure
 	}
-	for _, hook := range hooks {
-		if val, ok := hook.Config["url"]; ok {
-			hookurl, err := url.Parse(val)
-			if err == nil && hookurl.Host == link.Host {
-				return hook
-			}
-		}
-	}
-	return nil
 }

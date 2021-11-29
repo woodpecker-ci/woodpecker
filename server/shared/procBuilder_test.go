@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
@@ -41,13 +41,13 @@ bbb`,
 pipeline:
   xxx:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		}}
 
@@ -171,6 +171,41 @@ runs_on:
 	}
 	if buildItems[0].RunsOn[1] != "failure" {
 		t.Fatal("Should run on failure")
+	}
+}
+
+func TestPipelineName(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{Config: ".woodpecker"},
+		Curr:  &model.Build{},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Name: ".woodpecker/lint.yml", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			{Name: ".woodpecker/.test.yml", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pipelineNames := []string{buildItems[0].Proc.Name, buildItems[1].Proc.Name}
+	if !containsItemWithName("lint", buildItems) || !containsItemWithName("test", buildItems) {
+		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
 }
 
@@ -419,5 +454,4 @@ func TestSanitizePath(t *testing.T) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}
-
 }

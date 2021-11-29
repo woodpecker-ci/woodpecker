@@ -14,13 +14,13 @@ func WithContext(ctx context.Context) context.Context {
 	})
 }
 
-// WithContextFunc returns a copy of parent context that is cancelled when
+// WithContextFunc returns a copy of parent context that is canceled when
 // an os interrupt signal is received. The callback function f is invoked
 // before cancellation.
 func WithContextFunc(ctx context.Context, f func()) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
 		defer signal.Stop(c)
 

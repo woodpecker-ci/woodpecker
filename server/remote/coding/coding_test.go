@@ -16,15 +16,16 @@ package coding
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/coding/fixtures"
 )
 
 func Test_coding(t *testing.T) {
@@ -33,9 +34,9 @@ func Test_coding(t *testing.T) {
 	s := httptest.NewServer(fixtures.Handler())
 	c := &Coding{URL: s.URL}
 
+	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Coding", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -67,14 +68,14 @@ func Test_coding(t *testing.T) {
 			g.It("Should redirect to authorize", func() {
 				w := httptest.NewRecorder()
 				r, _ := http.NewRequest("GET", "", nil)
-				_, err := c.Login(w, r)
-				g.Assert(err == nil).IsTrue()
+				_, err := c.Login(ctx, w, r)
+				g.Assert(err).IsNil()
 				g.Assert(w.Code).Equal(http.StatusSeeOther)
 			})
 			g.It("Should return authenticated user", func() {
 				r, _ := http.NewRequest("GET", "?code=code", nil)
-				u, err := c.Login(nil, r)
-				g.Assert(err == nil).IsTrue()
+				u, err := c.Login(ctx, nil, r)
+				g.Assert(err).IsNil()
 				g.Assert(u.Login).Equal(fakeUser.Login)
 				g.Assert(u.Token).Equal(fakeUser.Token)
 				g.Assert(u.Secret).Equal(fakeUser.Secret)
@@ -83,105 +84,87 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("Given an access token", func() {
 			g.It("Should return the anthenticated user", func() {
-				login, err := c.Auth(
-					fakeUser.Token,
-					fakeUser.Secret,
-				)
-				g.Assert(err == nil).IsTrue()
+				login, err := c.Auth(ctx, fakeUser.Token, fakeUser.Secret)
+				g.Assert(err).IsNil()
 				g.Assert(login).Equal(fakeUser.Login)
 			})
 			g.It("Should handle a failure to resolve user", func() {
-				_, err := c.Auth(
-					fakeUserNotFound.Token,
-					fakeUserNotFound.Secret,
-				)
-				g.Assert(err != nil).IsTrue()
+				_, err := c.Auth(ctx, fakeUserNotFound.Token, fakeUserNotFound.Secret)
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Given a refresh token", func() {
 			g.It("Should return a refresh access token", func() {
-				ok, err := c.Refresh(fakeUserRefresh)
-				g.Assert(err == nil).IsTrue()
+				ok, err := c.Refresh(ctx, fakeUserRefresh)
+				g.Assert(err).IsNil()
 				g.Assert(ok).IsTrue()
 				g.Assert(fakeUserRefresh.Token).Equal("VDZupx0usVRV4oOd1FCu4xUxgk8SY0TK")
 				g.Assert(fakeUserRefresh.Secret).Equal("BenBQq7TWZ7Cp0aUM47nQjTz2QHNmTWcPctB609n")
 			})
 			g.It("Should handle an invalid refresh token", func() {
-				ok, _ := c.Refresh(fakeUserRefreshInvalid)
+				ok, _ := c.Refresh(ctx, fakeUserRefreshInvalid)
 				g.Assert(ok).IsFalse()
 			})
 		})
 
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
-				repo, err := c.Repo(
-					fakeUser,
-					fakeRepo.Owner,
-					fakeRepo.Name,
-				)
-				g.Assert(err == nil).IsTrue()
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
 				g.Assert(repo.Link).Equal(s.URL + fakeRepo.Link)
-				g.Assert(repo.Kind).Equal(fakeRepo.Kind)
+				g.Assert(repo.SCMKind).Equal(fakeRepo.SCMKind)
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
 				g.Assert(repo.Branch).Equal(fakeRepo.Branch)
-				g.Assert(repo.IsPrivate).Equal(fakeRepo.IsPrivate)
+				g.Assert(repo.IsSCMPrivate).Equal(fakeRepo.IsSCMPrivate)
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(
-					fakeUser,
-					fakeRepoNotFound.Owner,
-					fakeRepoNotFound.Name,
-				)
-				g.Assert(err != nil).IsTrue()
+				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("When requesting repository permissions", func() {
 			g.It("Should authorize admin access for project owner", func() {
-				perm, err := c.Perm(fakeUser, "demo1", "perm_owner")
-				g.Assert(err == nil).IsTrue()
+				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_owner")
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize admin access for project admin", func() {
-				perm, err := c.Perm(fakeUser, "demo1", "perm_admin")
-				g.Assert(err == nil).IsTrue()
+				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_admin")
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize read access for project member", func() {
-				perm, err := c.Perm(fakeUser, "demo1", "perm_member")
-				g.Assert(err == nil).IsTrue()
+				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_member")
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize no access for project guest", func() {
-				perm, err := c.Perm(fakeUser, "demo1", "perm_guest")
-				g.Assert(err == nil).IsTrue()
+				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_guest")
+				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsFalse()
 				g.Assert(perm.Push).IsFalse()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Perm(
-					fakeUser,
-					fakeRepoNotFound.Owner,
-					fakeRepoNotFound.Name,
-				)
-				g.Assert(err != nil).IsTrue()
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("When downloading a file", func() {
 			g.It("Should return file for specified build", func() {
-				data, err := c.File(fakeUser, fakeRepo, fakeBuild, ".drone.yml")
-				g.Assert(err == nil).IsTrue()
+				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+				g.Assert(err).IsNil()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
 		})
@@ -194,7 +177,7 @@ func Test_coding(t *testing.T) {
 					Password: "password",
 				})
 				netrc, err := remote.Netrc(fakeUser, nil)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal("someuser")
 				g.Assert(netrc.Password).Equal("password")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
@@ -204,7 +187,7 @@ func Test_coding(t *testing.T) {
 					Machine: "git.coding.net",
 				})
 				netrc, err := remote.Netrc(fakeUser, nil)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
@@ -213,23 +196,23 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When activating a repository", func() {
 			g.It("Should create the hook", func() {
-				err := c.Activate(fakeUser, fakeRepo, "http://127.0.0.1")
-				g.Assert(err == nil).IsTrue()
+				err := c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
+				g.Assert(err).IsNil()
 			})
 			g.It("Should update the hook when exists", func() {
-				err := c.Activate(fakeUser, fakeRepo, "http://127.0.0.2")
-				g.Assert(err == nil).IsTrue()
+				err := c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.2")
+				g.Assert(err).IsNil()
 			})
 		})
 
 		g.Describe("When deactivating a repository", func() {
 			g.It("Should successfully remove hook", func() {
-				err := c.Deactivate(fakeUser, fakeRepo, "http://127.0.0.3")
-				g.Assert(err == nil).IsTrue()
+				err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.3")
+				g.Assert(err).IsNil()
 			})
 			g.It("Should successfully deactivate when hook already removed", func() {
-				err := c.Deactivate(fakeUser, fakeRepo, "http://127.0.0.4")
-				g.Assert(err == nil).IsTrue()
+				err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.4")
+				g.Assert(err).IsNil()
 			})
 		})
 
@@ -241,11 +224,10 @@ func Test_coding(t *testing.T) {
 				req.Header.Set(hookEvent, hookPush)
 
 				r, _, err := c.Hook(req)
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("demo1/test1")
 			})
 		})
-
 	})
 }
 
@@ -273,29 +255,20 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		Owner:     "demo1",
-		Name:      "test1",
-		FullName:  "demo1/test1",
-		Avatar:    "/static/project_icon/scenery-5.png",
-		Link:      "/u/gilala/p/abp/git",
-		Kind:      model.RepoGit,
-		Clone:     "https://git.coding.net/demo1/test1.git",
-		Branch:    "master",
-		IsPrivate: true,
+		Owner:        "demo1",
+		Name:         "test1",
+		FullName:     "demo1/test1",
+		Avatar:       "/static/project_icon/scenery-5.png",
+		Link:         "/u/gilala/p/abp/git",
+		SCMKind:      model.RepoGit,
+		Clone:        "https://git.coding.net/demo1/test1.git",
+		Branch:       "master",
+		IsSCMPrivate: true,
 	}
 
 	fakeRepoNotFound = &model.Repo{
 		Owner: "not_found_owner",
 		Name:  "not_found_project",
-	}
-
-	fakeRepos = []*model.RepoLite{
-		&model.RepoLite{
-			Owner:    "demo1",
-			Name:     "test1",
-			FullName: "demo1/test1",
-			Avatar:   "/static/project_icon/scenery-5.png",
-		},
 	}
 
 	fakeBuild = &model.Build{

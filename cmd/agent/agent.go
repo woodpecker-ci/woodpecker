@@ -21,21 +21,18 @@ import (
 	"os"
 	"sync"
 
-	grpccredentials "google.golang.org/grpc/credentials"
-
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/tevino/abool"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
-	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
 )
 
 func loop(c *cli.Context) error {
@@ -51,26 +48,41 @@ func loop(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
-	if c.BoolT("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
+	}
+
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.Bool("debug") {
+		if c.IsSet("debug") {
+			log.Warn().Msg("--debug is deprecated, use --log-level instead")
+		}
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
 	}
 
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
-	if c.BoolT("healthcheck") {
-		go http.ListenAndServe(":3000", nil)
+	if c.Bool("healthcheck") {
+		go func() {
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				log.Error().Msgf("can not listen on port 3000: %v", err)
+			}
+		}()
 	}
 
 	// TODO pass version information to grpc server
@@ -126,12 +138,21 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				// new docker engine
-				engine, err := docker.NewEnv()
+				// new engine
+				engine, err := backend.FindEngine(c.String("backend-engine"))
 				if err != nil {
-					log.Error().Err(err).Msg("cannot create docker client")
+					log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 					return
 				}
+
+				// load enginge (e.g. init api client)
+				err = engine.Load()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot load backend engine")
+					return
+				}
+
+				log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
 				r := agent.NewRunner(client, filter, hostname, counter, &engine)
 				if err := r.Run(ctx); err != nil {
@@ -151,7 +172,7 @@ type credentials struct {
 	password string
 }
 
-func (c *credentials) GetRequestMetadata(oldcontext.Context, ...string) (map[string]string, error) {
+func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
 	return map[string]string{
 		"username": c.username,
 		"password": c.password,

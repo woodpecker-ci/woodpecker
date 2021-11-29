@@ -17,17 +17,16 @@ package datastore
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestSecretFind(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from secrets")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
-	err := s.SecretCreate(&model.Secret{
+	err := store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "password",
 		Value:  "correct-horse-battery-staple",
@@ -39,7 +38,7 @@ func TestSecretFind(t *testing.T) {
 		return
 	}
 
-	secret, err := s.SecretFind(&model.Repo{ID: 1}, "password")
+	secret, err := store.SecretFind(&model.Repo{ID: 1}, "password")
 	if err != nil {
 		t.Error(err)
 		return
@@ -68,55 +67,45 @@ func TestSecretFind(t *testing.T) {
 }
 
 func TestSecretList(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from secrets")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
-	s.SecretCreate(&model.Secret{
+	assert.NoError(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "bar",
-	})
-	s.SecretCreate(&model.Secret{
+	}))
+	assert.NoError(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "baz",
 		Value:  "qux",
-	})
+	}))
 
-	list, err := s.SecretList(&model.Repo{ID: 1})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(list), 2; got != want {
-		t.Errorf("Want %d secrets, got %d", want, got)
-	}
+	list, err := store.SecretList(&model.Repo{ID: 1})
+	assert.NoError(t, err)
+	assert.Len(t, list, 2)
 }
 
 func TestSecretUpdate(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from secrets")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	secret := &model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "baz",
 	}
-	if err := s.SecretCreate(secret); err != nil {
+	if err := store.SecretCreate(secret); err != nil {
 		t.Errorf("Unexpected error: insert secret: %s", err)
 		return
 	}
 	secret.Value = "qux"
-	if err := s.SecretUpdate(secret); err != nil {
+	assert.EqualValues(t, 1, secret.ID)
+	if err := store.SecretUpdate(secret); err != nil {
 		t.Errorf("Unexpected error: update secret: %s", err)
 		return
 	}
-	updated, err := s.SecretFind(&model.Repo{ID: 1}, "foo")
+	updated, err := store.SecretFind(&model.Repo{ID: 1}, "foo")
 	if err != nil {
 		t.Error(err)
 		return
@@ -127,27 +116,24 @@ func TestSecretUpdate(t *testing.T) {
 }
 
 func TestSecretDelete(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from secrets")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
 	secret := &model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "baz",
 	}
-	if err := s.SecretCreate(secret); err != nil {
+	if err := store.SecretCreate(secret); err != nil {
 		t.Errorf("Unexpected error: insert secret: %s", err)
 		return
 	}
 
-	if err := s.SecretDelete(secret); err != nil {
+	if err := store.SecretDelete(secret); err != nil {
 		t.Errorf("Unexpected error: delete secret: %s", err)
 		return
 	}
-	_, err := s.SecretFind(&model.Repo{ID: 1}, "foo")
+	_, err := store.SecretFind(&model.Repo{ID: 1}, "foo")
 	if err == nil {
 		t.Errorf("Expect error: sql.ErrNoRows")
 		return
@@ -155,13 +141,10 @@ func TestSecretDelete(t *testing.T) {
 }
 
 func TestSecretIndexes(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from secrets")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
 
-	if err := s.SecretCreate(&model.Secret{
+	if err := store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "bar",
@@ -171,11 +154,11 @@ func TestSecretIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate name
-	if err := s.SecretCreate(&model.Secret{
+	if err := store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "baz",
 	}); err == nil {
-		t.Errorf("Unexpected error: dupliate name")
+		t.Errorf("Unexpected error: duplicate name")
 	}
 }

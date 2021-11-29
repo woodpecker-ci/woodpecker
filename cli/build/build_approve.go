@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildApproveCmd = cli.Command{
+var buildApproveCmd = &cli.Command{
 	Name:      "approve",
 	Usage:     "approve a build",
 	ArgsUsage: "<repo/name> <build>",
 	Action:    buildApprove,
+	Flags:     common.GlobalFlags,
 }
 
 func buildApprove(c *cli.Context) (err error) {

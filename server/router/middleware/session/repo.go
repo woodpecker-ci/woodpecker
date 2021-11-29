@@ -18,12 +18,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func Repo(c *gin.Context) *model.Repo {
@@ -38,27 +38,16 @@ func Repo(c *gin.Context) *model.Repo {
 	return r
 }
 
-func Repos(c *gin.Context) []*model.RepoLite {
-	v, ok := c.Get("repos")
-	if !ok {
-		return nil
-	}
-	r, ok := v.([]*model.RepoLite)
-	if !ok {
-		return nil
-	}
-	return r
-}
-
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			owner = c.Param("owner")
-			name  = c.Param("name")
-			user  = User(c)
+			store_ = store.FromContext(c)
+			owner  = c.Param("owner")
+			name   = c.Param("name")
+			user   = User(c)
 		)
 
-		repo, err := store.GetRepoOwnerName(c, owner, name)
+		repo, err := store_.GetRepoName(owner + "/" + name)
 		if err == nil {
 			c.Set("repo", repo)
 			c.Next()
@@ -66,7 +55,7 @@ func SetRepo() gin.HandlerFunc {
 		}
 
 		// debugging
-		log.Debugf("Cannot find repository %s/%s. %s",
+		log.Debug().Msgf("Cannot find repository %s/%s. %s",
 			owner,
 			name,
 			err.Error(),
@@ -93,8 +82,8 @@ func Perm(c *gin.Context) *model.Perm {
 }
 
 func SetPerm() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
+		store_ := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
 		perm := new(model.Perm)
@@ -102,19 +91,22 @@ func SetPerm() gin.HandlerFunc {
 		switch {
 		case user != nil:
 			var err error
-			perm, err = store.FromContext(c).PermFind(user, repo)
+			perm, err = store_.PermFind(user, repo)
 			if err != nil {
-				log.Errorf("Error fetching permission for %s %s. %s",
+				log.Error().Msgf("Error fetching permission for %s %s. %s",
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = remote.FromContext(c).Perm(user, repo.Owner, repo.Name)
+				perm, err = server.Config.Services.Remote.Perm(c, user, repo.Owner, repo.Name)
 				if err == nil {
-					log.Debugf("Synced user permission for %s %s", user.Login, repo.FullName)
+					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store.FromContext(c).PermUpsert(perm)
+					if err := store_.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
 				}
 			}
 		}
@@ -137,11 +129,10 @@ func SetPerm() gin.HandlerFunc {
 		}
 
 		if user != nil {
-			log.Debugf("%s granted %+v permission to %s",
+			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
-
 		} else {
-			log.Debugf("Guest granted %+v to %s", perm, repo.FullName)
+			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 		}
 
 		c.Set("perm", perm)
@@ -161,11 +152,11 @@ func MustPull(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debugf("User %s denied read access to %s",
+		log.Debug().Msgf("User %s denied read access to %s",
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debugf("Guest denied read access to %s %s",
+		log.Debug().Msgf("Guest denied read access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)
@@ -186,12 +177,11 @@ func MustPush(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debugf("User %s denied write access to %s",
+		log.Debug().Msgf("User %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
-
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debugf("Guest denied write access to %s %s",
+		log.Debug().Msgf("Guest denied write access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)

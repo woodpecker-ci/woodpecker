@@ -15,16 +15,18 @@
 package shared
 
 import (
+	"context"
+	"fmt"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // UserSyncer syncs the user repository and permissions.
 type UserSyncer interface {
-	Sync(user *model.User) error
+	Sync(ctx context.Context, user *model.User) error
 }
 
 type Syncer struct {
@@ -38,9 +40,8 @@ type Syncer struct {
 // synchronized with the local datastore.
 type FilterFunc func(*model.Repo) bool
 
-// NamespaceFilter
 func NamespaceFilter(namespaces map[string]bool) FilterFunc {
-	if namespaces == nil || len(namespaces) == 0 {
+	if len(namespaces) == 0 {
 		return noopFilter
 	}
 	return func(repo *model.Repo) bool {
@@ -62,39 +63,35 @@ func (s *Syncer) SetFilter(fn FilterFunc) {
 	s.Match = fn
 }
 
-func (s *Syncer) Sync(user *model.User) error {
+func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
-	repos, err := s.Remote.Repos(user)
+	repos, err := s.Remote.Repos(ctx, user)
 	if err != nil {
 		return err
 	}
 
-	var remoteRepos []*model.Repo
-	var perms []*model.Perm
-
+	remoteRepos := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
 		if s.Match(repo) {
-			remoteRepos = append(remoteRepos, repo)
-			perm := model.Perm{
+			repo.Perm = &model.Perm{
 				UserID: user.ID,
+				RepoID: repo.ID,
 				Repo:   repo.FullName,
-				Pull:   true,
 				Synced: unix,
 			}
-			if repo.Perm != nil {
-				perm.Push = repo.Perm.Push
-				perm.Admin = repo.Perm.Admin
+			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
+			if err != nil {
+				return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
 			}
-			perms = append(perms, &perm)
+			repo.Perm.Pull = remotePerm.Pull
+			repo.Perm.Push = remotePerm.Push
+			repo.Perm.Admin = remotePerm.Admin
+
+			remoteRepos = append(remoteRepos, repo)
 		}
 	}
 
 	err = s.Store.RepoBatch(remoteRepos)
-	if err != nil {
-		return err
-	}
-
-	err = s.Store.PermBatch(perms)
 	if err != nil {
 		return err
 	}

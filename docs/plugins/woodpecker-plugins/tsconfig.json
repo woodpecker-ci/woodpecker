@@ -1,0 +1,13 @@
+{
+  "extends": "@tsconfig/docusaurus/tsconfig.json",
+  "include": ["src", "types"],
+  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*", "src/theme"],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "noEmit": false,
+    "pretty": true,
+    "outDir": "./dist"
+  }
+}

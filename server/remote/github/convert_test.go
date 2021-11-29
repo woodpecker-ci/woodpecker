@@ -17,17 +17,15 @@ package github
 import (
 	"testing"
 
-	"github.com/google/go-github/github"
-	"github.com/woodpecker-ci/woodpecker/model"
-
 	"github.com/franela/goblin"
+	"github.com/google/go-github/v39/github"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("GitHub converter", func() {
-
 		g.It("should convert passing status", func() {
 			g.Assert(convertStatus(model.StatusSuccess)).Equal(statusSuccess)
 		})
@@ -65,7 +63,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert repository list", func() {
-			from := []github.Repository{
+			from := []*github.Repository{
 				{
 					Private:  github.Bool(false),
 					FullName: github.String("octocat/hello-world"),
@@ -76,7 +74,7 @@ func Test_helper(t *testing.T) {
 					},
 					HTMLURL:  github.String("https://github.com/octocat/hello-world"),
 					CloneURL: github.String("https://github.com/octocat/hello-world.git"),
-					Permissions: &map[string]bool{
+					Permissions: map[string]bool{
 						"push":  true,
 						"pull":  true,
 						"admin": true,
@@ -103,7 +101,7 @@ func Test_helper(t *testing.T) {
 					AvatarURL: github.String("http://..."),
 					Login:     github.String("octocat"),
 				},
-				Permissions: &map[string]bool{
+				Permissions: map[string]bool{
 					"push":  true,
 					"pull":  true,
 					"admin": true,
@@ -116,15 +114,15 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("develop")
-			g.Assert(to.Kind).Equal("git")
-			g.Assert(to.IsPrivate).IsTrue()
+			g.Assert(string(to.SCMKind)).Equal("git")
+			g.Assert(to.IsSCMPrivate).IsTrue()
 			g.Assert(to.Clone).Equal("https://github.com/octocat/hello-world.git")
 			g.Assert(to.Link).Equal("https://github.com/octocat/hello-world")
 		})
 
 		g.It("should convert repository permissions", func() {
 			from := &github.Repository{
-				Permissions: &map[string]bool{
+				Permissions: map[string]bool{
 					"admin": true,
 					"push":  true,
 					"pull":  true,
@@ -138,7 +136,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team", func() {
-			from := github.Organization{
+			from := &github.Organization{
 				Login:     github.String("octocat"),
 				AvatarURL: github.String("http://..."),
 			}
@@ -148,7 +146,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team list", func() {
-			from := []github.Organization{
+			from := []*github.Organization{
 				{
 					Login:     github.String("octocat"),
 					AvatarURL: github.String("http://..."),
@@ -174,7 +172,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(repo.Owner).Equal(from.Repo.Owner.Login)
 			g.Assert(repo.Name).Equal(from.Repo.Name)
 			g.Assert(repo.FullName).Equal(from.Repo.FullName)
-			g.Assert(repo.IsPrivate).Equal(from.Repo.Private)
+			g.Assert(repo.IsSCMPrivate).Equal(from.Repo.Private)
 			g.Assert(repo.Link).Equal(from.Repo.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.Repo.CloneURL)
 			g.Assert(repo.Branch).Equal(from.Repo.DefaultBranch)

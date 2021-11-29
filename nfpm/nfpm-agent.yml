@@ -1,0 +1,12 @@
+name: woodpecker-agent
+arch: amd64
+platform: linux
+version: v${WOODPECKER_VERSION}
+description: Woodpecker Agent
+homepage: https://github.com/woodpecker-ci/woodpecker
+license: Apache 2.0
+maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
+section: daemon/system
+contents:
+- src: ./dist/agent/linux_amd64/woodpecker-agent
+  dst: /usr/local/bin/woodpecker-agent

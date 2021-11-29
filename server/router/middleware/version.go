@@ -16,11 +16,12 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-// Version is a middleware function that appends the Drone version information
+// Version is a middleware function that appends the Woodpecker version information
 // to the HTTP response. This is intended for debugging and troubleshooting.
 func Version(c *gin.Context) {
-	c.Header("X-DRONE-VERSION", version.String())
+	c.Header("X-WOODPECKER-VERSION", version.String())
 }

@@ -3,11 +3,8 @@ package rpc
 import (
 	"context"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
-
-// ErrCancelled signals the pipeine is cancelled.
-// var ErrCancelled = errors.New("cancelled")
 
 type (
 	// Filter defines filters for fetching items from the queue.

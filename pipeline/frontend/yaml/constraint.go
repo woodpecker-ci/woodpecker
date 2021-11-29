@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
-	libcompose "github.com/docker/libcompose/yaml"
+	"gopkg.in/yaml.v3"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -100,11 +100,11 @@ func (c *Constraint) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *Constraint) UnmarshalYAML(value *yaml.Node) error {
 	var out1 = struct {
-		Include libcompose.Stringorslice
-		Exclude libcompose.Stringorslice
+		Include types.Stringorslice
+		Exclude types.Stringorslice
 	}{}
 
-	var out2 libcompose.Stringorslice
+	var out2 types.Stringorslice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -164,8 +164,8 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	out2 := map[string]string{}
 
-	unmarshal(&out1)
-	unmarshal(&out2)
+	_ = unmarshal(&out1) // it contains include and exclude statement
+	_ = unmarshal(&out2) // it contains no include/exclude statement, assume include as default
 
 	c.Include = out1.Include
 	c.Exclude = out1.Exclude
@@ -178,12 +178,12 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshals the constraint.
 func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 	var out1 = struct {
-		Include       libcompose.Stringorslice `yaml:"include,omitempty"`
-		Exclude       libcompose.Stringorslice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                   `yaml:"ignore_message,omitempty"`
+		Include       types.Stringorslice `yaml:"include,omitempty"`
+		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
+		IgnoreMessage string              `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 libcompose.Stringorslice
+	var out2 types.Stringorslice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)

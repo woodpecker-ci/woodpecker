@@ -1,0 +1,90 @@
+pipeline:
+  when-branch:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      branch: master
+
+  when-event:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      event: push
+
+  when-event-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      event: [push, pull_request, tag, deployment]
+
+  when-tag:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      tag: "v**"
+
+  when-status:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      status: [success, failure]
+
+  when-platform:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      platform: linux/amd64
+
+  when-platform-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      platform: [ linux/*, windows/amd64 ]
+
+  when-environment:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      environment: production
+      event: deployment
+
+  when-matrix:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      matrix:
+        GO_VERSION: 1.5
+        REDIS_VERSION: 2.8
+
+  when-instance:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      instance: stage.woodpecker.company.com
+
+  when-path:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      path: "folder/**"
+
+  when-path-include-exclude:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      path:
+        include: [ '.woodpecker/*.yml', '*.ini' ]
+        exclude: [ '*.md', 'docs/**' ]
+        ignore_message: "[ALL]"
