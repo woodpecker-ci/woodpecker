@@ -1,15 +1,14 @@
 pipeline:
+  dummy-web:
+    image: golang:1.16
+    commands:
+      - echo "test" > web/dist/index.html
+
   lint:
     image: golang:1.16
     group: test
     commands:
       - make lint
-
-  formatcheck:
-    image: golang:1.16
-    group: test
-    commands:
-      - make formatcheck
 
   agent:
     image: golang:1.16
