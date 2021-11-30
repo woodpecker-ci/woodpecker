@@ -1,0 +1,45 @@
+pipeline:
+  deps:
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn install --frozen-lockfile
+    when:
+      path: "web/**"
+
+  lint:
+    group: test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn lint
+    when:
+      path: "web/**"
+
+  formatcheck:
+    group: test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn formatcheck
+    when:
+      path: "web/**"
+
+  typecheck:
+    group: test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn typecheck
+    when:
+      path: "web/**"
+
+  test:
+    group: test
+    image: node:16-alpine
+    commands:
+      - cd web/
+      - yarn test
+    when:
+      path: "web/**"
+

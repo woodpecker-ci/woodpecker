@@ -1,7 +1,3 @@
-clone:
-  git:
-    image: plugins/git:next
-
 pipeline:
   set-version:
     image: alpine/helm:3.5.3

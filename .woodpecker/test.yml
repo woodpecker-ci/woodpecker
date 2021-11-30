@@ -1,0 +1,76 @@
+pipeline:
+  dummy-web:
+    image: golang:1.16
+    commands:
+      - mkdir -p web/dist/
+      - echo "test" > web/dist/index.html
+
+  lint:
+    image: golang:1.16
+    group: test
+    commands:
+      - make lint
+
+  agent:
+    image: golang:1.16
+    group: test
+    commands:
+      - make test-agent
+
+  server:
+    image: golang:1.16
+    group: test
+    commands:
+      - make test-server
+
+  cli:
+    image: golang:1.16
+    group: test
+    commands:
+      - make test-cli
+
+  lib:
+    image: golang:1.16
+    group: test
+    commands:
+      - make test-lib
+
+  sqlite:
+    image: golang:1.16
+    group: test
+    environment:
+      - DATABASE_DRIVER=sqlite3
+    commands:
+      - make test-server-datastore
+
+  postgres:
+    image: golang:1.16
+    group: test
+    environment:
+      - DATABASE_DRIVER=postgres
+      - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+    commands:
+      - make test-server-datastore
+
+  mysql:
+    image: golang:1.16
+    group: test
+    environment:
+      - DATABASE_DRIVER=mysql
+      - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+    commands:
+      - make test-server-datastore
+
+services:
+  postgres:
+    image: postgres:9.6
+    ports: ["5432"]
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  mysql:
+    image: mysql:5.6.27
+    ports: ["3306"]
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
