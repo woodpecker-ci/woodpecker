@@ -3,14 +3,14 @@ GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 VERSION ?= next
-ifneq ($(DRONE_TAG),)
-	VERSION := $(DRONE_TAG:v%=%)
+ifneq ($(CI_COMMIT_TAG),)
+	VERSION := $(CI_COMMIT_TAG:v%=%)
 endif
 
 # append commit-sha to next version
 BUILD_VERSION := $(VERSION)
 ifeq ($(BUILD_VERSION),next)
-	BUILD_VERSION := $(shell echo "next-$(shell echo ${DRONE_COMMIT_SHA} | head -c 8)")
+	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
@@ -45,11 +45,22 @@ lint:
 frontend-dependencies:
 	(cd web/; yarn install --frozen-lockfile)
 
+lint-frontend:
+	(cd web/; yarn)
+	(cd web/; yarn lesshint)
+	(cd web/; yarn lint --quiet)
+
 test-agent:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
 test-server:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
+
+test-server-datastore:
+	$(DOCKER_RUN) go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+
+test-cli:
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-frontend: frontend-dependencies
 	(cd web/; yarn run lint)
@@ -58,9 +69,9 @@ test-frontend: frontend-dependencies
 	(cd web/; yarn run test)
 
 test-lib:
-	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
+	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
-test: test-lib test-agent test-server
+test: formatcheck vet test-agent test-server test-server-datastore test-cli test-frontend test-lib
 
 build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)

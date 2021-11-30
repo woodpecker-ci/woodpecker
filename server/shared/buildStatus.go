@@ -44,7 +44,7 @@ func UpdateToStatusDeclined(store UpdateBuildStore, build model.Build, reviewer 
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateStatusToDone(store UpdateBuildStore, build model.Build, status string, stopped int64) (*model.Build, error) {
+func UpdateStatusToDone(store UpdateBuildStore, build model.Build, status model.StatusValue, stopped int64) (*model.Build, error) {
 	build.Status = status
 	build.Finished = stopped
 	return &build, store.UpdateBuild(&build)

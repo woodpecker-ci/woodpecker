@@ -37,7 +37,6 @@ func Test_coding(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Coding", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -116,10 +115,10 @@ func Test_coding(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
 				g.Assert(repo.Link).Equal(s.URL + fakeRepo.Link)
-				g.Assert(repo.Kind).Equal(fakeRepo.Kind)
+				g.Assert(repo.SCMKind).Equal(fakeRepo.SCMKind)
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
 				g.Assert(repo.Branch).Equal(fakeRepo.Branch)
-				g.Assert(repo.IsPrivate).Equal(fakeRepo.IsPrivate)
+				g.Assert(repo.IsSCMPrivate).Equal(fakeRepo.IsSCMPrivate)
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
@@ -229,7 +228,6 @@ func Test_coding(t *testing.T) {
 				g.Assert(r.FullName).Equal("demo1/test1")
 			})
 		})
-
 	})
 }
 
@@ -257,15 +255,15 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		Owner:     "demo1",
-		Name:      "test1",
-		FullName:  "demo1/test1",
-		Avatar:    "/static/project_icon/scenery-5.png",
-		Link:      "/u/gilala/p/abp/git",
-		Kind:      model.RepoGit,
-		Clone:     "https://git.coding.net/demo1/test1.git",
-		Branch:    "master",
-		IsPrivate: true,
+		Owner:        "demo1",
+		Name:         "test1",
+		FullName:     "demo1/test1",
+		Avatar:       "/static/project_icon/scenery-5.png",
+		Link:         "/u/gilala/p/abp/git",
+		SCMKind:      model.RepoGit,
+		Clone:        "https://git.coding.net/demo1/test1.git",
+		Branch:       "master",
+		IsSCMPrivate: true,
 	}
 
 	fakeRepoNotFound = &model.Repo{

@@ -38,7 +38,6 @@ func Test_github(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("GitHub", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -102,7 +101,7 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
-				g.Assert(repo.IsPrivate).IsTrue()
+				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
 				g.Assert(repo.Link).Equal(fakeRepo.Link)
 			})
@@ -150,28 +149,19 @@ var (
 		Token: "cfcd2084",
 	}
 
-	fakeUserNoRepos = &model.User{
-		Login: "octocat",
-		Token: "repos_not_found",
-	}
-
 	fakeRepo = &model.Repo{
-		Owner:     "octocat",
-		Name:      "Hello-World",
-		FullName:  "octocat/Hello-World",
-		Avatar:    "https://github.com/images/error/octocat_happy.gif",
-		Link:      "https://github.com/octocat/Hello-World",
-		Clone:     "https://github.com/octocat/Hello-World.git",
-		IsPrivate: true,
+		Owner:        "octocat",
+		Name:         "Hello-World",
+		FullName:     "octocat/Hello-World",
+		Avatar:       "https://github.com/images/error/octocat_happy.gif",
+		Link:         "https://github.com/octocat/Hello-World",
+		Clone:        "https://github.com/octocat/Hello-World.git",
+		IsSCMPrivate: true,
 	}
 
 	fakeRepoNotFound = &model.Repo{
 		Owner:    "test_name",
 		Name:     "repo_not_found",
 		FullName: "test_name/repo_not_found",
-	}
-
-	fakeBuild = &model.Build{
-		Commit: "9ecad50",
 	}
 )

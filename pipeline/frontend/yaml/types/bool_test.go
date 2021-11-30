@@ -12,7 +12,6 @@ func TestBoolTrue(t *testing.T) {
 
 	g.Describe("Yaml bool type", func() {
 		g.Describe("given a yaml file", func() {
-
 			g.It("should unmarshal true", func() {
 				in := []byte("true")
 				out := BoolTrue{}

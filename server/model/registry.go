@@ -15,7 +15,10 @@
 
 package model
 
-import "errors"
+import (
+	"errors"
+	"net/url"
+)
 
 var (
 	errRegistryAddressInvalid  = errors.New("Invalid Registry Address")
@@ -32,7 +35,7 @@ type RegistryService interface {
 	RegistryDelete(*Repo, string) error
 }
 
-// RegistryService defines a service for managing registries.
+// ReadOnlyRegistryService defines a service for managing registries.
 type ReadOnlyRegistryService interface {
 	RegistryFind(*Repo, string) (*Registry, error)
 	RegistryList(*Repo) ([]*Registry, error)
@@ -44,7 +47,7 @@ type RegistryStore interface {
 	RegistryList(*Repo) ([]*Registry, error)
 	RegistryCreate(*Registry) error
 	RegistryUpdate(*Registry) error
-	RegistryDelete(*Registry) error
+	RegistryDelete(repo *Repo, addr string) error
 }
 
 // Registry represents a docker registry with credentials.
@@ -68,9 +71,10 @@ func (r *Registry) Validate() error {
 		return errRegistryUsernameInvalid
 	case len(r.Password) == 0:
 		return errRegistryPasswordInvalid
-	default:
-		return nil
 	}
+
+	_, err := url.Parse(r.Address)
+	return err
 }
 
 // Copy makes a copy of the registry without the password.

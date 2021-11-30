@@ -31,7 +31,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
@@ -138,12 +138,21 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				// new docker engine
-				engine, err := docker.NewEnv()
+				// new engine
+				engine, err := backend.FindEngine(c.String("backend-engine"))
 				if err != nil {
-					log.Error().Err(err).Msg("cannot create docker client")
+					log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 					return
 				}
+
+				// load enginge (e.g. init api client)
+				err = engine.Load()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot load backend engine")
+					return
+				}
+
+				log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
 				r := agent.NewRunner(client, filter, hostname, counter, &engine)
 				if err := r.Run(ctx); err != nil {

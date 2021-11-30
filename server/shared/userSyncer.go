@@ -40,9 +40,8 @@ type Syncer struct {
 // synchronized with the local datastore.
 type FilterFunc func(*model.Repo) bool
 
-// NamespaceFilter
 func NamespaceFilter(namespaces map[string]bool) FilterFunc {
-	if namespaces == nil || len(namespaces) == 0 {
+	if len(namespaces) == 0 {
 		return noopFilter
 	}
 	return func(repo *model.Repo) bool {

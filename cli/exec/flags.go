@@ -69,12 +69,12 @@ var flags = []cli.Flag{
 	// workspace default
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WORKSPACE_BASE"},
+		EnvVars: []string{"CI_WORKSPACE_BASE"},
 		Name:    "workspace-base",
 		Value:   "/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WORKSPACE_PATH"},
+		EnvVars: []string{"CI_WORKSPACE_PATH"},
 		Name:    "workspace-path",
 		Value:   "src",
 	},
@@ -82,185 +82,185 @@ var flags = []cli.Flag{
 	// netrc parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_NETRC_USERNAME"},
+		EnvVars: []string{"CI_NETRC_USERNAME"},
 		Name:    "netrc-username",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_NETRC_PASSWORD"},
+		EnvVars: []string{"CI_NETRC_PASSWORD"},
 		Name:    "netrc-password",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_NETRC_MACHINE"},
+		EnvVars: []string{"CI_NETRC_MACHINE"},
 		Name:    "netrc-machine",
 	},
 	//
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SYSTEM_ARCH"},
+		EnvVars: []string{"CI_SYSTEM_ARCH"},
 		Name:    "system-arch",
 		Value:   "linux/amd64",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SYSTEM_NAME"},
+		EnvVars: []string{"CI_SYSTEM_NAME"},
 		Name:    "system-name",
 		Value:   "pipec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SYSTEM_LINK"},
+		EnvVars: []string{"CI_SYSTEM_LINK"},
 		Name:    "system-link",
 		Value:   "https://github.com/cncd/pipec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REPO_NAME"},
+		EnvVars: []string{"CI_REPO_NAME"},
 		Name:    "repo-name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REPO_LINK"},
+		EnvVars: []string{"CI_REPO_LINK"},
 		Name:    "repo-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REPO_REMOTE"},
+		EnvVars: []string{"CI_REPO_REMOTE"},
 		Name:    "repo-remote-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REPO_PRIVATE"},
+		EnvVars: []string{"CI_REPO_PRIVATE"},
 		Name:    "repo-private",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_BUILD_NUMBER"},
+		EnvVars: []string{"CI_BUILD_NUMBER"},
 		Name:    "build-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_PARENT_BUILD_NUMBER"},
+		EnvVars: []string{"CI_PARENT_BUILD_NUMBER"},
 		Name:    "parent-build-number",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_BUILD_CREATED"},
+		EnvVars: []string{"CI_BUILD_CREATED"},
 		Name:    "build-created",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_BUILD_STARTED"},
+		EnvVars: []string{"CI_BUILD_STARTED"},
 		Name:    "build-started",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_BUILD_FINISHED"},
+		EnvVars: []string{"CI_BUILD_FINISHED"},
 		Name:    "build-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BUILD_STATUS"},
+		EnvVars: []string{"CI_BUILD_STATUS"},
 		Name:    "build-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BUILD_EVENT"},
+		EnvVars: []string{"CI_BUILD_EVENT"},
 		Name:    "build-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BUILD_LINK"},
+		EnvVars: []string{"CI_BUILD_LINK"},
 		Name:    "build-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BUILD_TARGET"},
+		EnvVars: []string{"CI_BUILD_TARGET"},
 		Name:    "build-target",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_SHA"},
+		EnvVars: []string{"CI_COMMIT_SHA"},
 		Name:    "commit-sha",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_REF"},
+		EnvVars: []string{"CI_COMMIT_REF"},
 		Name:    "commit-ref",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_REFSPEC"},
+		EnvVars: []string{"CI_COMMIT_REFSPEC"},
 		Name:    "commit-refspec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_BRANCH"},
+		EnvVars: []string{"CI_COMMIT_BRANCH"},
 		Name:    "commit-branch",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_MESSAGE"},
+		EnvVars: []string{"CI_COMMIT_MESSAGE"},
 		Name:    "commit-message",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_AUTHOR_NAME"},
+		EnvVars: []string{"CI_COMMIT_AUTHOR_NAME"},
 		Name:    "commit-author-name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_AUTHOR_AVATAR"},
+		EnvVars: []string{"CI_COMMIT_AUTHOR_AVATAR"},
 		Name:    "commit-author-avatar",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_COMMIT_AUTHOR_EMAIL"},
+		EnvVars: []string{"CI_COMMIT_AUTHOR_EMAIL"},
 		Name:    "commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_NUMBER"},
+		EnvVars: []string{"CI_PREV_BUILD_NUMBER"},
 		Name:    "prev-build-number",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_CREATED"},
+		EnvVars: []string{"CI_PREV_BUILD_CREATED"},
 		Name:    "prev-build-created",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_STARTED"},
+		EnvVars: []string{"CI_PREV_BUILD_STARTED"},
 		Name:    "prev-build-started",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_FINISHED"},
+		EnvVars: []string{"CI_PREV_BUILD_FINISHED"},
 		Name:    "prev-build-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_STATUS"},
+		EnvVars: []string{"CI_PREV_BUILD_STATUS"},
 		Name:    "prev-build-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_EVENT"},
+		EnvVars: []string{"CI_PREV_BUILD_EVENT"},
 		Name:    "prev-build-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_BUILD_LINK"},
+		EnvVars: []string{"CI_PREV_BUILD_LINK"},
 		Name:    "prev-build-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_SHA"},
+		EnvVars: []string{"CI_PREV_COMMIT_SHA"},
 		Name:    "prev-commit-sha",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_REF"},
+		EnvVars: []string{"CI_PREV_COMMIT_REF"},
 		Name:    "prev-commit-ref",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_REFSPEC"},
+		EnvVars: []string{"CI_PREV_COMMIT_REFSPEC"},
 		Name:    "prev-commit-refspec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_BRANCH"},
+		EnvVars: []string{"CI_PREV_COMMIT_BRANCH"},
 		Name:    "prev-commit-branch",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_MESSAGE"},
+		EnvVars: []string{"CI_PREV_COMMIT_MESSAGE"},
 		Name:    "prev-commit-message",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_AUTHOR_NAME"},
+		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_NAME"},
 		Name:    "prev-commit-author-name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_AUTHOR_AVATAR"},
+		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_AVATAR"},
 		Name:    "prev-commit-author-avatar",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREV_COMMIT_AUTHOR_EMAIL"},
+		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_EMAIL"},
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_JOB_NUMBER"},
+		EnvVars: []string{"CI_JOB_NUMBER"},
 		Name:    "job-number",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_ENV"},
+		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
 	},
 }

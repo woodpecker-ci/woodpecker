@@ -18,12 +18,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/gin-gonic/gin"
-
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -98,13 +97,16 @@ func SetPerm() gin.HandlerFunc {
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = remote.FromContext(c).Perm(c, user, repo.Owner, repo.Name)
+				perm, err = server.Config.Services.Remote.Perm(c, user, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store_.PermUpsert(perm)
+					if err := store_.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
 				}
 			}
 		}
@@ -129,7 +131,6 @@ func SetPerm() gin.HandlerFunc {
 		if user != nil {
 			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
-
 		} else {
 			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 		}
@@ -178,7 +179,6 @@ func MustPush(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		log.Debug().Msgf("User %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
-
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		log.Debug().Msgf("Guest denied write access to %s %s",

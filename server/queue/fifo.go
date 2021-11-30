@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/model"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -19,7 +21,6 @@ const (
 type entry struct {
 	item     *Task
 	done     chan bool
-	retry    int
 	error    error
 	deadline time.Time
 }
@@ -97,8 +98,8 @@ func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string, exitStatus string) error {
-	return q.finished([]string{id}, exitStatus, nil)
+func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+	return q.finished([]string{id}, string(exitStatus), nil)
 }
 
 // Error signals that the item is done executing with error.
@@ -355,7 +356,6 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 		}
 	}
 
-	next = nil
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
 		waiting, ok := e.Value.(*Task)
