@@ -343,8 +343,25 @@ func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *mod
 		return err
 	}
 
+	context := c.Context
+
+	switch b.Event {
+	case model.EventPull:
+		context += "/pr"
+	default:
+		if len(b.Event) > 0 {
+			context += "/" + b.Event
+		}
+	}
+
 	status := getStatus(b.Status)
 	desc := getDesc(b.Status)
+
+	if proc != nil {
+		context += "/" + proc.Name
+		status = getStatus(proc.State)
+		desc = getDesc(proc.State)
+	}
 
 	_, _, err = client.CreateStatus(
 		r.Owner,
@@ -354,7 +371,7 @@ func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *mod
 			State:       status,
 			TargetURL:   link,
 			Description: desc,
-			Context:     c.Context,
+			Context:     context,
 		},
 	)
 
