@@ -36,8 +36,8 @@ func Refresh(c *gin.Context) {
 
 	// check if the remote includes the ability to
 	// refresh the user token.
-	remote_ := server.Config.Services.Remote
-	refresher, ok := remote_.(remote.Refresher)
+	_remote := server.Config.Services.Remote
+	refresher, ok := _remote.(remote.Refresher)
 	if !ok {
 		c.Next()
 		return

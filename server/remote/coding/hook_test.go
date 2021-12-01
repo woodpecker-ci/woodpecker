@@ -83,8 +83,8 @@ func Test_hook(t *testing.T) {
 		g.It("Should convert repository", func() {
 			repository := &Repository{
 				Name:     "test_project",
-				HttpsURL: "https://git.coding.net/kelvin/test_project.git",
-				SshURL:   "git@git.coding.net:kelvin/test_project.git",
+				HTTPSURL: "https://git.coding.net/kelvin/test_project.git",
+				SSHURL:   "git@git.coding.net:kelvin/test_project.git",
 				WebURL:   "https://coding.net/u/kelvin/p/test_project",
 				Owner: &User{
 					GlobalKey: "kelvin",

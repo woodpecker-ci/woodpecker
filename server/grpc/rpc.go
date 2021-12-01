@@ -80,10 +80,9 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 			pipeline := new(rpc.Pipeline)
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
-		} else {
-			if err := s.Done(c, task.ID, rpc.State{}); err != nil {
-				log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
-			}
+		}
+		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
+			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
 }

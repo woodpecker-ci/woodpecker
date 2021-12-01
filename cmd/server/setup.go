@@ -166,9 +166,8 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 			registry.New(s),
 			registry.Filesystem(c.String("docker-config")),
 		)
-	} else {
-		return registry.New(s)
 	}
+	return registry.New(s)
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
@@ -301,7 +300,7 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	return coding.New(opts)
 }
 
-func setupMetrics(g *errgroup.Group, store_ store.Store) {
+func setupMetrics(g *errgroup.Group, _store store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_jobs",
@@ -350,9 +349,9 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	})
 	g.Go(func() error {
 		for {
-			repoCount, _ := store_.GetRepoCount()
-			userCount, _ := store_.GetUserCount()
-			buildCount, _ := store_.GetBuildCount()
+			repoCount, _ := _store.GetRepoCount()
+			userCount, _ := _store.GetUserCount()
+			buildCount, _ := _store.GetBuildCount()
 			builds.Set(float64(buildCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))

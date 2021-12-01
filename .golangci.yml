@@ -28,6 +28,7 @@ linters:
     - varcheck
     - ineffassign
     - unused
+    - revive
 
 run:
   timeout: 5m

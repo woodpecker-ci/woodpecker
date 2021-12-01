@@ -138,20 +138,20 @@ func LogStreamSSE(c *gin.Context) {
 	flusher.Flush()
 
 	repo := session.Repo(c)
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
 	// // parse the build number and job sequence number from
 	// // the repquest parameter.
 	buildn, _ := strconv.ParseInt(c.Param("build"), 10, 64)
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
-	build, err := store_.GetBuildNumber(repo, buildn)
+	build, err := _store.GetBuildNumber(repo, buildn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get build number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: build not found\n\n"))
 		return
 	}
-	proc, err := store_.ProcFind(build, jobn)
+	proc, err := _store.ProcFind(build, jobn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get proc number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))

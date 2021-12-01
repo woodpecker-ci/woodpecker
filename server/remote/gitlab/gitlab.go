@@ -91,7 +91,7 @@ func New(opts Opts) (remote.Remote, error) {
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	var config = &oauth2.Config{
-		ClientId:     g.ClientID,
+		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
@@ -119,12 +119,12 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var token_, err = trans.Exchange(code)
+	var token, err = trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
 
-	client, err := newClient(g.URL, token_.AccessToken, g.SkipVerify)
+	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +138,8 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Login:  login.Username,
 		Email:  login.Email,
 		Avatar: login.AvatarURL,
-		Token:  token_.AccessToken,
-		Secret: token_.RefreshToken,
+		Token:  token.AccessToken,
+		Secret: token.RefreshToken,
 	}
 	if !strings.HasPrefix(user.Avatar, "http") {
 		user.Avatar = g.URL + "/" + login.AvatarURL
@@ -214,12 +214,12 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string)
 		return nil, err
 	}
 
-	repo_, err := g.getProject(ctx, client, owner, name)
+	_repo, err := g.getProject(ctx, client, owner, name)
 	if err != nil {
 		return nil, err
 	}
 
-	return g.convertGitlabRepo(repo_)
+	return g.convertGitlabRepo(_repo)
 }
 
 // Repos fetches a list of repos from the remote system.
@@ -291,11 +291,11 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
-	file, _, err := client.RepositoryFiles.GetRawFile(repo_.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit}, gitlab.WithContext(ctx))
+	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit}, gitlab.WithContext(ctx))
 	return file, err
 }
 
@@ -307,7 +307,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 	}
 
 	files := make([]*remote.FileMeta, 0, perPage)
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 
 	for i := 1; true; i++ {
 		opts.Page = 1
-		batch, _, err := client.Repositories.ListTree(repo_.ID, opts, gitlab.WithContext(ctx))
+		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -354,12 +354,12 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(repo_.ID, build.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
 		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
@@ -401,16 +401,16 @@ func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return err
 	}
 	token := uri.Query().Get("access_token")
-	webUrl := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
+	webURL := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
 	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.SetDroneCIService(repo_.ID, &gitlab.SetDroneCIServiceOptions{
+	_, err = client.Services.SetDroneCIService(_repo.ID, &gitlab.SetDroneCIServiceOptions{
 		Token:                 &token,
-		DroneURL:              &webUrl,
+		DroneURL:              &webURL,
 		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
 	}, gitlab.WithContext(ctx))
 	return err
@@ -424,12 +424,12 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
 	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.DeleteDroneCIService(repo_.ID, gitlab.WithContext(ctx))
+	_, err = client.Services.DeleteDroneCIService(_repo.ID, gitlab.WithContext(ctx))
 
 	return err
 }
@@ -441,12 +441,12 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabBranches, _, err := client.Branches.ListBranches(repo_.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

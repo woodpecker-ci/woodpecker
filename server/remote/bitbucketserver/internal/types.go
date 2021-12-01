@@ -42,7 +42,7 @@ type BuildStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 	Desc  string `json:"description,omitempty"`
 }
 

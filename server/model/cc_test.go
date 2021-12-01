@@ -26,7 +26,7 @@ func TestCC(t *testing.T) {
 	g.Describe("CC", func() {
 		g.It("Should create a project", func() {
 			now := time.Now().Unix()
-			now_fmt := time.Unix(now, 0).Format(time.RFC3339)
+			nowFmt := time.Unix(now, 0).Format(time.RFC3339)
 			r := &Repo{
 				FullName: "foo/bar",
 			}
@@ -41,7 +41,7 @@ func TestCC(t *testing.T) {
 			g.Assert(cc.Project.Activity).Equal("Sleeping")
 			g.Assert(cc.Project.LastBuildStatus).Equal("Success")
 			g.Assert(cc.Project.LastBuildLabel).Equal("1")
-			g.Assert(cc.Project.LastBuildTime).Equal(now_fmt)
+			g.Assert(cc.Project.LastBuildTime).Equal(nowFmt)
 			g.Assert(cc.Project.WebURL).Equal("http://localhost/foo/bar/1")
 		})
 
