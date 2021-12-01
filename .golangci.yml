@@ -7,22 +7,22 @@ linters-settings:
 linters:
   disable-all: true
   enable:
+    - bidichk
+    - deadcode
+    - errcheck
     - gofmt
     - goimports
-    - govet
-    - deadcode
     - gosimple
-    - typecheck
-    - errcheck
-    - bidichk
+    - govet
+    - ineffassign
     - misspell
-    - whitespace
+    - revive
     - staticcheck
     - structcheck
-    - varcheck
-    - ineffassign
+    - typecheck
     - unused
-    - revive
+    - varcheck
+    - whitespace
 
 run:
   timeout: 5m
