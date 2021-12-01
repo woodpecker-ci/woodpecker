@@ -59,8 +59,7 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 
 ### Plugins
 
-Woodpecker has official plugins https://woodpecker-ci.org/plugins,
-but you can also use your own.
+Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you can also use your own.
 
 [Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
@@ -68,15 +67,15 @@ but you can also use your own.
 
 https://woodpecker-ci.org/
 
+## Contribution
+
+See [Contributing Guide](CONTRIBUTING.md)
+
 ## Who uses Woodpecker?
 
 [Codeberg](https://codeberg.org), the woodpecker project itself, and many others not listed.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
-
-## Contribution
-
-See [Contributing Guide](CONTRIBUTING.md)
 
 ## Stars over time
 [![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
