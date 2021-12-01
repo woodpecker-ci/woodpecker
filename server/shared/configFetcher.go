@@ -13,15 +13,19 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type ConfigFetcher struct {
+type ConfigFetcher interface {
+	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
+}
+
+type configFetcher struct {
 	remote remote.Remote
 	user   *model.User
 	repo   *model.Repo
 	build  *model.Build
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *ConfigFetcher {
-	return &ConfigFetcher{
+func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+	return &configFetcher{
 		remote: remote,
 		user:   user,
 		repo:   repo,
@@ -33,7 +37,7 @@ func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, 
 var configFetchTimeout = 3 // seconds
 
 // Fetch pipeline config from source forge
-func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
+func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times, timeout is one second longer each time
@@ -50,7 +54,7 @@ func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 
 // fetch config by timeout
 // TODO: deduplicate code
-func (cf *ConfigFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
+func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
