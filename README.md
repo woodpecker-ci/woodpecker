@@ -60,7 +60,7 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 ### Plugins
 
 Woodpecker has official plugins https://woodpecker-ci.org/plugins,
-but you can also use own one.
+but you can also use your own.
 
 [Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
@@ -70,7 +70,7 @@ https://woodpecker-ci.org/
 
 ## Who uses Woodpecker?
 
-[Codeberg](https://codeberg.org), We ourselve and a lot more.
+[Codeberg](https://codeberg.org), the woodpecker project itself, and many others not listed.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
 

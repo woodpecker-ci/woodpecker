@@ -101,7 +101,7 @@ pipeline:
 
 If required, Woodpecker can be made to skip whole pipelines based on `when`. This could be utilised to ensure compliance that only certain jobs run on certain agents (regional restrictions). Or targeting architectures.
 
-This is achieved by ensuring the `when` block is on the root level. Rather than
+This is achieved by ensuring the `when` block is on the root level.
 
 See [when](#step-when---step-conditional-execution) above to understand all the different types of conditions that can be used.
 
