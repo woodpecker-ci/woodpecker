@@ -26,7 +26,7 @@ To configure your pipeline you should place a `.woodpecker.yml` file in the root
 
 :::info
 
-Currently, only YAML 1.1 is supported for `.woodpecker.yml`. YAML 1.2 support is [planned for the future](https://github.com/woodpecker-ci/woodpecker/issues/517)!
+Currently, only YAML 1.1 syntax is supported for pipeline configuration files. YAML 1.2 support is [planned for the future](https://github.com/woodpecker-ci/woodpecker/issues/517)!
 
 :::
 
