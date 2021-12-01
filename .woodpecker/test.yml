@@ -10,30 +10,30 @@ pipeline:
     group: test
     commands:
       - make lint
+    when:
+      path:
+        include:
+          - "vendor/**"
+          - "go.mod"
+          - "go.sum"
+          - "**/*.go"
+          - ".golangci.yml"
 
-  agent:
+  test:
     image: golang:1.16
     group: test
     commands:
       - make test-agent
-
-  server:
-    image: golang:1.16
-    group: test
-    commands:
       - make test-server
-
-  cli:
-    image: golang:1.16
-    group: test
-    commands:
       - make test-cli
-
-  lib:
-    image: golang:1.16
-    group: test
-    commands:
       - make test-lib
+    when:
+      path:
+        include:
+          - "vendor/**"
+          - "go.mod"
+          - "go.sum"
+          - "**/*.go"
 
   sqlite:
     image: golang:1.16
@@ -62,13 +62,13 @@ pipeline:
       - make test-server-datastore
 
 services:
-  postgres:
+  service-postgres:
     image: postgres:9.6
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
-  mysql:
+  service-mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
