@@ -24,7 +24,7 @@ In the above example we define two pipeline steps, `frontend` and `backend`. The
 
 ## Global Pipeline Conditionals
 
-Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions. 
+Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions.
 
 ### `branches`
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
@@ -101,7 +101,7 @@ pipeline:
 
 If required, Woodpecker can be made to skip whole pipelines based on `when`. This could be utilised to ensure compliance that only certain jobs run on certain agents (regional restrictions). Or targeting architectures.
 
-This is achieved by ensuring the `when` block is on the root level. Rather than 
+This is achieved by ensuring the `when` block is on the root level. Rather than
 
 See [when](#step-when---step-conditional-execution) above to understand all the different types of conditions that can be used.
 
@@ -125,12 +125,12 @@ pipeline:
 
 ```
 
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. 
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines.
 Because we had our original `when` block underneath the `build` block, if it was run on the `linux/amd64` agent. It would have cloned the repository, and then skipped the build step. Resulting in a Successful build.
 
 Moving the when block to the root level will ensure that the whole pipeline will run be targeted to agents that match all of the conditions.
 
-This can be utilised in conjunction with other when blocks as well. 
+This can be utilised in conjunction with other when blocks as well.
 
 Example `when` pipeline & step block:
 
@@ -196,6 +196,24 @@ pipeline:
     commands:
 +     - go build
 +     - go test
+```
+
+### File changes are incremental
+
+- Woodpecker clones the source code in the beginning pipeline
+- Changes to files are persisted through steps as the same volume is mounted to all steps
+
+```yaml
+# .woodpecker.yml
+pipeline:
+  build:
+    image: debian
+    commands:
+      - touch myfile
+  a-test-step:
+    image: debian
+    commands:
+      - cat myfile
 ```
 
 ### `image`
