@@ -88,7 +88,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			environ := b.environmentVariables(metadata, axis)
 
 			// substitute vars
-			substituted, err := b._envsubst(string(y.Data), environ)
+			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -175,7 +175,7 @@ func containsItemWithName(name string, items []*BuildItem) bool {
 	return false
 }
 
-func (b *ProcBuilder) _envsubst(y string, environ map[string]string) (string, error) {
+func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
