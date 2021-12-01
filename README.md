@@ -134,6 +134,9 @@ Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you
 
 See [Contributing Guide](CONTRIBUTING.md)
 
+## Stars over time
+[![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
+
 ## License
 
 Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
