@@ -23,12 +23,6 @@ linters:
     - unused
     - varcheck
     - whitespace
-    - staticcheck
-    - structcheck
-    - varcheck
-    - ineffassign
-    - unused
-    - revive
 
 run:
   timeout: 5m
