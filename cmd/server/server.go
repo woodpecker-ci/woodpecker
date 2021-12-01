@@ -98,22 +98,22 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	remote_, err := setupRemote(c)
+	_remote, err := setupRemote(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	store_, err := setupStore(c)
+	_store, err := setupStore(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 	defer func() {
-		if err := store_.Close(); err != nil {
+		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
 		}
 	}()
 
-	setupEvilGlobals(c, store_, remote_)
+	setupEvilGlobals(c, _store, _remote)
 
 	proxyWebUI := c.String("www-proxy")
 
@@ -141,7 +141,7 @@ func run(c *cli.Context) error {
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
-		middleware.Store(c, store_),
+		middleware.Store(c, _store),
 	)
 
 	var g errgroup.Group
@@ -164,11 +164,11 @@ func run(c *cli.Context) error {
 			}),
 		)
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			remote_,
+			_remote,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
-			store_,
+			_store,
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
@@ -181,7 +181,7 @@ func run(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, store_)
+	setupMetrics(&g, _store)
 
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {

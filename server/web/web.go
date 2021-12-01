@@ -36,7 +36,7 @@ func New() *gin.Engine {
 
 	e.Use(setupCache)
 
-	h := http.FileServer(web.HttpFS())
+	h := http.FileServer(web.HTTPFS())
 	e.GET("/favicon.svg", gin.WrapH(h))
 	e.GET("/assets/*filepath", gin.WrapH(h))
 

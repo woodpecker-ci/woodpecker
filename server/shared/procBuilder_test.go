@@ -332,7 +332,7 @@ depends_on: [ zerostep ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -386,7 +386,7 @@ depends_on: [ shouldbefiltered ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
