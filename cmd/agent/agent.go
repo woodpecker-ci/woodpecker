@@ -24,14 +24,14 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
@@ -52,13 +52,13 @@ func loop(c *cli.Context) error {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
 
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.BoolT("debug") {
+	if c.Bool("debug") {
 		if c.IsSet("debug") {
 			log.Warn().Msg("--debug is deprecated, use --log-level instead")
 		}
@@ -77,8 +77,12 @@ func loop(c *cli.Context) error {
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
-	if c.BoolT("healthcheck") {
-		go http.ListenAndServe(":3000", nil)
+	if c.Bool("healthcheck") {
+		go func() {
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				log.Error().Msgf("can not listen on port 3000: %v", err)
+			}
+		}()
 	}
 
 	// TODO pass version information to grpc server
@@ -134,12 +138,21 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				// new docker engine
-				engine, err := docker.NewEnv()
+				// new engine
+				engine, err := backend.FindEngine(c.String("backend-engine"))
 				if err != nil {
-					log.Error().Err(err).Msg("cannot create docker client")
+					log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 					return
 				}
+
+				// load enginge (e.g. init api client)
+				err = engine.Load()
+				if err != nil {
+					log.Error().Err(err).Msg("cannot load backend engine")
+					return
+				}
+
+				log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
 				r := agent.NewRunner(client, filter, hostname, counter, &engine)
 				if err := r.Run(ctx); err != nil {

@@ -18,12 +18,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/gin-gonic/gin"
-
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -42,12 +41,13 @@ func Repo(c *gin.Context) *model.Repo {
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			owner = c.Param("owner")
-			name  = c.Param("name")
-			user  = User(c)
+			_store = store.FromContext(c)
+			owner  = c.Param("owner")
+			name   = c.Param("name")
+			user   = User(c)
 		)
 
-		repo, err := store.GetRepoOwnerName(c, owner, name)
+		repo, err := _store.GetRepoName(owner + "/" + name)
 		if err == nil {
 			c.Set("repo", repo)
 			c.Next()
@@ -83,6 +83,7 @@ func Perm(c *gin.Context) *model.Perm {
 
 func SetPerm() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		_store := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
 		perm := new(model.Perm)
@@ -90,19 +91,22 @@ func SetPerm() gin.HandlerFunc {
 		switch {
 		case user != nil:
 			var err error
-			perm, err = store.FromContext(c).PermFind(user, repo)
+			perm, err = _store.PermFind(user, repo)
 			if err != nil {
 				log.Error().Msgf("Error fetching permission for %s %s. %s",
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = remote.FromContext(c).Perm(c, user, repo.Owner, repo.Name)
+				perm, err = server.Config.Services.Remote.Perm(c, user, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
-					store.FromContext(c).PermUpsert(perm)
+					if err := _store.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
 				}
 			}
 		}
@@ -127,7 +131,6 @@ func SetPerm() gin.HandlerFunc {
 		if user != nil {
 			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
-
 		} else {
 			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
 		}
@@ -176,7 +179,6 @@ func MustPush(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		log.Debug().Msgf("User %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
-
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		log.Debug().Msgf("Guest denied write access to %s %s",

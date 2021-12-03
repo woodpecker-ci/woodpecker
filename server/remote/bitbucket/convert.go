@@ -43,7 +43,7 @@ const (
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning, model.StatusBlocked:
 		return statusPending
@@ -56,7 +56,7 @@ func convertStatus(status string) string {
 
 // convertDesc is a helper function used to convert a Woodpecker status to a
 // Bitbucket status description.
-func convertDesc(status string) string {
+func convertDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return descPending
@@ -77,17 +77,17 @@ func convertDesc(status string) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		Clone:     cloneLink(from),
-		Owner:     strings.Split(from.FullName, "/")[0],
-		Name:      strings.Split(from.FullName, "/")[1],
-		FullName:  from.FullName,
-		Link:      from.Links.Html.Href,
-		IsPrivate: from.IsPrivate,
-		Avatar:    from.Owner.Links.Avatar.Href,
-		Kind:      from.Scm,
-		Branch:    "master",
+		Clone:        cloneLink(from),
+		Owner:        strings.Split(from.FullName, "/")[0],
+		Name:         strings.Split(from.FullName, "/")[1],
+		FullName:     from.FullName,
+		Link:         from.Links.HTML.Href,
+		IsSCMPrivate: from.IsPrivate,
+		Avatar:       from.Owner.Links.Avatar.Href,
+		SCMKind:      model.SCMKind(from.Scm),
+		Branch:       "master",
 	}
-	if repo.Kind == model.RepoHg {
+	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
 	}
 	return &repo
@@ -110,7 +110,7 @@ func cloneLink(repo *internal.Repo) string {
 	// if no repository name is provided, we use the Html link. this excludes the
 	// .git suffix, but will still clone the repo.
 	if len(clone) == 0 {
-		clone = repo.Links.Html.Href
+		clone = repo.Links.HTML.Href
 	}
 
 	// if bitbucket tries to automatically populate the user in the url we must
@@ -167,7 +167,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 			from.PullRequest.Dest.Branch.Name,
 		),
 		Remote:    fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		Link:      from.PullRequest.Links.Html.Href,
+		Link:      from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -182,7 +182,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
 	build := &model.Build{
 		Commit:    change.New.Target.Hash,
-		Link:      change.New.Target.Links.Html.Href,
+		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,

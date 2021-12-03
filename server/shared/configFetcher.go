@@ -13,19 +13,23 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type configFetcher struct {
-	remote_ remote.Remote
-	user    *model.User
-	repo    *model.Repo
-	build   *model.Build
+type ConfigFetcher interface {
+	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *configFetcher {
+type configFetcher struct {
+	remote remote.Remote
+	user   *model.User
+	repo   *model.Repo
+	build  *model.Build
+}
+
+func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
-		remote_: remote,
-		user:    user,
-		repo:    repo,
-		build:   build,
+		remote: remote,
+		user:   user,
+		repo:   repo,
+		build:  build,
 	}
 }
 
@@ -58,7 +62,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
-			file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+			file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 			if err == nil && len(file) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 				return []*remote.FileMeta{{
@@ -69,7 +73,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		}
 
 		// or a folder
-		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
+		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
 		if err == nil && len(files) != 0 {
 			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
@@ -84,7 +88,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	// test .woodpecker/ folder
 	// if folder is not supported we will get a "Not implemented" error and continue
 	config = ".woodpecker"
-	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
+	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
@@ -92,7 +96,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".woodpecker.yml"
-	file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
@@ -102,7 +106,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".drone.yml"
-	file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err = cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{

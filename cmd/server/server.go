@@ -29,7 +29,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -45,17 +45,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/logger"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
-func loop(c *cli.Context) error {
-
+func run(c *cli.Context) error {
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
 	}
@@ -99,25 +98,29 @@ func loop(c *cli.Context) error {
 		)
 	}
 
-	remote_, err := SetupRemote(c)
+	_remote, err := setupRemote(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	store_, err := setupStore(c)
+	_store, err := setupStore(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
+	defer func() {
+		if err := _store.Close(); err != nil {
+			log.Error().Err(err).Msg("could not close store")
+		}
+	}()
 
-	setupEvilGlobals(c, store_, remote_)
+	setupEvilGlobals(c, _store, _remote)
 
 	proxyWebUI := c.String("www-proxy")
 
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		// we are switching from gin to httpservermux|treemux,
-		webUIServe = setupTree(c).ServeHTTP
+		webUIServe = web.New().ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -135,39 +138,37 @@ func loop(c *cli.Context) error {
 	// setup the server and start the listener
 	handler := router.Load(
 		webUIServe,
-		logger.Logger(time.RFC3339, true),
+		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
-		middleware.Store(c, store_),
-		middleware.Remote(remote_),
+		middleware.Store(c, _store),
 	)
 
 	var g errgroup.Group
 
 	// start the grpc server
 	g.Go(func() error {
-
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
 			log.Err(err).Msg("")
 			return err
 		}
-		auther := &authorizer{
+		authorizer := &authorizer{
 			password: c.String("agent-secret"),
 		}
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(auther.streamInterceptor),
-			grpc.UnaryInterceptor(auther.unaryIntercaptor),
+			grpc.StreamInterceptor(authorizer.streamInterceptor),
+			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			remote_,
+			_remote,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
-			store_,
+			_store,
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
@@ -180,7 +181,7 @@ func loop(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, store_)
+	setupMetrics(&g, _store)
 
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {
@@ -219,7 +220,9 @@ func loop(c *cli.Context) error {
 	}
 
 	dir := cacheDir()
-	os.MkdirAll(dir, 0700)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
 
 	manager := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -245,16 +248,20 @@ func loop(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
-
 	// storage
 	server.Config.Storage.Files = v
 	server.Config.Storage.Config = v
+
+	// remote
+	server.Config.Services.Remote = r
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
+		log.Error().Err(err).Msg("could not create pubsub service")
+	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Senders = sender.New(v, v)

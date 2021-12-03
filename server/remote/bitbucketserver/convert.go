@@ -43,7 +43,7 @@ const (
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return statusPending
@@ -56,7 +56,7 @@ func convertStatus(status string) string {
 
 // convertDesc is a helper function used to convert a Woodpecker status to a
 // Bitbucket status description.
-func convertDesc(status string) string {
+func convertDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return descPending
@@ -72,14 +72,13 @@ func convertDesc(status string) string {
 // convertRepo is a helper function used to convert a Bitbucket server repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
-
 	repo := model.Repo{
-		Name:      from.Slug,
-		Owner:     from.Project.Key,
-		Branch:    "master",
-		Kind:      model.RepoGit,
-		IsPrivate: true, // Since we have to use Netrc it has to always be private :/
-		FullName:  fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
+		Name:         from.Slug,
+		Owner:        from.Project.Key,
+		Branch:       "master",
+		SCMKind:      model.RepoGit,
+		IsSCMPrivate: true, // Since we have to use Netrc it has to always be private :/
+		FullName:     fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 	}
 
 	for _, item := range from.Links.Clone {
@@ -98,7 +97,6 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		}
 	}
 	return &repo
-
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push

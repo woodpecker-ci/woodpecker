@@ -50,7 +50,7 @@ func convertMapI2MapS(v interface{}) interface{} {
 	return v
 }
 
-func LoadYmlFileAsJson(path string) ([]byte, error) {
+func LoadYmlFileAsJSON(path string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

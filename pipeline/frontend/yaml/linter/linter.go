@@ -48,7 +48,7 @@ func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
 		if err := l.lintImage(container); err != nil {
 			return err
 		}
-		if l.trusted == false {
+		if !l.trusted {
 			if err := l.lintTrusted(container); err != nil {
 				return err
 			}

@@ -26,20 +26,20 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
-	parts := strings.Split(repo_.PathWithNamespace, "/")
+func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+	parts := strings.Split(_repo.PathWithNamespace, "/")
 	// TODO: save repo id (support nested repos)
 	var owner = parts[0]
 	var name = parts[1]
 	repo := &model.Repo{
 		Owner:      owner,
 		Name:       name,
-		FullName:   repo_.PathWithNamespace,
-		Avatar:     repo_.AvatarURL,
-		Link:       repo_.WebURL,
-		Clone:      repo_.HTTPURLToRepo,
-		Branch:     repo_.DefaultBranch,
-		Visibility: string(repo_.Visibility),
+		FullName:   _repo.PathWithNamespace,
+		Avatar:     _repo.AvatarURL,
+		Link:       _repo.WebURL,
+		Clone:      _repo.HTTPURLToRepo,
+		Branch:     _repo.DefaultBranch,
+		Visibility: model.RepoVisibly(_repo.Visibility),
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -51,9 +51,9 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 	}
 
 	if g.PrivateMode {
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	} else {
-		repo.IsPrivate = !repo_.Public
+		repo.IsSCMPrivate = !_repo.Public
 	}
 
 	return repo, nil
@@ -149,11 +149,11 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
-		repo.IsPrivate = false
+		repo.IsSCMPrivate = false
 	}
 
 	build.Event = model.EventPush
@@ -194,11 +194,11 @@ func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 
 	switch hook.Project.Visibility {
 	case gitlab.PrivateVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.InternalVisibility:
-		repo.IsPrivate = true
+		repo.IsSCMPrivate = true
 	case gitlab.PublicVisibility:
-		repo.IsPrivate = false
+		repo.IsSCMPrivate = false
 	}
 
 	build.Event = model.EventTag

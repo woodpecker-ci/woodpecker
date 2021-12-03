@@ -226,7 +226,7 @@ func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 		State: convertStatus(b.Status),
 		Desc:  convertDesc(b.Status),
 		Key:   "Woodpecker",
-		Url:   link,
+		URL:   link,
 	}
 	return c.newClient(ctx, u).CreateStatus(r.Owner, r.Name, b.Commit, &status)
 }
@@ -239,13 +239,13 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	if err != nil {
 		return err
 	}
-	c.Deactivate(ctx, u, r, link)
+	_ = c.Deactivate(ctx, u, r, link)
 
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawurl.Host,
 		Events: []string{"repo:push"},
-		Url:    link,
+		URL:    link,
 	})
 }
 
@@ -260,7 +260,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	}
 	hook := matchingHooks(hooks.Values, link)
 	if hook != nil {
-		return client.DeleteHook(r.Owner, r.Name, hook.Uuid)
+		return client.DeleteHook(r.Owner, r.Name, hook.UUID)
 	}
 	return nil
 }
@@ -273,6 +273,12 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    "x-token-auth",
 		Password: u.Token,
 	}, nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
@@ -320,7 +326,7 @@ func matchingHooks(hooks []*internal.Hook, rawurl string) *internal.Hook {
 		return nil
 	}
 	for _, hook := range hooks {
-		hookurl, err := url.Parse(hook.Url)
+		hookurl, err := url.Parse(hook.URL)
 		if err == nil && hookurl.Host == link.Host {
 			return hook
 		}

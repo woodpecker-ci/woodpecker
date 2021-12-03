@@ -41,13 +41,13 @@ bbb`,
 pipeline:
   xxx:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
 pipeline:
   build:
     image: scratch
-    yyy: ${DRONE_COMMIT_MESSAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		}}
 
@@ -186,12 +186,12 @@ func TestPipelineName(t *testing.T) {
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: []*remote.FileMeta{
-			&remote.FileMeta{Name: ".woodpecker/lint.yml", Data: []byte(`
+			{Name: ".woodpecker/lint.yml", Data: []byte(`
 pipeline:
   build:
     image: scratch
 `)},
-			&remote.FileMeta{Name: ".woodpecker/.test.yml", Data: []byte(`
+			{Name: ".woodpecker/.test.yml", Data: []byte(`
 pipeline:
   build:
     image: scratch
@@ -332,7 +332,7 @@ depends_on: [ zerostep ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -386,7 +386,7 @@ depends_on: [ shouldbefiltered ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -454,5 +454,4 @@ func TestSanitizePath(t *testing.T) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}
-
 }

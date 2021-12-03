@@ -21,10 +21,8 @@ import (
 )
 
 func TestSecret(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Secret", func() {
-
 		g.It("should match event", func() {
 			secret := Secret{}
 			secret.Events = []string{"pull_request"}
@@ -51,13 +49,13 @@ func TestSecret(t *testing.T) {
 				secret := Secret{}
 				secret.Value = "secretvalue"
 				err := secret.Validate()
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 			g.It("when no value", func() {
 				secret := Secret{}
 				secret.Name = "secretname"
 				err := secret.Validate()
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 	})

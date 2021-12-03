@@ -57,6 +57,8 @@ func apiRoutes(e *gin.Engine) {
 			repo.POST("", session.MustRepoAdmin(), api.PostRepo)
 			repo.GET("", api.GetRepo)
 
+			repo.GET("/branches", api.GetRepoBranches)
+
 			repo.GET("/builds", api.GetBuilds)
 			repo.GET("/builds/:number", api.GetBuild)
 

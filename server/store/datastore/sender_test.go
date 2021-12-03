@@ -17,17 +17,16 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestSenderFind(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
-	err := s.SenderCreate(&model.Sender{
+	err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
@@ -38,7 +37,7 @@ func TestSenderFind(t *testing.T) {
 		return
 	}
 
-	sender, err := s.SenderFind(&model.Repo{ID: 1}, "octocat")
+	sender, err := store.SenderFind(&model.Repo{ID: 1}, "octocat")
 	if err != nil {
 		t.Error(err)
 		return
@@ -55,26 +54,23 @@ func TestSenderFind(t *testing.T) {
 }
 
 func TestSenderList(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
-	s.SenderCreate(&model.Sender{
+	assert.NoError(t, store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
 		Block:  false,
-	})
-	s.SenderCreate(&model.Sender{
+	}))
+	assert.NoError(t, store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "defunkt",
 		Allow:  true,
 		Block:  false,
-	})
+	}))
 
-	list, err := s.SenderList(&model.Repo{ID: 1})
+	list, err := store.SenderList(&model.Repo{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
@@ -85,11 +81,8 @@ func TestSenderList(t *testing.T) {
 }
 
 func TestSenderUpdate(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
 	sender := &model.Sender{
 		RepoID: 1,
@@ -97,33 +90,26 @@ func TestSenderUpdate(t *testing.T) {
 		Allow:  true,
 		Block:  false,
 	}
-	if err := s.SenderCreate(sender); err != nil {
+	if err := store.SenderCreate(sender); err != nil {
 		t.Errorf("Unexpected error: insert sender: %s", err)
 		return
 	}
+	assert.EqualValues(t, 1, sender.ID)
 	sender.Allow = false
-	if err := s.SenderUpdate(sender); err != nil {
+	if err := store.SenderUpdate(sender); err != nil {
 		t.Errorf("Unexpected error: update sender: %s", err)
 		return
 	}
-	updated, err := s.SenderFind(&model.Repo{ID: 1}, "octocat")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := updated.Allow, false; got != want {
-		t.Errorf("Want allow value %v, got %v", want, got)
-	}
+	updated, err := store.SenderFind(&model.Repo{ID: 1}, "octocat")
+	assert.NoError(t, err)
+	assert.False(t, updated.Allow)
 }
 
 func TestSenderIndexes(t *testing.T) {
-	s := newTest()
-	defer func() {
-		s.Exec("delete from senders")
-		s.Close()
-	}()
+	store, closer := newTestStore(t, new(model.Sender))
+	defer closer()
 
-	if err := s.SenderCreate(&model.Sender{
+	if err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,
@@ -134,7 +120,7 @@ func TestSenderIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate name
-	if err := s.SenderCreate(&model.Sender{
+	if err := store.SenderCreate(&model.Sender{
 		RepoID: 1,
 		Login:  "octocat",
 		Allow:  true,

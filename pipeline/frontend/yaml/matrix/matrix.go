@@ -29,7 +29,6 @@ func (a Axis) String() string {
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
-
 	axis, err := parseList(data)
 	if err == nil && len(axis) != 0 {
 		return axis, nil

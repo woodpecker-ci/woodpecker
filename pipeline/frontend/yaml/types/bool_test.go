@@ -12,7 +12,6 @@ func TestBoolTrue(t *testing.T) {
 
 	g.Describe("Yaml bool type", func() {
 		g.Describe("given a yaml file", func() {
-
 			g.It("should unmarshal true", func() {
 				in := []byte("true")
 				out := BoolTrue{}
@@ -47,7 +46,7 @@ func TestBoolTrue(t *testing.T) {
 				in := []byte("abc") // string value should fail parse
 				out := BoolTrue{}
 				err := yaml.Unmarshal(in, &out)
-				g.Assert(err != nil).IsTrue("expects error")
+				g.Assert(err).IsNotNil("expects error")
 			})
 		})
 	})

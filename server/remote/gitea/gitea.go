@@ -118,7 +118,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		return nil, nil
 	}
 
-	token, err := config.Exchange(oauth2.NoContext, code)
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -424,6 +424,25 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	return nil
 }
 
+// Branches returns the names of all branches for the named repository.
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range giteaBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
@@ -453,7 +472,7 @@ const (
 
 // getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
-func getStatus(status string) gitea.StatusState {
+func getStatus(status model.StatusValue) gitea.StatusState {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
 		return gitea.StatusPending
@@ -474,7 +493,7 @@ func getStatus(status string) gitea.StatusState {
 
 // getDesc is a helper function that generates a description
 // message for the build based on the status.
-func getDesc(status string) string {
+func getDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:
 		return DescPending

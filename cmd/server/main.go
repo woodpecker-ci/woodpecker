@@ -18,25 +18,22 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func main() {
-	godotenv.Load(".env")
 	app := cli.NewApp()
 	app.Name = "woodpecker-server"
 	app.Version = version.String()
 	app.Usage = "woodpecker server"
-	app.Action = loop
+	app.Action = run
 	app.Flags = flags
-	app.Before = before
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

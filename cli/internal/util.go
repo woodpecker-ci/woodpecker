@@ -2,12 +2,13 @@ package internal
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/jackspirou/syscerts"
-	"github.com/urfave/cli"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
@@ -17,25 +18,26 @@ import (
 // NewClient returns a new client from the CLI context.
 func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	var (
-		skip     = c.GlobalBool("skip-verify")
-		socks    = c.GlobalString("socks-proxy")
-		socksoff = c.GlobalBool("socks-proxy-off")
-		token    = c.GlobalString("token")
-		server   = c.GlobalString("server")
+		skip     = c.Bool("skip-verify")
+		socks    = c.String("socks-proxy")
+		socksoff = c.Bool("socks-proxy-off")
+		token    = c.String("token")
+		server   = c.String("server")
 	)
 	server = strings.TrimRight(server, "/")
 
 	// if no server url is provided we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address.")
+		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token.")
+		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token")
 	}
 
 	// attempt to find system CA certs
-	certs := syscerts.SystemRootsPool()
+	certs, err := x509.SystemCertPool()
+	log.Error().Msgf("failed to find system CA certs: %v", err)
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
 		InsecureSkipVerify: skip,
@@ -43,7 +45,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	config := new(oauth2.Config)
 	client := config.Client(
-		oauth2.NoContext,
+		c.Context,
 		&oauth2.Token{
 			AccessToken: token,
 		},
@@ -75,7 +77,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 func ParseRepo(str string) (user, repo string, err error) {
 	var parts = strings.Split(str, "/")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world.")
+		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
 		return
 	}
 	user = parts[0]

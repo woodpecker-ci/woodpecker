@@ -169,15 +169,15 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 		return nil, err
 	}
 	return &model.Repo{
-		Owner:     project.Owner,
-		Name:      project.Name,
-		FullName:  projectFullName(project.Owner, project.Name),
-		Avatar:    c.resourceLink(project.Icon),
-		Link:      c.resourceLink(project.DepotPath),
-		Kind:      model.RepoGit,
-		Clone:     project.HttpsURL,
-		Branch:    depot.DefaultBranch,
-		IsPrivate: !project.IsPublic,
+		Owner:        project.Owner,
+		Name:         project.Name,
+		FullName:     projectFullName(project.Owner, project.Name),
+		Avatar:       c.resourceLink(project.Icon),
+		Link:         c.resourceLink(project.DepotPath),
+		SCMKind:      model.RepoGit,
+		Clone:        project.HTTPSURL,
+		Branch:       depot.DefaultBranch,
+		IsSCMPrivate: !project.IsPublic,
 	}, nil
 }
 
@@ -196,15 +196,15 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		repo := &model.Repo{
-			Owner:     project.Owner,
-			Name:      project.Name,
-			FullName:  projectFullName(project.Owner, project.Name),
-			Avatar:    c.resourceLink(project.Icon),
-			Link:      c.resourceLink(project.DepotPath),
-			Kind:      model.RepoGit,
-			Clone:     project.HttpsURL,
-			Branch:    depot.DefaultBranch,
-			IsPrivate: !project.IsPublic,
+			Owner:        project.Owner,
+			Name:         project.Name,
+			FullName:     projectFullName(project.Owner, project.Name),
+			Avatar:       c.resourceLink(project.Icon),
+			Link:         c.resourceLink(project.DepotPath),
+			SCMKind:      model.RepoGit,
+			Clone:        project.HTTPSURL,
+			Branch:       depot.DefaultBranch,
+			IsSCMPrivate: !project.IsPublic,
 		}
 		repos = append(repos, repo)
 	}
@@ -274,6 +274,12 @@ func (c *Coding) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 // post-commit hooks matching the given link.
 func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return c.newClient(ctx, u).RemoveWebhook(r.Owner, r.Name, link)
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	// TODO: fetch all branches
+	return []string{r.Branch}, nil
 }
 
 // Hook parses the post-commit hook from the Request body and returns the

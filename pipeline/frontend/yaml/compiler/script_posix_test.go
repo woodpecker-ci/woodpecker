@@ -26,8 +26,6 @@ fi
 unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
-unset DRONE_NETRC_USERNAME
-unset DRONE_NETRC_PASSWORD
 
 echo + "echo \${PATH}"
 echo ${PATH}

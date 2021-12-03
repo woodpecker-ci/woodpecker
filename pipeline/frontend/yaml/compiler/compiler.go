@@ -3,7 +3,7 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
@@ -42,6 +42,7 @@ type Compiler struct {
 	volumes    []string
 	networks   []string
 	env        map[string]string
+	cloneEnv   map[string]string
 	base       string
 	path       string
 	metadata   frontend.Metadata
@@ -54,8 +55,9 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:     map[string]string{},
-		secrets: map[string]Secret{},
+		env:      map[string]string{},
+		cloneEnv: map[string]string{},
+		secrets:  map[string]Secret{},
 	}
 	for _, opt := range opts {
 		opt(compiler)
@@ -108,18 +110,14 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		container := &yaml.Container{
-			Name:  "clone",
-			Image: "woodpeckerci/plugin-git:latest",
+			Name: "clone",
+			// TODO: switch to `:latest` once v1.1.0 got released
+			//       https://github.com/woodpecker-ci/plugin-git/issues/3
+			Image: "woodpeckerci/plugin-git:next",
 			Settings: yaml.Settings{
 				Params: map[string]interface{}{"depth": "0"},
 			},
-		}
-		// TODO: migrate to woodpeckerci/plugin-git:latest (multi arch)
-		switch c.metadata.Sys.Arch {
-		case "linux/arm":
-			container.Image = "plugins/git:linux-arm"
-		case "linux/arm64":
-			container.Image = "plugins/git:linux-arm64"
+			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
 		step := c.createProcess(name, container, "clone")
@@ -141,6 +139,9 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
 			step := c.createProcess(name, container, "clone")
+			for k, v := range c.cloneEnv {
+				step.Environment[k] = v
+			}
 			stage.Steps = append(stage.Steps, step)
 
 			config.Stages = append(config.Stages, stage)
@@ -163,7 +164,6 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			name := fmt.Sprintf("%s_services_%d", c.prefix, i)
 			step := c.createProcess(name, container, "services")
 			stage.Steps = append(stage.Steps, step)
-
 		}
 		config.Stages = append(config.Stages, stage)
 	}

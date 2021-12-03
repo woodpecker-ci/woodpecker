@@ -4,9 +4,8 @@ import (
 	"path"
 	"strings"
 
-	libcompose "github.com/docker/libcompose/yaml"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // Cacher defines a compiler transform that can be used
@@ -33,8 +32,8 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Conta
 				"fallback_to": "master.tar",
 			},
 		},
-		Volumes: libcompose.Volumes{
-			Volumes: []*libcompose.Volume{
+		Volumes: types.Volumes{
+			Volumes: []*types.Volume{
 				{
 					Source:      path.Join(c.base, repo),
 					Destination: "/cache",
@@ -58,8 +57,8 @@ func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Conta
 				"file":    strings.Replace(branch, "/", "_", -1) + ".tar",
 			},
 		},
-		Volumes: libcompose.Volumes{
-			Volumes: []*libcompose.Volume{
+		Volumes: types.Volumes{
+			Volumes: []*types.Volume{
 				{
 					Source:      path.Join(c.base, repo),
 					Destination: "/cache",

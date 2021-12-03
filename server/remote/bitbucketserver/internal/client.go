@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	currentUserId    = "%s/plugins/servlet/applinks/whoami"
+	currentUserID    = "%s/plugins/servlet/applinks/whoami"
 	pathUser         = "%s/rest/api/1.0/users/%s"
 	pathRepo         = "%s/rest/api/1.0/projects/%s/repos/%s"
 	pathRepos        = "%s/rest/api/1.0/repos?start=%s&limit=%s"
@@ -69,15 +69,15 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 }
 
 func (c *Client) FindCurrentUser() (*User, error) {
-	CurrentUserIdResponse, err := c.doGet(fmt.Sprintf(currentUserId, c.base))
-	if CurrentUserIdResponse != nil {
-		defer CurrentUserIdResponse.Body.Close()
+	CurrentUserIDResponse, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
+	if CurrentUserIDResponse != nil {
+		defer CurrentUserIDResponse.Body.Close()
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	bits, err := ioutil.ReadAll(CurrentUserIdResponse.Body)
+	bits, err := ioutil.ReadAll(CurrentUserIDResponse.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,6 @@ func (c *Client) FindCurrentUser() (*User, error) {
 	}
 
 	return &user, nil
-
 }
 
 func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
@@ -116,6 +115,9 @@ func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
 		log.Err(err).Msg("")
 	}
 	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
 	repo := Repo{}
 	err = json.Unmarshal(contents, &repo)
 	if err != nil {
@@ -178,7 +180,6 @@ func (c *Client) CreateHook(owner string, name string, callBackLink string) erro
 			return err
 		}
 		hooks = hookSettingsToArray(hookSettings)
-
 	}
 	if !stringInSlice(callBackLink, hooks) {
 		hooks = append(hooks, callBackLink)
@@ -186,6 +187,9 @@ func (c *Client) CreateHook(owner string, name string, callBackLink string) erro
 
 	putHookSettings := arrayToHookSettings(hooks)
 	hookBytes, err := json.Marshal(putHookSettings)
+	if err != nil {
+		return err
+	}
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
@@ -195,17 +199,18 @@ func (c *Client) CreateStatus(revision string, status *BuildStatus) error {
 }
 
 func (c *Client) DeleteHook(owner string, name string, link string) error {
-
 	hookSettings, err := c.GetHooks(owner, name)
 	if err != nil {
 		return err
 	}
 	putHooks := filter(hookSettingsToArray(hookSettings), func(item string) bool {
-
 		return !strings.Contains(item, link)
 	})
 	putHookSettings := arrayToHookSettings(putHooks)
 	hookBytes, err := json.Marshal(putHookSettings)
+	if err != nil {
+		return err
+	}
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
@@ -291,24 +296,11 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 	return err
 }
 
-//Helper function to do delete on the hook
-func (c *Client) doDelete(url string) error {
-	request, err := http.NewRequestWithContext(c.ctx, "DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-	response, err := c.client.Do(request)
-	if response != nil {
-		defer response.Body.Close()
-	}
-	return err
-}
-
 //Helper function to get repos paginated
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
-	requestUrl := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
-	response, err := c.doGet(requestUrl)
+	requestURL := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
+	response, err := c.doGet(requestURL)
 	if response != nil {
 		defer response.Body.Close()
 	}

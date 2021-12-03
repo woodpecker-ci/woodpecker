@@ -6,18 +6,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
 )
 
 // Command exports the info command.
-var Command = cli.Command{
+var Command = &cli.Command{
 	Name:      "lint",
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    lint,
-	Flags:     []cli.Flag{},
+	Flags:     common.GlobalFlags,
 }
 
 func lint(c *cli.Context) error {
@@ -42,7 +43,7 @@ func lint(c *cli.Context) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			lintFile(path)
+			_ = lintFile(path) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
 			return nil
 		}
@@ -52,7 +53,7 @@ func lint(c *cli.Context) error {
 }
 
 func lintFile(file string) error {
-	err, configErrors := schema.Lint(file)
+	configErrors, err := schema.Lint(file)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {

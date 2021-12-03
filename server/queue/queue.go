@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 var (
-	// ErrCancel indicates the task was cancelled.
-	ErrCancel = errors.New("queue: task cancelled")
+	// ErrCancel indicates the task was canceled.
+	ErrCancel = errors.New("queue: task canceled")
 
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
@@ -144,7 +146,7 @@ type Queue interface {
 	Extend(c context.Context, id string) error
 
 	// Done signals the task is complete.
-	Done(c context.Context, exitStatus string, id string) error
+	Done(c context.Context, id string, exitStatus model.StatusValue) error
 
 	// Error signals the task is complete with errors.
 	Error(c context.Context, id string, err error) error

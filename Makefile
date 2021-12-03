@@ -3,14 +3,14 @@ GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 VERSION ?= next
-ifneq ($(DRONE_TAG),)
-	VERSION := $(DRONE_TAG:v%=%)
+ifneq ($(CI_COMMIT_TAG),)
+	VERSION := $(CI_COMMIT_TAG:v%=%)
 endif
 
 # append commit-sha to next version
 BUILD_VERSION := $(VERSION)
 ifeq ($(BUILD_VERSION),next)
-	BUILD_VERSION := $(shell echo "next-$(shell echo ${DRONE_COMMIT_SHA} | head -c 8)")
+	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
@@ -25,45 +25,56 @@ vendor:
 	go mod tidy
 	go mod vendor
 
-formatcheck:
-	@([ -z "$(shell gofmt -d $(GOFILES_NOVENDOR) | head)" ]) || (echo "Source is unformatted"; exit 1)
-
 format:
-	@gofmt -w ${GOFILES_NOVENDOR}
+	@gofmt -s -w ${GOFILES_NOVENDOR}
 
 .PHONY: clean
 clean:
 	go clean -i ./...
 	rm -rf build
 
-.PHONY: vet
-vet:
-	@echo "Running go vet..."
-	@go vet $(GO_PACKAGES)
-
 .PHONY: lint
 lint:
+	@echo "Running golangci-lint"
+	go run vendor/github.com/golangci/golangci-lint/cmd/golangci-lint/main.go run --timeout 5m
 	@echo "Running zerolog linter"
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/agent
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/cli
 	go run vendor/github.com/rs/zerolog/cmd/lint/lint.go github.com/woodpecker-ci/woodpecker/cmd/server
 
+frontend-dependencies:
+	(cd web/; yarn install --frozen-lockfile)
+
+lint-frontend:
+	(cd web/; yarn)
+	(cd web/; yarn lesshint)
+	(cd web/; yarn lint --quiet)
+
 test-agent:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent $(GO_PACKAGES)
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
 test-server:
-	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
-test-frontend:
-	(cd web/; yarn; yarn run test)
+test-server-datastore:
+	$(DOCKER_RUN) go test -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+
+test-cli:
+	$(DOCKER_RUN) go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
+
+test-frontend: frontend-dependencies
+	(cd web/; yarn run lint)
+	(cd web/; yarn run formatcheck)
+	(cd web/; yarn run typecheck)
+	(cd web/; yarn run test)
 
 test-lib:
-	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd/')
+	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
-test: test-lib test-agent test-server
+test: formatcheck vet test-agent test-server test-server-datastore test-cli test-frontend test-lib
 
 build-frontend:
-	(cd web/; yarn; yarn build)
+	(cd web/; yarn install --frozen-lockfile; yarn build)
 
 build-server: build-frontend
 	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
@@ -121,6 +132,23 @@ release-checksums:
 	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
 
 release: release-frontend release-server release-agent release-cli
+
+bundle-prepare:
+	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
+
+bundle-agent: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+
+bundle-server: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+
+bundle-cli: bundle-prepare
+	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
+	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+
+bundle: bundle-agent bundle-server bundle-cli
 
 .PHONY: version
 version:
