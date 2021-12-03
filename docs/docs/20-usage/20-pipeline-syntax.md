@@ -209,7 +209,7 @@ pipeline:
   build:
     image: debian
     commands:
-      - touch myfile
+      - echo "test content" > myfile
   a-test-step:
     image: debian
     commands:
