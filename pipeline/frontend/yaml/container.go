@@ -90,7 +90,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		}
 	}
 
-	// FIXME deprecate Vargs -> Settings
+	// TODO: drop Vargs in favour of Settings in v1.16.0 release
 	for _, cc := range c.Containers {
 		if cc.Settings.Params == nil && cc.Vargs != nil {
 			cc.Settings.Params = make(map[string]interface{})
