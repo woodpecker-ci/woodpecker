@@ -58,13 +58,8 @@ type (
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
 		Constraints   Constraints            `yaml:"when,omitempty"`
-		Settings      Settings               `yaml:"settings"`
-		Vargs         map[string]interface{} `yaml:",inline"`
-	}
-
-	// Settings is a map of settings
-	Settings struct {
-		Params map[string]interface{} `yaml:",inline"`
+		Settings      map[string]interface{} `yaml:"settings"`
+		vargs         map[string]interface{} `yaml:",inline"` // TODO: remove with v0.16.0
 	}
 )
 
@@ -91,14 +86,15 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		}
 	}
 
-	// TODO: drop Vargs in favour of Settings in v1.16.0 release
+	// TODO: drop vargs in favor of Settings in v1.16.0 release
 	for _, cc := range c.Containers {
-		if cc.Settings.Params == nil && cc.Vargs != nil {
-			cc.Settings.Params = make(map[string]interface{})
+		if cc.Settings == nil && cc.vargs != nil {
+			cc.Settings = make(map[string]interface{})
 		}
-		for k, v := range cc.Vargs {
-			cc.Settings.Params[k] = v
+		for k, v := range cc.vargs {
+			cc.Settings[k] = v
 		}
 	}
+
 	return nil
 }

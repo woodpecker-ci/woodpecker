@@ -72,7 +72,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached {
-		if err := paramsToEnv(container.Settings.Params, environment); err != nil {
+		if err := paramsToEnv(container.Settings, environment); err != nil {
 			log.Error().Err(err).Msg("paramsToEnv")
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
@@ -62,6 +63,7 @@ when:
 settings:
   foo: bar
   baz: false
+deprecated_setting: fallback
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -114,11 +116,10 @@ func TestUnmarshalContainer(t *testing.T) {
 				Include: []string{"master"},
 			},
 		},
-		Settings: Settings{
-			Params: map[string]interface{}{
-				"foo": "bar",
-				"baz": false,
-			},
+		Settings: map[string]interface{}{
+			"foo":                "bar",
+			"baz":                false,
+			"deprecated_setting": "fallback",
 		},
 	}
 	got := Container{}
@@ -126,8 +127,7 @@ func TestUnmarshalContainer(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(want, got) {
-		t.Errorf("problem parsing container")
-		pretty.Ldiff(t, want, got)
+		assert.EqualValues(t, want, got)
 	}
 }
 

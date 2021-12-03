@@ -113,10 +113,8 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			Name: "clone",
 			// TODO: switch to `:latest` once v1.1.0 got released
 			//       https://github.com/woodpecker-ci/plugin-git/issues/3
-			Image: "woodpeckerci/plugin-git:next",
-			Settings: yaml.Settings{
-				Params: map[string]interface{}{"depth": "0"},
-			},
+			Image:       "woodpeckerci/plugin-git:next",
+			Settings:    map[string]interface{}{"depth": "0"},
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
