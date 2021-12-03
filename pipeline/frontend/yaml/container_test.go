@@ -117,8 +117,10 @@ func TestUnmarshalContainer(t *testing.T) {
 			},
 		},
 		Settings: map[string]interface{}{
-			"foo":                "bar",
-			"baz":                false,
+			"foo": "bar",
+			"baz": false,
+		},
+		Vargs: map[string]interface{}{
 			"deprecated_setting": "fallback",
 		},
 	}
