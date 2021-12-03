@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,8 +28,5 @@ func TestParamsToEnv(t *testing.T) {
 	}
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got))
-
-	if !reflect.DeepEqual(want, got) {
-		assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
-	}
+	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }

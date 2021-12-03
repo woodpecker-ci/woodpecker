@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,10 +53,7 @@ func TestUnmarshalSecrets(t *testing.T) {
 		in := []byte(test.from)
 		got := Secrets{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Secrets) {
-			assert.EqualValues(t, test.want, got.Secrets, "problem parsing secrets %q", test.from)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Secrets, "problem parsing secrets %q", test.from)
 	}
 }

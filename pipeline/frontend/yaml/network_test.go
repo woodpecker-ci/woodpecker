@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,11 +35,8 @@ func TestUnmarshalNetwork(t *testing.T) {
 		in := []byte(test.from)
 		got := Network{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got) {
-			assert.EqualValues(t, test.want, got, "problem parsing network %q", test.from)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got, "problem parsing network %q", test.from)
 	}
 }
 
@@ -82,11 +78,8 @@ func TestUnmarshalNetworks(t *testing.T) {
 		in := []byte(test.from)
 		got := Networks{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Networks) {
-			assert.EqualValues(t, test.want, got.Networks, "problem parsing network %q", test.from)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Networks, "problem parsing network %q", test.from)
 	}
 }
 
@@ -99,8 +92,6 @@ func TestUnmarshalNetworkErr(t *testing.T) {
 	for _, test := range testdata {
 		in := []byte(test)
 		err := yaml.Unmarshal(in, new(Networks))
-		if err == nil {
-			t.Errorf("wanted error for networks %q", test)
-		}
+		assert.Error(t, err, "wanted error for networks %q", test)
 	}
 }

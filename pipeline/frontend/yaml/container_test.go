@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -114,11 +113,8 @@ func TestUnmarshalContainer(t *testing.T) {
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(want, got) {
-		assert.EqualValues(t, want, got, "problem parsing container")
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
 // TestUnmarshalContainersErr unmarshals a map of containers. The order is
@@ -152,11 +148,8 @@ func TestUnmarshalContainers(t *testing.T) {
 		in := []byte(test.from)
 		got := Containers{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -171,8 +164,6 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		in := []byte(test)
 		containers := new(Containers)
 		err := yaml.Unmarshal(in, &containers)
-		if err == nil {
-			t.Errorf("wanted error for containers %q", test)
-		}
+		assert.Error(t, err, "wanted error for containers %q", test)
 	}
 }

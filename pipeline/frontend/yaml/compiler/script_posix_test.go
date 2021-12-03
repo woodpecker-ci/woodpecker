@@ -43,9 +43,6 @@ go test
 		script := generateScriptPosix(test.from)
 		decoded, _ := base64.StdEncoding.DecodeString(script)
 		got := string(decoded)
-
-		if got != test.want {
-			assert.EqualValues(t, got, test.want, "Want encoded script for %s", test.from)
-		}
+		assert.EqualValues(t, got, test.want, "Want encoded script for %s", test.from)
 	}
 }
