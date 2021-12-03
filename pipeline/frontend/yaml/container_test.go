@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
@@ -151,11 +150,15 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node }",
+			from: "test: { name: unit_test, image: node, deprecated_setting: fallback, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
+					Settings: map[string]interface{}{
+						"deprecated_setting": "fallback",
+						"normal_setting":     true,
+					},
 				},
 			},
 		},
@@ -167,8 +170,7 @@ func TestUnmarshalContainers(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			t.Errorf("problem parsing containers %q", test.from)
-			pretty.Ldiff(t, test.want, got.Containers)
+			assert.EqualValues(t, test.want, got.Containers)
 		}
 	}
 }

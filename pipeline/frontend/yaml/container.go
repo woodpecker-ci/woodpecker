@@ -95,6 +95,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		for k, v := range cc.Vargs {
 			cc.Settings[k] = v
 		}
+		cc.Vargs = nil
 	}
 
 	return nil
