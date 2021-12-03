@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -39,8 +39,7 @@ func TestUnmarshalNetwork(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got) {
-			t.Errorf("problem parsing network %q", test.from)
-			pretty.Ldiff(t, test.want, got)
+			assert.EqualValues(t, test.want, got, "problem parsing network %q", test.from)
 		}
 	}
 }
@@ -86,8 +85,7 @@ func TestUnmarshalNetworks(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got.Networks) {
-			t.Errorf("problem parsing network %q", test.from)
-			pretty.Ldiff(t, test.want, got.Networks)
+			assert.EqualValues(t, test.want, got.Networks, "problem parsing network %q", test.from)
 		}
 	}
 }

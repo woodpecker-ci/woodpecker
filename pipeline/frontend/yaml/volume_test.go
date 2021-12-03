@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -39,8 +39,7 @@ func TestUnmarshalVolume(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got) {
-			t.Errorf("problem parsing volume %q", test.from)
-			pretty.Ldiff(t, test.want, got)
+			assert.EqualValues(t, test.want, got, "problem parsing volume %q", test.from)
 		}
 	}
 }
@@ -86,8 +85,7 @@ func TestUnmarshalVolumes(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got.Volumes) {
-			t.Errorf("problem parsing volumes %q", test.from)
-			pretty.Ldiff(t, test.want, got.Volumes)
+			assert.EqualValues(t, test.want, got.Volumes, "problem parsing volumes %q", test.from)
 		}
 	}
 }

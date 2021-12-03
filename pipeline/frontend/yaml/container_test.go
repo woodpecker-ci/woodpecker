@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
@@ -117,8 +117,7 @@ func TestUnmarshalContainer(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(want, got) {
-		t.Errorf("problem parsing container")
-		pretty.Ldiff(t, want, got)
+		assert.EqualValues(t, want, got, "problem parsing container")
 	}
 }
 
@@ -156,8 +155,7 @@ func TestUnmarshalContainers(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			t.Errorf("problem parsing containers %q", test.from)
-			pretty.Ldiff(t, test.want, got.Containers)
+			assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
 		}
 	}
 }

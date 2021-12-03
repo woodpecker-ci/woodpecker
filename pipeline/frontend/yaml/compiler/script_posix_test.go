@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateScriptPosix(t *testing.T) {
@@ -45,8 +45,7 @@ go test
 		got := string(decoded)
 
 		if got != test.want {
-			t.Errorf("Want encoded script for %s", test.from)
-			pretty.Ldiff(t, got, test.want)
+			assert.EqualValues(t, got, test.want, "Want encoded script for %s", test.from)
 		}
 	}
 }
