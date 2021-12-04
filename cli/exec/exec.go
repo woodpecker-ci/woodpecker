@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -31,16 +32,68 @@ var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
-	Action:    exec,
+	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
 }
 
-func exec(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
+func run(c *cli.Context) error {
+	if c.Args().Len() == 0 {
+		isDir, path, err := common.DetectPipelineConfig()
+		if err != nil {
+			return err
+		}
+		if isDir {
+			return execDir(c, path)
+		}
+		return execFile(c, path)
 	}
 
+	multiArgs := c.Args().Len() > 1
+	for _, arg := range c.Args().Slice() {
+		fi, err := os.Stat(arg)
+		if err != nil {
+			return err
+		}
+		if multiArgs {
+			fmt.Println("#", fi.Name())
+		}
+		if fi.IsDir() {
+			if err := execDir(c, arg); err != nil {
+				return err
+			}
+		} else {
+			if err := execFile(c, arg); err != nil {
+				return err
+			}
+		}
+		if multiArgs {
+			fmt.Println("")
+		}
+	}
+
+	return nil
+}
+
+func execDir(c *cli.Context, dir string) error {
+	// TODO: respect pipeline dependency
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+
+		// check if it is a regular file (not dir)
+		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+			fmt.Println("#", info.Name())
+			_ = execFile(c, path) // TODO: should we drop errors or store them and report back?
+			fmt.Println("")
+			return nil
+		}
+
+		return nil
+	})
+}
+
+func execFile(c *cli.Context, file string) error {
 	dat, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
@@ -55,7 +108,7 @@ func exec(c *cli.Context) error {
 		axes = append(axes, matrix.Axis{})
 	}
 	for _, axis := range axes {
-		err := execWithAxis(c, axis)
+		err := execWithAxis(c, file, axis)
 		if err != nil {
 			return err
 		}
@@ -63,12 +116,7 @@ func exec(c *cli.Context) error {
 	return nil
 }
 
-func execWithAxis(c *cli.Context, axis matrix.Axis) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
-
+func execWithAxis(c *cli.Context, file string, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
