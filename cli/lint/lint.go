@@ -22,23 +22,38 @@ var Command = &cli.Command{
 }
 
 func lint(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker"
-		if fi, err := os.Stat(file); err != nil || !fi.IsDir() {
-			file = ".woodpecker.yml"
+	if c.Args().Len() == 0 {
+		isDir, path, err := common.DetectPipelineConfig()
+		if err != nil {
+			return err
+		}
+		if isDir {
+			return lintDir(path)
+		}
+		return lintFile(path)
+	}
+
+	for _, arg := range c.Args().Slice() {
+		fi, err := os.Stat(arg)
+		if err != nil {
+			return err
+		}
+		if fi.IsDir() {
+			if err := lintDir(arg); err != nil {
+				return err
+			}
+		} else {
+			if err := lintFile(arg); err != nil {
+				return err
+			}
 		}
 	}
 
-	fi, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-	if !fi.IsDir() {
-		return lintFile(file)
-	}
+	return nil
+}
 
-	return filepath.Walk(file, func(path string, info os.FileInfo, e error) error {
+func lintDir(dir string) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
