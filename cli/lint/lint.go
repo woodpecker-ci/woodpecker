@@ -22,44 +22,10 @@ var Command = &cli.Command{
 }
 
 func lint(c *cli.Context) error {
-	if c.Args().Len() == 0 {
-		isDir, path, err := common.DetectPipelineConfig()
-		if err != nil {
-			return err
-		}
-		if isDir {
-			return lintDir(path)
-		}
-		return lintFile(path)
-	}
-
-	multiArgs := c.Args().Len() > 1
-	for _, arg := range c.Args().Slice() {
-		fi, err := os.Stat(arg)
-		if err != nil {
-			return err
-		}
-		if multiArgs {
-			fmt.Println("#", fi.Name())
-		}
-		if fi.IsDir() {
-			if err := lintDir(arg); err != nil {
-				return err
-			}
-		} else {
-			if err := lintFile(arg); err != nil {
-				return err
-			}
-		}
-		if multiArgs {
-			fmt.Println("")
-		}
-	}
-
-	return nil
+	return common.RunPipelineFunc(c, lintFile, lintDir)
 }
 
-func lintDir(dir string) error {
+func lintDir(c *cli.Context, dir string) error {
 	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
@@ -68,7 +34,7 @@ func lintDir(dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			_ = lintFile(path) // TODO: should we drop errors or store them and report back?
+			_ = lintFile(c, path) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
 			return nil
 		}
@@ -77,7 +43,7 @@ func lintDir(dir string) error {
 	})
 }
 
-func lintFile(file string) error {
+func lintFile(_ *cli.Context, file string) error {
 	configErrors, err := schema.Lint(file)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")

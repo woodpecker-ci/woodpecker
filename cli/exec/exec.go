@@ -37,41 +37,7 @@ var Command = &cli.Command{
 }
 
 func run(c *cli.Context) error {
-	if c.Args().Len() == 0 {
-		isDir, path, err := common.DetectPipelineConfig()
-		if err != nil {
-			return err
-		}
-		if isDir {
-			return execDir(c, path)
-		}
-		return execFile(c, path)
-	}
-
-	multiArgs := c.Args().Len() > 1
-	for _, arg := range c.Args().Slice() {
-		fi, err := os.Stat(arg)
-		if err != nil {
-			return err
-		}
-		if multiArgs {
-			fmt.Println("#", fi.Name())
-		}
-		if fi.IsDir() {
-			if err := execDir(c, arg); err != nil {
-				return err
-			}
-		} else {
-			if err := execFile(c, arg); err != nil {
-				return err
-			}
-		}
-		if multiArgs {
-			fmt.Println("")
-		}
-	}
-
-	return nil
+	return common.RunPipelineFunc(c, execFile, execDir)
 }
 
 func execDir(c *cli.Context, dir string) error {
