@@ -111,18 +111,15 @@ See [when](#step-when---step-conditional-execution) above to understand all the 
 Example targeting a specific platform:
 
 ```diff
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-   -when:
-      -platform: [ linux/arm* ]
-
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
+ 
 +when:
 +  platform: [ linux/arm* ]
-
 ```
 
 Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines.
@@ -134,38 +131,37 @@ This can be utilised in conjunction with other when blocks as well.
 
 Example `when` pipeline & step block:
 
-```yml
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-
-  publish:
-    image: plugins/docker
-    repo: foo/bar
-   +when:
-    +tag: release*
+```diff
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
+ 
+   publish:
+     image: plugins/docker
+     settings:
+       repo: foo/bar
++    when:
++     tag: release*
 
 +when:
 +  platform: [ linux/arm* ]
-
 ```
 
 ### `platform`
 
 To configure your pipeline to select an agent with a specific platform, you can use `platform` key.
 ```diff
-
 +platform: linux/arm64
-
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ 
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 ```
 
 ### Skip Commits
@@ -190,12 +186,12 @@ Every step of your pipeline executes arbitrary commands inside a specified docke
 The associated commit of a current pipeline run is checked out with git to a workspace which is mounted to every step of the pipeline as the working directory.
 
 ```diff
-pipeline:
-  backend:
-    image: golang
-    commands:
-+     - go build
-+     - go test
+ pipeline:
+   backend:
+     image: golang
+     commands:
++      - go build
++      - go test
 ```
 
 ### File changes are incremental
@@ -466,22 +462,23 @@ Woodpecker automatically configures a default clone step if not explicitly defin
 +clone:
 +  git:
 +    image: woodpeckerci/plugin-git
-
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ 
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 ```
 
 Example configuration to override depth:
 
 ```diff
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-+   depth: 50
+ clone:
+   git:
+     image: woodpeckerci/plugin-git
++    settings:
++      depth: 50
 ```
 
 Example configuration to use a custom clone plugin:
@@ -495,10 +492,11 @@ clone:
 Example configuration to clone Mercurial repository:
 
 ```diff
-clone:
-  hg:
-+   image: plugins/hg
-+   path: bitbucket.org/foo/bar
+ clone:
+   hg:
++    image: plugins/hg
++    settings:
++      path: bitbucket.org/foo/bar
 ```
 
 #### Git Submodules
@@ -506,10 +504,10 @@ clone:
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
 
 ```diff
-[submodule "my-module"]
-	path = my-module
--	url = git@github.com:octocat/my-module.git
-+	url = https://github.com/octocat/my-module.git
+ [submodule "my-module"]
+ path = my-module
+-url = git@github.com:octocat/my-module.git
++url = https://github.com/octocat/my-module.git
 ```
 
 To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use the https url in Woodpecker, add `submodule_override`:
@@ -518,9 +516,10 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 clone:
   git:
     image: woodpeckerci/plugin-git
-    recursive: true
-+   submodule_override:
-+     my-module: https://github.com/octocat/my-module.git
+    settings:
+      recursive: true
++     submodule_override:
++       my-module: https://github.com/octocat/my-module.git
 
 pipeline:
   ...

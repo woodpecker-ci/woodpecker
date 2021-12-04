@@ -12,7 +12,8 @@ Example conditional execution by branch:
 pipeline:
   slack:
     image: plugins/slack
-    channel: dev
+    settings:
+      channel: dev
 +   when:
 +     branch: master
 ```
@@ -90,7 +91,8 @@ There are use cases for executing pipeline steps on failure, such as sending not
 pipeline:
   slack:
     image: plugins/slack
-    channel: dev
+    settings:
+      channel: dev
 +   when:
 +     status: [ success, failure ]
 ```
