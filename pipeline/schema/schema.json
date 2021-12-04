@@ -157,6 +157,10 @@
             { "type": "array", "items": { "type": "string" }, "minLength": 1 }
           ]
         },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
         "settings": {
           "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
           "type": "array",
