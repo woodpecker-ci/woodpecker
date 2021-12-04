@@ -24,7 +24,10 @@ var Command = &cli.Command{
 func lint(c *cli.Context) error {
 	file := c.Args().First()
 	if file == "" {
-		file = ".woodpecker.yml"
+		file = ".woodpecker"
+		if fi, err := os.Stat(file); err != nil || !fi.IsDir() {
+			file = ".woodpecker.yml"
+		}
 	}
 
 	fi, err := os.Stat(file)
