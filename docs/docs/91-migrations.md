@@ -51,7 +51,17 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
   - `drone.sqlite` -> `woodpecker.sqlite`
 
-- ...
+- Plugin Settings moved into `settings` section:
+  ```diff
+   pipline:
+   something:
+     image: my/plugin
+  -  setting1: foo
+  -  setting2: bar
+  +  settings:
+  +    setting1: foo
+  +    setting2: bar
+  ```
 
 ## 0.14.0
 
