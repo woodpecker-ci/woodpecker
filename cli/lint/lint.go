@@ -33,10 +33,14 @@ func lint(c *cli.Context) error {
 		return lintFile(path)
 	}
 
+	multiArgs := c.Args().Len() > 1
 	for _, arg := range c.Args().Slice() {
 		fi, err := os.Stat(arg)
 		if err != nil {
 			return err
+		}
+		if multiArgs {
+			fmt.Println("#", fi.Name())
 		}
 		if fi.IsDir() {
 			if err := lintDir(arg); err != nil {
@@ -46,6 +50,9 @@ func lint(c *cli.Context) error {
 			if err := lintFile(arg); err != nil {
 				return err
 			}
+		}
+		if multiArgs {
+			fmt.Println("")
 		}
 	}
 
