@@ -97,7 +97,7 @@
     "step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": ["image"],
       "properties": {
         "image": {
@@ -156,6 +156,12 @@
             { "type": "string" },
             { "type": "array", "items": { "type": "string" }, "minLength": 1 }
           ]
+        },
+        "settings": {
+          "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
+          "type": "array",
+          "items": { "type": "string" },
+          "minLength": 1
         }
       }
     },
