@@ -121,9 +121,19 @@
         },
         "environment": {
           "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
-          "type": "array",
-          "items": { "type": "string" },
-          "minLength": 1
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "minLength": 1
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": ["boolean", "string", "number"]
+              }
+            }
+          ]
         },
         "secrets": {
           "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
@@ -163,9 +173,10 @@
         },
         "settings": {
           "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
-          "type": "array",
-          "items": { "type": "string" },
-          "minLength": 1
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         }
       }
     },
