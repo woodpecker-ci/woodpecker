@@ -380,6 +380,11 @@ Woodpecker gives the ability to define Docker volumes in the Yaml. You can use t
 
 For more details check the [volumes docs](/docs/usage/volumes/).
 
+### `detach`
+
+Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
+
+For more details check the [service docs](/docs/usage/services#detachment).
 
 ## Advanced Configurations
 
