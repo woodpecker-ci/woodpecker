@@ -146,7 +146,8 @@ Example commit substitution:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${CI_COMMIT_SHA}
+    settings:
++     tags: ${CI_COMMIT_SHA}
 ```
 
 Example tag substitution:
@@ -155,7 +156,8 @@ Example tag substitution:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${CI_COMMIT_TAG}
+    settings:
++     tags: ${CI_COMMIT_TAG}
 ```
 
 ## String Operations
@@ -182,7 +184,8 @@ Example variable substitution with substring:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${CI_COMMIT_SHA:0:8}
+    settings:
++     tags: ${CI_COMMIT_SHA:0:8}
 ```
 
 Example variable substitution strips `v` prefix from `v.1.0.0`:
@@ -191,5 +194,6 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 pipeline:
   docker:
     image: plugins/docker
-+   tags: ${CI_COMMIT_TAG##v}
+    settings:
++     tags: ${CI_COMMIT_TAG##v}
 ```
