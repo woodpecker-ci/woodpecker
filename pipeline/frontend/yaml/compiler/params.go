@@ -22,13 +22,11 @@ func paramsToEnv(from map[string]interface{}, to map[string]string) (err error) 
 		if v == nil || len(k) == 0 {
 			continue
 		}
-
 		to[sanitizeParamKey(k)], err = sanitizeParamValue(v)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -37,6 +35,18 @@ func sanitizeParamKey(k string) string {
 		strings.ToUpper(
 			strings.ReplaceAll(k, ".", "_"),
 		)
+}
+
+func isComplex(t reflect.Kind) bool {
+	switch t {
+	case reflect.Bool,
+		reflect.String,
+		reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Float32, reflect.Float64:
+		return false
+	default:
+		return true
+	}
 }
 
 func sanitizeParamValue(v interface{}) (string, error) {
@@ -58,26 +68,30 @@ func sanitizeParamValue(v interface{}) (string, error) {
 
 	case reflect.Map:
 		ymlOut, _ := yaml.Marshal(vv.Interface())
-		out, _ := yml.Yml2Json(ymlOut)
+		out, _ := yml.ToJSON(ymlOut)
 		return string(out), nil
 
-	case reflect.Slice:
+	case reflect.Slice, reflect.Array:
+		if !isComplex(t.Elem().Kind()) {
+			in := make([]string, vv.Len())
+			for i := 0; i < vv.Len(); i++ {
+				var err error
+				if in[i], err = sanitizeParamValue(vv.Index(i).Interface()); err != nil {
+					return "", err
+				}
+			}
+			return strings.Join(in, ","), nil
+		}
+
 		out, err := yaml.Marshal(vv.Interface())
 		if err != nil {
 			return "", err
 		}
-
-		var in []string
-		err = yaml.Unmarshal(out, &in)
-		if err == nil {
-			return strings.Join(in, ","), nil
-		} else {
-			out, err = yml.Yml2Json(out)
-			if err != nil {
-				return "", err
-			}
-			return string(out), nil
+		out, err = yml.ToJSON(out)
+		if err != nil {
+			return "", err
 		}
+		return string(out), nil
 
 	default:
 		out, err := json.Marshal(vv.Interface())

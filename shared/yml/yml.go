@@ -50,7 +50,7 @@ func convertMapI2MapS(v interface{}) interface{} {
 	return v
 }
 
-func Yml2Json(data []byte) (j []byte, err error) {
+func ToJSON(data []byte) (j []byte, err error) {
 	m := make(map[interface{}]interface{})
 	err = yaml.Unmarshal(data, &m)
 	if err != nil {
@@ -71,7 +71,7 @@ func LoadYmlFileAsJSON(path string) (j []byte, err error) {
 		return nil, err
 	}
 
-	j, err = Yml2Json(data)
+	j, err = ToJSON(data)
 	if err != nil {
 		return nil, err
 	}
