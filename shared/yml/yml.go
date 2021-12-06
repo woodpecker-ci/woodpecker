@@ -51,7 +51,7 @@ func convertMapI2MapS(v interface{}) interface{} {
 }
 
 func ToJSON(data []byte) (j []byte, err error) {
-	m := make(map[interface{}]interface{})
+	m := yaml.Node{}
 	err = yaml.Unmarshal(data, &m)
 	if err != nil {
 		return nil, err

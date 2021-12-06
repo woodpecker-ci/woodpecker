@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -83,18 +82,15 @@ func sanitizeParamValue(v interface{}) (string, error) {
 			return strings.Join(in, ","), nil
 		}
 
+		// it's complex use yml.ToJSON
+		fallthrough
+
+	default:
 		out, err := yaml.Marshal(vv.Interface())
 		if err != nil {
 			return "", err
 		}
 		out, err = yml.ToJSON(out)
-		if err != nil {
-			return "", err
-		}
-		return string(out), nil
-
-	default:
-		out, err := json.Marshal(vv.Interface())
 		if err != nil {
 			return "", err
 		}
