@@ -7,23 +7,24 @@ import (
 )
 
 func TestToJSON(t *testing.T) {
-	result, err := ToJSON([]byte(`- name: Jack
+	tests := []struct {
+		yaml string
+		json string
+	}{{
+		yaml: `- name: Jack
 - name: Jill
-`))
-	assert.NoError(t, err)
-	assert.EqualValues(t, `[{"name":"Jack"},{"name":"Jill"}]`, string(result))
-
-	result, err = ToJSON([]byte(`name: Jack`))
-	assert.NoError(t, err)
-	assert.EqualValues(t, `{"name":"Jack"}`, string(result))
-
-	result, err = ToJSON([]byte(`name: Jack
+`,
+		json: `[{"name":"Jack"},{"name":"Jill"}]`,
+	}, {
+		yaml: `name: Jack`,
+		json: `{"name":"Jack"}`,
+	}, {
+		yaml: `name: Jack
 job: Butcher
-`))
-	assert.NoError(t, err)
-	assert.EqualValues(t, `{"job":"Butcher","name":"Jack"}`, string(result))
-
-	result, err = ToJSON([]byte(`- name: Jack
+`,
+		json: `{"job":"Butcher","name":"Jack"}`,
+	}, {
+		yaml: `- name: Jack
   job: Butcher
 - name: Jill
   job: Cook
@@ -32,7 +33,13 @@ job: Butcher
     data: |
       some data 123
       with new line
-`))
-	assert.NoError(t, err)
-	assert.EqualValues(t, `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":{"data":"some data 123\nwith new line\n","empty":false}}]`, string(result))
+`,
+		json: `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":{"data":"some data 123\nwith new line\n","empty":false}}]`,
+	}}
+
+	for _, tc := range tests {
+		result, err := ToJSON([]byte(tc.yaml))
+		assert.NoError(t, err)
+		assert.EqualValues(t, tc.json, string(result))
+	}
 }
