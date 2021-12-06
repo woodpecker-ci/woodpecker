@@ -6,7 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	json "github.com/ghodss/yaml"
+	json "github.com/woodpecker-ci/woodpecker/shared/yml"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -38,7 +39,7 @@ func paramsToEnv(from map[string]interface{}, to map[string]string) error {
 
 		case reflect.Map:
 			yml, _ := yaml.Marshal(vv.Interface())
-			out, _ := json.YAMLToJSON(yml)
+			out, _ := json.Yml2Json(yml)
 			to[k] = string(out)
 
 		case reflect.Slice:
@@ -52,7 +53,7 @@ func paramsToEnv(from map[string]interface{}, to map[string]string) error {
 			if err == nil {
 				to[k] = strings.Join(in, ",")
 			} else {
-				out, err = json.YAMLToJSON(out)
+				out, err = json.Yml2Json(out)
 				if err != nil {
 					return err
 				}

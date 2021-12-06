@@ -50,19 +50,28 @@ func convertMapI2MapS(v interface{}) interface{} {
 	return v
 }
 
-func LoadYmlFileAsJSON(path string) ([]byte, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
+func Yml2Json(data []byte) (j []byte, err error) {
 	m := make(map[interface{}]interface{})
 	err = yaml.Unmarshal(data, &m)
 	if err != nil {
 		return nil, err
 	}
 
-	j, err := json.Marshal(convertMapI2MapS(m))
+	j, err = json.Marshal(convertMapI2MapS(m))
+	if err != nil {
+		return nil, err
+	}
+
+	return j, nil
+}
+
+func LoadYmlFileAsJSON(path string) (j []byte, err error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	j, err = Yml2Json(data)
 	if err != nil {
 		return nil, err
 	}
