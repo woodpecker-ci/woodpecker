@@ -78,7 +78,7 @@ func TestSchema(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			err, configErrors := schema.Lint(tt.testFile)
+			configErrors, err := schema.Lint(tt.testFile)
 			if tt.fail {
 				if len(configErrors) == 0 {
 					assert.Error(t, err, "Expected config errors but got none")

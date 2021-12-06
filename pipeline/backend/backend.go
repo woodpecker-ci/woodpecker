@@ -27,7 +27,7 @@ func init() {
 func FindEngine(engineName string) (types.Engine, error) {
 	if engineName == "auto-detect" {
 		for _, engine := range engines {
-			if engine.IsAvivable() {
+			if engine.IsAvailable() {
 				return engine, nil
 			}
 		}

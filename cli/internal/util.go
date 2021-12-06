@@ -29,10 +29,10 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// if no server url is provided we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address.")
+		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token.")
+		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token")
 	}
 
 	// attempt to find system CA certs
@@ -77,7 +77,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 func ParseRepo(str string) (user, repo string, err error) {
 	var parts = strings.Split(str, "/")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world.")
+		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
 		return
 	}
 	user = parts[0]

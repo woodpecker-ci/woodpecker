@@ -53,7 +53,7 @@ func lint(c *cli.Context) error {
 }
 
 func lintFile(file string) error {
-	err, configErrors := schema.Lint(file)
+	configErrors, err := schema.Lint(file)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {

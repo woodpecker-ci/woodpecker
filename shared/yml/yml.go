@@ -65,7 +65,7 @@ func Yml2Json(data []byte) (j []byte, err error) {
 	return j, nil
 }
 
-func LoadYmlFileAsJson(path string) (j []byte, err error) {
+func LoadYmlFileAsJSON(path string) (j []byte, err error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

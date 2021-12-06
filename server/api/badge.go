@@ -38,8 +38,8 @@ var (
 )
 
 func GetBadge(c *gin.Context) {
-	store_ := store.FromContext(c)
-	repo, err := store_.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+	_store := store.FromContext(c)
+	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
@@ -57,7 +57,7 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	build, err := store_.GetBuildLast(repo, branch)
+	build, err := _store.GetBuildLast(repo, branch)
 	if err != nil {
 		log.Warn().Err(err).Msg("")
 		c.String(200, badgeNone)
@@ -79,14 +79,14 @@ func GetBadge(c *gin.Context) {
 }
 
 func GetCC(c *gin.Context) {
-	store_ := store.FromContext(c)
-	repo, err := store_.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+	_store := store.FromContext(c)
+	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
 	}
 
-	builds, err := store_.GetBuildList(repo, 1)
+	builds, err := _store.GetBuildList(repo, 1)
 	if err != nil || len(builds) == 0 {
 		c.AbortWithStatus(404)
 		return

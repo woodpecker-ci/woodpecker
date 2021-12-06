@@ -1,10 +1,8 @@
 package compiler
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,9 +28,5 @@ func TestParamsToEnv(t *testing.T) {
 	}
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got))
-
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("Problem converting plugin parameters to environment variables")
-		pretty.Ldiff(t, want, got)
-	}
+	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }

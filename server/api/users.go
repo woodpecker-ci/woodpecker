@@ -44,7 +44,7 @@ func GetUser(c *gin.Context) {
 }
 
 func PatchUser(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
 	in := &model.User{}
 	err := c.Bind(in)
@@ -53,14 +53,14 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	user, err := store_.GetUserLogin(c.Param("login"))
+	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 	user.Active = in.Active
 
-	err = store_.UpdateUser(user)
+	err = _store.UpdateUser(user)
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 		return
@@ -97,14 +97,14 @@ func PostUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
-	user, err := store_.GetUserLogin(c.Param("login"))
+	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
 		c.String(404, "Cannot find user. %s", err)
 		return
 	}
-	if err = store_.DeleteUser(user); err != nil {
+	if err = _store.DeleteUser(user); err != nil {
 		c.String(500, "Error deleting user. %s", err)
 		return
 	}

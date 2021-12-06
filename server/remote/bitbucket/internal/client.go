@@ -171,9 +171,8 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 
 	if len(out.Values) == 0 {
 		return nil, fmt.Errorf("no permissions in repository %s", fullName)
-	} else {
-		return out.Values[0], nil
 	}
+	return out.Values[0], nil
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {

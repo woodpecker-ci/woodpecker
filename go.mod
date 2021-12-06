@@ -27,7 +27,6 @@ require (
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/joho/godotenv v1.4.0
-	github.com/kr/pretty v0.3.0
 	github.com/lib/pq v1.10.3
 	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/moby/moby v20.10.10+incompatible

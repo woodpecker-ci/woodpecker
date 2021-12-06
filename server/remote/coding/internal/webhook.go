@@ -21,7 +21,7 @@ import (
 )
 
 type Webhook struct {
-	Id      int    `json:"id"`
+	ID      int    `json:"id"`
 	HookURL string `json:"hook_url"`
 }
 
@@ -46,7 +46,7 @@ func (c *Client) AddWebhook(globalKey, projectName, link string) error {
 	}
 	webhook := matchingHooks(webhooks, link)
 	if webhook != nil {
-		u := fmt.Sprintf("/user/%s/project/%s/git/hook/%d", globalKey, projectName, webhook.Id)
+		u := fmt.Sprintf("/user/%s/project/%s/git/hook/%d", globalKey, projectName, webhook.ID)
 		params := url.Values{}
 		params.Set("hook_url", link)
 		params.Set("type_pust", "true")
@@ -82,7 +82,7 @@ func (c *Client) RemoveWebhook(globalKey, projectName, link string) error {
 		return nil
 	}
 
-	u := fmt.Sprintf("/user/%s/project/%s/git/hook/%d", globalKey, projectName, webhook.Id)
+	u := fmt.Sprintf("/user/%s/project/%s/git/hook/%d", globalKey, projectName, webhook.ID)
 	_, err = c.Do("DELETE", u, nil)
 	if err != nil {
 		return APIClientErr{"fail to remove webhook", u, err}
