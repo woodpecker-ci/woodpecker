@@ -1,6 +1,6 @@
 # Project settings
 
-As the owner of a project in Woodpecker you can change some project related settings via the Webinterface.
+As the owner of a project in Woodpecker you can change project related settings via the web interface.
 
 ![project settings](./project-settings.png)
 
@@ -10,7 +10,7 @@ The path to the pipeline config file or folder. By default it is left empty whic
 
 ## Repository hooks
 
-Your Version-Control-System will notify Woodpecker about some events via webhooks. If you want your pipeline to only run on specific webhooks, you can check them by this setting.
+Your Version-Control-System will notify Woodpecker about events via webhooks. If you want your pipeline to only run on specific webhooks, you can check them with this setting.
 
 ## Project settings
 

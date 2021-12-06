@@ -130,9 +130,6 @@ github.com/franela/goblin
 github.com/fsnotify/fsnotify
 # github.com/fzipp/gocyclo v0.3.1
 github.com/fzipp/gocyclo
-# github.com/ghodss/yaml v1.0.0
-## explicit
-github.com/ghodss/yaml
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.7.4
@@ -333,11 +330,6 @@ github.com/kisielk/errcheck/errcheck
 # github.com/kisielk/gotool v1.0.0
 github.com/kisielk/gotool
 github.com/kisielk/gotool/internal/load
-# github.com/kr/pretty v0.3.0
-## explicit
-github.com/kr/pretty
-# github.com/kr/text v0.2.0
-github.com/kr/text
 # github.com/kulti/thelper v0.4.0
 github.com/kulti/thelper/pkg/analyzer
 # github.com/kunwardeep/paralleltest v1.0.3
@@ -476,8 +468,6 @@ github.com/quasilyte/go-ruleguard/ruleguard/textmatch
 github.com/quasilyte/go-ruleguard/ruleguard/typematch
 # github.com/quasilyte/regex/syntax v0.0.0-20200407221936-30656e2c4a95
 github.com/quasilyte/regex/syntax
-# github.com/rogpeppe/go-internal v1.8.0
-github.com/rogpeppe/go-internal/fmtsort
 # github.com/rs/zerolog v1.25.0
 ## explicit
 github.com/rs/zerolog
@@ -619,8 +609,6 @@ golang.org/x/mod/semver
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
-golang.org/x/net/html
-golang.org/x/net/html/atom
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack

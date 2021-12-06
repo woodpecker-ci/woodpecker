@@ -71,7 +71,7 @@ test-frontend: frontend-dependencies
 test-lib:
 	$(DOCKER_RUN) go test -race -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
-test: formatcheck vet test-agent test-server test-server-datastore test-cli test-frontend test-lib
+test: test-agent test-server test-server-datastore test-cli test-frontend test-lib
 
 build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)

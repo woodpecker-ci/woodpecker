@@ -16,12 +16,14 @@ pipeline:
 
   publish:
     image: plugins/docker
-    repo: foo/bar
-    tags: latest
+    settings:
+      repo: foo/bar
+      tags: latest
 
   notify:
     image: plugins/slack
-    channel: dev
+    settings:
+      channel: dev
 ```
 
 ## Plugin Isolation

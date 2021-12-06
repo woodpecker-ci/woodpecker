@@ -23,6 +23,15 @@ pipeline:
   environment:
     image: golang
     environment:
+      CGO: 0
+      GOOS: linux
+      GOARCH: amd64
+    commands:
+      - go test
+
+  environment-array:
+    image: golang
+    environment:
       - CGO=0
       - GOOS=linux
       - GOARCH=amd64

@@ -100,7 +100,7 @@ module.exports = {
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://wp.laszlo.cloud/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
               label: 'CI',
             },
           ],
