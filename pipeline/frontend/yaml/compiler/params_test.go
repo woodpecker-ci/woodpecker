@@ -8,23 +8,27 @@ import (
 
 func TestParamsToEnv(t *testing.T) {
 	from := map[string]interface{}{
-		"skip":    nil,
-		"string":  "stringz",
-		"int":     1,
-		"float":   1.2,
-		"bool":    true,
-		"map":     map[string]string{"hello": "world"},
-		"slice":   []int{1, 2, 3},
-		"complex": []struct{ Name string }{{"Jack"}, {"Jill"}},
+		"skip":   nil,
+		"string": "stringz",
+		"int":    1,
+		"float":  1.2,
+		"bool":   true,
+		"slice":  []int{1, 2, 3},
+		"map":    map[string]string{"hello": "world"},
+		//"complex":  []struct{ Name string }{{"Jack"}, {"Jill"}},
+		//"complex2": struct{ Name string }{"Jack"},
+		"from.address": "noreply@example.com",
 	}
 	want := map[string]string{
-		"PLUGIN_STRING":  "stringz",
-		"PLUGIN_INT":     "1",
-		"PLUGIN_FLOAT":   "1.2",
-		"PLUGIN_BOOL":    "true",
-		"PLUGIN_MAP":     `{"hello":"world"}`,
-		"PLUGIN_SLICE":   "1,2,3",
-		"PLUGIN_COMPLEX": `[{"name":"Jack"},{"name":"Jill"}]`,
+		"PLUGIN_STRING": "stringz",
+		"PLUGIN_INT":    "1",
+		"PLUGIN_FLOAT":  "1.2",
+		"PLUGIN_BOOL":   "true",
+		"PLUGIN_SLICE":  "1,2,3",
+		"PLUGIN_MAP":    `{"hello":"world"}`,
+		//"PLUGIN_COMPLEX":  `[{"name":"Jack"},{"name":"Jill"}]`,
+		//"PLUGIN_COMPLEX2": `{"Name":"Jack"}`,
+		"PLUGIN_FROM_ADDRESS": "noreply@example.com",
 	}
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got))
