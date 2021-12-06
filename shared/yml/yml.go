@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
@@ -30,18 +31,28 @@ func toJSON(node *yaml.Node) (interface{}, error) {
 			return nil, fmt.Errorf("broken mapping node")
 		}
 		val := make(map[string]interface{}, len(node.Content)%2)
-		for i := 0; i < len(node.Content); i = i + 2 {
-			k, err := toJSON(node.Content[i])
+		for i := len(node.Content); i > 1; i = i - 2 {
+			k, err := toJSON(node.Content[i-2])
 			if err != nil {
 				return nil, err
 			}
-			if val[fmt.Sprint(k)], err = toJSON(node.Content[i+1]); err != nil {
+			if val[fmt.Sprint(k)], err = toJSON(node.Content[i-1]); err != nil {
 				return nil, err
 			}
 		}
 		return val, nil
 
 	case yaml.ScalarNode:
+		switch node.Tag {
+		case nullTag:
+			return nil, nil
+		case boolTag:
+			return strconv.ParseBool(node.Value)
+		case intTag:
+			return strconv.ParseInt(node.Value, 10, 64)
+		case floatTag:
+			return strconv.ParseFloat(node.Value, 64)
+		}
 		return node.Value, nil
 	}
 
@@ -74,3 +85,17 @@ func LoadYmlFileAsJSON(path string) (j []byte, err error) {
 
 	return j, nil
 }
+
+// Source: https://github.com/go-yaml/yaml/blob/3e3283e801afc229479d5fc68aa41df1137b8394/resolve.go#L70-L81
+const (
+	nullTag  = "!!null"
+	boolTag  = "!!bool"
+	intTag   = "!!int"
+	floatTag = "!!float"
+	// strTag       = "!!str"       // we dont have to parse it
+	// timestampTag = "!!timestamp" // TODO: do we have to parse this?
+	// seqTag       = "!!seq"       // TODO: do we have to parse this?
+	// mapTag       = "!!map"       // TODO: do we have to parse this?
+	// binaryTag    = "!!binary"    // TODO: do we have to parse this?
+	// mergeTag     = "!!merge"     // TODO: do we have to parse this?
+)

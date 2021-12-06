@@ -28,10 +28,11 @@ job: Butcher
 - name: Jill
   job: Cook
   obj:
-    - data: |
-        some data 123
-        with new line
+    empty: false
+    data: |
+      some data 123
+      with new line
 `))
 	assert.NoError(t, err)
-	assert.EqualValues(t, `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":[{"data":"some data 123\nwith new line\n"}]}]`, string(result))
+	assert.EqualValues(t, `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":{"data":"some data 123\nwith new line\n","empty":false}}]`, string(result))
 }
