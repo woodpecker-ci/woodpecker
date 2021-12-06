@@ -8,61 +8,57 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Source: https://github.com/icza/dyno/blob/f1bafe5d99965c48cc9d5c7cf024eeb495facc1e/dyno.go#L563-L601
-// License: Apache 2.0 - Copyright 2017 Andras Belicza
-// ConvertMapI2MapS walks the given dynamic object recursively, and
-// converts maps with interface{} key type to maps with string key type.
-// This function comes handy if you want to marshal a dynamic object into
-// JSON where maps with interface{} key type are not allowed.
-//
-// Recursion is implemented into values of the following types:
-//   -map[interface{}]interface{}
-//   -map[string]interface{}
-//   -[]interface{}
-//
-// When converting map[interface{}]interface{} to map[string]interface{},
+// toJSON convert gopkg.in/yaml.v3 nodes to object that can be serialized as json
 // fmt.Sprint() with default formatting is used to convert the key to a string key.
-func convertMapI2MapS(v interface{}) interface{} {
-	switch x := v.(type) {
-	case map[interface{}]interface{}:
-		m := map[string]interface{}{}
-		for k, v2 := range x {
-			switch k2 := k.(type) {
-			case string: // Fast check if it's already a string
-				m[k2] = convertMapI2MapS(v2)
-			default:
-				m[fmt.Sprint(k)] = convertMapI2MapS(v2)
+func toJSON(node *yaml.Node) (interface{}, error) {
+	switch node.Kind {
+	case yaml.DocumentNode:
+		return toJSON(node.Content[0])
+
+	case yaml.SequenceNode:
+		val := make([]interface{}, len(node.Content))
+		var err error
+		for i := range node.Content {
+			if val[i], err = toJSON(node.Content[i]); err != nil {
+				return nil, err
 			}
 		}
-		v = m
+		return val, nil
 
-	case []interface{}:
-		for i, v2 := range x {
-			x[i] = convertMapI2MapS(v2)
+	case yaml.MappingNode:
+		if (len(node.Content) % 2) != 0 {
+			return nil, fmt.Errorf("broken mapping node")
 		}
+		val := make(map[string]interface{}, len(node.Content)%2)
+		for i := 0; i < len(node.Content); i = i + 2 {
+			k, err := toJSON(node.Content[i])
+			if err != nil {
+				return nil, err
+			}
+			if val[fmt.Sprint(k)], err = toJSON(node.Content[i+1]); err != nil {
+				return nil, err
+			}
+		}
+		return val, nil
 
-	case map[string]interface{}:
-		for k, v2 := range x {
-			x[k] = convertMapI2MapS(v2)
-		}
+	case yaml.ScalarNode:
+		return node.Value, nil
 	}
 
-	return v
+	return nil, fmt.Errorf("do not support yaml node kind '%v'", node.Kind)
 }
 
-func ToJSON(data []byte) (j []byte, err error) {
-	m := yaml.Node{}
-	err = yaml.Unmarshal(data, &m)
-	if err != nil {
+func ToJSON(data []byte) ([]byte, error) {
+	m := &yaml.Node{}
+	if err := yaml.Unmarshal(data, m); err != nil {
 		return nil, err
 	}
 
-	j, err = json.Marshal(convertMapI2MapS(m))
+	d, err := toJSON(m)
 	if err != nil {
 		return nil, err
 	}
-
-	return j, nil
+	return json.Marshal(d)
 }
 
 func LoadYmlFileAsJSON(path string) (j []byte, err error) {

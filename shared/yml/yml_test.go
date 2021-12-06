@@ -13,8 +13,7 @@ func TestToJSON(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, `[{"name":"Jack"},{"name":"Jill"}]`, string(result))
 
-	result, err = ToJSON([]byte(`name: Jack
-`))
+	result, err = ToJSON([]byte(`name: Jack`))
 	assert.NoError(t, err)
 	assert.EqualValues(t, `{"name":"Jack"}`, string(result))
 
@@ -22,12 +21,17 @@ func TestToJSON(t *testing.T) {
 job: Butcher
 `))
 	assert.NoError(t, err)
-	assert.EqualValues(t, `{"name":"Jack","job":"Butcher"}`, string(result))
+	assert.EqualValues(t, `{"job":"Butcher","name":"Jack"}`, string(result))
 
 	result, err = ToJSON([]byte(`- name: Jack
   job: Butcher
 - name: Jill
+  job: Cook
+  obj:
+    - data: |
+        some data 123
+        with new line
 `))
 	assert.NoError(t, err)
-	assert.EqualValues(t, `[{"name":"Jack","job":"Butcher"},{"name":"Jill"}]`, string(result))
+	assert.EqualValues(t, `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":[{"data":"some data 123\nwith new line\n"}]}]`, string(result))
 }
