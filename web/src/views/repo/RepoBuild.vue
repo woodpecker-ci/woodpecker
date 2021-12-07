@@ -42,7 +42,8 @@
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="commit" />
-          <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
+          <span v-if="build.event === 'pull_request'">{{ build.commit.slice(0, 10) }}</span>
+          <a v-else class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
