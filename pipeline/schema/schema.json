@@ -97,7 +97,7 @@
     "step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": ["image"],
       "properties": {
         "image": {
@@ -121,9 +121,19 @@
         },
         "environment": {
           "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
-          "type": "array",
-          "items": { "type": "string" },
-          "minLength": 1
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "minLength": 1
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": ["boolean", "string", "number"]
+              }
+            }
+          ]
         },
         "secrets": {
           "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
@@ -156,6 +166,17 @@
             { "type": "string" },
             { "type": "array", "items": { "type": "string" }, "minLength": 1 }
           ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "settings": {
+          "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         }
       }
     },

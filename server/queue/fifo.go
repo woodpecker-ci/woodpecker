@@ -21,7 +21,6 @@ const (
 type entry struct {
 	item     *Task
 	done     chan bool
-	retry    int
 	error    error
 	deadline time.Time
 }
@@ -357,7 +356,6 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 		}
 	}
 
-	next = nil
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
 		waiting, ok := e.Value.(*Task)

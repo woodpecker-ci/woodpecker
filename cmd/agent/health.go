@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
@@ -46,7 +47,7 @@ func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 func handleVersion(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "text/json")
-	json.NewEncoder(w).Encode(versionResp{
+	_ = json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",
 		Version: version.String(),
 	})
@@ -59,7 +60,9 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 	}
 	w.Header().Add("Content-Type", "text/json")
-	counter.WriteTo(w)
+	if _, err := counter.WriteTo(w); err != nil {
+		log.Error().Err(err).Msg("handleStats")
+	}
 }
 
 type versionResp struct {

@@ -25,7 +25,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -49,13 +48,13 @@ func HandleLogin(c *gin.Context) {
 }
 
 func HandleAuth(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := remote.Login(c, c.Writer, c.Request)
+	tmpuser, err := server.Config.Services.Remote.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(303, "/login?error=oauth_error")
@@ -69,9 +68,8 @@ func HandleAuth(c *gin.Context) {
 	config := ToConfig(c)
 
 	// get the user from the database
-	u, err := store_.GetUserLogin(tmpuser.Login)
+	u, err := _store.GetUserLogin(tmpuser.Login)
 	if err != nil {
-
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
@@ -82,8 +80,8 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := remote.Teams(c, tmpuser)
-			if terr != nil || config.IsMember(teams) == false {
+			teams, terr := server.Config.Services.Remote.Teams(c, tmpuser)
+			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
@@ -103,7 +101,7 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// insert the user into the database
-		if err := store_.CreateUser(u); err != nil {
+		if err := _store.CreateUser(u); err != nil {
 			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
 			c.Redirect(303, "/login?error=internal_error")
 			return
@@ -119,15 +117,15 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := remote.Teams(c, u)
-		if terr != nil || config.IsMember(teams) == false {
+		teams, terr := server.Config.Services.Remote.Teams(c, u)
+		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
 			return
 		}
 	}
 
-	if err := store_.UpdateUser(u); err != nil {
+	if err := _store.UpdateUser(u); err != nil {
 		log.Error().Msgf("cannot update %s. %s", u.Login, err)
 		c.Redirect(303, "/login?error=internal_error")
 		return
@@ -158,37 +156,37 @@ func GetLogout(c *gin.Context) {
 }
 
 func GetLoginToken(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
 	in := &tokenPayload{}
 	err := c.Bind(in)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	login, err := remote.Auth(c, in.Access, in.Refresh)
+	login, err := server.Config.Services.Remote.Auth(c, in.Access, in.Refresh)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
-	user, err := store_.GetUserLogin(login)
+	user, err := _store.GetUserLogin(login)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	token := token.New(token.SessToken, user.Login)
-	tokenstr, err := token.SignExpires(user.Hash, exp)
+	newToken := token.New(token.SessToken, user.Login)
+	tokenStr, err := newToken.SignExpires(user.Hash, exp)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, &tokenPayload{
-		Access:  tokenstr,
+		Access:  tokenStr,
 		Expires: exp - time.Now().Unix(),
 	})
 }

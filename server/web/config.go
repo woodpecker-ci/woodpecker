@@ -16,21 +16,20 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func WebConfig(c *gin.Context) {
-	var err error
-
+func Config(c *gin.Context) {
 	user := session.User(c)
 
 	var csrf string
@@ -65,10 +64,9 @@ func WebConfig(c *gin.Context) {
 	c.Header("Content-Type", "text/javascript; charset=utf-8")
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
 
-	err = tmpl.Execute(c.Writer, configData)
-	if err != nil {
-		fmt.Println(err)
-		c.AbortWithError(http.StatusInternalServerError, nil)
+	if err := tmpl.Execute(c.Writer, configData); err != nil {
+		log.Error().Err(err).Msgf("could not execute template")
+		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 }
 

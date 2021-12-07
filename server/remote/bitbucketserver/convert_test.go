@@ -25,10 +25,8 @@ import (
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket Server converter", func() {
-
 		g.It("should convert repository", func() {
 			from := &internal.Repo{
 				Slug: "hello-world",

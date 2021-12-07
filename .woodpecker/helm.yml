@@ -1,13 +1,9 @@
-clone:
-  git:
-    image: plugins/git:next
-
 pipeline:
   set-version:
     image: alpine/helm:3.5.3
     commands:
       # use tag name or 0.0.0 if not running on a tag
-      - export CHART_VERSION="${DRONE_TAG##v}"
+      - export CHART_VERSION="${CI_COMMIT_TAG##v}"
       - export CHART_VERSION=$${CHART_VERSION:=0.0.0}
       - echo "Version $CHART_VERSION"
       - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-agent/Chart.yaml

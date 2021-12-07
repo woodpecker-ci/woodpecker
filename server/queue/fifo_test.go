@@ -6,6 +6,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var noContext = context.Background()
@@ -14,7 +16,7 @@ func TestFifo(t *testing.T) {
 	want := &Task{ID: "1"}
 
 	q := New()
-	q.Push(noContext, want)
+	assert.NoError(t, q.Push(noContext, want))
 	info := q.Info(noContext)
 	if len(info.Pending) != 1 {
 		t.Errorf("expect task in pending queue")
@@ -37,7 +39,7 @@ func TestFifo(t *testing.T) {
 		return
 	}
 
-	q.Done(noContext, got.ID, StatusSuccess)
+	assert.NoError(t, q.Done(noContext, got.ID, StatusSuccess))
 	info = q.Info(noContext)
 	if len(info.Pending) != 0 {
 		t.Errorf("expect task removed from pending queue")
@@ -54,7 +56,7 @@ func TestFifoExpire(t *testing.T) {
 
 	q := New().(*fifo)
 	q.extension = 0
-	q.Push(noContext, want)
+	assert.NoError(t, q.Push(noContext, want))
 	info := q.Info(noContext)
 	if len(info.Pending) != 1 {
 		t.Errorf("expect task in pending queue")
@@ -78,7 +80,7 @@ func TestFifoWait(t *testing.T) {
 	want := &Task{ID: "1"}
 
 	q := New().(*fifo)
-	q.Push(noContext, want)
+	assert.NoError(t, q.Push(noContext, want))
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != want {
@@ -89,12 +91,12 @@ func TestFifoWait(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		q.Wait(noContext, got.ID)
+		assert.NoError(t, q.Wait(noContext, got.ID))
 		wg.Done()
 	}()
 
 	<-time.After(time.Millisecond)
-	q.Done(noContext, got.ID, StatusSuccess)
+	assert.NoError(t, q.Done(noContext, got.ID, StatusSuccess))
 	wg.Wait()
 }
 
@@ -102,7 +104,7 @@ func TestFifoEvict(t *testing.T) {
 	t1 := &Task{ID: "1"}
 
 	q := New()
-	q.Push(noContext, t1)
+	assert.NoError(t, q.Push(noContext, t1))
 	info := q.Info(noContext)
 	if len(info.Pending) != 1 {
 		t.Errorf("expect task in pending queue")
@@ -131,7 +133,7 @@ func TestFifoDependencies(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task1}))
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != task1 {
@@ -139,7 +141,7 @@ func TestFifoDependencies(t *testing.T) {
 		return
 	}
 
-	q.Done(noContext, got.ID, StatusSuccess)
+	assert.NoError(t, q.Done(noContext, got.ID, StatusSuccess))
 
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task2 {
@@ -167,7 +169,7 @@ func TestFifoErrors(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != task1 {
@@ -175,7 +177,7 @@ func TestFifoErrors(t *testing.T) {
 		return
 	}
 
-	q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
 
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task2 {
@@ -216,7 +218,7 @@ func TestFifoErrors2(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	for i := 0; i < 2; i++ {
 		got, _ := q.Poll(noContext, func(*Task) bool { return true })
@@ -226,10 +228,10 @@ func TestFifoErrors2(t *testing.T) {
 		}
 
 		if got != task1 {
-			q.Done(noContext, got.ID, StatusSuccess)
+			assert.NoError(t, q.Done(noContext, got.ID, StatusSuccess))
 		}
 		if got != task2 {
-			q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+			assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
 		}
 	}
 
@@ -263,7 +265,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	obtainedWorkCh := make(chan *Task)
 
@@ -289,32 +291,30 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				if got != task1 {
 					t.Errorf("expect task1 returned from queue as task2 and task3 depends on it")
 					return
-				} else {
-					task1Processed = true
-					q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
-					go func() {
-						for {
-							fmt.Printf("Worker spawned\n")
-							got, _ := q.Poll(noContext, func(*Task) bool { return true })
-							obtainedWorkCh <- got
-						}
-					}()
 				}
+				task1Processed = true
+				assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+				go func() {
+					for {
+						fmt.Printf("Worker spawned\n")
+						got, _ := q.Poll(noContext, func(*Task) bool { return true })
+						obtainedWorkCh <- got
+					}
+				}()
 			} else if !task2Processed {
 				if got != task2 {
 					t.Errorf("expect task2 returned from queue")
 					return
-				} else {
-					task2Processed = true
-					q.Done(noContext, got.ID, StatusSuccess)
-					go func() {
-						for {
-							fmt.Printf("Worker spawned\n")
-							got, _ := q.Poll(noContext, func(*Task) bool { return true })
-							obtainedWorkCh <- got
-						}
-					}()
 				}
+				task2Processed = true
+				assert.NoError(t, q.Done(noContext, got.ID, StatusSuccess))
+				go func() {
+					for {
+						fmt.Printf("Worker spawned\n")
+						got, _ := q.Poll(noContext, func(*Task) bool { return true })
+						obtainedWorkCh <- got
+					}
+				}()
 			} else {
 				if got != task3 {
 					t.Errorf("expect task3 returned from queue")
@@ -324,9 +324,8 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				if got.ShouldRun() {
 					t.Errorf("expect task3 should not run, task1 succeeded but task2 failed")
 					return
-				} else {
-					return
 				}
+				return
 			}
 
 		case <-time.After(5 * time.Second):
@@ -356,14 +355,14 @@ func TestFifoTransitiveErrors(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 	if got != task1 {
 		t.Errorf("expect task1 returned from queue as task2 depends on it")
 		return
 	}
-	q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
 
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task2 {
@@ -374,7 +373,7 @@ func TestFifoTransitiveErrors(t *testing.T) {
 		t.Errorf("expect task2 should not run, since task1 failed")
 		return
 	}
-	q.Done(noContext, got.ID, StatusSkipped)
+	assert.NoError(t, q.Done(noContext, got.ID, StatusSkipped))
 
 	got, _ = q.Poll(noContext, func(*Task) bool { return true })
 	if got != task3 {
@@ -406,16 +405,16 @@ func TestFifoCancel(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
-	q.Error(noContext, task1.ID, fmt.Errorf("cancelled"))
-	q.Error(noContext, task2.ID, fmt.Errorf("cancelled"))
-	q.Error(noContext, task3.ID, fmt.Errorf("cancelled"))
+	assert.NoError(t, q.Error(noContext, task1.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(noContext, task2.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(noContext, task3.ID, fmt.Errorf("canceled")))
 
 	info := q.Info(noContext)
 	if len(info.Pending) != 0 {
-		t.Errorf("All pipelines should be cancelled")
+		t.Errorf("All pipelines should be canceled")
 		return
 	}
 }
@@ -435,7 +434,7 @@ func TestFifoPause(t *testing.T) {
 
 	q.Pause()
 	t0 := time.Now()
-	q.Push(noContext, task1)
+	assert.NoError(t, q.Push(noContext, task1))
 	time.Sleep(20 * time.Millisecond)
 	q.Resume()
 
@@ -447,7 +446,7 @@ func TestFifoPause(t *testing.T) {
 	}
 
 	q.Pause()
-	q.Push(noContext, task1)
+	assert.NoError(t, q.Push(noContext, task1))
 	q.Resume()
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
 }
@@ -459,7 +458,7 @@ func TestFifoPauseResume(t *testing.T) {
 
 	q := New().(*fifo)
 	q.Pause()
-	q.Push(noContext, task1)
+	assert.NoError(t, q.Push(noContext, task1))
 	q.Resume()
 
 	_, _ = q.Poll(noContext, func(*Task) bool { return true })
@@ -484,7 +483,7 @@ func TestWaitingVsPending(t *testing.T) {
 	}
 
 	q := New().(*fifo)
-	q.PushAtOnce(noContext, []*Task{task2, task3, task1})
+	assert.NoError(t, q.PushAtOnce(noContext, []*Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, func(*Task) bool { return true })
 
@@ -493,8 +492,10 @@ func TestWaitingVsPending(t *testing.T) {
 		t.Errorf("2 should wait on deps")
 	}
 
-	q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error"))
-	got, _ = q.Poll(noContext, func(*Task) bool { return true })
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+	got, err := q.Poll(noContext, func(*Task) bool { return true })
+	assert.NoError(t, err)
+	assert.EqualValues(t, task2, got)
 
 	info = q.Info(noContext)
 	if info.Stats.WaitingOnDeps != 0 {

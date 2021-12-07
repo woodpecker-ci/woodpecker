@@ -129,7 +129,6 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	return convertUser(user, accessToken), nil
-
 }
 
 // Auth is not supported by the Stash driver.
@@ -192,7 +191,7 @@ func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 		Desc:  convertDesc(b.Status),
 		Name:  fmt.Sprintf("Woodpecker #%d - %s", b.Number, b.Branch),
 		Key:   "Woodpecker",
-		Url:   link,
+		URL:   link,
 	}
 
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)

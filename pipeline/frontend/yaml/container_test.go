@@ -1,10 +1,9 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
@@ -59,6 +58,10 @@ tmpfs:
   - /var/lib/test
 when:
   branch: master
+settings:
+  foo: bar
+  baz: false
+deprecated_setting: fallback
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -111,15 +114,18 @@ func TestUnmarshalContainer(t *testing.T) {
 				Include: []string{"master"},
 			},
 		},
+		Settings: map[string]interface{}{
+			"foo": "bar",
+			"baz": false,
+		},
+		Vargs: map[string]interface{}{
+			"deprecated_setting": "fallback",
+		},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(want, got) {
-		t.Errorf("problem parsing container")
-		pretty.Ldiff(t, want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
 // TestUnmarshalContainersErr unmarshals a map of containers. The order is
@@ -140,11 +146,15 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node }",
+			from: "test: { name: unit_test, image: node, deprecated_setting: fallback, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
+					Settings: map[string]interface{}{
+						"deprecated_setting": "fallback",
+						"normal_setting":     true,
+					},
 				},
 			},
 		},
@@ -153,12 +163,8 @@ func TestUnmarshalContainers(t *testing.T) {
 		in := []byte(test.from)
 		got := Containers{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			t.Errorf("problem parsing containers %q", test.from)
-			pretty.Ldiff(t, test.want, got.Containers)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -173,8 +179,6 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		in := []byte(test)
 		containers := new(Containers)
 		err := yaml.Unmarshal(in, &containers)
-		if err == nil {
-			t.Errorf("wanted error for containers %q", test)
-		}
+		assert.Error(t, err, "wanted error for containers %q", test)
 	}
 }

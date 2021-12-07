@@ -39,7 +39,7 @@ type BuildStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 	Desc  string `json:"description,omitempty"`
 }
 
@@ -58,9 +58,9 @@ type EmailResp struct {
 }
 
 type Hook struct {
-	Uuid   string   `json:"uuid,omitempty"`
+	UUID   string   `json:"uuid,omitempty"`
 	Desc   string   `json:"description"`
-	Url    string   `json:"url"`
+	URL    string   `json:"url"`
 	Events []string `json:"events"`
 	Active bool     `json:"active"`
 }
@@ -75,7 +75,7 @@ type HookResp struct {
 
 type Links struct {
 	Avatar Link   `json:"avatar"`
-	Html   Link   `json:"html"`
+	HTML   Link   `json:"html"`
 	Clone  []Link `json:"clone"`
 }
 

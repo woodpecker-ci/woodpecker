@@ -80,8 +80,9 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 			pipeline := new(rpc.Pipeline)
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
-		} else {
-			s.Done(c, task.ID, rpc.State{})
+		}
+		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
+			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
 }
@@ -135,7 +136,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if proc, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
+	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
 		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
 	}
 
@@ -151,7 +152,9 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Repo:  *repo,
 		Build: *build,
 	})
-	s.pubsub.Publish(c, "topic/events", message)
+	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+		log.Error().Err(err).Msg("can not publish proc list to")
+	}
 
 	return nil
 }
@@ -279,7 +282,9 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Repo:  *repo,
 			Build: *build,
 		})
-		s.pubsub.Publish(c, "topic/events", message)
+		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+			log.Error().Err(err).Msg("can not publish proc list to")
+		}
 	}()
 
 	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
@@ -373,7 +378,9 @@ func isMultiPipeline(procs []*model.Proc) bool {
 func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	entry := new(logging.Entry)
 	entry.Data, _ = json.Marshal(line)
-	s.logger.Write(c, id, entry)
+	if err := s.logger.Write(c, id, entry); err != nil {
+		log.Error().Err(err).Msgf("rpc server could not write to logger")
+	}
 	return nil
 }
 
@@ -416,9 +423,13 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	user, err := s.store.GetUser(repo.UserID)
 	if err == nil {
 		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, _ := refresher.Refresh(ctx, user)
-			if ok {
-				s.store.UpdateUser(user)
+			ok, err := refresher.Refresh(ctx, user)
+			if err != nil {
+				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+			} else if ok {
+				if err := s.store.UpdateUser(user); err != nil {
+					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+				}
 			}
 		}
 		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
@@ -441,7 +452,9 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 		Repo:  *repo,
 		Build: *build,
 	})
-	s.pubsub.Publish(c, "topic/events", message)
+	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
+	}
 }
 
 func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {

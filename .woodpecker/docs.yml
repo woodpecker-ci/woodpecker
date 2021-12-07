@@ -1,7 +1,3 @@
-clone:
-  git:
-    image: plugins/git:next
-
 pipeline:
   build:
     image: node:14-alpine
@@ -25,17 +21,17 @@ pipeline:
       - chmod 0600 $HOME/.ssh/id_rsa
       - git config --global user.email "woodpecker-bot@obermui.de"
       - git config --global user.name "woodpecker-bot"
-      - git clone -b master --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
       - cd /repo
       - git add .
       # exit successfully if nothing changed
       - test -n "$(git status --porcelain)" || exit 0
-      - git commit -m "Deploy website - based on ${DRONE_COMMIT_SHA}"
+      - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
       event: push
-      branch: master
+      branch: ${CI_REPO_DEFAULT_BRANCH}
       path: "docs/**"
 

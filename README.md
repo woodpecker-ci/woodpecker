@@ -5,8 +5,8 @@
 </p>
 <br/>
 <p align="center">
-  <a href="https://wp.laszlo.cloud/woodpecker-ci/woodpecker" title="Build Status">
-    <img src="https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg">
+  <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
+    <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg">
@@ -48,91 +48,37 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-    image: debian
-    commands:
-      - echo "This is the build step"
-  a-test-step:
-    image: debian
-    commands:
-      - echo "Testing.."
-```
+[Read More](https://woodpecker-ci.org/docs/usage/intro)
 
 ### Build steps are containers
 
 - Define any Docker image as context
 - Install the needed tools in custom Docker images, use them as context
 
-```diff
- pipeline:
-   build:
--    image: debian
-+    image: mycompany/image-with-awscli
-     commands:
-       - aws help
-```
+[Read More](https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps)
 
-### File changes are incremental
+### Plugins
 
-- Woodpecker clones the source code in the beginning pipeline
-- Changes to files are persisted through steps as the same volume is mounted to all steps
+Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you can also use your own.
 
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-    image: debian
-    commands:
-      - touch myfile
-  a-test-step:
-    image: debian
-    commands:
-      - cat myfile
-```
-
-### Plugins are straightforward
-
-- If you copy the same shell script from project to project
-- Pack it into a plugin instead
-- And make the yaml declarative
-- Plugins are Docker images with your script as an entrypoint
-
-```Dockerfile
-# Dockerfile
-FROM laszlocloud/kubectl
-COPY deploy /usr/local/deploy
-ENTRYPOINT ["/usr/local/deploy"]
-```
-
-```bash
-# deploy
-kubectl apply -f $PLUGIN_TEMPLATE
-```
-
-```yaml
-# .woodpecker.yml
-pipeline:
-  deploy-to-k8s:
-    image: laszlocloud/my-k8s-plugin
-    template: config/k8s/service.yml
-```
+[Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
 ## Documentation
 
 https://woodpecker-ci.org/
 
-## Who uses Woodpecker?
-
-Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
-
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
-
 ## Contribution
 
 See [Contributing Guide](CONTRIBUTING.md)
+
+## Who uses Woodpecker?
+
+[Codeberg](https://codeberg.org), the woodpecker project itself, and many others not listed.
+
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
+
+## Stars over time
+[![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
 
 ## License
 

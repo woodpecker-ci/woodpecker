@@ -76,13 +76,13 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 }
 
 func PostHook(c *gin.Context) {
-	remote_ := remote.FromContext(c)
-	store_ := store.FromContext(c)
+	_remote := server.Config.Services.Remote
+	_store := store.FromContext(c)
 
-	tmpRepo, build, err := remote_.Hook(c.Request)
+	tmpRepo, build, err := _remote.Hook(c.Request)
 	if err != nil {
 		log.Error().Msgf("failure to parse hook. %s", err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 		return
 	}
 	if build == nil {
@@ -104,15 +104,15 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
 		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if !repo.IsActive {
 		log.Error().Msgf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
-		c.AbortWithError(204, err)
+		_ = c.AbortWithError(204, err)
 		return
 	}
 
@@ -122,7 +122,7 @@ func PostHook(c *gin.Context) {
 	})
 	if err != nil {
 		log.Error().Msgf("failure to parse token from hook for %s. %s", repo.FullName, err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 		return
 	}
 	if parsed.Text != repo.FullName {
@@ -139,27 +139,27 @@ func PostHook(c *gin.Context) {
 
 	if build.Event == model.EventPull && !repo.AllowPull {
 		log.Info().Msgf("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
-		c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
+		_, _ = c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
 		c.Writer.WriteHeader(204)
 		return
 	}
 
-	user, err := store_.GetUser(repo.UserID)
+	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
 	// if the remote has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the build.
-	if refresher, ok := remote_.(remote.Refresher); ok {
+	if refresher, ok := _remote.(remote.Refresher); ok {
 		ok, err := refresher.Refresh(c, user)
 		if err != nil {
 			log.Error().Msgf("failed to refresh oauth2 token: %s", err)
 		} else if ok {
-			if err := store_.UpdateUser(user); err != nil {
+			if err := _store.UpdateUser(user); err != nil {
 				log.Error().Msgf("error while updating user: %s", err)
 				// move forward
 			}
@@ -167,18 +167,18 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
+	configFetcher := shared.NewConfigFetcher(_remote, user, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		log.Error().Msgf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	filtered, err := branchFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		log.Error().Msgf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
-		c.AbortWithError(400, err)
+		_ = c.AbortWithError(400, err)
 	}
 	if filtered {
 		c.String(200, "Branch does not match restrictions defined in yaml")
@@ -199,10 +199,10 @@ func PostHook(c *gin.Context) {
 		build.Status = model.StatusBlocked
 	}
 
-	err = store_.CreateBuild(build, build.Procs...)
+	err = _store.CreateBuild(build, build.Procs...)
 	if err != nil {
 		log.Error().Msgf("failure to save commit for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -211,7 +211,7 @@ func PostHook(c *gin.Context) {
 		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
 			log.Error().Msgf("failure to find or persist build config for %s. %s", repo.FullName, err)
-			c.AbortWithError(500, err)
+			_ = c.AbortWithError(500, err)
 			return
 		}
 	}
@@ -222,7 +222,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	netrc, err := remote_.Netrc(user, repo)
+	netrc, err := _remote.Netrc(user, repo)
 	if err != nil {
 		c.String(500, "Failed to generate netrc file. %s", err)
 		return
@@ -247,7 +247,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// get the previous build so that we can send status change notifications
-	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
+	last, _ := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
 
 	b := shared.ProcBuilder{
 		Repo:  repo,
@@ -262,14 +262,14 @@ func PostHook(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = shared.UpdateToStatusError(store_, *build, err); err != nil {
+		if _, err = shared.UpdateToStatusError(_store, *build, err); err != nil {
 			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store_.ProcCreate(build.Procs)
+	err = _store.ProcCreate(build.Procs)
 	if err != nil {
 		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
@@ -278,9 +278,9 @@ func PostHook(c *gin.Context) {
 		for _, item := range buildItems {
 			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
-				err = remote_.Status(c, user, repo, build, uri, item.Proc)
+				err = _remote.Status(c, user, repo, build, uri, item.Proc)
 			} else {
-				err = remote_.Status(c, user, repo, build, uri, nil)
+				err = _remote.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
 				log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
@@ -288,8 +288,12 @@ func PostHook(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 // TODO: parse yaml once and not for each filter function
@@ -367,7 +371,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 }
 
 // publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) {
+func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) error {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -381,10 +385,10 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 		Repo:  *repo,
 		Build: buildCopy,
 	})
-	server.Config.Services.Pubsub.Publish(c, "topic/events", message)
+	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) {
+func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) error {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
 		if item.Proc.State == model.StatusSkipped {
@@ -408,10 +412,12 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 			Timeout: repo.Timeout,
 		})
 
-		server.Config.Services.Logs.Open(context.Background(), task.ID)
+		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
+			return err
+		}
 		tasks = append(tasks, task)
 	}
-	server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
 func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {

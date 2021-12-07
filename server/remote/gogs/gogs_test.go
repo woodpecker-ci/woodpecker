@@ -38,7 +38,6 @@ func Test_gogs(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gogs", func() {
-
 		g.After(func() {
 			s.Close()
 		})

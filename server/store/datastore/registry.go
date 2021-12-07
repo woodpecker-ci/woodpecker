@@ -42,7 +42,11 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 	return err
 }
 
-func (s storage) RegistryDelete(registry *model.Registry) error {
-	_, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
+func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
+	registry, err := s.RegistryFind(repo, addr)
+	if err != nil {
+		return err
+	}
+	_, err = s.engine.ID(registry.ID).Delete(new(model.Registry))
 	return err
 }
