@@ -17,7 +17,6 @@ require (
 	github.com/drone/envsubst v1.0.3
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
-	github.com/ghodss/yaml v1.0.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0

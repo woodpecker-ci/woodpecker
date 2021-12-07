@@ -130,9 +130,6 @@ github.com/franela/goblin
 github.com/fsnotify/fsnotify
 # github.com/fzipp/gocyclo v0.3.1
 github.com/fzipp/gocyclo
-# github.com/ghodss/yaml v1.0.0
-## explicit
-github.com/ghodss/yaml
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.7.4
