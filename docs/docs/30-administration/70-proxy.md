@@ -82,55 +82,8 @@ server {
 This guide provides a brief overview for installing Woodpecker server behind the [Caddy webserver](https://caddyserver.com/). This is an example caddyfile proxy configuration:
 
 ```nohighlight
-woodpecker.mycompany.com {
-    gzip {
-        not /stream/
-    }
-    proxy / localhost:8000 {
-        websocket
-        transparent
-    }
-}
-```
-You must disable gzip compression for streamed data otherwise the live updates won't be instant:
-
-```diff
-woodpecker.mycompany.com {
-+   gzip {
-+       not /stream/
-+   }
-    proxy / localhost:8000 {
-        websocket
-        transparent
-    }
-}
-```
-
-You must configure the proxy to enable websocket upgrades:
-
-```diff
-woodpecker.mycompany.com {
-    gzip {
-        not /stream/
-    }
-    proxy / localhost:8000 {
-+       websocket
-        transparent
-    }
-}
-```
-
-You must configure the proxy to include `X-Forwarded` headers using the `transparent` directive:
-
-```diff
-woodpecker.mycompany.com {
-    gzip {
-        not /stream/
-    }
-    proxy / localhost:8000 {
-        websocket
-+       transparent
-    }
+woodpecker.example.com {
+  reverse_proxy woodpecker-server:8000
 }
 ```
 
@@ -138,7 +91,7 @@ woodpecker.mycompany.com {
 After installing [ngrok](https://ngrok.com/), open a new console and run:
 
 ```
-ngrok http 80
+ngrok http 8000
 ```
 
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok url (usually xxx.ngrok.io) and start the server.
