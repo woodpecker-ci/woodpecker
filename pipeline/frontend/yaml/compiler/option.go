@@ -60,30 +60,17 @@ func WithMetadata(metadata frontend.Metadata) Option {
 		for k, v := range metadata.Environ() {
 			compiler.env[k] = v
 		}
-		// TODO this is present for backward compatibility and should
-		// be removed in a future version.
-		for k, v := range metadata.EnvironDrone() {
-			compiler.env[k] = v
-		}
 	}
 }
 
 // WithNetrc configures the compiler with netrc authentication
 // credentials added by default to every container in the pipeline.
 func WithNetrc(username, password, machine string) Option {
-	return WithEnviron(
-		map[string]string{
-			"CI_NETRC_USERNAME": username,
-			"CI_NETRC_PASSWORD": password,
-			"CI_NETRC_MACHINE":  machine,
-
-			// TODO: This is present for backward compatibility and should
-			// be removed in a future version.
-			"DRONE_NETRC_USERNAME": username,
-			"DRONE_NETRC_PASSWORD": password,
-			"DRONE_NETRC_MACHINE":  machine,
-		},
-	)
+	return func(compiler *Compiler) {
+		compiler.cloneEnv["CI_NETRC_USERNAME"] = username
+		compiler.cloneEnv["CI_NETRC_PASSWORD"] = password
+		compiler.cloneEnv["CI_NETRC_MACHINE"] = machine
+	}
 }
 
 // WithWorkspace configures the compiler with the workspace base

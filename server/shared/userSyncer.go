@@ -16,6 +16,7 @@ package shared
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -39,17 +40,12 @@ type Syncer struct {
 // synchronized with the local datastore.
 type FilterFunc func(*model.Repo) bool
 
-// NamespaceFilter
 func NamespaceFilter(namespaces map[string]bool) FilterFunc {
-	if namespaces == nil || len(namespaces) == 0 {
+	if len(namespaces) == 0 {
 		return noopFilter
 	}
 	return func(repo *model.Repo) bool {
-		if namespaces[repo.Owner] {
-			return true
-		} else {
-			return false
-		}
+		return namespaces[repo.Owner]
 	}
 }
 
@@ -70,33 +66,28 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 		return err
 	}
 
-	var remoteRepos []*model.Repo
-	var perms []*model.Perm
-
+	remoteRepos := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
 		if s.Match(repo) {
-			remoteRepos = append(remoteRepos, repo)
-			perm := model.Perm{
+			repo.Perm = &model.Perm{
 				UserID: user.ID,
+				RepoID: repo.ID,
 				Repo:   repo.FullName,
-				Pull:   true,
 				Synced: unix,
 			}
 			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
-			if err == nil && remotePerm != nil {
-				perm.Push = remotePerm.Push
-				perm.Admin = remotePerm.Admin
+			if err != nil {
+				return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
 			}
-			perms = append(perms, &perm)
+			repo.Perm.Pull = remotePerm.Pull
+			repo.Perm.Push = remotePerm.Push
+			repo.Perm.Admin = remotePerm.Admin
+
+			remoteRepos = append(remoteRepos, repo)
 		}
 	}
 
 	err = s.Store.RepoBatch(remoteRepos)
-	if err != nil {
-		return err
-	}
-
-	err = s.Store.PermBatch(perms)
 	if err != nil {
 		return err
 	}

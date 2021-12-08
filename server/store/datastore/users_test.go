@@ -28,7 +28,6 @@ func TestUsers(t *testing.T) {
 
 	g := goblin.Goblin(t)
 	g.Describe("User", func() {
-
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
@@ -213,10 +212,12 @@ func TestUsers(t *testing.T) {
 			g.Assert(store.CreateRepo(repo2)).IsNil()
 			g.Assert(store.CreateRepo(repo3)).IsNil()
 
-			g.Assert(store.PermBatch([]*model.Perm{
+			for _, perm := range []*model.Perm{
 				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
 				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
-			})).IsNil()
+			} {
+				g.Assert(store.PermUpsert(perm)).IsNil()
+			}
 
 			build1 := &model.Build{
 				RepoID: repo1.ID,

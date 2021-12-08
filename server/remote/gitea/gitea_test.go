@@ -38,7 +38,6 @@ func Test_gitea(t *testing.T) {
 	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -97,7 +96,7 @@ func Test_gitea(t *testing.T) {
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
-				g.Assert(repo.IsPrivate).IsTrue()
+				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
 				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
 			})

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 // Parse parses the pipeline config from an io.Reader.

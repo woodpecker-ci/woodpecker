@@ -15,8 +15,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
@@ -72,9 +72,6 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for key, val := range metadata.Job.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
@@ -161,8 +158,8 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
-	engine, err := docker.NewEnv()
-	if err != nil {
+	engine := docker.New()
+	if err = engine.Load(); err != nil {
 		return err
 	}
 
@@ -260,8 +257,7 @@ var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reade
 		return err
 	}
 
-	logstream := NewLineWriter(proc.Alias)
-	io.Copy(logstream, part)
-
-	return nil
+	logStream := NewLineWriter(proc.Alias)
+	_, err = io.Copy(logStream, part)
+	return err
 })

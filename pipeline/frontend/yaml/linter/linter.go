@@ -48,7 +48,7 @@ func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
 		if err := l.lintImage(container); err != nil {
 			return err
 		}
-		if l.trusted == false {
+		if !l.trusted {
 			if err := l.lintTrusted(container); err != nil {
 				return err
 			}
@@ -76,9 +76,9 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
-	if len(c.Vargs) != 0 {
+	if len(c.Settings) != 0 {
 		var keys []string
-		for key := range c.Vargs {
+		for key := range c.Settings {
 			keys = append(keys, key)
 		}
 		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)

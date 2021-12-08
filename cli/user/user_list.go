@@ -36,7 +36,9 @@ func userList(c *cli.Context) error {
 		return err
 	}
 	for _, user := range users {
-		tmpl.Execute(os.Stdout, user)
+		if err := tmpl.Execute(os.Stdout, user); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -1,20 +1,22 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex border-b mb-4 items-center dark:border-gray-600">
-      <IconButton icon="back" @click="$router.back()" />
-      <h1 class="text-xl ml-2 text-gray-500">Pipeline #{{ buildId }} - {{ message }}</h1>
-      <BuildStatusIcon :build="build" class="flex ml-auto" />
+    <FluidContainer class="flex border-b mb-4 items-center dark:border-gray-600 min-w-0">
+      <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
+      <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
+        Pipeline #{{ buildId }} - {{ message }}
+      </h1>
+      <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
       <template v-if="repoPermissions.push">
         <Button
           v-if="build.status === 'pending' || build.status === 'running'"
-          class="ml-4"
+          class="ml-4 flex-shrink-0"
           text="Cancel"
           :is-loading="isCancelingBuild"
           @click="cancelBuild"
         />
         <Button
           v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
-          class="ml-4"
+          class="ml-4 flex-shrink-0"
           text="Restart"
           :is-loading="isRestartingBuild"
           @click="restartBuild"
@@ -33,11 +35,15 @@
           <Icon v-else-if="build.event === 'deployment'" name="deployment" />
           <Icon v-else-if="build.event === 'tag'" name="tag" />
           <Icon v-else name="push" />
-          <span>{{ build.branch }}</span>
+          <a v-if="build.event === 'pull_request'" class="text-link" :href="build.link_url" target="_blank">{{
+            `#${build.ref.replaceAll('refs/pull/', '').replaceAll('/merge', '').replaceAll('/head', '')}`
+          }}</a>
+          <span v-else>{{ build.branch }}</span>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="commit" />
-          <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
+          <span v-if="build.event === 'pull_request'">{{ build.commit.slice(0, 10) }}</span>
+          <a v-else class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
@@ -67,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, Ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -79,7 +85,9 @@ import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useBuild from '~/compositions/useBuild';
+import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
+import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import { findProc } from '~/utils/helpers';
@@ -129,6 +137,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const notifications = useNotifications();
+    const favicon = useFavicon();
 
     const buildStore = BuildStore();
     const buildId = toRef(props, 'buildId');
@@ -170,6 +179,8 @@ export default defineComponent({
       }
 
       await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10));
+
+      favicon.updateStatus(build.value.status);
     }
 
     const { doSubmit: cancelBuild, isLoading: isCancelingBuild } = useAsyncAction(async () => {
@@ -223,6 +234,9 @@ export default defineComponent({
 
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
+    onBeforeUnmount(() => {
+      favicon.updateStatus('default');
+    });
 
     return {
       repoPermissions,
@@ -240,6 +254,7 @@ export default defineComponent({
       restartBuild,
       approveBuild,
       declineBuild,
+      goBack: useRouteBackOrDefault({ name: 'repo' }),
     };
   },
 });

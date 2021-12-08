@@ -24,7 +24,7 @@ import (
 
 	"github.com/drone/envsubst"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
@@ -88,7 +88,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			environ := b.environmentVariables(metadata, axis)
 
 			// substitute vars
-			substituted, err := b.envsubst_(string(y.Data), environ)
+			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -175,7 +175,7 @@ func containsItemWithName(name string, items []*BuildItem) bool {
 	return false
 }
 
-func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, error) {
+func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -187,9 +187,6 @@ func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, er
 
 func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for k, v := range axis {
 		environ[k] = v
 	}
@@ -233,7 +230,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 				b.Netrc.Password,
 				b.Netrc.Machine,
 			),
-			b.Repo.IsPrivate,
+			b.Repo.IsSCMPrivate,
 		),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
@@ -298,7 +295,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name:    repo.FullName,
 			Link:    repo.Link,
 			Remote:  repo.Clone,
-			Private: repo.IsPrivate,
+			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
 		Curr: frontend.Build{
@@ -307,7 +304,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  build.Created,
 			Started:  build.Started,
 			Finished: build.Finished,
-			Status:   build.Status,
+			Status:   string(build.Status),
 			Event:    build.Event,
 			Link:     build.Link,
 			Target:   build.Deploy,
@@ -330,7 +327,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  last.Created,
 			Started:  last.Started,
 			Finished: last.Finished,
-			Status:   last.Status,
+			Status:   string(last.Status),
 			Event:    last.Event,
 			Link:     last.Link,
 			Target:   last.Deploy,

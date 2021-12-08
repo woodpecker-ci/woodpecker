@@ -1,10 +1,8 @@
-import marked from 'marked';
+import { marked } from 'marked';
 
 const tokens = ['---', '---'];
 const regexHeader = new RegExp('^' + tokens[0] + '([\\s|\\S]*?)' + tokens[1]);
-const regexContent = new RegExp(
-  '^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*'
-);
+const regexContent = new RegExp('^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*');
 
 export function getHeader<T = any>(data: string): T {
   const header = getRawHeader(data);

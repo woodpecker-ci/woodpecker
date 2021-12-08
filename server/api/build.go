@@ -19,7 +19,6 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,7 +41,7 @@ func GetBuilds(c *gin.Context) {
 	repo := session.Repo(c)
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
@@ -55,7 +54,7 @@ func GetBuilds(c *gin.Context) {
 }
 
 func GetBuild(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 	if c.Param("number") == "latest" {
 		GetBuildLast(c)
 		return
@@ -64,17 +63,17 @@ func GetBuild(c *gin.Context) {
 	repo := session.Repo(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := store_.FileList(build)
-	procs, _ := store_.ProcList(build)
+	files, _ := _store.FileList(build)
+	procs, _ := _store.ProcList(build)
 	build.Procs = model.Tree(procs)
 	build.Files = files
 
@@ -82,23 +81,23 @@ func GetBuild(c *gin.Context) {
 }
 
 func GetBuildLast(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	branch := c.DefaultQuery("branch", repo.Branch)
 
-	build, err := store_.GetBuildLast(repo, branch)
+	build, err := _store.GetBuildLast(repo, branch)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	procs, _ := store_.ProcList(build)
+	procs, _ := _store.ProcList(build)
 	build.Procs = model.Tree(procs)
 	c.JSON(http.StatusOK, build)
 }
 
 func GetBuildLogs(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	// parse the build number and job sequence number from
@@ -107,32 +106,34 @@ func GetBuildLogs(c *gin.Context) {
 	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
 	name := c.Params.ByName("proc")
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	proc, err := store_.ProcChild(build, ppid, name)
+	proc, err := _store.ProcChild(build, ppid, name)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	rc, err := store_.LogFind(proc)
+	rc, err := _store.LogFind(proc)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	defer rc.Close()
 
 	c.Header("Content-Type", "application/json")
-	io.Copy(c.Writer, rc)
+	if _, err := io.Copy(c.Writer, rc); err != nil {
+		log.Error().Err(err).Msg("could not copy log to http response")
+	}
 }
 
 func GetProcLogs(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	// parse the build number and job sequence number from
@@ -140,43 +141,45 @@ func GetProcLogs(c *gin.Context) {
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	proc, err := store_.ProcFind(build, pid)
+	proc, err := _store.ProcFind(build, pid)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	rc, err := store_.LogFind(proc)
+	rc, err := _store.LogFind(proc)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
 	defer rc.Close()
 
 	c.Header("Content-Type", "application/json")
-	io.Copy(c.Writer, rc)
+	if _, err := io.Copy(c.Writer, rc); err != nil {
+		log.Error().Err(err).Msg("could not copy log to http response")
+	}
 }
 
 // DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	procs, err := store_.ProcList(build)
+	procs, err := _store.ProcList(build)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
@@ -203,42 +206,54 @@ func DeleteBuild(c *gin.Context) {
 			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
 		}
 	}
-	server.Config.Services.Queue.EvictAtOnce(context.Background(), procToEvict)
-	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToEvict, queue.ErrCancel)
-	server.Config.Services.Queue.ErrorAtOnce(context.Background(), procToCancel, queue.ErrCancel)
+
+	if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
 	// Then update the DB status for pending builds
 	// Running ones will be set when the agents stop on the cancel signal
 	for _, proc := range procs {
 		if proc.State == model.StatusPending {
 			if proc.PPID != 0 {
-				if _, err = shared.UpdateProcToStatusSkipped(store_, *proc, 0); err != nil {
+				if _, err = shared.UpdateProcToStatusSkipped(_store, *proc, 0); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			} else {
-				if _, err = shared.UpdateProcToStatusKilled(store_, *proc); err != nil {
+				if _, err = shared.UpdateProcToStatusKilled(_store, *proc); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(store_, *build)
+	killedBuild, err := shared.UpdateToStatusKilled(_store, *build)
 	if err != nil {
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
 	// For pending builds, we stream the UI the latest state.
 	// For running builds, the UI will be updated when the agents acknowledge the cancel
 	if build.Status == model.StatusPending {
-		procs, err = store_.ProcList(killedBuild)
+		procs, err = _store.ProcList(killedBuild)
 		if err != nil {
-			c.AbortWithError(404, err)
+			_ = c.AbortWithError(404, err)
 			return
 		}
 		killedBuild.Procs = model.Tree(procs)
-		publishToTopic(c, killedBuild, repo, model.Cancelled)
+		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
+		}
 	}
 
 	c.String(204, "")
@@ -246,16 +261,16 @@ func DeleteBuild(c *gin.Context) {
 
 func PostApproval(c *gin.Context) {
 	var (
-		remote_ = remote.FromContext(c)
-		store_  = store.FromContext(c)
+		_remote = server.Config.Services.Remote
+		_store  = store.FromContext(c)
 		repo    = session.Repo(c)
 		user    = session.User(c)
 		num, _  = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	)
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if build.Status != model.StatusBlocked {
@@ -267,17 +282,17 @@ func PostApproval(c *gin.Context) {
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	netrc, err := remote_.Netrc(user, repo)
+	netrc, err := _remote.Netrc(user, repo)
 	if err != nil {
 		c.String(500, "failed to generate netrc file. %s", err)
 		return
 	}
 
-	if build, err = shared.UpdateToStatusPending(store_, *build, user.Login); err != nil {
+	if build, err = shared.UpdateToStatusPending(_store, *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
@@ -286,7 +301,7 @@ func PostApproval(c *gin.Context) {
 
 	// get the previous build so that we can send
 	// on status change notifications
-	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
+	last, _ := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
@@ -321,14 +336,14 @@ func PostApproval(c *gin.Context) {
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err = shared.UpdateToStatusError(store_, *build, err); err != nil {
+		if _, err = shared.UpdateToStatusError(_store, *build, err); err != nil {
 			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
 		}
 		return
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store_.ProcCreate(build.Procs)
+	err = _store.ProcCreate(build.Procs)
 	if err != nil {
 		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
 	}
@@ -337,9 +352,9 @@ func PostApproval(c *gin.Context) {
 		for _, item := range buildItems {
 			uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
 			if len(buildItems) > 1 {
-				err = remote_.Status(c, user, repo, build, uri, item.Proc)
+				err = _remote.Status(c, user, repo, build, uri, item.Proc)
 			} else {
-				err = remote_.Status(c, user, repo, build, uri, nil)
+				err = _remote.Status(c, user, repo, build, uri, nil)
 			}
 			if err != nil {
 				log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
@@ -347,23 +362,27 @@ func PostApproval(c *gin.Context) {
 		}
 	}()
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 func PostDecline(c *gin.Context) {
 	var (
-		remote_ = remote.FromContext(c)
-		store_  = store.FromContext(c)
+		_remote = server.Config.Services.Remote
+		_store  = store.FromContext(c)
 
 		repo   = session.Repo(c)
 		user   = session.User(c)
 		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	)
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 	if build.Status != model.StatusBlocked {
@@ -371,13 +390,13 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	if _, err = shared.UpdateToStatusDeclined(store_, *build, user.Login); err != nil {
+	if _, err = shared.UpdateToStatusDeclined(_store, *build, user.Login); err != nil {
 		c.String(500, "error updating build. %s", err)
 		return
 	}
 
 	uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-	err = remote_.Status(c, user, repo, build, uri, nil)
+	err = _remote.Status(c, user, repo, build, uri, nil)
 	if err != nil {
 		log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
@@ -396,27 +415,27 @@ func GetBuildQueue(c *gin.Context) {
 
 // PostBuild restarts a build
 func PostBuild(c *gin.Context) {
-	remote_ := remote.FromContext(c)
-	store_ := store.FromContext(c)
+	_remote := server.Config.Services.Remote
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	user, err := store_.GetUser(repo.UserID)
+	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
 		log.Error().Msgf("failure to get build %d. %s", num, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
@@ -430,10 +449,14 @@ func PostBuild(c *gin.Context) {
 	// if the remote has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the job.
-	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, _ := refresher.Refresh(c, user)
-		if ok {
-			store_.UpdateUser(user)
+	if refresher, ok := _remote.(remote.Refresher); ok {
+		ok, err := refresher.Refresh(c, user)
+		if err != nil {
+			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+		} else if ok {
+			if err := _store.UpdateUser(user); err != nil {
+				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+			}
 		}
 	}
 
@@ -441,14 +464,14 @@ func PostBuild(c *gin.Context) {
 	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	netrc, err := remote_.Netrc(user, repo)
+	netrc, err := _remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Msgf("failure to generate netrc for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -470,7 +493,7 @@ func PostBuild(c *gin.Context) {
 		build.Event = event
 	}
 
-	err = store_.CreateBuild(build)
+	err = _store.CreateBuild(build)
 	if err != nil {
 		c.String(500, err.Error())
 		return
@@ -479,7 +502,7 @@ func PostBuild(c *gin.Context) {
 	err = persistBuildConfigs(configs, build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to persist build config for %s. %s", repo.FullName, err)
-		c.AbortWithError(500, err)
+		_ = c.AbortWithError(500, err)
 		return
 	}
 
@@ -497,7 +520,7 @@ func PostBuild(c *gin.Context) {
 
 	// get the previous build so that we can send
 	// on status change notifications
-	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
+	last, _ := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
 	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
 	if err != nil {
 		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
@@ -540,7 +563,7 @@ func PostBuild(c *gin.Context) {
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = store_.ProcCreate(build.Procs)
+	err = _store.ProcCreate(build.Procs)
 	if err != nil {
 		log.Error().Msgf("cannot restart %s#%d: %s", repo.FullName, build.Number, err)
 		build.Status = model.StatusError
@@ -552,26 +575,30 @@ func PostBuild(c *gin.Context) {
 	}
 	c.JSON(202, build)
 
-	publishToTopic(c, build, repo, model.Enqueued)
-	queueBuild(build, repo, buildItems)
+	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+	}
 }
 
 func DeleteBuildLogs(c *gin.Context) {
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
 	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
-	build, err := store_.GetBuildNumber(repo, num)
+	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	procs, err := store_.ProcList(build)
+	procs, err := _store.ProcList(build)
 	if err != nil {
-		c.AbortWithError(404, err)
+		_ = c.AbortWithError(404, err)
 		return
 	}
 
@@ -584,7 +611,7 @@ func DeleteBuildLogs(c *gin.Context) {
 	for _, proc := range procs {
 		t := time.Now().UTC()
 		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, proc.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := store_.LogSave(proc, buf)
+		lerr := _store.LogSave(proc, buf)
 		if lerr != nil {
 			err = lerr
 		}

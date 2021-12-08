@@ -106,12 +106,11 @@ type Store interface {
 	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// RepoBatch TODO: only store activated repos ...
+	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
 	RepoBatch([]*model.Repo) error
 
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
-	PermBatch(perms []*model.Perm) error
 	PermDelete(perm *model.Perm) error
 	PermFlush(user *model.User, before int64) error
 
@@ -138,7 +137,7 @@ type Store interface {
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(*model.Registry) error
+	RegistryDelete(repo *model.Repo, addr string) error
 
 	ProcLoad(int64) (*model.Proc, error)
 	ProcFind(*model.Build, int) (*model.Proc, error)

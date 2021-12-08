@@ -24,10 +24,8 @@ import (
 )
 
 func Test_helper(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("GitHub converter", func() {
-
 		g.It("should convert passing status", func() {
 			g.Assert(convertStatus(model.StatusSuccess)).Equal(statusSuccess)
 		})
@@ -116,8 +114,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("develop")
-			g.Assert(to.Kind).Equal("git")
-			g.Assert(to.IsPrivate).IsTrue()
+			g.Assert(string(to.SCMKind)).Equal("git")
+			g.Assert(to.IsSCMPrivate).IsTrue()
 			g.Assert(to.Clone).Equal("https://github.com/octocat/hello-world.git")
 			g.Assert(to.Link).Equal("https://github.com/octocat/hello-world")
 		})
@@ -174,7 +172,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(repo.Owner).Equal(from.Repo.Owner.Login)
 			g.Assert(repo.Name).Equal(from.Repo.Name)
 			g.Assert(repo.FullName).Equal(from.Repo.FullName)
-			g.Assert(repo.IsPrivate).Equal(from.Repo.Private)
+			g.Assert(repo.IsSCMPrivate).Equal(from.Repo.Private)
 			g.Assert(repo.Link).Equal(from.Repo.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.Repo.CloneURL)
 			g.Assert(repo.Branch).Equal(from.Repo.DefaultBranch)

@@ -30,15 +30,15 @@ import (
 )
 
 func load(config string) *Gitlab {
-	url_, err := url.Parse(config)
+	_url, err := url.Parse(config)
 	if err != nil {
 		panic(err)
 	}
-	params := url_.Query()
-	url_.RawQuery = ""
+	params := _url.Query()
+	_url.RawQuery = ""
 
 	gitlab := Gitlab{}
-	gitlab.URL = url_.String()
+	gitlab.URL = _url.String()
 	gitlab.ClientID = params.Get("client_id")
 	gitlab.ClientSecret = params.Get("client_secret")
 	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
@@ -97,7 +97,7 @@ func Test_Gitlab(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
-				assert.True(t, _repo.IsPrivate)
+				assert.True(t, _repo.IsSCMPrivate)
 			})
 
 			g.It("Should return error, when repo not exist", func() {
