@@ -29,6 +29,7 @@ var secretInfoCmd = &cli.Command{
 }
 
 func secretInfo(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	var (
 		secretName = c.String("name")
 		repoName   = c.String("repository")

@@ -30,6 +30,7 @@ var registryInfoCmd = &cli.Command{
 }
 
 func registryInfo(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	var (
 		hostname = c.String("hostname")
 		reponame = c.String("repository")

@@ -22,6 +22,7 @@ var buildQueueCmd = &cli.Command{
 }
 
 func buildQueue(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err

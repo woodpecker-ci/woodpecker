@@ -41,6 +41,7 @@ var secretUpdateCmd = &cli.Command{
 }
 
 func secretUpdate(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	reponame := c.String("repository")
 	if reponame == "" {
 		reponame = c.Args().First()

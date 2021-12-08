@@ -18,6 +18,7 @@ var userRemoveCmd = &cli.Command{
 }
 
 func userRemove(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	login := c.Args().First()
 
 	client, err := internal.NewClient(c)

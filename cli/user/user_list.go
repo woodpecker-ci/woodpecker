@@ -21,6 +21,7 @@ var userListCmd = &cli.Command{
 }
 
 func userList(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err

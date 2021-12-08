@@ -25,6 +25,7 @@ var registryListCmd = &cli.Command{
 }
 
 func registryList(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	var (
 		format   = c.String("format") + "\n"
 		reponame = c.String("repository")

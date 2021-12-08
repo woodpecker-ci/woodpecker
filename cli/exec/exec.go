@@ -36,6 +36,7 @@ var Command = &cli.Command{
 }
 
 func exec(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	file := c.Args().First()
 	if file == "" {
 		file = ".woodpecker.yml"

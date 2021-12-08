@@ -22,6 +22,7 @@ var Command = &cli.Command{
 }
 
 func lint(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	file := c.Args().First()
 	if file == "" {
 		file = ".woodpecker.yml"

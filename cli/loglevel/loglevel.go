@@ -20,6 +20,7 @@ var Command = &cli.Command{
 }
 
 func logLevel(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err

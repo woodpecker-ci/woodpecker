@@ -38,6 +38,7 @@ var registryCreateCmd = &cli.Command{
 }
 
 func registryCreate(c *cli.Context) error {
+	common.SetupConsoleLogger(c)
 	var (
 		hostname = c.String("hostname")
 		username = c.String("username")
