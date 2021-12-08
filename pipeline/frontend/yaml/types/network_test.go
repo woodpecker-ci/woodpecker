@@ -15,8 +15,7 @@ func TestMarshalNetworks(t *testing.T) {
 	}{
 		{
 			networks: Networks{},
-			expected: `{}
-`,
+			expected: "{}\n",
 		},
 		{
 			networks: Networks{
@@ -158,7 +157,7 @@ func TestUnmarshalNetworks(t *testing.T) {
 	for _, network := range networks {
 		actual := &Networks{}
 		err := yaml.Unmarshal([]byte(network.yaml), actual)
-		assert.Nil(t, err)
-		assert.Equal(t, network.expected, actual, "should be equal")
+		assert.NoError(t, err)
+		assert.EqualValues(t, network.expected, actual)
 	}
 }
