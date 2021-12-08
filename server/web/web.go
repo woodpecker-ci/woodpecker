@@ -37,12 +37,25 @@ func New() *gin.Engine {
 	e.Use(setupCache)
 
 	h := http.FileServer(web.HTTPFS())
-	e.GET("/favicon.svg", gin.WrapH(h))
+	e.GET("/favicon.svg", redirect("/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
+	e.GET("/favicons/*filepath", gin.WrapH(h))
 	e.GET("/assets/*filepath", gin.WrapH(h))
 
 	e.NoRoute(handleIndex)
 
 	return e
+}
+
+// redirect return gin helper to redirect a request
+func redirect(location string, status ...int) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		code := http.StatusFound
+		if len(status) == 1 {
+			code = status[0]
+		}
+
+		http.Redirect(ctx.Writer, ctx.Request, location, code)
+	}
 }
 
 func handleIndex(c *gin.Context) {
