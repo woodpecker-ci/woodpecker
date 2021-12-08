@@ -210,20 +210,14 @@ func DeleteBuild(c *gin.Context) {
 	if len(procToEvict) != 0 {
 		if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
 			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
 		}
 		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
 			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
 		}
 	}
 	if len(procToCancel) != 0 {
 		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
 			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToCancel)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
 		}
 	}
 
