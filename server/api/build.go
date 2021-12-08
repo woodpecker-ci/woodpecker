@@ -74,7 +74,11 @@ func GetBuild(c *gin.Context) {
 	}
 	files, _ := _store.FileList(build)
 	procs, _ := _store.ProcList(build)
-	build.Procs = model.Tree(procs)
+	build.Procs, err = model.Tree(procs)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	build.Files = files
 
 	c.JSON(http.StatusOK, build)
@@ -91,8 +95,16 @@ func GetBuildLast(c *gin.Context) {
 		return
 	}
 
-	procs, _ := _store.ProcList(build)
-	build.Procs = model.Tree(procs)
+	procs, err := _store.ProcList(build)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	build.Procs, err = model.Tree(procs)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.JSON(http.StatusOK, build)
 }
 
@@ -250,7 +262,10 @@ func DeleteBuild(c *gin.Context) {
 			_ = c.AbortWithError(404, err)
 			return
 		}
-		killedBuild.Procs = model.Tree(procs)
+		if killedBuild.Procs, err = model.Tree(procs); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
