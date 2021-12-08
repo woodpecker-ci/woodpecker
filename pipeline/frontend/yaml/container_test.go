@@ -158,6 +158,70 @@ func TestUnmarshalContainers(t *testing.T) {
 				},
 			},
 		},
+		{
+			from: `publish-agent:
+    group: bundle
+    image: print/env
+    repo: woodpeckerci/woodpecker-agent
+    dockerfile: docker/Dockerfile.agent
+    secrets: [docker_username, docker_password]
+    tag: [next, latest]
+    dry_run: true
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-agent",
+					Image: "print/env",
+					Group: "bundle",
+					Secrets: Secrets{Secrets: []*Secret{{
+						Source: "docker_username",
+						Target: "docker_username",
+					}, {
+						Source: "docker_password",
+						Target: "docker_password",
+					}}},
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-agent",
+						"dockerfile": "docker/Dockerfile.agent",
+						"tag":        stringsToInterface("next", "latest"),
+						"dry_run":    true,
+					},
+					Constraints: Constraints{
+						Event:  Constraint{Include: []string{"push"}},
+						Branch: Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    group: docker
+    image: print/env
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    tag: [next]
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					Group: "docker",
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-cli",
+						"dockerfile": "docker/Dockerfile.cli",
+						"tag":        stringsToInterface("next"),
+					},
+					Constraints: Constraints{
+						Event:  Constraint{Include: []string{"push"}},
+						Branch: Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range testdata {
 		in := []byte(test.from)
@@ -181,4 +245,12 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		err := yaml.Unmarshal(in, &containers)
 		assert.Error(t, err, "wanted error for containers %q", test)
 	}
+}
+
+func stringsToInterface(val ...string) []interface{} {
+	res := make([]interface{}, len(val))
+	for i := range val {
+		res[i] = val[i]
+	}
+	return res
 }
