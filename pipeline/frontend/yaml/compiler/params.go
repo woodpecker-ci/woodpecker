@@ -71,7 +71,10 @@ func sanitizeParamValue(v interface{}) (string, error) {
 		return string(out), nil
 
 	case reflect.Slice, reflect.Array:
-		if !isComplex(t.Elem().Kind()) {
+		if vv.Len() == 0 {
+			return "", nil
+		}
+		if !isComplex(t.Elem().Kind()) || t.Elem().Kind() == reflect.Interface {
 			in := make([]string, vv.Len())
 			for i := 0; i < vv.Len(); i++ {
 				var err error
