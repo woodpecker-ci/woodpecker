@@ -34,7 +34,7 @@
             <Icon v-else-if="build.event === 'tag'" name="tag" />
             <Icon v-else name="push" />
             <span v-if="build.event === 'pull_request'" class="truncate">{{
-              `#${build.ref.replaceAll('refs/pull/', '').replaceAll('/merge', '')}`
+              `#${build.ref.replaceAll('refs/pull/', '').replaceAll('/merge', '').replaceAll('/head', '')}`
             }}</span>
             <span v-else class="truncate">{{ build.branch }}</span>
           </div>
