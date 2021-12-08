@@ -175,7 +175,7 @@
           "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
           "type": "object",
           "additionalProperties": {
-            "type": ["boolean", "string", "number"]
+            "type": ["boolean", "string", "number", "array", "object"]
           }
         }
       }

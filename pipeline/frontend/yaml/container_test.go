@@ -199,9 +199,10 @@ func TestUnmarshalContainers(t *testing.T) {
 			from: `publish-cli:
     group: docker
     image: print/env
-    repo: woodpeckerci/woodpecker-cli
-    dockerfile: docker/Dockerfile.cli
-    tag: [next]
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli
+      tag: [next]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,
