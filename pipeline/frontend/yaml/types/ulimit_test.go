@@ -3,7 +3,6 @@ package types
 import (
 	"testing"
 
-	todo_yaml "gopkg.in/yaml.v2"
 	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/assert"
@@ -119,7 +118,7 @@ nofile:
 
 	for _, ulimit := range ulimits {
 		actual := &Ulimits{}
-		err := todo_yaml.Unmarshal([]byte(ulimit.yaml), actual)
+		err := yaml.Unmarshal([]byte(ulimit.yaml), actual)
 
 		assert.Nil(t, err)
 		assert.Equal(t, ulimit.expected, actual, "should be equal")
