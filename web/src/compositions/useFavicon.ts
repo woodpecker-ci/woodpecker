@@ -43,8 +43,12 @@ function convertStatus(status: BuildStatus): Status {
 
 export function useFavicon() {
   return {
-    updateStatus(status: BuildStatus) {
-      faviconStatus.value = convertStatus(status);
+    updateStatus(status?: BuildStatus | 'default') {
+      if (status === undefined || status === 'default') {
+        faviconStatus.value = 'default';
+      } else {
+        faviconStatus.value = convertStatus(status);
+      }
     },
   };
 }
