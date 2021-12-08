@@ -35,11 +35,15 @@
           <Icon v-else-if="build.event === 'deployment'" name="deployment" />
           <Icon v-else-if="build.event === 'tag'" name="tag" />
           <Icon v-else name="push" />
-          <span>{{ build.branch }}</span>
+          <a v-if="build.event === 'pull_request'" class="text-link" :href="build.link_url" target="_blank">{{
+            `#${build.ref.replaceAll('refs/pull/', '').replaceAll('/merge', '').replaceAll('/head', '')}`
+          }}</a>
+          <span v-else>{{ build.branch }}</span>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="commit" />
-          <a class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
+          <span v-if="build.event === 'pull_request'">{{ build.commit.slice(0, 10) }}</span>
+          <a v-else class="text-link" :href="build.link_url" target="_blank">{{ build.commit.slice(0, 10) }}</a>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
