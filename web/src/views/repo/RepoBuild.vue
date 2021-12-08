@@ -1,7 +1,7 @@
 <template>
   <template v-if="build && repo">
     <FluidContainer class="flex border-b mb-4 items-center dark:border-gray-600 min-w-0">
-      <IconButton icon="back" class="flex-shrink-0" @click="$router.back()" />
+      <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
       <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
         Pipeline #{{ buildId }} - {{ message }}
       </h1>
@@ -83,6 +83,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useBuild from '~/compositions/useBuild';
 import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
+import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import { findProc } from '~/utils/helpers';
@@ -249,6 +250,7 @@ export default defineComponent({
       restartBuild,
       approveBuild,
       declineBuild,
+      goBack: useRouteBackOrDefault({ name: 'repo' }),
     };
   },
 });
