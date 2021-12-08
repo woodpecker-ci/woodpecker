@@ -74,8 +74,7 @@ func GetBuild(c *gin.Context) {
 	}
 	files, _ := _store.FileList(build)
 	procs, _ := _store.ProcList(build)
-	build.Procs, err = model.Tree(procs)
-	if err != nil {
+	if build.Procs, err = model.Tree(procs); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -100,8 +99,7 @@ func GetBuildLast(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	build.Procs, err = model.Tree(procs)
-	if err != nil {
+	if build.Procs, err = model.Tree(procs); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
