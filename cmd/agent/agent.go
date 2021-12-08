@@ -64,6 +64,9 @@ func loop(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	}
 
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
