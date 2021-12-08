@@ -18,6 +18,8 @@ func TestParamsToEnv(t *testing.T) {
 		"complex":      []struct{ Name string }{{"Jack"}, {"Jill"}},
 		"complex2":     struct{ Name string }{"Jack"},
 		"from.address": "noreply@example.com",
+		"tags":         stringsToInterface("next", "latest"),
+		"tag":          stringsToInterface("next"),
 	}
 	want := map[string]string{
 		"PLUGIN_STRING":       "stringz",
@@ -29,8 +31,18 @@ func TestParamsToEnv(t *testing.T) {
 		"PLUGIN_COMPLEX":      `[{"name":"Jack"},{"name":"Jill"}]`,
 		"PLUGIN_COMPLEX2":     `{"name":"Jack"}`,
 		"PLUGIN_FROM_ADDRESS": "noreply@example.com",
+		"PLUGIN_TAG":          "next",
+		"PLUGIN_TAGS":         "next,latest",
 	}
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
+}
+
+func stringsToInterface(val ...string) []interface{} {
+	res := make([]interface{}, len(val))
+	for i := range val {
+		res[i] = val[i]
+	}
+	return res
 }
