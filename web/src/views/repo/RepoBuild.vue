@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, Ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -81,6 +81,7 @@ import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useBuild from '~/compositions/useBuild';
+import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
@@ -131,6 +132,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const notifications = useNotifications();
+    const favicon = useFavicon();
 
     const buildStore = BuildStore();
     const buildId = toRef(props, 'buildId');
@@ -172,6 +174,8 @@ export default defineComponent({
       }
 
       await buildStore.loadBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10));
+
+      favicon.updateStatus(build.value.status);
     }
 
     const { doSubmit: cancelBuild, isLoading: isCancelingBuild } = useAsyncAction(async () => {
@@ -225,6 +229,9 @@ export default defineComponent({
 
     onMounted(loadBuild);
     watch([repo, buildId], loadBuild);
+    onBeforeUnmount(() => {
+      favicon.updateStatus('default');
+    });
 
     return {
       repoPermissions,

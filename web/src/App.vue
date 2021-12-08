@@ -39,7 +39,7 @@ export default defineComponent({
     const notifications = useNotifications();
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     apiClient.setErrorHandler((err) => {
-      notifications.notify({ title: err.message || 'An unkown error occurred', type: 'error' });
+      notifications.notify({ title: err.message || 'An unknown error occurred', type: 'error' });
     });
 
     const blank = computed(() => route.meta.blank);
