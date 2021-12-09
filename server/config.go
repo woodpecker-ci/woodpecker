@@ -52,6 +52,7 @@ var Config = struct {
 	Server struct {
 		Key            string
 		Cert           string
+		OAuthHost      string
 		Host           string
 		Port           string
 		Pass           string

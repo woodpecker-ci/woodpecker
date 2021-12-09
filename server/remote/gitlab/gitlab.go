@@ -96,7 +96,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Scope:        defaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
+		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 
 	// get the OAuth errors

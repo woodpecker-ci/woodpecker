@@ -99,7 +99,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
 			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.Host),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 
 	// get the OAuth errors

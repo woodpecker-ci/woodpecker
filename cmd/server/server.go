@@ -287,6 +287,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if len(c.String("server-dev-oauth-host")) > 0 {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	} else {
+		server.Config.Server.OAuthHost = c.String("server-host")
+	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
