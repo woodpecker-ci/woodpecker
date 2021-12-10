@@ -17,7 +17,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -221,8 +223,12 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
+	server, err := url.Parse(c.String("gitea-server"))
+	if err != nil {
+		return nil, err
+	}
 	opts := gitea.Opts{
-		URL:         c.String("gitea-server"),
+		URL:         strings.TrimRight(server.String(), "/"),
 		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
 		Password:    c.String("gitea-git-password"),
