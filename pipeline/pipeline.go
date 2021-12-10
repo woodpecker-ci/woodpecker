@@ -9,7 +9,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
 type (
@@ -146,7 +145,7 @@ func (r *Runtime) exec(proc *backend.Step) error {
 		}
 
 		go func() {
-			if err := r.logger.Log(proc, multipart.New(rc)); err != nil {
+			if err := r.logger.Log(proc, rc); err != nil {
 				log.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()

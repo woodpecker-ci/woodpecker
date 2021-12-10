@@ -157,8 +157,11 @@ func LogStreamSSE(c *gin.Context) {
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
+
+	// TODO: if stream is done simply return all logs from db and close SSE
+
 	if proc.State != model.StatusRunning {
-		log.Debug().Msg("stream not found.")
+		log.Debug().Msg("proc not running.")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
 		return
 	}
@@ -177,12 +180,14 @@ func LogStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
+		fmt.Println("log stream: starting", proc.ID)
 		// TODO remove global variable
 		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
-			defer func() {
-				obj := recover() // fix #2480 // TODO: check if it's still needed
-				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
-			}()
+			// defer func() {
+			// 	obj := recover() // fix #2480 // TODO: check if it's still needed
+			// 	log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
+			// }()
+
 			for _, entry := range entries {
 				select {
 				case <-ctx.Done():

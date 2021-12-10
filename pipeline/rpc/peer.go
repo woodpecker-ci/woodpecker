@@ -65,9 +65,6 @@ type Peer interface {
 	// Update updates the pipeline state.
 	Update(c context.Context, id string, state State) error
 
-	// Upload uploads the pipeline artifact.
-	Upload(c context.Context, id string, file *File) error
-
 	// Log writes the pipeline log entry.
 	Log(c context.Context, id string, line *Line) error
 }

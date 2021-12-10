@@ -23,7 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
 // Command exports the exec command.
@@ -251,13 +250,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
-	}
-
+var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc io.ReadCloser) error {
 	logStream := NewLineWriter(proc.Alias)
-	_, err = io.Copy(logStream, part)
+	_, err := io.Copy(logStream, rc)
 	return err
 })

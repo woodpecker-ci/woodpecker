@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"sync"
 )
@@ -65,10 +66,16 @@ func (l *log) Write(c context.Context, path string, entry *Entry) error {
 	s, ok := l.streams[path]
 	l.Unlock()
 	if !ok {
-		return ErrNotFound
+		// open new log stream if not already opened
+		if err := l.Open(c, path); err != nil {
+			return err
+		}
+
+		return l.Write(c, path, entry)
 	}
 	s.Lock()
 	s.list = append(s.list, entry)
+	fmt.Println("&&&&& writer", path, ">>", len(s.subs), string(entry.Data))
 	for sub := range s.subs {
 		go sub.handler(entry)
 	}
@@ -81,16 +88,23 @@ func (l *log) Tail(c context.Context, path string, handler Handler) error {
 	s, ok := l.streams[path]
 	l.Unlock()
 	if !ok {
-		return ErrNotFound
+		// open new log stream if not already opened
+		if err := l.Open(c, path); err != nil {
+			return err
+		}
+
+		return l.Tail(c, path, handler)
 	}
 
 	sub := &subscriber{
 		handler: handler,
 	}
 	s.Lock()
+	// send all existing log entries if some exist
 	if len(s.list) != 0 {
 		sub.handler(s.list...)
 	}
+	// add subscriber to list
 	s.subs[sub] = struct{}{}
 	s.Unlock()
 

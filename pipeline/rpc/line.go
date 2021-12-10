@@ -10,8 +10,10 @@ import (
 )
 
 // Identifies the type of line in the logs.
+type LineType int
+
 const (
-	LineStdout int = iota
+	LineStdout LineType = iota
 	LineStderr
 	LineExitCode
 	LineMetadata
@@ -20,11 +22,11 @@ const (
 
 // Line is a line of console output.
 type Line struct {
-	Proc string `json:"proc,omitempty"`
-	Time int64  `json:"time,omitempty"`
-	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omitempty"`
-	Out  string `json:"out,omitempty"`
+	Proc string   `json:"proc,omitempty"`
+	Time int64    `json:"time,omitempty"`
+	Type LineType `json:"type,omitempty"`
+	Pos  int      `json:"pos,omitempty"`
+	Out  string   `json:"out,omitempty"`
 }
 
 func (l *Line) String() string {
@@ -38,17 +40,16 @@ func (l *Line) String() string {
 
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	peer  Peer
-	id    string
-	name  string
-	num   int
-	now   time.Time
-	rep   *strings.Replacer
-	lines []*Line
+	peer     Peer
+	id       string
+	name     string
+	num      int
+	now      time.Time
+	replacer *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer Peer, id, name string, secret ...string) *LineWriter {
+func NewLineWriter(peer Peer, id, name string, secrets ...string) *LineWriter {
 	w := new(LineWriter)
 	w.peer = peer
 	w.id = id
@@ -56,25 +57,26 @@ func NewLineWriter(peer Peer, id, name string, secret ...string) *LineWriter {
 	w.num = 0
 	w.now = time.Now().UTC()
 
-	var oldnew []string
-	for _, old := range secret {
-		oldnew = append(oldnew, old)
-		oldnew = append(oldnew, "********")
+	var oldnewSecrets []string
+	for _, secret := range secrets {
+		oldnewSecrets = append(oldnewSecrets, secret)
+		oldnewSecrets = append(oldnewSecrets, "********")
 	}
-	if len(oldnew) != 0 {
-		w.rep = strings.NewReplacer(oldnew...)
+	if len(oldnewSecrets) != 0 {
+		w.replacer = strings.NewReplacer(oldnewSecrets...)
 	}
+
 	return w
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	out := string(p)
-	if w.rep != nil {
-		out = w.rep.Replace(out)
+	data := string(p)
+	if w.replacer != nil {
+		data = w.replacer.Replace(data)
 	}
 
 	line := &Line{
-		Out:  out,
+		Out:  data,
 		Proc: w.name,
 		Pos:  w.num,
 		Time: int64(time.Since(w.now).Seconds()),
@@ -83,29 +85,10 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	if err := w.peer.Log(context.Background(), w.id, line); err != nil {
 		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%s'", w.id)
 	}
-	w.num++
 
-	// for _, part := range bytes.Split(p, []byte{'\n'}) {
-	// 	line := &Line{
-	// 		Out:  string(part),
-	// 		Proc: w.name,
-	// 		Pos:  w.num,
-	// 		Time: int64(time.Since(w.now).Seconds()),
-	// 		Type: LineStdout,
-	// 	}
-	// 	w.peer.Log(context.Background(), w.id, line)
-	// 	w.num++
-	// }
-	w.lines = append(w.lines, line)
+	if strings.Contains(data, "\n") {
+		w.num++
+	}
+
 	return len(p), nil
-}
-
-// Lines returns the line history
-func (w *LineWriter) Lines() []*Line {
-	return w.lines
-}
-
-// Clear clears the line history
-func (w *LineWriter) Clear() {
-	w.lines = w.lines[:0]
 }
