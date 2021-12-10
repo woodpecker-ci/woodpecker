@@ -31,8 +31,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._patch(`/api/repos/${owner}/${repo}`, repoSettings);
   }
 
-  deleteRepo(owner: string, repo: string): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}`);
+  deleteRepo(owner: string, repo: string, remove = true): Promise<unknown> {
+    let query = encodeQueryString({ remove });
+    return this._delete(`/api/repos/${owner}/${repo}?${query}`);
   }
 
   repairRepo(owner: string, repo: string): Promise<unknown> {
