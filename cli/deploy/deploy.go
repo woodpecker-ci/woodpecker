@@ -45,7 +45,6 @@ var Command = &cli.Command{
 }
 
 func deploy(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

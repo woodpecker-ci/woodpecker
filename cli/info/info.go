@@ -22,7 +22,6 @@ var Command = &cli.Command{
 }
 
 func info(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err

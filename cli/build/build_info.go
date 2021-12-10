@@ -22,7 +22,6 @@ var buildInfoCmd = &cli.Command{
 }
 
 func buildInfo(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

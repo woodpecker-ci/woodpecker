@@ -26,7 +26,6 @@ var buildLastCmd = &cli.Command{
 }
 
 func buildLast(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

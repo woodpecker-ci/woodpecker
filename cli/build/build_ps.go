@@ -22,7 +22,6 @@ var buildPsCmd = &cli.Command{
 }
 
 func buildPs(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 
 	owner, name, err := internal.ParseRepo(repo)

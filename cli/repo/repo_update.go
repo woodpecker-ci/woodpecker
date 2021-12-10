@@ -49,7 +49,6 @@ var repoUpdateCmd = &cli.Command{
 }
 
 func repoUpdate(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

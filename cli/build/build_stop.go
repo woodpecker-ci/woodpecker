@@ -19,7 +19,6 @@ var buildStopCmd = &cli.Command{
 }
 
 func buildStop(c *cli.Context) (err error) {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

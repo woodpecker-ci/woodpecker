@@ -21,7 +21,6 @@ var repoInfoCmd = &cli.Command{
 }
 
 func repoInfo(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	arg := c.Args().First()
 	owner, name, err := internal.ParseRepo(arg)
 	if err != nil {

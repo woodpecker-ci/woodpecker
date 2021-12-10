@@ -38,7 +38,6 @@ var registryUpdateCmd = &cli.Command{
 }
 
 func registryUpdate(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	var (
 		hostname = c.String("hostname")
 		username = c.String("username")

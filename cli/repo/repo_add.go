@@ -18,7 +18,6 @@ var repoAddCmd = &cli.Command{
 }
 
 func repoAdd(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

@@ -19,7 +19,6 @@ var userAddCmd = &cli.Command{
 }
 
 func userAdd(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	login := c.Args().First()
 
 	client, err := internal.NewClient(c)

@@ -19,7 +19,6 @@ var logPurgeCmd = &cli.Command{
 }
 
 func logPurge(c *cli.Context) (err error) {
-	common.SetupConsoleLogger(c)
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {

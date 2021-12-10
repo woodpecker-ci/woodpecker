@@ -21,7 +21,6 @@ var repoSyncCmd = &cli.Command{
 }
 
 func repoSync(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err

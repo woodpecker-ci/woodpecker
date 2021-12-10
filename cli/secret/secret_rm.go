@@ -25,7 +25,6 @@ var secretDeleteCmd = &cli.Command{
 }
 
 func secretDelete(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	var (
 		secret   = c.String("name")
 		reponame = c.String("repository")

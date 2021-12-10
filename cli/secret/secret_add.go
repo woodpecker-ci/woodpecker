@@ -41,7 +41,6 @@ var secretCreateCmd = &cli.Command{
 }
 
 func secretCreate(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	reponame := c.String("repository")
 	if reponame == "" {
 		reponame = c.Args().First()

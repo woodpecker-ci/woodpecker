@@ -26,7 +26,6 @@ var secretListCmd = &cli.Command{
 }
 
 func secretList(c *cli.Context) error {
-	common.SetupConsoleLogger(c)
 	var (
 		format   = c.String("format") + "\n"
 		reponame = c.String("repository")
