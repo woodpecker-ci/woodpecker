@@ -74,7 +74,10 @@ func GetBuild(c *gin.Context) {
 	}
 	files, _ := _store.FileList(build)
 	procs, _ := _store.ProcList(build)
-	build.Procs = model.Tree(procs)
+	if build.Procs, err = model.Tree(procs); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	build.Files = files
 
 	c.JSON(http.StatusOK, build)
@@ -91,8 +94,15 @@ func GetBuildLast(c *gin.Context) {
 		return
 	}
 
-	procs, _ := _store.ProcList(build)
-	build.Procs = model.Tree(procs)
+	procs, err := _store.ProcList(build)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if build.Procs, err = model.Tree(procs); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.JSON(http.StatusOK, build)
 }
 
@@ -143,19 +153,19 @@ func GetProcLogs(c *gin.Context) {
 
 	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	proc, err := _store.ProcFind(build, pid)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	rc, err := _store.LogFind(proc)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
@@ -175,18 +185,18 @@ func DeleteBuild(c *gin.Context) {
 
 	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	procs, err := _store.ProcList(build)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
-		c.String(400, "Cannot cancel a non-running or non-pending build")
+		c.String(http.StatusBadRequest, "Cannot cancel a non-running or non-pending build")
 		return
 	}
 
@@ -207,17 +217,18 @@ func DeleteBuild(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+	if len(procToEvict) != 0 {
+		if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+		}
+		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+		}
 	}
-	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+	if len(procToCancel) != 0 {
+		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToCancel)
+		}
 	}
 
 	// Then update the DB status for pending builds
@@ -238,7 +249,8 @@ func DeleteBuild(c *gin.Context) {
 
 	killedBuild, err := shared.UpdateToStatusKilled(_store, *build)
 	if err != nil {
-		_ = c.AbortWithError(500, err)
+		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", build)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -250,7 +262,10 @@ func DeleteBuild(c *gin.Context) {
 			_ = c.AbortWithError(404, err)
 			return
 		}
-		killedBuild.Procs = model.Tree(procs)
+		if killedBuild.Procs, err = model.Tree(procs); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
