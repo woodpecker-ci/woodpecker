@@ -23,6 +23,7 @@ import (
 var (
 	errSecretNameInvalid  = errors.New("Invalid Secret Name")
 	errSecretValueInvalid = errors.New("Invalid Secret Value")
+	errSecretEventInvalid = errors.New("Invalid Secret Event")
 )
 
 // SecretService defines a service for managing secrets.
@@ -77,6 +78,12 @@ func (s *Secret) Match(event string) bool {
 
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
+	for _, event := range s.Events {
+		if !ValidateWebhookEvent(event) {
+			return errSecretEventInvalid
+		}
+	}
+
 	switch {
 	case len(s.Name) == 0:
 		return errSecretNameInvalid

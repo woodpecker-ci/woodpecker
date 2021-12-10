@@ -14,12 +14,23 @@
 
 package model
 
+type WebhookEvent string
+
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+	EventPush   WebhookEvent = "push"
+	EventPull   WebhookEvent = "pull_request"
+	EventTag    WebhookEvent = "tag"
+	EventDeploy WebhookEvent = "deployment"
 )
+
+func ValidateWebhookEvent(s string) bool {
+	switch s {
+	case string(EventPush), string(EventPull), string(EventTag), string(EventDeploy):
+		return true
+	default:
+		return false
+	}
+}
 
 // StatusValue represent pipeline states woodpecker know
 type StatusValue string
