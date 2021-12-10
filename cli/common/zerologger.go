@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func SetupConsoleLogger(c *cli.Context) {
+func SetupConsoleLogger(c *cli.Context) error {
 	if c.IsSet("log-level") {
 		level := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(level)
@@ -19,4 +19,5 @@ func SetupConsoleLogger(c *cli.Context) {
 		log.Logger = log.With().Caller().Logger()
 		log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 	}
+	return nil
 }

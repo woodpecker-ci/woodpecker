@@ -63,6 +63,7 @@ func main() {
 			Out: os.Stderr,
 		},
 	)
+	app.Before = common.SetupConsoleLogger
 
 	if err := app.Run(os.Args); err != nil {
 		zlog.Fatal().Err(err).Msg("error running cli")
