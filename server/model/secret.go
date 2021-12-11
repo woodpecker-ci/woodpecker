@@ -23,6 +23,7 @@ import (
 var (
 	errSecretNameInvalid  = errors.New("Invalid Secret Name")
 	errSecretValueInvalid = errors.New("Invalid Secret Value")
+	errSecretEventInvalid = errors.New("Invalid Secret Event")
 )
 
 // SecretService defines a service for managing secrets.
@@ -47,14 +48,14 @@ type SecretStore interface {
 // Secret represents a secret variable, such as a password or token.
 // swagger:model registry
 type Secret struct {
-	ID         int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	RepoID     int64    `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name       string   `json:"name"            xorm:"UNIQUE(s) INDEX 'secret_name'"`
-	Value      string   `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images     []string `json:"image"           xorm:"json 'secret_images'"`
-	Events     []string `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool     `json:"-"               xorm:"secret_skip_verify"`
-	Conceal    bool     `json:"-"               xorm:"secret_conceal"`
+	ID         int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	RepoID     int64          `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name       string         `json:"name"            xorm:"UNIQUE(s) INDEX 'secret_name'"`
+	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
+	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
+	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"`
+	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
 }
 
 // TableName return database table name for xorm
@@ -63,12 +64,12 @@ func (Secret) TableName() string {
 }
 
 // Match returns true if an image and event match the restricted list.
-func (s *Secret) Match(event string) bool {
+func (s *Secret) Match(event WebhookEvent) bool {
 	if len(s.Events) == 0 {
 		return true
 	}
 	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(pattern, event); match {
+		if match, _ := filepath.Match(string(pattern), string(event)); match {
 			return true
 		}
 	}
@@ -77,6 +78,12 @@ func (s *Secret) Match(event string) bool {
 
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
+	for _, event := range s.Events {
+		if !ValidateWebhookEvent(event) {
+			return errSecretEventInvalid
+		}
+	}
+
 	switch {
 	case len(s.Name) == 0:
 		return errSecretNameInvalid

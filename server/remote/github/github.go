@@ -440,7 +440,7 @@ func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *mode
 		ctx += "/pr"
 	default:
 		if len(b.Event) > 0 {
-			ctx += "/" + b.Event
+			ctx += "/" + string(b.Event)
 		}
 	}
 
