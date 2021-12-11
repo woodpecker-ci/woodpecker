@@ -45,11 +45,6 @@ var fixPRSecretEventName = task{
 				}
 			}
 		}
-
-		if err := sess.Begin(); err != nil {
-			return err
-		}
-
-		return sess.Commit()
+		return nil
 	},
 }
