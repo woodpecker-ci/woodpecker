@@ -31,7 +31,7 @@ func TestSecretFind(t *testing.T) {
 		Name:   "password",
 		Value:  "correct-horse-battery-staple",
 		Images: []string{"golang", "node"},
-		Events: []string{"push", "tag"},
+		Events: []model.WebhookEvent{"push", "tag"},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: insert secret: %s", err)
@@ -52,10 +52,10 @@ func TestSecretFind(t *testing.T) {
 	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
 		t.Errorf("Want secret value %s, got %s", want, got)
 	}
-	if got, want := secret.Events[0], "push"; got != want {
+	if got, want := secret.Events[0], model.EventPush; got != want {
 		t.Errorf("Want secret event %s, got %s", want, got)
 	}
-	if got, want := secret.Events[1], "tag"; got != want {
+	if got, want := secret.Events[1], model.EventTag; got != want {
 		t.Errorf("Want secret event %s, got %s", want, got)
 	}
 	if got, want := secret.Images[0], "golang"; got != want {
