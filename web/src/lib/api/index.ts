@@ -32,7 +32,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   deleteRepo(owner: string, repo: string, remove = true): Promise<unknown> {
-    let query = encodeQueryString({ remove });
+    const query = encodeQueryString({ remove });
     return this._delete(`/api/repos/${owner}/${repo}?${query}`);
   }
 
