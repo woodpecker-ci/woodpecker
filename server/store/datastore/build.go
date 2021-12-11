@@ -110,6 +110,7 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 	}
 
 	for i := range procList {
+		procList[i].BuildID = build.ID
 		// only Insert set auto created ID back to object
 		if _, err := sess.Insert(procList[i]); err != nil {
 			return err
