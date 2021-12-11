@@ -23,9 +23,9 @@ const (
 	EventDeploy WebhookEvent = "deployment"
 )
 
-func ValidateWebhookEvent(s string) bool {
+func ValidateWebhookEvent(s WebhookEvent) bool {
 	switch s {
-	case string(EventPush), string(EventPull), string(EventTag), string(EventDeploy):
+	case EventPush, EventPull, EventTag, EventDeploy:
 		return true
 	default:
 		return false
