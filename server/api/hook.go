@@ -76,10 +76,9 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 }
 
 func PostHook(c *gin.Context) {
-	_remote := server.Config.Services.Remote
 	_store := store.FromContext(c)
 
-	tmpRepo, build, err := _remote.Hook(c.Request)
+	tmpRepo, build, err := server.Config.Services.Remote.Hook(c.Request)
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
@@ -158,7 +157,7 @@ func PostHook(c *gin.Context) {
 	// if the remote has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the build.
-	if refresher, ok := _remote.(remote.Refresher); ok {
+	if refresher, ok := server.Config.Services.Remote.(remote.Refresher); ok {
 		refreshed, err := refresher.Refresh(c, repoUser)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
@@ -171,7 +170,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(_remote, repoUser, repo, build)
+	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, repoUser, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		msg := fmt.Sprintf("cannot find '%s' in '%s', context user: '%s'", repo.Config, build.Ref, repoUser.Login)
@@ -232,7 +231,11 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	startBuild(c, build, repoUser, repo, remoteYamlConfigs)
+	build, err = startBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
+	if err != nil {
+		c.String(http.StatusInternalServerError, fmt.Sprintf("startBuild: %v", err))
+	}
+	c.JSON(200, build)
 }
 
 // TODO: parse yaml once and not for each filter function
@@ -310,7 +313,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 }
 
 // publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) (err error) {
+func publishToTopic(c context.Context, build *model.Build, repo *model.Repo, event model.EventType) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
