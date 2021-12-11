@@ -362,7 +362,19 @@ func TestRepoBatch(t *testing.T) {
 }
 
 func TestRepoCrud(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t,
+		new(model.Repo),
+		new(model.User),
+		new(model.Perm),
+		new(model.Build),
+		new(model.BuildConfig),
+		new(model.Logs),
+		new(model.Proc),
+		new(model.File),
+		new(model.Secret),
+		new(model.Sender),
+		new(model.Registry),
+		new(model.Config))
 	defer closer()
 
 	repo := model.Repo{
@@ -372,16 +384,40 @@ func TestRepoCrud(t *testing.T) {
 		Name:     "test",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
-	_, err1 := store.GetRepo(repo.ID)
-	err2 := store.DeleteRepo(&repo)
-	_, err3 := store.GetRepo(repo.ID)
-	if err1 != nil {
-		t.Errorf("Unexpected error: select repository: %s", err1)
+	build := model.Build{
+		RepoID: repo.ID,
 	}
-	if err2 != nil {
-		t.Errorf("Unexpected error: delete repository: %s", err2)
+	proc := model.Proc{
+		Name: "a proc",
 	}
-	if err3 == nil {
-		t.Errorf("Expected error: sql.ErrNoRows")
+	assert.NoError(t, store.CreateBuild(&build, &proc))
+
+	// create unrelated
+	repoUnrelated := model.Repo{
+		UserID:   2,
+		FullName: "x/x",
+		Owner:    "x",
+		Name:     "x",
 	}
+	assert.NoError(t, store.CreateRepo(&repoUnrelated))
+	buildUnrelated := model.Build{
+		RepoID: repoUnrelated.ID,
+	}
+	procUnrelated := model.Proc{
+		Name: "a unrelated proc",
+	}
+	assert.NoError(t, store.CreateBuild(&buildUnrelated, &procUnrelated))
+
+	_, err := store.GetRepo(repo.ID)
+	assert.NoError(t, err)
+	assert.NoError(t, store.DeleteRepo(&repo))
+	_, err = store.GetRepo(repo.ID)
+	assert.Error(t, err)
+
+	procCount, err := store.engine.Count(new(model.Proc))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, procCount)
+	buildCount, err := store.engine.Count(new(model.Build))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, buildCount)
 }
