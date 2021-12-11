@@ -15,8 +15,9 @@
 package migration
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 var fixPRSecretEventName = task{
