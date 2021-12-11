@@ -30,6 +30,7 @@
   <i-ic-round-light-mode v-else-if="name === 'light'" class="h-6 w-6" />
   <i-mdi-sync v-else-if="name === 'sync'" class="h-6 w-6" />
   <i-ic-baseline-healing v-else-if="name === 'heal'" class="h-6 w-6" />
+  <i-bx-bx-power-off v-else-if="name === 'turn-off'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -68,7 +69,8 @@ export type IconNames =
   | 'dark'
   | 'light'
   | 'sync'
-  | 'heal';
+  | 'heal'
+  | 'turn-off';
 
 export default defineComponent({
   name: 'Icon',

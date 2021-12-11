@@ -25,12 +25,12 @@ func TestSecret(t *testing.T) {
 	g.Describe("Secret", func() {
 		g.It("should match event", func() {
 			secret := Secret{}
-			secret.Events = []string{"pull_request"}
+			secret.Events = []WebhookEvent{"pull_request"}
 			g.Assert(secret.Match("pull_request")).IsTrue()
 		})
 		g.It("should not match event", func() {
 			secret := Secret{}
-			secret.Events = []string{"pull_request"}
+			secret.Events = []WebhookEvent{"pull_request"}
 			g.Assert(secret.Match("push")).IsFalse()
 		})
 		g.It("should match when no event filters defined", func() {

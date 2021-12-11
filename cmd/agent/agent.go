@@ -148,7 +148,7 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				// load enginge (e.g. init api client)
+				// load engine (e.g. init api client)
 				err = engine.Load()
 				if err != nil {
 					log.Error().Err(err).Msg("cannot load backend engine")

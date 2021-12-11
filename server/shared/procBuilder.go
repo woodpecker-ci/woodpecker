@@ -305,7 +305,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Started:  build.Started,
 			Finished: build.Finished,
 			Status:   string(build.Status),
-			Event:    build.Event,
+			Event:    string(build.Event),
 			Link:     build.Link,
 			Target:   build.Deploy,
 			Commit: frontend.Commit{
@@ -328,7 +328,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Started:  last.Started,
 			Finished: last.Finished,
 			Status:   string(last.Status),
-			Event:    last.Event,
+			Event:    string(last.Event),
 			Link:     last.Link,
 			Target:   last.Deploy,
 			Commit: frontend.Commit{

@@ -513,12 +513,10 @@ func PostBuild(c *gin.Context) {
 	build.Error = ""
 	build.Deploy = c.DefaultQuery("deploy_to", build.Deploy)
 
-	event := c.DefaultQuery("event", build.Event)
-	if event == model.EventPush ||
-		event == model.EventPull ||
-		event == model.EventTag ||
-		event == model.EventDeploy {
-		build.Event = event
+	if event, ok := c.GetQuery("event"); ok {
+		if event := model.WebhookEvent(event); model.ValidateWebhookEvent(event) {
+			build.Event = event
+		}
 	}
 
 	err = _store.CreateBuild(build)

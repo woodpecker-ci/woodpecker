@@ -54,9 +54,51 @@ func (s storage) UpdateRepo(repo *model.Repo) error {
 }
 
 func (s storage) DeleteRepo(repo *model.Repo) error {
-	_, err := s.engine.ID(repo.ID).Delete(new(model.Repo))
-	// TODO: delete related within a session
-	return err
+	const batchSize = perPage
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("sender_repo_id = ?", repo.ID).Delete(new(model.Sender)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("perm_repo_id = ?", repo.ID).Delete(new(model.Perm)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("registry_repo_id = ?", repo.ID).Delete(new(model.Registry)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
+		return err
+	}
+
+	// delete related builds
+	for startBuilds := 0; ; startBuilds += batchSize {
+		buildIDs := make([]int64, 0, batchSize)
+		if err := sess.Limit(batchSize, startBuilds).Table("builds").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&buildIDs); err != nil {
+			return err
+		}
+		if len(buildIDs) == 0 {
+			break
+		}
+
+		for i := range buildIDs {
+			if err := deleteBuild(sess, buildIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+
+	if _, err := sess.ID(repo.ID).Delete(new(model.Repo)); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
 // RepoList list all repos where permissions fo specific user are stored
