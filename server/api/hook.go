@@ -86,7 +86,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if build == nil {
-		c.String(http.StatusOK, "ignoring hook: hook parse result in empty build")
+		c.String(http.StatusOK, "ignoring hook: hook parsing resulted in empty build")
 		return
 	}
 	if tmpRepo == nil {
@@ -141,7 +141,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	if build.Event == model.EventPull && !repo.AllowPull {
-		msg := "ignoring hook: pull requests are disabled on woodpecker for this repo"
+		msg := "ignoring hook: pull requests are disabled for this repo in woodpecker"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusNoContent, msg)
 		return
