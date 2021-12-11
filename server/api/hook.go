@@ -87,7 +87,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if build == nil {
-		c.String(http.StatusOK, "ignoring hook: could not parse build from hook body created")
+		c.String(http.StatusOK, "ignoring hook: hook parse result in empty build")
 		return
 	}
 	if tmpRepo == nil {
