@@ -20,9 +20,7 @@ package api
 import (
 	"context"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -234,83 +232,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	netrc, err := _remote.Netrc(repoUser, repo)
-	if err != nil {
-		msg := "Failed to generate netrc file"
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, "%s: %v", msg, err)
-		return
-	}
-
-	envs := map[string]string{}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
-		for _, global := range globals {
-			envs[global.Name] = global.Value
-		}
-	}
-
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
-	}
-
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
-	}
-
-	// get the previous build so that we can send status change notifications
-	last, err := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
-	}
-
-	b := shared.ProcBuilder{
-		Repo:  repo,
-		Curr:  build,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Link:  server.Config.Server.Host,
-		Yamls: remoteYamlConfigs,
-	}
-	buildItems, err := b.Build()
-	if err != nil {
-		if _, err = shared.UpdateToStatusError(_store, *build, err); err != nil {
-			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
-		}
-		return
-	}
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
-	c.JSON(200, build)
-
-	if err := _store.ProcCreate(build.Procs); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, build.Number)
-	}
-
-	defer func() {
-		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
-			if len(buildItems) > 1 {
-				err = _remote.Status(c, repoUser, repo, build, uri, item.Proc)
-			} else {
-				err = _remote.Status(c, repoUser, repo, build, uri, nil)
-			}
-			if err != nil {
-				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			}
-		}
-	}()
-
-	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-	if err := queueBuild(build, repo, buildItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
-	}
+	startBuild(c, build, repoUser, repo, remoteYamlConfigs)
 }
 
 // TODO: parse yaml once and not for each filter function
