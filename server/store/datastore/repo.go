@@ -77,7 +77,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	// build related
+	// delete related builds
 	for startBuilds := 0; ; startBuilds += batchSize {
 		buildIDs := make([]int64, 0, batchSize)
 		if err := sess.Limit(batchSize, startBuilds).Table("builds").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&buildIDs); err != nil {
@@ -87,36 +87,11 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 			break
 		}
 
-		for _, buildID := range buildIDs {
-			// proc related
-			for startProcs := 0; ; startProcs += batchSize {
-				procIDs := make([]int64, 0, batchSize)
-				if err := sess.Limit(batchSize, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", buildID).Find(&procIDs); err != nil {
-					return err
-				}
-				if len(procIDs) == 0 {
-					break
-				}
-
-				for _, procID := range procIDs {
-					if _, err := sess.Where("log_job_id = ?", procID).Delete(new(model.Logs)); err != nil {
-						return err
-					}
-					if _, err := sess.Where("file_proc_id = ?", procID).Delete(new(model.File)); err != nil {
-						return err
-					}
-				}
-			}
-			if _, err := sess.Where("proc_build_id = ?", buildID).Delete(new(model.Proc)); err != nil {
-				return err
-			}
-			if _, err := sess.Where("build_id = ?", buildID).Delete(new(model.BuildConfig)); err != nil {
+		for i := range buildIDs {
+			if err := deleteBuild(sess, buildIDs[i]); err != nil {
 				return err
 			}
 		}
-	}
-	if _, err := sess.Where("build_repo_id = ?", repo.ID).Delete(new(model.Build)); err != nil {
-		return err
 	}
 
 	if _, err := sess.ID(repo.ID).Delete(new(model.Repo)); err != nil {

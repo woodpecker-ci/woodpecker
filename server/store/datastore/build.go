@@ -17,6 +17,8 @@ package datastore
 import (
 	"time"
 
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -119,5 +121,29 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 
 func (s storage) UpdateBuild(build *model.Build) error {
 	_, err := s.engine.ID(build.ID).AllCols().Update(build)
+	return err
+}
+
+func deleteBuild(sess *xorm.Session, buildID int64) error {
+	// delete related procs
+	for startProcs := 0; ; startProcs += perPage {
+		procIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", buildID).Find(&procIDs); err != nil {
+			return err
+		}
+		if len(procIDs) == 0 {
+			break
+		}
+
+		for i := range procIDs {
+			if err := deleteProc(sess, procIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+	if _, err := sess.Where("build_id = ?", buildID).Delete(new(model.BuildConfig)); err != nil {
+		return err
+	}
+	_, err := sess.ID(buildID).Delete(new(model.Build))
 	return err
 }
