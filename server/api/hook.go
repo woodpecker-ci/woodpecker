@@ -20,7 +20,9 @@ package api
 import (
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -227,9 +229,8 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	c.JSON(200, build)
-
 	if build.Status == model.StatusBlocked {
+		c.JSON(200, build)
 		return
 	}
 
@@ -260,7 +261,10 @@ func PostHook(c *gin.Context) {
 	}
 
 	// get the previous build so that we can send status change notifications
-	last, _ := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
+	last, err := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
+	}
 
 	b := shared.ProcBuilder{
 		Repo:  repo,
@@ -281,10 +285,10 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
+	c.JSON(200, build)
 
-	err = _store.ProcCreate(build.Procs)
-	if err != nil {
-		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
+	if err := _store.ProcCreate(build.Procs); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, build.Number)
 	}
 
 	defer func() {
