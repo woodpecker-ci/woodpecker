@@ -36,7 +36,7 @@ import (
 const (
 	defaultScope  = "api"
 	perPage       = 100
-	statusContext = "ci/drone"
+	statusContext = "ci/woodpecker"
 )
 
 // Opts defines configuration options.
@@ -359,13 +359,28 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
+	contextName := statusContext
+
+	switch build.Event {
+	case model.EventPull:
+		contextName += "/pr"
+	default:
+		if len(build.Event) > 0 {
+			contextName += "/" + string(build.Event)
+		}
+	}
+
+	if proc != nil {
+		contextName += "/" + proc.Name
+	}
+
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
 		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
 		TargetURL:   &link,
 		Name:        nil,
-		Context:     gitlab.String(statusContext),
+		Context:     gitlab.String(contextName),
 	}, gitlab.WithContext(ctx))
 
 	return err
