@@ -31,6 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -430,36 +431,26 @@ func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 	case "deployment":
 		return deploymentStatus(ctx, client, r, b, link)
 	default:
-		return repoStatus(ctx, client, r, b, link, c.Context, proc)
+		return repoStatus(ctx, client, r, b, link, proc)
 	}
 }
 
-func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
-	switch b.Event {
-	case model.EventPull:
-		ctx += "/pr"
-	default:
-		if len(b.Event) > 0 {
-			ctx += "/" + string(b.Event)
-		}
-	}
-
-	status := github.String(convertStatus(b.Status))
-	desc := github.String(convertDesc(b.Status))
+func repoStatus(c context.Context, client *github.Client, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+	status := github.String(convertStatus(build.Status))
+	desc := github.String(convertDesc(build.Status))
 
 	if proc != nil {
-		ctx += "/" + proc.Name
 		status = github.String(convertStatus(proc.State))
 		desc = github.String(convertDesc(proc.State))
 	}
 
 	data := github.RepoStatus{
-		Context:     github.String(ctx),
+		Context:     github.String(common.GetStatusName(repo, build, proc)),
 		State:       status,
 		Description: desc,
 		TargetURL:   github.String(link),
 	}
-	_, _, err := client.Repositories.CreateStatus(c, r.Owner, r.Name, b.Commit, &data)
+	_, _, err := client.Repositories.CreateStatus(c, repo.Owner, repo.Name, build.Commit, &data)
 	return err
 }
 

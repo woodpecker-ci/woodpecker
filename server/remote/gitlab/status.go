@@ -22,11 +22,11 @@ import (
 
 const (
 	DescPending  = "the build is pending"
-	DescRunning  = "the buils is running"
+	DescRunning  = "the build is running"
 	DescSuccess  = "the build was successful"
 	DescFailure  = "the build failed"
-	DescCanceled = "the build canceled"
-	DescBlocked  = "the build is pending approval"
+	DescCanceled = "the build was canceled"
+	DescBlocked  = "the build is waiting for approval"
 	DescDeclined = "the build was rejected"
 )
 

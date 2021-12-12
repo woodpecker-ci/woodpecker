@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -337,41 +338,29 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client, err := c.newClientToken(ctx, u.Token)
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
 	}
 
-	context := c.Context
-
-	switch b.Event {
-	case model.EventPull:
-		context += "/pr"
-	default:
-		if len(b.Event) > 0 {
-			context += "/" + b.Event
-		}
-	}
-
-	status := getStatus(b.Status)
-	desc := getDesc(b.Status)
+	status := getStatus(build.Status)
+	desc := getDesc(build.Status)
 
 	if proc != nil {
-		context += "/" + proc.Name
 		status = getStatus(proc.State)
 		desc = getDesc(proc.State)
 	}
 
 	_, _, err = client.CreateStatus(
-		r.Owner,
-		r.Name,
-		b.Commit,
+		repo.Owner,
+		repo.Name,
+		build.Commit,
 		gitea.CreateStatusOption{
 			State:       status,
 			TargetURL:   link,
 			Description: desc,
-			Context:     context,
+			Context:     common.GetStatusName(repo, build, proc),
 		},
 	)
 
