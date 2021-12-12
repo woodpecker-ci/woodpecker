@@ -76,9 +76,9 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
-	if len(c.Vargs) != 0 {
+	if len(c.Settings) != 0 {
 		var keys []string
-		for key := range c.Vargs {
+		for key := range c.Settings {
 			keys = append(keys, key)
 		}
 		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)

@@ -371,7 +371,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 }
 
 // publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) error {
+func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -379,7 +379,10 @@ func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event 
 		},
 	}
 	buildCopy := *build
-	buildCopy.Procs = model.Tree(buildCopy.Procs)
+	if buildCopy.Procs, err = model.Tree(buildCopy.Procs); err != nil {
+		return err
+	}
+
 	message.Data, _ = json.Marshal(model.Event{
 		Type:  model.Enqueued,
 		Repo:  *repo,

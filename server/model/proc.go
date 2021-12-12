@@ -64,17 +64,20 @@ func (p *Proc) Failing() bool {
 }
 
 // Tree creates a process tree from a flat process list.
-func Tree(procs []*Proc) []*Proc {
+func Tree(procs []*Proc) ([]*Proc, error) {
 	var nodes []*Proc
 	for _, proc := range procs {
 		if proc.PPID == 0 {
 			nodes = append(nodes, proc)
 		} else {
-			parent, _ := findNode(nodes, proc.PPID)
+			parent, err := findNode(nodes, proc.PPID)
+			if err != nil {
+				return nil, err
+			}
 			parent.Children = append(parent.Children, proc)
 		}
 	}
-	return nodes
+	return nodes, nil
 }
 
 func findNode(nodes []*Proc, pid int) (*Proc, error) {

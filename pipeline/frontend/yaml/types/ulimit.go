@@ -37,7 +37,7 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			case int:
 				soft = int64(mv)
 				hard = int64(mv)
-			case map[interface{}]interface{}:
+			case map[string]interface{}:
 				if len(mv) != 2 {
 					return fmt.Errorf("Failed to unmarshal Ulimit: %#v", mapValue)
 				}

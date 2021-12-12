@@ -4,6 +4,7 @@
     :key="option.value"
     :model-value="innerValue.includes(option.value)"
     :label="option.text"
+    :description="option.description"
     class="mb-2"
     @update:model-value="clickOption(option)"
   />

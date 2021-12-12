@@ -74,6 +74,9 @@ func run(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(lvl)
 	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	}
 	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
