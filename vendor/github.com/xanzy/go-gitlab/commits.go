@@ -466,11 +466,11 @@ func (s *CommitsService) SetCommitStatus(pid interface{}, sha string, opt *SetCo
 	return cs, resp, err
 }
 
-// GetMergeRequestsByCommit gets merge request associated with a commit.
+// ListMergeRequestsByCommit gets merge request associated with a commit.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/commits.html#list-merge-requests-associated-with-a-commit
-func (s *CommitsService) GetMergeRequestsByCommit(pid interface{}, sha string, options ...RequestOptionFunc) ([]*MergeRequest, *Response, error) {
+func (s *CommitsService) ListMergeRequestsByCommit(pid interface{}, sha string, options ...RequestOptionFunc) ([]*MergeRequest, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
