@@ -14,6 +14,21 @@ pipeline:
 +   secrets: [ docker_username, docker_password ]
 ```
 
+Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.  
+In this example, the secret named `secret_token` would be passed to the pipeline as `PLUGIN_TOKEN`.
+
+**NOTE:** the `from_secret` syntax only works with the newer `settings` block.
+
+```diff
+pipeline:
+  docker:
+    image: my-plugin
+    settings:
++     token:
++       from_secret: secret_token
+```
+
+
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
