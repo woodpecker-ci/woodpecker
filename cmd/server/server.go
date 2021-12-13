@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -76,6 +77,8 @@ func run(c *cli.Context) error {
 	}
 	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 		log.Logger = log.With().Caller().Logger()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 

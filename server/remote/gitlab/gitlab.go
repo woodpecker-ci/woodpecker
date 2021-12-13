@@ -17,7 +17,6 @@ package gitlab
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -467,26 +466,7 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	eventType := gitlab.WebhookEventType(req)
-	// TODO: Fix Upstream: We get `Service Hook` - which the library do not understand
-	if eventType == "Service Hook" {
-		e := struct {
-			ObjectKind string `json:"object_kind"`
-		}{}
-		if err := json.Unmarshal(payload, &e); err != nil {
-			return nil, nil, err
-		}
-		switch e.ObjectKind {
-		case "push":
-			eventType = gitlab.EventTypePush
-		case "tag_push":
-			eventType = gitlab.EventTypeTagPush
-		case "merge_request":
-			eventType = gitlab.EventTypeMergeRequest
-		}
-	}
-
-	parsed, err := gitlab.ParseWebhook(eventType, payload)
+	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
 	if err != nil {
 		return nil, nil, err
 	}
