@@ -57,7 +57,6 @@ my_secret:
 `)
 	var from map[string]interface{}
 	err := yaml.Unmarshal(fromYAML, &from)
-	t.Logf("%T", from["my_secret"])
 	assert.NoError(t, err)
 
 	want := map[string]string{
@@ -74,6 +73,19 @@ my_secret:
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got, secrets))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
+}
+
+func TestYAMLToParamsToEnvError(t *testing.T) {
+	fromYAML := []byte(`my_secret:
+  from_secret: not_a_secret
+`)
+	var from map[string]interface{}
+	err := yaml.Unmarshal(fromYAML, &from)
+	assert.NoError(t, err)
+	secrets := map[string]Secret{
+		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
+	}
+	assert.Error(t, paramsToEnv(from, make(map[string]string), secrets))
 }
 
 func stringsToInterface(val ...string) []interface{} {
