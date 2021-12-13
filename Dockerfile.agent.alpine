@@ -1,5 +1,4 @@
-FROM alpine:3.9.4
-
+FROM alpine:3.14
 RUN apk add -U --no-cache ca-certificates
 
 ENV GODEBUG=netdns=go
