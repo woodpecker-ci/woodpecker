@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -31,16 +32,46 @@ var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
-	Action:    exec,
+	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
 }
 
-func exec(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
+func run(c *cli.Context) error {
+	return common.RunPipelineFunc(c, execFile, execDir)
+}
 
+func execDir(c *cli.Context, dir string) error {
+	// TODO: respect pipeline dependency
+	repoPath, _ := filepath.Abs(filepath.Dir(dir))
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+
+		// check if it is a regular file (not dir)
+		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+			fmt.Println("#", info.Name())
+			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
+			fmt.Println("")
+			return nil
+		}
+
+		return nil
+	})
+}
+
+func execFile(c *cli.Context, file string) error {
+	repoPath, _ := filepath.Abs(filepath.Dir(file))
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return runExec(c, file, repoPath)
+}
+
+func runExec(c *cli.Context, file, repoPath string) error {
 	dat, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
@@ -55,7 +86,7 @@ func exec(c *cli.Context) error {
 		axes = append(axes, matrix.Axis{})
 	}
 	for _, axis := range axes {
-		err := execWithAxis(c, axis)
+		err := execWithAxis(c, file, repoPath, axis)
 		if err != nil {
 			return err
 		}
@@ -63,12 +94,7 @@ func exec(c *cli.Context) error {
 	return nil
 }
 
-func execWithAxis(c *cli.Context, axis matrix.Axis) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
-
+func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
@@ -115,13 +141,9 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		if workspacePath == "" {
 			workspacePath = c.String("workspace-path")
 		}
-		dir, _ := filepath.Abs(filepath.Dir(file))
 
-		if runtime.GOOS == "windows" {
-			dir = convertPathForWindows(dir)
-		}
 		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
-		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
+		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
 	// lint the yaml file
