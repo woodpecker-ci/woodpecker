@@ -2,9 +2,27 @@
 
 ## Preparation
 
-### Install Go
+### Install Tools
 
-Install Golang as described by [this guide](https://go.dev/doc/install).
+#### Go
+
+Install Golang (>=1.16) as described by [this guide](https://go.dev/doc/install).
+
+#### make
+
+> GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files. (https://www.gnu.org/software/make/)
+
+Install make on:
+  - Ubuntu: `apt install make` - [Docs](https://wiki.ubuntuusers.de/Makefile/)
+  - [Windows](https://stackoverflow.com/a/32127632/8461267)
+  - Mac OS: `brew install make`
+
+#### Node.js & Yarn
+
+Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build Woodpeckers UI or documentation.
+
+For dependencies installation (node_modules) for the UI and documentation of Woodpecker the package-manager Yarn is used. The installation of Yarn is described by [this guide](https://yarnpkg.com/getting-started/install).
+
 
 ### Create an `.env` file with your development configuration
 
@@ -57,11 +75,11 @@ As a starting guide for programming Go with VS-Code you can use this video guide
 
 The Woodpecker source code already includes launch configurations for the Woodpecker server and agent. To start debugging you can click on the debug icon in the navigation bar of VS-Code (ctrl-shift-d). On that page you will see the existing launch jobs at the top. Simply select the agent or server and click on the play button. You can set breakpoints in the source files to stop at specific points.
 
-![](92-development/vscode-debug.png)
+![Woodpecker debugging with VS-Code](92-development/vscode-debug.png)
 
 ## UI Development
 
-To develop the UI you need to install [Node.js (>=14)](https://nodejs.org/en/download/) and [Yarn](https://yarnpkg.com/getting-started/install). In addition it is recommended to use VS-Code with the recommended plugin selection to get features like auto-formatting, linting and typechecking. The UI is written with [Vue 3](https://v3.vuejs.org/) as Single-Page-Application accessing the Woodpecker REST api.
+To develop the UI you need to install [Node.js and Yarn](#nodejs--yarn). In addition it is recommended to use VS-Code with the recommended plugin selection to get features like auto-formatting, linting and typechecking. The UI is written with [Vue 3](https://v3.vuejs.org/) as Single-Page-Application accessing the Woodpecker REST api.
 
 The UI code is placed in `web/`. Change to that folder in your terminal with `cd web/` and install all dependencies by running `yarn install`. Start the UI locally with [hot-reloading](https://stackoverflow.com/a/41429055/8461267) by running: `yarn start`. To access the UI you now have to start the Woodpecker server.
 For this you have to add the line `WOODPECKER_DEV_WWW_PROXY=http://localhost:3000` to your `.env` config and start the server after that as explained in the [debugging](#debugging) section.
@@ -72,7 +90,7 @@ The UI will now be served under [http://localhost:8000](http://localhost:8000) (
 
 The documentation is using docusaurus as framework. You can learn more about it from its [official documentation](https://docusaurus.io/docs/).
 
-If you only want to change some text it probably is enough if you just search for the corresponding [Markdown](https://www.markdownguide.org/basic-syntax/) file inside the `docs/docs/` folder and adjust it. If you want to change larger parts and test the rendered documentation you can run docusaurus locally. Similarly to the UI you need to install [Node.js (>=14)](https://nodejs.org/en/download/) and [Yarn](https://yarnpkg.com/getting-started/install). After that you can run and build docusaurus locally by using following commands:
+If you only want to change some text it probably is enough if you just search for the corresponding [Markdown](https://www.markdownguide.org/basic-syntax/) file inside the `docs/docs/` folder and adjust it. If you want to change larger parts and test the rendered documentation you can run docusaurus locally. Similarly to the UI you need to install [Node.js and Yarn](#nodejs--yarn). After that you can run and build docusaurus locally by using following commands:
 
 ```bash
 cd docs/
@@ -88,6 +106,10 @@ yarn start
 # or build the docs to deploy it to some static page hosting
 yarn build
 ```
+
+## Package architecture of Woodpecker
+
+![Woodpecker architecture](92-development/woodpecker-architecture.png)
 
 ## Run applications from terminal
 
