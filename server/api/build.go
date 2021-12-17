@@ -397,7 +397,6 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 		log.Error().Err(err).Msg("queueBuild")
 	}
 
-	// TODO: check if it leaks secrets etc...!!!
 	return build, nil
 }
 
