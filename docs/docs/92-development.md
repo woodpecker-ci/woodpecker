@@ -198,7 +198,7 @@ var addIsKingKongToUsers = task{
 ```
 
 :::tip
-Woodpecker uses [Xorm](https://gitea.com/xorm/xorm) as ORM to connect to databases. The `sess *xorm.Session` can be used to alter your database. At the end of the migration you can `return sess.Commit()` which will execute your migration as a single transaction. After a successful execution of that transaction the server will automatically add the migration to a list, so it wont be executed again on the next start.
+Woodpecker uses [Xorm](https://gitea.com/xorm/xorm) as ORM for the database connection. The `sess *xorm.Session` can be used to alter your database. At the end of the migration you can `return sess.Commit()` which will execute your migration as a single transaction. After a successful execution of that transaction the server will automatically add the migration to a list, so it wont be executed again on the next start.
 :::
 
 
