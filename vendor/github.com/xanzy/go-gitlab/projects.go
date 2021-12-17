@@ -88,6 +88,7 @@ type Project struct {
 	OnlyAllowMergeIfAllDiscussionsAreResolved bool                       `json:"only_allow_merge_if_all_discussions_are_resolved"`
 	RemoveSourceBranchAfterMerge              bool                       `json:"remove_source_branch_after_merge"`
 	LFSEnabled                                bool                       `json:"lfs_enabled"`
+	RepositoryStorage                         string                     `json:"repository_storage"`
 	RequestAccessEnabled                      bool                       `json:"request_access_enabled"`
 	MergeMethod                               MergeMethodValue           `json:"merge_method"`
 	ForkedFromProject                         *ForkParent                `json:"forked_from_project"`
@@ -282,6 +283,7 @@ type ListProjectsOptions struct {
 	OrderBy                  *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Owned                    *bool             `url:"owned,omitempty" json:"owned,omitempty"`
 	RepositoryChecksumFailed *bool             `url:"repository_checksum_failed,omitempty" json:"repository_checksum_failed,omitempty"`
+	RepositoryStorage        *string           `url:"repository_storage,omitempty" json:"repository_storage,omitempty"`
 	Search                   *string           `url:"search,omitempty" json:"search,omitempty"`
 	SearchNamespaces         *bool             `url:"search_namespaces,omitempty" json:"search_namespaces,omitempty"`
 	Simple                   *bool             `url:"simple,omitempty" json:"simple,omitempty"`
@@ -598,6 +600,7 @@ type CreateProjectOptions struct {
 	PublicBuilds                              *bool                                `url:"public_builds,omitempty" json:"public_builds,omitempty"`
 	RemoveSourceBranchAfterMerge              *bool                                `url:"remove_source_branch_after_merge,omitempty" json:"remove_source_branch_after_merge,omitempty"`
 	RepositoryAccessLevel                     *AccessControlValue                  `url:"repository_access_level,omitempty" json:"repository_access_level,omitempty"`
+	RepositoryStorage                         *string                              `url:"repository_storage,omitempty" json:"repository_storage,omitempty"`
 	RequestAccessEnabled                      *bool                                `url:"request_access_enabled,omitempty" json:"request_access_enabled,omitempty"`
 	RequirementsAccessLevel                   *AccessControlValue                  `url:"requirements_access_level,omitempty" json:"requirements_access_level,omitempty"`
 	ResolveOutdatedDiffDiscussions            *bool                                `url:"resolve_outdated_diff_discussions,omitempty" json:"resolve_outdated_diff_discussions,omitempty"`
@@ -746,6 +749,7 @@ type EditProjectOptions struct {
 	PublicBuilds                              *bool                                `url:"public_builds,omitempty" json:"public_builds,omitempty"`
 	RemoveSourceBranchAfterMerge              *bool                                `url:"remove_source_branch_after_merge,omitempty" json:"remove_source_branch_after_merge,omitempty"`
 	RepositoryAccessLevel                     *AccessControlValue                  `url:"repository_access_level,omitempty" json:"repository_access_level,omitempty"`
+	RepositoryStorage                         *string                              `url:"repository_storage,omitempty" json:"repository_storage,omitempty"`
 	RequestAccessEnabled                      *bool                                `url:"request_access_enabled,omitempty" json:"request_access_enabled,omitempty"`
 	RequirementsAccessLevel                   *AccessControlValue                  `url:"requirements_access_level,omitempty" json:"requirements_access_level,omitempty"`
 	ResolveOutdatedDiffDiscussions            *bool                                `url:"resolve_outdated_diff_discussions,omitempty" json:"resolve_outdated_diff_discussions,omitempty"`

@@ -917,12 +917,12 @@ type ListCommitDiscussionsOptions ListOptions
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#list-project-commit-discussion-items
-func (s *DiscussionsService) ListCommitDiscussions(pid interface{}, commit string, opt *ListCommitDiscussionsOptions, options ...RequestOptionFunc) ([]*Discussion, *Response, error) {
+func (s *DiscussionsService) ListCommitDiscussions(pid interface{}, commit int, opt *ListCommitDiscussionsOptions, options ...RequestOptionFunc) ([]*Discussion, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions",
 		pathEscape(project),
 		commit,
 	)
@@ -946,12 +946,12 @@ func (s *DiscussionsService) ListCommitDiscussions(pid interface{}, commit strin
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#get-single-commit-discussion-item
-func (s *DiscussionsService) GetCommitDiscussion(pid interface{}, commit string, discussion string, options ...RequestOptionFunc) (*Discussion, *Response, error) {
+func (s *DiscussionsService) GetCommitDiscussion(pid interface{}, commit int, discussion string, options ...RequestOptionFunc) (*Discussion, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions/%s",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s",
 		pathEscape(project),
 		commit,
 		discussion,
@@ -986,12 +986,12 @@ type CreateCommitDiscussionOptions struct {
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#create-new-commit-thread
-func (s *DiscussionsService) CreateCommitDiscussion(pid interface{}, commit string, opt *CreateCommitDiscussionOptions, options ...RequestOptionFunc) (*Discussion, *Response, error) {
+func (s *DiscussionsService) CreateCommitDiscussion(pid interface{}, commit int, opt *CreateCommitDiscussionOptions, options ...RequestOptionFunc) (*Discussion, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions",
 		pathEscape(project),
 		commit,
 	)
@@ -1024,12 +1024,12 @@ type AddCommitDiscussionNoteOptions struct {
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#add-note-to-existing-commit-thread
-func (s *DiscussionsService) AddCommitDiscussionNote(pid interface{}, commit string, discussion string, opt *AddCommitDiscussionNoteOptions, options ...RequestOptionFunc) (*Note, *Response, error) {
+func (s *DiscussionsService) AddCommitDiscussionNote(pid interface{}, commit int, discussion string, opt *AddCommitDiscussionNoteOptions, options ...RequestOptionFunc) (*Note, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions/%s/notes",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes",
 		pathEscape(project),
 		commit,
 		discussion,
@@ -1063,12 +1063,12 @@ type UpdateCommitDiscussionNoteOptions struct {
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#modify-an-existing-commit-thread-note
-func (s *DiscussionsService) UpdateCommitDiscussionNote(pid interface{}, commit string, discussion string, note int, opt *UpdateCommitDiscussionNoteOptions, options ...RequestOptionFunc) (*Note, *Response, error) {
+func (s *DiscussionsService) UpdateCommitDiscussionNote(pid interface{}, commit int, discussion string, note int, opt *UpdateCommitDiscussionNoteOptions, options ...RequestOptionFunc) (*Note, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions/%s/notes/%d",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes/%d",
 		pathEscape(project),
 		commit,
 		discussion,
@@ -1093,12 +1093,12 @@ func (s *DiscussionsService) UpdateCommitDiscussionNote(pid interface{}, commit 
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/discussions.html#delete-a-commit-thread-note
-func (s *DiscussionsService) DeleteCommitDiscussionNote(pid interface{}, commit string, discussion string, note int, options ...RequestOptionFunc) (*Response, error) {
+func (s *DiscussionsService) DeleteCommitDiscussionNote(pid interface{}, commit int, discussion string, note int, options ...RequestOptionFunc) (*Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/commits/%s/discussions/%s/notes/%d",
+	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes/%d",
 		pathEscape(project),
 		commit,
 		discussion,

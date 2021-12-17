@@ -13,7 +13,7 @@ import (
 
 // paramsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func paramsToEnv(from map[string]interface{}, to map[string]string) (err error) {
+func paramsToEnv(from map[string]interface{}, to map[string]string, secrets map[string]Secret) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -21,7 +21,7 @@ func paramsToEnv(from map[string]interface{}, to map[string]string) (err error) 
 		if v == nil || len(k) == 0 {
 			continue
 		}
-		to[sanitizeParamKey(k)], err = sanitizeParamValue(v)
+		to[sanitizeParamKey(k)], err = sanitizeParamValue(v, secrets)
 		if err != nil {
 			return err
 		}
@@ -48,7 +48,7 @@ func isComplex(t reflect.Kind) bool {
 	}
 }
 
-func sanitizeParamValue(v interface{}) (string, error) {
+func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
 
@@ -66,6 +66,16 @@ func sanitizeParamValue(v interface{}) (string, error) {
 		return fmt.Sprintf("%v", vv.Float()), nil
 
 	case reflect.Map:
+		if fromSecret, ok := v.(map[string]interface{}); ok {
+			if secretNameI, ok := fromSecret["from_secret"]; ok {
+				if secretName, ok := secretNameI.(string); ok {
+					if secret, ok := secrets[secretName]; ok {
+						return secret.Value, nil
+					}
+					return "", fmt.Errorf("no secret found for %q", secretName)
+				}
+			}
+		}
 		ymlOut, _ := yaml.Marshal(vv.Interface())
 		out, _ := yml.ToJSON(ymlOut)
 		return string(out), nil
@@ -78,7 +88,7 @@ func sanitizeParamValue(v interface{}) (string, error) {
 			in := make([]string, vv.Len())
 			for i := 0; i < vv.Len(); i++ {
 				var err error
-				if in[i], err = sanitizeParamValue(vv.Index(i).Interface()); err != nil {
+				if in[i], err = sanitizeParamValue(vv.Index(i).Interface(), secrets); err != nil {
 					return "", err
 				}
 			}
