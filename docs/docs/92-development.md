@@ -107,6 +107,43 @@ yarn start
 yarn build
 ```
 
+## Testing & linting code
+
+To test or lint parts of Woodpecker you can run one of the following commands:
+
+```bash
+# test server code
+make test-server
+
+# test agent code
+make test-agent
+
+# test cli code
+make test-cli
+
+# test datastore / database related code like migrations of the server
+make test-server-datastore
+
+# lint go code
+make lint
+
+# lint UI code
+make lint-frontend
+
+# test UI code
+make test-frontend
+```
+
+If you want to test a specific go file you can also use:
+
+```bash
+go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/<path-to-the-package-or-file-to-test>
+```
+
+Or you can open the file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
+
+![Run test via VS-Code](92-development/vscode-run-test.png)
+
 ## Package architecture of Woodpecker
 
 ![Woodpecker architecture](92-development/woodpecker-architecture.png)
