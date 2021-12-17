@@ -77,7 +77,7 @@ The Woodpecker source code already includes launch configurations for the Woodpe
 
 ![Woodpecker debugging with VS-Code](92-development/vscode-debug.png)
 
-## UI Development
+## UI development
 
 To develop the UI you need to install [Node.js and Yarn](#nodejs--yarn). In addition it is recommended to use VS-Code with the recommended plugin selection to get features like auto-formatting, linting and typechecking. The UI is written with [Vue 3](https://v3.vuejs.org/) as Single-Page-Application accessing the Woodpecker REST api.
 
@@ -86,7 +86,7 @@ For this you have to add the line `WOODPECKER_DEV_WWW_PROXY=http://localhost:300
 
 The UI will now be served under [http://localhost:8000](http://localhost:8000) (don't access the UI from port 3000 as that only show the UI without access to the actual api).
 
-## Documentation Development
+## Documentation development
 
 The documentation is using docusaurus as framework. You can learn more about it from its [official documentation](https://docusaurus.io/docs/).
 
