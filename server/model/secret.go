@@ -17,6 +17,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 )
 
@@ -80,7 +81,7 @@ func (s *Secret) Match(event WebhookEvent) bool {
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
 		if !ValidateWebhookEvent(event) {
-			return errSecretEventInvalid
+			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
 		}
 	}
 
