@@ -180,7 +180,7 @@ func PostHook(c *gin.Context) {
 	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, repoUser, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
-		msg := fmt.Sprintf("cannot find '%s' in '%s', context user: '%s'", repo.Config, build.Ref, repoUser.Login)
+		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusNotFound, msg)
 		return
@@ -245,6 +245,10 @@ func PostHook(c *gin.Context) {
 				_ = c.AbortWithError(http.StatusInternalServerError, err)
 				return
 			}
+		}
+
+		if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
 		}
 
 		c.JSON(http.StatusOK, build)
