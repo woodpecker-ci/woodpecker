@@ -184,6 +184,7 @@ func PostHook(c *gin.Context) {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusBadRequest, "%s: %v", msg, err)
+		return
 	}
 	if filtered {
 		msg := "ignoring hook: branch does not match restrictions defined in yaml"
@@ -227,6 +228,14 @@ func PostHook(c *gin.Context) {
 	}
 
 	if build.Status == model.StatusBlocked {
+		// TODO: get build items
+		err = pushBuildStatus(c, repoUser, repo, build, []*shared.BuildItem{})
+		if err != nil {
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		c.JSON(200, build)
 		return
 	}
@@ -234,7 +243,9 @@ func PostHook(c *gin.Context) {
 	build, err = startBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
 	if err != nil {
 		c.String(http.StatusInternalServerError, fmt.Sprintf("startBuild: %v", err))
+		return
 	}
+
 	c.JSON(200, build)
 }
 

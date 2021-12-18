@@ -377,16 +377,9 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	}
 
 	defer func() {
-		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
-			if len(buildItems) > 1 {
-				err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, item.Proc)
-			} else {
-				err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, nil)
-			}
-			if err != nil {
-				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			}
+		err := pushBuildStatus(ctx, user, repo, build, buildItems)
+		if err != nil {
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
 		}
 	}()
 
@@ -400,10 +393,27 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	return build, nil
 }
 
+func pushBuildStatus(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, buildItems []*shared.BuildItem) (err error) {
+	if len(buildItems) > 1 {
+		uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
+		err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, nil)
+		return err
+	}
+
+	for _, item := range buildItems {
+		uri := fmt.Sprintf("%s/%s/build/%d/%d", server.Config.Server.Host, repo.FullName, build.Number, item.Proc.PID)
+		err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, item.Proc)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func PostDecline(c *gin.Context) {
 	var (
-		_remote = server.Config.Services.Remote
-		_store  = store.FromContext(c)
+		_store = store.FromContext(c)
 
 		repo   = session.Repo(c)
 		user   = session.User(c)
@@ -425,8 +435,8 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-	err = _remote.Status(c, user, repo, build, uri, nil)
+	// TODO: get build items
+	err = pushBuildStatus(c, user, repo, build, []*shared.BuildItem{})
 	if err != nil {
 		log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
 	}
