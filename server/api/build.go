@@ -377,8 +377,12 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	}
 
 	defer func() {
-		// TODO check if build.Procs contains proper data
 		for _, proc := range build.Procs {
+			// skip parent procs
+			if proc.Children != nil && len(proc.Children) > 0 {
+				continue
+			}
+
 			err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
 			if err != nil {
 				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
@@ -389,6 +393,7 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	if err := publishToTopic(ctx, build, repo, model.Enqueued); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
+
 	if err := queueBuild(build, repo, buildItems); err != nil {
 		log.Error().Err(err).Msg("queueBuild")
 	}
