@@ -1,16 +1,19 @@
 package secrets
 
 import (
+	"context"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type builtin struct {
+	context.Context
 	store model.SecretStore
 }
 
 // New returns a new local secret service.
-func New(store model.SecretStore) model.SecretService {
-	return &builtin{store}
+func New(ctx context.Context, store model.SecretStore) model.SecretService {
+	return &builtin{store: store, Context: ctx}
 }
 
 func (b *builtin) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {

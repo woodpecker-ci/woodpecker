@@ -147,9 +147,6 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	}
-	if in.BuildCounter != nil {
-		repo.Counter = *in.BuildCounter
-	}
 
 	err := _store.UpdateRepo(repo)
 	if err != nil {
@@ -199,7 +196,6 @@ func GetRepoBranches(c *gin.Context) {
 
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
-	remote := server.Config.Services.Remote
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
@@ -208,21 +204,19 @@ func DeleteRepo(c *gin.Context) {
 	repo.IsActive = false
 	repo.UserID = 0
 
-	err := _store.UpdateRepo(repo)
-	if err != nil {
+	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	if remove {
-		err := _store.DeleteRepo(repo)
-		if err != nil {
+		if err := _store.DeleteRepo(repo); err != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 	}
 
-	if err := remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := server.Config.Services.Remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

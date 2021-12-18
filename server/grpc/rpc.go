@@ -137,11 +137,16 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	}
 
 	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
-		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
+		log.Error().Err(err).Msg("rpc.update: cannot update proc")
 	}
 
-	build.Procs, _ = s.store.ProcList(build)
-	build.Procs = model.Tree(build.Procs)
+	if build.Procs, err = s.store.ProcList(build); err != nil {
+		log.Error().Err(err).Msg("can not get proc list from store")
+	}
+	if build.Procs, err = model.Tree(build.Procs); err != nil {
+		log.Error().Err(err).Msg("can not build tree from proc list")
+		return err
+	}
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -330,12 +335,15 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: done: cannot ack proc_id %d: %s", procID, err)
 	}
 
-	procs, _ := s.store.ProcList(build)
+	procs, err := s.store.ProcList(build)
+	if err != nil {
+		return err
+	}
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !isThereRunningStage(procs) {
 		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
-			log.Error().Msgf("error: done: cannot update build_id %d final state: %s", build.ID, err)
+			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", build.ID)
 		}
 
 		if !isMultiPipeline(procs) {
@@ -348,10 +356,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	}
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Msgf("error: done: cannot close build_id %d logger: %s", proc.ID, err)
+		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
 	}
 
-	s.notify(c, repo, build, procs)
+	if err := s.notify(c, repo, build, procs); err != nil {
+		return err
+	}
 
 	if build.Status == model.StatusSuccess || build.Status == model.StatusFailure {
 		s.buildCount.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Inc()
@@ -440,8 +450,10 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) {
-	build.Procs = model.Tree(procs)
+func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) (err error) {
+	if build.Procs, err = model.Tree(procs); err != nil {
+		return err
+	}
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -455,6 +467,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
+	return nil
 }
 
 func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {

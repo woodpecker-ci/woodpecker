@@ -40,7 +40,8 @@ export default () => {
     }
 
     if (isProcRunning(_proc)) {
-      stream = apiClient.streamLogs(owner, repo, build, _proc.pid, onLogsUpdate);
+      // load stream of parent process (which receives all child processes logs)
+      stream = apiClient.streamLogs(owner, repo, build, _proc.ppid, onLogsUpdate);
     }
   }
 

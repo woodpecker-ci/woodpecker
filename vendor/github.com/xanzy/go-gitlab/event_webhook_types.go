@@ -640,6 +640,10 @@ type PipelineEvent struct {
 		FinishedAt     string   `json:"finished_at"`
 		Duration       int      `json:"duration"`
 		QueuedDuration int      `json:"queued_duration"`
+		Variables      []struct {
+			Key   string `json:"key"`
+			Value string `json:"value"`
+		} `json:"variables"`
 	} `json:"object_attributes"`
 	MergeRequest struct {
 		ID                 int    `json:"id"`
@@ -694,15 +698,22 @@ type PipelineEvent struct {
 		AllowFailure bool       `json:"allow_failure"`
 		User         *EventUser `json:"user"`
 		Runner       struct {
-			ID          int    `json:"id"`
-			Description string `json:"description"`
-			Active      bool   `json:"active"`
-			IsShared    bool   `json:"is_shared"`
+			ID          int      `json:"id"`
+			Description string   `json:"description"`
+			Active      bool     `json:"active"`
+			IsShared    bool     `json:"is_shared"`
+			RunnerType  string   `json:"runner_type"`
+			Tags        []string `json:"tags"`
 		} `json:"runner"`
 		ArtifactsFile struct {
 			Filename string `json:"filename"`
 			Size     int    `json:"size"`
 		} `json:"artifacts_file"`
+		Environment struct {
+			Name           string `json:"name"`
+			Action         string `json:"action"`
+			DeploymentTier string `json:"deployment_tier"`
+		} `json:"environment"`
 	} `json:"builds"`
 }
 
@@ -742,6 +753,7 @@ type PushEvent struct {
 	Commits    []*struct {
 		ID        string     `json:"id"`
 		Message   string     `json:"message"`
+		Title     string     `json:"title"`
 		Timestamp *time.Time `json:"timestamp"`
 		URL       string     `json:"url"`
 		Author    struct {
@@ -896,6 +908,7 @@ type TagEvent struct {
 	Commits    []*struct {
 		ID        string     `json:"id"`
 		Message   string     `json:"message"`
+		Title     string     `json:"title"`
 		Timestamp *time.Time `json:"timestamp"`
 		URL       string     `json:"url"`
 		Author    struct {

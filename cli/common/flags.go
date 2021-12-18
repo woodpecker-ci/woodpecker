@@ -47,6 +47,11 @@ var GlobalFlags = []cli.Flag{
 		Usage:   "socks proxy ignored",
 		Hidden:  true,
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Name:    "log-level",
+		Usage:   "set logging level",
+	},
 }
 
 // FormatFlag return format flag with value set based on template

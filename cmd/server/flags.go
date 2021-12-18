@@ -79,12 +79,6 @@ var flags = []cli.Flag{
 		Name:    "quic",
 		Usage:   "enable quic",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WWW_PROXY"},
-		Name:    "www-proxy",
-		Usage:   "serve the website by using a proxy (used for development)",
-		Hidden:  true,
-	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
 		Name:    "admin",
@@ -511,5 +505,19 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	},
+	// development flags
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_WWW_PROXY"},
+		Name:    "www-proxy",
+		Usage:   "serve the website by using a proxy (used for development)",
+		Hidden:  true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
+		Name:    "server-dev-oauth-host",
+		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Value:   "",
+		Hidden:  true,
 	},
 }

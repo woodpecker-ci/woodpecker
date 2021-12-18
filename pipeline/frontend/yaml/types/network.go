@@ -72,16 +72,12 @@ func handleNetwork(name string, value interface{}) (*Network, error) {
 		}, nil
 	}
 	switch v := value.(type) {
-	case map[interface{}]interface{}:
+	case map[string]interface{}:
 		network := &Network{
 			Name: name,
 		}
 		for mapKey, mapValue := range v {
-			name, ok := mapKey.(string)
-			if !ok {
-				return &Network{}, fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
-			}
-			switch name {
+			switch mapKey {
 			case "aliases":
 				aliases, ok := mapValue.([]interface{})
 				if !ok {

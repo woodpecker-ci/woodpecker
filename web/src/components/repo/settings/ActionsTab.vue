@@ -16,6 +16,15 @@
 
       <Button
         class="mr-auto mt-4"
+        color="blue"
+        start-icon="turn-off"
+        text="Disable repository"
+        :is-loading="isDeactivatingRepo"
+        @click="deactivateRepo"
+      />
+
+      <Button
+        class="mr-auto mt-4"
         color="red"
         start-icon="trash"
         text="Delete repository"
@@ -65,7 +74,7 @@ export default defineComponent({
 
       // TODO use proper dialog
       // eslint-disable-next-line no-alert, no-restricted-globals
-      if (!confirm('All data will be lost after this action!!!\n\nDo you really want to procceed?')) {
+      if (!confirm('All data will be lost after this action!!!\n\nDo you really want to proceed?')) {
         return;
       }
 
@@ -74,11 +83,23 @@ export default defineComponent({
       await router.replace({ name: 'repos' });
     });
 
+    const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncAction(async () => {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      await apiClient.deleteRepo(repo.value.owner, repo.value.name, false);
+      notifications.notify({ title: 'Repository disabled', type: 'success' });
+      await router.replace({ name: 'repos' });
+    });
+
     return {
       isRepairingRepo,
       isDeletingRepo,
+      isDeactivatingRepo,
       deleteRepo,
       repairRepo,
+      deactivateRepo,
     };
   },
 });

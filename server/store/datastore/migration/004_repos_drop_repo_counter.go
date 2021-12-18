@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package migration
 
-type Logs struct {
-	ID     int64  `xorm:"pk autoincr 'log_id'"`
-	ProcID int64  `xorm:"UNIQUE 'log_job_id'"`
-	Data   []byte `xorm:"log_data"`
-	// TODO: add create timestamp
+import (
+	"xorm.io/xorm"
+)
+
+var alterTableReposDropCounter = task{
+	name: "alter-table-drop-counter",
+	fn: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "repos", "repo_counter")
+	},
 }

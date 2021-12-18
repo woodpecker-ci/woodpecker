@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -73,6 +74,11 @@ func run(c *cli.Context) error {
 			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
 		}
 		zerolog.SetGlobalLevel(lvl)
+	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
@@ -284,6 +290,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-dev-oauth-host") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	} else {
+		server.Config.Server.OAuthHost = c.String("server-host")
+	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")

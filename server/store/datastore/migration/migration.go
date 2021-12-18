@@ -30,6 +30,8 @@ var migrationTasks = []task{
 	legacy2Xorm,
 	alterTableReposDropFallback,
 	alterTableReposDropAllowDeploysAllowTags,
+	fixPRSecretEventName,
+	alterTableReposDropCounter,
 }
 
 type migrations struct {
