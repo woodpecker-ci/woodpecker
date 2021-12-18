@@ -82,15 +82,19 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
-		c.String(http.StatusBadRequest, "%s: %v", msg, err)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
 	if build == nil {
-		c.String(http.StatusOK, "ignoring hook: hook parsing resulted in empty build")
+		msg := "ignoring hook: hook parsing resulted in empty build"
+		log.Debug().Msg(msg)
+		c.String(http.StatusOK, msg)
 		return
 	}
 	if tmpRepo == nil {
-		c.String(http.StatusBadRequest, "failure to ascertain repo from hook")
+		msg := "failure to ascertain repo from hook"
+		log.Debug().Msg(msg)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
 
@@ -106,13 +110,15 @@ func PostHook(c *gin.Context) {
 
 	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get repo %s/%s from store", tmpRepo.Owner, tmpRepo.Name)
+		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusNotFound, "%s: %v", msg, err)
+		c.String(http.StatusNotFound, msg)
 		return
 	}
 	if !repo.IsActive {
-		c.String(204, "ignoring hook: %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
+		msg := fmt.Sprintf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
+		log.Debug().Msg(msg)
+		c.String(http.StatusNoContent, msg)
 		return
 	}
 
@@ -123,7 +129,7 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		msg := fmt.Sprintf("failure to parse token from hook for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusBadRequest, "%s: %v", msg, err)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
 	if parsed.Text != repo.FullName {
@@ -149,8 +155,9 @@ func PostHook(c *gin.Context) {
 
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("failure to find repo owner via id '%d'", repo.UserID)
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -175,7 +182,7 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		msg := fmt.Sprintf("cannot find '%s' in '%s', context user: '%s'", repo.Config, build.Ref, repoUser.Login)
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		c.String(http.StatusNotFound, "%s: %v", msg, err)
+		c.String(http.StatusNotFound, msg)
 		return
 	}
 
@@ -183,20 +190,20 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		c.String(http.StatusBadRequest, "%s: %v", msg, err)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
 	if filtered {
 		msg := "ignoring hook: branch does not match restrictions defined in yaml"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
-		c.String(200, msg)
+		c.String(http.StatusOK, msg)
 		return
 	}
 
 	if zeroSteps(build, remoteYamlConfigs) {
 		msg := "ignoring hook: step conditions yield zero runnable steps"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
-		c.String(200, msg)
+		c.String(http.StatusOK, msg)
 		return
 	}
 
@@ -212,8 +219,9 @@ func PostHook(c *gin.Context) {
 
 	err = _store.CreateBuild(build, build.Procs...)
 	if err != nil {
-		log.Error().Err(err).Msgf("failure to save commit for %s", repo.FullName)
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		msg := fmt.Sprintf("failure to save commit for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -221,8 +229,9 @@ func PostHook(c *gin.Context) {
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
 		if err != nil {
-			log.Error().Err(err).Msgf("failure to find or persist build config for %s", repo.FullName)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
 			return
 		}
 	}
@@ -236,17 +245,19 @@ func PostHook(c *gin.Context) {
 			return
 		}
 
-		c.JSON(200, build)
+		c.JSON(http.StatusOK, build)
 		return
 	}
 
 	build, err = startBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
 	if err != nil {
-		c.String(http.StatusInternalServerError, fmt.Sprintf("startBuild: %v", err))
+		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
-	c.JSON(200, build)
+	c.JSON(http.StatusOK, build)
 }
 
 // TODO: parse yaml once and not for each filter function
