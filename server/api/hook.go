@@ -110,13 +110,13 @@ func PostHook(c *gin.Context) {
 
 	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get repo %s/%s from store", tmpRepo.Owner, tmpRepo.Name)
+		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusNotFound, msg)
 		return
 	}
 	if !repo.IsActive {
-		msg := fmt.Sprintf("ignoring hook: repo %s/%s is inactive", tmpRepo.Owner, tmpRepo.Name)
+		msg := fmt.Sprintf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
 		log.Debug().Msg(msg)
 		c.String(http.StatusNoContent, msg)
 		return
@@ -155,7 +155,7 @@ func PostHook(c *gin.Context) {
 
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get user %d from store", repo.UserID)
+		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
