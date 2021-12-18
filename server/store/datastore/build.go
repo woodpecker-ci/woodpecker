@@ -91,17 +91,13 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 		return err
 	}
 
-	// increment counter
-	if _, err := sess.ID(build.RepoID).Incr("repo_counter").Update(new(model.Repo)); err != nil {
+	// calc build number
+	var number int64
+	if _, err := sess.SQL("SELECT MAX(build_number) FROM `builds` WHERE build_repo_id = ?", build.RepoID).Get(&number); err != nil {
 		return err
 	}
+	build.Number = number + 1
 
-	repo := new(model.Repo)
-	if err := wrapGet(sess.ID(build.RepoID).Get(repo)); err != nil {
-		return err
-	}
-
-	build.Number = repo.Counter
 	build.Created = time.Now().UTC().Unix()
 	build.Enqueued = build.Created
 	// only Insert set auto created ID back to object
