@@ -237,12 +237,14 @@ func PostHook(c *gin.Context) {
 	}
 
 	if build.Status == model.StatusBlocked {
-		// TODO: get build items
-		err = pushBuildStatus(c, repoUser, repo, build)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
+		// TODO: check of build.Procs contains proper data
+		for _, proc := range build.Procs {
+			err = server.Config.Services.Remote.Status(c, repoUser, repo, build, proc)
+			if err != nil {
+				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
 		}
 
 		c.JSON(http.StatusOK, build)

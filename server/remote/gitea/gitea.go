@@ -338,18 +338,10 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
-	}
-
-	status := getStatus(build.Status)
-	desc := getDesc(build.Status)
-
-	if proc != nil {
-		status = getStatus(proc.State)
-		desc = getDesc(proc.State)
 	}
 
 	_, _, err = client.CreateStatus(
@@ -357,13 +349,12 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		repo.Name,
 		build.Commit,
 		gitea.CreateStatusOption{
-			State:       status,
-			TargetURL:   link,
-			Description: desc,
-			Context:     common.GetStatusName(repo, build, proc),
+			State:       getStatus(proc.State),
+			TargetURL:   common.GetBuildStatusLink(repo, build, proc),
+			Description: common.GetBuildStatusDescription(proc.State),
+			Context:     common.GetBuildStatusContext(repo, build, proc),
 		},
 	)
-
 	return err
 }
 
@@ -466,16 +457,6 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
 }
 
-const (
-	DescPending  = "the build is pending"
-	DescRunning  = "the build is running"
-	DescSuccess  = "the build was successful"
-	DescFailure  = "the build failed"
-	DescCanceled = "the build canceled"
-	DescBlocked  = "the build is pending approval"
-	DescDeclined = "the build was rejected"
-)
-
 // getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
 func getStatus(status model.StatusValue) gitea.StatusState {
@@ -494,28 +475,5 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 		return gitea.StatusWarning
 	default:
 		return gitea.StatusFailure
-	}
-}
-
-// getDesc is a helper function that generates a description
-// message for the build based on the status.
-func getDesc(status model.StatusValue) string {
-	switch status {
-	case model.StatusPending:
-		return DescPending
-	case model.StatusRunning:
-		return DescRunning
-	case model.StatusSuccess:
-		return DescSuccess
-	case model.StatusFailure, model.StatusError:
-		return DescFailure
-	case model.StatusKilled:
-		return DescCanceled
-	case model.StatusBlocked:
-		return DescBlocked
-	case model.StatusDeclined:
-		return DescDeclined
-	default:
-		return DescFailure
 	}
 }

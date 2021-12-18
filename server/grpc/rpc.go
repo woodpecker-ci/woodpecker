@@ -431,22 +431,24 @@ func buildStatus(procs []*model.Proc) model.StatusValue {
 
 func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
-	if err == nil {
-		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, err := refresher.Refresh(ctx, user)
-			if err != nil {
-				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-			} else if ok {
-				if err := s.store.UpdateUser(user); err != nil {
-					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-				}
+	if err != nil {
+		return
+	}
+
+	if refresher, ok := s.remote.(remote.Refresher); ok {
+		ok, err := refresher.Refresh(ctx, user)
+		if err != nil {
+			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+		} else if ok {
+			if err := s.store.UpdateUser(user); err != nil {
+				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = s.remote.Status(ctx, user, repo, build, uri, proc)
-		if err != nil {
-			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
+	}
+
+	err = s.remote.Status(ctx, user, repo, build, proc)
+	if err != nil {
+		log.Error().Err(err).Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number)
 	}
 }
 

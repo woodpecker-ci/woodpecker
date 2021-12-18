@@ -209,7 +209,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
 	return nil
 }
 

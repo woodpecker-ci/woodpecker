@@ -283,12 +283,12 @@ func (_m *Remote) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 }
 
 // Status provides a mock function with given fields: ctx, u, r, b, link, proc
-func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	ret := _m.Called(ctx, u, r, b, link, proc)
+func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
+	ret := _m.Called(ctx, u, r, b, proc)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, string, *model.Proc) error); ok {
-		r0 = rf(ctx, u, r, b, link, proc)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, *model.Proc) error); ok {
+		r0 = rf(ctx, u, r, b, proc)
 	} else {
 		r0 = ret.Error(0)
 	}

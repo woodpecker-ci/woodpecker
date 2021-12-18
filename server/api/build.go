@@ -377,9 +377,12 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	}
 
 	defer func() {
-		err := pushBuildStatus(ctx, user, repo, build)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+		// TODO check if build.Procs contains proper data
+		for _, proc := range build.Procs {
+			err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
+			if err != nil {
+				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			}
 		}
 	}()
 
@@ -391,25 +394,6 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 	}
 
 	return build, nil
-}
-
-func pushBuildStatus(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build) (err error) {
-	// TODO is it possible to have builds without procs?
-	if len(build.Procs) > 1 {
-		uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, nil)
-		return err
-	}
-
-	for _, proc := range build.Procs {
-		uri := fmt.Sprintf("%s/%s/build/%d/%d", server.Config.Server.Host, repo.FullName, build.Number, proc.PID)
-		err = server.Config.Services.Remote.Status(ctx, user, repo, build, uri, proc)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func PostDecline(c *gin.Context) {
@@ -436,10 +420,12 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	// TODO: get build items
-	err = pushBuildStatus(c, user, repo, build)
-	if err != nil {
-		log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+	// TODO check if build.Procs contains proper data
+	for _, proc := range build.Procs {
+		err = server.Config.Services.Remote.Status(c, user, repo, build, proc)
+		if err != nil {
+			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+		}
 	}
 
 	c.JSON(200, build)
