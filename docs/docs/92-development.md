@@ -86,6 +86,24 @@ For this you have to add the line `WOODPECKER_DEV_WWW_PROXY=http://localhost:300
 
 The UI will now be served under [http://localhost:8000](http://localhost:8000) (don't access the UI from port 3000 as that only show the UI without access to the actual api).
 
+### Tools and frameworks
+
+The following list contains some tools and frameworks used by the Woodpecker UI. For some points we added some guidelines / hints to help you developing.
+
+- [Vue 3](https://v3.vuejs.org/)
+  - use `setup` and composition api
+  - place (re-usable) components in `web/src/components/`
+  - views should have a route in `web/src/router.ts` and are located in `web/src/views/`
+- [Windicss](https://windicss.org/) (similar to Tailwind)
+  - use Windicss classes where possible
+  - if needed extend the Windicss config to use new classes
+- [Vite](https://vitejs.dev/) (similar to Webpack)
+- [Typescript](https://www.typescriptlang.org/)
+  - avoid using `any` and `unknown` (the linter will prevent you from doing so anyways :wink:)
+- [eslint](https://eslint.org/)
+- [Volar & vue-tsc](https://github.com/johnsoncodehk/volar/) for type-checking in .vue file
+  - use the take-over mode of Volar as described by [this guide](https://github.com/johnsoncodehk/volar/discussions/471)
+
 ## Documentation development
 
 The documentation is using docusaurus as framework. You can learn more about it from its [official documentation](https://docusaurus.io/docs/).
@@ -140,7 +158,7 @@ If you want to test a specific go file you can also use:
 go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/<path-to-the-package-or-file-to-test>
 ```
 
-Or you can open the file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
+Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
 
 ![Run test via VS-Code](92-development/vscode-run-test.png)
 

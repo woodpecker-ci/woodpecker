@@ -7,7 +7,6 @@
     "esbenp.prettier-vscode",
     "voorjaar.windicss-intellisense",
     "johnsoncodehk.volar",
-    "johnsoncodehk.vscode-typescript-vue-plugin",
     "redhat.vscode-yaml"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
