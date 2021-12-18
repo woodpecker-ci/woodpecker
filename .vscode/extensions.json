@@ -7,7 +7,8 @@
     "esbenp.prettier-vscode",
     "voorjaar.windicss-intellisense",
     "johnsoncodehk.volar",
-    "redhat.vscode-yaml"
+    "redhat.vscode-yaml",
+    "davidanson.vscode-markdownlint"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []

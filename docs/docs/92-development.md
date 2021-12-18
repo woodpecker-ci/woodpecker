@@ -24,7 +24,7 @@ Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build W
 For dependencies installation (node_modules) for the UI and documentation of Woodpecker the package-manager Yarn is used. The installation of Yarn is described by [this guide](https://yarnpkg.com/getting-started/install).
 
 
-### Create an `.env` file with your development configuration
+### Create a `.env` file with your development configuration
 
 Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` in the root of the Woodpecker project and add any need config to it.
 
