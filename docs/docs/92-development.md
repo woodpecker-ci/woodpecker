@@ -26,7 +26,7 @@ For dependencies installation (node_modules) for the UI and documentation of Woo
 
 ### Create an `.env` file with your development configuration
 
-Similar to the env variables you can set for your production setup of Woodpecker, you can create a `.env` in the root of the Woodpecker project and add any need config to it.
+Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` in the root of the Woodpecker project and add any need config to it.
 
 A common config for debugging would look like this:
 
@@ -69,7 +69,7 @@ Create an O-Auth app for your SCM as describe in the [SCM documentation](/docs/a
 You can use different methods for debugging the Woodpecker applications. One of the currently recommend ways to debug and test the Woodpecker application is using [VS-Code](https://code.visualstudio.com/) or [VS-Codium](https://vscodium.com/) (Open-Source binaries of VS-Code) as most maintainers are using it and Woodpecker already includes the needed debug configurations for it.
 
 As a starting guide for programming Go with VS-Code you can use this video guide:
-[![](https://img.youtube.com/vi/1MXIGYrMk80/0.jpg)](https://www.youtube.com/watch?v=1MXIGYrMk80)
+[![Getting started with Go in VS-Code](https://img.youtube.com/vi/1MXIGYrMk80/0.jpg)](https://www.youtube.com/watch?v=1MXIGYrMk80)
 
 ### Debugging Woodpecker
 
@@ -108,7 +108,7 @@ The following list contains some tools and frameworks used by the Woodpecker UI.
 
 The documentation is using docusaurus as framework. You can learn more about it from its [official documentation](https://docusaurus.io/docs/).
 
-If you only want to change some text it probably is enough if you just search for the corresponding [Markdown](https://www.markdownguide.org/basic-syntax/) file inside the `docs/docs/` folder and adjust it. If you want to change larger parts and test the rendered documentation you can run docusaurus locally. Similarly to the UI you need to install [Node.js and Yarn](#nodejs--yarn). After that you can run and build docusaurus locally by using following commands:
+If you only want to change some text it probably is enough if you just search for the corresponding [Markdown](https://www.markdownguide.org/basic-syntax/) file inside the `docs/docs/` folder and adjust it. If you want to change larger parts and test the rendered documentation you can run docusaurus locally. Similarly to the UI you need to install [Node.js and Yarn](#nodejs--yarn). After that you can run and build docusaurus locally by using the following commands:
 
 ```bash
 cd docs/
@@ -168,7 +168,7 @@ Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run
 
 ## Run applications from terminal
 
-If you want to run a Woodpecker applications from your terminal you can use execute following commands from the base of the Woodpecker project. They will execute Woodpecker in a similar way as described in [debugging Woodpecker](#debugging-woodpecker) without the ability to really debug it in your editor.
+If you want to run a Woodpecker applications from your terminal you can use one of the following commands from the base of the Woodpecker project. They will execute Woodpecker in a similar way as described in [debugging Woodpecker](#debugging-woodpecker) without the ability to really debug it in your editor.
 
 ```bash
 # start server
@@ -183,7 +183,7 @@ $ go run ./cmd/cli [command]
 
 ## Add new migration
 
-Woodpecker uses migrations to change the database schema if a database model has been changed. If a developer for example adds a new property `IsKingKong` to the database model of a User in `server/model/` he would need to add a new migration like the following example to a file like `server/store/datastore/migration/123_add_is_king_kong_to_users.go`:
+Woodpecker uses migrations to change the database schema if a database model has been changed. If a developer for example adds a new property `IsKingKong` to the database model of a User in `server/model/` they would need to add a new migration like the following example to a file like `server/store/datastore/migration/123_add_is_king_kong_to_users.go`:
 
 ```go
 // Copyright 2021 Woodpecker Authors
