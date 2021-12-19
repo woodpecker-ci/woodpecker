@@ -88,9 +88,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		tableSQL = tableSQL[strings.Index(tableSQL, "("):]
 
 		// Remove the required columnNames
-		for _, name := range columnNames {
-			tableSQL = removeColumnFromSQLITETableSchema(tableSQL, name)
-		}
+		tableSQL = removeColumnFromSQLITETableSchema(tableSQL, columnNames...)
 
 		// Ensure the query is ended properly
 		tableSQL = strings.TrimSpace(tableSQL)
@@ -215,14 +213,26 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 }
 
 var whitespaces = regexp.MustCompile(`\s+`)
+var columnSeparator = regexp.MustCompile(`\s?,\s?`)
 
-func removeColumnFromSQLITETableSchema(schema, name string) string {
-	schema = regexp.MustCompile(regexp.QuoteMeta("`"+name+"`")+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
-	return regexp.MustCompile(regexp.QuoteMeta(name)+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
+func removeColumnFromSQLITETableSchema(schema string, names ...string) string {
+	if len(names) == 0 {
+		return schema
+	}
+	for i := range names {
+		if len(names[i]) == 0 {
+			continue
+		}
+		schema = regexp.MustCompile(`\s`+regexp.QuoteMeta("`"+names[i]+"`")+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
+		schema = regexp.MustCompile(`\s`+regexp.QuoteMeta(names[i])+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
+	}
+	return schema
 }
 
 func normalizeSQLiteTableSchema(schema string) string {
-	return whitespaces.ReplaceAllString(
-		strings.ReplaceAll(schema, "\n", " "),
-		" ")
+	return columnSeparator.ReplaceAllString(
+		whitespaces.ReplaceAllString(
+			strings.ReplaceAll(schema, "\n", " "),
+			" "),
+		", ")
 }
