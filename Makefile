@@ -9,6 +9,7 @@ endif
 # append commit-sha to next version
 BUILD_VERSION := $(VERSION)
 ifeq ($(BUILD_VERSION),next)
+	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
@@ -147,4 +148,4 @@ bundle: bundle-agent bundle-server bundle-cli
 
 .PHONY: version
 version:
-	@echo ${VERSION}
+	@echo ${BUILD_VERSION}
