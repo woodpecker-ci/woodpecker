@@ -23,6 +23,12 @@ github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
 # github.com/OpenPeeDeeP/depguard v1.0.1
 github.com/OpenPeeDeeP/depguard
+# github.com/OrlovEvgeny/go-mcache v0.0.0-20200121124330-1a8195b34f3a
+## explicit
+github.com/OrlovEvgeny/go-mcache
+github.com/OrlovEvgeny/go-mcache/gcmap
+github.com/OrlovEvgeny/go-mcache/item
+github.com/OrlovEvgeny/go-mcache/safeMap
 # github.com/alexkohler/prealloc v1.0.0
 github.com/alexkohler/prealloc/pkg
 # github.com/ashanbrown/forbidigo v1.2.0
@@ -46,7 +52,7 @@ github.com/breml/bidichk/pkg/bidichk
 github.com/butuzov/ireturn/analyzer
 github.com/butuzov/ireturn/config
 github.com/butuzov/ireturn/types
-# github.com/cespare/xxhash/v2 v2.1.1
+# github.com/cespare/xxhash/v2 v2.1.2
 github.com/cespare/xxhash/v2
 # github.com/charithe/durationcheck v0.0.9
 github.com/charithe/durationcheck
@@ -66,6 +72,8 @@ github.com/daixiang0/gci/pkg/gci
 github.com/davecgh/go-spew/spew
 # github.com/denis-tingajkin/go-header v0.4.2
 github.com/denis-tingajkin/go-header
+# github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f
+github.com/dgryski/go-rendezvous
 # github.com/docker/cli v20.10.10+incompatible
 ## explicit
 github.com/docker/cli/cli/config/configfile
@@ -153,6 +161,16 @@ github.com/go-playground/universal-translator
 # github.com/go-playground/validator/v10 v10.9.0
 ## explicit
 github.com/go-playground/validator/v10
+# github.com/go-redis/redis/v8 v8.11.4
+## explicit
+github.com/go-redis/redis/v8
+github.com/go-redis/redis/v8/internal
+github.com/go-redis/redis/v8/internal/hashtag
+github.com/go-redis/redis/v8/internal/hscan
+github.com/go-redis/redis/v8/internal/pool
+github.com/go-redis/redis/v8/internal/proto
+github.com/go-redis/redis/v8/internal/rand
+github.com/go-redis/redis/v8/internal/util
 # github.com/go-sql-driver/mysql v1.6.0
 ## explicit
 github.com/go-sql-driver/mysql

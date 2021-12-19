@@ -5,6 +5,7 @@ go 1.16
 require (
 	code.gitea.io/sdk/gitea v0.15.0
 	github.com/Microsoft/go-winio v0.5.1 // indirect
+	github.com/OrlovEvgeny/go-mcache v0.0.0-20200121124330-1a8195b34f3a
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
@@ -19,6 +20,7 @@ require (
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
+	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.1.0
