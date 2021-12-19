@@ -2,7 +2,7 @@
   // List of extensions which should be recommended for users of this workspace.
   "recommendations": [
     "golang.go",
-    "editorconfig.editorconfig",
+    "EditorConfig.EditorConfig",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "voorjaar.windicss-intellisense",
