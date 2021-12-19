@@ -359,11 +359,11 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
-		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(proc.State),
 		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
 		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
 		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		PipelineID:  gitlab.Int(int(build.Number)),
 	}, gitlab.WithContext(ctx))
 
 	return err
