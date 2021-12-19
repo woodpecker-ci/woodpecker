@@ -17,6 +17,8 @@ pipeline:
     image: golang:1.16
     commands:
       - make release-agent
+    when:
+      event: tag
 
   build-cli:
     group: build
@@ -58,6 +60,18 @@ pipeline:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+
+  publish-agent-dryrun:
+    group: bundle
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
+      tag: test
+    when:
+      event: pull_request
 
   publish-agent:
     group: bundle
