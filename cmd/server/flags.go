@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -115,11 +117,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_ESCALATE"},
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value:   cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_VOLUME"},
