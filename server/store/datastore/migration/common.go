@@ -223,8 +223,11 @@ func removeColumnFromSQLITETableSchema(schema string, names ...string) string {
 		if len(names[i]) == 0 {
 			continue
 		}
-		schema = regexp.MustCompile(`\s`+regexp.QuoteMeta("`"+names[i]+"`")+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
-		schema = regexp.MustCompile(`\s`+regexp.QuoteMeta(names[i])+"[^`,)]*?[,)]").ReplaceAllString(schema, "")
+		schema = regexp.MustCompile(`\s(`+
+			regexp.QuoteMeta("`"+names[i]+"`")+
+			"|"+
+			regexp.QuoteMeta(names[i])+
+			")[^`,)]*?[,)]").ReplaceAllString(schema, "")
 	}
 	return schema
 }
