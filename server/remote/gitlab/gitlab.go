@@ -387,6 +387,16 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
+func (g *Gitlab) getTokenAndWebURL(link string) (token string, webURL string, err error) {
+	uri, err := url.Parse(link)
+	if err != nil {
+		return "", "", err
+	}
+	token = uri.Query().Get("access_token")
+	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	return token, webURL, nil
+}
+
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
@@ -394,23 +404,31 @@ func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	if err != nil {
 		return err
 	}
-	uri, err := url.Parse(link)
-	if err != nil {
-		return err
-	}
-	token := uri.Query().Get("access_token")
-	webURL := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
 	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.SetDroneCIService(_repo.ID, &gitlab.SetDroneCIServiceOptions{
-		Token:                 &token,
-		DroneURL:              &webURL,
+
+	token, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	if len(token) == 0 {
+		return fmt.Errorf("no token found")
+	}
+
+	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
+		URL:                   gitlab.String(webURL),
+		Token:                 gitlab.String(token),
+		PushEvents:            gitlab.Bool(true),
+		TagPushEvents:         gitlab.Bool(true),
+		MergeRequestsEvents:   gitlab.Bool(true),
+		DeploymentEvents:      gitlab.Bool(true),
 		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
 	}, gitlab.WithContext(ctx))
+
 	return err
 }
 
@@ -426,8 +444,44 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.DeleteDroneCIService(_repo.ID, gitlab.WithContext(ctx))
+
+	_, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	hookID := -1
+	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
+		PerPage: 10,
+		Page:    1,
+	}
+	for {
+		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
+		if err != nil {
+			return err
+		}
+
+		for _, hook := range hooks {
+			if hook.URL == webURL {
+				hookID = hook.ID
+				break
+			}
+		}
+
+		// Exit the loop when we've seen all pages
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
+
+		// Update the page number to get the next page
+		listProjectHooksOptions.Page = resp.NextPage
+	}
+
+	if hookID == -1 {
+		return fmt.Errorf("could not find hook to delete")
+	}
+
+	_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
 
 	return err
 }
