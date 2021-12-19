@@ -189,7 +189,7 @@ func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(build.Status),
-		Desc:  convertDesc(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
 		Name:  fmt.Sprintf("Woodpecker #%d - %s", build.Number, build.Branch),
 		Key:   "Woodpecker",
 		URL:   common.GetBuildStatusLink(repo, build, nil),

@@ -225,7 +225,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
 		State: convertStatus(build.Status),
-		Desc:  convertDesc(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
 		Key:   "Woodpecker",
 		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}

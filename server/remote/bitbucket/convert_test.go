@@ -43,24 +43,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(convertStatus(model.StatusError)).Equal(statusFailure)
 		})
 
-		g.It("should convert passing desc", func() {
-			g.Assert(convertDesc(model.StatusSuccess)).Equal(descSuccess)
-		})
-
-		g.It("should convert pending desc", func() {
-			g.Assert(convertDesc(model.StatusPending)).Equal(descPending)
-			g.Assert(convertDesc(model.StatusRunning)).Equal(descPending)
-		})
-
-		g.It("should convert failing desc", func() {
-			g.Assert(convertDesc(model.StatusFailure)).Equal(descFailure)
-		})
-
-		g.It("should convert error desc", func() {
-			g.Assert(convertDesc(model.StatusKilled)).Equal(descError)
-			g.Assert(convertDesc(model.StatusError)).Equal(descError)
-		})
-
 		g.It("should convert repository", func() {
 			from := &internal.Repo{
 				FullName:  "octocat/hello-world",
