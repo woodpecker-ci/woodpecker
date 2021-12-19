@@ -185,6 +185,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_ARCH":    m.Sys.Arch,
 		"CI_SYSTEM_VERSION": version.Version,
 
+		// TODO drop for v0.16.0 development
 		// DEPRECATED
 		"CI_ARCH":                    m.Sys.Arch,                           // use CI_SYSTEM_ARCH
 		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
