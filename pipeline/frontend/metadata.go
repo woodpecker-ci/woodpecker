@@ -141,7 +141,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_TAG":                  "", // will be set if event is tag
+		"CI_COMMIT_TAG":           "", // will be set if event is tag
 		"CI_PULL_REQUEST":         "", // will be set if event is pr
 
 		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
@@ -199,9 +199,11 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_BRANCH":                  m.Curr.Commit.Branch,                 // use CI_COMMIT_BRANCH
 		"CI_SOURCE_BRANCH":           sourceBranch,                         // use CI_COMMIT_SOURCE_BRANCH
 		"CI_TARGET_BRANCH":           targetBranch,                         // use CI_COMMIT_TARGET_BRANCH
+		"CI_TAG":                     "",                                   // use CI_COMMIT_TAG
 	}
 	if m.Curr.Event == EventTag {
-		params["CI_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+		params["CI_TAG"] = params["CI_COMMIT_TAG"]
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)

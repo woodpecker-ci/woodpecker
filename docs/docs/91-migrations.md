@@ -29,6 +29,7 @@ Some versions need some changes to the server configuration or the pipeline conf
   - Some variables got deprecated and will be removed in future versions. Please migrate to the new names. Same applies for `DRONE_` of them.
     - CI_ARCH => use CI_SYSTEM_ARCH
     - CI_COMMIT => CI_COMMIT_SHA
+    - CI_TAG => CI_COMMIT_TAG
     - CI_REMOTE_URL => use CI_REPO_REMOTE
     - CI_REPO_BRANCH => use CI_REPO_DEFAULT_BRANCH
     - CI_PARENT_BUILD_NUMBER => use CI_BUILD_PARENT
