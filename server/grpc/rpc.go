@@ -450,7 +450,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	if proc.Children == nil || len(proc.Children) == 0 {
 		err = s.remote.Status(ctx, user, repo, build, proc)
 		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number)
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
 		}
 	}
 }
