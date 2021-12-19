@@ -13,13 +13,23 @@ type mem struct {
 	cache *mcache.CacheDriver
 }
 
+// make sure mcache match interface
+var _ cache.Cache = &mem{}
+
+func NewMCache() cache.Cache {
+	return &mem{
+		cache: mcache.New(),
+	}
+}
+
 func (m mem) Set(_ context.Context, key string, value interface{}, expiration time.Duration) error {
 	return m.cache.Set(key, value, expiration)
 }
 
-func (m mem) Get(_ context.Context, key string) (interface{}, bool, error) {
+func (m mem) Get(_ context.Context, key string, objStore *interface{}) (bool, error) {
 	item, exist := m.cache.Get(key)
-	return item, exist, nil
+	*objStore = item
+	return exist, nil
 }
 
 func (m mem) Del(_ context.Context, keys ...string) error {
@@ -29,13 +39,4 @@ func (m mem) Del(_ context.Context, keys ...string) error {
 		}
 	}
 	return nil
-}
-
-// make sure mcache match interface
-var _ cache.Cache = &mem{}
-
-func NewMCache() cache.Cache {
-	return &mem{
-		cache: mcache.New(),
-	}
 }
