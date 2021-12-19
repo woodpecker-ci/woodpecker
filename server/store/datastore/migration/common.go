@@ -106,7 +106,16 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		}
 
 		// Find all the columns in the table
-		columns := regexp.MustCompile("`([^`]*)`").FindAllString(tableSQL, -1)
+		var columns []string
+		for _, rawColumn := range strings.Split(strings.ReplaceAll(tableSQL[1:len(tableSQL)-1], ", ", ",\n"), "\n") {
+			if strings.ContainsAny(rawColumn, "()") {
+				continue
+			}
+			rawColumn = strings.TrimSpace(rawColumn)
+			columns = append(columns,
+				strings.ReplaceAll(rawColumn[0:strings.Index(rawColumn, " ")], "`", ""),
+			)
+		}
 
 		tableSQL = fmt.Sprintf("CREATE TABLE `new_%s_new` ", tableName) + tableSQL
 		if _, err := sess.Exec(tableSQL); err != nil {
