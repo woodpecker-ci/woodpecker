@@ -92,7 +92,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		// Remove the required columnNames
 		for _, name := range columnNames {
 			tableSQL = regexp.MustCompile(regexp.QuoteMeta("`"+name+"`")+"[^`,)]*?[,)]").ReplaceAllString(tableSQL, "")
-			tableSQL = regexp.MustCompile(regexp.QuoteMeta("name")+"[^`,)]*?[,)]").ReplaceAllString(tableSQL, "")
+			tableSQL = regexp.MustCompile(regexp.QuoteMeta(name)+"[^`,)]*?[,)]").ReplaceAllString(tableSQL, "")
 			tableSQL = whitespaces.ReplaceAllString(strings.ReplaceAll(tableSQL, "\n", " "), " ")
 		}
 
