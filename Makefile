@@ -1,4 +1,3 @@
-DOCKER_RUN_GO_VERSION=1.16
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
@@ -14,10 +13,6 @@ ifeq ($(BUILD_VERSION),next)
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
-
-DOCKER_RUN?=
-_with-docker:
-	$(eval DOCKER_RUN=docker run --rm -v $(shell pwd):/go/src/ -v $(shell pwd)/build:/build -w /go/src golang:$(DOCKER_RUN_GO_VERSION))
 
 all: build
 
@@ -51,16 +46,16 @@ lint-frontend:
 	(cd web/; yarn lint --quiet)
 
 test-agent:
-	$(DOCKER_RUN) go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
+	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
 test-server:
-	$(DOCKER_RUN) go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
+	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
 test-cli:
-	$(DOCKER_RUN) go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
+	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore:
-	$(DOCKER_RUN) go test -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-frontend: frontend-dependencies
 	(cd web/; yarn run lint)
@@ -69,7 +64,7 @@ test-frontend: frontend-dependencies
 	(cd web/; yarn run test)
 
 test-lib:
-	$(DOCKER_RUN) go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test: test-agent test-server test-server-datastore test-cli test-lib test-frontend
 
@@ -77,13 +72,13 @@ build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)
 
 build-server: build-frontend
-	$(DOCKER_RUN) go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	go build -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent:
-	$(DOCKER_RUN) go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+	go build -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
 
 build-cli:
-	$(DOCKER_RUN) go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
+	go build -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
 
 build: build-agent build-server build-cli
 
