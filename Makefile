@@ -76,13 +76,13 @@ build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)
 
 build-server: build-frontend
-	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build  -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent:
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build  -ldflags '${LDFLAGS}' -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
 
 build-cli:
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build  -ldflags '${LDFLAGS}' -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
 
 build: build-agent build-server build-cli
 
