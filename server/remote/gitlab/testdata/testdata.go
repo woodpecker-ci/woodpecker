@@ -15,13 +15,9 @@
 package testdata
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 // NewServer setup a mock server for testing purposes.
@@ -52,23 +48,17 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/projects/brightbox/puppet":
 			w.Write(project6Paylod)
 			return
-		case "/api/v4/projects/4/services/drone-ci":
+		case "/api/v4/projects/4/hooks":
 			switch r.Method {
-			case "PUT":
-				body, _ := io.ReadAll(r.Body)
-				opts := make(map[string]interface{})
-				assert.NoError(t, json.Unmarshal(body, &opts))
-				token, ok := opts["token"].(string)
-				assert.True(t, ok)
-				if token == "" {
-					w.WriteHeader(404)
-				} else {
-					w.WriteHeader(201)
-				}
-			case "DELETE":
+			case "GET":
+				w.Write(project4PayloadHooks)
+			case "POST":
+				w.Write(project4PayloadHook)
 				w.WriteHeader(201)
 			}
-
+			return
+		case "/api/v4/projects/4/hooks/10717088":
+			w.WriteHeader(201)
 			return
 		case "/oauth/token":
 			w.Write(accessTokenPayload)

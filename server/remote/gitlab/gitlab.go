@@ -416,6 +416,10 @@ func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return err
 	}
 
+	if len(token) == 0 {
+		return fmt.Errorf("no token found")
+	}
+
 	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
 		URL:                   gitlab.String(webURL),
 		Token:                 gitlab.String(token),
