@@ -87,7 +87,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		}
 	}
 
-	// TODO: drop Vargs in favor of Settings in v1.16.0 release
+	// TODO drop Vargs in favor of Settings in v0.16.0 release
 	for _, cc := range c.Containers {
 		if cc.Settings == nil && cc.Vargs != nil {
 			cc.Settings = make(map[string]interface{})
