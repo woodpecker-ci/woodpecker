@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -53,11 +55,7 @@ var flags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:  "privileged",
 		Usage: "privileged plugins",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 
 	//
