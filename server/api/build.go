@@ -425,7 +425,10 @@ func PostDecline(c *gin.Context) {
 		return
 	}
 
-	// TODO check if build.Procs contains proper data
+	if build.Procs, err = _store.ProcList(build); err != nil {
+		log.Error().Err(err).Msg("can not get proc list from store")
+	}
+
 	for _, proc := range build.Procs {
 		err = server.Config.Services.Remote.Status(c, user, repo, build, proc)
 		if err != nil {
