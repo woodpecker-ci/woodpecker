@@ -6,10 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMigrate(t *testing.T) {
-
-}
-
 func TestRemoveColumnFromSQLITETableSchema(t *testing.T) {
 	schema := "CREATE TABLE repos ( repo_id INTEGER PRIMARY KEY AUTOINCREMENT, repo_user_id INTEGER, repo_owner TEXT, " +
 		"repo_name TEXT, repo_full_name TEXT, `repo_avatar` TEXT, repo_branch TEXT, repo_timeout INTEGER, " +
