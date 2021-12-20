@@ -29,7 +29,7 @@ func testDriverConfig() (driver, config string) {
 
 	if os.Getenv("WOODPECKER_DATABASE_DRIVER") != "" {
 		driver = os.Getenv("WOODPECKER_DATABASE_DRIVER")
-		config = os.Getenv("WOODPECKER_DATABASE_CONFIG")
+		config = os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 	}
 	return
 }
