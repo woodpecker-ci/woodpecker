@@ -1,7 +1,0 @@
-*
-!.git/
-!go.mod
-!go.sum
-!vendor/modules.txt
-!*/**.go
-!Makefile
