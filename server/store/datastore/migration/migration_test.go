@@ -60,6 +60,17 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 			t.FailNow()
 		}
 		return
+	case "mysql", "postgres":
+		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
+		if !new {
+			t.Logf("do not have dump to test against")
+			t.SkipNow()
+		}
+		engine, err = xorm.NewEngine(driver, config)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		return
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
