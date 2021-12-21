@@ -224,3 +224,53 @@ var project6Paylod = []byte(`
 	}
 }
 `)
+
+var project4PayloadHook = []byte(`
+{
+	"id": 10717088,
+	"url": "http://example.com/api/hook",
+	"created_at": "2021-12-18T23:29:33.852Z",
+	"push_events": true,
+	"tag_push_events": true,
+	"merge_requests_events": true,
+	"repository_update_events": false,
+	"enable_ssl_verification": true,
+	"project_id": 4,
+	"issues_events": false,
+	"confidential_issues_events": false,
+	"note_events": false,
+	"confidential_note_events": null,
+	"pipeline_events": false,
+	"wiki_page_events": false,
+	"deployment_events": true,
+	"job_events": false,
+	"releases_events": false,
+	"push_events_branch_filter": null
+}
+`)
+
+var project4PayloadHooks = []byte(`
+[
+  {
+    "id": 10717088,
+    "url": "http://example.com/api/hook",
+    "created_at": "2021-12-18T23:29:33.852Z",
+    "push_events": true,
+    "tag_push_events": true,
+    "merge_requests_events": true,
+    "repository_update_events": false,
+    "enable_ssl_verification": true,
+    "project_id": 4,
+    "issues_events": false,
+    "confidential_issues_events": false,
+    "note_events": false,
+    "confidential_note_events": null,
+    "pipeline_events": false,
+    "wiki_page_events": false,
+    "deployment_events": true,
+    "job_events": false,
+    "releases_events": false,
+    "push_events_branch_filter": null
+  }
+]
+`)

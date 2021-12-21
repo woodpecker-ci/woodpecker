@@ -71,4 +71,5 @@ var Config = struct {
 		Networks   []string
 		Privileged []string
 	}
+	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

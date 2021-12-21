@@ -42,11 +42,9 @@ type Repo struct {
 	IsGated      bool        `json:"gated"                    xorm:"repo_gated"`
 	IsActive     bool        `json:"active"                   xorm:"repo_active"`
 	AllowPull    bool        `json:"allow_pr"                 xorm:"repo_allow_pr"`
-	// Counter is used as index to determine new build numbers
-	Counter int64  `json:"last_build"                  xorm:"NOT NULL DEFAULT 0 'repo_counter'"`
-	Config  string `json:"config_file"                 xorm:"varchar(500) 'repo_config_path'"`
-	Hash    string `json:"-"                           xorm:"varchar(500) 'repo_hash'"`
-	Perm    *Perm  `json:"-"                           xorm:"-"`
+	Config       string      `json:"config_file"                 xorm:"varchar(500) 'repo_config_path'"`
+	Hash         string      `json:"-"                           xorm:"varchar(500) 'repo_hash'"`
+	Perm         *Perm       `json:"-"                           xorm:"-"`
 }
 
 // TableName return database table name for xorm
@@ -92,11 +90,10 @@ func (r *Repo) Update(from *Repo) {
 
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
-	Config       *string `json:"config_file,omitempty"`
-	IsTrusted    *bool   `json:"trusted,omitempty"`
-	IsGated      *bool   `json:"gated,omitempty"`
-	Timeout      *int64  `json:"timeout,omitempty"`
-	Visibility   *string `json:"visibility,omitempty"`
-	AllowPull    *bool   `json:"allow_pr,omitempty"`
-	BuildCounter *int64  `json:"build_counter,omitempty"`
+	Config     *string `json:"config_file,omitempty"`
+	IsTrusted  *bool   `json:"trusted,omitempty"`
+	IsGated    *bool   `json:"gated,omitempty"`
+	Timeout    *int64  `json:"timeout,omitempty"`
+	Visibility *string `json:"visibility,omitempty"`
+	AllowPull  *bool   `json:"allow_pr,omitempty"`
 }
