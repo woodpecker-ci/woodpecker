@@ -81,7 +81,7 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		Owner:        strings.Split(from.FullName, "/")[0],
 		Name:         strings.Split(from.FullName, "/")[1],
 		FullName:     from.FullName,
-		Link:         from.Links.Html.Href,
+		Link:         from.Links.HTML.Href,
 		IsSCMPrivate: from.IsPrivate,
 		Avatar:       from.Owner.Links.Avatar.Href,
 		SCMKind:      model.SCMKind(from.Scm),
@@ -110,7 +110,7 @@ func cloneLink(repo *internal.Repo) string {
 	// if no repository name is provided, we use the Html link. this excludes the
 	// .git suffix, but will still clone the repo.
 	if len(clone) == 0 {
-		clone = repo.Links.Html.Href
+		clone = repo.Links.HTML.Href
 	}
 
 	// if bitbucket tries to automatically populate the user in the url we must
@@ -167,7 +167,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 			from.PullRequest.Dest.Branch.Name,
 		),
 		Remote:    fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		Link:      from.PullRequest.Links.Html.Href,
+		Link:      from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -182,7 +182,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
 	build := &model.Build{
 		Commit:    change.New.Target.Hash,
-		Link:      change.New.Target.Links.Html.Href,
+		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,

@@ -1,4 +1,5 @@
 import 'windi.css';
+import '~/compositions/useFavicon';
 
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';

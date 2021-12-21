@@ -319,7 +319,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoardList(gid interface{}, board, l
 	}
 
 	var gbl []*BoardList
-	resp, err := s.client.Do(req, gbl)
+	resp, err := s.client.Do(req, &gbl)
 	if err != nil {
 		return nil, resp, err
 	}

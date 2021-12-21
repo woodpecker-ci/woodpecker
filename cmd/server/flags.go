@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -79,12 +81,6 @@ var flags = []cli.Flag{
 		Name:    "quic",
 		Usage:   "enable quic",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WWW_PROXY"},
-		Name:    "www-proxy",
-		Usage:   "serve the website by using a proxy (used for development)",
-		Hidden:  true,
-	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
 		Name:    "admin",
@@ -121,11 +117,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_ESCALATE"},
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value:   cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_VOLUME"},
@@ -217,6 +209,13 @@ var flags = []cli.Flag{
 	//
 	// remote parameters
 	//
+	&cli.BoolFlag{
+		Name:    "flat-permissions",
+		Usage:   "no remote call for permissions should be made",
+		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
+		Hidden:  true,
+		// TODO(485) temporary workaround to not hit api rate limits
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",
@@ -511,5 +510,19 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	},
+	// development flags
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_WWW_PROXY"},
+		Name:    "www-proxy",
+		Usage:   "serve the website by using a proxy (used for development)",
+		Hidden:  true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
+		Name:    "server-dev-oauth-host",
+		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Value:   "",
+		Hidden:  true,
 	},
 }

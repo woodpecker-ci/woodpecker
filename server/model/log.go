@@ -18,4 +18,5 @@ type Logs struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
 	ProcID int64  `xorm:"UNIQUE 'log_job_id'"`
 	Data   []byte `xorm:"log_data"`
+	// TODO: add create timestamp
 }

@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -83,4 +85,15 @@ func (s storage) ProcClear(build *model.Build) error {
 	}
 
 	return sess.Commit()
+}
+
+func deleteProc(sess *xorm.Session, procID int64) error {
+	if _, err := sess.Where("log_job_id = ?", procID).Delete(new(model.Logs)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("file_proc_id = ?", procID).Delete(new(model.File)); err != nil {
+		return err
+	}
+	_, err := sess.ID(procID).Delete(new(model.Proc))
+	return err
 }

@@ -47,7 +47,7 @@
         </InputField>
 
         <InputField label="Value">
-          <TextField v-model="selectedSecret.value" placeholder="Value" required />
+          <TextField v-model="selectedSecret.value" placeholder="Value" :lines="5" required />
         </InputField>
 
         <InputField label="Available at following events">
@@ -87,7 +87,12 @@ const emptySecret = {
 const secretEventsOptions: CheckboxOption[] = [
   { value: WebhookEvents.Push, text: 'Push' },
   { value: WebhookEvents.Tag, text: 'Tag' },
-  { value: WebhookEvents.PullRequest, text: 'Pull Request' },
+  {
+    value: WebhookEvents.PullRequest,
+    text: 'Pull Request',
+    description:
+      'Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets.',
+  },
   { value: WebhookEvents.Deploy, text: 'Deploy' },
 ];
 

@@ -22,20 +22,11 @@ var Command = &cli.Command{
 }
 
 func lint(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
+	return common.RunPipelineFunc(c, lintFile, lintDir)
+}
 
-	fi, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-	if !fi.IsDir() {
-		return lintFile(file)
-	}
-
-	return filepath.Walk(file, func(path string, info os.FileInfo, e error) error {
+func lintDir(c *cli.Context, dir string) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -43,7 +34,7 @@ func lint(c *cli.Context) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			_ = lintFile(path) // TODO: should we drop errors or store them and report back?
+			_ = lintFile(c, path) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
 			return nil
 		}
@@ -52,8 +43,8 @@ func lint(c *cli.Context) error {
 	})
 }
 
-func lintFile(file string) error {
-	err, configErrors := schema.Lint(file)
+func lintFile(_ *cli.Context, file string) error {
+	configErrors, err := schema.Lint(file)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {

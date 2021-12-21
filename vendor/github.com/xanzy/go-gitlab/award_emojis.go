@@ -225,7 +225,7 @@ func (s *AwardEmojiService) createAwardEmoji(pid interface{}, resource string, r
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/award_emoji.html#award-a-new-emoji-on-a-note
 func (s *AwardEmojiService) DeleteIssueAwardEmoji(pid interface{}, issueIID, awardID int, options ...RequestOptionFunc) (*Response, error) {
-	return s.deleteAwardEmoji(pid, awardMergeRequest, issueIID, awardID, options...)
+	return s.deleteAwardEmoji(pid, awardIssue, issueIID, awardID, options...)
 }
 
 // DeleteMergeRequestAwardEmoji delete award emoji on a merge request.
@@ -241,7 +241,7 @@ func (s *AwardEmojiService) DeleteMergeRequestAwardEmoji(pid interface{}, mergeR
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/award_emoji.html#award-a-new-emoji-on-a-note
 func (s *AwardEmojiService) DeleteSnippetAwardEmoji(pid interface{}, snippetID, awardID int, options ...RequestOptionFunc) (*Response, error) {
-	return s.deleteAwardEmoji(pid, awardMergeRequest, snippetID, awardID, options...)
+	return s.deleteAwardEmoji(pid, awardSnippets, snippetID, awardID, options...)
 }
 
 // DeleteAwardEmoji Delete an award emoji on the specified resource.

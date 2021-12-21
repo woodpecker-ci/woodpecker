@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -287,34 +288,20 @@ func TestBuilds(t *testing.T) {
 }
 
 func TestBuildIncrement(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Build), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Build))
 	defer closer()
 
-	repo := &model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test",
-		Owner:    "bradrydzewski",
-		Name:     "test",
+	buildA := &model.Build{RepoID: 1}
+	if !assert.NoError(t, store.CreateBuild(buildA)) {
+		return
 	}
-	if err := store.CreateRepo(repo); err != nil {
-		t.Error(err)
-	}
+	assert.EqualValues(t, 1, buildA.Number)
 
-	if err := store.CreateBuild(&model.Build{RepoID: repo.ID}); err != nil {
-		t.Error(err)
-	}
-	repo, _ = store.GetRepo(repo.ID)
+	buildB := &model.Build{RepoID: 1}
+	assert.NoError(t, store.CreateBuild(buildB))
+	assert.EqualValues(t, 2, buildB.Number)
 
-	if got, want := repo.Counter, int64(1); got != want {
-		t.Errorf("Want repository counter incremented to %d, got %d", want, got)
-	}
-
-	if err := store.CreateBuild(&model.Build{RepoID: repo.ID}); err != nil {
-		t.Error(err)
-	}
-	repo, _ = store.GetRepo(repo.ID)
-
-	if got, want := repo.Counter, int64(2); got != want {
-		t.Errorf("Want repository counter incremented to %d, got %d", want, got)
-	}
+	buildC := &model.Build{RepoID: 2}
+	assert.NoError(t, store.CreateBuild(buildC))
+	assert.EqualValues(t, 1, buildC.Number)
 }

@@ -17,7 +17,6 @@ package gitlab
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -91,12 +90,12 @@ func New(opts Opts) (remote.Remote, error) {
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	var config = &oauth2.Config{
-		ClientId:     g.ClientID,
+		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
 		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.Host),
+		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 
 	// get the OAuth errors
@@ -119,12 +118,12 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var token_, err = trans.Exchange(code)
+	var token, err = trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
 
-	client, err := newClient(g.URL, token_.AccessToken, g.SkipVerify)
+	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +137,8 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Login:  login.Username,
 		Email:  login.Email,
 		Avatar: login.AvatarURL,
-		Token:  token_.AccessToken,
-		Secret: token_.RefreshToken,
+		Token:  token.AccessToken,
+		Secret: token.RefreshToken,
 	}
 	if !strings.HasPrefix(user.Avatar, "http") {
 		user.Avatar = g.URL + "/" + login.AvatarURL
@@ -214,12 +213,12 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string)
 		return nil, err
 	}
 
-	repo_, err := g.getProject(ctx, client, owner, name)
+	_repo, err := g.getProject(ctx, client, owner, name)
 	if err != nil {
 		return nil, err
 	}
 
-	return g.convertGitlabRepo(repo_)
+	return g.convertGitlabRepo(_repo)
 }
 
 // Repos fetches a list of repos from the remote system.
@@ -291,11 +290,11 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
-	file, _, err := client.RepositoryFiles.GetRawFile(repo_.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit}, gitlab.WithContext(ctx))
+	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit}, gitlab.WithContext(ctx))
 	return file, err
 }
 
@@ -307,7 +306,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 	}
 
 	files := make([]*remote.FileMeta, 0, perPage)
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +319,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 
 	for i := 1; true; i++ {
 		opts.Page = 1
-		batch, _, err := client.Repositories.ListTree(repo_.ID, opts, gitlab.WithContext(ctx))
+		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -354,12 +353,12 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(repo_.ID, build.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
 		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
 		State:       getStatus(build.Status),
 		Description: gitlab.String(getDesc(build.Status)),
@@ -389,6 +388,16 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
+func (g *Gitlab) getTokenAndWebURL(link string) (token string, webURL string, err error) {
+	uri, err := url.Parse(link)
+	if err != nil {
+		return "", "", err
+	}
+	token = uri.Query().Get("access_token")
+	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	return token, webURL, nil
+}
+
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
@@ -396,23 +405,31 @@ func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	if err != nil {
 		return err
 	}
-	uri, err := url.Parse(link)
-	if err != nil {
-		return err
-	}
-	token := uri.Query().Get("access_token")
-	webUrl := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.SetDroneCIService(repo_.ID, &gitlab.SetDroneCIServiceOptions{
-		Token:                 &token,
-		DroneURL:              &webUrl,
+
+	token, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	if len(token) == 0 {
+		return fmt.Errorf("no token found")
+	}
+
+	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
+		URL:                   gitlab.String(webURL),
+		Token:                 gitlab.String(token),
+		PushEvents:            gitlab.Bool(true),
+		TagPushEvents:         gitlab.Bool(true),
+		MergeRequestsEvents:   gitlab.Bool(true),
+		DeploymentEvents:      gitlab.Bool(true),
 		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
 	}, gitlab.WithContext(ctx))
+
 	return err
 }
 
@@ -424,12 +441,48 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.DeleteDroneCIService(repo_.ID, gitlab.WithContext(ctx))
+
+	_, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	hookID := -1
+	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
+		PerPage: 10,
+		Page:    1,
+	}
+	for {
+		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
+		if err != nil {
+			return err
+		}
+
+		for _, hook := range hooks {
+			if hook.URL == webURL {
+				hookID = hook.ID
+				break
+			}
+		}
+
+		// Exit the loop when we've seen all pages
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
+
+		// Update the page number to get the next page
+		listProjectHooksOptions.Page = resp.NextPage
+	}
+
+	if hookID == -1 {
+		return fmt.Errorf("could not find hook to delete")
+	}
+
+	_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
 
 	return err
 }
@@ -441,12 +494,12 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	repo_, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	gitlabBranches, _, err := client.Branches.ListBranches(repo_.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -467,26 +520,7 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	eventType := gitlab.WebhookEventType(req)
-	// TODO: Fix Upstream: We get `Service Hook` - which the library do not understand
-	if eventType == "Service Hook" {
-		e := struct {
-			ObjectKind string `json:"object_kind"`
-		}{}
-		if err := json.Unmarshal(payload, &e); err != nil {
-			return nil, nil, err
-		}
-		switch e.ObjectKind {
-		case "push":
-			eventType = gitlab.EventTypePush
-		case "tag_push":
-			eventType = gitlab.EventTypeTagPush
-		case "merge_request":
-			eventType = gitlab.EventTypeMergeRequest
-		}
-	}
-
-	parsed, err := gitlab.ParseWebhook(eventType, payload)
+	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
 	if err != nil {
 		return nil, nil, err
 	}

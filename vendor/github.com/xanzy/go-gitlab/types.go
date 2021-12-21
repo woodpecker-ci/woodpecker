@@ -199,6 +199,39 @@ func FileAction(v FileActionValue) *FileActionValue {
 	return p
 }
 
+// GenericPackageSelectValue represents a generic package select value.
+type GenericPackageSelectValue string
+
+// The available generic package select values.
+const (
+	SelectPackageFile GenericPackageSelectValue = "package_file"
+)
+
+// GenericPackageSelect is a helper routine that allocates a new
+// GenericPackageSelectValue value to store v and returns a pointer to it.
+func GenericPackageSelect(v GenericPackageSelectValue) *GenericPackageSelectValue {
+	p := new(GenericPackageSelectValue)
+	*p = v
+	return p
+}
+
+// GenericPackageStatusValue represents a generic package status.
+type GenericPackageStatusValue string
+
+// The available generic package statuses.
+const (
+	PackageDefault GenericPackageStatusValue = "default"
+	PackageHidden  GenericPackageStatusValue = "hidden"
+)
+
+// GenericPackageStatus is a helper routine that allocates a new
+// GenericPackageStatusValue value to store v and returns a pointer to it.
+func GenericPackageStatus(v GenericPackageStatusValue) *GenericPackageStatusValue {
+	p := new(GenericPackageStatusValue)
+	*p = v
+	return p
+}
+
 // ISOTime represents an ISO 8601 formatted date
 type ISOTime time.Time
 

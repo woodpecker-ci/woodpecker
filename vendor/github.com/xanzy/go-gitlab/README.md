@@ -34,6 +34,7 @@ to add new and/or missing endpoints. Currently the following services are suppor
 - [x] Events
 - [x] Feature Flags
 - [ ] Geo Nodes
+- [x] Generic Packages
 - [x] GitLab CI Config Templates
 - [x] Gitignores Templates
 - [x] Group Access Requests
@@ -57,12 +58,14 @@ to add new and/or missing endpoints. Currently the following services are suppor
 - [x] Notes (comments)
 - [x] Notification Settings
 - [x] Open Source License Templates
+- [x] Packages
 - [x] Pages
 - [x] Pages Domains
 - [x] Personal Access Tokens
 - [x] Pipeline Schedules
 - [x] Pipeline Triggers
 - [x] Pipelines
+- [x] Plan limits
 - [x] Project Access Requests
 - [x] Project Badges
 - [x] Project Clusters

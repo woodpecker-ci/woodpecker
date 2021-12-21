@@ -82,7 +82,7 @@ func (ve ValidationErrors) Translate(ut ut.Translator) ValidationErrorsTranslati
 // FieldError contains all functions to get error details
 type FieldError interface {
 
-	// Tag returns the validation tag that failed. if the
+	// returns the validation tag that failed. if the
 	// validation was an alias, this will return the
 	// alias name and not the underlying tag that failed.
 	//
@@ -90,7 +90,7 @@ type FieldError interface {
 	// will return "iscolor"
 	Tag() string
 
-	// ActualTag returns the validation tag that failed, even if an
+	// returns the validation tag that failed, even if an
 	// alias the actual tag within the alias will be returned.
 	// If an 'or' validation fails the entire or will be returned.
 	//
@@ -98,7 +98,7 @@ type FieldError interface {
 	// will return "hexcolor|rgb|rgba|hsl|hsla"
 	ActualTag() string
 
-	// Namespace returns the namespace for the field error, with the tag
+	// returns the namespace for the field error, with the tag
 	// name taking precedence over the field's actual name.
 	//
 	// eg. JSON name "User.fname"
@@ -109,7 +109,7 @@ type FieldError interface {
 	// using validate.Field(...) as there is no way to extract it's name
 	Namespace() string
 
-	// StructNamespace returns the namespace for the field error, with the field's
+	// returns the namespace for the field error, with the field's
 	// actual name.
 	//
 	// eq. "User.FirstName" see Namespace for comparison
@@ -118,24 +118,24 @@ type FieldError interface {
 	// using validate.Field(...) as there is no way to extract its name
 	StructNamespace() string
 
-	// Field returns the fields name with the tag name taking precedence over the
+	// returns the fields name with the tag name taking precedence over the
 	// field's actual name.
 	//
 	// eq. JSON name "fname"
 	// see StructField for comparison
 	Field() string
 
-	// StructField returns the field's actual name from the struct, when able to determine.
+	// returns the field's actual name from the struct, when able to determine.
 	//
 	// eq.  "FirstName"
 	// see Field for comparison
 	StructField() string
 
-	// Value returns the actual field's value in case needed for creating the error
+	// returns the actual field's value in case needed for creating the error
 	// message
 	Value() interface{}
 
-	// Param returns the param value, in string form for comparison; this will also
+	// returns the param value, in string form for comparison; this will also
 	// help with generating an error message
 	Param() string
 
@@ -146,10 +146,10 @@ type FieldError interface {
 
 	// Type returns the Field's reflect Type
 	//
-	// eg. time.Time's type is time.Time
+	// // eg. time.Time's type is time.Time
 	Type() reflect.Type
 
-	// Translate returns the FieldError's translated error
+	// returns the FieldError's translated error
 	// from the provided 'ut.Translator' and registered 'TranslationFunc'
 	//
 	// NOTE: if no registered translator can be found it returns the same as
@@ -221,7 +221,7 @@ func (fe *fieldError) Field() string {
 	// return fld
 }
 
-// StructField returns the field's actual name from the struct, when able to determine.
+// returns the field's actual name from the struct, when able to determine.
 func (fe *fieldError) StructField() string {
 	// return fe.structField
 	return fe.structNs[len(fe.structNs)-int(fe.structfieldLen):]

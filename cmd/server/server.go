@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -74,6 +75,11 @@ func run(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(lvl)
 	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
@@ -98,22 +104,22 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	remote_, err := setupRemote(c)
+	_remote, err := setupRemote(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	store_, err := setupStore(c)
+	_store, err := setupStore(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 	defer func() {
-		if err := store_.Close(); err != nil {
+		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
 		}
 	}()
 
-	setupEvilGlobals(c, store_, remote_)
+	setupEvilGlobals(c, _store, _remote)
 
 	proxyWebUI := c.String("www-proxy")
 
@@ -141,7 +147,7 @@ func run(c *cli.Context) error {
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
-		middleware.Store(c, store_),
+		middleware.Store(c, _store),
 	)
 
 	var g errgroup.Group
@@ -164,11 +170,11 @@ func run(c *cli.Context) error {
 			}),
 		)
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			remote_,
+			_remote,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
-			store_,
+			_store,
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
@@ -181,7 +187,7 @@ func run(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, store_)
+	setupMetrics(&g, _store)
 
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {
@@ -284,6 +290,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-dev-oauth-host") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	} else {
+		server.Config.Server.OAuthHost = c.String("server-host")
+	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
@@ -293,6 +304,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// TODO(485) temporary workaround to not hit api rate limits
+	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 
 type authorizer struct {

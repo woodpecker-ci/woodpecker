@@ -7,14 +7,6 @@ and has the ability to dive into arrays and maps of any type.
 
 see more examples https://github.com/go-playground/validator/tree/master/_examples
 
-Singleton
-
-Validator is designed to be thread-safe and used as a singleton instance.
-It caches information about your struct and validations,
-in essence only parsing your validation tags once per struct type.
-Using multiple instances neglects the benefit of caching.
-The not thread-safe functions are explicitly marked as such in the documentation.
-
 Validation Functions Return Type error
 
 Doing things this way is actually the way the standard library does, see the
@@ -734,12 +726,6 @@ This validates that a string value contains unicode alphanumeric characters only
 
 	Usage: alphanumunicode
 
-Boolean
-
-This validates that a string value can successfully be parsed into a boolean with strconv.ParseBool
-
-	Usage: boolean
-
 Number
 
 This validates that a string value contains number values only.
@@ -824,12 +810,6 @@ JSON String
 This validates that a string value is valid JSON
 
 	Usage: json
-
-JWT String
-
-This validates that a string value is a valid JWT
-
-	Usage: jwt
 
 File path
 
@@ -1241,20 +1221,6 @@ see: https://www.iso.org/iso-3166-country-codes.html
 
 	Usage: iso3166_1_alpha3
 
-BCP 47 Language Tag
-
-This validates that a string value is a valid BCP 47 language tag, as parsed by language.Parse.
-More information on https://pkg.go.dev/golang.org/x/text/language
-
-	Usage: bcp47_language_tag
-
-BIC (SWIFT code)
-
-This validates that a string value is a valid Business Identifier Code (SWIFT code), defined in ISO 9362.
-More information on https://www.iso.org/standard/60390.html
-
-	Usage: bic
-
 TimeZone
 
 This validates that a string value is a valid time zone based on the time zone database present on the system.
@@ -1262,7 +1228,7 @@ Although empty value and Local value are allowed by time.LoadLocation golang fun
 More information on https://golang.org/pkg/time/#LoadLocation
 
 	Usage: timezone
-
+  
 
 Alias Validators and Tags
 

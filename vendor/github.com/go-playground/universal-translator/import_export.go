@@ -257,8 +257,6 @@ func (t *UniversalTranslator) ImportByReader(format ImportExportFormat, reader i
 func stringToPR(s string) locales.PluralRule {
 
 	switch s {
-	case "Zero":
-		return locales.PluralRuleZero
 	case "One":
 		return locales.PluralRuleOne
 	case "Two":

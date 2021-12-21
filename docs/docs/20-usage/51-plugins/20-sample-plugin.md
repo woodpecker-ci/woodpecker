@@ -10,10 +10,11 @@ The below example demonstrates how we might configure a webhook plugin in the Ya
 pipeline:
   webhook:
     image: foo/webhook
-    url: http://foo.com
-    method: post
-    body: |
-      hello world
+    settings:
+      url: http://foo.com
+      method: post
+      body: |
+        hello world
 ```
 
 ## Write the logic

@@ -1,6 +1,6 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple CI engine with great extensibility.
+Woodpecker is a simple CI engine with great extensibility. It runs your pipelines inside [Docker](https://www.docker.com/) containers, so if you are already using them in your daily workflow, you'll love Woodpecker for sure.
 
 ![woodpecker](woodpecker.png)
 
@@ -26,7 +26,9 @@ pipeline:
 ### Build steps are containers
 
 - Define any Docker image as context
-- Install the needed tools in custom Docker images, use them as context
+  - either use your own and install the needed tools in custom Docker images, or
+  - search [Docker Hub](https://hub.docker.com/) for images that are already tailored for your needs) 
+- List the commands that should be executed in your container, in order to build or test your application
 
 ```diff
 pipeline:

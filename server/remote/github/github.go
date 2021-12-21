@@ -338,9 +338,9 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 
 	intendedURL := req.URL.Query()["url"]
 	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.Host, intendedURL[0])
+		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
 	} else {
-		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.Host)
+		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
 	}
 
 	return &oauth2.Config{
@@ -440,7 +440,7 @@ func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *mode
 		ctx += "/pr"
 	default:
 		if len(b.Event) > 0 {
-			ctx += "/" + b.Event
+			ctx += "/" + string(b.Event)
 		}
 	}
 

@@ -7,20 +7,22 @@ linters-settings:
 linters:
   disable-all: true
   enable:
+    - bidichk
+    - deadcode
+    - errcheck
     - gofmt
     - goimports
-    - govet
-    - deadcode
     - gosimple
-    - typecheck
-    - errcheck
-    - bidichk
+    - govet
+    - ineffassign
     - misspell
-    - whitespace
+    - revive
     - staticcheck
     - structcheck
+    - typecheck
+    - unused
     - varcheck
-    - ineffassign
+    - whitespace
 
 run:
   timeout: 5m
@@ -30,3 +32,4 @@ issues:
     - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
       linters:
         - deadcode
+        - unused

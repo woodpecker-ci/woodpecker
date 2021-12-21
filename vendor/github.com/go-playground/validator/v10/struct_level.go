@@ -23,18 +23,18 @@ func wrapStructLevelFunc(fn StructLevelFunc) StructLevelFuncCtx {
 // to validate a struct
 type StructLevel interface {
 
-	// Validator returns the main validation object, in case one wants to call validations internally.
+	// returns the main validation object, in case one wants to call validations internally.
 	// this is so you don't have to use anonymous functions to get access to the validate
 	// instance.
 	Validator() *Validate
 
-	// Top returns the top level struct, if any
+	// returns the top level struct, if any
 	Top() reflect.Value
 
-	// Parent returns the current fields parent struct, if any
+	// returns the current fields parent struct, if any
 	Parent() reflect.Value
 
-	// Current returns the current struct.
+	// returns the current struct.
 	Current() reflect.Value
 
 	// ExtractType gets the actual underlying type of field value.
@@ -42,7 +42,7 @@ type StructLevel interface {
 	// underlying value and its kind.
 	ExtractType(field reflect.Value) (value reflect.Value, kind reflect.Kind, nullable bool)
 
-	// ReportError reports an error just by passing the field and tag information
+	// reports an error just by passing the field and tag information
 	//
 	// NOTES:
 	//
@@ -54,7 +54,7 @@ type StructLevel interface {
 	// and process on the flip side it's up to you.
 	ReportError(field interface{}, fieldName, structFieldName string, tag, param string)
 
-	// ReportValidationErrors reports an error just by passing ValidationErrors
+	// reports an error just by passing ValidationErrors
 	//
 	// NOTES:
 	//

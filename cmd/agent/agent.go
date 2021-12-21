@@ -64,6 +64,9 @@ func loop(c *cli.Context) error {
 		}
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	}
 
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
@@ -145,7 +148,7 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				// load enginge (e.g. init api client)
+				// load engine (e.g. init api client)
 				err = engine.Load()
 				if err != nil {
 					log.Error().Err(err).Msg("cannot load backend engine")

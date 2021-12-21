@@ -52,6 +52,7 @@ var Config = struct {
 	Server struct {
 		Key            string
 		Cert           string
+		OAuthHost      string
 		Host           string
 		Port           string
 		Pass           string
@@ -70,4 +71,5 @@ var Config = struct {
 		Networks   []string
 		Privileged []string
 	}
+	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

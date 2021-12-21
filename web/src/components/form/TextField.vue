@@ -12,6 +12,7 @@
     "
   >
     <input
+      v-if="lines === 1"
       v-model="innerValue"
       class="
         w-full
@@ -23,6 +24,20 @@
       "
       :type="type"
       :placeholder="placeholder"
+    />
+    <textarea
+      v-else
+      v-model="innerValue"
+      class="
+        w-full
+        bg-transparent
+        text-gray-600
+        placeholder-gray-400
+        focus:outline-none focus:border-blue-400
+        dark:placeholder-gray-600 dark:text-gray-500
+      "
+      :placeholder="placeholder"
+      :rows="lines"
     />
   </div>
 </template>
@@ -49,6 +64,11 @@ export default defineComponent({
     type: {
       type: String,
       default: 'text',
+    },
+
+    lines: {
+      type: Number,
+      default: 1,
     },
   },
 

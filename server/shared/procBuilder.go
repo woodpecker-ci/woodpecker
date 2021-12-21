@@ -88,7 +88,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			environ := b.environmentVariables(metadata, axis)
 
 			// substitute vars
-			substituted, err := b.envsubst_(string(y.Data), environ)
+			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -175,7 +175,7 @@ func containsItemWithName(name string, items []*BuildItem) bool {
 	return false
 }
 
-func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, error) {
+func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -305,7 +305,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Started:  build.Started,
 			Finished: build.Finished,
 			Status:   string(build.Status),
-			Event:    build.Event,
+			Event:    string(build.Event),
 			Link:     build.Link,
 			Target:   build.Deploy,
 			Commit: frontend.Commit{
@@ -328,7 +328,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Started:  last.Started,
 			Finished: last.Finished,
 			Status:   string(last.Status),
-			Event:    last.Event,
+			Event:    string(last.Event),
 			Link:     last.Link,
 			Target:   last.Deploy,
 			Commit: frontend.Commit{

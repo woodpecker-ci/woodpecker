@@ -5,25 +5,24 @@ import "reflect"
 // FieldLevel contains all the information and helper functions
 // to validate a field
 type FieldLevel interface {
-
-	// Top returns the top level struct, if any
+	// returns the top level struct, if any
 	Top() reflect.Value
 
-	// Parent returns the current fields parent struct, if any or
+	// returns the current fields parent struct, if any or
 	// the comparison value if called 'VarWithValue'
 	Parent() reflect.Value
 
-	// Field returns current field for validation
+	// returns current field for validation
 	Field() reflect.Value
 
-	// FieldName returns the field's name with the tag
+	// returns the field's name with the tag
 	// name taking precedence over the fields actual name.
 	FieldName() string
 
-	// StructFieldName returns the struct field's name
+	// returns the struct field's name
 	StructFieldName() string
 
-	// Param returns param for validation against current field
+	// returns param for validation against current field
 	Param() string
 
 	// GetTag returns the current validations tag name
@@ -34,7 +33,7 @@ type FieldLevel interface {
 	// underlying value and it's kind.
 	ExtractType(field reflect.Value) (value reflect.Value, kind reflect.Kind, nullable bool)
 
-	// GetStructFieldOK traverses the parent struct to retrieve a specific field denoted by the provided namespace
+	// traverses the parent struct to retrieve a specific field denoted by the provided namespace
 	// in the param and returns the field, field kind and whether is was successful in retrieving
 	// the field at all.
 	//
@@ -50,7 +49,7 @@ type FieldLevel interface {
 	// Deprecated: Use GetStructFieldOKAdvanced2() instead which also return if the value is nullable.
 	GetStructFieldOKAdvanced(val reflect.Value, namespace string) (reflect.Value, reflect.Kind, bool)
 
-	// GetStructFieldOK2 traverses the parent struct to retrieve a specific field denoted by the provided namespace
+	// traverses the parent struct to retrieve a specific field denoted by the provided namespace
 	// in the param and returns the field, field kind, if it's a nullable type and whether is was successful in retrieving
 	// the field at all.
 	//
@@ -58,7 +57,7 @@ type FieldLevel interface {
 	// could not be retrieved because it didn't exist.
 	GetStructFieldOK2() (reflect.Value, reflect.Kind, bool, bool)
 
-	// GetStructFieldOKAdvanced2 is the same as GetStructFieldOK except that it accepts the parent struct to start looking for
+	// GetStructFieldOKAdvanced is the same as GetStructFieldOK except that it accepts the parent struct to start looking for
 	// the field and namespace allowing more extensibility for validators.
 	GetStructFieldOKAdvanced2(val reflect.Value, namespace string) (reflect.Value, reflect.Kind, bool, bool)
 }
@@ -108,12 +107,12 @@ func (v *validate) GetStructFieldOKAdvanced(val reflect.Value, namespace string)
 	return current, kind, found
 }
 
-// GetStructFieldOK2 returns Param returns param for validation against current field
+// GetStructFieldOK returns Param returns param for validation against current field
 func (v *validate) GetStructFieldOK2() (reflect.Value, reflect.Kind, bool, bool) {
 	return v.getStructFieldOKInternal(v.slflParent, v.ct.param)
 }
 
-// GetStructFieldOKAdvanced2 is the same as GetStructFieldOK except that it accepts the parent struct to start looking for
+// GetStructFieldOKAdvanced is the same as GetStructFieldOK except that it accepts the parent struct to start looking for
 // the field and namespace allowing more extensibility for validators.
 func (v *validate) GetStructFieldOKAdvanced2(val reflect.Value, namespace string) (reflect.Value, reflect.Kind, bool, bool) {
 	return v.getStructFieldOKInternal(val, namespace)

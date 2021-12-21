@@ -58,7 +58,9 @@ type (
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
 		Constraints   Constraints            `yaml:"when,omitempty"`
-		Vargs         map[string]interface{} `yaml:",inline"`
+		Settings      map[string]interface{} `yaml:"settings"`
+		// Deprecated
+		Vargs map[string]interface{} `yaml:",inline"` // TODO: remove deprecated with v0.16.0
 	}
 )
 
@@ -84,5 +86,17 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 			c.Containers = append(c.Containers, &container)
 		}
 	}
+
+	// TODO drop Vargs in favor of Settings in v0.16.0 release
+	for _, cc := range c.Containers {
+		if cc.Settings == nil && cc.Vargs != nil {
+			cc.Settings = make(map[string]interface{})
+		}
+		for k, v := range cc.Vargs {
+			cc.Settings[k] = v
+		}
+		cc.Vargs = nil
+	}
+
 	return nil
 }

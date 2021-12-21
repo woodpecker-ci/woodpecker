@@ -24,7 +24,7 @@ In the above example we define two pipeline steps, `frontend` and `backend`. The
 
 ## Global Pipeline Conditionals
 
-Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions. 
+Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions.
 
 ### `branches`
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
@@ -101,7 +101,7 @@ pipeline:
 
 If required, Woodpecker can be made to skip whole pipelines based on `when`. This could be utilised to ensure compliance that only certain jobs run on certain agents (regional restrictions). Or targeting architectures.
 
-This is achieved by ensuring the `when` block is on the root level. Rather than 
+This is achieved by ensuring the `when` block is on the root level.
 
 See [when](#step-when---step-conditional-execution) above to understand all the different types of conditions that can be used.
 
@@ -111,61 +111,57 @@ See [when](#step-when---step-conditional-execution) above to understand all the 
 Example targeting a specific platform:
 
 ```diff
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-   -when:
-      -platform: [ linux/arm* ]
-
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
+ 
 +when:
 +  platform: [ linux/arm* ]
-
 ```
 
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. 
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines.
 Because we had our original `when` block underneath the `build` block, if it was run on the `linux/amd64` agent. It would have cloned the repository, and then skipped the build step. Resulting in a Successful build.
 
 Moving the when block to the root level will ensure that the whole pipeline will run be targeted to agents that match all of the conditions.
 
-This can be utilised in conjunction with other when blocks as well. 
+This can be utilised in conjunction with other when blocks as well.
 
 Example `when` pipeline & step block:
 
-```yml
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-
-  publish:
-    image: plugins/docker
-    repo: foo/bar
-   +when:
-    +tag: release*
+```diff
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
+ 
+   publish:
+     image: plugins/docker
+     settings:
+       repo: foo/bar
++    when:
++     tag: release*
 
 +when:
 +  platform: [ linux/arm* ]
-
 ```
 
 ### `platform`
 
 To configure your pipeline to select an agent with a specific platform, you can use `platform` key.
 ```diff
-
 +platform: linux/arm64
-
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ 
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 ```
 
 ### Skip Commits
@@ -190,12 +186,30 @@ Every step of your pipeline executes arbitrary commands inside a specified docke
 The associated commit of a current pipeline run is checked out with git to a workspace which is mounted to every step of the pipeline as the working directory.
 
 ```diff
+ pipeline:
+   backend:
+     image: golang
+     commands:
++      - go build
++      - go test
+```
+
+### File changes are incremental
+
+- Woodpecker clones the source code in the beginning pipeline
+- Changes to files are persisted through steps as the same volume is mounted to all steps
+
+```yaml
+# .woodpecker.yml
 pipeline:
-  backend:
-    image: golang
+  build:
+    image: debian
     commands:
-+     - go build
-+     - go test
+      - echo "test content" > myfile
+  a-test-step:
+    image: debian
+    commands:
+      - cat myfile
 ```
 
 ### `image`
@@ -203,20 +217,20 @@ pipeline:
 Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
 
 ```diff
-pipeline:
-  build:
-+   image: golang:1.6
-    commands:
-      - go build
-      - go test
-
-  publish:
-+   image: plugins/docker
-    repo: foo/bar
-
-services:
-  database:
-+   image: mysql
+ pipeline:
+   build:
++    image: golang:1.6
+     commands:
+       - go build
+       - go test
+ 
+   publish:
++    image: plugins/docker
+     repo: foo/bar
+ 
+ services:
+   database:
++    image: mysql
 ```
 
 Woodpecker supports any valid Docker image from any Docker registry:
@@ -232,10 +246,10 @@ image: index.docker.io/library/golang:1.7
 Woodpecker does not automatically upgrade docker images. Example configuration to always pull the latest image when updates are available:
 
 ```diff
-pipeline:
-  build:
-    image: golang:latest
-+   pull: true
+ pipeline:
+   build:
+     image: golang:latest
++    pull: true
 ```
 
 #### Images from private registries
@@ -247,12 +261,12 @@ These credentials are never exposed to your pipeline, which means they cannot be
 Example configuration using a private image:
 
 ```diff
-pipeline:
-  build:
-+   image: gcr.io/custom/golang
-    commands:
-      - go build
-      - go test
+ pipeline:
+   build:
++    image: gcr.io/custom/golang
+     commands:
+       - go build
+       - go test
 ```
 
 Woodpecker matches the registry hostname to each image in your yaml. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
@@ -284,12 +298,12 @@ For specific details on configuring access to Google Container Registry, please 
 Commands of every pipeline step are executed serially as if you would enter them into your local shell.
 
 ```diff
-pipeline:
-  backend:
-    image: golang
-    commands:
-+     - go build
-+     - go test
+ pipeline:
+   backend:
+     image: golang
+     commands:
++      - go build
++      - go test
 ```
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
@@ -335,23 +349,23 @@ Woodpecker supports parallel step execution for same-machine fan-in and fan-out.
 Example parallel configuration:
 
 ```diff
-pipeline:
-  backend:
-+   group: build
-    image: golang
-    commands:
-      - go build
-      - go test
-  frontend:
-+   group: build
-    image: node
-    commands:
-      - npm install
-      - npm run test
-      - npm run build
-  publish:
-    image: plugins/docker
-    repo: octocat/hello-world
+ pipeline:
+   backend:
++    group: build
+     image: golang
+     commands:
+       - go build
+       - go test
+   frontend:
++    group: build
+     image: node
+     commands:
+       - npm install
+       - npm run test
+       - npm run build
+   publish:
+     image: plugins/docker
+     repo: octocat/hello-world
 ```
 
 In the above example, the `frontend` and `backend` steps are executed in parallel. The pipeline runner will not execute the `publish` step until the group completes.
@@ -362,6 +376,11 @@ Woodpecker gives the ability to define Docker volumes in the Yaml. You can use t
 
 For more details check the [volumes docs](/docs/usage/volumes/).
 
+### `detach`
+
+Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
+
+For more details check the [service docs](/docs/usage/services#detachment).
 
 ## Advanced Configurations
 
@@ -380,31 +399,31 @@ The workspace can be customized using the workspace block in the Yaml file:
 +  base: /go
 +  path: src/github.com/octocat/hello-world
 
-pipeline:
-  build:
-    image: golang:latest
-    commands:
-      - go get
-      - go test
+ pipeline:
+   build:
+     image: golang:latest
+     commands:
+       - go get
+       - go test
 ```
 
 The base attribute defines a shared base volume available to all pipeline steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
 ```diff
-workspace:
-+ base: /go
-  path: src/github.com/octocat/hello-world
-
-pipeline:
-  deps:
-    image: golang:latest
-    commands:
-      - go get
-      - go test
-  build:
-    image: node:latest
-    commands:
-      - go build
+ workspace:
++  base: /go
+   path: src/github.com/octocat/hello-world
+ 
+ pipeline:
+   deps:
+     image: golang:latest
+     commands:
+       - go get
+       - go test
+   build:
+     image: node:latest
+     commands:
+       - go build
 ```
 
 This would be equivalent to the following docker commands:
@@ -419,9 +438,9 @@ docker run --volume=my-named-volume:/go node:latest
 The path attribute defines the working directory of your build. This is where your code is cloned and will be the default working directory of every step in your build process. The path must be relative and is combined with your base path.
 
 ```diff
-workspace:
-  base: /go
-+ path: src/github.com/octocat/hello-world
+ workspace:
+   base: /go
++  path: src/github.com/octocat/hello-world
 ```
 
 ```text
@@ -443,22 +462,23 @@ Woodpecker automatically configures a default clone step if not explicitly defin
 +clone:
 +  git:
 +    image: woodpeckerci/plugin-git
-
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ 
+ pipeline:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 ```
 
 Example configuration to override depth:
 
 ```diff
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-+   depth: 50
+ clone:
+   git:
+     image: woodpeckerci/plugin-git
++    settings:
++      depth: 50
 ```
 
 Example configuration to use a custom clone plugin:
@@ -472,10 +492,11 @@ clone:
 Example configuration to clone Mercurial repository:
 
 ```diff
-clone:
-  hg:
-+   image: plugins/hg
-+   path: bitbucket.org/foo/bar
+ clone:
+   hg:
++    image: plugins/hg
++    settings:
++      path: bitbucket.org/foo/bar
 ```
 
 #### Git Submodules
@@ -483,21 +504,22 @@ clone:
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
 
 ```diff
-[submodule "my-module"]
-	path = my-module
--	url = git@github.com:octocat/my-module.git
-+	url = https://github.com/octocat/my-module.git
+ [submodule "my-module"]
+ path = my-module
+-url = git@github.com:octocat/my-module.git
++url = https://github.com/octocat/my-module.git
 ```
 
 To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use the https url in Woodpecker, add `submodule_override`:
 
 ```diff
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-    recursive: true
-+   submodule_override:
-+     my-module: https://github.com/octocat/my-module.git
+ clone:
+   git:
+     image: woodpeckerci/plugin-git
+     settings:
+       recursive: true
++      submodule_override:
++        my-module: https://github.com/octocat/my-module.git
 
 pipeline:
   ...
@@ -510,17 +532,17 @@ Woodpecker gives the ability to configure privileged mode in the Yaml. You can u
 > Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
 
 ```diff
-pipeline:
-  build:
-    image: docker
-    environment:
-      - DOCKER_HOST=tcp://docker:2375
-    commands:
-      - docker --tls=false ps
-
-services:
-  docker:
-    image: docker:dind
-    command: [ "--storage-driver=vfs", "--tls=false" ]
-+   privileged: true
+ pipeline:
+   build:
+     image: docker
+     environment:
+       - DOCKER_HOST=tcp://docker:2375
+     commands:
+       - docker --tls=false ps
+ 
+ services:
+   docker:
+     image: docker:dind
+     command: [ "--storage-driver=vfs", "--tls=false" ]
++    privileged: true
 ```

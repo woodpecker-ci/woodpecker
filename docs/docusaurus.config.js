@@ -25,8 +25,8 @@ module.exports = {
       },
       items: [
         {
-          type: 'doc',
-          docId: 'intro',
+          to: 'docs/intro',
+          activeBaseRegex: 'docs/(?!migrations)',
           position: 'left',
           label: 'Docs',
         },
@@ -36,8 +36,8 @@ module.exports = {
           label: 'Plugins',
         },
         {
-          type: 'doc',
-          docId: 'migrations',
+          to: 'docs/migrations',
+          activeBaseRegex: 'docs/migrations',
           position: 'left',
           label: 'Migrations',
         },
@@ -100,7 +100,7 @@ module.exports = {
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://wp.laszlo.cloud/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
               label: 'CI',
             },
           ],
