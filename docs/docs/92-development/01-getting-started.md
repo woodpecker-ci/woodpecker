@@ -15,7 +15,7 @@ Install make on:
   - [Windows](https://stackoverflow.com/a/32127632/8461267)
   - Mac OS: `brew install make`
 
-#### Node.js & Yarn
+### Node.js & Yarn
 
 Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build Woodpeckers UI or documentation.
 
