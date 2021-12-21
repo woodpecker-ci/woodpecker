@@ -219,7 +219,7 @@ func PostHook(c *gin.Context) {
 
 	err = _store.CreateBuild(build, build.Procs...)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save commit for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -236,26 +236,28 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	if build.Status == model.StatusBlocked {
-		// TODO: check of build.Procs contains proper data
-		for _, proc := range build.Procs {
-			err = server.Config.Services.Remote.Status(c, repoUser, repo, build, proc)
-			if err != nil {
-				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-				_ = c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-		}
+	build, buildItems, err := createBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
+	if err != nil {
+		msg := fmt.Sprintf("failure to create build for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
 
+	if build.Status == model.StatusBlocked {
 		if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
+		}
+
+		if err := updateBuildStatus(c, build, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updateBuildStatus")
 		}
 
 		c.JSON(http.StatusOK, build)
 		return
 	}
 
-	build, err = startBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
+	build, err = startBuild(c, _store, build, repoUser, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

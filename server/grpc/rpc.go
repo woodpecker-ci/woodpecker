@@ -345,15 +345,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", build.ID)
 		}
-
-		if !isMultiPipeline(procs) {
-			s.updateRemoteStatus(c, repo, build, nil)
-		}
 	}
 
-	if isMultiPipeline(procs) {
-		s.updateRemoteStatus(c, repo, build, proc)
-	}
+	s.updateRemoteStatus(c, repo, build, proc)
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
@@ -446,8 +440,8 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 		}
 	}
 
-	// skip status updates for parent procs
-	if proc.Children == nil || len(proc.Children) == 0 {
+	// only do status updates for parent procs
+	if proc != nil && proc.IsParent() {
 		err = s.remote.Status(ctx, user, repo, build, proc)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)

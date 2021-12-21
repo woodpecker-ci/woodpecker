@@ -313,98 +313,28 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, err = startBuild(c, _store, build, user, repo, yamls)
+	build, buildItems, err := createBuild(c, _store, build, user, repo, yamls)
 	if err != nil {
-		c.String(http.StatusInternalServerError, fmt.Sprintf("startBuild: %v", err))
-	}
-	c.JSON(200, build)
-}
-
-func startBuild(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta) (*model.Build, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
-	if err != nil {
-		msg := "Failed to generate netrc file"
+		msg := fmt.Sprintf("failure to createBuild for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf("%s: %v", msg, err)
+		c.String(http.StatusInternalServerError, msg)
+		return
 	}
 
-	// get the previous build so that we can send status change notifications
-	last, err := store.GetBuildLastBefore(repo, build.Branch, build.ID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
-	}
-
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
+	build, err = startBuild(c, _store, build, user, repo, buildItems)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
+		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
-	}
-
-	envs := map[string]string{}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
-		for _, global := range globals {
-			envs[global.Name] = global.Value
-		}
-	}
-
-	b := shared.ProcBuilder{
-		Repo:  repo,
-		Curr:  build,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Link:  server.Config.Server.Host,
-		Yamls: yamls,
-	}
-	buildItems, err := b.Build()
-	if err != nil {
-		if _, err := shared.UpdateToStatusError(store, *build, err); err != nil {
-			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
-		}
-		return nil, err
-	}
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
-
-	if err := store.ProcCreate(build.Procs); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, build.Number)
-	}
-
-	defer func() {
-		for _, proc := range build.Procs {
-			// skip parent procs
-			if proc.Children != nil && len(proc.Children) > 0 {
-				continue
-			}
-
-			err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
-			if err != nil {
-				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			}
-		}
-	}()
-
-	if err := publishToTopic(ctx, build, repo, model.Enqueued); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-
-	if err := queueBuild(build, repo, buildItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
-	}
-
-	return build, nil
+	c.JSON(200, build)
 }
 
 func PostDecline(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
-
 		repo   = session.Repo(c)
 		user   = session.User(c)
 		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
@@ -428,12 +358,12 @@ func PostDecline(c *gin.Context) {
 	if build.Procs, err = _store.ProcList(build); err != nil {
 		log.Error().Err(err).Msg("can not get proc list from store")
 	}
+	if build.Procs, err = model.Tree(build.Procs); err != nil {
+		log.Error().Err(err).Msg("can not build tree from proc list")
+	}
 
-	for _, proc := range build.Procs {
-		err = server.Config.Services.Remote.Status(c, user, repo, build, proc)
-		if err != nil {
-			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-		}
+	if err := updateBuildStatus(c, build, repo, user); err != nil {
+		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 
 	c.JSON(200, build)
@@ -502,12 +432,9 @@ func PostBuild(c *gin.Context) {
 		_ = c.AbortWithError(404, err)
 		return
 	}
-
-	netrc, err := _remote.Netrc(user, repo)
-	if err != nil {
-		log.Error().Msgf("failure to generate netrc for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
-		return
+	var yamls []*remote.FileMeta
+	for _, y := range configs {
+		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	build.ID = 0
@@ -521,24 +448,32 @@ func PostBuild(c *gin.Context) {
 	build.Deploy = c.DefaultQuery("deploy_to", build.Deploy)
 
 	if event, ok := c.GetQuery("event"); ok {
-		if event := model.WebhookEvent(event); model.ValidateWebhookEvent(event) {
-			build.Event = event
+		build.Event = model.WebhookEvent(event)
+
+		if !model.ValidateWebhookEvent(build.Event) {
+			msg := fmt.Sprintf("build event '%s' is invalid", event)
+			c.String(http.StatusBadRequest, msg)
+			return
 		}
 	}
 
 	err = _store.CreateBuild(build)
 	if err != nil {
-		c.String(500, err.Error())
+		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
 	err = persistBuildConfigs(configs, build.ID)
 	if err != nil {
-		log.Error().Msgf("failure to persist build config for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
+		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
+	// TODO pass envs to createBuild
 	// Read query string parameters into buildParams, exclude reserved params
 	var buildParams = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
@@ -551,69 +486,23 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	// get the previous build so that we can send
-	// on status change notifications
-	last, _ := _store.GetBuildLastBefore(repo, build.Branch, build.ID)
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
+	build, buildItems, err := createBuild(c, _store, build, user, repo, yamls)
 	if err != nil {
-		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
-	}
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
-	if err != nil {
-		log.Debug().Msgf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
-	}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
-		for _, global := range globals {
-			buildParams[global.Name] = global.Value
-		}
-	}
-
-	var yamls []*remote.FileMeta
-	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
-	}
-
-	b := shared.ProcBuilder{
-		Repo:  repo,
-		Curr:  build,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Link:  server.Config.Server.Host,
-		Yamls: yamls,
-		Envs:  buildParams,
-	}
-	buildItems, err := b.Build()
-	if err != nil {
-		build.Status = model.StatusError
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Error = err.Error()
-		c.JSON(500, build)
+		msg := fmt.Sprintf("failure to createBuild for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
 
-	err = _store.ProcCreate(build.Procs)
+	build, err = startBuild(c, _store, build, user, repo, buildItems)
 	if err != nil {
-		log.Error().Msgf("cannot restart %s#%d: %s", repo.FullName, build.Number, err)
-		build.Status = model.StatusError
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Error = err.Error()
-		c.JSON(500, build)
+		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
-	c.JSON(202, build)
 
-	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-	if err := queueBuild(build, repo, buildItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
-	}
+	c.JSON(200, build)
 }
 
 func DeleteBuildLogs(c *gin.Context) {
@@ -655,6 +544,99 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
+}
+
+func createBuild(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta) (*model.Build, []*shared.BuildItem, error) {
+	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to generate netrc file")
+	}
+
+	// get the previous build so that we can send status change notifications
+	last, err := store.GetBuildLastBefore(repo, build.Branch, build.ID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
+	}
+
+	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
+	}
+
+	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
+	}
+
+	envs := map[string]string{}
+	if server.Config.Services.Environ != nil {
+		globals, _ := server.Config.Services.Environ.EnvironList(repo)
+		for _, global := range globals {
+			envs[global.Name] = global.Value
+		}
+	}
+
+	b := shared.ProcBuilder{
+		Repo:  repo,
+		Curr:  build,
+		Last:  last,
+		Netrc: netrc,
+		Secs:  secs,
+		Regs:  regs,
+		Envs:  envs,
+		Link:  server.Config.Server.Host,
+		Yamls: yamls,
+	}
+	buildItems, err := b.Build()
+	if err != nil {
+		if _, err := shared.UpdateToStatusError(store, *build, err); err != nil {
+			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
+		}
+		return nil, nil, err
+	}
+
+	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
+
+	return build, buildItems, nil
+}
+
+func startBuild(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, buildItems []*shared.BuildItem) (*model.Build, error) {
+	if err := store.ProcCreate(build.Procs); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, build.Number)
+		return nil, err
+	}
+
+	if err := publishToTopic(ctx, build, repo, model.Enqueued); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+
+	if err := queueBuild(build, repo, buildItems); err != nil {
+		log.Error().Err(err).Msg("queueBuild")
+		return nil, err
+	}
+
+	if err := updateBuildStatus(ctx, build, repo, user); err != nil {
+		log.Error().Err(err).Msg("updateBuildStatus")
+	}
+
+	return build, nil
+}
+
+func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
+	for _, proc := range build.Procs {
+		// skip child procs
+		if !proc.IsParent() {
+			continue
+		}
+
+		err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
+		if err != nil {
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func persistBuildConfigs(configs []*model.Config, buildID int64) error {
