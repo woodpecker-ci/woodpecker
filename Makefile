@@ -75,7 +75,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-fronte
 build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)
 
-build-server: build-frontend
+build-server:
 	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent:

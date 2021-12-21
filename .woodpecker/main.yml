@@ -2,9 +2,7 @@ pipeline:
   build-web:
     image: node:16-alpine
     commands:
-      - cd web/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - make build-frontend
 
   build-server:
     group: build
