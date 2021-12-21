@@ -18,6 +18,13 @@ endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
 
+GO ?= go
+HAS_GO = $(shell hash $(GO) > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
+ifeq ($(HAS_GO), GO)
+	XGO_VERSION := go-1.17.x
+	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
+endif
+
 all: build
 
 vendor:
@@ -75,9 +82,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-fronte
 build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)
 
-build-server: build-frontend build-server-standalone
-
-build-server-standalone:
+build-server: build-frontend
 	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent:
@@ -90,11 +95,14 @@ build: build-agent build-server build-cli
 
 release-frontend: build-frontend
 
-release-server:
-	# compile
-	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
-	# tar binary files
-	tar -cvzf dist/woodpecker-server_${TARGETOS}_${TARGETARCH}.tar.gz   -C dist/server/${TARGETOS}_${TARGETARCH} woodpecker-server
+check-xgo:
+	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) install src.techknowlogick.com/xgo@latest; \
+	fi
+
+release-server: check-xgo
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
+	mv $(wildcard ./dist/server/woodpecker-server-*) ./dist/woodpecker-server
 
 release-agent:
 	# compile

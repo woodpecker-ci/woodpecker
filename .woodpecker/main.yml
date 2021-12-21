@@ -45,6 +45,8 @@ pipeline:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: test
+    environment:
+      TAGS: sqlite_unlock_notify
     when:
       event: pull_request
 
@@ -58,6 +60,8 @@ pipeline:
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       # TODO: only release as next after 0.15.0 got released
       tag: [next, latest]
+    environment:
+      TAGS: sqlite_unlock_notify
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -72,6 +76,8 @@ pipeline:
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       # TODO: only release as next-alpine after 0.15.0 got released
       tag: [next-alpine, latest-alpine]
+    environment:
+      TAGS: sqlite_unlock_notify
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -149,6 +155,8 @@ pipeline:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: [latest, "${CI_COMMIT_TAG}"]
+    environment:
+      TAGS: sqlite_unlock_notify
     when:
       event: tag
 
@@ -161,6 +169,8 @@ pipeline:
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+    environment:
+      TAGS: sqlite_unlock_notify
     when:
       event: tag
 

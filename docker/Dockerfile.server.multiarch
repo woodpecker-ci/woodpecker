@@ -1,11 +1,11 @@
-FROM --platform=$BUILDPLATFORM golang:1.16 AS build
+FROM --platform=$BUILDPLATFORM techknowlogick/xgo:go-1.17.x AS build
 
 WORKDIR /src
 COPY . .
 ARG TARGETOS TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
-    make build-server-standalone
+    make release-server
 
 FROM scratch
 ENV GODEBUG=netdns=go
