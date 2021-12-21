@@ -313,9 +313,9 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := createBuild(c, _store, build, user, repo, yamls)
+	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuild for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -473,7 +473,7 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	// TODO pass envs to createBuild
+	// TODO pass envs to createBuildItems
 	// Read query string parameters into buildParams, exclude reserved params
 	var buildParams = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
@@ -486,9 +486,9 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := createBuild(c, _store, build, user, repo, yamls)
+	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuild for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -546,7 +546,7 @@ func DeleteBuildLogs(c *gin.Context) {
 	c.String(204, "")
 }
 
-func createBuild(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta) (*model.Build, []*shared.BuildItem, error) {
+func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta) (*model.Build, []*shared.BuildItem, error) {
 	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
