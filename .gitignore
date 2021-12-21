@@ -1,7 +1,8 @@
 ### IDEs ###
 .idea/
-.vscode/
+.vscode/*
 !.vscode/launch.json
+!.vscode/extensions.json
 
 ### GO ###
 # Binaries for programs and plugins
