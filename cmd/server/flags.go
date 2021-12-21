@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -115,11 +117,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_ESCALATE"},
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value:   cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_VOLUME"},
@@ -211,6 +209,13 @@ var flags = []cli.Flag{
 	//
 	// remote parameters
 	//
+	&cli.BoolFlag{
+		Name:    "flat-permissions",
+		Usage:   "no remote call for permissions should be made",
+		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
+		Hidden:  true,
+		// TODO(485) temporary workaround to not hit api rate limits
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",

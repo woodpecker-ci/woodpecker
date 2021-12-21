@@ -31,6 +31,7 @@ var migrationTasks = []task{
 	alterTableReposDropFallback,
 	alterTableReposDropAllowDeploysAllowTags,
 	fixPRSecretEventName,
+	alterTableReposDropCounter,
 }
 
 type migrations struct {

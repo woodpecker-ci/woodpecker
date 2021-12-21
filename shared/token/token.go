@@ -52,10 +52,9 @@ func parse(raw string, fn SecretFunc) (*Token, error) {
 }
 
 func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
-	token := r.Header.Get("Authorization")
-
 	// first we attempt to get the token from the
 	// authorization header.
+	token := r.Header.Get("Authorization")
 	if len(token) != 0 {
 		log.Trace().Msgf("token.ParseRequest: found token in header: %s", token)
 		bearer := token
@@ -63,6 +62,11 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 			return nil, err
 		}
 		return parse(bearer, fn)
+	}
+
+	token = r.Header.Get("X-Gitlab-Token")
+	if len(token) != 0 {
+		return parse(token, fn)
 	}
 
 	// then we attempt to get the token from the

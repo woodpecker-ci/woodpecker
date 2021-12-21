@@ -110,10 +110,8 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		container := &yaml.Container{
-			Name: "clone",
-			// TODO: switch to `:latest` once v1.1.0 got released
-			//       https://github.com/woodpecker-ci/plugin-git/issues/3
-			Image:       "woodpeckerci/plugin-git:next",
+			Name:        "clone",
+			Image:       "woodpeckerci/plugin-git:latest",
 			Settings:    map[string]interface{}{"depth": "0"},
 			Environment: c.cloneEnv,
 		}

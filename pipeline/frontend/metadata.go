@@ -141,8 +141,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_TAG":                  "", // will be set if event is tag
-		"CI_PULL_REQUEST":         "", // will be set if event is pr
+		"CI_COMMIT_TAG":           "", // will be set if event is tag
+		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
 
 		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -185,6 +185,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_ARCH":    m.Sys.Arch,
 		"CI_SYSTEM_VERSION": version.Version,
 
+		// TODO drop for v0.16.0 development
 		// DEPRECATED
 		"CI_ARCH":                    m.Sys.Arch,                           // use CI_SYSTEM_ARCH
 		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
@@ -199,12 +200,16 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_BRANCH":                  m.Curr.Commit.Branch,                 // use CI_COMMIT_BRANCH
 		"CI_SOURCE_BRANCH":           sourceBranch,                         // use CI_COMMIT_SOURCE_BRANCH
 		"CI_TARGET_BRANCH":           targetBranch,                         // use CI_COMMIT_TARGET_BRANCH
+		"CI_TAG":                     "",                                   // use CI_COMMIT_TAG
+		"CI_PULL_REQUEST":            "",                                   // use CI_COMMIT_PULL_REQUEST
 	}
 	if m.Curr.Event == EventTag {
-		params["CI_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+		params["CI_TAG"] = params["CI_COMMIT_TAG"]
 	}
 	if m.Curr.Event == EventPull {
-		params["CI_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_PULL_REQUEST"] = params["CI_COMMIT_PULL_REQUEST"]
 	}
 
 	return params
