@@ -100,9 +100,15 @@ check-xgo:
 		$(GO) install src.techknowlogick.com/xgo@latest; \
 	fi
 
-release-server: check-xgo
+release-server-xgo: check-xgo
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
 	mv $(wildcard ./dist/server/woodpecker-server-*) ./dist/woodpecker-server
+
+release-server:
+	# compile
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	# tar binary files
+	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
 
 release-agent:
 	# compile
