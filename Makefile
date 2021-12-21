@@ -18,10 +18,9 @@ endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
 
-GO ?= go
-HAS_GO = $(shell hash $(GO) > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
+HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO), GO)
-	XGO_VERSION := go-1.17.x
+	XGO_VERSION ?= go-1.17.x
 	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
 endif
 
@@ -102,7 +101,7 @@ check-xgo:
 
 release-server-xgo: check-xgo
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
-	mv $(wildcard ./dist/server/woodpecker-server-*) ./dist/woodpecker-server
+	mv dist/server/$(shell ls dist/server) dist/woodpecker-server
 
 release-server:
 	# compile
