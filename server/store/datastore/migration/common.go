@@ -82,15 +82,13 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		if err != nil {
 			return err
 		}
-		tableSQL := string(res[0]["sql"])
+		tableSQL := normalizeSQLiteTableSchema(string(res[0]["sql"]))
 
 		// Separate out the column definitions
 		tableSQL = tableSQL[strings.Index(tableSQL, "("):]
 
 		// Remove the required columnNames
-		for _, name := range columnNames {
-			tableSQL = regexp.MustCompile(regexp.QuoteMeta("`"+name+"`")+"[^`,)]*?[,)]").ReplaceAllString(tableSQL, "")
-		}
+		tableSQL = removeColumnFromSQLITETableSchema(tableSQL, columnNames...)
 
 		// Ensure the query is ended properly
 		tableSQL = strings.TrimSpace(tableSQL)
@@ -102,7 +100,16 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		}
 
 		// Find all the columns in the table
-		columns := regexp.MustCompile("`([^`]*)`").FindAllString(tableSQL, -1)
+		var columns []string
+		for _, rawColumn := range strings.Split(strings.ReplaceAll(tableSQL[1:len(tableSQL)-1], ", ", ",\n"), "\n") {
+			if strings.ContainsAny(rawColumn, "()") {
+				continue
+			}
+			rawColumn = strings.TrimSpace(rawColumn)
+			columns = append(columns,
+				strings.ReplaceAll(rawColumn[0:strings.Index(rawColumn, " ")], "`", ""),
+			)
+		}
 
 		tableSQL = fmt.Sprintf("CREATE TABLE `new_%s_new` ", tableName) + tableSQL
 		if _, err := sess.Exec(tableSQL); err != nil {
@@ -203,4 +210,32 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 	}
 
 	return nil
+}
+
+var whitespaces = regexp.MustCompile(`\s+`)
+var columnSeparator = regexp.MustCompile(`\s?,\s?`)
+
+func removeColumnFromSQLITETableSchema(schema string, names ...string) string {
+	if len(names) == 0 {
+		return schema
+	}
+	for i := range names {
+		if len(names[i]) == 0 {
+			continue
+		}
+		schema = regexp.MustCompile(`\s(`+
+			regexp.QuoteMeta("`"+names[i]+"`")+
+			"|"+
+			regexp.QuoteMeta(names[i])+
+			")[^`,)]*?[,)]").ReplaceAllString(schema, "")
+	}
+	return schema
+}
+
+func normalizeSQLiteTableSchema(schema string) string {
+	return columnSeparator.ReplaceAllString(
+		whitespaces.ReplaceAllString(
+			strings.ReplaceAll(schema, "\n", " "),
+			" "),
+		", ")
 }
