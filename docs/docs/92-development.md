@@ -183,41 +183,39 @@ $ go run ./cmd/cli [command]
 
 ## Add new migration
 
-Woodpecker uses migrations to change the database schema if a database model has been changed. If a developer for example adds a new property `IsKingKong` to the database model of a User in `server/model/` they would need to add a new migration like the following example to a file like `server/store/datastore/migration/123_add_is_king_kong_to_users.go`:
+Woodpecker uses migrations to change the database schema if a database model has been changed.
+
+:::info
+If you add a new property to a model, you dont have to do anything,
+the column will be created based on the xorm tag automaticaly.
+If you add a new model, you only have to add it to the `syncAll()` function at
+`server/store/datastore/migration/migration.go` to get a table created.
+:::
+
+If a developer for example removes a property `Counter` from the model `Repo` in `server/model/` they would need to add a new migration task like the following  example to a file like `server/store/datastore/migration/004_repos_drop_repo_counter.go`:
 
 ```go
-// Copyright 2021 Woodpecker Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package migration
 
 import (
 	"xorm.io/xorm"
 )
 
-var addIsKingKongToUsers = task{
-	name: "add-king-kong-to-users",
+var alterTableReposDropCounter = task{
+	name: "alter-table-drop-counter",
 	fn: func(sess *xorm.Session) error {
-    // TODO
-		return sess.Commit()
+		return dropTableColumns(sess, "repos", "repo_counter")
 	},
 }
 ```
 
-:::tip
-Woodpecker uses [Xorm](https://gitea.com/xorm/xorm) as ORM for the database connection. The `sess *xorm.Session` can be used to alter your database. At the end of the migration you can `return sess.Commit()` which will execute your migration as a single transaction. After a successful execution of that transaction the server will automatically add the migration to a list, so it wont be executed again on the next start.
+:::warning
+Do not `sess.Begin()`, `sess.Commit()` or `sess.Close()` the session, it is managed from outside.
 :::
 
-
 To automatically execute the migration after the start of the server, the new migration needs to be added to the end of `migrationTasks` in `server/store/datastore/migration/migration.go`.
+
+:::tip
+Woodpecker uses [Xorm](https://xorm.io/) as ORM for the database connection.
+If you can find its documentation at [gobook.io/read/gitea.com/xorm](https://gobook.io/read/gitea.com/xorm/manual-en-US).
+:::
