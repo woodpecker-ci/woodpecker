@@ -1,0 +1,22 @@
+FROM --platform=$BUILDPLATFORM golang:1.16 AS build
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    make build-server
+
+FROM scratch
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
+ENV WOODPECKER_DATABASE_DRIVER=sqlite3
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+EXPOSE 8000 9000 80 443
+
+# copy certs from golang:1.16 image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy server binary
+COPY --from=build src/dist/woodpecker-server /bin/
+
+ENTRYPOINT ["/bin/woodpecker-server"]

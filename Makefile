@@ -90,9 +90,9 @@ release-frontend: build-frontend
 
 release-server:
 	# compile
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 	# tar binary files
-	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
+	tar -cvzf dist/woodpecker-server_${TARGETOS}_${TARGETARCH}.tar.gz   -C dist/server/${TARGETOS}_${TARGETARCH} woodpecker-server
 
 release-agent:
 	# compile
