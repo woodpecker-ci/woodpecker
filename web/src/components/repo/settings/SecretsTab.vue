@@ -50,6 +50,13 @@
           <TextField v-model="selectedSecret.value" placeholder="Value" :lines="5" required />
         </InputField>
 
+        <InputField label="Available for following images">
+          <TextField
+            v-model="images"
+            placeholder="Comma separated list of images where this secret is available, leave empty to allow all images"
+          />
+        </InputField>
+
         <InputField label="Available at following events">
           <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
@@ -118,6 +125,7 @@ export default defineComponent({
     const secrets = ref<Secret[]>();
     const showAddSecret = ref(false);
     const selectedSecret = ref<Partial<Secret>>({ ...emptySecret });
+    const images = ref('');
 
     async function loadSecrets() {
       if (!repo?.value) {
@@ -132,6 +140,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
+      selectedSecret.value.image = images.value.split(',');
       await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
       notifications.notify({ title: 'Secret created', type: 'success' });
       showAddSecret.value = false;
@@ -157,6 +166,7 @@ export default defineComponent({
       secretEventsOptions,
       selectedSecret,
       secrets,
+      images,
       showAddSecret,
       isSaving,
       isDeleting,
