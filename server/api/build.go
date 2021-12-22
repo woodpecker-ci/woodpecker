@@ -313,7 +313,7 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls)
+	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -473,20 +473,21 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	// TODO pass envs to createBuildItems
 	// Read query string parameters into buildParams, exclude reserved params
-	var buildParams = map[string]string{}
+	var envs = map[string]string{}
 	for key, val := range c.Request.URL.Query() {
 		switch key {
+		// Skip some options of the endpoint
 		case "fork", "event", "deploy_to":
+			continue
 		default:
 			// We only accept string literals, because build parameters will be
 			// injected as environment variables
-			buildParams[key] = val[0]
+			envs[key] = val[0]
 		}
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls)
+	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls, envs)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -546,7 +547,7 @@ func DeleteBuildLogs(c *gin.Context) {
 	c.String(204, "")
 }
 
-func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta) (*model.Build, []*shared.BuildItem, error) {
+func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Build, []*shared.BuildItem, error) {
 	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
@@ -568,7 +569,9 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
 	}
 
-	envs := map[string]string{}
+	if envs == nil {
+		envs = map[string]string{}
+	}
 	if server.Config.Services.Environ != nil {
 		globals, _ := server.Config.Services.Environ.EnvironList(repo)
 		for _, global := range globals {

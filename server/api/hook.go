@@ -236,7 +236,7 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, repoUser, repo, remoteYamlConfigs)
+	build, buildItems, err := createBuildItems(c, _store, build, repoUser, repo, remoteYamlConfigs, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
