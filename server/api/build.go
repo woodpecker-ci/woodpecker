@@ -483,6 +483,7 @@ func PostBuild(c *gin.Context) {
 		default:
 			// We only accept string literals, because build parameters will be
 			// injected as environment variables
+			// TODO: sanitize the value
 			envs[key] = val[0]
 		}
 	}
