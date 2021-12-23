@@ -26,5 +26,20 @@ This can also happen when a owner propose a vote or the majority of the maintain
 All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.  
 If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
 
-For security reasons, Owners must use 2FA.
-(https://docs.github.com/en/github/authenticating-to-github/securing-your-account-with-two-factor-authentication-2fa)
+For security reasons, Owners must use 2FA.  
+([Docs: Securing your account with two-factor authentication](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa))
+
+To honor the past owners, here's the history of the owners and the time
+they served:
+
+* 2021-xx-xx ~
+  * [6543](https://github.com/6543)
+  * [Anbraten](https://github.com/anbraten)
+
+* 20xx-xx-xx ~ 2021-xx-xx
+  * [Laszlo Fogas](https://github.com/laszlocph)
+
+## Versioning
+
+We use [Semantic Versioning](https://semver.org/) to be able,
+to communicate when admins have to do manual migration steps and when they can just bump versions up.
