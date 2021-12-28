@@ -32,11 +32,11 @@ For security reasons, Owners must use 2FA.
 To honor the past owners, here's the history of the owners and the time
 they served:
 
-* 2021-xx-xx ~
+* 2021-09-28 ~
   * [6543](https://github.com/6543)
   * [Anbraten](https://github.com/anbraten)
 
-* 20xx-xx-xx ~ 2021-xx-xx
+* 2019-07-25 ~ 2021-09-28
   * [Laszlo Fogas](https://github.com/laszlocph)
 
 ## Versioning
