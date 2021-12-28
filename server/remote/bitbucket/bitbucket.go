@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Bitbucket cloud endpoints.
@@ -221,14 +222,14 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status creates a build status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
-		State: convertStatus(b.Status),
-		Desc:  convertDesc(b.Status),
+		State: convertStatus(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
 		Key:   "Woodpecker",
-		URL:   link,
+		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}
-	return c.newClient(ctx, u).CreateStatus(r.Owner, r.Name, b.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, build.Commit, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
