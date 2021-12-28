@@ -29,13 +29,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 )
 
 const (
-	defaultScope  = "api"
-	perPage       = 100
-	statusContext = "ci/drone"
+	defaultScope = "api"
+	perPage      = 100
 )
 
 // Opts defines configuration options.
@@ -347,7 +347,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 }
 
 // Status sends the commit status back to gitlab.
-func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -359,12 +359,11 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
-		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
-		State:       getStatus(build.Status),
-		Description: gitlab.String(getDesc(build.Status)),
-		TargetURL:   &link,
-		Name:        nil,
-		Context:     gitlab.String(statusContext),
+		State:       getStatus(proc.State),
+		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
+		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
+		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		PipelineID:  gitlab.Int(int(build.Number)),
 	}, gitlab.WithContext(ctx))
 
 	return err

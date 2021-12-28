@@ -34,6 +34,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -185,18 +186,18 @@ func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
-		State: convertStatus(b.Status),
-		Desc:  convertDesc(b.Status),
-		Name:  fmt.Sprintf("Woodpecker #%d - %s", b.Number, b.Branch),
+		State: convertStatus(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", build.Number, build.Branch),
 		Key:   "Woodpecker",
-		URL:   link,
+		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}
 
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, user.Token)
 
-	return client.CreateStatus(b.Commit, &status)
+	return client.CreateStatus(build.Commit, &status)
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {

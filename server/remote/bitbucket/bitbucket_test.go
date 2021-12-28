@@ -254,7 +254,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, "http://127.0.0.1", nil)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, fakeProc)
 			g.Assert(err).IsNil()
 		})
 
@@ -351,5 +351,10 @@ var (
 
 	fakeBuild = &model.Build{
 		Commit: "9ecad50",
+	}
+
+	fakeProc = &model.Proc{
+		Name:  "test",
+		State: model.StatusSuccess,
 	}
 )

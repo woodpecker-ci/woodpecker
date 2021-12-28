@@ -34,13 +34,6 @@ const (
 	statusFailure = "FAILED"
 )
 
-const (
-	descPending = "this build is pending"
-	descSuccess = "the build was successful"
-	descFailure = "the build failed"
-	descError   = "oops, something went wrong"
-)
-
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
 func convertStatus(status model.StatusValue) string {
@@ -51,21 +44,6 @@ func convertStatus(status model.StatusValue) string {
 		return statusSuccess
 	default:
 		return statusFailure
-	}
-}
-
-// convertDesc is a helper function used to convert a Woodpecker status to a
-// Bitbucket status description.
-func convertDesc(status model.StatusValue) string {
-	switch status {
-	case model.StatusPending, model.StatusRunning:
-		return descPending
-	case model.StatusSuccess:
-		return descSuccess
-	case model.StatusFailure:
-		return descFailure
-	default:
-		return descError
 	}
 }
 
