@@ -419,13 +419,15 @@ func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 	return nil
 }
 
+var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
+
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
 func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	client := c.newClientToken(ctx, user.Token)
 
 	if build.Event == model.EventDeploy {
-		matches := regexp.MustCompile(`.+/deployments/(\d+)`).FindStringSubmatch(build.Link)
+		matches := reDeploy.FindStringSubmatch(build.Link)
 		if len(matches) != 2 {
 			return nil
 		}

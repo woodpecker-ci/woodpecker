@@ -426,6 +426,7 @@ func buildStatus(procs []*model.Proc) model.StatusValue {
 func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
+		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
 		return
 	}
 
