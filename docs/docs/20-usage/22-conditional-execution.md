@@ -6,7 +6,7 @@ This can also be utilised on a playbook level if you have multi-arch agents and 
 
 ## `repo`
 
-Example conditional execution by branch:
+Example conditional execution by repository:
 
 ```diff
 pipeline:
