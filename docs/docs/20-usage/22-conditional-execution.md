@@ -4,6 +4,20 @@ Woodpecker supports defining conditional pipeline steps in the `when` block. If 
 
 This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See [platform](#platform) below.
 
+## `repo`
+
+Example conditional execution by branch:
+
+```diff
+pipeline:
+  slack:
+    image: plugins/slack
+    settings:
+      channel: dev
++   when:
++     repo: test/test
+```
+
 ## `branch`
 
 Example conditional execution by branch:
