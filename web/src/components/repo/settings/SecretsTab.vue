@@ -140,7 +140,8 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      selectedSecret.value.image = images.value.split(',');
+      const imageList = images.value.split(',').map((s) => s.trim());
+      selectedSecret.value.image = imageList.filter((s) => s !== '');
       await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
       notifications.notify({ title: 'Secret created', type: 'success' });
       showAddSecret.value = false;
