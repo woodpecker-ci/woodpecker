@@ -88,3 +88,10 @@ pipeline:
         include: [ '.woodpecker/*.yml', '*.ini' ]
         exclude: [ '*.md', 'docs/**' ]
         ignore_message: "[ALL]"
+
+  when-repo:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      repo: test/test

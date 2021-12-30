@@ -31,6 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -418,66 +419,34 @@ func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 	return nil
 }
 
-//
-// TODO(bradrydzewski) refactor below functions
-//
+var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client := c.newClientToken(ctx, u.Token)
-	switch b.Event {
-	case "deployment":
-		return deploymentStatus(ctx, client, r, b, link)
-	default:
-		return repoStatus(ctx, client, r, b, link, c.Context, proc)
-	}
-}
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+	client := c.newClientToken(ctx, user.Token)
 
-func repoStatus(c context.Context, client *github.Client, r *model.Repo, b *model.Build, link, ctx string, proc *model.Proc) error {
-	switch b.Event {
-	case model.EventPull:
-		ctx += "/pr"
-	default:
-		if len(b.Event) > 0 {
-			ctx += "/" + string(b.Event)
+	if build.Event == model.EventDeploy {
+		matches := reDeploy.FindStringSubmatch(build.Link)
+		if len(matches) != 2 {
+			return nil
 		}
+		id, _ := strconv.Atoi(matches[1])
+
+		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
+			State:       github.String(convertStatus(build.Status)),
+			Description: github.String(common.GetBuildStatusDescription(build.Status)),
+			LogURL:      github.String(common.GetBuildStatusLink(repo, build, nil)),
+		})
+		return err
 	}
 
-	status := github.String(convertStatus(b.Status))
-	desc := github.String(convertDesc(b.Status))
-
-	if proc != nil {
-		ctx += "/" + proc.Name
-		status = github.String(convertStatus(proc.State))
-		desc = github.String(convertDesc(proc.State))
-	}
-
-	data := github.RepoStatus{
-		Context:     github.String(ctx),
-		State:       status,
-		Description: desc,
-		TargetURL:   github.String(link),
-	}
-	_, _, err := client.Repositories.CreateStatus(c, r.Owner, r.Name, b.Commit, &data)
-	return err
-}
-
-var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
-
-func deploymentStatus(ctx context.Context, client *github.Client, r *model.Repo, b *model.Build, link string) error {
-	matches := reDeploy.FindStringSubmatch(b.Link)
-	if len(matches) != 2 {
-		return nil
-	}
-	id, _ := strconv.Atoi(matches[1])
-
-	data := github.DeploymentStatusRequest{
-		State:       github.String(convertStatus(b.Status)),
-		Description: github.String(convertDesc(b.Status)),
-		LogURL:      github.String(link),
-	}
-	_, _, err := client.Repositories.CreateDeploymentStatus(ctx, r.Owner, r.Name, int64(id), &data)
+	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, build.Commit, &github.RepoStatus{
+		Context:     github.String(common.GetBuildStatusContext(repo, build, proc)),
+		State:       github.String(convertStatus(proc.State)),
+		Description: github.String(common.GetBuildStatusDescription(proc.State)),
+		TargetURL:   github.String(common.GetBuildStatusLink(repo, build, proc)),
+	})
 	return err
 }
 
