@@ -87,6 +87,10 @@ module.exports = {
               href: 'https://discord.gg/fcMQqSMXJy',
             },
             {
+              label: 'Matrix',
+              href: 'https://matrix.to/#/#woodpecker:matrix.org',
+            },
+            {
               label: 'Mastodon',
               href: 'https://mastodon.technology/@WoodpeckerCI',
             },

@@ -11,6 +11,9 @@
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg">
   </a>
+  <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
+    <img src="https://img.shields.io/matrix/woodpecker:matrix.org">
+  </a>
   <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
   </a>
