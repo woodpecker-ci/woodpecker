@@ -41,8 +41,9 @@ func TestSecret(t *testing.T) {
 			secret := Secret{}
 			secret.Name = "secretname"
 			secret.Value = "secretvalue"
+			secret.Events = []WebhookEvent{EventPush}
 			err := secret.Validate()
-			g.Assert(err).Equal(nil)
+			g.Assert(err).IsNil()
 		})
 		g.Describe("should fail validation", func() {
 			g.It("when no name", func() {
