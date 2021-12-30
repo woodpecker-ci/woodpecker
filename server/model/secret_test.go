@@ -24,13 +24,11 @@ func TestSecret(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Secret", func() {
 		g.It("should match event", func() {
-			secret := Secret{}
-			secret.Events = []WebhookEvent{"pull_request"}
+			secret := Secret{Events: []WebhookEvent{"pull_request"}}
 			g.Assert(secret.Match("pull_request")).IsTrue()
 		})
 		g.It("should not match event", func() {
-			secret := Secret{}
-			secret.Events = []WebhookEvent{"pull_request"}
+			secret := Secret{Events: []WebhookEvent{"pull_request"}}
 			g.Assert(secret.Match("push")).IsFalse()
 		})
 		g.It("should match when no event filters defined", func() {
@@ -38,23 +36,50 @@ func TestSecret(t *testing.T) {
 			g.Assert(secret.Match("pull_request")).IsTrue()
 		})
 		g.It("should pass validation", func() {
-			secret := Secret{}
-			secret.Name = "secretname"
-			secret.Value = "secretvalue"
-			secret.Events = []WebhookEvent{EventPush}
+			secret := Secret{
+				Name:   "secretname",
+				Value:  "secretvalue",
+				Events: []WebhookEvent{EventPush},
+				Images: []string{"docker.io/library/mysql:latest", "alpine"},
+			}
 			err := secret.Validate()
 			g.Assert(err).IsNil()
 		})
 		g.Describe("should fail validation", func() {
 			g.It("when no name", func() {
-				secret := Secret{}
-				secret.Value = "secretvalue"
+				secret := Secret{
+					Value:  "secretvalue",
+					Events: []WebhookEvent{EventPush},
+					Images: []string{"docker.io/library/mysql:latest", "alpine"},
+				}
 				err := secret.Validate()
 				g.Assert(err).IsNotNil()
 			})
 			g.It("when no value", func() {
-				secret := Secret{}
-				secret.Name = "secretname"
+				secret := Secret{
+					Name:   "secretname",
+					Events: []WebhookEvent{EventPush},
+					Images: []string{"docker.io/library/mysql:latest", "alpine"},
+				}
+				err := secret.Validate()
+				g.Assert(err).IsNotNil()
+			})
+			g.It("when no events", func() {
+				secret := Secret{
+					Name:   "secretname",
+					Value:  "secretvalue",
+					Images: []string{"docker.io/library/mysql-alpine:latest", "alpine"},
+				}
+				err := secret.Validate()
+				g.Assert(err).IsNotNil()
+			})
+			g.It("wrong image no value", func() {
+				secret := Secret{
+					Name:   "secretname",
+					Value:  "secretvalue",
+					Events: []WebhookEvent{EventPush},
+					Images: []string{"wrong image:no"},
+				}
 				err := secret.Validate()
 				g.Assert(err).IsNotNil()
 			})
