@@ -90,6 +90,9 @@ func (s *Secret) Validate() error {
 			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
 		}
 	}
+	if len(s.Events) == 0 {
+		return fmt.Errorf("%s: no event specified", errSecretEventInvalid)
+	}
 
 	for _, image := range s.Images {
 		if len(image) == 0 {
