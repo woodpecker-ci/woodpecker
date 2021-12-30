@@ -9,13 +9,13 @@ This can also be utilised on a playbook level if you have multi-arch agents and 
 Example conditional execution by repository:
 
 ```diff
-pipeline:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     repo: test/test
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      repo: test/test
 ```
 
 ## `branch`
