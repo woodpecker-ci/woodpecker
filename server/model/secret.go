@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"regexp"
 )
 
 var (
@@ -77,11 +78,25 @@ func (s *Secret) Match(event WebhookEvent) bool {
 	return false
 }
 
+var validDockerImageString = regexp.MustCompile(
+	`^([\w\d]+(.[\w\d])?\/?)*` + // image optional with domain
+		`(:[\w\d])?$`, // optional image tag
+)
+
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
 		if !ValidateWebhookEvent(event) {
 			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
+		}
+	}
+
+	for _, image := range s.Images {
+		if len(image) == 0 {
+			return fmt.Errorf("empty image in images")
+		}
+		if !validDockerImageString.MatchString(image) {
+			return fmt.Errorf("image '%s' do not match regexp '%s'", image, validDockerImageString.String())
 		}
 	}
 
