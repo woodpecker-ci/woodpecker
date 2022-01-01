@@ -37,7 +37,7 @@ export default defineComponent({
 
     onMounted(() => {
       tab.value = {
-        id: props.title.toLocaleLowerCase() || tabs.value.length.toString(),
+        id: props.id || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
         title: props.title,
       };
       tabs.value.push(tab.value);

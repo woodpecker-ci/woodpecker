@@ -58,6 +58,7 @@
       <Tabs v-model="activeTab" disable-hash-mode>
         <Tab title="Logs" />
         <Tab title="Config" />
+        <Tab v-if="build.changed_files" id="changed-files" :title="`Changed files (${build.changed_files.length})`" />
       </Tabs>
     </FluidContainer>
 
@@ -210,11 +211,16 @@ export default defineComponent({
         if (route.name === 'repo-build') {
           return 'logs';
         }
+        if (route.name === 'repo-build-changed-files') {
+          return 'changed-files';
+        }
         return 'config';
       },
       set(tab: string) {
         if (tab === 'config') {
           router.replace({ name: 'repo-build-config' });
+        } else if (tab === 'changed-files') {
+          router.replace({ name: 'repo-build-changed-files' });
         } else {
           router.replace({ name: 'repo-build' });
         }

@@ -64,6 +64,12 @@ const routes: RouteRecordRaw[] = [
             component: (): Component => import('~/views/repo/build/BuildConfig.vue'),
             props: true,
           },
+          {
+            path: 'changed-files',
+            name: 'repo-build-changed-files',
+            component: (): Component => import('~/views/repo/build/BuildChangedFiles.vue'),
+            props: true,
+          },
         ],
       },
       {
