@@ -1,5 +1,5 @@
 <template>
-  <div class="flex mt-4 w-full bg-gray-600 dark:bg-dark-gray-800 min-h-0 flex-grow">
+  <div class="flex w-full bg-gray-600 dark:bg-dark-gray-800 min-h-0 flex-grow">
     <div v-if="build.error" class="flex flex-col p-4">
       <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
       <span class="text-red-400">{{ build.error }}</span>

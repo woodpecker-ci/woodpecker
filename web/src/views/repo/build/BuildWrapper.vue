@@ -1,31 +1,31 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex border-b mb-4 items-center dark:border-gray-600 min-w-0">
-      <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
-      <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
-        Pipeline #{{ buildId }} - {{ message }}
-      </h1>
-      <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
-      <template v-if="repoPermissions.push">
-        <Button
-          v-if="build.status === 'pending' || build.status === 'running'"
-          class="ml-4 flex-shrink-0"
-          text="Cancel"
-          :is-loading="isCancelingBuild"
-          @click="cancelBuild"
-        />
-        <Button
-          v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
-          class="ml-4 flex-shrink-0"
-          text="Restart"
-          :is-loading="isRestartingBuild"
-          @click="restartBuild"
-        />
-      </template>
-    </FluidContainer>
+    <FluidContainer class="flex flex-col min-w-0">
+      <div class="flex border-b pb-4 items-center dark:border-gray-600">
+        <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
+        <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
+          Pipeline #{{ buildId }} - {{ message }}
+        </h1>
+        <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
+        <template v-if="repoPermissions.push">
+          <Button
+            v-if="build.status === 'pending' || build.status === 'running'"
+            class="ml-4 flex-shrink-0"
+            text="Cancel"
+            :is-loading="isCancelingBuild"
+            @click="cancelBuild"
+          />
+          <Button
+            v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
+            class="ml-4 flex-shrink-0"
+            text="Restart"
+            :is-loading="isRestartingBuild"
+            @click="restartBuild"
+          />
+        </template>
+      </div>
 
-    <div class="p-0 flex flex-col flex-grow">
-      <FluidContainer class="flex text-gray-500 justify-between py-0">
+      <div class="flex text-gray-500 justify-between px-2 py-4">
         <div class="flex space-x-2 items-center">
           <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
           <span>{{ build.author }}</span>
@@ -53,35 +53,39 @@
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
-      </FluidContainer>
+      </div>
 
-      <div v-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
-        <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-        <p class="text-xl text-gray-500">This pipeline is awaiting approval by some maintainer!</p>
-        <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
-          <Button color="green" text="Approve" :is-loading="isApprovingBuild" @click="approveBuild" />
-          <Button color="red" text="Decline" :is-loading="isDecliningBuild" @click="declineBuild" />
-        </div>
-      </div>
-      <div v-else-if="build.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-        <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-        <p class="text-xl text-gray-500">This pipeline has been declined!</p>
-      </div>
-      <BuildProcs v-else v-model:selected-proc-id="selectedProcId" :build="build" />
-    </div>
+      <Tabs v-model="activeTab" disable-hash-mode>
+        <Tab title="Logs" />
+        <Tab title="Config" />
+      </Tabs>
+    </FluidContainer>
+
+    <router-view />
   </template>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  provide,
+  Ref,
+  toRef,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
-import BuildProcs from '~/components/repo/build/BuildProcs.vue';
 import BuildStatusIcon from '~/components/repo/build/BuildStatusIcon.vue';
+import Tab from '~/components/tabs/Tab.vue';
+import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useBuild from '~/compositions/useBuild';
@@ -90,18 +94,17 @@ import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
-import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
-  name: 'RepoBuild',
+  name: 'BuildWrapper',
 
   components: {
     FluidContainer,
     Button,
     BuildStatusIcon,
-    BuildProcs,
     IconButton,
-    Icon,
+    Tabs,
+    Tab,
   },
 
   props: {
@@ -150,28 +153,10 @@ export default defineComponent({
     }
 
     const build = buildStore.getBuild(repoOwner, repoName, buildId);
-    const { since, duration, message } = useBuild(build);
-    const procId = toRef(props, 'procId');
-    const selectedProcId = computed({
-      get() {
-        if (procId.value) {
-          return parseInt(procId.value, 10);
-        }
+    const { since, duration } = useBuild(build);
+    provide('build', build);
 
-        if (!build.value || !build.value.procs || !build.value.procs[0].children) {
-          return null;
-        }
-
-        return build.value.procs[0].children[0].pid;
-      },
-      set(_selectedProcId: number | null) {
-        if (!_selectedProcId) {
-          return;
-        }
-
-        router.replace({ params: { ...route.params, procId: `${_selectedProcId}` } });
-      },
-    });
+    const { message } = useBuild(build);
 
     async function loadBuild(): Promise<void> {
       if (!repo) {
@@ -193,32 +178,14 @@ export default defineComponent({
       }
 
       // TODO: is selectedProcId right?
-      const proc = findProc(build.value.procs, selectedProcId.value || 2);
+      // const proc = findProc(build.value.procs, selectedProcId.value || 2);
 
-      if (!proc) {
-        throw new Error('Unexpected: Proc not found');
-      }
+      // if (!proc) {
+      //   throw new Error('Unexpected: Proc not found');
+      // }
 
-      await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), proc.ppid);
+      await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), 0);
       notifications.notify({ title: 'Pipeline canceled', type: 'success' });
-    });
-
-    const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo is undefined');
-      }
-
-      await apiClient.approveBuild(repo.value.owner, repo.value.name, buildId.value);
-      notifications.notify({ title: 'Pipeline approved', type: 'success' });
-    });
-
-    const { doSubmit: declineBuild, isLoading: isDecliningBuild } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo is undefined');
-      }
-
-      await apiClient.declineBuild(repo.value.owner, repo.value.name, buildId.value);
-      notifications.notify({ title: 'Pipeline declined', type: 'success' });
     });
 
     const { doSubmit: restartBuild, isLoading: isRestartingBuild } = useAsyncAction(async () => {
@@ -238,22 +205,34 @@ export default defineComponent({
       favicon.updateStatus('default');
     });
 
+    const activeTab = computed({
+      get() {
+        if (route.name === 'repo-build') {
+          return 'logs';
+        }
+        return 'config';
+      },
+      set(tab: string) {
+        if (tab === 'config') {
+          router.replace({ name: 'repo-build-config' });
+        } else {
+          router.replace({ name: 'repo-build' });
+        }
+      },
+    });
+
     return {
       repoPermissions,
-      selectedProcId,
       build,
-      since,
-      duration,
       repo,
       message,
       isCancelingBuild,
-      isApprovingBuild,
-      isDecliningBuild,
       isRestartingBuild,
+      activeTab,
+      since,
+      duration,
       cancelBuild,
       restartBuild,
-      approveBuild,
-      declineBuild,
       goBack: useRouteBackOrDefault({ name: 'repo' }),
     };
   },

@@ -48,10 +48,23 @@ const routes: RouteRecordRaw[] = [
         props: (route) => ({ branch: route.params.branch }),
       },
       {
-        path: 'build/:buildId/:procId?',
-        name: 'repo-build',
-        component: (): Component => import('~/views/repo/RepoBuild.vue'),
+        path: 'build/:buildId',
+        component: (): Component => import('~/views/repo/build/BuildWrapper.vue'),
         props: true,
+        children: [
+          {
+            path: ':procId?',
+            name: 'repo-build',
+            component: (): Component => import('~/views/repo/build/Build.vue'),
+            props: true,
+          },
+          {
+            path: 'config',
+            name: 'repo-build-config',
+            component: (): Component => import('~/views/repo/build/BuildConfig.vue'),
+            props: true,
+          },
+        ],
       },
       {
         path: 'settings',
