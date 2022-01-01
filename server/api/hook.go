@@ -213,7 +213,7 @@ func PostHook(c *gin.Context) {
 	build.Status = model.StatusPending
 
 	// TODO(336) extend gated feature with an allow/block List
-	if repo.IsGated && build.Sender != repoUser.Login {
+	if repo.IsGated {
 		build.Status = model.StatusBlocked
 	}
 
