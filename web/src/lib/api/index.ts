@@ -1,14 +1,25 @@
 import ApiClient, { encodeQueryString } from './client';
-import { Build, BuildFeed, BuildLog, BuildProc, Registry, Repo, RepoPermissions, RepoSettings, Secret } from './types';
+import {
+  Build,
+  BuildFeed,
+  BuildLog,
+  BuildProc,
+  Registry,
+  Repo,
+  RepoList,
+  RepoPermissions,
+  RepoSettings,
+  Secret,
+} from './types';
 
 type RepoListOptions = {
   all?: boolean;
   flush?: boolean;
 };
 export default class WoodpeckerClient extends ApiClient {
-  getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
+  getRepoList(opts?: RepoListOptions): Promise<RepoList> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/user/repos?${query}`) as Promise<Repo[]>;
+    return this._get(`/api/user/repos?${query}`) as Promise<RepoList>;
   }
 
   getRepo(owner: string, repo: string): Promise<Repo> {

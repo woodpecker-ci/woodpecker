@@ -93,6 +93,7 @@ func GetRepos(c *gin.Context) {
 	all, _ := strconv.ParseBool(c.Query("all"))
 	flush, _ := strconv.ParseBool(c.Query("flush"))
 
+	var flushError error
 	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
 		log.Debug().Msgf("sync begin: %s", user.Login)
 		user.Synced = time.Now().Unix()
@@ -110,31 +111,40 @@ func GetRepos(c *gin.Context) {
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
+		flushError = sync.Sync(c, user, server.Config.FlatPermissions)
+		if flushError != nil {
+			log.Debug().Msgf("sync error: %s: %s", user.Login, flushError)
 		} else {
 			log.Debug().Msgf("sync complete: %s", user.Login)
 		}
 	}
 
-	repos, err := _store.RepoList(user, true)
+	allRepos, err := _store.RepoList(user, true)
 	if err != nil {
 		c.String(500, "Error fetching repository list. %s", err)
 		return
 	}
 
+	var repos []*model.Repo
 	if all {
-		c.JSON(http.StatusOK, repos)
-		return
-	}
-
-	var active []*model.Repo
-	for _, repo := range repos {
-		if repo.IsActive {
-			active = append(active, repo)
+		repos = allRepos
+	} else {
+		for _, repo := range allRepos {
+			if repo.IsActive {
+				repos = append(repos, repo)
+			}
 		}
 	}
-	c.JSON(http.StatusOK, active)
+
+	result := model.RepoList{
+		Repos: repos,
+	}
+
+	if flushError != nil {
+		result.Message = flushError.Error()
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func PostToken(c *gin.Context) {

@@ -72,13 +72,25 @@ export default defineComponent({
     const { searchedRepos } = useRepoSearch(repos, search);
 
     onMounted(async () => {
-      repos.value = await apiClient.getRepoList({ all: true });
+      const result = await apiClient.getRepoList({ all: true });
+      repos.value = result.repos;
+
+      if (result.message) {
+        notifications.notify({ title: result.message, type: 'error' });
+      }
     });
 
     const { doSubmit: reloadRepos, isLoading: isReloadingRepos } = useAsyncAction(async () => {
+      const result = await apiClient.getRepoList({ all: true, flush: true });
+
       repos.value = undefined;
-      repos.value = await apiClient.getRepoList({ all: true, flush: true });
-      notifications.notify({ title: 'Repository list reloaded', type: 'success' });
+      repos.value = result.repos;
+
+      if (result.message) {
+        notifications.notify({ title: result.message, type: 'error' });
+      } else {
+        notifications.notify({ title: 'Repository list reloaded', type: 'success' });
+      }
     });
 
     const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {

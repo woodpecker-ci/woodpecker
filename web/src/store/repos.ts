@@ -34,8 +34,8 @@ export default defineStore({
       this.repos[repoSlug(repo)] = repo;
     },
     async loadRepos() {
-      const repos = await apiClient.getRepoList();
-      repos.forEach((repo) => {
+      const result = await apiClient.getRepoList();
+      result.repos.forEach((repo) => {
         this.repos[repoSlug(repo.owner, repo.name)] = repo;
       });
     },

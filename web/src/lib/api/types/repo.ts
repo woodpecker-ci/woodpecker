@@ -70,3 +70,11 @@ export type RepoPermissions = {
   admin: boolean;
   synced: number;
 };
+
+export type RepoList = {
+  message: string | null;
+  // error message if any errors occurred
+
+  repos: Repo[];
+  // list of the fetched repositories
+};

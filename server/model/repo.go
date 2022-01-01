@@ -97,3 +97,8 @@ type RepoPatch struct {
 	Visibility *string `json:"visibility,omitempty"`
 	AllowPull  *bool   `json:"allow_pr,omitempty"`
 }
+
+type RepoList struct {
+	Message string  `json:"message"`
+	Repos   []*Repo `json:"repos"`
+}
