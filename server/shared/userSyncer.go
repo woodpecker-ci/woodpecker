@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -67,6 +69,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 	}
 
 	remoteRepos := make([]*model.Repo, 0, len(repos))
+	hasErrors := false
 	for _, repo := range repos {
 		if s.Match(repo) {
 			repo.Perm = &model.Perm{
@@ -86,7 +89,9 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 			} else {
 				remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
 				if err != nil {
-					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+					log.Debug().Msgf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+					hasErrors = true
+					continue
 				}
 				repo.Perm.Pull = remotePerm.Pull
 				repo.Perm.Push = remotePerm.Push
@@ -97,6 +102,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 		}
 	}
 
+	// still store all successfully queried repositories
 	err = s.Store.RepoBatch(remoteRepos)
 	if err != nil {
 		return err
@@ -113,5 +119,14 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 		return nil
 	}
 
-	return s.Perms.PermFlush(user, unix)
+	err = s.Perms.PermFlush(user, unix)
+	if err != nil {
+		return err
+	}
+
+	if hasErrors {
+		return fmt.Errorf("failed to sync all repositories. See previous messages for details")
+	}
+
+	return nil
 }
