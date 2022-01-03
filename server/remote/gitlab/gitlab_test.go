@@ -109,21 +109,27 @@ func Test_Gitlab(t *testing.T) {
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := client.Perm(ctx, &user, "diaspora", "diaspora-client")
+				perm, err := client.Perm(ctx, &user, &repo)
 				assert.NoError(t, err)
 				assert.True(t, perm.Admin)
 				assert.True(t, perm.Pull)
 				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := client.Perm(ctx, &user, "brightbox", "puppet")
+				perm, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "brightbox",
+					Name:  "puppet",
+				})
 				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := client.Perm(ctx, &user, "not-existed", "not-existed")
+				_, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "not-existed",
+					Name:  "not-existed",
+				})
 
 				g.Assert(err).IsNotNil()
 			})

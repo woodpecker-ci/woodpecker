@@ -214,12 +214,12 @@ func (_m *Remote) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 // Perm provides a mock function with given fields: ctx, u, owner, repo
-func (_m *Remote) Perm(ctx context.Context, u *model.User, owner string, repo string) (*model.Perm, error) {
-	ret := _m.Called(ctx, u, owner, repo)
+func (_m *Remote) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
+	ret := _m.Called(ctx, u, repo.Owner, repo.Name)
 
 	var r0 *model.Perm
 	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string, string) *model.Perm); ok {
-		r0 = rf(ctx, u, owner, repo)
+		r0 = rf(ctx, u, repo.Owner, repo.Name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Perm)
@@ -228,7 +228,7 @@ func (_m *Remote) Perm(ctx context.Context, u *model.User, owner string, repo st
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *model.User, string, string) error); ok {
-		r1 = rf(ctx, u, owner, repo)
+		r1 = rf(ctx, u, repo.Owner, repo.Name)
 	} else {
 		r1 = ret.Error(1)
 	}

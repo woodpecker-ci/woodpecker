@@ -138,25 +138,25 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("When requesting repository permissions", func() {
 			g.It("Should handle not found errors", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 			g.It("Should authorize read access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoReadOnly.Owner, fakeRepoReadOnly.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepoReadOnly)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsFalse()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize write access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoWriteOnly.Owner, fakeRepoWriteOnly.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepoWriteOnly)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize admin access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoAdmin.Owner, fakeRepoAdmin.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepoAdmin)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
