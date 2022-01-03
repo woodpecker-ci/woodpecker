@@ -63,7 +63,7 @@ pipeline:
       event: push
 
   publish-agent-dryrun:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
       dry_run: true
@@ -75,7 +75,7 @@ pipeline:
       event: pull_request
 
   publish-agent:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
@@ -89,7 +89,7 @@ pipeline:
       event: push
 
   publish-agent-alpine:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
@@ -163,7 +163,7 @@ pipeline:
       event: tag
 
   release-agent:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
@@ -175,7 +175,7 @@ pipeline:
       event: tag
 
   release-agent-alpine:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
