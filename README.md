@@ -8,6 +8,9 @@
   <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
+  <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg?token=0CJ17X0KD8"/>
+  </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
   </a>
