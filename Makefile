@@ -75,9 +75,6 @@ test-lib:
 
 test: test-agent test-server test-server-datastore test-cli test-lib test-frontend
 
-coverage:
-	go run contrib/gocovmerge.go $(shell ls *-coverage.out) > coverage.all || echo "gocovmerge failed"
-
 build-frontend:
 	(cd web/; yarn install --frozen-lockfile; yarn build)
 
