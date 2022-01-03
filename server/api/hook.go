@@ -271,16 +271,20 @@ func PostHook(c *gin.Context) {
 // TODO: parse yaml once and not for each filter function
 func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
+
+	if build.Event == model.EventTag || build.Event == model.EventDeploy {
+		return false, nil
+	}
+
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
+		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
 		if err != nil {
 			log.Trace().Msgf("parse config '%s': %s", remoteYamlConfig.Name, err)
 			return false, err
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-		} else {
+		if parsedPipelineConfig.Branches.Match(build.Branch) {
 			return false, nil
 		}
 	}
