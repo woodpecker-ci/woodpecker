@@ -128,35 +128,35 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When requesting repository permissions", func() {
 			g.It("Should authorize admin access for project owner", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_owner")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_owner"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize admin access for project admin", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_admin")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_admin"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize read access for project member", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_member")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_member"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize no access for project guest", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_guest")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_guest"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsFalse()
 				g.Assert(perm.Push).IsFalse()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})

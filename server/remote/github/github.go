@@ -213,9 +213,9 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Perm returns the user permissions for the named GitHub repository.
-func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClientToken(ctx, u.Token)
-	repo, _, err := client.Repositories.Get(ctx, owner, name)
+	repo, _, err := client.Repositories.Get(ctx, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}

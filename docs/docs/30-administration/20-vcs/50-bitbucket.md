@@ -53,4 +53,5 @@ WOODPECKER_BITBUCKET_SECRET=... # Bitbucket oauth2 client secret
 
 ## Missing Features
 
-Merge requests are not currently supported. We are interested in patches to include this functionality. If you are interested in contributing to Woodpecker and submitting a patch please [contact us](https://discord.gg/fcMQqSMXJy).
+Merge requests are not currently supported. We are interested in patches to include this functionality.
+If you are interested in contributing to Woodpecker and submitting a patch please **contact us** via [Discord](https://discord.gg/fcMQqSMXJy) or [Matrix](https://matrix.to/#/#WoodpeckerCI-Develop:obermui.de).

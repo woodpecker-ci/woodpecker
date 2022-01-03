@@ -261,12 +261,12 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 }
 
 // Perm fetches the named repository from the remote system.
-func (g *Gitlab) Perm(ctx context.Context, user *model.User, owner, name string) (*model.Perm, error) {
+func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-	repo, err := g.getProject(ctx, client, owner, name)
+	repo, err := g.getProject(ctx, client, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}

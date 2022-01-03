@@ -213,8 +213,8 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 // Perm fetches the named repository permissions from
 // the remote system for the specified user.
-func (c *Coding) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
-	project, err := c.newClient(ctx, u).GetProject(owner, repo)
+func (c *Coding) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
+	project, err := c.newClient(ctx, u).GetProject(repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
