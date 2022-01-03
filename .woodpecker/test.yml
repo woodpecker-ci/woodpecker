@@ -41,7 +41,7 @@ pipeline:
     environment:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
-      - make test-server-datastore
+      - make test-server-datastore-coverage
 
   postgres:
     image: golang:1.16
