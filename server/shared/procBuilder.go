@@ -192,6 +192,7 @@ func containsItemWithName(name string, items []*BuildItem) bool {
 func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
+		// TODO: check if we should escape in general (what about \t ...?)
 		if strings.Contains(env, "\n") {
 			env = fmt.Sprintf("%q", env)
 		}

@@ -85,6 +85,8 @@ func (s storage) GetBuildCount() (int64, error) {
 }
 
 func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error {
+	// TODO: Verify repoID exist ...
+
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
