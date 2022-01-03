@@ -106,7 +106,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				return nil, err
 			}
 
-			if !parsed.Branches.Match(b.Curr.Branch) {
+			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
 				proc.State = model.StatusSkipped
 			}
 
