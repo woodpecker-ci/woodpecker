@@ -251,6 +251,7 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 				return nil, err
 			}
 
+			// TODO(648) remove when woodpecker understands nested repos
 			if strings.Count(repo.FullName, "/") > 1 {
 				log.Debug().Msgf("Skipping nested repository %s for user %s, because they are not supported, yet (see #648).", repo.FullName, user.Login)
 				continue
