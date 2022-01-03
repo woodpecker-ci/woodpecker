@@ -169,10 +169,10 @@ func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	return all, nil
 }
 
-func (c *Config) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
+func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
-	return client.FindRepoPerms(owner, repo)
+	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
