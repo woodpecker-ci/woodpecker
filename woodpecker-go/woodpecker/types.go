@@ -43,6 +43,12 @@ type (
 		BuildCounter *int    `json:"build_counter,omitempty"`
 	}
 
+	// RepoList defines the response type of the repos request
+	RepoList struct {
+		Message string  `json:"message"`
+		Repos   []*Repo `json:"repos"`
+	}
+
 	// Build defines a build object.
 	Build struct {
 		ID        int64   `json:"id"`

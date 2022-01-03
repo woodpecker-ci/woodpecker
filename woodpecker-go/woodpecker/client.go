@@ -124,19 +124,19 @@ func (c *client) Repo(owner string, name string) (*Repo, error) {
 // RepoList returns a list of all repositories to which
 // the user has explicit access in the host system.
 func (c *client) RepoList() ([]*Repo, error) {
-	var out []*Repo
+	var out RepoList
 	uri := fmt.Sprintf(pathRepos, c.addr)
 	err := c.get(uri, &out)
-	return out, err
+	return out.Repos, err
 }
 
 // RepoListOpts returns a list of all repositories to which
 // the user has explicit access in the host system.
 func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
-	var out []*Repo
+	var out RepoList
 	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
 	err := c.get(uri, &out)
-	return out, err
+	return out.Repos, err
 }
 
 // RepoPost activates a repository.
