@@ -70,6 +70,7 @@ pipeline:
     pull: true
     image: plugins/codecov
     environment:
+      - DRONE=true
       - DRONE_REPO=${CI_REPO}
       - DRONE_BRANCH=${CI_COMMIT_BRANCH}
       - DRONE_COMMIT=${CI_COMMIT_SHA}
