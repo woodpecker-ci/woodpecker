@@ -80,7 +80,10 @@ pipeline:
       - DRONE_PULL_REQUEST=${CI_COMMIT_PULL_REQUEST}
     settings:
       files:
-        - coverage.all
+        - agent-coverage.out
+        - cli-coverage.out
+        - server-coverage.out
+        - datastore-coverage.out
       token:
         from_secret: codecov_token
 
