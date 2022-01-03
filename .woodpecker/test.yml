@@ -61,6 +61,20 @@ pipeline:
     commands:
       - make test-server-datastore
 
+  generate-coverage:
+    image: golang:1.16
+    commands:
+      - make coverage
+
+  coverage-codecov:
+    pull: true
+    image: plugins/codecov
+    settings:
+      files:
+        - coverage.all
+      token:
+        from_secret: codecov_token
+
 services:
   service-postgres:
     image: postgres:9.6
