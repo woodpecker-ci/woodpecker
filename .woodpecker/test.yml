@@ -61,10 +61,17 @@ pipeline:
     commands:
       - make test-server-datastore
 
-  generate-coverage:
+  echo-test:
     image: golang:1.16
     commands:
-      - make coverage
+      - echo DRONE=true
+      - echo DRONE_REPO=${CI_REPO}
+      - echo DRONE_BRANCH=${CI_COMMIT_BRANCH}
+      - echo DRONE_COMMIT=${CI_COMMIT_SHA}
+      - echo DRONE_TAG=${CI_COMMIT_TAG}
+      - echo DRONE_BUILD_NUMBER=${CI_BUILD_NUMBER}
+      - echo DRONE_BUILD_LINK=${CI_BUILD_LINK}
+      - echo DRONE_PULL_REQUEST=${CI_COMMIT_PULL_REQUEST}
 
   coverage-codecov:
     pull: true
