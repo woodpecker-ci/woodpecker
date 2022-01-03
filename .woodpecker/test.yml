@@ -61,7 +61,7 @@ pipeline:
     commands:
       - make test-server-datastore
 
-  coverage-codecov:
+  codecov:
     pull: true
     image: plugins/codecov
     environment:
