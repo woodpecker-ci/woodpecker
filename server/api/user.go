@@ -128,7 +128,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	var active []*model.Repo
+	active := make([]*model.Repo, 0)
 	for _, repo := range repos {
 		if repo.IsActive {
 			active = append(active, repo)
