@@ -227,7 +227,7 @@ func PostHook(c *gin.Context) {
 
 	// persist the build config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
+		_, err := findOrPersistPipelineConfig(_store, build, remoteYamlConfig)
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
@@ -310,9 +310,9 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	return false
 }
 
-func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
-	conf, err := server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+	conf, err := store.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
 			RepoID: build.RepoID,
@@ -320,10 +320,10 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 			Hash:   sha,
 			Name:   shared.SanitizePath(remoteYamlConfig.Name),
 		}
-		err = server.Config.Storage.Config.ConfigCreate(conf)
+		err = store.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+			conf, err = store.ConfigFindIdentical(build.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
@@ -334,8 +334,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 		ConfigID: conf.ID,
 		BuildID:  build.ID,
 	}
-	err = server.Config.Storage.Config.BuildConfigCreate(buildConfig)
-	if err != nil {
+	if err := store.BuildConfigCreate(buildConfig); err != nil {
 		return nil, err
 	}
 

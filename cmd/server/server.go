@@ -256,7 +256,6 @@ func run(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// storage
 	server.Config.Storage.Files = v
-	server.Config.Storage.Config = v
 
 	// remote
 	server.Config.Services.Remote = r

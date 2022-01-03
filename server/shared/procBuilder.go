@@ -100,11 +100,10 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// lint pipeline
-			lerr := linter.New(
+			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
-			).Lint(parsed)
-			if lerr != nil {
-				return nil, lerr
+			).Lint(parsed); err != nil {
+				return nil, err
 			}
 
 			if !parsed.Branches.Match(b.Curr.Branch) {
