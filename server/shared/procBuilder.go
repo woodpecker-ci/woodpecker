@@ -137,7 +137,22 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
+	// check if at least one proc can start
+	procListContainsItemsToRun(items)
+	if !procListContainsItemsToRun(items) {
+		return nil, fmt.Errorf("build has no startpoint")
+	}
+
 	return items, nil
+}
+
+func procListContainsItemsToRun(items []*BuildItem) bool {
+	for i := range items {
+		if items[i].Proc.State == model.StatusPending {
+			return true
+		}
+	}
+	return false
 }
 
 func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
