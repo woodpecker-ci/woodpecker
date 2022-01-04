@@ -90,7 +90,7 @@ func New(opts Opts) (remote.Remote, error) {
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	var config = &oauth2.Config{
+	config := &oauth2.Config{
 		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
@@ -109,17 +109,17 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	// get the OAuth code
-	var code = req.FormValue("code")
+	code := req.FormValue("code")
 	if len(code) == 0 {
 		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
 		return nil, nil
 	}
 
-	var trans = &oauth2.Transport{Config: config, Transport: &http.Transport{
+	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var token, err = trans.Exchange(code)
+	token, err := trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -395,7 +395,7 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
-func (g *Gitlab) getTokenAndWebURL(link string) (token string, webURL string, err error) {
+func (g *Gitlab) getTokenAndWebURL(link string) (token, webURL string, err error) {
 	uri, err := url.Parse(link)
 	if err != nil {
 		return "", "", err

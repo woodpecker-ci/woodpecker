@@ -93,7 +93,7 @@ func loop(c *cli.Context) error {
 
 	// grpc.Dial(target, ))
 
-	var transport = grpc.WithInsecure()
+	transport := grpc.WithInsecure()
 
 	if c.Bool("secure-grpc") {
 		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
@@ -111,7 +111,6 @@ func loop(c *cli.Context) error {
 			Timeout: c.Duration("keepalive-timeout"),
 		}),
 	)
-
 	if err != nil {
 		return err
 	}

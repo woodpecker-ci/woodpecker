@@ -36,7 +36,7 @@ func createSQLiteDB(t *testing.T) string {
 		t.FailNow()
 	}
 
-	if !assert.NoError(t, ioutil.WriteFile(tmpF.Name(), dbF, 0644)) {
+	if !assert.NoError(t, ioutil.WriteFile(tmpF.Name(), dbF, 0o644)) {
 		t.FailNow()
 	}
 	return tmpF.Name()

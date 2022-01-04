@@ -33,7 +33,7 @@ func Test_helper(t *testing.T) {
 			}
 			from.Project.Key = "octocat"
 
-			//var links [1]internal.LinkType
+			// var links [1]internal.LinkType
 			link := internal.CloneLink{
 				Name: "http",
 				Href: "https://x7hw@server.org/foo/bar.git",
