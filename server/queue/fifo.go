@@ -336,7 +336,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
+func (q *fifo) updateDepStatusInQueue(taskID, status string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()

@@ -250,7 +250,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 	}
 
 	// Gitea SDK forces us to read repo list paginated.
-	var page = 1
+	page := 1
 	for {
 		all, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{

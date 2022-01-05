@@ -17,7 +17,7 @@ package model
 import "testing"
 
 func TestUserValidate(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		user User
 		err  error
 	}{

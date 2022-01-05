@@ -473,7 +473,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// Read query string parameters into buildParams, exclude reserved params
-	var envs = map[string]string{}
+	envs := map[string]string{}
 	for key, val := range c.Request.URL.Query() {
 		switch key {
 		// Skip some options of the endpoint
