@@ -15,10 +15,10 @@
 package datastore
 
 import (
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
-
-	"xorm.io/xorm"
 )
 
 type storage struct {

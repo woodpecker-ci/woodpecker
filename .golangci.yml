@@ -6,9 +6,10 @@ linters-settings:
   gofumpt:
     lang-version: "1.16"
     extra-rules: true
+  gci:
+    local-prefixes: github.com/woodpecker-ci/woodpecker
 
 linters:
-  disable-all: true
   enable:
     - bidichk
     - deadcode
@@ -27,6 +28,66 @@ linters:
     - varcheck
     - whitespace
     - gofumpt
+    - asciicheck
+    - bodyclose
+#    - contextcheck
+#    - cyclop
+    - depguard
+    - dogsled
+#    - dupl
+    - durationcheck
+#    - errchkjson
+#    - errname
+#    - errorlint
+#    - exhaustivestruct
+#    - exhaustive
+#    - exportloopref
+#    - forbidigo
+#    - forcetypeassert
+    - gci
+#    - gochecknoglobals
+#    - gochecknoinits
+#    - gocognit
+#    - goconst
+#    - gocritic
+#    - gocyclo
+    - goheader
+    - goimports
+#    - gomnd
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+#    - gosec
+#    - ifshort
+    - importas
+#    - ireturn
+#    - lll
+    - makezero
+#    - nakedret
+#    - nestif
+#    - nilerr
+#    - nilnil
+#    - nlreturn
+#    - noctx
+    - nolintlint
+#    - paralleltest
+#    - prealloc
+#    - predeclared
+#    - promlinter
+    - rowserrcheck
+    - sqlclosecheck
+#    - stylecheck
+#    - tagliatelle
+#    - tenv
+#    - testpackage
+#    - thelper
+#    - tparallel
+    - unconvert
+#    - unparam
+    - wastedassign
+    - whitespace
+#    - wrapcheck
+#    - wsl
 
 run:
   timeout: 5m

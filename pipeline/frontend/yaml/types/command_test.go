@@ -4,9 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 type StructCommand struct {

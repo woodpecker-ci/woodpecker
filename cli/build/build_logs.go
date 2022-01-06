@@ -3,9 +3,9 @@ package build
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 )
 
 var buildLogsCmd = &cli.Command{

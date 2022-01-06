@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const (

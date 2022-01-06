@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/docker/docker/api/types/strslice"
+
 	// TODO: search for maintained
 	"github.com/flynn/go-shlex"
 )
