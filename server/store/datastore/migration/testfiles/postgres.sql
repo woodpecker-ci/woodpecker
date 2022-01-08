@@ -944,14 +944,14 @@ SELECT pg_catalog.setval('public.agents_agent_id_seq', 1, false);
 -- Name: builds_build_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.builds_build_id_seq', 1, false);
+SELECT pg_catalog.setval('public.builds_build_id_seq', 1, true);
 
 
 --
 -- Name: config_config_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.config_config_id_seq', 1, false);
+SELECT pg_catalog.setval('public.config_config_id_seq', 1, true);
 
 
 --
@@ -972,7 +972,7 @@ SELECT pg_catalog.setval('public.logs_log_id_seq', 1, false);
 -- Name: procs_proc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.procs_proc_id_seq', 1, false);
+SELECT pg_catalog.setval('public.procs_proc_id_seq', 3, true);
 
 
 --
@@ -986,14 +986,14 @@ SELECT pg_catalog.setval('public.registry_registry_id_seq', 1, false);
 -- Name: repos_repo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.repos_repo_id_seq', 1, false);
+SELECT pg_catalog.setval('public.repos_repo_id_seq', 122, true);
 
 
 --
 -- Name: secrets_secret_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.secrets_secret_id_seq', 1, false);
+SELECT pg_catalog.setval('public.secrets_secret_id_seq', 4, true);
 
 
 --
@@ -1007,7 +1007,7 @@ SELECT pg_catalog.setval('public.senders_sender_id_seq', 1, false);
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: root
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_user_id_seq', 1, true);
 
 
 --
