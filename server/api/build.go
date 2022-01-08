@@ -195,7 +195,7 @@ func GetBuildConfig(c *gin.Context) {
 		return
 	}
 
-	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
+	configs, err := _store.ConfigsForBuild(build.ID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
