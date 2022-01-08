@@ -87,10 +87,11 @@ func buildFromPush(hook *pushHook) *model.Build {
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
-		if len(hook.Commits) == 1 {
-			link = hook.Commits[0].URL
-		}
 	}
+
+  if len(hook.Commits) == 1 {
+	  link = hook.Commits[0].URL
+  }
 
 	return &model.Build{
 		Event:        model.EventPush,
