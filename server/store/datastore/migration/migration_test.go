@@ -97,7 +97,7 @@ func restorePostgresDump(t *testing.T, e *xorm.Engine) {
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	_, err = e.SQL(dump).Exec()
+	_, err = e.SQL(string(dump)).Exec()
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
