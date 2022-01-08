@@ -708,304 +708,288 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Data for Name: agents; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.agents (agent_id, agent_addr, agent_platform, agent_capacity, agent_created, agent_updated) FROM stdin;
-\.
-
-
---
--- Data for Name: build_config; Type: TABLE DATA; Schema: public; Owner: root
---
-
-COPY public.build_config (config_id, build_id) FROM stdin;
-1	1
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: builds; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.builds (build_id, build_repo_id, build_number, build_event, build_status, build_enqueued, build_created, build_started, build_finished, build_commit, build_branch, build_ref, build_refspec, build_remote, build_title, build_message, build_timestamp, build_author, build_avatar, build_email, build_link, build_deploy, build_signed, build_verified, build_parent, build_error, build_reviewer, build_reviewed, build_sender, build_config_id, changed_files) FROM stdin;
-1	105	1	push	failure	1641630525	1641630525	1641630525	1641630527	24bf205107cea48b92bc6444e18e40d21733a594	master	refs/heads/master				„.drone.yml“ hinzufügen\n	1641630525	test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	test@test.test	http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594		f	t	0			0	test	0	[".drone.yml"]\n
-\.
+INSERT INTO public.builds (build_id, build_repo_id, build_number, build_event, build_status, build_enqueued, build_created, build_started, build_finished, build_commit, build_branch, build_ref, build_refspec, build_remote, build_title, build_message, build_timestamp, build_author, build_avatar, build_email, build_link, build_deploy, build_signed, build_verified, build_parent, build_error, build_reviewer, build_reviewed, build_sender, build_config_id, changed_files) VALUES
+(1, 105, 1, 'push', 'failure', 1641630525, 1641630525, 1641630525, 1641630527, '24bf205107cea48b92bc6444e18e40d21733a594', 'master', 'refs/heads/master', '', '', '', '„.drone.yml“ hinzufügen\n', '1641630525', 'test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'test@test.test', 'http://10.40.8.5:3000/2/settings/compare/3fee083df05667d525878b5fcbd4eaf2a121c559...24bf205107cea48b92bc6444e18e40d21733a594', '', 'f', 't', '0', '', '', '0', 'test', '0', '[".drone.yml"]\n');
 
 
 --
 -- Data for Name: config; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.config (config_id, config_repo_id, config_hash, config_data, config_name) FROM stdin;
-1	105	ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8	\\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a706970656c696e653a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d	drone
-\.
+INSERT INTO public.config (config_id, config_repo_id, config_hash, config_data, config_name) VALUES
+(1, 105, 'ec8ca9529d6081e631aec26175b26ac91699395b96b9c5fc1f3af6d3aef5d3a8', '\x636c6f6e653a0a20206769743a0a20202020696d6167653a20776f6f647065636b657263692f706c7567696e2d6769743a746573740a0a706970656c696e653a0a20205072696e743a0a20202020696d6167653a207072696e742f656e760a20202020736563726574733a205b204141414141414141414141414141414141414141414141414141205d', 'drone');
+
+
+--
+-- Data for Name: build_config; Type: TABLE DATA; Schema: public; Owner: root
+--
+
+INSERT INTO public.build_config (config_id, build_id) VALUES
+(1, 1);
 
 
 --
 -- Data for Name: files; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.files (file_id, file_build_id, file_proc_id, file_name, file_mime, file_size, file_time, file_data, file_pid, file_meta_passed, file_meta_failed, file_meta_skipped) FROM stdin;
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.logs (log_id, log_job_id, log_data) FROM stdin;
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.migrations (name) FROM stdin;
-create-table-users
-create-table-repos
-create-table-builds
-create-index-builds-repo
-create-index-builds-author
-create-table-procs
-create-index-procs-build
-create-table-logs
-create-table-files
-create-index-files-builds
-create-index-files-procs
-create-table-secrets
-create-index-secrets-repo
-create-table-registry
-create-index-registry-repo
-create-table-config
-create-table-tasks
-create-table-agents
-create-table-senders
-create-index-sender-repos
-alter-table-add-repo-visibility
-update-table-set-repo-visibility
-alter-table-add-repo-seq
-update-table-set-repo-seq
-update-table-set-repo-seq-default
-alter-table-add-repo-active
-update-table-set-repo-active
-alter-table-add-user-synced
-update-table-set-user-synced
-create-table-perms
-create-index-perms-repo
-create-index-perms-user
-alter-table-add-file-pid
-alter-table-add-file-meta-passed
-alter-table-add-file-meta-failed
-alter-table-add-file-meta-skipped
-alter-table-update-file-meta
-create-table-build-config
-alter-table-add-config-name
-update-table-set-config-name
-populate-build-config
-alter-table-add-task-dependencies
-alter-table-add-task-run-on
-alter-table-add-repo-fallback
-update-table-set-repo-fallback
-update-table-set-repo-fallback-again
-add-builds-changed_files-column
-update-builds-set-changed_files
-update-table-set-users-token-and-secret-length
-\.
+INSERT INTO public.migrations (name) VALUES
+('create-table-users'),
+('create-table-repos'),
+('create-table-builds'),
+('create-index-builds-repo'),
+('create-index-builds-author'),
+('create-table-procs'),
+('create-index-procs-build'),
+('create-table-logs'),
+('create-table-files'),
+('create-index-files-builds'),
+('create-index-files-procs'),
+('create-table-secrets'),
+('create-index-secrets-repo'),
+('create-table-registry'),
+('create-index-registry-repo'),
+('create-table-config'),
+('create-table-tasks'),
+('create-table-agents'),
+('create-table-senders'),
+('create-index-sender-repos'),
+('alter-table-add-repo-visibility'),
+('update-table-set-repo-visibility'),
+('alter-table-add-repo-seq'),
+('update-table-set-repo-seq'),
+('update-table-set-repo-seq-default'),
+('alter-table-add-repo-active'),
+('update-table-set-repo-active'),
+('alter-table-add-user-synced'),
+('update-table-set-user-synced'),
+('create-table-perms'),
+('create-index-perms-repo'),
+('create-index-perms-user'),
+('alter-table-add-file-pid'),
+('alter-table-add-file-meta-passed'),
+('alter-table-add-file-meta-failed'),
+('alter-table-add-file-meta-skipped'),
+('alter-table-update-file-meta'),
+('create-table-build-config'),
+('alter-table-add-config-name'),
+('update-table-set-config-name'),
+('populate-build-config'),
+('alter-table-add-task-dependencies'),
+('alter-table-add-task-run-on'),
+('alter-table-add-repo-fallback'),
+('update-table-set-repo-fallback'),
+('update-table-set-repo-fallback-again'),
+('add-builds-changed_files-column'),
+('update-builds-set-changed_files'),
+('update-table-set-users-token-and-secret-length');
 
 
 --
 -- Data for Name: perms; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm_admin, perm_synced) FROM stdin;
-1	1	t	t	t	1641626844
-1	2	t	t	t	1641626844
-1	3	t	t	t	1641626844
-1	4	t	t	t	1641626844
-1	5	t	t	t	1641626844
-1	6	t	t	t	1641626844
-1	7	t	t	t	1641626844
-1	8	t	t	t	1641626844
-1	9	t	t	t	1641626844
-1	10	t	t	t	1641626844
-1	11	t	t	t	1641626844
-1	12	t	t	t	1641626844
-1	13	t	t	t	1641626844
-1	14	t	t	t	1641626844
-1	15	t	t	t	1641626844
-1	16	t	t	t	1641626844
-1	17	t	t	t	1641626844
-1	18	t	t	t	1641626844
-1	19	t	t	t	1641626844
-1	20	t	t	t	1641626844
-1	21	t	t	t	1641626844
-1	22	t	t	t	1641626844
-1	23	t	t	t	1641626844
-1	24	t	t	t	1641626844
-1	25	t	t	t	1641626844
-1	26	t	t	t	1641626844
-1	27	t	t	t	1641626844
-1	28	t	t	t	1641626844
-1	29	t	t	t	1641626844
-1	30	t	t	t	1641626844
-1	31	t	t	t	1641626844
-1	32	t	t	t	1641626844
-1	33	t	t	t	1641626844
-1	34	t	t	t	1641626844
-1	35	t	t	t	1641626844
-1	36	t	t	t	1641626844
-1	37	t	t	t	1641626844
-1	38	t	t	t	1641626844
-1	39	t	t	t	1641626844
-1	40	t	t	t	1641626844
-1	41	t	t	t	1641626844
-1	42	t	t	t	1641626844
-1	43	t	t	t	1641626844
-1	44	t	t	t	1641626844
-1	45	t	t	t	1641626844
-1	46	t	t	t	1641626844
-1	47	t	t	t	1641626844
-1	48	t	t	t	1641626844
-1	49	t	t	t	1641626844
-1	50	t	t	t	1641626844
-1	51	t	t	t	1641626844
-1	52	t	t	t	1641626844
-1	53	t	t	t	1641626844
-1	54	t	t	t	1641626844
-1	55	t	t	t	1641626844
-1	56	t	t	t	1641626844
-1	57	t	t	t	1641626844
-1	58	t	t	t	1641626844
-1	59	t	t	t	1641626844
-1	60	t	t	t	1641626844
-1	115	t	t	t	1641630451
-1	105	t	t	t	1641630452
-\.
+INSERT INTO public.perms (perm_user_id, perm_repo_id, perm_pull, perm_push, perm_admin, perm_synced) VALUES
+(1, 1, 't', 't', 't', 1641626844),
+(1, 2, 't', 't', 't', 1641626844),
+(1, 3, 't', 't', 't', 1641626844),
+(1, 4, 't', 't', 't', 1641626844),
+(1, 5, 't', 't', 't', 1641626844),
+(1, 6, 't', 't', 't', 1641626844),
+(1, 7, 't', 't', 't', 1641626844),
+(1, 8, 't', 't', 't', 1641626844),
+(1, 9, 't', 't', 't', 1641626844),
+(1, 10, 't', 't', 't', 1641626844),
+(1, 11, 't', 't', 't', 1641626844),
+(1, 12, 't', 't', 't', 1641626844),
+(1, 13, 't', 't', 't', 1641626844),
+(1, 14, 't', 't', 't', 1641626844),
+(1, 15, 't', 't', 't', 1641626844),
+(1, 16, 't', 't', 't', 1641626844),
+(1, 17, 't', 't', 't', 1641626844),
+(1, 18, 't', 't', 't', 1641626844),
+(1, 19, 't', 't', 't', 1641626844),
+(1, 20, 't', 't', 't', 1641626844),
+(1, 21, 't', 't', 't', 1641626844),
+(1, 22, 't', 't', 't', 1641626844),
+(1, 23, 't', 't', 't', 1641626844),
+(1, 24, 't', 't', 't', 1641626844),
+(1, 25, 't', 't', 't', 1641626844),
+(1, 26, 't', 't', 't', 1641626844),
+(1, 27, 't', 't', 't', 1641626844),
+(1, 28, 't', 't', 't', 1641626844),
+(1, 29, 't', 't', 't', 1641626844),
+(1, 30, 't', 't', 't', 1641626844),
+(1, 31, 't', 't', 't', 1641626844),
+(1, 32, 't', 't', 't', 1641626844),
+(1, 33, 't', 't', 't', 1641626844),
+(1, 34, 't', 't', 't', 1641626844),
+(1, 35, 't', 't', 't', 1641626844),
+(1, 36, 't', 't', 't', 1641626844),
+(1, 37, 't', 't', 't', 1641626844),
+(1, 38, 't', 't', 't', 1641626844),
+(1, 39, 't', 't', 't', 1641626844),
+(1, 40, 't', 't', 't', 1641626844),
+(1, 41, 't', 't', 't', 1641626844),
+(1, 42, 't', 't', 't', 1641626844),
+(1, 43, 't', 't', 't', 1641626844),
+(1, 44, 't', 't', 't', 1641626844),
+(1, 45, 't', 't', 't', 1641626844),
+(1, 46, 't', 't', 't', 1641626844),
+(1, 47, 't', 't', 't', 1641626844),
+(1, 48, 't', 't', 't', 1641626844),
+(1, 49, 't', 't', 't', 1641626844),
+(1, 50, 't', 't', 't', 1641626844),
+(1, 51, 't', 't', 't', 1641626844),
+(1, 52, 't', 't', 't', 1641626844),
+(1, 53, 't', 't', 't', 1641626844),
+(1, 54, 't', 't', 't', 1641626844),
+(1, 55, 't', 't', 't', 1641626844),
+(1, 56, 't', 't', 't', 1641626844),
+(1, 57, 't', 't', 't', 1641626844),
+(1, 58, 't', 't', 't', 1641626844),
+(1, 59, 't', 't', 't', 1641626844),
+(1, 60, 't', 't', 't', 1641626844),
+(1, 115, 't', 't', 't', 1641630451),
+(1, 105, 't', 't', 't', 1641630452);
 
 
 --
 -- Data for Name: procs; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.procs (proc_id, proc_build_id, proc_pid, proc_ppid, proc_pgid, proc_name, proc_state, proc_error, proc_exit_code, proc_started, proc_stopped, proc_machine, proc_platform, proc_environ) FROM stdin;
-1	1	1	0	1	drone	failure	Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown	1	1641630525	1641630527	PC-Maddl-HOME		{}\n
-2	1	2	1	2	git	success		0	1641630525	1641630527	PC-Maddl-HOME		null\n
-3	1	3	1	3	Print	skipped		0	0	0			null\n
-\.
+INSERT INTO public.procs (proc_id, proc_build_id, proc_pid, proc_ppid, proc_pgid, proc_name, proc_state, proc_error, proc_exit_code, proc_started, proc_stopped, proc_machine, proc_platform, proc_environ) VALUES
+(1, 1, 1, 0, 1, 'drone', 'failure', 'Error response from daemon: manifest for woodpeckerci/plugin-git:test not found: manifest unknown: manifest unknown', '1', '1641630525', '1641630527', 'someHostname', '', '{}'),
+(2, 1, 2, 1, 2, 'git', 'success', '', '0', '1641630525', '1641630527', 'someHostname', '', null),
+(3, 1, 3, 1, 3, 'Print', 'skipped', '', '0', '0', '0', '', '', null);
 
 
 --
 -- Data for Name: registry; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.registry (registry_id, registry_repo_id, registry_addr, registry_email, registry_username, registry_password, registry_token) FROM stdin;
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: repos; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_allow_deploys, repo_allow_tags, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_counter, repo_active, repo_fallback) FROM stdin;
-1	0	test	a	test/a	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/a	http://10.40.8.5:3000/test/a.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-2	0	test	aa	test/aa	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/aa	http://10.40.8.5:3000/test/aa.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-3	0	test	aaaa	test/aaaa	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/aaaa	http://10.40.8.5:3000/test/aaaa.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-4	0	test	asciidoc-test	test/asciidoc-test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/asciidoc-test	http://10.40.8.5:3000/test/asciidoc-test.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-5	0	test	bigLFS	test/bigLFS	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/bigLFS	http://10.40.8.5:3000/test/bigLFS.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-6	0	test	codeberg-gitea	test/codeberg-gitea	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/codeberg-gitea	http://10.40.8.5:3000/test/codeberg-gitea.git	codeberg-1.15	0	f	f	f	f	f	f		git		f		0	f	f
-7	0	fnetX	codeberg-gitea	fnetX/codeberg-gitea	http://10.40.8.5:3000/avatars/2a635c272612fabab4fa1d11c9720d1a	http://10.40.8.5:3000/fnetX/codeberg-gitea	http://10.40.8.5:3000/fnetX/codeberg-gitea.git	pages	0	f	f	f	f	f	f		git		f		0	f	f
-8	0	test	CSV-deom	test/CSV-deom	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/CSV-deom	http://10.40.8.5:3000/test/CSV-deom.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-9	0	test	empty	test/empty	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/empty	http://10.40.8.5:3000/test/empty.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-10	0	test3	fdsa	test3/fdsa	http://10.40.8.5:3000/avatar/68985079da908d72fcfca7b557d8f729	http://10.40.8.5:3000/test3/fdsa	http://10.40.8.5:3000/test3/fdsa.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-11	0	test	fdsa	test/fdsa	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/fdsa	http://10.40.8.5:3000/test/fdsa.git	main	0	t	f	f	f	f	f		git		f		0	f	f
-12	0	test	fdsa-mig	test/fdsa-mig	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/fdsa-mig	http://10.40.8.5:3000/test/fdsa-mig.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-13	0	test	fdsa-mig2	test/fdsa-mig2	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/fdsa-mig2	http://10.40.8.5:3000/test/fdsa-mig2.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-14	0	test	fdsaddd	test/fdsaddd	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/fdsaddd	http://10.40.8.5:3000/test/fdsaddd.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-15	0	df	fdsafdsafdsa	df/fdsafdsafdsa	http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f	http://10.40.8.5:3000/df/fdsafdsafdsa	http://10.40.8.5:3000/df/fdsafdsafdsa.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-16	0	test	freebsd	test/freebsd	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/freebsd	http://10.40.8.5:3000/test/freebsd.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-17	0	test	FreeBSD_ports	test/FreeBSD_ports	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/FreeBSD_ports	http://10.40.8.5:3000/test/FreeBSD_ports.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-18	0	test	Gadgetbridge	test/Gadgetbridge	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/Gadgetbridge	http://10.40.8.5:3000/test/Gadgetbridge.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-19	0	test	gcc	test/gcc	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/gcc	http://10.40.8.5:3000/test/gcc.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-20	0	test	gitea	test/gitea	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/gitea	http://10.40.8.5:3000/test/gitea.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-21	0	test	github-orgmode-tests	test/github-orgmode-tests	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/github-orgmode-tests	http://10.40.8.5:3000/test/github-orgmode-tests.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-22	0	test	go-hexcolor	test/go-hexcolor	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/go-hexcolor	http://10.40.8.5:3000/test/go-hexcolor.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-23	0	test	go-sdk	test/go-sdk	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/go-sdk	http://10.40.8.5:3000/test/go-sdk.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-24	0	test	go-version	test/go-version	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/go-version	http://10.40.8.5:3000/test/go-version.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-25	0	test	go-version2	test/go-version2	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/go-version2	http://10.40.8.5:3000/test/go-version2.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-26	0	CI-Tests	helm-release	CI-Tests/helm-release	http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687	http://10.40.8.5:3000/CI-Tests/helm-release	http://10.40.8.5:3000/CI-Tests/helm-release.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-27	0	test	init	test/init	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/init	http://10.40.8.5:3000/test/init.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-28	0	df	init	df/init	http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f	http://10.40.8.5:3000/df/init	http://10.40.8.5:3000/df/init.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-29	0	23r3e2	init	23r3e2/init	http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b	http://10.40.8.5:3000/23r3e2/init	http://10.40.8.5:3000/23r3e2/init.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-30	0	test	LFS-TEST	test/LFS-TEST	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/LFS-TEST	http://10.40.8.5:3000/test/LFS-TEST.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-31	0	test	mig-opendev-test	test/mig-opendev-test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/mig-opendev-test	http://10.40.8.5:3000/test/mig-opendev-test.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-32	0	test	mig-opendev-test2	test/mig-opendev-test2	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/mig-opendev-test2	http://10.40.8.5:3000/test/mig-opendev-test2.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-33	0	test	mopidy-autoplay	test/mopidy-autoplay	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/mopidy-autoplay	http://10.40.8.5:3000/test/mopidy-autoplay.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-34	0	test	namla	test/namla	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/namla	http://10.40.8.5:3000/test/namla.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-36	0	CI-Tests	pages-zola	CI-Tests/pages-zola	http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687	http://10.40.8.5:3000/CI-Tests/pages-zola	http://10.40.8.5:3000/CI-Tests/pages-zola.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-38	0	CI-Tests	plugin-settings	CI-Tests/plugin-settings	http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687	http://10.40.8.5:3000/CI-Tests/plugin-settings	http://10.40.8.5:3000/CI-Tests/plugin-settings.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-40	0	test	produceit	test/produceit	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/produceit	http://10.40.8.5:3000/test/produceit.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-42	0	test	Remmina-pull	test/Remmina-pull	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/Remmina-pull	http://10.40.8.5:3000/test/Remmina-pull.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-44	0	CI-Tests	settings	CI-Tests/settings	http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687	http://10.40.8.5:3000/CI-Tests/settings	http://10.40.8.5:3000/CI-Tests/settings.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-46	0	581	tag-issue	581/tag-issue	http://10.40.8.5:3000/avatars/c6e19e830859f2cb9f7c8f8cacb8d2a6	http://10.40.8.5:3000/581/tag-issue	http://10.40.8.5:3000/581/tag-issue.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-48	0	23r3e2	test-clone	23r3e2/test-clone	http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b	http://10.40.8.5:3000/23r3e2/test-clone	http://10.40.8.5:3000/23r3e2/test-clone.git	master	0	t	f	f	f	f	f		git		f		0	f	f
-50	0	test	test-gitea-migration-release-draft	test/test-gitea-migration-release-draft	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/test-gitea-migration-release-draft	http://10.40.8.5:3000/test/test-gitea-migration-release-draft.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-52	0	test	testCIservices	test/testCIservices	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/testCIservices	http://10.40.8.5:3000/test/testCIservices.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-54	0	test	testStrangeCommits	test/testStrangeCommits	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/testStrangeCommits	http://10.40.8.5:3000/test/testStrangeCommits.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-56	0	test	vim	test/vim	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/vim	http://10.40.8.5:3000/test/vim.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-58	0	test	ww	test/ww	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/ww	http://10.40.8.5:3000/test/ww.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-60	0	test	x_bows	test/x_bows	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/x_bows	http://10.40.8.5:3000/test/x_bows.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-35	0	orga	oio	orga/oio	http://10.40.8.5:3000/avatars/93778f25b68b74ce5d69b8f8634bbf36	http://10.40.8.5:3000/orga/oio	http://10.40.8.5:3000/orga/oio.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-37	0	test	pathological	test/pathological	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/pathological	http://10.40.8.5:3000/test/pathological.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-39	0	test	PNGs	test/PNGs	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/PNGs	http://10.40.8.5:3000/test/PNGs.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-41	0	test	pyrocko	test/pyrocko	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/pyrocko	http://10.40.8.5:3000/test/pyrocko.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-43	0	test	reStructuredText_ReST	test/reStructuredText_ReST	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/reStructuredText_ReST	http://10.40.8.5:3000/test/reStructuredText_ReST.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-45	0	df	spam	df/spam	http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f	http://10.40.8.5:3000/df/spam	http://10.40.8.5:3000/df/spam.git	main	0	f	f	f	f	f	f		git		f		0	f	f
-47	0	test	tea	test/tea	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/tea	http://10.40.8.5:3000/test/tea.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-49	0	test	test-event	test/test-event	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/test-event	http://10.40.8.5:3000/test/test-event.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-51	0	test	testCI	test/testCI	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/testCI	http://10.40.8.5:3000/test/testCI.git	master	0	t	f	f	f	f	f		git		f		0	f	f
-53	0	hahaO	testCIservices	hahaO/testCIservices	http://10.40.8.5:3000/avatars/2a6eec168901fffe947ddd5a69dbdb82	http://10.40.8.5:3000/hahaO/testCIservices	http://10.40.8.5:3000/hahaO/testCIservices.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-55	0	CI-Tests	version-test	CI-Tests/version-test	http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687	http://10.40.8.5:3000/CI-Tests/version-test	http://10.40.8.5:3000/CI-Tests/version-test.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-57	0	test	woodpecker	test/woodpecker	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/woodpecker	http://10.40.8.5:3000/test/woodpecker.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-59	0	test	xss-issue	test/xss-issue	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	http://10.40.8.5:3000/test/xss-issue	http://10.40.8.5:3000/test/xss-issue.git	master	0	f	f	f	f	f	f		git		f		0	f	f
-115	1	2	testCIservices	2/testCIservices	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/testCIservices	http://10.40.8.5:3000/2/testCIservices.git	master	60	f	f	t	t	t	t	FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====	git	.drone.yml	f	public	0	t	t
-105	1	2	settings	2/settings	http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c	http://10.40.8.5:3000/2/settings	http://10.40.8.5:3000/2/settings.git	master	60	f	f	t	t	t	t	3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====	git	.drone.yml	f	public	1	t	t
-\.
+INSERT INTO public.repos (repo_id, repo_user_id, repo_owner, repo_name, repo_full_name, repo_avatar, repo_link, repo_clone, repo_branch, repo_timeout, repo_private, repo_trusted, repo_allow_pr, repo_allow_push, repo_allow_deploys, repo_allow_tags, repo_hash, repo_scm, repo_config_path, repo_gated, repo_visibility, repo_counter, repo_active, repo_fallback) VALUES
+(1, 0, 'test', 'a', 'test/a', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/a', 'http://10.40.8.5:3000/test/a.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(2, 0, 'test', 'aa', 'test/aa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/aa', 'http://10.40.8.5:3000/test/aa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(3, 0, 'test', 'aaaa', 'test/aaaa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/aaaa', 'http://10.40.8.5:3000/test/aaaa.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(4, 0, 'test', 'asciidoc-test', 'test/asciidoc-test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/asciidoc-test', 'http://10.40.8.5:3000/test/asciidoc-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(5, 0, 'test', 'bigLFS', 'test/bigLFS', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/bigLFS', 'http://10.40.8.5:3000/test/bigLFS.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(6, 0, 'test', 'codeberg-gitea', 'test/codeberg-gitea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/codeberg-gitea', 'http://10.40.8.5:3000/test/codeberg-gitea.git', 'codeberg-1.15', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(8, 0, 'test', 'CSV-deom', 'test/CSV-deom', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/CSV-deom', 'http://10.40.8.5:3000/test/CSV-deom.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(9, 0, 'test', 'empty', 'test/empty', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/empty', 'http://10.40.8.5:3000/test/empty.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(10, 0, 'test3', 'fdsa', 'test3/fdsa', 'http://10.40.8.5:3000/avatar/68985079da908d72fcfca7b557d8f729', 'http://10.40.8.5:3000/test3/fdsa', 'http://10.40.8.5:3000/test3/fdsa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(11, 0, 'test', 'fdsa', 'test/fdsa', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa', 'http://10.40.8.5:3000/test/fdsa.git', 'main', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(12, 0, 'test', 'fdsa-mig', 'test/fdsa-mig', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa-mig', 'http://10.40.8.5:3000/test/fdsa-mig.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(13, 0, 'test', 'fdsa-mig2', 'test/fdsa-mig2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsa-mig2', 'http://10.40.8.5:3000/test/fdsa-mig2.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(14, 0, 'test', 'fdsaddd', 'test/fdsaddd', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/fdsaddd', 'http://10.40.8.5:3000/test/fdsaddd.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(15, 0, 'df', 'fdsafdsafdsa', 'df/fdsafdsafdsa', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/fdsafdsafdsa', 'http://10.40.8.5:3000/df/fdsafdsafdsa.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(16, 0, 'test', 'freebsd', 'test/freebsd', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/freebsd', 'http://10.40.8.5:3000/test/freebsd.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(17, 0, 'test', 'FreeBSD_ports', 'test/FreeBSD_ports', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/FreeBSD_ports', 'http://10.40.8.5:3000/test/FreeBSD_ports.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(18, 0, 'test', 'Gadgetbridge', 'test/Gadgetbridge', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/Gadgetbridge', 'http://10.40.8.5:3000/test/Gadgetbridge.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(19, 0, 'test', 'gcc', 'test/gcc', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/gcc', 'http://10.40.8.5:3000/test/gcc.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(20, 0, 'test', 'gitea', 'test/gitea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/gitea', 'http://10.40.8.5:3000/test/gitea.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(21, 0, 'test', 'github-orgmode-tests', 'test/github-orgmode-tests', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/github-orgmode-tests', 'http://10.40.8.5:3000/test/github-orgmode-tests.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(22, 0, 'test', 'go-hexcolor', 'test/go-hexcolor', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-hexcolor', 'http://10.40.8.5:3000/test/go-hexcolor.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(23, 0, 'test', 'go-sdk', 'test/go-sdk', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-sdk', 'http://10.40.8.5:3000/test/go-sdk.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(24, 0, 'test', 'go-version', 'test/go-version', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-version', 'http://10.40.8.5:3000/test/go-version.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(25, 0, 'test', 'go-version2', 'test/go-version2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/go-version2', 'http://10.40.8.5:3000/test/go-version2.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(26, 0, 'CI-Tests', 'helm-release', 'CI-Tests/helm-release', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/helm-release', 'http://10.40.8.5:3000/CI-Tests/helm-release.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(27, 0, 'test', 'init', 'test/init', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/init', 'http://10.40.8.5:3000/test/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(28, 0, 'df', 'init', 'df/init', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/init', 'http://10.40.8.5:3000/df/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(29, 0, '23r3e2', 'init', '23r3e2/init', 'http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b', 'http://10.40.8.5:3000/23r3e2/init', 'http://10.40.8.5:3000/23r3e2/init.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(30, 0, 'test', 'LFS-TEST', 'test/LFS-TEST', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/LFS-TEST', 'http://10.40.8.5:3000/test/LFS-TEST.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(31, 0, 'test', 'mig-opendev-test', 'test/mig-opendev-test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mig-opendev-test', 'http://10.40.8.5:3000/test/mig-opendev-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(32, 0, 'test', 'mig-opendev-test2', 'test/mig-opendev-test2', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mig-opendev-test2', 'http://10.40.8.5:3000/test/mig-opendev-test2.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(33, 0, 'test', 'mopidy-autoplay', 'test/mopidy-autoplay', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/mopidy-autoplay', 'http://10.40.8.5:3000/test/mopidy-autoplay.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(34, 0, 'test', 'namla', 'test/namla', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/namla', 'http://10.40.8.5:3000/test/namla.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(36, 0, 'CI-Tests', 'pages-zola', 'CI-Tests/pages-zola', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/pages-zola', 'http://10.40.8.5:3000/CI-Tests/pages-zola.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(38, 0, 'CI-Tests', 'plugin-settings', 'CI-Tests/plugin-settings', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/plugin-settings', 'http://10.40.8.5:3000/CI-Tests/plugin-settings.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(40, 0, 'test', 'produceit', 'test/produceit', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/produceit', 'http://10.40.8.5:3000/test/produceit.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(42, 0, 'test', 'Remmina-pull', 'test/Remmina-pull', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/Remmina-pull', 'http://10.40.8.5:3000/test/Remmina-pull.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(44, 0, 'CI-Tests', 'settings', 'CI-Tests/settings', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/settings', 'http://10.40.8.5:3000/CI-Tests/settings.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(46, 0, '581', 'tag-issue', '581/tag-issue', 'http://10.40.8.5:3000/avatars/c6e19e830859f2cb9f7c8f8cacb8d2a6', 'http://10.40.8.5:3000/581/tag-issue', 'http://10.40.8.5:3000/581/tag-issue.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(48, 0, '23r3e2', 'test-clone', '23r3e2/test-clone', 'http://10.40.8.5:3000/avatars/9bc4c5e506b1bfbe3033e35f9e78428b', 'http://10.40.8.5:3000/23r3e2/test-clone', 'http://10.40.8.5:3000/23r3e2/test-clone.git', 'master', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(50, 0, 'test', 'test-gitea-migration-release-draft', 'test/test-gitea-migration-release-draft', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/test-gitea-migration-release-draft', 'http://10.40.8.5:3000/test/test-gitea-migration-release-draft.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(52, 0, 'test', 'testCIservices', 'test/testCIservices', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testCIservices', 'http://10.40.8.5:3000/test/testCIservices.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(54, 0, 'test', 'testStrangeCommits', 'test/testStrangeCommits', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testStrangeCommits', 'http://10.40.8.5:3000/test/testStrangeCommits.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(56, 0, 'test', 'vim', 'test/vim', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/vim', 'http://10.40.8.5:3000/test/vim.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(58, 0, 'test', 'ww', 'test/ww', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/ww', 'http://10.40.8.5:3000/test/ww.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(60, 0, 'test', 'x_bows', 'test/x_bows', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/x_bows', 'http://10.40.8.5:3000/test/x_bows.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(35, 0, 'orga', 'oio', 'orga/oio', 'http://10.40.8.5:3000/avatars/93778f25b68b74ce5d69b8f8634bbf36', 'http://10.40.8.5:3000/orga/oio', 'http://10.40.8.5:3000/orga/oio.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(37, 0, 'test', 'pathological', 'test/pathological', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/pathological', 'http://10.40.8.5:3000/test/pathological.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(39, 0, 'test', 'PNGs', 'test/PNGs', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/PNGs', 'http://10.40.8.5:3000/test/PNGs.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(41, 0, 'test', 'pyrocko', 'test/pyrocko', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/pyrocko', 'http://10.40.8.5:3000/test/pyrocko.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(43, 0, 'test', 'reStructuredText_ReST', 'test/reStructuredText_ReST', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/reStructuredText_ReST', 'http://10.40.8.5:3000/test/reStructuredText_ReST.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(45, 0, 'df', 'spam', 'df/spam', 'http://10.40.8.5:3000/avatars/eff7d5dba32b4da32d9a67a519434d3f', 'http://10.40.8.5:3000/df/spam', 'http://10.40.8.5:3000/df/spam.git', 'main', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(47, 0, 'test', 'tea', 'test/tea', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/tea', 'http://10.40.8.5:3000/test/tea.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(49, 0, 'test', 'test-event', 'test/test-event', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/test-event', 'http://10.40.8.5:3000/test/test-event.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(51, 0, 'test', 'testCI', 'test/testCI', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/testCI', 'http://10.40.8.5:3000/test/testCI.git', 'master', '0', 't', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(53, 0, 'hahaO', 'testCIservices', 'hahaO/testCIservices', 'http://10.40.8.5:3000/avatars/2a6eec168901fffe947ddd5a69dbdb82', 'http://10.40.8.5:3000/hahaO/testCIservices', 'http://10.40.8.5:3000/hahaO/testCIservices.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(55, 0, 'CI-Tests', 'version-test', 'CI-Tests/version-test', 'http://10.40.8.5:3000/avatars/999baa049c222f6d4d89f49018ecf687', 'http://10.40.8.5:3000/CI-Tests/version-test', 'http://10.40.8.5:3000/CI-Tests/version-test.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(57, 0, 'test', 'woodpecker', 'test/woodpecker', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/woodpecker', 'http://10.40.8.5:3000/test/woodpecker.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(59, 0, 'test', 'xss-issue', 'test/xss-issue', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'http://10.40.8.5:3000/test/xss-issue', 'http://10.40.8.5:3000/test/xss-issue.git', 'master', '0', 'f', 'f', 'f', 'f', 'f', 'f', '', 'git', '', 'f', '', '0', 'f', 'f'),
+(115, 1, '2', 'testCIservices', '2/testCIservices', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/testCIservices', 'http://10.40.8.5:3000/2/testCIservices.git', 'master', '60', 'f', 'f', 't', 't', 't', 't', 'FOUXTSNL2GXK7JP2SQQJVWVAS6J4E4SGIQYPAHEJBIFPVR46LLDA====', 'git', '.drone.yml', 'f', 'public', '0', 't', 't'),
+(105, 1, '2', 'settings', '2/settings', 'http://10.40.8.5:3000/avatars/c81e728d9d4c2f636f067f89cc14862c', 'http://10.40.8.5:3000/2/settings', 'http://10.40.8.5:3000/2/settings.git', 'master', '60', 'f', 'f', 't', 't', 't', 't', '3OQA7X5CNGPTILDYLQSJFDML6U2W7UUFBPPP2G2LRBG3WETAYZLA====', 'git', '.drone.yml', 'f', 'public', '1', 't', 't');
 
 
 --
 -- Data for Name: secrets; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal) FROM stdin;
-1	105	wow	\\x74657374	null\n	["push","tag","deployment","pull_request"]\n	f	f
-2	105	n	\\x6e	null\n	["deployment"]\n	f	f
-3	105	abc	\\x656466	null\n	["push"]\n	f	f
-4	105	quak	\\x66647361	null\n	["pull-request"]\n	f	f
-\.
+INSERT INTO public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secret_images, secret_events, secret_skip_verify, secret_conceal) VALUES
+(1, 105, 'wow', '\x74657374', 'null\n', '["push","tag","deployment","pull_request"]\n', 'f', 'f'),
+(2, 105, 'n', '\x6e', 'null\n', '["deployment"]\n', 'f', 'f'),
+(3, 105, 'abc', '\x656466', 'null\n', '["push"]\n', 'f', 'f'),
+(4, 105, 'quak', '\x66647361', 'null\n', '["pull-request"]\n', 'f', 'f');
 
 
 --
 -- Data for Name: senders; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.senders (sender_id, sender_repo_id, sender_login, sender_allow, sender_block) FROM stdin;
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: tasks; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.tasks (task_id, task_data, task_labels, task_dependencies, task_run_on) FROM stdin;
-\.
+--- EMPTY
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: root
 --
 
-COPY public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_active, user_admin, user_hash, user_synced) FROM stdin;
-1	test	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8	eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ	1641634127	test@test.test	http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe	f	f	OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====	1641630445
-\.
+INSERT INTO public.users (user_id, user_login, user_token, user_secret, user_expiry, user_email, user_avatar, user_active, user_admin, user_hash, user_synced) VALUES
+(1, 'test', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjowLCJleHAiOjE2NDE2MzQxMjcsImlhdCI6MTY0MTYzMDUyN30.Fu0wUP-08NpPjq737y6HOeyKN_-_SE4iOZr5yrH7S8Jrz8nIuNKfU7AvlypeMSJ7wo8e3cSTadbSH1polZuFv-Nb1AqWDDXeuXudm61BkF96sTslbSHd0nF7cOy6hqCfIAfQLQpqZTJZ4E26oOSSJxPfOOntOWhlEejRl5F-flXAoYAQLegHxdn9IfYJeM1eanZqF4k6dT9hthFp9v4fmUjODPPfHip_iS7ckPonP1E4-8KeNkU3O-lIS1fgrsbCDA8531FXIGB0U7cSur7H0picKGL6WSzAErPGntlNlQWYB5JedDtLN9Ionxy1Y9LKQON76XYL4gM1Ji98RCEXggVqd7TW0B1fGV-Jve2hU3fKaDyQywsCJp36mpnVaqb5eiTssncHixAwZE0C4yh_XsTd-WoVhsbqlEuDfPTjrtAK94mSzHJTcO3fbtE9L-MoPevQIPM7Yog0i2Xn1oPUCDXVXsV2yJriBiI_r2xbG0nz5Bwn8KAFZ0dNGJ7T9urqKaKMh9guE4jgYLIpRpod_Fd13_GAK0ebgF2CZJdjJT7eEGhzzcg4uFpFdIXL2kNgVN1D6YLMPw3HhVg7_MIfASbJgpcppFhYa4Fk-OpchL5-e_mMyeWogvaJA2wSpyY1f5zJlBnFuIyk_OdV0TwQ3b_TjutehsiibT9WRpOK8h8', 'eyJhbGciOiJSUzI1NiIsImtpZCI6IldmbUJ1c2Q0RndUVWRmMjc2NHowUWlEYlJ3TnRBcU5pNVlXS1U1c2k0eEEiLCJ0eXAiOiJKV1QifQ.eyJnbnQiOjEsInR0IjoxLCJleHAiOjE2NDQyNTg1MjcsImlhdCI6MTY0MTYzMDUyN30.iVtIGQ6VTgRI8L3xFD_YNvVBGZ6kdFb3ERdyOCIHC_CHhOEpZxVGawMGnNNooqbNdmOqJQ0RLJyiAirEKdxSVrtWvqub6uVMjjpeBylE1sAFymCGNJQf77dKvgPHW3QY5FvOSoOoNcRU2g99Bx8sbZhiI12GnNOB-abazrzICpOUikiTdb2ri3w_TNF2Ibrn-itSa1yuhmTrVpqXt_CT4MEfteiDmgjyqonmk-J_BqbcriF3DKAvrXNK1VKVU7xODcFSIRizlgA2kDmnpMT3Oo-Z1I37TFIGAuDOTgcceOPa7rXg_Mfd_jhL7bSH1BI4RsK0rgde3NaCQlU2n7yVOYGbJCSsSWwSAi-gCjjuTTPnQWe3ep3IWrB73_7tKG2_x7YxZ1nQCSFKouA5rZH4g6yoV8wdJh8_bX2Z64-MJBUl8E7JGM2urA5GY1abo0GZ6ZuQi2JS5WnG1iTL9pFlmOoTpN1DKtNE2PUE90GJwi0qGeACif9uJBXQPDAgKk7fbUxKYQobc6ko2CJ1isoRjbi8-GsJ9lhw7tXno5zfAvN3eps9SYgmIRNh0t_vx-LMBezSTSEcTJpv-7Ap6F10GD3E9KmGcYrOMvdtaYgkWFXO6rh49uElUVid-C1tNVpKjnj7ewUosQo9MHSn-d5l1df0rJSueXcaUMSqRSrEzqQ', '1641634127', 'test@test.test', 'http://10.40.8.5:3000/avatars/d6c72f5d7e2a070b52e1194969df2cfe', 'f', 'f', 'OBW2OF5QH3NMCYJ44VU5B5YEQ5LHZLTFW2FDSAJ4R4JVZ4HWSNVQ====', '1641630445');
 
 
 --
