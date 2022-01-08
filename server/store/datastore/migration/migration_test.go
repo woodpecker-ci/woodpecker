@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"database/sql"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -74,16 +75,17 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Eng
 		return
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !new {
-			close = func(e *xorm.Engine) {
-				cleanDB(t, e)
-			}
-		}
 		engine, err = xorm.NewEngine(driver, config)
 		if !assert.NoError(t, err) {
 			t.FailNow()
 		}
-		restorePostgresDump(t, engine)
+		if !new {
+			cleanDB(t, engine)
+			restorePostgresDump(t, config)
+			close = func(e *xorm.Engine) {
+				cleanDB(t, e)
+			}
+		}
 		return
 	default:
 		t.Errorf("unsupported driver: %s", driver)
@@ -92,15 +94,21 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Eng
 	return
 }
 
-func restorePostgresDump(t *testing.T, e *xorm.Engine) {
+func restorePostgresDump(t *testing.T, config string) {
 	dump, err := ioutil.ReadFile(postgresDump)
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	_, err = e.SQL(string(dump)).Exec()
+
+	db, err := sql.Open("postgres", config)
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
+	defer db.Close()
+
+	_, err = db.Exec(string(dump))
+	assert.NoError(t, err)
+	db.Close()
 }
 
 func cleanDB(t *testing.T, e *xorm.Engine) {
