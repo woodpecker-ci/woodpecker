@@ -1,17 +1,18 @@
 <template>
-  <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-gray-500 justify-between py-0">
-    <div v-for="buildConfig in buildConfigs" :key="buildConfig.hash" class="w-full">
-      <div class="font-bold">{{ buildConfig.name }}</div>
-      <div class="w-full bg-gray-400 dark:bg-dark-gray-700 rounded-md p-2 font-mono whitespace-pre">
-        {{ buildConfig.data }}
-      </div>
-    </div>
+  <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-gray-500 justify-between !py-0">
+    <CodeViewer
+      v-for="buildConfig in buildConfigs"
+      :key="buildConfig.hash"
+      :name="buildConfig.name"
+      :text="buildConfig.data"
+    />
   </FluidContainer>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
 
+import CodeViewer from '~/components/atomic/CodeViewer.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Build, BuildConfig, Repo } from '~/lib/api/types';
@@ -21,6 +22,7 @@ export default defineComponent({
 
   components: {
     FluidContainer,
+    CodeViewer,
   },
 
   setup() {
