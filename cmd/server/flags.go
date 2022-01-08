@@ -27,6 +27,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_DEBUG"},
 		Name:    "debug",
 		Usage:   "enable server debug mode",
+		Hidden:  true,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
