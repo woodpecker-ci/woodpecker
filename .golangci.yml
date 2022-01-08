@@ -3,6 +3,9 @@ linters-settings:
     simplify: true
   misspell:
     locale: US
+  gofumpt:
+    lang-version: "1.16"
+    extra-rules: true
 
 linters:
   disable-all: true
@@ -23,6 +26,7 @@ linters:
     - unused
     - varcheck
     - whitespace
+    - gofumpt
 
 run:
   timeout: 5m

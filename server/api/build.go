@@ -320,7 +320,7 @@ func PostApproval(c *gin.Context) {
 	}
 
 	// fetch the build file from the database
-	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
+	configs, err := _store.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		_ = c.AbortWithError(404, err)
@@ -450,7 +450,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// fetch the pipeline config from database
-	configs, err := server.Config.Storage.Config.ConfigsForBuild(build.ID)
+	configs, err := _store.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		_ = c.AbortWithError(404, err)
@@ -489,8 +489,7 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	err = persistBuildConfigs(configs, build.ID)
-	if err != nil {
+	if err := persistBuildConfigs(_store, configs, build.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
@@ -498,7 +497,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// Read query string parameters into buildParams, exclude reserved params
-	var envs = map[string]string{}
+	envs := map[string]string{}
 	for key, val := range c.Request.URL.Query() {
 		switch key {
 		// Skip some options of the endpoint
@@ -667,13 +666,13 @@ func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo
 	return nil
 }
 
-func persistBuildConfigs(configs []*model.Config, buildID int64) error {
+func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
 	for _, conf := range configs {
 		buildConfig := &model.BuildConfig{
 			ConfigID: conf.ID,
 			BuildID:  buildID,
 		}
-		err := server.Config.Storage.Config.BuildConfigCreate(buildConfig)
+		err := store.BuildConfigCreate(buildConfig)
 		if err != nil {
 			return err
 		}

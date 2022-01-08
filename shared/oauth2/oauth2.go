@@ -88,7 +88,7 @@ func (f CacheFile) Token() (*Token, error) {
 }
 
 func (f CacheFile) PutToken(tok *Token) error {
-	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return OAuthError{"CacheFile.PutToken", err.Error()}
 	}

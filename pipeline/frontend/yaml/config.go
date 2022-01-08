@@ -1,10 +1,6 @@
 package yaml
 
 import (
-	"io"
-	"io/ioutil"
-	"os"
-
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
@@ -35,15 +31,6 @@ type (
 	}
 )
 
-// Parse parses the configuration from bytes b.
-func Parse(r io.Reader) (*Config, error) {
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	return ParseBytes(out)
-}
-
 // ParseBytes parses the configuration from bytes b.
 func ParseBytes(b []byte) (*Config, error) {
 	out := new(Config)
@@ -60,14 +47,4 @@ func ParseString(s string) (*Config, error) {
 	return ParseBytes(
 		[]byte(s),
 	)
-}
-
-// ParseFile parses the configuration from path p.
-func ParseFile(p string) (*Config, error) {
-	f, err := os.Open(p)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return Parse(f)
 }

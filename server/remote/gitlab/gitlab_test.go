@@ -52,19 +52,19 @@ func load(config string) *Gitlab {
 
 func Test_Gitlab(t *testing.T) {
 	// setup a dummy github server
-	var server = testdata.NewServer(t)
+	server := testdata.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
 	client := load(env)
 
-	var user = model.User{
+	user := model.User{
 		Login: "test_user",
 		Token: "e3b0c44298fc1c149afbf4c8996fb",
 	}
 
-	var repo = model.Repo{
+	repo := model.Repo{
 		Name:  "diaspora-client",
 		Owner: "diaspora",
 	}

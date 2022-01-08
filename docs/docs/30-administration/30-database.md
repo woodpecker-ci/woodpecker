@@ -36,6 +36,7 @@ services:
 ## Configure Postgres
 
 The below example demonstrates postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
+Please use postgres versions equal or higher than **11**.
 
 ```diff
 # docker-compose.yml

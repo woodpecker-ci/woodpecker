@@ -9,9 +9,7 @@ import (
 // to create and manage container resources.
 type Engine interface {
 	Name() string
-
 	IsAvailable() bool
-
 	Load() error
 
 	// Setup the pipeline environment.
