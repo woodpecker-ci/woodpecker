@@ -904,7 +904,7 @@ COPY public.secrets (secret_id, secret_repo_id, secret_name, secret_value, secre
 1	105	wow	\\x74657374	null\n	["push","tag","deployment","pull_request"]\n	f	f
 2	105	n	\\x6e	null\n	["deployment"]\n	f	f
 3	105	abc	\\x656466	null\n	["push"]\n	f	f
-4	105	quak	\\x66647361	null\n	["pull_request"]\n	f	f
+4	105	quak	\\x66647361	null\n	["pull-request"]\n	f	f
 \.
 
 
