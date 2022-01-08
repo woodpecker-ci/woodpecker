@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	sqliteDB = "./testfiles/sqlite.db"
+	sqliteDB     = "./testfiles/sqlite.db"
+	postgresDump = "./testfiles/postgres.sql"
 )
 
 func testDriver() string {
@@ -42,16 +43,16 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
+func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Engine)) {
 	driver := testDriver()
 	var err error
-	close = func() {}
+	close = func(*xorm.Engine) {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
 		if !new {
 			config = createSQLiteDB(t)
-			close = func() {
+			close = func(*xorm.Engine) {
 				_ = os.Remove(config)
 			}
 		}
@@ -60,7 +61,7 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 			t.FailNow()
 		}
 		return
-	case "mysql", "postgres":
+	case "mysql":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !new {
 			t.Logf("do not have dump to test against")
@@ -71,6 +72,19 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 			t.FailNow()
 		}
 		return
+	case "postgres":
+		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
+		if !new {
+			close = func(e *xorm.Engine) {
+				cleanDB(t, e)
+			}
+		}
+		engine, err = xorm.NewEngine(driver, config)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		restorePostgresDump(t, engine)
+		return
 	default:
 		t.Errorf("unsupported driver: %s", driver)
 		t.FailNow()
@@ -78,14 +92,33 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 	return
 }
 
+func restorePostgresDump(t *testing.T, e *xorm.Engine) {
+	dump, err := ioutil.ReadFile(postgresDump)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+	_, err = e.SQL(dump).Exec()
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+}
+
+func cleanDB(t *testing.T, e *xorm.Engine) {
+	for _, bean := range allBeans {
+		if !assert.NoError(t, e.DropTables(bean)) {
+			t.FailNow()
+		}
+	}
+}
+
 func TestMigrate(t *testing.T) {
 	// init new db
 	engine, close := testDB(t, true)
 	assert.NoError(t, Migrate(engine))
-	close()
+	close(engine)
 
 	// migrate old db
 	engine, close = testDB(t, false)
 	assert.NoError(t, Migrate(engine))
-	close()
+	close(engine)
 }
