@@ -101,7 +101,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Event).Equal(model.EventPush)
 			g.Assert(build.Commit).Equal(hook.After)
 			g.Assert(build.Ref).Equal(hook.Ref)
-			g.Assert(build.Link).Equal(hook.Compare)
+			g.Assert(build.Link).Equal(hook.Commits[0].URL)
 			g.Assert(build.Branch).Equal("master")
 			g.Assert(build.Message).Equal(hook.Commits[0].Message)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
