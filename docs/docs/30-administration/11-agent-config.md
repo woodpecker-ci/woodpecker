@@ -130,11 +130,6 @@ Disable colored debug output.
 
 Configures the agent hostname.
 
-### `WOODPECKER_PLATFORM`
-> Default: `linux/amd64`
-
-Restrict builds by platform conditions.
-
 ### `WOODPECKER_MAX_PROCS`
 > Default: `1`
 
