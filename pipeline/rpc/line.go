@@ -66,6 +66,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	if w.rep != nil {
 		out = w.rep.Replace(out)
 	}
+	log.Trace().Str("name", w.name).Str("ID", w.id).Msgf("grpc write line: %s", out)
 
 	line := &Line{
 		Out:  out,
