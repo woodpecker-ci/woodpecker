@@ -112,11 +112,13 @@ func buildFromPush(hook *pushHook) *model.Build {
 func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files := make([]string, 0)
 
-	for _, c := range hook.Commits {
-		files = append(files, c.Added...)
-		files = append(files, c.Removed...)
-		files = append(files, c.Modified...)
+	if len(hook.Commits) == 0 {
+		return files
 	}
+
+	files = append(files, hook.Commits[0].Added...)
+	files = append(files, hook.Commits[0].Removed...)
+	files = append(files, hook.Commits[0].Modified...)
 
 	return files
 }
