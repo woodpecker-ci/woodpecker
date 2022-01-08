@@ -98,7 +98,7 @@ Here is the full list of configuration options and their default variables.
 ### `WOODPECKER_SERVER`
 > Default: `localhost:9000`
 
-Configures the Woodpecker server address.
+Configures gRPC address of the server.
 
 ### `WOODPECKER_USERNAME`
 > Default: `x-oauth-basic`
