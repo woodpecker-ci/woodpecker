@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/shared"
 )
 
 // Identifies the type of line in the logs.
@@ -49,22 +51,14 @@ type LineWriter struct {
 
 // NewLineWriter returns a new line reader.
 func NewLineWriter(peer Peer, id, name string, secret ...string) *LineWriter {
-	w := new(LineWriter)
-	w.peer = peer
-	w.id = id
-	w.name = name
-	w.num = 0
-	w.now = time.Now().UTC()
-
-	var oldnew []string
-	for _, old := range secret {
-		oldnew = append(oldnew, old)
-		oldnew = append(oldnew, "********")
+	return &LineWriter{
+		peer:  peer,
+		id:    id,
+		name:  name,
+		now:   time.Now().UTC(),
+		rep:   shared.NewSecretsReplacer(secret),
+		lines: nil,
 	}
-	if len(oldnew) != 0 {
-		w.rep = strings.NewReplacer(oldnew...)
-	}
-	return w
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
