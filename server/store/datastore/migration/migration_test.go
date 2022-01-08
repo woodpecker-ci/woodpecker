@@ -75,15 +75,15 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 		return
 	case "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		engine, err = xorm.NewEngine(driver, config)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
 		if !new {
 			restorePostgresDump(t, config)
 			close = func() {
 				cleanDB(t, engine)
 			}
+		}
+		engine, err = xorm.NewEngine(driver, config)
+		if !assert.NoError(t, err) {
+			t.FailNow()
 		}
 		return
 	default:
