@@ -86,7 +86,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      await apiClient.approveBuild(repo.value.owner, repo.value.name, `${build.value.id}`);
+      await apiClient.approveBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
       notifications.notify({ title: 'Pipeline approved', type: 'success' });
     });
 
@@ -95,7 +95,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      await apiClient.declineBuild(repo.value.owner, repo.value.name, `${build.value.id}`);
+      await apiClient.declineBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
       notifications.notify({ title: 'Pipeline declined', type: 'success' });
     });
 
