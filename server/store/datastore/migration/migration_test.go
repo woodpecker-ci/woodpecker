@@ -80,7 +80,6 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Eng
 			t.FailNow()
 		}
 		if !new {
-			cleanDB(t, engine)
 			restorePostgresDump(t, config)
 			close = func(e *xorm.Engine) {
 				cleanDB(t, e)
@@ -107,8 +106,9 @@ func restorePostgresDump(t *testing.T, config string) {
 	defer db.Close()
 
 	_, err = db.Exec(string(dump))
-	assert.NoError(t, err)
-	db.Close()
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
 }
 
 func cleanDB(t *testing.T, e *xorm.Engine) {
