@@ -1,4 +1,4 @@
-## [0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-01-08
+## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-01-08
 
 * FEATURES
   * Multiarch build cli docker images (#634)
@@ -15,12 +15,11 @@
   * Gitea: push webhook notice changed files of all related commits (#675)
   * Use global branch filter only on events containing branch info (#659)
   * API GetRepos() return empty list if no active repos exist (#658)
-  * skip nested GitLab repositories during sync (#656)
-  * hotfix gitlab sub repo listing (#652)
+  * Skip nested GitLab repositories during sync (#656), (#652)
   * proc.Tree() func should not depend on sorted procs list (#647)
-  * fix sqlite migration on column drop of abnormal schemas (#629)
+  * Fix sqlite migration on column drop of abnormal schemas (#629)
   * Fix gRPC incomapatability in helm chart (#627)
-  * fix new pipeline not published to UI if protected repo mode enabled (#619)
+  * Fix new pipeline not published to UI if protected repo mode enabled (#619)
   * Make cancel pipeline work again (#585)
   * Dont panic, report error back (#582)
   * Improve status updates (#561)
@@ -30,7 +29,7 @@
   * Fix passing of netrc credentials to clone step (#492)
   * Fix various typos (#416)
   * Append trailing slash to default GH API URL (#411)
-  * fix: filter pipeline config files (#279)
+  * Fix filter pipeline config files (#279)
 * ENHANCEMENTS
   * Build ref link point to commit not compare if only one commit was pushed (#673)
   * Hide multi line secrets from log (#671)
@@ -40,20 +39,18 @@
   * Add "woodpeckerci/plugin-docker-buildx" to privileged plugins (#623)
   * Use gitlab generic webhooks instead of drone-ci-service (#620)
   * Calculate build number on creation (#615)
-  * hide gin routes logging on none-debug starts (#603)
-  * let remove be a remove (#593)
-  * add flag to set oauth redirect host in dev mode (#586)
+  * Hide gin routes logging on none-debug starts (#603)
+  * Let remove be a remove (#593)
+  * Add flag to set oauth redirect host in dev mode (#586)
   * Add log-level option to cli (#584)
-  * improve favicons (#576)
+  * Improve favicons (#576)
   * Show icon and index of a pull request in pipelines triggered by pull requests (#575)
   * Improve secrets tab (#574)
   * Remove github.com/kr/pretty in favor of assert.EqualValues() (#564)
-  * Add linter revive (#554)
-  * Add linter unused (#551)
-  * Add linter ineffassign (#550)
+  * Add linter revive, unused, ineffassign (#550), (#551), (#554)
   * Simplify web router code (#541)
   * Server obtain remote from glob config not from context (#540)
-  * serve index.html directly without template (#539)
+  * Serve index.html directly without template (#539)
   * Add linter varcheck (#538)
   * Add linter structcheck (#537)
   * Add linter staticcheck (#535)
@@ -62,10 +59,9 @@
   * Use monospace font for build logs (#527)
   * Show environ in every BuildProc (#526)
   * Rename struct field and add new types into server/model's (#523)
-  * store migrations: cache migrations and add note (#522)
   * Drop error only on purpose or else report back or log (#514)
   * Update database in one transaction on syncing user repositorys (#513)
-  * format do 'simplify' and check via CI (#509)
+  * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
   * Change paths to use woodpecker instead of drone (#494)
@@ -120,8 +116,8 @@
   * Add golangci-lint (#502)
   * Add more golangci-lint linters & sort them (#499)
   * Add `TestPipelineName` to `procBuilder_test.go` (#461)
-  * Improve ci tests (#353)
-  * [CI] Run "build" on pull too (#287)
+  * Improve CI tests (#353)
+  * Compile on pull too (#287)
 * DOCUMENTATION
   * Add WoodpeckerCI tag to README (#663)
   * Add `repo` to `when` block (#642)
@@ -140,18 +136,18 @@
   * Update links to woodpecker-ci.org (#445)
   * Add image migration docs (#406)
   * Add security policy (#396)
-  * [Docs] Add Migrations to header (#386)
+  * Add Migrations to header (#386)
   * Delete Gerrit placeholder (#372)
   * Explain open registration setting (#361)
   * Simplify docker-compose samples (#356)
   * Add json schema and cli lint command (#342)
   * Improve docs deployment (#333)
-  * docs: improve plugin docs (#313)
+  * Improve plugin docs (#313)
   * Add Support section to README (#310)
   * Improve administration docs (#307)
   * Issue templates (#298)
   * Community Guide (#296)
-  * [Docs] Migrate docs framework to Docusaurus (#282)
+  * Migrate docs framework to Docusaurus (#282)
   * Use woodpecker env variable instead of drone in docker-compose (#264)
 * MISC
   * github.com/xanzy/go-gitlab v0.51.1 -> v0.52.2 (#599)
@@ -168,7 +164,7 @@
   * Use go's vendoring (#284)
   * code.gitea.io/sdk/gitea v0.14.1 -> v0.15.0 (#263)
 
-## [0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
+## [v0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
 
 * BUGFIXES
   * Add flag for not fetching permissions (FlatPermissions) (#491)
@@ -177,7 +173,7 @@
 * ENHANCEMENTS
   * Use go embed for web files and remove httptreemux (#382) (#489)
 
-## [0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
+## [v0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
 
 * BUGFIXES
   * Fix sanitziePath (#326) (aa4fa9aab3)
@@ -188,7 +184,7 @@
 * TESTING
   * Add TestPipelineName to procBuilder_test.go (#461) (#455)
 
-## [0.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.1) - 2021-09-21
+## [v0.14.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.1) - 2021-09-21
 
 * SECURITY
   * Migrate jwt token lib (#332)
@@ -198,7 +194,7 @@
   * Fix ignore pushes to tags for gitea (#289)
   * Fix use custom config path to sanitize build names (#280)
 
-## [0.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0) - 2021-08-01
+## [v0.14.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.0) - 2021-08-01
 
 * FEATURES
   * Add OAuth2 Support for Gitea Remote (#226)
