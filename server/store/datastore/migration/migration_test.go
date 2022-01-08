@@ -44,16 +44,16 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Engine)) {
+func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 	driver := testDriver()
 	var err error
-	close = func(*xorm.Engine) {}
+	close = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
 		if !new {
 			config = createSQLiteDB(t)
-			close = func(*xorm.Engine) {
+			close = func() {
 				_ = os.Remove(config)
 			}
 		}
@@ -81,8 +81,8 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func(e *xorm.Eng
 		}
 		if !new {
 			restorePostgresDump(t, config)
-			close = func(e *xorm.Engine) {
-				cleanDB(t, e)
+			close = func() {
+				cleanDB(t, engine)
 			}
 		}
 		return
@@ -123,10 +123,10 @@ func TestMigrate(t *testing.T) {
 	// init new db
 	engine, close := testDB(t, true)
 	assert.NoError(t, Migrate(engine))
-	close(engine)
+	close()
 
 	// migrate old db
 	engine, close = testDB(t, false)
 	assert.NoError(t, Migrate(engine))
-	close(engine)
+	close()
 }
