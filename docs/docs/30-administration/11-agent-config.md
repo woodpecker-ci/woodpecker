@@ -140,13 +140,6 @@ Configures the agent hostname.
 
 Restrict builds by platform conditions.
 
-### `WOODPECKER_FILTER`
-> Default: empty
-
-Filter expression to restrict builds by label.
-
-Example: TODO
-
 ### `WOODPECKER_MAX_PROCS`
 > Default: `1`
 
