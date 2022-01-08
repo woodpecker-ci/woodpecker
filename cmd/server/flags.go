@@ -209,6 +209,12 @@ var flags = []cli.Flag{
 	//
 	// remote parameters
 	//
+	&cli.StringFlag{
+		EnvVars: []string{"STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
+		Name:    "status-context",
+		Usage:   "status context prefix",
+		Value:   "continuous-integration/woodpecker",
+	},
 	&cli.BoolFlag{
 		Name:    "flat-permissions",
 		Usage:   "no remote call for permissions should be made",
@@ -226,12 +232,6 @@ var flags = []cli.Flag{
 		Name:    "github-server",
 		Usage:   "github server address",
 		Value:   "https://github.com",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_CONTEXT"},
-		Name:    "github-context",
-		Usage:   "github status context",
-		Value:   "continuous-integration/woodpecker",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_CLIENT"},
@@ -331,12 +331,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITEA_SECRET"},
 		Name:    "gitea-secret",
 		Usage:   "gitea oauth2 client secret",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_CONTEXT"},
-		Name:    "gitea-context",
-		Usage:   "gitea status context",
-		Value:   "continuous-integration/woodpecker",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_GITEA_GIT_USERNAME"},

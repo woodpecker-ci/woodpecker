@@ -229,7 +229,6 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 	}
 	opts := gitea.Opts{
 		URL:         strings.TrimRight(server.String(), "/"),
-		Context:     c.String("gitea-context"),
 		Username:    c.String("gitea-git-username"),
 		Password:    c.String("gitea-git-password"),
 		Client:      c.String("gitea-client"),
@@ -276,7 +275,6 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 func setupGithub(c *cli.Context) (remote.Remote, error) {
 	opts := github.Opts{
 		URL:         c.String("github-server"),
-		Context:     c.String("github-context"),
 		Client:      c.String("github-client"),
 		Secret:      c.String("github-secret"),
 		Scopes:      c.StringSlice("github-scope"),

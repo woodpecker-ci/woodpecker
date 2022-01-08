@@ -10,7 +10,7 @@ import (
 const base = "ci/woodpecker"
 
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	name := base
+	name := base // TODO: use "status-context"
 
 	switch build.Event {
 	case model.EventPull:

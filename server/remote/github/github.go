@@ -42,7 +42,6 @@ const (
 // Opts defines configuration options.
 type Opts struct {
 	URL         string   // GitHub server url.
-	Context     string   // Context to display in status check
 	Client      string   // GitHub oauth client id.
 	Secret      string   // GitHub oauth client secret.
 	Scopes      []string // GitHub oauth scopes
@@ -67,7 +66,6 @@ func New(opts Opts) (remote.Remote, error) {
 	r := &client{
 		API:         defaultAPI,
 		URL:         defaultURL,
-		Context:     opts.Context,
 		Client:      opts.Client,
 		Secret:      opts.Secret,
 		Scopes:      opts.Scopes,
@@ -88,7 +86,6 @@ func New(opts Opts) (remote.Remote, error) {
 
 type client struct {
 	URL         string
-	Context     string
 	API         string
 	Client      string
 	Secret      string
