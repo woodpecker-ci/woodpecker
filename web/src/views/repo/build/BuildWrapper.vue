@@ -31,6 +31,7 @@
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
         <Tabs v-model="activeTab" disable-hash-mode>
           <Tab id="tasks" title="Tasks" />
+          <Tab id="config" title="Config" />
         </Tabs>
 
         <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 ml-auto">
@@ -63,7 +64,7 @@ import {
   toRef,
   watch,
 } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
@@ -122,6 +123,7 @@ export default defineComponent({
 
   setup(props) {
     const apiClient = useApiClient();
+    const route = useRoute();
     const router = useRouter();
     const notifications = useNotifications();
     const favicon = useFavicon();
@@ -191,11 +193,19 @@ export default defineComponent({
 
     const activeTab = computed({
       get() {
+        if (route.name === 'repo-build-config') {
+          return 'config';
+        }
+
         return 'tasks';
       },
       set(tab: string) {
         if (tab === 'tasks') {
           router.replace({ name: 'repo-build' });
+        }
+
+        if (tab === 'config') {
+          router.replace({ name: 'repo-build-config' });
         }
       },
     });
