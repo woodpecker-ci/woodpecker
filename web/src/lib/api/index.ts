@@ -1,16 +1,5 @@
 import ApiClient, { encodeQueryString } from './client';
-import {
-  Build,
-  BuildConfig,
-  BuildFeed,
-  BuildLog,
-  BuildProc,
-  Registry,
-  Repo,
-  RepoPermissions,
-  RepoSettings,
-  Secret,
-} from './types';
+import { Build, BuildFeed, BuildLog, BuildProc, Registry, Repo, RepoPermissions, RepoSettings, Secret } from './types';
 
 type RepoListOptions = {
   all?: boolean;
@@ -58,10 +47,6 @@ export default class WoodpeckerClient extends ApiClient {
 
   getBuild(owner: string, repo: string, number: number | 'latest'): Promise<Build> {
     return this._get(`/api/repos/${owner}/${repo}/builds/${number}`) as Promise<Build>;
-  }
-
-  getBuildConfig(owner: string, repo: string, number: number): Promise<BuildConfig[]> {
-    return this._get(`/api/repos/${owner}/${repo}/builds/${number}/config`) as Promise<BuildConfig[]>;
   }
 
   getBuildFeed(opts?: Record<string, string | number | boolean>): Promise<BuildFeed[]> {
