@@ -45,7 +45,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/builds?${query}`) as Promise<Build[]>;
   }
 
-  getBuild(owner: string, repo: string, number: string | 'latest'): Promise<Build> {
+  getBuild(owner: string, repo: string, number: number | 'latest'): Promise<Build> {
     return this._get(`/api/repos/${owner}/${repo}/builds/${number}`) as Promise<Build>;
   }
 
