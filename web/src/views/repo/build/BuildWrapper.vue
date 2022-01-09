@@ -31,7 +31,7 @@
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
         <Tabs v-model="activeTab" disable-hash-mode>
           <Tab id="tasks" title="Tasks" />
-          <Tab v-if="build.changed_files" id="changed-files" :title="`Changed files (${build.changed_files.length})`" />
+          <Tab id="changed-files" :title="`Changed files (${build.changed_files?.length || 0})`" />
         </Tabs>
 
         <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 ml-auto">
