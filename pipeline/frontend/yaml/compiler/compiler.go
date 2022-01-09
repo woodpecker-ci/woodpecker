@@ -168,7 +168,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	var stage *backend.Stage
 	var group string
 	for i, container := range conf.Pipeline.Containers {
-		//Skip if local and should not run local
+		// Skip if local and should not run local
 		if c.local && !container.Constraints.Local.Bool() {
 			continue
 		}

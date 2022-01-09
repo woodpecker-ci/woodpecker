@@ -6,12 +6,12 @@
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
-          <Icon name="duration" />
-          <span>{{ duration }}</span>
-        </div>
-        <div class="flex space-x-2 items-center">
           <Icon name="since" />
           <span>{{ since }}</span>
+        </div>
+        <div class="flex space-x-2 items-center">
+          <Icon name="duration" />
+          <span>{{ duration }}</span>
         </div>
       </div>
     </div>

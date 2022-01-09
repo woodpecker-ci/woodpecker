@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package session
+package shared
 
-import (
-	"testing"
-)
+import "strings"
 
-func TestSetPerm(t *testing.T) {
+func NewSecretsReplacer(secrets []string) *strings.Replacer {
+	var oldnew []string
+	for _, old := range secrets {
+		old = strings.TrimSpace(old)
+		if len(old) == 0 {
+			continue
+		}
+		// since replacer is executed on each line we have to split multi-line-secrets
+		for _, part := range strings.Split(old, "\n") {
+			oldnew = append(oldnew, part)
+			oldnew = append(oldnew, "********")
+		}
+	}
+
+	return strings.NewReplacer(oldnew...)
 }

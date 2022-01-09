@@ -9,7 +9,10 @@
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
-    <img src="https://img.shields.io/discord/838698813463724034.svg">
+    <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
+  </a>
+  <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
+    <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix">
   </a>
   <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
@@ -73,9 +76,19 @@ See [Contributing Guide](CONTRIBUTING.md)
 
 ## Who uses Woodpecker?
 
-[Codeberg](https://codeberg.org), the woodpecker project itself, and many others not listed.
+[Codeberg](https://codeberg.org), the woodpecker project itself, and many others.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
+
+Also consider using the topic `WoodpeckerCI` in your repository, so others can learn
+from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
+
+Here are some places where people mention Woodpecker:
+
+- [GitHub](https://github.com/topics/WoodpeckerCI)
+- [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
+- [Twitter](https://twitter.com/hashtag/WoodpeckerCI)
+- [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
 ## Stars over time
 [![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)

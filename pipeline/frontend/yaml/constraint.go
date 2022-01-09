@@ -99,7 +99,7 @@ func (c *Constraint) Excludes(v string) bool {
 
 // UnmarshalYAML unmarshals the constraint.
 func (c *Constraint) UnmarshalYAML(value *yaml.Node) error {
-	var out1 = struct {
+	out1 := struct {
 		Include types.Stringorslice
 		Exclude types.Stringorslice
 	}{}
@@ -177,7 +177,7 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // UnmarshalYAML unmarshals the constraint.
 func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
-	var out1 = struct {
+	out1 := struct {
 		Include       types.Stringorslice `yaml:"include,omitempty"`
 		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
 		IgnoreMessage string              `yaml:"ignore_message,omitempty"`

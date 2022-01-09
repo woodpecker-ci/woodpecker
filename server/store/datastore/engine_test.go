@@ -53,6 +53,12 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 	return &storage{
 			engine: engine,
 		}, func() {
+			for _, bean := range tables {
+				if err := engine.DropIndexes(bean); err != nil {
+					t.Error(err)
+					t.FailNow()
+				}
+			}
 			if err := engine.DropTables(tables...); err != nil {
 				t.Error(err)
 				t.FailNow()
