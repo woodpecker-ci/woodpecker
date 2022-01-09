@@ -61,7 +61,6 @@ func apiRoutes(e *gin.Engine) {
 
 			repo.GET("/builds", api.GetBuilds)
 			repo.GET("/builds/:number", api.GetBuild)
-			repo.GET("/builds/:number/config", api.GetBuildConfig)
 
 			// requires push permissions
 			repo.POST("/builds/:number", session.MustPush, api.PostBuild)
