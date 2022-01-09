@@ -111,7 +111,11 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		authCodeURL, err := config.AuthCodeURL("drone")
+		if err != nil {
+			return nil, fmt.Errorf("authCodeURL error: %v", err)
+		}
+		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
 		return nil, nil
 	}
 
