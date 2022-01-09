@@ -1,4 +1,4 @@
-## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-01-08
+## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-09
 
 * FEATURES
   * Show changed files of pipeline in UI (#650)
