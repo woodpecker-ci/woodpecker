@@ -180,6 +180,30 @@ func GetProcLogs(c *gin.Context) {
 	}
 }
 
+func GetBuildConfig(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	build, err := _store.GetBuildNumber(repo, num)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	configs, err := _store.ConfigsForBuild(build.ID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, configs)
+}
+
 // DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	_store := store.FromContext(c)
