@@ -3,8 +3,7 @@
 * FEATURES
   * Show changed files of pipeline in UI (#650)
   * Show yml config of pipeline in UI (#649)
-  * Multiarch build cli docker images (#634)
-  * Multiarch build docker agent images (#622)
+  * Multiarch build for cli and agent docker images (#634), (#622)
   * Get secrets in settings (#604)
   * Add multi-pipeline support to exec & lint (#568)
   * Add repo branches endpoint (#481)
@@ -19,7 +18,7 @@
   * Use global branch filter only on events containing branch info (#659)
   * API GetRepos() return empty list if no active repos exist (#658)
   * Skip nested GitLab repositories during sync (#656), (#652)
-  * proc.Tree() func should not depend on sorted procs list (#647)
+  * Build proc tree function should not depend on sorted procs list (#647)
   * Fix sqlite migration on column drop of abnormal schemas (#629)
   * Fix gRPC incomapatability in helm chart (#627)
   * Fix new pipeline not published to UI if protected repo mode enabled (#619)
