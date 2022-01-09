@@ -3,13 +3,14 @@
     <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
       <div class="flex mb-2 items-center">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
-        <BuildStatusIcon :build="build" class="flex flex-shrink-0" />
 
         <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
           Pipeline #{{ buildId }} - {{ message }}
         </h1>
 
-        <div v-if="repoPermissions.push" class="ml-auto">
+        <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
+
+        <template v-if="repoPermissions.push">
           <Button
             v-if="build.status === 'pending' || build.status === 'running'"
             class="ml-4 flex-shrink-0"
@@ -24,7 +25,7 @@
             :is-loading="isRestartingBuild"
             @click="restartBuild"
           />
-        </div>
+        </template>
       </div>
 
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
