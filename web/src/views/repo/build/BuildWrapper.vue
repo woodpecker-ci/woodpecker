@@ -31,6 +31,7 @@
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
         <Tabs v-model="activeTab" disable-hash-mode>
           <Tab id="tasks" title="Tasks" />
+          <Tab id="config" title="Config" />
           <Tab id="changed-files" :title="`Changed files (${build.changed_files?.length || 0})`" />
         </Tabs>
 
@@ -197,6 +198,10 @@ export default defineComponent({
           return 'changed-files';
         }
 
+        if (route.name === 'repo-build-config') {
+          return 'config';
+        }
+
         return 'tasks';
       },
       set(tab: string) {
@@ -206,6 +211,10 @@ export default defineComponent({
 
         if (tab === 'changed-files') {
           router.replace({ name: 'repo-build-changed-files' });
+        }
+
+        if (tab === 'config') {
+          router.replace({ name: 'repo-build-config' });
         }
       },
     });

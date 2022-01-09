@@ -5,7 +5,7 @@
         <h1 class="text-xl text-gray-500">Registry credentials</h1>
         <p class="text-sm text-gray-400 dark:text-gray-600">
           Registries credentials can be added to use private images for your pipeline.
-          <DocsLink url="docs/usage/registry" />
+          <DocsLink url="docs/usage/registries" />
         </p>
       </div>
       <Button
