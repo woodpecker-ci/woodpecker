@@ -12,7 +12,17 @@
       <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
       <p class="text-xl text-gray-500">This pipeline has been declined!</p>
     </div>
-    <BuildProcs v-else v-model:selected-proc-id="selectedProcId" :build="build" />
+
+    <div v-else class="flex w-full bg-gray-600 dark:bg-dark-gray-800 min-h-0 flex-grow">
+      <div v-if="build.error" class="flex flex-col p-4">
+        <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
+        <span class="text-red-400">{{ build.error }}</span>
+      </div>
+
+      <BuildProcList v-model:selected-proc-id="selectedProcId" :build="build" />
+
+      <BuildLog v-if="selectedProcId" :build="build" :proc-id="selectedProcId" class="w-9/12 flex-grow" />
+    </div>
   </div>
 </template>
 
@@ -22,7 +32,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import BuildProcs from '~/components/repo/build/BuildProcs.vue';
+import BuildLog from '~/components/repo/build/BuildLog.vue';
+import BuildProcList from '~/components/repo/build/BuildProcList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
@@ -33,8 +44,9 @@ export default defineComponent({
 
   components: {
     Button,
-    BuildProcs,
+    BuildProcList,
     Icon,
+    BuildLog,
   },
 
   props: {

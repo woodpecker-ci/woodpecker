@@ -12,11 +12,7 @@ export default (build: Ref<Build | undefined>) => {
       return undefined;
     }
 
-    const start = build.value.started_at || 0;
-
-    if (start === 0) {
-      return 0;
-    }
+    const start = build.value.created_at || 0;
 
     return start * 1000;
   });

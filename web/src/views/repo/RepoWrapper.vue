@@ -16,7 +16,7 @@
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
 
-    <Tabs v-model="activeTab" disable-hash-mode>
+    <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
       <Tab title="Activity" />
       <Tab title="Branches" />
     </Tabs>

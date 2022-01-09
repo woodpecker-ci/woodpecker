@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex w-full pt-4 mb-4">
+    <div class="flex w-full pt-4">
       <div
         v-for="tab in tabs"
         :key="tab.id"

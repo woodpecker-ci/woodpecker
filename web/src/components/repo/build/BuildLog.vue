@@ -28,7 +28,7 @@ import { Build, Repo } from '~/lib/api/types';
 import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
-  name: 'BuildLogs',
+  name: 'BuildLog',
 
   components: {},
 
