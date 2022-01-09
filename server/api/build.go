@@ -293,7 +293,7 @@ func DeleteBuild(c *gin.Context) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
+		if err := publishToTopic(c, killedBuild, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 	}
@@ -388,6 +388,10 @@ func PostDecline(c *gin.Context) {
 
 	if err := updateBuildStatus(c, build, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
+	}
+
+	if err := publishToTopic(c, build, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
 	c.JSON(200, build)
@@ -633,7 +637,7 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, build, repo, model.Enqueued); err != nil {
+	if err := publishToTopic(ctx, build, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
