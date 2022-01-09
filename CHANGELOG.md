@@ -1,6 +1,8 @@
 ## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-01-08
 
 * FEATURES
+  * Show changed files of pipeline in UI (#650)
+  * Show yml config of pipeline in UI (#649)
   * Multiarch build cli docker images (#634)
   * Multiarch build docker agent images (#622)
   * Get secrets in settings (#604)
@@ -12,6 +14,7 @@
 * SECURITY
   * Add linter bidichk to prevent malicios utf8 chars (#516)
 * BUGFIXES
+  * Send decline events back to UI (#680)
   * Gitea: push webhook notice changed files of all related commits (#675)
   * Use global branch filter only on events containing branch info (#659)
   * API GetRepos() return empty list if no active repos exist (#658)
@@ -119,6 +122,8 @@
   * Improve CI tests (#353)
   * Compile on pull too (#287)
 * DOCUMENTATION
+  * Add registries docs (#679)
+  * Add documentation of all agent configuration options (#667)
   * Add WoodpeckerCI tag to README (#663)
   * Add `repo` to `when` block (#642)
   * Add development docs (#610)
