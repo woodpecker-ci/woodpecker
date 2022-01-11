@@ -29,10 +29,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
-func load(config string) *Gitlab {
+func load(t *testing.T, config string) *Gitlab {
 	_url, err := url.Parse(config)
 	if err != nil {
-		panic(err)
+		t.FailNow()
 	}
 	params := _url.Query()
 	_url.RawQuery = ""
@@ -57,7 +57,7 @@ func Test_Gitlab(t *testing.T) {
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	client := load(env)
+	client := load(t, env)
 
 	user := model.User{
 		Login: "test_user",
