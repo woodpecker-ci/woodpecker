@@ -1,4 +1,4 @@
-## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-09
+## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-11
 
 * BREAKING
   * Change paths to use woodpecker instead of drone (#494)
