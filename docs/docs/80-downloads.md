@@ -9,6 +9,7 @@
 Image variants:
 * The `latest` image is the latest stable release
 * The `x.x.x` version images are stable releases
+* The `x.x` images are based on version specific release branche, they have the latest bugfixes backported
 * The `next` images are based on the current master branch and should not be used for production environments
 
 ``` bash
