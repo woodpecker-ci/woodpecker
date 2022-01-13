@@ -7,9 +7,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-var (
-	engines map[string]types.Engine
-)
+var engines map[string]types.Engine
 
 func init() {
 	engines = make(map[string]types.Engine)

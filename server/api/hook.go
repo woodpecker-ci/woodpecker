@@ -180,7 +180,7 @@ func PostHook(c *gin.Context) {
 	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, repoUser, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
-		msg := fmt.Sprintf("cannot find '%s' in '%s', context user: '%s'", repo.Config, build.Ref, repoUser.Login)
+		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusNotFound, msg)
 		return
@@ -213,13 +213,13 @@ func PostHook(c *gin.Context) {
 	build.Status = model.StatusPending
 
 	// TODO(336) extend gated feature with an allow/block List
-	if repo.IsGated && build.Sender != repoUser.Login {
+	if repo.IsGated {
 		build.Status = model.StatusBlocked
 	}
 
 	err = _store.CreateBuild(build, build.Procs...)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save commit for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -227,7 +227,7 @@ func PostHook(c *gin.Context) {
 
 	// persist the build config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
+		_, err := findOrPersistPipelineConfig(_store, build, remoteYamlConfig)
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
@@ -236,12 +236,28 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
+	build, buildItems, err := createBuildItems(c, _store, build, repoUser, repo, remoteYamlConfigs, nil)
+	if err != nil {
+		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
 	if build.Status == model.StatusBlocked {
+		if err := publishToTopic(c, build, repo); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
+		}
+
+		if err := updateBuildStatus(c, build, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updateBuildStatus")
+		}
+
 		c.JSON(http.StatusOK, build)
 		return
 	}
 
-	build, err = startBuild(c, _store, build, repoUser, repo, remoteYamlConfigs)
+	build, err = startBuild(c, _store, build, repoUser, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -255,16 +271,20 @@ func PostHook(c *gin.Context) {
 // TODO: parse yaml once and not for each filter function
 func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
+
+	if build.Event == model.EventTag || build.Event == model.EventDeploy {
+		return false, nil
+	}
+
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
+		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
 		if err != nil {
 			log.Trace().Msgf("parse config '%s': %s", remoteYamlConfig.Name, err)
 			return false, err
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-		} else {
+		if parsedPipelineConfig.Branches.Match(build.Branch) {
 			return false, nil
 		}
 	}
@@ -294,9 +314,9 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	return false
 }
 
-func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := shasum(remoteYamlConfig.Data)
-	conf, err := server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+	conf, err := store.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
 			RepoID: build.RepoID,
@@ -304,10 +324,10 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 			Hash:   sha,
 			Name:   shared.SanitizePath(remoteYamlConfig.Name),
 		}
-		err = server.Config.Storage.Config.ConfigCreate(conf)
+		err = store.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
+			conf, err = store.ConfigFindIdentical(build.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
@@ -318,8 +338,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 		ConfigID: conf.ID,
 		BuildID:  build.ID,
 	}
-	err = server.Config.Storage.Config.BuildConfigCreate(buildConfig)
-	if err != nil {
+	if err := store.BuildConfigCreate(buildConfig); err != nil {
 		return nil, err
 	}
 
@@ -327,7 +346,7 @@ func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYam
 }
 
 // publishes message to UI clients
-func publishToTopic(c context.Context, build *model.Build, repo *model.Repo, event model.EventType) (err error) {
+func publishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -340,7 +359,6 @@ func publishToTopic(c context.Context, build *model.Build, repo *model.Repo, eve
 	}
 
 	message.Data, _ = json.Marshal(model.Event{
-		Type:  model.Enqueued,
 		Repo:  *repo,
 		Build: buildCopy,
 	})

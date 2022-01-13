@@ -57,7 +57,7 @@ spec:
                 name: {{ . }}
             {{- end }}
         - name: dind
-          image: "docker:19.03.5-dind"
+          image: "docker:20.10.12-dind"
           env:
           - name: DOCKER_DRIVER
             value: overlay2

@@ -43,9 +43,8 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Config model.ConfigStore
-		Files  model.FileStore
-		Procs  model.ProcStore
+		Files model.FileStore
+		Procs model.ProcStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
 	}
@@ -71,4 +70,5 @@ var Config = struct {
 		Networks   []string
 		Privileged []string
 	}
+	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

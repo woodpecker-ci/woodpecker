@@ -22,8 +22,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type mockUpdateBuildStore struct {
-}
+type mockUpdateBuildStore struct{}
 
 func (m *mockUpdateBuildStore) UpdateBuild(build *model.Build) error {
 	return nil

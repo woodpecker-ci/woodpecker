@@ -1,4 +1,5 @@
 export * from './build';
+export * from './buildConfig';
 export * from './registry';
 export * from './repo';
 export * from './secret';

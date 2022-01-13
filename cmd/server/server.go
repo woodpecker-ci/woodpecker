@@ -226,7 +226,7 @@ func run(c *cli.Context) error {
 	}
 
 	dir := cacheDir()
-	if err := os.MkdirAll(dir, 0700); err != nil {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
 
@@ -256,7 +256,6 @@ func run(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// storage
 	server.Config.Storage.Files = v
-	server.Config.Storage.Config = v
 
 	// remote
 	server.Config.Services.Remote = r
@@ -304,6 +303,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// TODO(485) temporary workaround to not hit api rate limits
+	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 
 type authorizer struct {

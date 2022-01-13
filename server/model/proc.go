@@ -63,20 +63,33 @@ func (p *Proc) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
+// IsParent returns true if the process is a parent process.
+func (p *Proc) IsParent() bool {
+	return p.PPID == 0
+}
+
 // Tree creates a process tree from a flat process list.
 func Tree(procs []*Proc) ([]*Proc, error) {
 	var nodes []*Proc
-	for _, proc := range procs {
-		if proc.PPID == 0 {
-			nodes = append(nodes, proc)
-		} else {
-			parent, err := findNode(nodes, proc.PPID)
+
+	// init parent nodes
+	for i := range procs {
+		if procs[i].IsParent() {
+			nodes = append(nodes, procs[i])
+		}
+	}
+
+	// assign children to parrents
+	for i := range procs {
+		if !procs[i].IsParent() {
+			parent, err := findNode(nodes, procs[i].PPID)
 			if err != nil {
 				return nil, err
 			}
-			parent.Children = append(parent.Children, proc)
+			parent.Children = append(parent.Children, procs[i])
 		}
 	}
+
 	return nodes, nil
 }
 

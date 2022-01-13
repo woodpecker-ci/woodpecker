@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Bitbucket cloud endpoints.
@@ -179,11 +180,11 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 // does not have an endpoint to access user permissions, we attempt to fetch
 // the repository hook list, which is restricted to administrators to calculate
 // administrative access to a repository.
-func (c *config) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClient(ctx, u)
 
 	perms := new(model.Perm)
-	repo, err := client.FindRepo(owner, name)
+	repo, err := client.FindRepo(r.Owner, r.Name)
 	if err != nil {
 		return perms, err
 	}
@@ -221,14 +222,14 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status creates a build status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
-		State: convertStatus(b.Status),
-		Desc:  convertDesc(b.Status),
+		State: convertStatus(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
 		Key:   "Woodpecker",
-		URL:   link,
+		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}
-	return c.newClient(ctx, u).CreateStatus(r.Owner, r.Name, b.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, build.Commit, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with

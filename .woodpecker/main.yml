@@ -17,12 +17,16 @@ pipeline:
     image: golang:1.16
     commands:
       - make release-agent
+    when:
+      event: tag
 
   build-cli:
     group: build
     image: golang:1.16
     commands:
       - make release-cli
+    when:
+      event: tag
 
   build-deb-rpm:
     group: bundle
@@ -30,8 +34,7 @@ pipeline:
     commands:
       - make bundle
     when:
-      event: [push, tag]
-      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: tag
 
   publish-server:
     image: plugins/docker
@@ -57,13 +60,26 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
+  publish-agent-dryrun:
+    group: bundle
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
+      tag: test
+    when:
+      event: pull_request
+
   publish-agent:
     group: bundle
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
       tag: next
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -71,23 +87,37 @@ pipeline:
 
   publish-agent-alpine:
     group: bundle
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.alpine
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: next-alpine
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
+  publish-cli-dryrun:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
+      tag: test
+    when:
+      event: pull_request
+
   publish-cli:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
       tag: next
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -95,11 +125,12 @@ pipeline:
 
   publish-cli-alpine:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.alpine
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: next-alpine
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -129,44 +160,48 @@ pipeline:
 
   release-agent:
     group: bundle
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
 
   release-agent-alpine:
     group: bundle
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.alpine
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
 
   release-cli:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
 
   release-cli-alpine:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.alpine
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag

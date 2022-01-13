@@ -60,7 +60,7 @@ func GetFeed(c *gin.Context) {
 			Perms:  _store,
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
-		if err := sync.Sync(c, user); err != nil {
+		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
 			log.Debug().Msgf("sync complete: %s", user.Login)
@@ -110,7 +110,7 @@ func GetRepos(c *gin.Context) {
 			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
-		if err := sync.Sync(c, user); err != nil {
+		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
 		} else {
 			log.Debug().Msgf("sync complete: %s", user.Login)
@@ -128,7 +128,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	var active []*model.Repo
+	active := make([]*model.Repo, 0)
 	for _, repo := range repos {
 		if repo.IsActive {
 			active = append(active, repo)

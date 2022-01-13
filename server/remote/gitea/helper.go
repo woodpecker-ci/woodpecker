@@ -84,15 +84,20 @@ func buildFromPush(hook *pushHook) *model.Build {
 	}
 
 	message := ""
+	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	}
+
+	if len(hook.Commits) == 1 {
+		link = hook.Commits[0].URL
 	}
 
 	return &model.Build{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         hook.Compare,
+		Link:         link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
@@ -107,13 +112,11 @@ func buildFromPush(hook *pushHook) *model.Build {
 func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files := make([]string, 0)
 
-	if len(hook.Commits) == 0 {
-		return files
+	for _, c := range hook.Commits {
+		files = append(files, c.Added...)
+		files = append(files, c.Removed...)
+		files = append(files, c.Modified...)
 	}
-
-	files = append(files, hook.Commits[0].Added...)
-	files = append(files, hook.Commits[0].Removed...)
-	files = append(files, hook.Commits[0].Modified...)
 
 	return files
 }

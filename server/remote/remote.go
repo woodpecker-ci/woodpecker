@@ -46,7 +46,7 @@ type Remote interface {
 
 	// Perm fetches the named repository permissions from
 	// the remote system for the specified user.
-	Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error)
+	Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error)
 
 	// File fetches a file from the remote repository and returns in string
 	// format.
@@ -57,7 +57,7 @@ type Remote interface {
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.

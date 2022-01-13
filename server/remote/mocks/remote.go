@@ -9,6 +9,7 @@ import (
 	mock "github.com/stretchr/testify/mock"
 
 	model "github.com/woodpecker-ci/woodpecker/server/model"
+
 	remote "github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
@@ -213,13 +214,13 @@ func (_m *Remote) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	return r0, r1
 }
 
-// Perm provides a mock function with given fields: ctx, u, owner, repo
-func (_m *Remote) Perm(ctx context.Context, u *model.User, owner string, repo string) (*model.Perm, error) {
-	ret := _m.Called(ctx, u, owner, repo)
+// Perm provides a mock function with given fields: ctx, u, r
+func (_m *Remote) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
+	ret := _m.Called(ctx, u, r)
 
 	var r0 *model.Perm
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string, string) *model.Perm); ok {
-		r0 = rf(ctx, u, owner, repo)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) *model.Perm); ok {
+		r0 = rf(ctx, u, r)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Perm)
@@ -227,8 +228,8 @@ func (_m *Remote) Perm(ctx context.Context, u *model.User, owner string, repo st
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, string, string) error); ok {
-		r1 = rf(ctx, u, owner, repo)
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo) error); ok {
+		r1 = rf(ctx, u, r)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -282,13 +283,13 @@ func (_m *Remote) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 	return r0, r1
 }
 
-// Status provides a mock function with given fields: ctx, u, r, b, link, proc
-func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	ret := _m.Called(ctx, u, r, b, link, proc)
+// Status provides a mock function with given fields: ctx, u, r, b, p
+func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error {
+	ret := _m.Called(ctx, u, r, b, p)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, string, *model.Proc) error); ok {
-		r0 = rf(ctx, u, r, b, link, proc)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, *model.Proc) error); ok {
+		r0 = rf(ctx, u, r, b, p)
 	} else {
 		r0 = ret.Error(0)
 	}

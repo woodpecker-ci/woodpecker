@@ -106,14 +106,14 @@ func Test_gogs(t *testing.T) {
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -164,7 +164,7 @@ func Test_gogs(t *testing.T) {
 
 		g.It("Should return no-op for usupporeted features", func() {
 			_, err1 := c.Auth(ctx, "octocat", "4vyW6b49Z")
-			err2 := c.Status(ctx, nil, nil, nil, "", nil)
+			err2 := c.Status(ctx, nil, nil, nil, nil)
 			err3 := c.Deactivate(ctx, nil, nil, "")
 			g.Assert(err1).IsNotNil()
 			g.Assert(err2).IsNil()

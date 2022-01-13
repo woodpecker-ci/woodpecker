@@ -20,16 +20,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-const (
-	DescPending  = "the build is pending"
-	DescRunning  = "the buils is running"
-	DescSuccess  = "the build was successful"
-	DescFailure  = "the build failed"
-	DescCanceled = "the build canceled"
-	DescBlocked  = "the build is pending approval"
-	DescDeclined = "the build was rejected"
-)
-
 // getStatus is a helper that converts a Woodpecker status to a Gitlab status.
 func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 	switch status {
@@ -45,28 +35,5 @@ func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 		return gitlab.Canceled
 	default:
 		return gitlab.Failed
-	}
-}
-
-// getDesc is a helper function that generates a description
-// message for the build based on the status.
-func getDesc(status model.StatusValue) string {
-	switch status {
-	case model.StatusPending:
-		return DescPending
-	case model.StatusRunning:
-		return DescRunning
-	case model.StatusSuccess:
-		return DescSuccess
-	case model.StatusFailure, model.StatusError:
-		return DescFailure
-	case model.StatusKilled:
-		return DescCanceled
-	case model.StatusBlocked:
-		return DescBlocked
-	case model.StatusDeclined:
-		return DescDeclined
-	default:
-		return DescFailure
 	}
 }

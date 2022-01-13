@@ -171,9 +171,9 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	repo, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
 	return nil
 }
 

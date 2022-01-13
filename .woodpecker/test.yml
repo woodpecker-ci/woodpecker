@@ -39,7 +39,7 @@ pipeline:
     image: golang:1.16
     group: test
     environment:
-      - DATABASE_DRIVER=sqlite3
+      - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore
 
@@ -47,8 +47,8 @@ pipeline:
     image: golang:1.16
     group: test
     environment:
-      - DATABASE_DRIVER=postgres
-      - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
 
@@ -56,14 +56,14 @@ pipeline:
     image: golang:1.16
     group: test
     environment:
-      - DATABASE_DRIVER=mysql
-      - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DRIVER=mysql
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
 
 services:
   service-postgres:
-    image: postgres:9.6
+    image: postgres:11
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres

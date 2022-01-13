@@ -28,9 +28,9 @@ import (
 
 func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
-	// TODO: save repo id (support nested repos)
-	var owner = parts[0]
-	var name = parts[1]
+	// TODO(648) save repo id (support nested repos)
+	owner := strings.Join(parts[:len(parts)-1], "/")
+	name := parts[len(parts)-1]
 	repo := &model.Repo{
 		Owner:      owner,
 		Name:       name,

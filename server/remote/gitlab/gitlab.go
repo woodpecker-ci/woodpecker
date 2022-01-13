@@ -24,18 +24,19 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 )
 
 const (
-	defaultScope  = "api"
-	perPage       = 100
-	statusContext = "ci/drone"
+	defaultScope = "api"
+	perPage      = 100
 )
 
 // Opts defines configuration options.
@@ -89,7 +90,7 @@ func New(opts Opts) (remote.Remote, error) {
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	var config = &oauth2.Config{
+	config := &oauth2.Config{
 		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
@@ -108,17 +109,21 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	// get the OAuth code
-	var code = req.FormValue("code")
+	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		authCodeURL, err := config.AuthCodeURL("drone")
+		if err != nil {
+			return nil, fmt.Errorf("authCodeURL error: %v", err)
+		}
+		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
 		return nil, nil
 	}
 
-	var trans = &oauth2.Transport{Config: config, Transport: &http.Transport{
+	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var token, err = trans.Exchange(code)
+	token, err := trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -249,6 +254,13 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 			if err != nil {
 				return nil, err
 			}
+
+			// TODO(648) remove when woodpecker understands nested repos
+			if strings.Count(repo.FullName, "/") > 1 {
+				log.Debug().Msgf("Skipping nested repository %s for user %s, because they are not supported, yet (see #648).", repo.FullName, user.Login)
+				continue
+			}
+
 			repos = append(repos, repo)
 		}
 
@@ -261,12 +273,12 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 }
 
 // Perm fetches the named repository from the remote system.
-func (g *Gitlab) Perm(ctx context.Context, user *model.User, owner, name string) (*model.Perm, error) {
+func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-	repo, err := g.getProject(ctx, client, owner, name)
+	repo, err := g.getProject(ctx, client, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +359,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 }
 
 // Status sends the commit status back to gitlab.
-func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -359,12 +371,11 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
-		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
-		State:       getStatus(build.Status),
-		Description: gitlab.String(getDesc(build.Status)),
-		TargetURL:   &link,
-		Name:        nil,
-		Context:     gitlab.String(statusContext),
+		State:       getStatus(proc.State),
+		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
+		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
+		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		PipelineID:  gitlab.Int(int(build.Number)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -388,6 +399,16 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	}, nil
 }
 
+func (g *Gitlab) getTokenAndWebURL(link string) (token, webURL string, err error) {
+	uri, err := url.Parse(link)
+	if err != nil {
+		return "", "", err
+	}
+	token = uri.Query().Get("access_token")
+	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	return token, webURL, nil
+}
+
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
@@ -395,23 +416,31 @@ func (g *Gitlab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	if err != nil {
 		return err
 	}
-	uri, err := url.Parse(link)
-	if err != nil {
-		return err
-	}
-	token := uri.Query().Get("access_token")
-	webURL := fmt.Sprintf("%s://%s", uri.Scheme, uri.Host)
 
 	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.SetDroneCIService(_repo.ID, &gitlab.SetDroneCIServiceOptions{
-		Token:                 &token,
-		DroneURL:              &webURL,
+
+	token, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	if len(token) == 0 {
+		return fmt.Errorf("no token found")
+	}
+
+	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
+		URL:                   gitlab.String(webURL),
+		Token:                 gitlab.String(token),
+		PushEvents:            gitlab.Bool(true),
+		TagPushEvents:         gitlab.Bool(true),
+		MergeRequestsEvents:   gitlab.Bool(true),
+		DeploymentEvents:      gitlab.Bool(true),
 		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
 	}, gitlab.WithContext(ctx))
+
 	return err
 }
 
@@ -427,8 +456,44 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	if err != nil {
 		return err
 	}
-	// TODO: "WoodpeckerCIService"
-	_, err = client.Services.DeleteDroneCIService(_repo.ID, gitlab.WithContext(ctx))
+
+	_, webURL, err := g.getTokenAndWebURL(link)
+	if err != nil {
+		return err
+	}
+
+	hookID := -1
+	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
+		PerPage: 10,
+		Page:    1,
+	}
+	for {
+		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
+		if err != nil {
+			return err
+		}
+
+		for _, hook := range hooks {
+			if hook.URL == webURL {
+				hookID = hook.ID
+				break
+			}
+		}
+
+		// Exit the loop when we've seen all pages
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
+
+		// Update the page number to get the next page
+		listProjectHooksOptions.Page = resp.NextPage
+	}
+
+	if hookID == -1 {
+		return fmt.Errorf("could not find hook to delete")
+	}
+
+	_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
 
 	return err
 }

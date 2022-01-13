@@ -29,10 +29,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
-func load(config string) *Gitlab {
+func load(t *testing.T, config string) *Gitlab {
 	_url, err := url.Parse(config)
 	if err != nil {
-		panic(err)
+		t.FailNow()
 	}
 	params := _url.Query()
 	_url.RawQuery = ""
@@ -52,19 +52,19 @@ func load(config string) *Gitlab {
 
 func Test_Gitlab(t *testing.T) {
 	// setup a dummy github server
-	var server = testdata.NewServer(t)
+	server := testdata.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	client := load(env)
+	client := load(t, env)
 
-	var user = model.User{
+	user := model.User{
 		Login: "test_user",
 		Token: "e3b0c44298fc1c149afbf4c8996fb",
 	}
 
-	var repo = model.Repo{
+	repo := model.Repo{
 		Name:  "diaspora-client",
 		Owner: "diaspora",
 	}
@@ -109,21 +109,27 @@ func Test_Gitlab(t *testing.T) {
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := client.Perm(ctx, &user, "diaspora", "diaspora-client")
+				perm, err := client.Perm(ctx, &user, &repo)
 				assert.NoError(t, err)
 				assert.True(t, perm.Admin)
 				assert.True(t, perm.Pull)
 				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := client.Perm(ctx, &user, "brightbox", "puppet")
+				perm, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "brightbox",
+					Name:  "puppet",
+				})
 				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := client.Perm(ctx, &user, "not-existed", "not-existed")
+				_, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "not-existed",
+					Name:  "not-existed",
+				})
 
 				g.Assert(err).IsNotNil()
 			})
