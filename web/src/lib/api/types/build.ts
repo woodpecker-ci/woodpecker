@@ -108,6 +108,7 @@ export type BuildProc = {
   start_time?: number;
   end_time?: number;
   machine?: string;
+  error?: string;
   children?: BuildProc[];
 };
 

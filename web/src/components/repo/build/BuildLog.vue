@@ -17,9 +17,10 @@
     <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
       exit code {{ proc.exit_code }}
     </div>
-    <template v-if="!proc?.start_time" />
+
     <div class="text-gray-300 mx-auto">
-      <span v-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
+      <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
+      <span v-else-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
         >This step has been canceled.</span
       >
       <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
