@@ -24,7 +24,7 @@ In the above example we define two pipeline steps, `frontend` and `backend`. The
 
 ## Global Pipeline Conditionals
 
-Woodpecker gives the ability to skip whole pipelines (not just steps) when based on certain conditions.
+Woodpecker gives the ability to skip whole pipelines (not just steps) based on certain conditions.
 
 ### `branches`
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
@@ -96,66 +96,18 @@ pipeline:
 +  exclude: [ develop, feature/* ]
 ```
 
-
-### `when`
-
-If required, Woodpecker can be made to skip whole pipelines based on `when`. This could be utilised to ensure compliance that only certain jobs run on certain agents (regional restrictions). Or targeting architectures.
-
-This is achieved by ensuring the `when` block is on the root level.
-
-See [when](#step-when---step-conditional-execution) above to understand all the different types of conditions that can be used.
-
-> Note: You may need to set the agent environment settings, as these are not set automatically. See: [agent configuration](/docs/administration/agent-config) for more details.
-
-
-Example targeting a specific platform:
-
-```diff
- pipeline:
-   build:
-     image: golang
-     commands:
-       - go build
-       - go test
- 
-+when:
-+  platform: [ linux/arm* ]
-```
-
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines.
-Because we had our original `when` block underneath the `build` block, if it was run on the `linux/amd64` agent. It would have cloned the repository, and then skipped the build step. Resulting in a Successful build.
-
-Moving the when block to the root level will ensure that the whole pipeline will run be targeted to agents that match all of the conditions.
-
-This can be utilised in conjunction with other when blocks as well.
-
-Example `when` pipeline & step block:
-
-```diff
- pipeline:
-   build:
-     image: golang
-     commands:
-       - go build
-       - go test
- 
-   publish:
-     image: plugins/docker
-     settings:
-       repo: foo/bar
-+    when:
-+     tag: release*
-
-+when:
-+  platform: [ linux/arm* ]
-```
-
 ### `platform`
 
-To configure your pipeline to select an agent with a specific platform, you can use `platform` key.
+To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
 ```diff
 +platform: linux/arm64
- 
+
  pipeline:
    build:
      image: golang
@@ -172,13 +124,11 @@ Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to
 git commit -m "updated README [CI SKIP]"
 ```
 
-
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
 
 For more details check the [services docs](/docs/usage/services/).
-
 
 ## Steps
 
@@ -223,11 +173,11 @@ Woodpecker uses Docker images for the build environment, for plugins and for ser
      commands:
        - go build
        - go test
- 
+
    publish:
 +    image: plugins/docker
      repo: foo/bar
- 
+
  services:
    database:
 +    image: mysql
@@ -413,7 +363,7 @@ The base attribute defines a shared base volume available to all pipeline steps.
  workspace:
 +  base: /go
    path: src/github.com/octocat/hello-world
- 
+
  pipeline:
    deps:
      image: golang:latest
@@ -462,7 +412,7 @@ Woodpecker automatically configures a default clone step if not explicitly defin
 +clone:
 +  git:
 +    image: woodpeckerci/plugin-git
- 
+
  pipeline:
    build:
      image: golang
@@ -539,7 +489,7 @@ Woodpecker gives the ability to configure privileged mode in the Yaml. You can u
        - DOCKER_HOST=tcp://docker:2375
      commands:
        - docker --tls=false ps
- 
+
  services:
    docker:
      image: docker:dind
