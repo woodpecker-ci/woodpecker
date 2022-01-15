@@ -1,8 +1,10 @@
 <template>
   <FluidContainer v-if="repo && repoPermissions && $route.meta.repoHeader">
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <h1 class="text-xl text-gray-500">{{ `${repo.owner} / ${repo.name}` }}</h1>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
+    <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
+      <h1 class="text-xl text-gray-500 w-full md:w-auto text-center mb-4 md:mb-0">
+        {{ `${repo.owner} / ${repo.name}` }}
+      </h1>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="md:ml-auto">
         <img :src="badgeUrl" />
       </a>
       <a

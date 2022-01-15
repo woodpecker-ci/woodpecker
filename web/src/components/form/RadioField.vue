@@ -6,6 +6,7 @@
       class="
         radio
         relative
+        flex-shrink-0
         border border-gray-400
         dark:border-gray-600
         cursor-pointer
