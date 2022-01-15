@@ -32,14 +32,15 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
-		Owner:      owner,
-		Name:       name,
-		FullName:   _repo.PathWithNamespace,
-		Avatar:     _repo.AvatarURL,
-		Link:       _repo.WebURL,
-		Clone:      _repo.HTTPURLToRepo,
-		Branch:     _repo.DefaultBranch,
-		Visibility: model.RepoVisibly(_repo.Visibility),
+		Owner:        owner,
+		Name:         name,
+		FullName:     _repo.PathWithNamespace,
+		Avatar:       _repo.AvatarURL,
+		Link:         _repo.WebURL,
+		Clone:        _repo.HTTPURLToRepo,
+		Branch:       _repo.DefaultBranch,
+		Visibility:   model.RepoVisibly(_repo.Visibility),
+		IsSCMPrivate: !_repo.Public,
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -48,12 +49,6 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
 		repo.Avatar = fmt.Sprintf("%s/%s", g.URL, repo.Avatar)
-	}
-
-	if g.PrivateMode {
-		repo.IsSCMPrivate = true
-	} else {
-		repo.IsSCMPrivate = !_repo.Public
 	}
 
 	return repo, nil

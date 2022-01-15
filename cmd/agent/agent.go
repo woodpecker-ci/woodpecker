@@ -58,12 +58,6 @@ func loop(c *cli.Context) error {
 	}
 
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.Bool("debug") {
-		if c.IsSet("debug") {
-			log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		}
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 		log.Logger = log.With().Caller().Logger()
 	}
@@ -95,20 +89,20 @@ func loop(c *cli.Context) error {
 
 	transport := grpc.WithInsecure()
 
-	if c.Bool("secure-grpc") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+	if c.Bool("grpc-secure") {
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	}
 
 	conn, err := grpc.Dial(
 		c.String("server"),
 		transport,
 		grpc.WithPerRPCCredentials(&credentials{
-			username: c.String("username"),
-			password: c.String("password"),
+			username: c.String("grpc-username"),
+			password: c.String("grpc-password"),
 		}),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("keepalive-time"),
-			Timeout: c.Duration("keepalive-timeout"),
+			Time:    c.Duration("grpc-keepalive-time"),
+			Timeout: c.Duration("grpc-keepalive-timeout"),
 		}),
 	)
 	if err != nil {

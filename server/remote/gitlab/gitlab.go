@@ -44,9 +44,6 @@ type Opts struct {
 	URL          string // Gitlab server url.
 	ClientID     string // Oauth2 client id.
 	ClientSecret string // Oauth2 client secret.
-	Username     string // Optional machine account username.
-	Password     string // Optional machine account password.
-	PrivateMode  bool   // Gogs is running in private mode.
 	SkipVerify   bool   // Skip ssl verification.
 }
 
@@ -56,9 +53,6 @@ type Gitlab struct {
 	ClientID     string
 	ClientSecret string
 	Machine      string
-	Username     string
-	Password     string
-	PrivateMode  bool
 	SkipVerify   bool
 	HideArchives bool
 	Search       bool
@@ -80,9 +74,6 @@ func New(opts Opts) (remote.Remote, error) {
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		Machine:      u.Host,
-		Username:     opts.Username,
-		Password:     opts.Password,
-		PrivateMode:  opts.PrivateMode,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -385,13 +376,6 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 // cloning Gitlab repositories. The netrc will use the global machine account
 // when configured.
 func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if g.Password != "" {
-		return &model.Netrc{
-			Login:    g.Username,
-			Password: g.Password,
-			Machine:  g.Machine,
-		}, nil
-	}
 	return &model.Netrc{
 		Login:    "oauth2",
 		Password: u.Token,

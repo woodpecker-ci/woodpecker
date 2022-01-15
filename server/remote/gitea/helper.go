@@ -28,16 +28,12 @@ import (
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
-func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
+func toRepo(from *gitea.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
-	private := from.Private
-	if privateMode {
-		private = true
-	}
 	return &model.Repo{
 		SCMKind:      model.RepoGit,
 		Name:         name,
@@ -45,7 +41,7 @@ func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
 		FullName:     from.FullName,
 		Avatar:       avatar,
 		Link:         from.HTMLURL,
-		IsSCMPrivate: private,
+		IsSCMPrivate: from.Private,
 		Clone:        from.CloneURL,
 		Branch:       from.DefaultBranch,
 	}

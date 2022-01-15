@@ -82,7 +82,7 @@ func Test_helper(t *testing.T) {
 				},
 			}
 
-			to := convertRepoList(from, false)
+			to := convertRepoList(from)
 			g.Assert(to[0].Avatar).Equal("http://...")
 			g.Assert(to[0].FullName).Equal("octocat/hello-world")
 			g.Assert(to[0].Owner).Equal("octocat")
@@ -108,7 +108,7 @@ func Test_helper(t *testing.T) {
 				},
 			}
 
-			to := convertRepo(&from, false)
+			to := convertRepo(&from)
 			g.Assert(to.Avatar).Equal("http://...")
 			g.Assert(to.FullName).Equal("octocat/hello-world")
 			g.Assert(to.Owner).Equal("octocat")

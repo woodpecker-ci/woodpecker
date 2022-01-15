@@ -48,22 +48,15 @@ type Gitea struct {
 	Machine      string
 	ClientID     string
 	ClientSecret string
-	Username     string
-	Password     string
-	PrivateMode  bool
 	SkipVerify   bool
 }
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Gitea server url.
-	Context     string // Context to display in status check
-	Client      string // OAuth2 Client ID
-	Secret      string // OAuth2 Client Secret
-	Username    string // Optional machine account username.
-	Password    string // Optional machine account password.
-	PrivateMode bool   // Gitea is running in private mode.
-	SkipVerify  bool   // Skip ssl verification.
+	URL        string // Gitea server url.
+	Client     string // OAuth2 Client ID
+	Secret     string // OAuth2 Client Secret
+	SkipVerify bool   // Skip ssl verification.
 }
 
 // New returns a Remote implementation that integrates with Gitea,
@@ -79,13 +72,9 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:          opts.URL,
-		Context:      opts.Context,
 		Machine:      u.Host,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
-		Username:     opts.Username,
-		Password:     opts.Password,
-		PrivateMode:  opts.PrivateMode,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -233,10 +222,7 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*m
 	if err != nil {
 		return nil, err
 	}
-	if c.PrivateMode {
-		repo.Private = true
-	}
-	return toRepo(repo, c.PrivateMode), nil
+	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gitea account, including
@@ -265,7 +251,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		}
 
 		for _, repo := range all {
-			repos = append(repos, toRepo(repo, c.PrivateMode))
+			repos = append(repos, toRepo(repo))
 		}
 
 		if len(all) < perPage {
@@ -362,13 +348,6 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 // cloning Gitea repositories. The netrc will use the global machine account
 // when configured.
 func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if c.Password != "" {
-		return &model.Netrc{
-			Login:    c.Username,
-			Password: c.Password,
-			Machine:  c.Machine,
-		}, nil
-	}
 	return &model.Netrc{
 		Login:    u.Login,
 		Password: u.Token,
