@@ -7,9 +7,10 @@
 ## Docker images
 
 Image variants:
-* The `next` images are based on the current master branch
-* The `latest` is same as next (will change after v0.15.0 release to be latest stable release)
-* The `x.x.x` version images are stable releases
+* The `latest` image is the latest stable release
+* The `vX.X.X` version images are stable releases
+* The `vX.X` images are based on version specific release branche, they have the latest bugfixes backported
+* The `next` images are based on the current master branch and should not be used for production environments
 
 ``` bash
 # server

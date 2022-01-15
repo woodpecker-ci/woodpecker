@@ -43,8 +43,7 @@ pipeline:
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server
-      # TODO: only release as next after 0.15.0 got released
-      tag: [next, latest]
+      tag: next
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -56,8 +55,7 @@ pipeline:
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine
-      # TODO: only release as next-alpine after 0.15.0 got released
-      tag: [next-alpine, latest-alpine]
+      tag: next-alpine
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -82,8 +80,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
-      # TODO: only release as next after 0.15.0 got released
-      tag: [next, latest]
+      tag: next
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -96,8 +93,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      # TODO: only release as next-alpine after 0.15.0 got released
-      tag: [next-alpine, latest-alpine]
+      tag: next-alpine
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
