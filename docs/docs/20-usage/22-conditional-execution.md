@@ -159,7 +159,10 @@ when:
 
 ## `path`
 
-> NOTE: This feature is currently only available for GitHub and Gitea repositories.
+:::info
+This feature is currently only available for GitHub and Gitea without pull support.  
+It ignores tag events.
+:::
 
 Execute a step only on a pipeline with certain files being changed:
 
