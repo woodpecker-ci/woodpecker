@@ -290,6 +290,16 @@ func TestConstraintMap(t *testing.T) {
 			with: map[string]string{"GOLANG": "1.7", "REDIS": "3.0"},
 			want: true,
 		},
+		{
+			conf: "{ GOLANG: 1.7, BRANCH: release/**/test }",
+			with: map[string]string{"GOLANG": "1.7", "BRANCH": "release/v1.12.1//test"},
+			want: true,
+		},
+		{
+			conf: "{ GOLANG: 1.7, BRANCH: release/**/test }",
+			with: map[string]string{"GOLANG": "1.7", "BRANCH": "release/v1.12.1/qest"},
+			want: false,
+		},
 		// include syntax
 		{
 			conf: "include: { GOLANG: 1.7 }",
