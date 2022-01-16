@@ -27,6 +27,10 @@ func TestNewSecretsReplacer(t *testing.T) {
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
 		secrets: []string{"Test\nwith\n\ntwo new lines"},
 		expect:  "start log\ndone\nnow\nan\nmulti line secret!! ;)",
+	}, {
+		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)\nwith\ntwo\n\nnewlines",
+		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
+		expect:  "start log\ndone\nnow\n********\n******** ;)\nwith\n********\n\n********",
 	}}
 
 	for _, c := range tc {
