@@ -25,6 +25,9 @@ func NewSecretsReplacer(secrets []string) *strings.Replacer {
 		}
 		// since replacer is executed on each line we have to split multi-line-secrets
 		for _, part := range strings.Split(old, "\n") {
+			if len(part) == 0 {
+				continue
+			}
 			oldnew = append(oldnew, part)
 			oldnew = append(oldnew, "********")
 		}
