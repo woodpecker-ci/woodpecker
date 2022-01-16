@@ -31,6 +31,8 @@
   <i-mdi-sync v-else-if="name === 'sync'" class="h-6 w-6" />
   <i-ic-baseline-healing v-else-if="name === 'heal'" class="h-6 w-6" />
   <i-bx-bx-power-off v-else-if="name === 'turn-off'" class="h-6 w-6" />
+  <i-mdi-chevron-right v-else-if="name === 'chevron-right'" class="h-6 w-6" />
+  <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -70,7 +72,9 @@ export type IconNames =
   | 'light'
   | 'sync'
   | 'heal'
-  | 'turn-off';
+  | 'chevron-right'
+  | 'turn-off'
+  | 'close';
 
 export default defineComponent({
   name: 'Icon',
