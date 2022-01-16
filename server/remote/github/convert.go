@@ -221,7 +221,7 @@ func convertDeployHook(from *webhook) *model.Build {
 		Deploy:  from.Deployment.Env,
 		Sender:  from.Sender.Login,
 	}
-	// if the ref is a sha or short sha we need to manuallyconstruct the ref.
+	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(build.Commit, build.Ref) || build.Commit == build.Ref {
 		build.Branch = from.Repo.DefaultBranch
 		if build.Branch == "" {

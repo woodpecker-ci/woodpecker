@@ -137,7 +137,7 @@ func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 }
 
 // Hook provides a mock function with given fields: r
-func (_m *Remote) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	ret := _m.Called(r)
 
 	var r0 *model.Repo

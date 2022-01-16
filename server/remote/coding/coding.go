@@ -284,7 +284,7 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
-func (c *Coding) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	repo, build, err := parseHook(r)
 	if build != nil {
 		build.Avatar = c.resourceLink(build.Avatar)

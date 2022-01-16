@@ -264,7 +264,7 @@ func Test_bitbucket(t *testing.T) {
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 
-			r, _, err := c.Hook(req)
+			r, _, err := c.Hook(ctx, req)
 			g.Assert(err).IsNil()
 			g.Assert(r.FullName).Equal("user_name/repo_name")
 		})

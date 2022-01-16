@@ -169,7 +169,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, build.Event, model.EventPush)
@@ -191,7 +191,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, "test", hookRepo.Owner)
@@ -212,7 +212,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)

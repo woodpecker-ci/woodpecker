@@ -32,6 +32,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 const (
@@ -491,6 +492,51 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
-	return parseHook(r, c.MergeRef)
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+	repo, build, err := parseHook(r, c.MergeRef)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if build.Event == model.EventPull {
+		build, err = c.loadChangedFilesFromPullRequest(ctx, repo, build)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return repo, build, nil
+}
+
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, repo *model.Repo, build *model.Build) (*model.Build, error) {
+	user, err := store.FromContext(ctx).GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client := c.newClientToken(ctx, user.Token)
+
+	// extract id from ref: "refs/pull/%d/merge"
+	pullRequestID, err := strconv.Atoi(build.Ref)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := new(github.ListOptions)
+	opts.Page = 1
+
+	for opts.Page > 0 {
+		files, resp, err := client.PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pullRequestID, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, file := range files {
+			build.ChangedFiles = append(build.ChangedFiles, *file.Filename)
+		}
+
+		opts.Page = resp.NextPage
+	}
+
+	return build, nil
 }
