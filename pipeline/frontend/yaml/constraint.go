@@ -2,7 +2,6 @@ package yaml
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -80,7 +79,7 @@ func (c *Constraint) Match(v string) bool {
 // Includes returns true if the string matches the include patterns.
 func (c *Constraint) Includes(v string) bool {
 	for _, pattern := range c.Include {
-		if ok, _ := filepath.Match(pattern, v); ok {
+		if ok, _ := doublestar.Match(pattern, v); ok {
 			return true
 		}
 	}
@@ -90,7 +89,7 @@ func (c *Constraint) Includes(v string) bool {
 // Excludes returns true if the string matches the exclude patterns.
 func (c *Constraint) Excludes(v string) bool {
 	for _, pattern := range c.Exclude {
-		if ok, _ := filepath.Match(pattern, v); ok {
+		if ok, _ := doublestar.Match(pattern, v); ok {
 			return true
 		}
 	}
