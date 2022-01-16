@@ -475,20 +475,20 @@ func parseConstraints(t *testing.T, s string) *Constraints {
 	return c
 }
 
-func parseConstraint(t *testing.T, s string) *Constraint {
-	c := &Constraint{}
+func parseConstraint(t *testing.T, s string) *List {
+	c := &List{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintMap(t *testing.T, s string) *ConstraintMap {
-	c := &ConstraintMap{}
+func parseConstraintMap(t *testing.T, s string) *Map {
+	c := &Map{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }
 
-func parseConstraintPath(t *testing.T, s string) *ConstraintPath {
-	c := &ConstraintPath{}
+func parseConstraintPath(t *testing.T, s string) *Path {
+	c := &Path{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

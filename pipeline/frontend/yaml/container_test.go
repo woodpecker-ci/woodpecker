@@ -111,7 +111,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			},
 		},
 		Constraints: constraint.Constraints{
-			Branch: constraint.Constraint{
+			Branch: constraint.List{
 				Include: []string{"master"},
 			},
 		},
@@ -190,8 +190,8 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dry_run":    true,
 					},
 					Constraints: constraint.Constraints{
-						Event:  constraint.Constraint{Include: []string{"push"}},
-						Branch: constraint.Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						Event:  constraint.List{Include: []string{"push"}},
+						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 					},
 				},
 			},
@@ -218,8 +218,8 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next"),
 					},
 					Constraints: constraint.Constraints{
-						Event:  constraint.Constraint{Include: []string{"push"}},
-						Branch: constraint.Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						Event:  constraint.List{Include: []string{"push"}},
+						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 					},
 				},
 			},

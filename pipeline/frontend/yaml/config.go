@@ -12,7 +12,7 @@ type (
 	Config struct {
 		Cache     types.Stringorslice
 		Platform  string
-		Branches  constraint.Constraint
+		Branches  constraint.List
 		Workspace Workspace
 		Clone     Containers
 		Pipeline  Containers
