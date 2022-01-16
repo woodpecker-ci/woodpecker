@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -109,8 +110,8 @@ func TestUnmarshalContainer(t *testing.T) {
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: Constraints{
-			Branch: Constraint{
+		Constraints: constraint.Constraints{
+			Branch: constraint.Constraint{
 				Include: []string{"master"},
 			},
 		},
@@ -188,9 +189,9 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next", "latest"),
 						"dry_run":    true,
 					},
-					Constraints: Constraints{
-						Event:  Constraint{Include: []string{"push"}},
-						Branch: Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					Constraints: constraint.Constraints{
+						Event:  constraint.Constraint{Include: []string{"push"}},
+						Branch: constraint.Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 					},
 				},
 			},
@@ -216,9 +217,9 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
 					},
-					Constraints: Constraints{
-						Event:  Constraint{Include: []string{"push"}},
-						Branch: Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					Constraints: constraint.Constraints{
+						Event:  constraint.Constraint{Include: []string{"push"}},
+						Branch: constraint.Constraint{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 					},
 				},
 			},
