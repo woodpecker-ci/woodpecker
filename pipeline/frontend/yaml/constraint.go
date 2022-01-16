@@ -136,7 +136,7 @@ func (c *ConstraintMap) Match(params map[string]string) bool {
 		var matches int
 
 		for key, val := range c.Exclude {
-			if params[key] == val {
+			if ok, _ := doublestar.Match(val, params[key]); ok {
 				matches++
 			}
 		}
@@ -145,7 +145,7 @@ func (c *ConstraintMap) Match(params map[string]string) bool {
 		}
 	}
 	for key, val := range c.Include {
-		if params[key] != val {
+		if ok, _ := doublestar.Match(val, params[key]); !ok {
 			return false
 		}
 	}

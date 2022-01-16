@@ -285,11 +285,10 @@ func TestConstraintMap(t *testing.T) {
 			with: map[string]string{"GOLANG": "1.7", "REDIS": "3.0"},
 			want: false,
 		},
-		// TODO(bradrydzewski) eventually we should enable wildcard matching
 		{
 			conf: "{ GOLANG: 1.7, REDIS: 3.* }",
 			with: map[string]string{"GOLANG": "1.7", "REDIS": "3.0"},
-			want: false,
+			want: true,
 		},
 		// include syntax
 		{
@@ -368,10 +367,7 @@ func TestConstraintMap(t *testing.T) {
 	}
 	for _, test := range testdata {
 		c := parseConstraintMap(t, test.conf)
-		got, want := c.Match(test.with), test.want
-		if got != want {
-			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
-		}
+		assert.Equal(t, test.want, c.Match(test.with), "config: '%s', with: '%s'", test.conf, test.with)
 	}
 }
 
@@ -399,16 +395,16 @@ func TestConstraints(t *testing.T) {
 			want: true,
 		},
 		// environment constraint
-		// {
-		// 	conf: "{ branch: develop }",
-		// 	with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
-		// 	want: false,
-		// },
-		// {
-		// 	conf: "{ branch: master }",
-		// 	with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
-		// 	want: true,
-		// },
+		{
+			conf: "{ branch: develop }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			want: false,
+		},
+		{
+			conf: "{ branch: master }",
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			want: true,
+		},
 		// repo constraint
 		{
 			conf: "{ repo: owner/* }",
