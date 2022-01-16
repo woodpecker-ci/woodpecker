@@ -105,6 +105,11 @@ export default defineComponent({
           return defaultProcId.value;
         }
 
+        // is opened on >= md-screen
+        if (window.innerWidth > 768) {
+          return defaultProcId.value;
+        }
+
         return null;
       },
       set(_selectedProcId: number | null) {
