@@ -1,8 +1,6 @@
 # Conditional Step Execution
 
-Woodpecker supports defining conditional pipeline steps in the `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
-
-This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See [platform](#platform) below.
+Woodpecker supports defining conditions for pipeline step by a `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
 
 ## `repo`
 
