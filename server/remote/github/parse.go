@@ -172,7 +172,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge, privateMode bool) (*git
 		),
 	}
 	if merge {
-		build.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().Number)
+		build.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo(), privateMode), build, nil

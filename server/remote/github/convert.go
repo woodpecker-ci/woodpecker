@@ -82,19 +82,19 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository, private bool) *model.Repo {
 	repo := &model.Repo{
-		Owner:        *from.Owner.Login,
-		Name:         *from.Name,
-		FullName:     *from.FullName,
-		Link:         *from.HTMLURL,
-		IsSCMPrivate: *from.Private,
-		Clone:        *from.CloneURL,
-		Avatar:       *from.Owner.AvatarURL,
+		Name:         from.GetName(),
+		FullName:     from.GetFullName(),
+		Link:         from.GetHTMLURL(),
+		IsSCMPrivate: from.GetPrivate(),
+		Clone:        from.GetCloneURL(),
+		Branch:       from.GetDefaultBranch(),
+		Owner:        from.GetOwner().GetLogin(),
+		Avatar:       from.GetOwner().GetAvatarURL(),
+		Perm:         convertPerm(from.GetPermissions()),
 		SCMKind:      model.RepoGit,
-		Branch:       defaultBranch,
-		Perm:         convertPerm(from),
 	}
-	if from.DefaultBranch != nil {
-		repo.Branch = *from.DefaultBranch
+	if len(repo.Branch) == 0 {
+		repo.Branch = defaultBranch
 	}
 	if private {
 		repo.IsSCMPrivate = true
@@ -104,11 +104,11 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 
 // convertPerm is a helper function used to convert a GitHub repository
 // permissions to the common Woodpecker permissions structure.
-func convertPerm(from *github.Repository) *model.Perm {
+func convertPerm(perm map[string]bool) *model.Perm {
 	return &model.Perm{
-		Admin: from.Permissions["admin"],
-		Push:  from.Permissions["push"],
-		Pull:  from.Permissions["pull"],
+		Admin: perm["admin"],
+		Push:  perm["push"],
+		Pull:  perm["pull"],
 	}
 }
 
@@ -136,8 +136,8 @@ func convertTeamList(from []*github.Organization) []*model.Team {
 // to the common Woodpecker repository structure.
 func convertTeam(from *github.Organization) *model.Team {
 	return &model.Team{
-		Login:  *from.Login,
-		Avatar: *from.AvatarURL,
+		Login:  from.GetLogin(),
+		Avatar: from.GetAvatarURL(),
 	}
 }
 

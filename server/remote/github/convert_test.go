@@ -129,7 +129,7 @@ func Test_helper(t *testing.T) {
 				},
 			}
 
-			to := convertPerm(from)
+			to := convertPerm(from.GetPermissions())
 			g.Assert(to.Push).IsTrue()
 			g.Assert(to.Pull).IsTrue()
 			g.Assert(to.Admin).IsTrue()
@@ -158,7 +158,7 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert a repository from webhook", func() {
-			from := &github.PushEventRepository{}
+			from := &github.PushEventRepository{Owner: &github.User{}}
 			from.Owner.Login = github.String("octocat")
 			from.Owner.Name = github.String("octocat")
 			from.Name = github.String("hello-world")
@@ -178,110 +178,122 @@ func Test_helper(t *testing.T) {
 			g.Assert(repo.Branch).Equal(*from.DefaultBranch)
 		})
 
-		/*
+		g.It("should convert a pull request from webhook", func() {
+			from := &github.PullRequestEvent{
+				Action: github.String(actionOpen),
+				PullRequest: &github.PullRequest{
+					State: github.String(stateOpen),
+					Base:  &github.PullRequestBranch{},
+					Head: &github.PullRequestBranch{
+						Repo: &github.Repository{},
+					},
+					User: &github.User{},
+				}, Sender: &github.User{}}
+			from.PullRequest.Base.Ref = github.String("master")
+			from.PullRequest.Head.Ref = github.String("changes")
+			from.PullRequest.Head.SHA = github.String("f72fc19")
+			from.PullRequest.Head.Repo.CloneURL = github.String("https://github.com/octocat/hello-world-fork")
+			from.PullRequest.HTMLURL = github.String("https://github.com/octocat/hello-world/pulls/42")
+			from.PullRequest.Number = github.Int(42)
+			from.PullRequest.Title = github.String("Updated README.md")
+			from.PullRequest.User.Login = github.String("octocat")
+			from.PullRequest.User.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
+			from.Sender.Login = github.String("octocat")
 
-			g.It("should convert a pull request from webhook", func() {
-				from := &github.PullRequestEvent{}
-				from.PullRequest.Base.Ref = github.String("master")
-				from.PullRequest.Head.Ref = github.String("changes")
-				from.PullRequest.Head.SHA = github.String("f72fc19")
-				from.PullRequest.Head.Repo.CloneURL = github.String("https://github.com/octocat/hello-world-fork")
-				from.PullRequest.HTMLURL = github.String("https://github.com/octocat/hello-world/pulls/42")
-				from.PullRequest.Number = 42
-				from.PullRequest.Title = github.String("Updated README.md")
-				from.PullRequest.User.Login = github.String("octocat")
-				from.PullRequest.User.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
-				from.Sender.Login = github.String("octocat")
+			pull, _, build, err := parsePullHook(from, true, false)
+			g.Assert(err).IsNil()
+			g.Assert(pull).IsNotNil()
+			g.Assert(build.Event).Equal(model.EventPull)
+			g.Assert(build.Branch).Equal(*from.PullRequest.Base.Ref)
+			g.Assert(build.Ref).Equal("refs/pull/42/merge")
+			g.Assert(build.Refspec).Equal("changes:master")
+			g.Assert(build.Remote).Equal("https://github.com/octocat/hello-world-fork")
+			g.Assert(build.Commit).Equal(*from.PullRequest.Head.SHA)
+			g.Assert(build.Message).Equal(*from.PullRequest.Title)
+			g.Assert(build.Title).Equal(*from.PullRequest.Title)
+			g.Assert(build.Author).Equal(*from.PullRequest.User.Login)
+			g.Assert(build.Avatar).Equal(*from.PullRequest.User.AvatarURL)
+			g.Assert(build.Sender).Equal(*from.Sender.Login)
+		})
 
-				build := convertPullHook(from, true)
-				g.Assert(build.Event).Equal(model.EventPull)
-				g.Assert(build.Branch).Equal(*from.PullRequest.Base.Ref)
-				g.Assert(build.Ref).Equal("refs/pull/42/merge")
-				g.Assert(build.Refspec).Equal("changes:master")
-				g.Assert(build.Remote).Equal("https://github.com/octocat/hello-world-fork")
-				g.Assert(build.Commit).Equal(*from.PullRequest.Head.SHA)
-				g.Assert(build.Message).Equal(*from.PullRequest.Title)
-				g.Assert(build.Title).Equal(*from.PullRequest.Title)
-				g.Assert(build.Author).Equal(*from.PullRequest.User.Login)
-				g.Assert(build.Avatar).Equal(*from.PullRequest.User.AvatarURL)
-				g.Assert(build.Sender).Equal(*from.Sender.Login)
-			})
+		g.It("should convert a deployment from webhook", func() {
+			from := &github.DeploymentEvent{Deployment: &github.Deployment{}, Sender: &github.User{}}
+			from.Deployment.Description = github.String(":shipit:")
+			from.Deployment.Environment = github.String("production")
+			from.Deployment.ID = github.Int64(42)
+			from.Deployment.Ref = github.String("master")
+			from.Deployment.SHA = github.String("f72fc19")
+			from.Deployment.URL = github.String("https://github.com/octocat/hello-world")
+			from.Sender.Login = github.String("octocat")
+			from.Sender.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
 
-			g.It("should convert a deployment from webhook", func() {
-				from := &webhook{}
-				from.Deployment.Desc = ":shipit:"
-				from.Deployment.Env = "production"
-				from.Deployment.ID = 42
-				from.Deployment.Ref = "master"
-				from.Deployment.Sha = "f72fc19"
-				from.Deployment.URL = "https://github.com/octocat/hello-world"
-				from.Sender.Login = "octocat"
-				from.Sender.Avatar = "https://avatars1.githubusercontent.com/u/583231"
+			_, build, err := parseDeployHook(from, false)
+			g.Assert(err).IsNil()
+			g.Assert(build.Event).Equal(model.EventDeploy)
+			g.Assert(build.Branch).Equal("master")
+			g.Assert(build.Ref).Equal("refs/heads/master")
+			g.Assert(build.Commit).Equal(*from.Deployment.SHA)
+			g.Assert(build.Message).Equal(*from.Deployment.Description)
+			g.Assert(build.Link).Equal(*from.Deployment.URL)
+			g.Assert(build.Author).Equal(*from.Sender.Login)
+			g.Assert(build.Avatar).Equal(*from.Sender.AvatarURL)
+		})
 
-				build := convertDeployHook(from)
-				g.Assert(build.Event).Equal(model.EventDeploy)
-				g.Assert(build.Branch).Equal("master")
-				g.Assert(build.Ref).Equal("refs/heads/master")
-				g.Assert(build.Commit).Equal(from.Deployment.Sha)
-				g.Assert(build.Message).Equal(from.Deployment.Desc)
-				g.Assert(build.Link).Equal(from.Deployment.URL)
-				g.Assert(build.Author).Equal(from.Sender.Login)
-				g.Assert(build.Avatar).Equal(from.Sender.Avatar)
-			})
+		g.It("should convert a push from webhook", func() {
+			from := &github.PushEvent{Sender: &github.User{}, Repo: &github.PushEventRepository{}, HeadCommit: &github.HeadCommit{Author: &github.CommitAuthor{}}}
+			from.Sender.Login = github.String("octocat")
+			from.Sender.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
+			from.Repo.CloneURL = github.String("https://github.com/octocat/hello-world.git")
+			from.HeadCommit.Author.Email = github.String("github.String(octocat@github.com")
+			from.HeadCommit.Message = github.String("updated README.md")
+			from.HeadCommit.URL = github.String("https://github.com/octocat/hello-world")
+			from.HeadCommit.ID = github.String("f72fc19")
+			from.Ref = github.String("refs/heads/master")
 
-			g.It("should convert a push from webhook", func() {
-				from := &webhook{}
-				from.Sender.Login = "octocat"
-				from.Sender.Avatar = "https://avatars1.githubusercontent.com/u/583231"
-				from.Repo.CloneURL = "https://github.com/octocat/hello-world.git"
-				from.Head.Author.Email = "octocat@github.com"
-				from.Head.Message = "updated README.md"
-				from.Head.URL = "https://github.com/octocat/hello-world"
-				from.Head.ID = "f72fc19"
-				from.Ref = "refs/heads/master"
+			_, build, err := parsePushHook(from)
+			g.Assert(err).IsNil()
+			g.Assert(build.Event).Equal(model.EventPush)
+			g.Assert(build.Branch).Equal("master")
+			g.Assert(build.Ref).Equal("refs/heads/master")
+			g.Assert(build.Commit).Equal(*from.HeadCommit.ID)
+			g.Assert(build.Message).Equal(*from.HeadCommit.Message)
+			g.Assert(build.Link).Equal(*from.HeadCommit.URL)
+			g.Assert(build.Author).Equal(*from.Sender.Login)
+			g.Assert(build.Avatar).Equal(*from.Sender.AvatarURL)
+			g.Assert(build.Email).Equal(*from.HeadCommit.Author.Email)
+			g.Assert(build.Remote).Equal(*from.Repo.CloneURL)
+		})
 
-				build := convertPushHook(from)
-				g.Assert(build.Event).Equal(model.EventPush)
-				g.Assert(build.Branch).Equal("master")
-				g.Assert(build.Ref).Equal("refs/heads/master")
-				g.Assert(build.Commit).Equal(from.Head.ID)
-				g.Assert(build.Message).Equal(from.Head.Message)
-				g.Assert(build.Link).Equal(from.Head.URL)
-				g.Assert(build.Author).Equal(from.Sender.Login)
-				g.Assert(build.Avatar).Equal(from.Sender.Avatar)
-				g.Assert(build.Email).Equal(from.Head.Author.Email)
-				g.Assert(build.Remote).Equal(from.Repo.CloneURL)
-			})
+		g.It("should convert a tag from webhook", func() {
+			from := &github.PushEvent{}
+			from.Ref = github.String("refs/tags/v1.0.0")
 
-			g.It("should convert a tag from webhook", func() {
-				from := &webhook{}
-				from.Ref = "refs/tags/v1.0.0"
+			_, build, err := parsePushHook(from)
+			g.Assert(err).IsNil()
+			g.Assert(build.Event).Equal(model.EventTag)
+			g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
+		})
 
-				build := convertPushHook(from)
-				g.Assert(build.Event).Equal(model.EventTag)
-				g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
-			})
+		g.It("should convert tag's base branch from webhook to build's branch ", func() {
+			from := &github.PushEvent{}
+			from.Ref = github.String("refs/tags/v1.0.0")
+			from.BaseRef = github.String("refs/heads/master")
 
-			g.It("should convert tag's base branch from webhook to build's branch ", func() {
-				from := &webhook{}
-				from.Ref = "refs/tags/v1.0.0"
-				from.BaseRef = "refs/heads/master"
+			_, build, err := parsePushHook(from)
+			g.Assert(err).IsNil()
+			g.Assert(build.Event).Equal(model.EventTag)
+			g.Assert(build.Branch).Equal("master")
+		})
 
-				build := convertPushHook(from)
-				g.Assert(build.Event).Equal(model.EventTag)
-				g.Assert(build.Branch).Equal("master")
-			})
+		g.It("should not convert tag's base_ref from webhook if not prefixed with 'ref/heads/'", func() {
+			from := &github.PushEvent{}
+			from.Ref = github.String("refs/tags/v1.0.0")
+			from.BaseRef = github.String("refs/refs/master")
 
-			g.It("should not convert tag's base_ref from webhook if not prefixed with 'ref/heads/'", func() {
-				from := &webhook{}
-				from.Ref = "refs/tags/v1.0.0"
-				from.BaseRef = "refs/refs/master"
-
-				build := convertPushHook(from)
-				g.Assert(build.Event).Equal(model.EventTag)
-				g.Assert(build.Branch).Equal("refs/tags/v1.0.0")
-			})
-
-		*/
+			_, build, err := parsePushHook(from)
+			g.Assert(err).IsNil()
+			g.Assert(build.Event).Equal(model.EventTag)
+			g.Assert(build.Branch).Equal("refs/tags/v1.0.0")
+		})
 	})
 }

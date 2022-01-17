@@ -221,7 +221,7 @@ func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 	if err != nil {
 		return nil, err
 	}
-	return convertPerm(repo), nil
+	return convertPerm(repo.GetPermissions()), nil
 }
 
 // File fetches the file from the GitHub repository and returns its contents.
