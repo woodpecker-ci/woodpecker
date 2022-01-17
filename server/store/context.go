@@ -30,6 +30,12 @@ func FromContext(c context.Context) Store {
 	return c.Value(key).(Store)
 }
 
+// TryFromContext try to return the Store associated with this context.
+func TryFromContext(c context.Context) (Store, bool) {
+	store, ok := c.Value(key).(Store)
+	return store, ok
+}
+
 // ToContext adds the Store to this context if it supports
 // the Setter interface.
 func ToContext(c Setter, store Store) {

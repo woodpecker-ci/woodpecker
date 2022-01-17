@@ -159,7 +159,7 @@ when:
 
 :::info
 This feature is currently only available for GitHub, Gitlab and Gitea.
-Pull requests aren't supported at the moment ([#697](https://github.com/woodpecker-ci/woodpecker/pull/697)).  
+Pull requests aren't supported by gitea at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).  
 Path conditions are ignored for tag events.
 :::
 
