@@ -510,8 +510,8 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 }
 
 func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
-	_store := store.FromContext(ctx)
-	if _store == nil {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
 		return build, nil
 	}
 
