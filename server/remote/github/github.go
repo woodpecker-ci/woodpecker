@@ -517,8 +517,8 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, repo *mode
 	client := c.newClientToken(ctx, user.Token)
 
 	// extract id from ref: "refs/pull/%d/merge"
-	pullRequestID, err := strconv.Atoi(build.Ref)
-	if err != nil {
+	var pullRequestID int
+	if _, err := fmt.Sscanf(build.Ref, mergeRefs, &pullRequestID); err != nil {
 		return nil, err
 	}
 

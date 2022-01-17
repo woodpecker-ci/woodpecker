@@ -27,6 +27,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
+const (
+	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+)
+
 func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	// TODO(648) save repo id (support nested repos)
@@ -60,7 +64,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	return repo, nil
 }
 
-func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model.Repo, *model.Build, error) {
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -114,7 +118,7 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Commit = lastCommit.ID
 	build.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IID)
+	build.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	build.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
@@ -129,18 +133,10 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Title = obj.Title
 	build.Link = obj.URL
 
-	if hook.ObjectAttributes.StDiffs != nil {
-		files := make([]string, 0, len(hook.ObjectAttributes.StDiffs)*2)
-		for _, diff := range hook.ObjectAttributes.StDiffs {
-			files = append(files, diff.OldPath, diff.NewPath)
-		}
-		build.ChangedFiles = utils.DedupStrings(files)
-	}
-
 	return repo, build, nil
 }
 
-func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
+func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -190,7 +186,7 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	return repo, build, nil
 }
 
-func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 

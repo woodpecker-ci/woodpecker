@@ -31,7 +31,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -538,12 +540,60 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		return convertMergeRequestHock(event, req)
+		repo, build, err := convertMergeRequestHook(event, req)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return repo, build, nil
 	case *gitlab.PushEvent:
-		return convertPushHock(event)
+		return convertPushHook(event)
 	case *gitlab.TagEvent:
-		return convertTagHock(event)
+		return convertTagHook(event)
 	default:
 		return nil, nil, nil
 	}
+}
+
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+	_store := store.FromContext(ctx)
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	// extract id from ref: "refs/merge-requests/%d/head"
+	var pullRequestID int
+	if _, err := fmt.Sscanf(build.Ref, mergeRefs, &pullRequestID); err != nil {
+		return nil, err
+	}
+
+	changes, _, err := client.MergeRequests.GetMergeRequestChanges(repo.ID, pullRequestID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	files := build.ChangedFiles
+	for _, file := range changes.Changes {
+		files = append(files, file.NewPath)
+	}
+	build.ChangedFiles = utils.DedupStrings(files)
+
+	return build, nil
 }
