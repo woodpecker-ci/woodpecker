@@ -159,7 +159,7 @@ when:
 
 ## `path`
 
-> NOTE: This feature is currently only available for GitHub and Gitea repositories.
+> NOTE: This feature is currently only available for GitHub, Gitlab and Gitea repositories.
 
 Execute a step only on a pipeline with certain files being changed:
 
