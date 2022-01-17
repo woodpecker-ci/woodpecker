@@ -33,7 +33,7 @@ type (
 		Exclude []string
 	}
 
-	// Map defines a runtime constraint for exclude & include map.
+	// Map defines a runtime constraint for exclude & include map strings.
 	Map struct {
 		Include map[string]string
 		Exclude map[string]string
