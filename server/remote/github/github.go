@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v39/github"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -512,6 +513,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
+		log.Error().Msg("could not get store from context")
 		return build, nil
 	}
 

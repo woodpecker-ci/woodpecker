@@ -562,6 +562,7 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
+		log.Error().Msg("could not get store from context")
 		return build, nil
 	}
 
