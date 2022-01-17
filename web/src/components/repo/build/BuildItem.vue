@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="flex py-2 px-4 flex-grow min-w-0 flex-wrap">
+    <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
       <div class="<md:hidden flex items-center flex-shrink-0">
         <img class="w-8" :src="build.author_avatar" />
       </div>

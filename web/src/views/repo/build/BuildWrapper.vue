@@ -1,15 +1,16 @@
 <template>
   <template v-if="build && repo">
     <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
-      <div class="flex mb-2 items-center">
+      <div class="flex mb-2 items-center <md:flex-wrap">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 
         <h1
           class="
             order-3
             w-full
+            <md:flex-wrap
             md:order-none md:w-auto md:ml-2
-            flex flex-wrap
+            flex
             text-center text-xl text-gray-500
             whitespace-nowrap
             overflow-hidden overflow-ellipsis
@@ -17,7 +18,7 @@
         >
           <span class="w-full md:w-auto text-center">Pipeline #{{ buildId }}</span>
           <span class="<md:hidden mx-2">-</span>
-          <span class="w-full md:w-auto text-center">{{ message }}</span>
+          <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
         </h1>
 
         <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
