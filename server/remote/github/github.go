@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -493,13 +494,13 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	repo, build, err := parseHook(r, c.MergeRef)
+	pull, repo, build, err := parseHook(r, c.MergeRef, c.PrivateMode)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if build.Event == model.EventPull {
-		build, err = c.loadChangedFilesFromPullRequest(ctx, repo, build)
+	if pull != nil && len(build.ChangedFiles) == 0 {
+		build, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, build)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -508,35 +509,27 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return repo, build, nil
 }
 
-func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, repo *model.Repo, build *model.Build) (*model.Build, error) {
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, repo *model.Repo, build *model.Build) (*model.Build, error) {
 	user, err := store.FromContext(ctx).GetUser(repo.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	client := c.newClientToken(ctx, user.Token)
-
-	// extract id from ref: "refs/pull/%d/merge"
-	pullRequestID, err := strconv.Atoi(build.Ref)
-	if err != nil {
-		return nil, err
-	}
-
-	opts := new(github.ListOptions)
-	opts.Page = 1
-
+	opts := &github.ListOptions{Page: 1}
+	fileList := make([]string, 0, 16)
 	for opts.Page > 0 {
-		files, resp, err := client.PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pullRequestID, opts)
+		files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, file := range files {
-			build.ChangedFiles = append(build.ChangedFiles, *file.Filename)
+			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
 		}
 
 		opts.Page = resp.NextPage
 	}
+	build.ChangedFiles = utils.DedupStrings(fileList)
 
 	return build, nil
 }
