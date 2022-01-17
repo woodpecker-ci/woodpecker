@@ -236,7 +236,7 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r, c.URL)
 }
 

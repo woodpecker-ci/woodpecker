@@ -31,7 +31,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -524,7 +526,7 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
+func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
 	payload, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -538,12 +540,62 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		return convertMergeRequestHock(event, req)
+		mergeIID, repo, build, err := convertMergeRequestHook(event, req)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build, mergeIID); err != nil {
+			return nil, nil, err
+		}
+
+		return repo, build, nil
 	case *gitlab.PushEvent:
-		return convertPushHock(event)
+		return convertPushHook(event)
 	case *gitlab.TagEvent:
-		return convertTagHock(event)
+		return convertTagHook(event)
 	default:
 		return nil, nil, nil
 	}
+}
+
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return build, nil
+	}
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, mergeIID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]string, 0, len(changes.Changes)*2)
+	for _, file := range changes.Changes {
+		files = append(files, file.NewPath, file.OldPath)
+	}
+	build.ChangedFiles = utils.DedupStrings(files)
+
+	return build, nil
 }

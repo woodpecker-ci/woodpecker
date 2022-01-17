@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/sdk/gitea"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
@@ -110,15 +111,15 @@ func buildFromPush(hook *pushHook) *model.Build {
 }
 
 func getChangedFilesFromPushHook(hook *pushHook) []string {
-	files := make([]string, 0)
-
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
 	for _, c := range hook.Commits {
 		files = append(files, c.Added...)
 		files = append(files, c.Removed...)
 		files = append(files, c.Modified...)
 	}
 
-	return files
+	return utils.DedupStrings(files)
 }
 
 // helper function that extracts the Build data from a Gitea tag hook
