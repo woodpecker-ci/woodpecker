@@ -1,11 +1,24 @@
 <template>
   <template v-if="build && repo">
     <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
-      <div class="flex mb-2 items-center">
+      <div class="flex mb-2 items-center <md:flex-wrap">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 
-        <h1 class="text-xl ml-2 text-gray-500 whitespace-nowrap overflow-hidden overflow-ellipsis">
-          Pipeline #{{ buildId }} - {{ message }}
+        <h1
+          class="
+            order-3
+            w-full
+            <md:flex-wrap
+            md:order-none md:w-auto md:ml-2
+            flex
+            text-center text-xl text-gray-500
+            whitespace-nowrap
+            overflow-hidden overflow-ellipsis
+          "
+        >
+          <span class="w-full md:w-auto text-center">Pipeline #{{ buildId }}</span>
+          <span class="<md:hidden mx-2">-</span>
+          <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
         </h1>
 
         <BuildStatusIcon :build="build" class="flex flex-shrink-0 ml-auto" />
@@ -29,13 +42,13 @@
       </div>
 
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
-        <Tabs v-model="activeTab" disable-hash-mode>
+        <Tabs v-model="activeTab" disable-hash-mode class="order-2 md:order-none">
           <Tab id="tasks" title="Tasks" />
           <Tab id="config" title="Config" />
           <Tab id="changed-files" :title="`Changed files (${build.changed_files?.length || 0})`" />
         </Tabs>
 
-        <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 ml-auto">
+        <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <span>{{ since }}</span>

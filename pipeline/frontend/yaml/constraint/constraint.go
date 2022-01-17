@@ -1,8 +1,7 @@
-package yaml
+package constraint
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -15,33 +14,33 @@ import (
 type (
 	// Constraints defines a set of runtime constraints.
 	Constraints struct {
-		Ref         Constraint
-		Repo        Constraint
-		Instance    Constraint
-		Platform    Constraint
-		Environment Constraint
-		Event       Constraint
-		Branch      Constraint
-		Status      Constraint
-		Matrix      ConstraintMap
+		Ref         List
+		Repo        List
+		Instance    List
+		Platform    List
+		Environment List
+		Event       List
+		Branch      List
+		Status      List
+		Matrix      Map
 		Local       types.BoolTrue
-		Path        ConstraintPath
+		Path        Path
 	}
 
-	// Constraint defines a runtime constraint.
-	Constraint struct {
+	// List defines a runtime constraint for exclude & include string slices.
+	List struct {
 		Include []string
 		Exclude []string
 	}
 
-	// ConstraintMap defines a runtime constraint map.
-	ConstraintMap struct {
+	// Map defines a runtime constraint for exclude & include map strings.
+	Map struct {
 		Include map[string]string
 		Exclude map[string]string
 	}
 
-	// ConstraintPath defines a runtime constrain for paths
-	ConstraintPath struct {
+	// Path defines a runtime constrain for exclude & include paths.
+	Path struct {
 		Include       []string
 		Exclude       []string
 		IgnoreMessage string `yaml:"ignore_message,omitempty"`
@@ -51,20 +50,26 @@ type (
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraints) Match(metadata frontend.Metadata) bool {
-	return c.Platform.Match(metadata.Sys.Arch) &&
+	match := c.Platform.Match(metadata.Sys.Arch) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Branch.Match(metadata.Curr.Commit.Branch) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
 		c.Instance.Match(metadata.Sys.Host) &&
-		c.Matrix.Match(metadata.Job.Matrix) &&
-		c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
+		c.Matrix.Match(metadata.Job.Matrix)
+
+	// changed files filter do only apply for pull-request and push events
+	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
+		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
+	}
+
+	return match
 }
 
 // Match returns true if the string matches the include patterns and does not
 // match any of the exclude patterns.
-func (c *Constraint) Match(v string) bool {
+func (c *List) Match(v string) bool {
 	if c.Excludes(v) {
 		return false
 	}
@@ -78,9 +83,9 @@ func (c *Constraint) Match(v string) bool {
 }
 
 // Includes returns true if the string matches the include patterns.
-func (c *Constraint) Includes(v string) bool {
+func (c *List) Includes(v string) bool {
 	for _, pattern := range c.Include {
-		if ok, _ := filepath.Match(pattern, v); ok {
+		if ok, _ := doublestar.Match(pattern, v); ok {
 			return true
 		}
 	}
@@ -88,9 +93,9 @@ func (c *Constraint) Includes(v string) bool {
 }
 
 // Excludes returns true if the string matches the exclude patterns.
-func (c *Constraint) Excludes(v string) bool {
+func (c *List) Excludes(v string) bool {
 	for _, pattern := range c.Exclude {
-		if ok, _ := filepath.Match(pattern, v); ok {
+		if ok, _ := doublestar.Match(pattern, v); ok {
 			return true
 		}
 	}
@@ -98,7 +103,7 @@ func (c *Constraint) Excludes(v string) bool {
 }
 
 // UnmarshalYAML unmarshals the constraint.
-func (c *Constraint) UnmarshalYAML(value *yaml.Node) error {
+func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
 		Include types.Stringorslice
 		Exclude types.Stringorslice
@@ -125,7 +130,7 @@ func (c *Constraint) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if the params matches the include key values and does not
 // match any of the exclude key values.
-func (c *ConstraintMap) Match(params map[string]string) bool {
+func (c *Map) Match(params map[string]string) bool {
 	// when no includes or excludes automatically match
 	if len(c.Include) == 0 && len(c.Exclude) == 0 {
 		return true
@@ -136,7 +141,7 @@ func (c *ConstraintMap) Match(params map[string]string) bool {
 		var matches int
 
 		for key, val := range c.Exclude {
-			if params[key] == val {
+			if ok, _ := doublestar.Match(val, params[key]); ok {
 				matches++
 			}
 		}
@@ -145,7 +150,7 @@ func (c *ConstraintMap) Match(params map[string]string) bool {
 		}
 	}
 	for key, val := range c.Include {
-		if params[key] != val {
+		if ok, _ := doublestar.Match(val, params[key]); !ok {
 			return false
 		}
 	}
@@ -153,7 +158,7 @@ func (c *ConstraintMap) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshals the constraint map.
-func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string
@@ -176,7 +181,7 @@ func (c *ConstraintMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // UnmarshalYAML unmarshals the constraint.
-func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
+func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
 		Include       types.Stringorslice `yaml:"include,omitempty"`
 		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
@@ -205,7 +210,7 @@ func (c *ConstraintPath) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if file paths in string slice matches the include and not exclude patterns
 //  or if commit message contains ignore message.
-func (c *ConstraintPath) Match(v []string, message string) bool {
+func (c *Path) Match(v []string, message string) bool {
 	// ignore file pattern matches if the commit message contains a pattern
 	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
 		return true
@@ -225,7 +230,7 @@ func (c *ConstraintPath) Match(v []string, message string) bool {
 }
 
 // Includes returns true if the string matches any of the include patterns.
-func (c *ConstraintPath) Includes(v []string) bool {
+func (c *Path) Includes(v []string) bool {
 	for _, pattern := range c.Include {
 		for _, file := range v {
 			if ok, _ := doublestar.Match(pattern, file); ok {
@@ -237,7 +242,7 @@ func (c *ConstraintPath) Includes(v []string) bool {
 }
 
 // Excludes returns true if the string matches any of the exclude patterns.
-func (c *ConstraintPath) Excludes(v []string) bool {
+func (c *Path) Excludes(v []string) bool {
 	for _, pattern := range c.Exclude {
 		for _, file := range v {
 			if ok, _ := doublestar.Match(pattern, file); ok {

@@ -159,7 +159,11 @@ when:
 
 ## `path`
 
-> NOTE: This feature is currently only available for GitHub, Gitlab and Gitea repositories.
+:::info
+This feature is currently only available for GitHub, Gitlab and Gitea.
+Pull requests aren't supported by gitea at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).  
+Path conditions are ignored for tag events.
+:::
 
 Execute a step only on a pipeline with certain files being changed:
 
