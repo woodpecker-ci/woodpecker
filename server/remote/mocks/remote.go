@@ -136,13 +136,13 @@ func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 	return r0, r1
 }
 
-// Hook provides a mock function with given fields: r
+// Hook provides a mock function with given fields: ctx, r
 func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	ret := _m.Called(r)
+	ret := _m.Called(ctx, r)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(*http.Request) *model.Repo); ok {
-		r0 = rf(r)
+	if rf, ok := ret.Get(0).(func(context.Context, *http.Request) *model.Repo); ok {
+		r0 = rf(ctx, r)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -150,8 +150,8 @@ func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 	}
 
 	var r1 *model.Build
-	if rf, ok := ret.Get(1).(func(*http.Request) *model.Build); ok {
-		r1 = rf(r)
+	if rf, ok := ret.Get(1).(func(context.Context, *http.Request) *model.Build); ok {
+		r1 = rf(ctx, r)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*model.Build)
@@ -159,8 +159,8 @@ func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(*http.Request) error); ok {
-		r2 = rf(r)
+	if rf, ok := ret.Get(2).(func(context.Context, *http.Request) error); ok {
+		r2 = rf(ctx, r)
 	} else {
 		r2 = ret.Error(2)
 	}
