@@ -5,6 +5,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -57,7 +58,7 @@ type (
 		Volumes       types.Volumes          `yaml:"volumes,omitempty"`
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
-		Constraints   Constraints            `yaml:"when,omitempty"`
+		Constraints   constraint.Constraints `yaml:"when,omitempty"`
 		Settings      map[string]interface{} `yaml:"settings"`
 		// Deprecated
 		Vargs map[string]interface{} `yaml:",inline"` // TODO: remove deprecated with v0.16.0

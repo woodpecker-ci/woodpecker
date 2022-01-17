@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"strings"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -10,6 +11,16 @@ import (
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
 // TODO(bradrydzewski) compiler should handle user-defined networks from YAML
+
+const (
+	windowsPrefix = "windows/"
+
+	defaultCloneImage = "woodpeckerci/plugin-git:latest"
+	defaultCloneName  = "clone"
+
+	networkDriverNAT    = "nat"
+	networkDriverBridge = "bridge"
+)
 
 type Registry struct {
 	Hostname string
@@ -77,15 +88,15 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	})
 
 	// create a default network
-	if c.metadata.Sys.Arch == "windows/amd64" {
+	if strings.HasPrefix(c.metadata.Sys.Arch, windowsPrefix) {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: "nat",
+			Driver: networkDriverNAT,
 		})
 	} else {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: "bridge",
+			Driver: networkDriverBridge,
 		})
 	}
 
@@ -110,17 +121,17 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		container := &yaml.Container{
-			Name:        "clone",
-			Image:       "woodpeckerci/plugin-git:latest",
+			Name:        defaultCloneName,
+			Image:       defaultCloneImage,
 			Settings:    map[string]interface{}{"depth": "0"},
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, "clone")
+		step := c.createProcess(name, container, defaultCloneName)
 
 		stage := new(backend.Stage)
 		stage.Name = name
-		stage.Alias = "clone"
+		stage.Alias = defaultCloneName
 		stage.Steps = append(stage.Steps, step)
 
 		config.Stages = append(config.Stages, stage)
@@ -134,7 +145,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step := c.createProcess(name, container, "clone")
+			step := c.createProcess(name, container, defaultCloneName)
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}

@@ -159,7 +159,11 @@ when:
 
 ## `path`
 
-> NOTE: This feature is currently only available for GitHub and Gitea repositories.
+:::info
+This feature is currently only available for GitHub, Gitlab and Gitea.
+Pull requests aren't supported at the moment ([#697](https://github.com/woodpecker-ci/woodpecker/pull/697)).  
+Path conditions are ignored for tag events.
+:::
 
 Execute a step only on a pipeline with certain files being changed:
 
