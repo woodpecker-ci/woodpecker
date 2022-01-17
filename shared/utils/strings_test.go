@@ -14,19 +14,35 @@
 
 package utils
 
-// DedupStrings deduplicate string list, empty items are dropped
-func DedupStrings(list []string) []string {
-	m := make(map[string]struct{}, len(list))
+import (
+	"sort"
+	"testing"
 
-	for i := range list {
-		if s := list[i]; len(s) > 0 {
-			m[list[i]] = struct{}{}
+	"github.com/stretchr/testify/assert"
+)
+
+func TestDedupStrings(t *testing.T) {
+	tests := []struct {
+		in  []string
+		out []string
+	}{{
+		in:  []string{"", "ab", "12", "ab"},
+		out: []string{"12", "ab"},
+	}, {
+		in:  nil,
+		out: nil,
+	}, {
+		in:  []string{""},
+		out: nil,
+	}}
+
+	for _, tc := range tests {
+		result := DedupStrings(tc.in)
+		sort.Strings(result)
+		if len(tc.out) == 0 {
+			assert.Len(t, result, 0)
+		} else {
+			assert.EqualValues(t, tc.out, result, "could not correctly process input '%#v'", tc.in)
 		}
 	}
-
-	newList := make([]string, 0, len(m))
-	for k := range m {
-		newList = append(newList, k)
-	}
-	return newList
 }
