@@ -146,7 +146,7 @@ func parseDeployHook(hook *github.DeploymentEvent, privateMode bool) (*model.Rep
 // parsePullHook parses a pull request hook and returns the Repo and Build
 // details. If the pull request is closed nil values are returned.
 func parsePullHook(hook *github.PullRequestEvent, merge, privateMode bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
-	// ignore these
+	// only listen to new merge-requests and pushes to open ones
 	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync {
 		return nil, nil, nil, nil
 	}
@@ -179,7 +179,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge, privateMode bool) (*git
 }
 
 func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
-	files := make([]string, 0, len(commits)*3)
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(commits)*4)
 	for _, cm := range commits {
 		files = append(files, cm.Added...)
 		files = append(files, cm.Removed...)

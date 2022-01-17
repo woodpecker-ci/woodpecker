@@ -165,6 +165,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	build.Ref = hook.Ref
 
+	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
