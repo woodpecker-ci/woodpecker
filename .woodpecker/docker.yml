@@ -16,6 +16,30 @@ pipeline:
     commands:
       - make release-server
 
+  publish-server-dryrun:
+    image: plugins/docker
+    group: docker
+    secrets: [docker_username, docker_password]
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server
+      tag: next
+    when:
+      event: pull_request
+
+  publish-server-alpine-dryrun:
+    image: plugins/docker
+    group: docker
+    secrets: [ docker_username, docker_password ]
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine
+      tag: next-alpine
+    when:
+      event: pull_request
+
   publish-server:
     image: plugins/docker
     group: docker
