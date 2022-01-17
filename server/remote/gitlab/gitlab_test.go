@@ -214,6 +214,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of changed fiels
 					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
@@ -222,7 +223,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", build.Title)
-						assert.Len(t, build.ChangedFiles, 0) // TODO: update test data with new hooks
+						assert.Len(t, build.ChangedFiles, 0) // see L217
 					}
 				})
 			})
