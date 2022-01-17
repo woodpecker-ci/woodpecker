@@ -59,8 +59,8 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 		c.Instance.Match(metadata.Sys.Host) &&
 		c.Matrix.Match(metadata.Job.Matrix)
 
-	// changed files filter do not apply for tag event
-	if metadata.Curr.Event != frontend.EventTag {
+	// changed files filter do only apply for pull and push events
+	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 	}
 
