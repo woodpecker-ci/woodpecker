@@ -76,5 +76,25 @@ export default (build: Ref<Build | undefined>) => {
     return convertEmojis(build.value.message);
   });
 
-  return { since, duration, message };
+  const prettyRef = computed(() => {
+    if (build.value?.event === 'push') {
+      return build.value.branch;
+    }
+
+    if (build.value?.event === 'tag') {
+      return build.value.ref.replaceAll('refs/tags/', '');
+    }
+
+    if (build.value?.event === 'pull_request') {
+      return `#${build.value.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '')}`;
+    }
+
+    return build.value?.ref;
+  });
+
+  return { since, duration, message, prettyRef };
 };

@@ -6,7 +6,7 @@
       flex
       items-center
       py-1
-      px-4
+      px-2
       rounded-md
       border
       shadow-sm
@@ -32,7 +32,7 @@
     @click="doClick"
   >
     <slot>
-      <Icon v-if="startIcon" :name="startIcon" class="mr-2" :class="{ invisible: isLoading }" />
+      <Icon v-if="startIcon" :name="startIcon" class="mr-1" :class="{ invisible: isLoading }" />
       <span :class="{ invisible: isLoading }">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2" :class="{ invisible: isLoading }" />
       <div

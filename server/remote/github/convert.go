@@ -184,12 +184,15 @@ func convertPushHook(from *webhook) *model.Build {
 		Sender:       from.Sender.Login,
 		ChangedFiles: files,
 	}
+
 	if len(build.Author) == 0 {
 		build.Author = from.Head.Author.Username
 	}
+
 	// if len(build.Email) == 0 {
 	// TODO: default to gravatar?
 	// }
+
 	if strings.HasPrefix(build.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
@@ -199,7 +202,11 @@ func convertPushHook(from *webhook) *model.Build {
 		if strings.HasPrefix(from.BaseRef, "refs/heads/") {
 			build.Branch = strings.Replace(from.BaseRef, "refs/heads/", "", -1)
 		}
+
+		// tags should not have changed files
+		build.ChangedFiles = nil
 	}
+
 	return build
 }
 

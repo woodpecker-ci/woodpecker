@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -38,7 +39,7 @@ import (
 func loop(c *cli.Context) error {
 	filter := rpc.Filter{
 		Labels: map[string]string{
-			"platform": c.String("platform"),
+			"platform": runtime.GOOS + "/" + runtime.GOARCH,
 		},
 		Expr: c.String("filter"),
 	}

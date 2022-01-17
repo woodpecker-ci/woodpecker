@@ -3,6 +3,7 @@ package yaml
 import (
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -11,7 +12,7 @@ type (
 	Config struct {
 		Cache     types.Stringorslice
 		Platform  string
-		Branches  Constraint
+		Branches  constraint.List
 		Workspace Workspace
 		Clone     Containers
 		Pipeline  Containers

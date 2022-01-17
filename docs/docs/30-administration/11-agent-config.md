@@ -18,7 +18,6 @@ services:
 The following are automatically set and can be overridden:
 
 - WOODPECKER_HOSTNAME if not set, becomes the OS' hostname
-- WOODPECKER_PLATFORM if not set, is the architecture eg: `linux/amd64`
 - WOODPECKER_MAX_PROCS if not set, defaults to 1
 
 ## Processes per agent
@@ -40,30 +39,16 @@ services:
 
 ## Filtering agents
 
-When building your pipelines as long as you have set the platform or filter, builds can be made to only run code on certain agents. 
+When building your pipelines as long as you have set the platform or filter, builds can be made to only run code on certain agents.
 
 ```
 - WOODPECKER_HOSTNAME=mycompany-ci-01.example.com
-- WOODPECKER_PLATFORM=linux/amd64
 - WOODPECKER_FILTER=
 ```
 
 ### Filter on Platform
 
-Only want certain pipelines or steps to run on certain platforms? Such as arm vs amd64? 
-
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-agent:
-  [...]
-  environment:
-    - WOODPECKER_SERVER=localhost:9000
-    - WOODPECKER_AGENT_SECRET=""
-+   - WOODPECKER_PLATFORM=linux/arm64
-```
+Only want certain pipelines or steps to run on certain agents with specific platforms? Such as arm vs amd64?
 
 ```yaml
 # .woodpecker.yml
@@ -93,7 +78,7 @@ See [Conditionals Pipeline](/docs/usage/pipeline-syntax#step-when---conditional-
 
 ## All agent configuration options
 
-Here is the full list of configuration options and their default variables. 
+Here is the full list of configuration options and their default variables.
 
 ### `WOODPECKER_SERVER`
 > Default: `localhost:9000`

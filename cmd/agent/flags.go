@@ -71,12 +71,6 @@ var flags = []cli.Flag{
 		Usage:   "agent hostname",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PLATFORM"},
-		Name:    "platform",
-		Usage:   "restrict builds by platform conditions",
-		Value:   "linux/amd64",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_FILTER"},
 		Name:    "filter",
 		Usage:   "filter expression to restrict builds by label",
