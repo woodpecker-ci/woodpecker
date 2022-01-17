@@ -111,6 +111,7 @@ func buildFromPush(hook *pushHook) *model.Build {
 }
 
 func getChangedFilesFromPushHook(hook *pushHook) []string {
+	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, c := range hook.Commits {
 		files = append(files, c.Added...)
