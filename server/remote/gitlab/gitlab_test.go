@@ -178,6 +178,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/heads/master", build.Ref)
+						assert.Equal(t, []string{"cmd/cli/main.go"}, build.ChangedFiles)
 					}
 				})
 			})
@@ -199,6 +200,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/tags/v22", build.Ref)
+						assert.Len(t, build.ChangedFiles, 0)
 					}
 				})
 			})
@@ -208,7 +210,7 @@ func Test_Gitlab(t *testing.T) {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),
-						bytes.NewReader(testdata.ServiceHookMergeRequestBody),
+						bytes.NewReader(testdata.ServiceHookMergeRequestBody), // TODO: update test data with new hooks
 					)
 					req.Header = testdata.ServiceHookHeaders
 
@@ -220,6 +222,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "test", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", build.Title)
+						assert.Len(t, build.ChangedFiles, 0) // TODO: update test data with new hooks
 					}
 				})
 			})

@@ -22,7 +22,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -32,7 +31,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
-	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 )
 
@@ -542,49 +540,10 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.MergeEvent:
 		return convertMergeRequestHock(event, req)
 	case *gitlab.PushEvent:
-		repo, build, err := convertPushHock(event)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		build, err = g.loadChangedFilesFromPullRequest(ctx, repo, build)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		return repo, build, nil
+		return convertPushHock(event)
 	case *gitlab.TagEvent:
 		return convertTagHock(event)
 	default:
 		return nil, nil, nil
 	}
-}
-
-func (g *Gitlab) loadChangedFilesFromPullRequest(ctx context.Context, repo *model.Repo, build *model.Build) (*model.Build, error) {
-	user, err := store.FromContext(ctx).GetUser(repo.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
-	if err != nil {
-		return nil, err
-	}
-
-	// extract id from ref: "refs/merge-requests/%d/head"
-	pullRequestID, err := strconv.Atoi(build.Ref)
-	if err != nil {
-		return nil, err
-	}
-
-	changes, _, err := client.MergeRequests.GetMergeRequestChanges(repo.ID, pullRequestID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	for _, file := range changes.Changes {
-		build.ChangedFiles = append(build.ChangedFiles, file.NewPath)
-	}
-
-	return build, nil
 }

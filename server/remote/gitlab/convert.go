@@ -24,6 +24,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
@@ -114,7 +115,6 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Remote = obj.Source.HTTPURL
 
 	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IID)
-
 	build.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
@@ -128,6 +128,14 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 
 	build.Title = obj.Title
 	build.Link = obj.URL
+
+	if hook.ObjectAttributes.StDiffs != nil {
+		files := make([]string, 0, len(hook.ObjectAttributes.StDiffs)*2)
+		for _, diff := range hook.ObjectAttributes.StDiffs {
+			files = append(files, diff.OldPath, diff.NewPath)
+		}
+		build.ChangedFiles = utils.DedupStrings(files)
+	}
 
 	return repo, build, nil
 }
@@ -161,6 +169,7 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	build.Ref = hook.Ref
 
+	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
 			build.Author = cm.Author.Name
@@ -170,9 +179,13 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 			if len(build.Email) != 0 {
 				build.Avatar = getUserAvatar(build.Email)
 			}
-			break
 		}
+
+		files = append(files, cm.Added...)
+		files = append(files, cm.Removed...)
+		files = append(files, cm.Modified...)
 	}
+	build.ChangedFiles = utils.DedupStrings(files)
 
 	return repo, build, nil
 }
