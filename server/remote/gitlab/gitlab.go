@@ -540,13 +540,12 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		repo, build, err := convertMergeRequestHook(event, req)
+		mergeIID, repo, build, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build)
-		if err != nil {
+		if build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build, mergeIID); err != nil {
 			return nil, nil, err
 		}
 
@@ -560,8 +559,11 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	}
 }
 
-func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
 	_store := store.FromContext(ctx)
+	if _store == nil {
+		return build, nil
+	}
 
 	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
 	if err != nil {
@@ -578,25 +580,19 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	// extract id from ref: "refs/merge-requests/%d/head"
-	var pullRequestID int
-	if _, err := fmt.Sscanf(build.Ref, mergeRefs, &pullRequestID); err != nil {
-		return nil, err
-	}
-
 	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, pullRequestID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, mergeIID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	files := build.ChangedFiles
+	files := make([]string, 0, len(changes.Changes)*2)
 	for _, file := range changes.Changes {
-		files = append(files, file.NewPath)
+		files = append(files, file.NewPath, file.OldPath)
 	}
 	build.ChangedFiles = utils.DedupStrings(files)
 

@@ -509,8 +509,18 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return repo, build, nil
 }
 
-func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, repo *model.Repo, build *model.Build) (*model.Build, error) {
-	user, err := store.FromContext(ctx).GetUser(repo.UserID)
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+	_store := store.FromContext(ctx)
+	if _store == nil {
+		return build, nil
+	}
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		return nil, err
 	}
