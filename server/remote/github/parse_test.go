@@ -17,6 +17,7 @@ package github
 import (
 	"bytes"
 	"net/http"
+	"sort"
 	"testing"
 
 	"github.com/franela/goblin"
@@ -69,6 +70,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
+				sort.Strings(b.ChangedFiles)
 				g.Assert(b.ChangedFiles).Equal([]string{"pipeline/shared/replace_secrets.go", "pipeline/shared/replace_secrets_test.go"})
 			})
 		})

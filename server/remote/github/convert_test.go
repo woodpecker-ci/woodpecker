@@ -182,24 +182,28 @@ func Test_helper(t *testing.T) {
 			from := &github.PullRequestEvent{
 				Action: github.String(actionOpen),
 				PullRequest: &github.PullRequest{
-					State: github.String(stateOpen),
-					Base:  &github.PullRequestBranch{},
-					Head: &github.PullRequestBranch{
-						Repo: &github.Repository{},
+					State:   github.String(stateOpen),
+					HTMLURL: github.String("https://github.com/octocat/hello-world/pulls/42"),
+					Number:  github.Int(42),
+					Title:   github.String("Updated README.md"),
+					Base: &github.PullRequestBranch{
+						Ref: github.String("master"),
 					},
-					User: &github.User{},
-				}, Sender: &github.User{}}
-			from.PullRequest.Base.Ref = github.String("master")
-			from.PullRequest.Head.Ref = github.String("changes")
-			from.PullRequest.Head.SHA = github.String("f72fc19")
-			from.PullRequest.Head.Repo.CloneURL = github.String("https://github.com/octocat/hello-world-fork")
-			from.PullRequest.HTMLURL = github.String("https://github.com/octocat/hello-world/pulls/42")
-			from.PullRequest.Number = github.Int(42)
-			from.PullRequest.Title = github.String("Updated README.md")
-			from.PullRequest.User.Login = github.String("octocat")
-			from.PullRequest.User.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
-			from.Sender.Login = github.String("octocat")
-
+					Head: &github.PullRequestBranch{
+						Ref: github.String("changes"),
+						SHA: github.String("f72fc19"),
+						Repo: &github.Repository{
+							CloneURL: github.String("https://github.com/octocat/hello-world-fork"),
+						},
+					},
+					User: &github.User{
+						Login:     github.String("octocat"),
+						AvatarURL: github.String("https://avatars1.githubusercontent.com/u/583231"),
+					},
+				}, Sender: &github.User{
+					Login: github.String("octocat"),
+				},
+			}
 			pull, _, build, err := parsePullHook(from, true, false)
 			g.Assert(err).IsNil()
 			g.Assert(pull).IsNotNil()

@@ -214,7 +214,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of changed fiels
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
