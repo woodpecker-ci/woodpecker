@@ -312,12 +312,6 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 		return true
 	}
 
-	for _, buildItem := range buildItems {
-		if buildItem.Proc.State != model.StatusPending {
-			return false
-		}
-	}
-
 	return false
 }
 
