@@ -584,7 +584,12 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.GetMergeRequestChanges(repo.ID, pullRequestID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, pullRequestID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
