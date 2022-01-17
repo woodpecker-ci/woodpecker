@@ -51,7 +51,7 @@ func load(t *testing.T, config string) *Gitlab {
 }
 
 func Test_Gitlab(t *testing.T) {
-	// setup a dummy github server
+	// setup a dummy gitlab server
 	server := testdata.NewServer(t)
 	defer server.Close()
 
