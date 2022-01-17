@@ -10,16 +10,15 @@ pipeline:
   # S e r v e r #
   ###############
 
-  # needed until https://github.com/woodpecker-ci/woodpecker/pull/635
+  # TODO: needed until https://github.com/woodpecker-ci/woodpecker/pull/635
   build-server:
-    group: build
     image: golang:1.16
     commands:
       - make release-server
 
   publish-server:
     image: plugins/docker
-    group: bundle
+    group: docker
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -31,7 +30,7 @@ pipeline:
 
   publish-server-alpine:
     image: plugins/docker
-    group: bundle
+    group: docker
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -42,7 +41,7 @@ pipeline:
       event: push
 
   release-server:
-    group: bundle
+    group: docker
     image: plugins/docker
     secrets: [docker_username, docker_password]
     settings:
@@ -53,7 +52,7 @@ pipeline:
       event: tag
 
   release-server-alpine:
-    group: bundle
+    group: docker
     image: plugins/docker
     secrets: [ docker_username, docker_password ]
     settings:
@@ -68,7 +67,7 @@ pipeline:
   #############
 
   publish-agent-dryrun:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
       dry_run: true
@@ -80,7 +79,7 @@ pipeline:
       event: pull_request
 
   publish-agent:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
@@ -93,7 +92,7 @@ pipeline:
       event: push
 
   publish-agent-alpine:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
@@ -106,7 +105,7 @@ pipeline:
       event: push
 
   release-agent:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
@@ -118,7 +117,7 @@ pipeline:
       event: tag
 
   release-agent-alpine:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
