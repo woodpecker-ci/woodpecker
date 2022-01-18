@@ -32,13 +32,12 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      # TODO: only release as next-alpine after 0.15.0 got released
-      tag: [next-alpine, latest-alpine]
+      tag: next-alpine
     environment:
       TAGS: sqlite_unlock_notify
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
+      event: pull_request
 
   publish-server:
     image: woodpeckerci/plugin-docker-buildx
@@ -48,8 +47,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      # TODO: only release as next after 0.15.0 got released
-      tag: [next, latest]
+      tag: next
     environment:
       TAGS: sqlite_unlock_notify
     when:
@@ -64,8 +62,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      # TODO: only release as next-alpine after 0.15.0 got released
-      tag: [next-alpine, latest-alpine]
+      tag: next-alpine
     environment:
       TAGS: sqlite_unlock_notify
     when:
