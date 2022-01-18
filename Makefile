@@ -17,6 +17,7 @@ ifeq ($(BUILD_VERSION),next)
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+CGO_CFLAGS ?=
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO), GO)
@@ -100,6 +101,7 @@ check-xgo:
 	fi
 
 cross-compile-server: cross-compile-server-build-loop
+	tree dist
 	@$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make normalize-server-artifacts || exit 1;)
 
 cross-compile-server-build-loop:
