@@ -16,55 +16,230 @@ package fixtures
 
 // HookPush is a sample push hook.
 // https://developer.github.com/v3/activity/events/types/#pushevent
-const HookPush = `
-{
-  "ref": "refs/heads/changes",
-  "created": false,
-  "deleted": false,
-  "head_commit": {
-    "id": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
-    "message": "Update README.md",
-    "timestamp": "2015-05-05T19:40:15-04:00",
-    "url": "https://github.com/baxterthehacker/public-repo/commit/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
-    "author": {
-      "name": "baxterthehacker",
-      "email": "baxterthehacker@users.noreply.github.com",
-      "username": "baxterthehacker"
-    },
-    "committer": {
-      "name": "baxterthehacker",
-      "email": "baxterthehacker@users.noreply.github.com",
-      "username": "baxterthehacker"
-    },
-    "added": ["CHANGELOG.md"],
-    "removed": [],
-    "modified": ["app/controller/application.rb"]
-  },
+const HookPush = `{
+  "ref": "refs/heads/master",
+  "before": "2f780193b136b72bfea4eeb640786a8c4450c7a2",
+  "after": "366701fde727cb7a9e7f21eb88264f59f6f9b89c",
   "repository": {
-    "id": 35129377,
-    "name": "public-repo",
-    "full_name": "baxterthehacker/public-repo",
-    "owner": {
-      "name": "baxterthehacker",
-      "email": "baxterthehacker@users.noreply.github.com"
-    },
+    "id": 179344069,
+    "node_id": "MDEwOlJlcG9zaXRvcnkxNzkzNDQwNjk=",
+    "name": "woodpecker",
+    "full_name": "woodpecker-ci/woodpecker",
     "private": false,
-    "html_url": "https://github.com/baxterthehacker/public-repo",
-    "default_branch": "master"
+    "owner": {
+      "name": "woodpecker-ci",
+      "email": null,
+      "login": "woodpecker-ci",
+      "id": 84780935,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjg0NzgwOTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84780935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/woodpecker-ci",
+      "html_url": "https://github.com/woodpecker-ci",
+      "followers_url": "https://api.github.com/users/woodpecker-ci/followers",
+      "following_url": "https://api.github.com/users/woodpecker-ci/following{/other_user}",
+      "gists_url": "https://api.github.com/users/woodpecker-ci/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/woodpecker-ci/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/woodpecker-ci/subscriptions",
+      "organizations_url": "https://api.github.com/users/woodpecker-ci/orgs",
+      "repos_url": "https://api.github.com/users/woodpecker-ci/repos",
+      "events_url": "https://api.github.com/users/woodpecker-ci/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/woodpecker-ci/received_events",
+      "type": "Organization",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/woodpecker-ci/woodpecker",
+    "description": "Woodpecker is a community fork of the Drone CI system.",
+    "fork": false,
+    "url": "https://github.com/woodpecker-ci/woodpecker",
+    "forks_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/forks",
+    "keys_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/teams",
+    "hooks_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/hooks",
+    "issue_events_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/events",
+    "assignees_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/tags",
+    "blobs_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/languages",
+    "stargazers_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/stargazers",
+    "contributors_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/contributors",
+    "subscribers_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/subscribers",
+    "subscription_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/subscription",
+    "commits_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/merges",
+    "archive_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/downloads",
+    "issues_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/labels{/name}",
+    "releases_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/woodpecker-ci/woodpecker/deployments",
+    "created_at": 1554314798,
+    "updated_at": "2022-01-16T20:19:33Z",
+    "pushed_at": 1642370257,
+    "git_url": "git://github.com/woodpecker-ci/woodpecker.git",
+    "ssh_url": "git@github.com:woodpecker-ci/woodpecker.git",
+    "clone_url": "https://github.com/woodpecker-ci/woodpecker.git",
+    "svn_url": "https://github.com/woodpecker-ci/woodpecker",
+    "homepage": "https://woodpecker-ci.org",
+    "size": 81324,
+    "stargazers_count": 659,
+    "watchers_count": 659,
+    "language": "Go",
+    "has_issues": true,
+    "has_projects": false,
+    "has_downloads": true,
+    "has_wiki": false,
+    "has_pages": false,
+    "forks_count": 84,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 123,
+    "license": {
+      "key": "apache-2.0",
+      "name": "Apache License 2.0",
+      "spdx_id": "Apache-2.0",
+      "url": "https://api.github.com/licenses/apache-2.0",
+      "node_id": "MDc6TGljZW5zZTI="
+    },
+    "allow_forking": true,
+    "is_template": false,
+    "topics": [
+      "ci",
+      "devops",
+      "docker",
+      "hacktoberfest",
+      "hacktoberfest2021",
+      "woodpeckerci"
+    ],
+    "visibility": "public",
+    "forks": 84,
+    "open_issues": 123,
+    "watchers": 659,
+    "default_branch": "master",
+    "stargazers": 659,
+    "master_branch": "master",
+    "organization": "woodpecker-ci"
   },
   "pusher": {
-    "name": "baxterthehacker",
-    "email": "baxterthehacker@users.noreply.github.com"
+    "name": "6543",
+    "email": "noreply@6543.de"
+  },
+  "organization": {
+    "login": "woodpecker-ci",
+    "id": 84780935,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjg0NzgwOTM1",
+    "url": "https://api.github.com/orgs/woodpecker-ci",
+    "repos_url": "https://api.github.com/orgs/woodpecker-ci/repos",
+    "events_url": "https://api.github.com/orgs/woodpecker-ci/events",
+    "hooks_url": "https://api.github.com/orgs/woodpecker-ci/hooks",
+    "issues_url": "https://api.github.com/orgs/woodpecker-ci/issues",
+    "members_url": "https://api.github.com/orgs/woodpecker-ci/members{/member}",
+    "public_members_url": "https://api.github.com/orgs/woodpecker-ci/public_members{/member}",
+    "avatar_url": "https://avatars.githubusercontent.com/u/84780935?v=4",
+    "description": "Woodpecker is a community fork of the Drone CI system."
   },
   "sender": {
-    "login": "baxterthehacker",
-    "avatar_url": "https://avatars.githubusercontent.com/u/6752317?v=3"
-  }
-}
-`
+    "login": "6543",
+    "id": 24977596,
+    "node_id": "MDQ6VXNlcjI0OTc3NTk2",
+    "avatar_url": "https://avatars.githubusercontent.com/u/24977596?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/6543",
+    "html_url": "https://github.com/6543",
+    "followers_url": "https://api.github.com/users/6543/followers",
+    "following_url": "https://api.github.com/users/6543/following{/other_user}",
+    "gists_url": "https://api.github.com/users/6543/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/6543/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/6543/subscriptions",
+    "organizations_url": "https://api.github.com/users/6543/orgs",
+    "repos_url": "https://api.github.com/users/6543/repos",
+    "events_url": "https://api.github.com/users/6543/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/6543/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "base_ref": null,
+  "compare": "https://github.com/woodpecker-ci/woodpecker/compare/2f780193b136...366701fde727",
+  "commits": [
+    {
+      "id": "366701fde727cb7a9e7f21eb88264f59f6f9b89c",
+      "tree_id": "638e046f1e1e15dbed1ddf40f9471bf1af4d64ce",
+      "distinct": true,
+      "message": "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests",
+      "timestamp": "2022-01-16T22:57:37+01:00",
+      "url": "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c",
+      "author": {
+        "name": "Philipp",
+        "email": "noreply@philipp.xzy",
+        "username": "nupplaphil"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "username": "web-flow"
+      },
+      "added": [
 
-// HookPush is a sample push hook that is marked as deleted, and is expected to
-// be ignored.
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "pipeline/shared/replace_secrets.go",
+        "pipeline/shared/replace_secrets_test.go"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "366701fde727cb7a9e7f21eb88264f59f6f9b89c",
+    "tree_id": "638e046f1e1e15dbed1ddf40f9471bf1af4d64ce",
+    "distinct": true,
+    "message": "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests",
+    "timestamp": "2022-01-16T22:57:37+01:00",
+    "url": "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c",
+    "author": {
+      "name": "Philipp",
+      "email": "admin@philipp.info",
+      "username": "nupplaphil"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "username": "web-flow"
+    },
+    "added": [
+
+    ],
+    "removed": [
+
+    ],
+    "modified": [
+      "pipeline/shared/replace_secrets.go",
+      "pipeline/shared/replace_secrets_test.go"
+    ]
+  }
+}`
+
+// HookPushDeleted is a sample push hook that is marked as deleted, and is expected to be ignored.
 const HookPushDeleted = `
 {
   "deleted": true

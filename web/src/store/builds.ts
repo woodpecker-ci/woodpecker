@@ -88,7 +88,7 @@ export default defineStore({
       });
     },
     async loadBuild(owner: string, repo: string, buildNumber: number) {
-      const build = await apiClient.getBuild(owner, repo, buildNumber.toString());
+      const build = await apiClient.getBuild(owner, repo, buildNumber);
       this.setBuild(owner, repo, build);
     },
     async loadBuildFeed() {

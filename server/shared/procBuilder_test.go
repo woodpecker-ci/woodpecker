@@ -49,7 +49,8 @@ pipeline:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
-		}}
+		},
+	}
 
 	if buildItems, err := b.Build(); err != nil {
 		t.Fatal(err)
@@ -404,7 +405,8 @@ func TestTree(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{{Data: []byte(`
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
 pipeline:
   build:
     image: scratch

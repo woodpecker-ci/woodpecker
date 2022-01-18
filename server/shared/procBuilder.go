@@ -100,14 +100,13 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// lint pipeline
-			lerr := linter.New(
+			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
-			).Lint(parsed)
-			if lerr != nil {
-				return nil, lerr
+			).Lint(parsed); err != nil {
+				return nil, err
 			}
 
-			if !parsed.Branches.Match(b.Curr.Branch) {
+			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
 				proc.State = model.StatusSkipped
 			}
 
@@ -138,7 +137,22 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
+	// check if at least one proc can start, if list is not empty
+	procListContainsItemsToRun(items)
+	if len(items) > 0 && !procListContainsItemsToRun(items) {
+		return nil, fmt.Errorf("build has no startpoint")
+	}
+
 	return items, nil
+}
+
+func procListContainsItemsToRun(items []*BuildItem) bool {
+	for i := range items {
+		if items[i].Proc.State == model.StatusPending {
+			return true
+		}
+	}
+	return false
 }
 
 func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {

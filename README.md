@@ -79,9 +79,19 @@ See [Contributing Guide](CONTRIBUTING.md)
 
 ## Who uses Woodpecker?
 
-[Codeberg](https://codeberg.org), the woodpecker project itself, and many others not listed.
+[Codeberg](https://codeberg.org), the woodpecker project itself, and many others.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
+
+Also consider using the topic `WoodpeckerCI` in your repository, so others can learn
+from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
+
+Here are some places where people mention Woodpecker:
+
+- [GitHub](https://github.com/topics/WoodpeckerCI)
+- [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
+- [Twitter](https://twitter.com/hashtag/WoodpeckerCI)
+- [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
 ## Stars over time
 [![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)

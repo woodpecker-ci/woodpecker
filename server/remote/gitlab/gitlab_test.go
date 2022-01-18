@@ -29,10 +29,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
-func load(config string) *Gitlab {
+func load(t *testing.T, config string) *Gitlab {
 	_url, err := url.Parse(config)
 	if err != nil {
-		panic(err)
+		t.FailNow()
 	}
 	params := _url.Query()
 	_url.RawQuery = ""
@@ -51,20 +51,20 @@ func load(config string) *Gitlab {
 }
 
 func Test_Gitlab(t *testing.T) {
-	// setup a dummy github server
-	var server = testdata.NewServer(t)
+	// setup a dummy gitlab server
+	server := testdata.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	client := load(env)
+	client := load(t, env)
 
-	var user = model.User{
+	user := model.User{
 		Login: "test_user",
 		Token: "e3b0c44298fc1c149afbf4c8996fb",
 	}
 
-	var repo = model.Repo{
+	repo := model.Repo{
 		Name:  "diaspora-client",
 		Owner: "diaspora",
 	}
@@ -169,7 +169,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, build.Event, model.EventPush)
@@ -178,6 +178,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/heads/master", build.Ref)
+						assert.Equal(t, []string{"cmd/cli/main.go"}, build.ChangedFiles)
 					}
 				})
 			})
@@ -191,7 +192,7 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, "test", hookRepo.Owner)
@@ -199,6 +200,7 @@ func Test_Gitlab(t *testing.T) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/tags/v22", build.Ref)
+						assert.Len(t, build.ChangedFiles, 0)
 					}
 				})
 			})
@@ -208,18 +210,20 @@ func Test_Gitlab(t *testing.T) {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),
-						bytes.NewReader(testdata.ServiceHookMergeRequestBody),
+						bytes.NewReader(testdata.WebhookMergeRequestBody),
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(req)
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, build, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-						assert.Equal(t, "develop", hookRepo.Branch)
-						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", build.Title)
+						assert.Len(t, build.ChangedFiles, 0) // see L217
 					}
 				})
 			})

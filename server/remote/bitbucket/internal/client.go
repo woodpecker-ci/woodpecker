@@ -106,7 +106,7 @@ func (c *Client) ListRepos(account string, opts *ListOpts) (*RepoResp, error) {
 }
 
 func (c *Client) ListReposAll(account string) ([]*Repo, error) {
-	var page = 1
+	page := 1
 	var repos []*Repo
 
 	for {
@@ -164,7 +164,6 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
 	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
 	_, err := c.do(uri, get, nil, out)
-
 	if err != nil {
 		return nil, err
 	}

@@ -26,12 +26,15 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v39/github"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -219,7 +222,7 @@ func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 	if err != nil {
 		return nil, err
 	}
-	return convertPerm(repo), nil
+	return convertPerm(repo.GetPermissions()), nil
 }
 
 // File fetches the file from the GitHub repository and returns its contents.
@@ -491,6 +494,54 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
-	return parseHook(r, c.MergeRef)
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+	pull, repo, build, err := parseHook(r, c.MergeRef, c.PrivateMode)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if pull != nil && len(build.ChangedFiles) == 0 {
+		build, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, build)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return repo, build, nil
+}
+
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return build, nil
+	}
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &github.ListOptions{Page: 1}
+	fileList := make([]string, 0, 16)
+	for opts.Page > 0 {
+		files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, file := range files {
+			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+		}
+
+		opts.Page = resp.NextPage
+	}
+	build.ChangedFiles = utils.DedupStrings(fileList)
+
+	return build, nil
 }

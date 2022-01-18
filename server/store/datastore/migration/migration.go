@@ -34,6 +34,23 @@ var migrationTasks = []task{
 	alterTableReposDropCounter,
 }
 
+var allBeans = []interface{}{
+	new(model.Agent),
+	new(model.Build),
+	new(model.BuildConfig),
+	new(model.Config),
+	new(model.File),
+	new(model.Logs),
+	new(model.Perm),
+	new(model.Proc),
+	new(model.Registry),
+	new(model.Repo),
+	new(model.Secret),
+	new(model.Sender),
+	new(model.Task),
+	new(model.User),
+}
+
 type migrations struct {
 	Name string `xorm:"UNIQUE"`
 }
@@ -135,22 +152,7 @@ type syncEngine interface {
 }
 
 func syncAll(sess syncEngine) error {
-	for _, bean := range []interface{}{
-		new(model.Agent),
-		new(model.Build),
-		new(model.BuildConfig),
-		new(model.Config),
-		new(model.File),
-		new(model.Logs),
-		new(model.Perm),
-		new(model.Proc),
-		new(model.Registry),
-		new(model.Repo),
-		new(model.Secret),
-		new(model.Sender),
-		new(model.Task),
-		new(model.User),
-	} {
+	for _, bean := range allBeans {
 		if err := sess.Sync2(bean); err != nil {
 			return fmt.Errorf("sync2 error '%s': %v", reflect.TypeOf(bean), err)
 		}
