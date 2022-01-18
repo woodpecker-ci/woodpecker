@@ -28,18 +28,18 @@ pipeline:
     when:
       event: pull_request
 
-#  publish-server-alpine-dryrun:
-#    image: woodpeckerci/plugin-docker-buildx
-#    group: docker
-#    settings:
-#      dry_run: true
-#      repo: woodpeckerci/woodpecker-server
-#      dockerfile: docker/Dockerfile.server.alpine.multiarch
-#      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-#      tag: next-alpine
-#    when:
-#      branch: ${CI_REPO_DEFAULT_BRANCH}
-#      event: pull_request
+  publish-server-alpine-dryrun:
+    image: woodpeckerci/plugin-docker-buildx
+    group: docker
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      tag: next-alpine
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: pull_request
 
   publish-server:
     image: woodpeckerci/plugin-docker-buildx
