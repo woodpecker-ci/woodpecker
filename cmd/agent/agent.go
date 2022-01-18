@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"net/http"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -38,7 +39,7 @@ import (
 func loop(c *cli.Context) error {
 	filter := rpc.Filter{
 		Labels: map[string]string{
-			"platform": c.String("platform"),
+			"platform": runtime.GOOS + "/" + runtime.GOARCH,
 		},
 		Expr: c.String("filter"),
 	}
@@ -93,7 +94,7 @@ func loop(c *cli.Context) error {
 
 	// grpc.Dial(target, ))
 
-	var transport = grpc.WithInsecure()
+	transport := grpc.WithInsecure()
 
 	if c.Bool("secure-grpc") {
 		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
@@ -111,7 +112,6 @@ func loop(c *cli.Context) error {
 			Timeout: c.Duration("keepalive-timeout"),
 		}),
 	)
-
 	if err != nil {
 		return err
 	}

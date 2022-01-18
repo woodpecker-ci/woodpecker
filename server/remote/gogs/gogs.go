@@ -171,9 +171,9 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	repo, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 

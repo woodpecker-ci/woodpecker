@@ -32,8 +32,10 @@ import (
 )
 
 // TODO: make it set system wide via environment variables
-const defaultTimeout = 60 // 1 hour default build time
-const maxTimeout = defaultTimeout * 2
+const (
+	defaultTimeout int64 = 60 // 1 hour default build time
+	maxTimeout     int64 = defaultTimeout * 2
+)
 
 func PostRepo(c *gin.Context) {
 	remote := server.Config.Services.Remote

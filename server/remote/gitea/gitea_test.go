@@ -108,14 +108,14 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})

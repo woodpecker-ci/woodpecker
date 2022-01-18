@@ -88,7 +88,7 @@ func (f CacheFile) Token() (*Token, error) {
 }
 
 func (f CacheFile) PutToken(tok *Token) error {
-	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return OAuthError{"CacheFile.PutToken", err.Error()}
 	}
@@ -213,13 +213,13 @@ func (t *Transport) transport() http.RoundTripper {
 
 // AuthCodeURL returns a URL that the end-user should be redirected to,
 // so that they may obtain an authorization code.
-func (c *Config) AuthCodeURL(state string) string {
+func (c *Config) AuthCodeURL(state string) (string, error) {
 	_url, err := url.Parse(c.AuthURL)
 	if err != nil {
-		panic("AuthURL malformed: " + err.Error())
+		return "", fmt.Errorf("AuthURL malformed: %v", err)
 	}
 	if err := _url.Query().Get("error"); err != "" {
-		panic("AuthURL contains error: " + err)
+		return "", fmt.Errorf("AuthURL contains error: %v", err)
 	}
 	q := url.Values{
 		"response_type":   {"code"},
@@ -235,7 +235,7 @@ func (c *Config) AuthCodeURL(state string) string {
 	} else {
 		_url.RawQuery += "&" + q
 	}
-	return _url.String()
+	return _url.String(), nil
 }
 
 func condVal(v string) []string {

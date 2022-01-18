@@ -114,7 +114,7 @@ func (c *client) UserDel(login string) error {
 }
 
 // Repo returns a repository by name.
-func (c *client) Repo(owner string, name string) (*Repo, error) {
+func (c *client) Repo(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
 	err := c.get(uri, out)
@@ -140,7 +140,7 @@ func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
 }
 
 // RepoPost activates a repository.
-func (c *client) RepoPost(owner string, name string) (*Repo, error) {
+func (c *client) RepoPost(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
 	err := c.post(uri, nil, out)
@@ -148,7 +148,7 @@ func (c *client) RepoPost(owner string, name string) (*Repo, error) {
 }
 
 // RepoChown updates a repository owner.
-func (c *client) RepoChown(owner string, name string) (*Repo, error) {
+func (c *client) RepoChown(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathChown, c.addr, owner, name)
 	err := c.post(uri, nil, out)
@@ -156,7 +156,7 @@ func (c *client) RepoChown(owner string, name string) (*Repo, error) {
 }
 
 // RepoRepair repairs the repository hooks.
-func (c *client) RepoRepair(owner string, name string) error {
+func (c *client) RepoRepair(owner, name string) error {
 	uri := fmt.Sprintf(pathRepair, c.addr, owner, name)
 	return c.post(uri, nil, nil)
 }
@@ -290,7 +290,7 @@ func (c *client) Registry(owner, name, hostname string) (*Registry, error) {
 }
 
 // RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(owner string, name string) ([]*Registry, error) {
+func (c *client) RegistryList(owner, name string) ([]*Registry, error) {
 	var out []*Registry
 	uri := fmt.Sprintf(pathRepoRegistries, c.addr, owner, name)
 	err := c.get(uri, &out)
@@ -328,7 +328,7 @@ func (c *client) Secret(owner, name, secret string) (*Secret, error) {
 }
 
 // SecretList returns a list of all repository secrets.
-func (c *client) SecretList(owner string, name string) ([]*Secret, error) {
+func (c *client) SecretList(owner, name string) ([]*Secret, error) {
 	var out []*Secret
 	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
 	err := c.get(uri, &out)

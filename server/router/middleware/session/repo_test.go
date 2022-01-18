@@ -19,5 +19,4 @@ import (
 )
 
 func TestSetPerm(t *testing.T) {
-
 }

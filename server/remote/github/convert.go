@@ -15,9 +15,6 @@
 package github
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/google/go-github/v39/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -44,7 +41,7 @@ const (
 const (
 	headRefs  = "refs/pull/%d/head"  // pull request unmerged
 	mergeRefs = "refs/pull/%d/merge" // pull request merged with base
-	refspec   = "%s:%s"
+	refSpec   = "%s:%s"
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
@@ -85,19 +82,19 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository, private bool) *model.Repo {
 	repo := &model.Repo{
-		Owner:        *from.Owner.Login,
-		Name:         *from.Name,
-		FullName:     *from.FullName,
-		Link:         *from.HTMLURL,
-		IsSCMPrivate: *from.Private,
-		Clone:        *from.CloneURL,
-		Avatar:       *from.Owner.AvatarURL,
+		Name:         from.GetName(),
+		FullName:     from.GetFullName(),
+		Link:         from.GetHTMLURL(),
+		IsSCMPrivate: from.GetPrivate(),
+		Clone:        from.GetCloneURL(),
+		Branch:       from.GetDefaultBranch(),
+		Owner:        from.GetOwner().GetLogin(),
+		Avatar:       from.GetOwner().GetAvatarURL(),
+		Perm:         convertPerm(from.GetPermissions()),
 		SCMKind:      model.RepoGit,
-		Branch:       defaultBranch,
-		Perm:         convertPerm(from),
 	}
-	if from.DefaultBranch != nil {
-		repo.Branch = *from.DefaultBranch
+	if len(repo.Branch) == 0 {
+		repo.Branch = defaultBranch
 	}
 	if private {
 		repo.IsSCMPrivate = true
@@ -107,11 +104,11 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 
 // convertPerm is a helper function used to convert a GitHub repository
 // permissions to the common Woodpecker permissions structure.
-func convertPerm(from *github.Repository) *model.Perm {
+func convertPerm(perm map[string]bool) *model.Perm {
 	return &model.Perm{
-		Admin: from.Permissions["admin"],
-		Push:  from.Permissions["push"],
-		Pull:  from.Permissions["pull"],
+		Admin: perm["admin"],
+		Push:  perm["push"],
+		Pull:  perm["pull"],
 	}
 }
 
@@ -139,136 +136,29 @@ func convertTeamList(from []*github.Organization) []*model.Team {
 // to the common Woodpecker repository structure.
 func convertTeam(from *github.Organization) *model.Team {
 	return &model.Team{
-		Login:  *from.Login,
-		Avatar: *from.AvatarURL,
+		Login:  from.GetLogin(),
+		Avatar: from.GetAvatarURL(),
 	}
 }
 
 // convertRepoHook is a helper function used to extract the Repository details
 // from a webhook and convert to the common Woodpecker repository structure.
-func convertRepoHook(from *webhook) *model.Repo {
+func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	repo := &model.Repo{
-		Owner:        from.Repo.Owner.Login,
-		Name:         from.Repo.Name,
-		FullName:     from.Repo.FullName,
-		Link:         from.Repo.HTMLURL,
-		IsSCMPrivate: from.Repo.Private,
-		Clone:        from.Repo.CloneURL,
-		Branch:       from.Repo.DefaultBranch,
+		Owner:        eventRepo.GetOwner().GetLogin(),
+		Name:         eventRepo.GetName(),
+		FullName:     eventRepo.GetFullName(),
+		Link:         eventRepo.GetHTMLURL(),
+		IsSCMPrivate: eventRepo.GetPrivate(),
+		Clone:        eventRepo.GetCloneURL(),
+		Branch:       eventRepo.GetDefaultBranch(),
 		SCMKind:      model.RepoGit,
 	}
 	if repo.Branch == "" {
 		repo.Branch = defaultBranch
 	}
-	if repo.Owner == "" { // legacy webhooks
-		repo.Owner = from.Repo.Owner.Name
-	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
 	}
 	return repo
-}
-
-// convertPushHook is a helper function used to extract the Build details
-// from a push webhook and convert to the common Woodpecker Build structure.
-func convertPushHook(from *webhook) *model.Build {
-	files := getChangedFilesFromWebhook(from)
-	build := &model.Build{
-		Event:        model.EventPush,
-		Commit:       from.Head.ID,
-		Ref:          from.Ref,
-		Link:         from.Head.URL,
-		Branch:       strings.Replace(from.Ref, "refs/heads/", "", -1),
-		Message:      from.Head.Message,
-		Email:        from.Head.Author.Email,
-		Avatar:       from.Sender.Avatar,
-		Author:       from.Sender.Login,
-		Remote:       from.Repo.CloneURL,
-		Sender:       from.Sender.Login,
-		ChangedFiles: files,
-	}
-	if len(build.Author) == 0 {
-		build.Author = from.Head.Author.Username
-	}
-	// if len(build.Email) == 0 {
-	// TODO: default to gravatar?
-	// }
-	if strings.HasPrefix(build.Ref, "refs/tags/") {
-		// just kidding, this is actually a tag event. Why did this come as a push
-		// event we'll never know!
-		build.Event = model.EventTag
-		// For tags, if the base_ref (tag's base branch) is set, we're using it
-		// as build's branch so that we can filter events base on it
-		if strings.HasPrefix(from.BaseRef, "refs/heads/") {
-			build.Branch = strings.Replace(from.BaseRef, "refs/heads/", "", -1)
-		}
-	}
-	return build
-}
-
-// convertPushHook is a helper function used to extract the Build details
-// from a deploy webhook and convert to the common Woodpecker Build structure.
-func convertDeployHook(from *webhook) *model.Build {
-	build := &model.Build{
-		Event:   model.EventDeploy,
-		Commit:  from.Deployment.Sha,
-		Link:    from.Deployment.URL,
-		Message: from.Deployment.Desc,
-		Avatar:  from.Sender.Avatar,
-		Author:  from.Sender.Login,
-		Ref:     from.Deployment.Ref,
-		Branch:  from.Deployment.Ref,
-		Deploy:  from.Deployment.Env,
-		Sender:  from.Sender.Login,
-	}
-	// if the ref is a sha or short sha we need to manuallyconstruct the ref.
-	if strings.HasPrefix(build.Commit, build.Ref) || build.Commit == build.Ref {
-		build.Branch = from.Repo.DefaultBranch
-		if build.Branch == "" {
-			build.Branch = defaultBranch
-		}
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
-	}
-	// if the ref is a branch we should make sure it has refs/heads prefix
-	if !strings.HasPrefix(build.Ref, "refs/") { // branch or tag
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
-	}
-	return build
-}
-
-// convertPullHook is a helper function used to extract the Build details
-// from a pull request webhook and convert to the common Woodpecker Build structure.
-func convertPullHook(from *webhook, merge bool) *model.Build {
-	build := &model.Build{
-		Event:   model.EventPull,
-		Commit:  from.PullRequest.Head.SHA,
-		Link:    from.PullRequest.HTMLURL,
-		Ref:     fmt.Sprintf(headRefs, from.PullRequest.Number),
-		Branch:  from.PullRequest.Base.Ref,
-		Message: from.PullRequest.Title,
-		Author:  from.PullRequest.User.Login,
-		Avatar:  from.PullRequest.User.Avatar,
-		Title:   from.PullRequest.Title,
-		Sender:  from.Sender.Login,
-		Remote:  from.PullRequest.Head.Repo.CloneURL,
-		Refspec: fmt.Sprintf(refspec,
-			from.PullRequest.Head.Ref,
-			from.PullRequest.Base.Ref,
-		),
-	}
-	if merge {
-		build.Ref = fmt.Sprintf(mergeRefs, from.PullRequest.Number)
-	}
-	return build
-}
-
-func getChangedFilesFromWebhook(from *webhook) []string {
-	var files []string
-	files = append(files, from.Head.Added...)
-	files = append(files, from.Head.Removed...)
-	files = append(files, from.Head.Modified...)
-	if len(files) == 0 {
-		files = make([]string, 0)
-	}
-	return files
 }

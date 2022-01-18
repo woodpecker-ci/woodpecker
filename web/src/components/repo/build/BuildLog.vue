@@ -1,5 +1,13 @@
 <template>
-  <div v-if="build" class="font-mono bg-gray-700 dark:bg-dark-gray-700 p-4">
+  <div v-if="build" class="font-mono bg-gray-700 pt-14 md:pt-4 dark:bg-dark-gray-700 p-4 overflow-y-scroll">
+    <div
+      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
+      @click="$emit('update:proc-id', null)"
+    >
+      <span>{{ proc?.name }}</span>
+      <Icon name="close" class="ml-auto" />
+    </div>
+
     <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
       <div class="text-gray-500 text-sm w-4">{{ (logLine.pos || 0) + 1 }}</div>
       <!-- eslint-disable-next-line vue/no-v-html -->
@@ -9,9 +17,10 @@
     <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
       exit code {{ proc.exit_code }}
     </div>
-    <template v-if="!proc?.start_time" />
+
     <div class="text-gray-300 mx-auto">
-      <span v-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
+      <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
+      <span v-else-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
         >This step has been canceled.</span
       >
       <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
@@ -23,14 +32,15 @@
 import AnsiConvert from 'ansi-to-html';
 import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
 
+import Icon from '~/components/atomic/Icon.vue';
 import useBuildProc from '~/compositions/useBuildProc';
 import { Build, Repo } from '~/lib/api/types';
 import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
-  name: 'BuildLogs',
+  name: 'BuildLog',
 
-  components: {},
+  components: { Icon },
 
   props: {
     build: {
@@ -44,6 +54,11 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+  },
+
+  emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    'update:proc-id': (procId: number | null) => true,
   },
 
   setup(props) {

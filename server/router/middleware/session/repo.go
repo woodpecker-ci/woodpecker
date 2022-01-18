@@ -97,7 +97,7 @@ func SetPerm() gin.HandlerFunc {
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = server.Config.Services.Remote.Perm(c, user, repo.Owner, repo.Name)
+				perm, err = server.Config.Services.Remote.Perm(c, user, repo)
 				if err == nil {
 					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo.FullName

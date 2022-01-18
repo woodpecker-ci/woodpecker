@@ -46,7 +46,7 @@ type Remote interface {
 
 	// Perm fetches the named repository permissions from
 	// the remote system for the specified user.
-	Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error)
+	Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error)
 
 	// File fetches a file from the remote repository and returns in string
 	// format.
@@ -75,7 +75,7 @@ type Remote interface {
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(r *http.Request) (*model.Repo, *model.Build, error)
+	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
 }
 
 // FileMeta represents a file in version control

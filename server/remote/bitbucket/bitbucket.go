@@ -180,11 +180,11 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 // does not have an endpoint to access user permissions, we attempt to fetch
 // the repository hook list, which is restricted to administrators to calculate
 // administrative access to a repository.
-func (c *config) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClient(ctx, u)
 
 	perms := new(model.Perm)
-	repo, err := client.FindRepo(owner, name)
+	repo, err := client.FindRepo(r.Owner, r.Name)
 	if err != nil {
 		return perms, err
 	}
@@ -284,7 +284,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Build details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(req)
 }
 

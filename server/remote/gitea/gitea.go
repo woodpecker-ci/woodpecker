@@ -250,7 +250,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 	}
 
 	// Gitea SDK forces us to read repo list paginated.
-	var page = 1
+	page := 1
 	for {
 		all, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
@@ -279,13 +279,13 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 }
 
 // Perm returns the user permissions for the named Gitea repository.
-func (c *Gitea) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, _, err := client.GetRepo(owner, name)
+	repo, _, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +442,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
