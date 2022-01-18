@@ -1,11 +1,5 @@
-FROM --platform=$BUILDPLATFORM techknowlogick/xgo:go-1.17.x AS build
-
-WORKDIR /src
-COPY . .
+FROM golang:1.16 AS certs
 ARG TARGETOS TARGETARCH
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg \
-    make release-server-xgo
 
 FROM scratch
 ENV GODEBUG=netdns=go
@@ -15,8 +9,8 @@ ENV XDG_CACHE_HOME=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
 # copy certs from golang:1.16 image
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy server binary
-COPY --from=build src/dist/woodpecker-server /bin/
+COPY src/dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
 ENTRYPOINT ["/bin/woodpecker-server"]

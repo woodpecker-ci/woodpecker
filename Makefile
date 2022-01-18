@@ -99,9 +99,18 @@ check-xgo:
 		$(GO) install src.techknowlogick.com/xgo@latest; \
 	fi
 
+cross-compile-server: cross-compile-server-build-loop
+	@$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make normalize-server-artifacts || exit 1;)
+
+cross-compile-server-build-loop:
+	$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make release-server-xgo || exit 1;)
+
+normalize-server-artifacts:
+	mv dist/server/$(TARGETOS)/$(TARGETARCH)/$(shell ls dist/server/$(TARGETOS)/$(TARGETARCH)/) dist/server/$(TARGETOS)/$(TARGETARCH)/woodpecker-server
+
 release-server-xgo: check-xgo
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
-	mv dist/server/$(shell ls dist/server) dist/woodpecker-server
+	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH) ;\
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)/$(TARGETARCH) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
 
 release-server:
 	# compile
