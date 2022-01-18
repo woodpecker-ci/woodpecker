@@ -24,9 +24,25 @@ pipeline:
     when:
       event: pull_request
 
+  publish-server-alpine-dryrun:
+    image: woodpeckerci/plugin-docker-buildx
+    group: docker
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      # TODO: only release as next-alpine after 0.15.0 got released
+      tag: [next-alpine, latest-alpine]
+    environment:
+      TAGS: sqlite_unlock_notify
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+
   publish-server:
     image: woodpeckerci/plugin-docker-buildx
-    group: bundle
+    group: docker
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -42,7 +58,7 @@ pipeline:
 
   publish-server-alpine:
     image: woodpeckerci/plugin-docker-buildx
-    group: bundle
+    group: docker
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -57,7 +73,7 @@ pipeline:
       event: push
 
   release-server:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
@@ -71,7 +87,7 @@ pipeline:
       event: tag
 
   release-server-alpine:
-    group: bundle
+    group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
