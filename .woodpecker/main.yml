@@ -17,16 +17,12 @@ pipeline:
     image: golang:1.16
     commands:
       - make release-agent
-    when:
-      event: tag
 
   build-cli:
     group: build
     image: golang:1.16
     commands:
       - make release-cli
-    when:
-      event: tag
 
   build-deb-rpm:
     group: bundle
@@ -44,6 +40,11 @@ pipeline:
       event: tag
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
+
+  list-release:
+    image: golang:1.16
+    commands:
+      - ls -la dist/
 
   release:
     image: plugins/github-release

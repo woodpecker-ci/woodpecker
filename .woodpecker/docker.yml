@@ -10,12 +10,6 @@ pipeline:
   # S e r v e r #
   ###############
 
-  # TODO: needed until https://github.com/woodpecker-ci/woodpecker/pull/635
-  build-server:
-    image: golang:1.16
-    commands:
-      - make release-server
-
   publish-server-dryrun:
     image: woodpeckerci/plugin-docker-buildx
     group: bundle
