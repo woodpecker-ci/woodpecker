@@ -63,7 +63,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_SHA`                | commit sha                                                                                   |
 | `CI_COMMIT_REF`                | commit ref                                                                                   |
 | `CI_COMMIT_REFSPEC`            | commit ref spec                                                                              |
-| `CI_COMMIT_BRANCH`             | commit branch (on pull request base branch)                                                  |
+| `CI_COMMIT_BRANCH`             | commit branch (equals target branch for pull requests)                                                  |
 | `CI_COMMIT_SOURCE_BRANCH`      | commit source branch                                                                         |
 | `CI_COMMIT_TARGET_BRANCH`      | commit target branch                                                                         |
 | `CI_COMMIT_TAG`                | commit tag name (empty if event is not `tag`)                                                |
