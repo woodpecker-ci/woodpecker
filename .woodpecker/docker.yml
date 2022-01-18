@@ -12,7 +12,8 @@ pipeline:
   cross-compile-server:
     image: techknowlogick/xgo:go-1.17.x
     commands:
-      - apt install tree
+      - apt update
+      - apt install -y tree
       - make cross-compile-server
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
