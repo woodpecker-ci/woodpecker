@@ -2,15 +2,16 @@ package local
 
 import (
 	"context"
-	"io"
 	"encoding/base64"
+	"io"
+	"os"
 	"os/exec"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 type local struct {
-	cmd *exec.Cmd
+	cmd    *exec.Cmd
 	output io.ReadCloser
 }
 
@@ -44,6 +45,8 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	Command, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
 
 	e.cmd = exec.CommandContext(ctx, "/bin/sh", "-c", string(Command))
+	e.cmd.Dir = "/tmp/" + proc.Environment["CI_REPO"]
+	os.MkdirAll(e.cmd.Dir, 0700)
 
 	e.output, _ = e.cmd.StdoutPipe()
 
@@ -65,5 +68,6 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
+	os.RemoveAll(e.cmd.Dir)
 	return nil
 }
