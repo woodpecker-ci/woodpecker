@@ -10,6 +10,7 @@ import (
 
 type local struct {
 	cmd *exec.Cmd
+	output io.ReadCloser
 }
 
 // make sure local implements Engine
@@ -46,6 +47,8 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	
 	e.cmd = exec.CommandContext(ctx, "bash", "-c", Command)
 
+	e.output, _ = e.cmd.StdoutPipe()
+
 	return e.cmd.Start()
 }
 
@@ -59,7 +62,7 @@ func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
 
 // Tail the pipeline step logs.
 func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
-	return e.cmd.StdoutPipe()
+	return e.output, nil
 }
 
 // Destroy the pipeline environment.
