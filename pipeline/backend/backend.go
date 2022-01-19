@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
@@ -19,6 +20,10 @@ func init() {
 
 	// docker
 	engine := docker.New()
+	engines[engine.Name()] = engine
+
+	// local
+	engine = local.New()
 	engines[engine.Name()] = engine
 }
 
