@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"io"
+	"encoding/base64"
 	"os/exec"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -40,12 +41,9 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
-	Command := ""
-	for _, command := range proc.Command {
-		Command += command + "\n"
-	}
-	
-	e.cmd = exec.CommandContext(ctx, "bash", "-c", Command)
+	Command, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
+
+	e.cmd = exec.CommandContext(ctx, "/bin/sh", "-c", string(Command))
 
 	e.output, _ = e.cmd.StdoutPipe()
 
