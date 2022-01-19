@@ -3,12 +3,14 @@ package local
 import (
 	"context"
 	"io"
-	"os"
+	"os/exec"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-type local struct {}
+type local struct {
+	cmd *exec.Cmd
+}
 
 // make sure local implements Engine
 var _ types.Engine = &local{}
@@ -31,24 +33,33 @@ func (e *local) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(context.Context, *types.Config) error {
+func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 	return nil
 }
 
 // Exec the pipeline step.
-func (e *local) Exec(context.Context, *types.Step) error {
-	return nil
+func (e *local) Exec(ctx context.Context, proc *types.Step) error {
+	Command := ""
+	for _, command := range proc.Command {
+		Command += command + "\n"
+	}
+	
+	e.cmd = exec.CommandContext(ctx, "bash", "-c", Command)
+
+	return e.cmd.Start()
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
-	return nil, nil
+	return &types.State{
+		Exited: true,
+	}, e.cmd.Wait()
 }
 
 // Tail the pipeline step logs.
 func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
-	return nil, nil
+	return e.cmd.StdoutPipe()
 }
 
 // Destroy the pipeline environment.
