@@ -42,9 +42,17 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
-	Command, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
+	Command := []string{}
+	for a, b := range proc.Environment {
+		Command = append(Command, a+"="+b)
+	}
 
-	e.cmd = exec.CommandContext(ctx, "/bin/sh", "-c", string(Command))
+	Command = append(Command, "/bin/sh")
+	Command = append(Command, "-c")
+	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
+	Command = append(Command, string(Script))
+
+	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
 	e.cmd.Dir = "/tmp/" + proc.Environment["CI_REPO"]
 	os.MkdirAll(e.cmd.Dir, 0700)
 
