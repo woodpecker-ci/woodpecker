@@ -1,7 +1,7 @@
 # Multi pipelines
 
 :::info
-This Feature is only available for GitHub, Gitea & Gitlab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
+This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
 :::
 
 By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
