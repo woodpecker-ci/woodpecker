@@ -54,7 +54,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
 	e.cmd.Dir = "/tmp/" + proc.Environment["CI_REPO"]
-	os.MkdirAll(e.cmd.Dir, 0700)
+	_ = os.MkdirAll(e.cmd.Dir, 0o700)
 
 	e.output, _ = e.cmd.StdoutPipe()
 
