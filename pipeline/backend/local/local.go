@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -47,7 +48,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 		Command = append(Command, a+"="+b)
 	}
 
-	Command = append(Command, "/bin/sh")
+	Command = append(Command, proc.Image[18:len(proc.Image)-7]) // Use "image name" as run command
 	Command = append(Command, "-c")
 	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
 	Command = append(Command, string(Script))
