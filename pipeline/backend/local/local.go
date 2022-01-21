@@ -45,7 +45,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	// Get environment variables
 	Command := []string{}
 	for a, b := range proc.Environment {
-		if a != "HOME" && a != "SHELL" {
+		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
 			Command = append(Command, a+"="+b)
 		}
 	}
@@ -54,7 +54,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	Command = append(Command, proc.Image[18:len(proc.Image)-7])
 	Command = append(Command, "-c")
 
-	// Decode script and remove initial lines
+	// Decode script
 	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
 	Command = append(Command, string(Script))
 
