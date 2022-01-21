@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -58,6 +57,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	_ = os.MkdirAll(e.cmd.Dir, 0o700)
 
 	e.output, _ = e.cmd.StdoutPipe()
+	e.cmd.Stderr = e.cmd.Stdout
 
 	return e.cmd.Start()
 }
