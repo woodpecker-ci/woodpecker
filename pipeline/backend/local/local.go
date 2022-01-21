@@ -47,15 +47,20 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 		Command = append(Command, a+"="+b)
 	}
 
-	Command = append(Command, proc.Image[18:len(proc.Image)-7]) // Use "image name" as run command
+	// Use "image name" as run command
+	Command = append(Command, proc.Image[18:len(proc.Image)-7])
 	Command = append(Command, "-c")
+
+	// Decode script and remove initial lines
 	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
 	Command = append(Command, string(Script))
 
+	// Prepare command and working directory
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
 	e.cmd.Dir = "/tmp/" + proc.Environment["CI_REPO"]
 	_ = os.MkdirAll(e.cmd.Dir, 0o700)
 
+	// Get output and redirect Stderr to Stdout
 	e.output, _ = e.cmd.StdoutPipe()
 	e.cmd.Stderr = e.cmd.Stdout
 
