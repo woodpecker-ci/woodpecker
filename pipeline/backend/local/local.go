@@ -42,9 +42,12 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
+	// Get environment variables
 	Command := []string{}
 	for a, b := range proc.Environment {
-		Command = append(Command, a+"="+b)
+		if a != "HOME" && a != "SHELL" {
+			Command = append(Command, a+"="+b)
+		}
 	}
 
 	// Use "image name" as run command
