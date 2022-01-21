@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -54,9 +55,9 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	Command = append(Command, proc.Image[18:len(proc.Image)-7])
 	Command = append(Command, "-c")
 
-	// Decode script
+	// Decode script and remove initial lines
 	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-	Command = append(Command, string(Script))
+	Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
 
 	// Prepare command and working directory
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
