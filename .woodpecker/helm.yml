@@ -42,7 +42,7 @@ pipeline:
       - git clone https://github.com/woodpecker-ci/woodpecker-ci.github.io.git
       - cd woodpecker-ci.github.io/ && cr index --token ${CR_TOKEN} --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch master --package-path ../.cr-release-packages --index-path ../.cr-index/index.yaml --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
-#      event: tag
+      event: tag
       path:
         include:
           - "charts/**"
