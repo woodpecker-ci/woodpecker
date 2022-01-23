@@ -16,7 +16,7 @@ The Multi-Pipeline feature allows the pipeline to be split into several files an
 
 ## Example multi-pipeline definition
 :::warning
-Please note that files are only shared bewteen steps of the same pipeline (see [File changes are incremental](/docs/usage/pipeline-syntax#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` pipeline below in the `deploy` pipeline.
+Please note that files are only shared between steps of the same pipeline (see [File changes are incremental](/docs/usage/pipeline-syntax#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` pipeline below in the `deploy` pipeline.
 If you still need to pass artifacts between the pipelines you need use storage [plugins](docs/usage/plugins/plugins) (e.g. one which stores files in an Amazon S3 bucket).
 :::
 
