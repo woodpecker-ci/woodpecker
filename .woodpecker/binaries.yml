@@ -98,7 +98,8 @@ pipeline:
   release-dryrun:
     image: golang:1.16
     commands:
-    - ls -la dist/
+    - ls -la dist/*.*
+    - cat dist/checksums.txt
 
   release:
     image: plugins/github-release
