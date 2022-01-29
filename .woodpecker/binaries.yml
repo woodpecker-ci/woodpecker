@@ -18,6 +18,8 @@ pipeline:
           # go source code
           - "**/*.go"
           - "go.*"
+          # web source code
+          - "web/"
 
   build-server:
     group: build
@@ -33,6 +35,8 @@ pipeline:
           # go source code
           - "**/*.go"
           - "go.*"
+          # web source code
+          - "web/"
 
   build-agent:
     group: build
@@ -78,6 +82,8 @@ pipeline:
           # go source code
           - "**/*.go"
           - "go.*"
+          # web source code
+          - "web/"
 
   checksums:
     image: golang:1.16
@@ -92,6 +98,8 @@ pipeline:
           # go source code
           - "**/*.go"
           - "go.*"
+          # web source code
+          - "web/"
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
