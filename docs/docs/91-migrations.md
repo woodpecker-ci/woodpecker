@@ -65,6 +65,8 @@ Some versions need some changes to the server configuration or the pipeline conf
   +    setting2: bar
   ```
 
+- Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`. The platform is now automatically detected.
+
 ## 0.14.0
 
 No breaking changes

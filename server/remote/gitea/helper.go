@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/sdk/gitea"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
@@ -84,15 +85,20 @@ func buildFromPush(hook *pushHook) *model.Build {
 	}
 
 	message := ""
+	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	}
+
+	if len(hook.Commits) == 1 {
+		link = hook.Commits[0].URL
 	}
 
 	return &model.Build{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         hook.Compare,
+		Link:         link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
@@ -105,17 +111,15 @@ func buildFromPush(hook *pushHook) *model.Build {
 }
 
 func getChangedFilesFromPushHook(hook *pushHook) []string {
-	files := make([]string, 0)
-
-	if len(hook.Commits) == 0 {
-		return files
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
+	for _, c := range hook.Commits {
+		files = append(files, c.Added...)
+		files = append(files, c.Removed...)
+		files = append(files, c.Modified...)
 	}
 
-	files = append(files, hook.Commits[0].Added...)
-	files = append(files, hook.Commits[0].Removed...)
-	files = append(files, hook.Commits[0].Modified...)
-
-	return files
+	return utils.DedupStrings(files)
 }
 
 // helper function that extracts the Build data from a Gitea tag hook

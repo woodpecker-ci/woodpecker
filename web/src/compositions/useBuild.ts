@@ -12,11 +12,7 @@ export default (build: Ref<Build | undefined>) => {
       return undefined;
     }
 
-    const start = build.value.started_at || 0;
-
-    if (start === 0) {
-      return 0;
-    }
+    const start = build.value.created_at || 0;
 
     return start * 1000;
   });
@@ -80,5 +76,25 @@ export default (build: Ref<Build | undefined>) => {
     return convertEmojis(build.value.message);
   });
 
-  return { since, duration, message };
+  const prettyRef = computed(() => {
+    if (build.value?.event === 'push') {
+      return build.value.branch;
+    }
+
+    if (build.value?.event === 'tag') {
+      return build.value.ref.replaceAll('refs/tags/', '');
+    }
+
+    if (build.value?.event === 'pull_request') {
+      return `#${build.value.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '')}`;
+    }
+
+    return build.value?.ref;
+  });
+
+  return { since, duration, message, prettyRef };
 };

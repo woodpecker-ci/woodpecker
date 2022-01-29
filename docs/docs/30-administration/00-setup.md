@@ -1,7 +1,7 @@
 # Setup
 
 A Woodpecker deployment consists of two parts:
-- A server which is the heard of Woodpecker and ships the webinterface.
+- A server which is the heart of Woodpecker and ships the webinterface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
 > Each agent is able to process one pipeline step by default.
