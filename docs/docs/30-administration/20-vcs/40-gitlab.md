@@ -1,4 +1,4 @@
-# Gitlab
+# GitLab
 
 Woodpecker comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
@@ -24,6 +24,8 @@ services:
 You must register your application with GitLab in order to generate a Client and Secret. Navigate to your account settings and choose Applications from the menu, and click New Application.
 
 Please use `http://woodpecker.mycompany.com/authorize` as the Authorization callback URL. Grant `api` scope to the application.
+
+If you run the Woodpecker CI server on the same host as the GitLab instance, you might also need to allow local connections in GitLab, otherwise API requests will fail. In GitLab, navigate to the Admin dashboard, then go to `Settings > Network > Outbound requests` and enable `Allow requests to the local network from web hooks and services`.
 
 ## Configuration
 
