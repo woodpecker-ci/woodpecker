@@ -1,3 +1,7 @@
+depends_on:
+  - test
+  - web
+
 pipeline:
   build-web:
     image: node:16-alpine
@@ -217,7 +221,3 @@ pipeline:
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
-
-depends_on:
-  - test
-  - web
