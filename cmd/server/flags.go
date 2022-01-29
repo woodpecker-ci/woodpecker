@@ -213,7 +213,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
 		Name:    "status-context",
 		Usage:   "status context prefix",
-		Value:   "continuous-integration/woodpecker",
+		Value:   "ci/woodpecker",
 	},
 	&cli.BoolFlag{
 		Name:    "flat-permissions",
