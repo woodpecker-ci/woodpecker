@@ -75,7 +75,7 @@ type Remote interface {
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(r *http.Request) (*model.Repo, *model.Build, error)
+	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
 }
 
 // FileMeta represents a file in version control

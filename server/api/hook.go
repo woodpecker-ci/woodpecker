@@ -78,7 +78,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	tmpRepo, build, err := server.Config.Services.Remote.Hook(c.Request)
+	tmpRepo, build, err := server.Config.Services.Remote.Hook(c, c.Request)
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
@@ -288,6 +288,7 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 			return false, nil
 		}
 	}
+
 	return true, nil
 }
 

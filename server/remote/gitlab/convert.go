@@ -24,6 +24,11 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
+)
+
+const (
+	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
 )
 
 func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
@@ -54,7 +59,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	return repo, nil
 }
 
-func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model.Repo, *model.Build, error) {
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -63,17 +68,17 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	obj := hook.ObjectAttributes
 
 	if target == nil && source == nil {
-		return nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
 	} else if target == nil {
-		return nil, nil, fmt.Errorf("target key expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	} else if source == nil {
-		return nil, nil, fmt.Errorf("source key expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
 		var err error
 		if repo.Owner, repo.Name, err = extractFromPath(target.PathWithNamespace); err != nil {
-			return nil, nil, err
+			return 0, nil, nil, err
 		}
 		repo.FullName = target.PathWithNamespace
 	} else {
@@ -108,8 +113,7 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Commit = lastCommit.ID
 	build.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IID)
-
+	build.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	build.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
@@ -124,10 +128,10 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Title = obj.Title
 	build.Link = obj.URL
 
-	return repo, build, nil
+	return obj.IID, repo, build, nil
 }
 
-func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
+func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -156,6 +160,8 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	build.Ref = hook.Ref
 
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
 			build.Author = cm.Author.Name
@@ -165,14 +171,18 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 			if len(build.Email) != 0 {
 				build.Avatar = getUserAvatar(build.Email)
 			}
-			break
 		}
+
+		files = append(files, cm.Added...)
+		files = append(files, cm.Removed...)
+		files = append(files, cm.Modified...)
 	}
+	build.ChangedFiles = utils.DedupStrings(files)
 
 	return repo, build, nil
 }
 
-func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
