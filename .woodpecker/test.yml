@@ -6,12 +6,13 @@ pipeline:
       - echo "test" > web/dist/index.html
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   lint:
     image: golang:1.16
@@ -20,13 +21,12 @@ pipeline:
       - make lint
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          - ".golangci.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   test:
     image: golang:1.16
@@ -38,12 +38,13 @@ pipeline:
       - make test-lib
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   sqlite:
     image: golang:1.16
@@ -54,12 +55,11 @@ pipeline:
       - make test-server-datastore
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   postgres:
     image: golang:1.16
@@ -71,12 +71,11 @@ pipeline:
       - make test-server-datastore
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   mysql:
     image: golang:1.16
@@ -88,12 +87,11 @@ pipeline:
       - make test-server-datastore
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
 services:
   service-postgres:
@@ -104,12 +102,11 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   service-mysql:
     image: mysql:5.6.27
@@ -119,9 +116,8 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/test.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
