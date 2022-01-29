@@ -199,6 +199,12 @@ var flags = []cli.Flag{
 	//
 	// Github
 	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
+		Name:    "status-context",
+		Usage:   "status context prefix",
+		Value:   "ci/woodpecker",
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",

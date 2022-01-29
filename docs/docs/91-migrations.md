@@ -71,6 +71,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`. The platform is now automatically detected.
 
+- Use `WOODPECKER_STATUS_CONTEXT` instead of the deprecated options `WOODPECKER_GITHUB_CONTEXT` and `WOODPECKER_GITEA_CONTEXT`.
+
 ## 0.14.0
 
 No breaking changes
