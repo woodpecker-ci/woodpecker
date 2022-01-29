@@ -378,9 +378,17 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 // cloning Gitlab repositories. The netrc will use the global machine account
 // when configured.
 func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = "oauth2"
+		token = u.Token
+	}
+
 	return &model.Netrc{
-		Login:    "oauth2",
-		Password: u.Token,
+		Login:    login,
+		Password: token,
 		Machine:  g.Machine,
 	}, nil
 }
