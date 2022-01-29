@@ -48,13 +48,5 @@ WOODPECKER_GITEA_CLIENT=... # Gitea oauth2 client id
 
 WOODPECKER_GITEA_SECRET=... # Gitea oauth2 client secret
 
-WOODPECKER_GITEA_CONTEXT=continuous-integration/woodpecker # Customize the Gitea status message context
-
-WOODPECKER_GITEA_GIT_USERNAME=... # Optional. Use a single machine account username to clone all repositories.
-
-WOODPECKER_GITEA_GIT_PASSWORD=... # Optional. Use a single machine account password to clone all repositories.
-
-WOODPECKER_GITEA_PRIVATE_MODE=true # Set to true if Gitea is running in private mode.
-
 WOODPECKER_GITEA_SKIP_VERIFY=false # Set to true to disable SSL verification.
 ```
