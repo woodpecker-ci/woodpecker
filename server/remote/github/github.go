@@ -81,7 +81,6 @@ func New(opts Opts) (remote.Remote, error) {
 
 type client struct {
 	URL        string
-	Context    string
 	API        string
 	Client     string
 	Secret     string
@@ -276,9 +275,17 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 // cloning GitHub repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = u.Token
+		token = "x-oauth-basic"
+	}
+
 	return &model.Netrc{
-		Login:    u.Token,
-		Password: "x-oauth-basic",
+		Login:    login,
+		Password: token,
 		Machine:  c.Machine,
 	}, nil
 }
@@ -474,7 +481,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	pull, repo, build, err := parseHook(r, c.MergeRef, c.PrivateMode)
+	pull, repo, build, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}

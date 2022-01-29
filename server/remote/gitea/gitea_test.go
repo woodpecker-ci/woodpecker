@@ -49,7 +49,6 @@ func Test_gitea(t *testing.T) {
 					SkipVerify: true,
 				})
 				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*Gitea).Context).Equal("continuous-integration/test")
 				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
 				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
 			})
@@ -75,8 +74,8 @@ func Test_gitea(t *testing.T) {
 				})
 				netrc, _ := remote.Netrc(nil, nil)
 				g.Assert(netrc.Machine).Equal("gitea.com")
-				g.Assert(netrc.Login).Equal("someuser")
-				g.Assert(netrc.Password).Equal("password")
+				g.Assert(netrc.Login).Equal("")
+				g.Assert(netrc.Password).Equal("")
 			})
 		})
 

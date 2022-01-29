@@ -56,7 +56,6 @@ func Test_github(t *testing.T) {
 				g.Assert(remote.(*client).Client).Equal("0ZXh0IjoiI")
 				g.Assert(remote.(*client).Secret).Equal("I1NiIsInR5")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)
-				g.Assert(remote.(*client).Context).Equal("continuous-integration/test")
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
@@ -80,8 +79,8 @@ func Test_github(t *testing.T) {
 				})
 				netrc, _ := remote.Netrc(nil, nil)
 				g.Assert(netrc.Machine).Equal("github.com")
-				g.Assert(netrc.Login).Equal("someuser")
-				g.Assert(netrc.Password).Equal("password")
+				g.Assert(netrc.Login).Equal("")
+				g.Assert(netrc.Password).Equal("")
 			})
 		})
 
