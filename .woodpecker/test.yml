@@ -7,7 +7,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -22,7 +22,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         - ".golangci.yml"
         # go source code
         - "**/*.go"
@@ -39,7 +39,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -56,7 +56,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -72,7 +72,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -88,7 +88,7 @@ pipeline:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -103,7 +103,7 @@ services:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
@@ -117,7 +117,7 @@ services:
     when:
       path:
         # related config files
-        #- ".woodpecker/test.yml"
+        - ".woodpecker/test.yml"
         # go source code
         - "**/*.go"
         - "go.*"
