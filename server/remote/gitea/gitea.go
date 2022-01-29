@@ -57,7 +57,6 @@ type Gitea struct {
 // Opts defines configuration options.
 type Opts struct {
 	URL         string // Gitea server url.
-	Context     string // Context to display in status check
 	Client      string // OAuth2 Client ID
 	Secret      string // OAuth2 Client Secret
 	Username    string // Optional machine account username.
@@ -79,7 +78,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:          opts.URL,
-		Context:      opts.Context,
 		Machine:      u.Host,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,

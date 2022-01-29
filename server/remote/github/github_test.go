@@ -52,7 +52,6 @@ func Test_github(t *testing.T) {
 					Password:    "password",
 					SkipVerify:  true,
 					PrivateMode: true,
-					Context:     "continuous-integration/test",
 				})
 				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
 				g.Assert(remote.(*client).API).Equal("http://localhost:8080/api/v3/")
@@ -63,7 +62,6 @@ func Test_github(t *testing.T) {
 				g.Assert(remote.(*client).Secret).Equal("I1NiIsInR5")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)
 				g.Assert(remote.(*client).PrivateMode).Equal(true)
-				g.Assert(remote.(*client).Context).Equal("continuous-integration/test")
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
