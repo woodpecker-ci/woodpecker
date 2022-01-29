@@ -210,7 +210,7 @@ var flags = []cli.Flag{
 	// remote parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
 		Name:    "status-context",
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
