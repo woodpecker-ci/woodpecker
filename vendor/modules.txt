@@ -589,7 +589,7 @@ github.com/xeipuuv/gojsonreference
 github.com/xeipuuv/gojsonschema
 # github.com/yeya24/promlinter v0.1.0
 github.com/yeya24/promlinter
-# golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e
+# golang.org/x/crypto v0.0.0-20220128200615-198e4374d7ed
 ## explicit
 golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
