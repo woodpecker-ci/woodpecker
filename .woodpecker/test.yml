@@ -13,11 +13,12 @@ pipeline:
     when:
       path:
         include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
-          - "**/*.go"
+          # related config files
+          - ".woodpecker/test.yml"
           - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
 
   test:
     image: golang:1.16
@@ -30,10 +31,12 @@ pipeline:
     when:
       path:
         include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
           - "**/*.go"
+          - "go.*"
 
   sqlite:
     image: golang:1.16
@@ -42,6 +45,15 @@ pipeline:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
 
   postgres:
     image: golang:1.16
@@ -51,6 +63,15 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
 
   mysql:
     image: golang:1.16
@@ -60,6 +81,15 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
 
 services:
   service-postgres:
@@ -68,9 +98,28 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
+
   service-mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          - ".golangci.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
