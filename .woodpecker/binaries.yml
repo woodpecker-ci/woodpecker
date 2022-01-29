@@ -27,15 +27,14 @@ pipeline:
       - make release-server
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
-          # web source code
-          - "web/**"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
 
   build-agent:
     group: build
@@ -59,13 +58,12 @@ pipeline:
       - make release-cli
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   build-deb-rpm:
     group: bundle
@@ -74,15 +72,14 @@ pipeline:
       - make bundle
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
-          # web source code
-          - "web/**"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
 
   checksums:
     image: golang:1.16
@@ -90,15 +87,14 @@ pipeline:
       - make release-checksums
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
-          # web source code
-          - "web/**"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
