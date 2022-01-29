@@ -11,15 +11,14 @@ pipeline:
       - yarn build
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
-          # web source code
-          - "web/**"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
 
   build-server:
     group: build
