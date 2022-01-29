@@ -4,6 +4,14 @@ pipeline:
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
+    when:
+      path:
+        include:
+          # related config files
+          - ".woodpecker/test.yml"
+          # go source code
+          - "**/*.go"
+          - "go.*"
 
   lint:
     image: golang:1.16
@@ -33,7 +41,6 @@ pipeline:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
@@ -50,7 +57,6 @@ pipeline:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
@@ -68,7 +74,6 @@ pipeline:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
@@ -86,7 +91,6 @@ pipeline:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
@@ -103,7 +107,6 @@ services:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
@@ -119,7 +122,6 @@ services:
         include:
           # related config files
           - ".woodpecker/test.yml"
-          - ".golangci.yml"
           # go source code
           - "**/*.go"
           - "go.*"
