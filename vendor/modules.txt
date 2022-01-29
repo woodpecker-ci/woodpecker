@@ -469,7 +469,7 @@ github.com/quasilyte/go-ruleguard/ruleguard/textmatch
 github.com/quasilyte/go-ruleguard/ruleguard/typematch
 # github.com/quasilyte/regex/syntax v0.0.0-20200407221936-30656e2c4a95
 github.com/quasilyte/regex/syntax
-# github.com/rs/zerolog v1.25.0
+# github.com/rs/zerolog v1.26.1
 ## explicit
 github.com/rs/zerolog
 github.com/rs/zerolog/cmd/lint
@@ -589,7 +589,7 @@ github.com/xeipuuv/gojsonreference
 github.com/xeipuuv/gojsonschema
 # github.com/yeya24/promlinter v0.1.0
 github.com/yeya24/promlinter
-# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+# golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e
 ## explicit
 golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
