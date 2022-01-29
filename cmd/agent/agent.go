@@ -28,6 +28,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
@@ -87,11 +88,11 @@ func loop(c *cli.Context) error {
 	// TODO authenticate to grpc server
 
 	// grpc.Dial(target, ))
-
-	transport := grpc.WithInsecure()
-
+	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+	} else {
+		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
 	conn, err := grpc.Dial(
