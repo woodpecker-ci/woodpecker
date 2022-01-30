@@ -79,6 +79,11 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 }
 
 func TestMigrate(t *testing.T) {
+	// make all tasks required for tests
+	for _, task := range migrationTasks {
+		task.required = true
+	}
+
 	// init new db
 	engine, close := testDB(t, true)
 	assert.NoError(t, Migrate(engine))

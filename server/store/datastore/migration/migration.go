@@ -26,12 +26,12 @@ import (
 
 // APPEND NEW MIGRATIONS
 // they are executed in order and if one fail woodpecker try to rollback and quit
-var migrationTasks = []task{
-	legacy2Xorm,
-	alterTableReposDropFallback,
-	alterTableReposDropAllowDeploysAllowTags,
-	fixPRSecretEventName,
-	alterTableReposDropCounter,
+var migrationTasks = []*task{
+	&legacy2Xorm,
+	&alterTableReposDropFallback,
+	&alterTableReposDropAllowDeploysAllowTags,
+	&fixPRSecretEventName,
+	&alterTableReposDropCounter,
 }
 
 var allBeans = []interface{}{
