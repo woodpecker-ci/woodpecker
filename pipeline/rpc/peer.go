@@ -42,9 +42,6 @@ type (
 	}
 )
 
-// NoFilter is an empty filter.
-var NoFilter = Filter{}
-
 // Peer defines a peer-to-peer connection.
 type Peer interface {
 	// Next returns the next pipeline in the queue.
