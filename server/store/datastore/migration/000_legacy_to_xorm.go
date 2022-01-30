@@ -23,7 +23,8 @@ import (
 )
 
 var legacy2Xorm = task{
-	name: "xorm",
+	name:     "xorm",
+	required: true,
 	fn: func(sess *xorm.Session) error {
 		// make sure we have required migrations - else fail and point to last major version
 		for _, mig := range []string{
