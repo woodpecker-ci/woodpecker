@@ -12,4 +12,4 @@
 | [Multi pipeline](/docs/usage/multi-pipeline) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: |
 | [when-path filter](/docs/usage/conditional-execution#path) | :white_check_mark: | :white_check_mark:¹ | :white_check_mark: | :x: | :x: | :x: | :x: |
 
-¹(exept for pull requests)
+¹(except for pull requests)
