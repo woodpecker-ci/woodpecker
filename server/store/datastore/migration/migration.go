@@ -112,7 +112,7 @@ func Migrate(e *xorm.Engine) error {
 	return syncAll(e)
 }
 
-func runTasks(sess *xorm.Session, tasks []task) error {
+func runTasks(sess *xorm.Session, tasks []*task) error {
 	// cache migrations in db
 	migCache := make(map[string]bool)
 	var migList []*migrations
