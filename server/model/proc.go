@@ -68,6 +68,20 @@ func (p *Proc) IsParent() bool {
 	return p.PPID == 0
 }
 
+// IsMultiPipeline checks if proc list contain more than one parent proc
+func IsMultiPipeline(procs []*Proc) bool {
+	c := 0
+	for _, proc := range procs {
+		if proc.IsParent() {
+			c++
+		}
+		if c > 1 {
+			return true
+		}
+	}
+	return false
+}
+
 // Tree creates a process tree from a flat process list.
 func Tree(procs []*Proc) ([]*Proc, error) {
 	var nodes []*Proc
@@ -91,6 +105,31 @@ func Tree(procs []*Proc) ([]*Proc, error) {
 	}
 
 	return nodes, nil
+}
+
+// BuildStatus determine build status based on corresponding proc list
+func BuildStatus(procs []*Proc) StatusValue {
+	status := StatusSuccess
+
+	for _, p := range procs {
+		if p.IsParent() && p.Failing() {
+			status = p.State
+		}
+	}
+
+	return status
+}
+
+// IsThereRunningStage determine if it contains procs running or pending to run
+func IsThereRunningStage(procs []*Proc) bool {
+	for _, p := range procs {
+		if p.IsParent() {
+			if p.Running() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func findNode(nodes []*Proc, pid int) (*Proc, error) {
