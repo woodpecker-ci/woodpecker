@@ -23,6 +23,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func Test_parse(t *testing.T) {
@@ -106,7 +107,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Message).Equal(hook.Commits[0].Message)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(build.Author).Equal(hook.Sender.Login)
-			g.Assert(build.ChangedFiles).Equal([]string{"CHANGELOG.md", "app/controller/application.rb"})
+			g.Assert(utils.EqualStringSlice(build.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {
