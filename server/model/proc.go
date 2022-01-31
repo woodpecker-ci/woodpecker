@@ -121,6 +121,7 @@ func BuildStatus(procs []*Proc) StatusValue {
 }
 
 // IsThereRunningStage determine if it contains procs running or pending to run
+// TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
 func IsThereRunningStage(procs []*Proc) bool {
 	for _, p := range procs {
 		if p.IsParent() {
