@@ -56,6 +56,7 @@ var Config = struct {
 		Port           string
 		Pass           string
 		Docs           string
+		StatusContext  string
 		SessionExpires time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
