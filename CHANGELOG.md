@@ -1,3 +1,23 @@
+# Changelog
+
+## [v0.15.0-rc2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc2) - 2022-01-31
+
+* BUGFIXES
+  * Fix pipeline timestamps (#730)
+  * Remove "panic()" as much as possible from code (#682)
+* ENHANCEMENTS
+  * Let non required migration tasks fail and continue (#729)
+  * Improve pipeline compiler (#699)
+  * Support ChangedFiles for Github & Gitlab PRs and Gitea pushes (#697)
+  * Remove unused flags / options (#693)
+  * Automatically determine platform of agent (#690)
+* DOCUMENTATION
+  * Minor updates to docs (#712)
+  * Add note about Gitlab & Gitea internal connections to docs (#711)
+* MISC
+  * Update deps (#724)
+  * Compile for more platforms on release (#703)
+
 ## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-11
 
 * BREAKING
