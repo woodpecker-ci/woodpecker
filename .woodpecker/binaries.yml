@@ -43,13 +43,14 @@ pipeline:
       - make release-agent
     when:
       path:
-        include:
-          # related config files
-          - ".woodpecker/binaries.yml"
-          - "nfpm/*.yml"
-          # go source code
-          - "**/*.go"
-          - "go.*"
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
 
   build-cli:
     group: build
@@ -64,6 +65,8 @@ pipeline:
         # go source code
         - "**/*.go"
         - "go.*"
+        # web source code
+        - "web/**"
 
   build-deb-rpm:
     group: bundle
