@@ -321,6 +321,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
+	log.Trace().
+		Str("repo_id", fmt.Sprint(repo.ID)).
+		Str("build_id", fmt.Sprint(build.ID)).
+		Str("proc_id", id).
+		Msgf("gRPC Done with state: %#v", state)
+
 	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
