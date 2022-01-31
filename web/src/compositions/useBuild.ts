@@ -42,15 +42,12 @@ export default (build: Ref<Build | undefined>) => {
     const start = build.value.started_at || 0;
     const end = build.value.finished_at || build.value.updated_at || 0;
 
-    if (start === 0) {
+    if (start === 0 || end === 0) {
       return 0;
     }
 
-    if (end === 0) {
-      // only calculate time on running builds
-      if (build.value.status !== 'running') {
-        return 0;
-      }
+    // only calculate time based no now() for running builds
+    if (build.value.status === 'running') {
       return Date.now() - start * 1000;
     }
 
