@@ -64,6 +64,10 @@ func TestEqualStringSlice(t *testing.T) {
 		in1: []string{"AA", "AA", "2", " "},
 		in2: []string{"2", "AA", " ", "AA"},
 		out: true,
+	}, {
+		in1: []string{"AA", "AA", "2", " "},
+		in2: []string{"2", "2", " ", "AA"},
+		out: false,
 	}}
 
 	for _, tc := range tests {
