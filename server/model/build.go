@@ -28,7 +28,7 @@ type Build struct {
 	Error        string       `json:"error"                   xorm:"build_error"`
 	Enqueued     int64        `json:"enqueued_at"             xorm:"build_enqueued"`
 	Created      int64        `json:"created_at"              xorm:"build_created"`
-	Updated      int64        `json:"updated_at"              xorm:"updated 'updated' NOT NULL"`
+	Updated      int64        `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
 	Started      int64        `json:"started_at"              xorm:"build_started"`
 	Finished     int64        `json:"finished_at"             xorm:"build_finished"`
 	Deploy       string       `json:"deploy_to"               xorm:"build_deploy"`
