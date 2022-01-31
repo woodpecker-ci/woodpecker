@@ -1,3 +1,8 @@
+## [0.14.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.4) - 2022-01-31
+
+* BUGFIXES
+  * Docker Images use golang image for ca-certificates (#608)
+
 ## [0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
 
 * BUGFIXES
