@@ -68,7 +68,7 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-branch-server:
+  publish-release-branch-server:
     image: plugins/docker
     group: docker
     secrets: [docker_username, docker_password]
@@ -80,7 +80,7 @@ pipeline:
       branch: release/*
       event: push
 
-  publish-branch-server-alpine:
+  publish-release-branch-server-alpine:
     image: plugins/docker
     group: docker
     secrets: [ docker_username, docker_password ]
@@ -158,7 +158,7 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-branch-agent:
+  publish-release-branch-agent:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
@@ -171,7 +171,7 @@ pipeline:
       branch: release/*
       event: push
 
-  publish-branch-agent-alpine:
+  publish-release-branch-agent-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
@@ -252,7 +252,7 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-branch-cli:
+  publish-release-branch-cli:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
@@ -265,7 +265,7 @@ pipeline:
       branch: release/*
       event: push
 
-  publish-branch-cli-alpine:
+  publish-release-branch-cli-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
