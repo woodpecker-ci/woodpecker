@@ -4,7 +4,7 @@
 
 * BUGFIXES
   * Fix pipeline timestamps (#730)
-  * Remove "panic()" as much as posible from code (#682)
+  * Remove "panic()" as much as possible from code (#682)
 * ENHANCEMENTS
   * Let non required migration tasks fail and continue (#729)
   * Improve pipeline compiler (#699)
