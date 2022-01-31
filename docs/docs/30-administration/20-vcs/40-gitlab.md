@@ -40,11 +40,5 @@ WOODPECKER_GITLAB_CLIENT=... # GitLab oauth2 client id
 
 WOODPECKER_GITLAB_SECRET=... # GitLab oauth2 client secret.
 
-WOODPECKER_GITLAB_GIT_USERNAME=... # Optional. Use a single machine account username to clone all repositories
-
-WOODPECKER_GITLAB_GIT_PASSWORD=... # Optional. Use a single machine account password to clone all repositories
-
 WOODPECKER_GITLAB_SKIP_VERIFY=false # Set to true to disable SSL verification
-
-WOODPECKER_GITLAB_PRIVATE_MODE=false # Set to true if GitLab is running in private mode
 ```

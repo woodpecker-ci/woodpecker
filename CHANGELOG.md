@@ -166,6 +166,11 @@
   * Use go's vendoring (#284)
   * code.gitea.io/sdk/gitea v0.14.1 -> v0.15.0 (#263)
 
+## [v0.14.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.4) - 2022-01-31
+
+* BUGFIXES
+  * Docker Images use golang image for ca-certificates (#608)
+
 ## [v0.14.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.3) - 2021-10-30
 
 * BUGFIXES

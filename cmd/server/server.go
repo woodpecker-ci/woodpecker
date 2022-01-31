@@ -60,13 +60,8 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.Bool("debug") {
-		log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -296,6 +291,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
+	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")

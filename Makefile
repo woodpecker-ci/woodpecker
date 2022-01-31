@@ -131,7 +131,7 @@ release-cli:
 
 release-checksums:
 	# generate shas for tar files
-	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
+	(cd dist/; sha256sum *.* > checksums.txt)
 
 release: release-frontend release-server release-agent release-cli
 

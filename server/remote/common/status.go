@@ -7,10 +7,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-const base = "ci/woodpecker"
-
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	name := base
+	name := server.Config.Server.StatusContext
 
 	switch build.Event {
 	case model.EventPull:
