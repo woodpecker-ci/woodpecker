@@ -46,3 +46,27 @@ func TestDedupStrings(t *testing.T) {
 		}
 	}
 }
+
+func TestEqualStringSlice(t *testing.T) {
+	tests := []struct {
+		in1 []string
+		in2 []string
+		out bool
+	}{{
+		in1: []string{"", "ab", "12", "ab"},
+		in2: []string{"12", "ab"},
+		out: false,
+	}, {
+		in1: nil,
+		in2: nil,
+		out: true,
+	}, {
+		in1: []string{"AA", "AA", "2", " "},
+		in2: []string{"2", "AA", " ", "AA"},
+		out: true,
+	}}
+
+	for _, tc := range tests {
+		assert.EqualValues(t, tc.out, EqualStringSlice(tc.in1, tc.in2), "could not correctly process input: '%#v', %#v", tc.in1, tc.in2)
+	}
+}
