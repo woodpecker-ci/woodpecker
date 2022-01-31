@@ -47,6 +47,10 @@ export default (build: Ref<Build | undefined>) => {
     }
 
     if (end === 0) {
+      // only calculate time on running builds
+      if (build.value.status !== 'running') {
+        return 0;
+      }
       return Date.now() - start * 1000;
     }
 
