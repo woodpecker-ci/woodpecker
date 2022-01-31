@@ -40,17 +40,7 @@ WOODPECKER_GITHUB_CLIENT=... # GitHub oauth2 client id
 
 WOODPECKER_GITHUB_SECRET=... # GitHub oauth2 client secret.
 
-WOODPECKER_GITHUB_SCOPE=repo,repo:status,user:email,read:org # Comma-separated GitHub oauth scope.
-
-WOODPECKER_GITHUB_GIT_USERNAME=... # Optional. Use a single machine account username to clone all repositories.
-
-WOODPECKER_GITHUB_GIT_PASSWORD=... # Optional. Use a single machine account password to clone all repositories.
-
-WOODPECKER_GITHUB_PRIVATE_MODE=false # Set to true if GitHub is running in private mode.
-
 WOODPECKER_GITHUB_MERGE_REF=true # Set to true to use the `refs/pulls/%d/merge` vs `refs/pulls/%d/head`
-
-WOODPECKER_GITHUB_CONTEXT=continuous-integration/woodpecker # Customize the GitHub status message context
 
 WOODPECKER_GITHUB_SKIP_VERIFY=false # Set to true to disable SSL verification
 ```

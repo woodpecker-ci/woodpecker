@@ -206,7 +206,7 @@ func Test_parse(t *testing.T) {
 				Private:       true,
 				DefaultBranch: "master",
 			}
-			repo := toRepo(&from, false)
+			repo := toRepo(&from)
 			g.Assert(repo.FullName).Equal(from.FullName)
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")

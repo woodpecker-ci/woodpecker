@@ -44,15 +44,11 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string   // GitHub server url.
-	Client      string   // GitHub oauth client id.
-	Secret      string   // GitHub oauth client secret.
-	Scopes      []string // GitHub oauth scopes
-	Username    string   // Optional machine account username.
-	Password    string   // Optional machine account password.
-	PrivateMode bool     // GitHub is running in private mode.
-	SkipVerify  bool     // Skip ssl verification.
-	MergeRef    bool     // Clone pull requests using the merge ref.
+	URL        string // GitHub server url.
+	Client     string // GitHub oauth client id.
+	Secret     string // GitHub oauth client secret.
+	SkipVerify bool   // Skip ssl verification.
+	MergeRef   bool   // Clone pull requests using the merge ref.
 }
 
 // New returns a Remote implementation that integrates with a GitHub Cloud or
@@ -67,17 +63,13 @@ func New(opts Opts) (remote.Remote, error) {
 		u.Host = host
 	}
 	r := &client{
-		API:         defaultAPI,
-		URL:         defaultURL,
-		Client:      opts.Client,
-		Secret:      opts.Secret,
-		Scopes:      opts.Scopes,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
-		MergeRef:    opts.MergeRef,
-		Machine:     u.Host,
-		Username:    opts.Username,
-		Password:    opts.Password,
+		API:        defaultAPI,
+		URL:        defaultURL,
+		Client:     opts.Client,
+		Secret:     opts.Secret,
+		SkipVerify: opts.SkipVerify,
+		MergeRef:   opts.MergeRef,
+		Machine:    u.Host,
 	}
 	if opts.URL != defaultURL {
 		r.URL = strings.TrimSuffix(opts.URL, "/")
@@ -88,17 +80,13 @@ func New(opts Opts) (remote.Remote, error) {
 }
 
 type client struct {
-	URL         string
-	API         string
-	Client      string
-	Secret      string
-	Scopes      []string
-	Machine     string
-	Username    string
-	Password    string
-	PrivateMode bool
-	SkipVerify  bool
-	MergeRef    bool
+	URL        string
+	API        string
+	Client     string
+	Secret     string
+	Machine    string
+	SkipVerify bool
+	MergeRef   bool
 }
 
 // Login authenticates the session and returns the remote user details.
@@ -188,7 +176,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo, c.PrivateMode), nil
+	return convertRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for GitHub account, including
@@ -206,7 +194,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		if err != nil {
 			return nil, err
 		}
-		repos = append(repos, convertRepoList(list, c.PrivateMode)...)
+		repos = append(repos, convertRepoList(list)...)
 		opts.Page = resp.NextPage
 	}
 	return repos, nil
@@ -287,16 +275,17 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 // cloning GitHub repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if c.Password != "" {
-		return &model.Netrc{
-			Login:    c.Username,
-			Password: c.Password,
-			Machine:  c.Machine,
-		}, nil
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = u.Token
+		token = "x-oauth-basic"
 	}
+
 	return &model.Netrc{
-		Login:    u.Token,
-		Password: "x-oauth-basic",
+		Login:    login,
+		Password: token,
 		Machine:  c.Machine,
 	}, nil
 }
@@ -347,7 +336,7 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       c.Scopes,
+		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
@@ -492,7 +481,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	pull, repo, build, err := parseHook(r, c.MergeRef, c.PrivateMode)
+	pull, repo, build, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}

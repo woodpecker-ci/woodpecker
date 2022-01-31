@@ -45,18 +45,12 @@ func Test_gitea(t *testing.T) {
 		g.Describe("Creating a remote", func() {
 			g.It("Should return client with specified options", func() {
 				remote, _ := New(Opts{
-					URL:         "http://localhost:8080",
-					Username:    "someuser",
-					Password:    "password",
-					SkipVerify:  true,
-					PrivateMode: true,
+					URL:        "http://localhost:8080",
+					SkipVerify: true,
 				})
 				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
 				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
-				g.Assert(remote.(*Gitea).Username).Equal("someuser")
-				g.Assert(remote.(*Gitea).Password).Equal("password")
 				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
-				g.Assert(remote.(*Gitea).PrivateMode).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
@@ -76,14 +70,12 @@ func Test_gitea(t *testing.T) {
 			})
 			g.It("Should return a netrc with the machine account", func() {
 				remote, _ := New(Opts{
-					URL:      "http://gitea.com",
-					Username: "someuser",
-					Password: "password",
+					URL: "http://gitea.com",
 				})
 				netrc, _ := remote.Netrc(nil, nil)
 				g.Assert(netrc.Machine).Equal("gitea.com")
-				g.Assert(netrc.Login).Equal("someuser")
-				g.Assert(netrc.Password).Equal("password")
+				g.Assert(netrc.Login).Equal("")
+				g.Assert(netrc.Password).Equal("")
 			})
 		})
 

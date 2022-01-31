@@ -60,13 +60,8 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.Bool("debug") {
-		log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)

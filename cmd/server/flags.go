@@ -23,11 +23,6 @@ import (
 )
 
 var flags = []cli.Flag{
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG"},
-		Name:    "debug",
-		Usage:   "enable server debug mode",
-	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
 		Name:    "log-level",
@@ -75,11 +70,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
 		Name:    "lets-encrypt",
 		Usage:   "enable let's encrypt",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_QUIC"},
-		Name:    "quic",
-		Usage:   "enable quic",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
@@ -207,20 +197,13 @@ var flags = []cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
-	// remote parameters
+	// Github
 	//
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
 		Name:    "status-context",
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
-	},
-	&cli.BoolFlag{
-		Name:    "flat-permissions",
-		Usage:   "no remote call for permissions should be made",
-		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
-		Hidden:  true,
-		// TODO(485) temporary workaround to not hit api rate limits
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
@@ -243,27 +226,6 @@ var flags = []cli.Flag{
 		Name:    "github-secret",
 		Usage:   "github oauth2 client secret",
 	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_SCOPE"},
-		Name:    "github-scope",
-		Usage:   "github oauth scope",
-		Value: cli.NewStringSlice(
-			"repo",
-			"repo:status",
-			"user:email",
-			"read:org",
-		),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_GIT_USERNAME"},
-		Name:    "github-git-username",
-		Usage:   "github machine user username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_GIT_PASSWORD"},
-		Name:    "github-git-password",
-		Usage:   "github machine user password",
-	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_MERGE_REF"},
 		Name:    "github-merge-ref",
@@ -271,15 +233,13 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_PRIVATE_MODE"},
-		Name:    "github-private-mode",
-		Usage:   "github is running in private mode",
-	},
-	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
 	},
+	//
+	// Gogs
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GOGS"},
 		Name:    "gogs",
@@ -311,6 +271,9 @@ var flags = []cli.Flag{
 		Name:    "gogs-skip-verify",
 		Usage:   "gogs skip ssl verification",
 	},
+	//
+	// Gitea
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITEA"},
 		Name:    "gitea",
@@ -332,26 +295,14 @@ var flags = []cli.Flag{
 		Name:    "gitea-secret",
 		Usage:   "gitea oauth2 client secret",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_GIT_USERNAME"},
-		Name:    "gitea-git-username",
-		Usage:   "gitea service account username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_GIT_PASSWORD"},
-		Name:    "gitea-git-password",
-		Usage:   "gitea service account password",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_PRIVATE_MODE"},
-		Name:    "gitea-private-mode",
-		Usage:   "gitea private mode enabled",
-	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
 		Name:    "gitea-skip-verify",
 		Usage:   "gitea skip ssl verification",
 	},
+	//
+	// Bitbucket
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_BITBUCKET"},
 		Name:    "bitbucket",
@@ -367,6 +318,9 @@ var flags = []cli.Flag{
 		Name:    "bitbucket-secret",
 		Usage:   "bitbucket oauth2 client secret",
 	},
+	//
+	// Gitlab
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITLAB"},
 		Name:    "gitlab",
@@ -388,26 +342,14 @@ var flags = []cli.Flag{
 		Name:    "gitlab-secret",
 		Usage:   "gitlab oauth2 client secret",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_GIT_USERNAME"},
-		Name:    "gitlab-git-username",
-		Usage:   "gitlab service account username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_GIT_PASSWORD"},
-		Name:    "gitlab-git-password",
-		Usage:   "gitlab service account password",
-	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
 		Name:    "gitlab-skip-verify",
 		Usage:   "gitlab skip ssl verification",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_PRIVATE_MODE"},
-		Name:    "gitlab-private-mode",
-		Usage:   "gitlab is running in private mode",
-	},
+	//
+	// Bitbucket Stash
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_STASH"},
 		Name:    "stash",
@@ -448,6 +390,9 @@ var flags = []cli.Flag{
 		Name:    "stash-skip-verify",
 		Usage:   "stash skip ssl verification",
 	},
+	//
+	// Coding
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_CODING"},
 		Name:    "coding",
@@ -505,7 +450,9 @@ var flags = []cli.Flag{
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
+	//
 	// development flags
+	//
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_WWW_PROXY"},
 		Name:    "www-proxy",
@@ -518,5 +465,15 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
 		Value:   "",
 		Hidden:  true,
+	},
+	//
+	// misc
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
+		Name:    "flat-permissions",
+		Usage:   "no remote call for permissions should be made",
+		Hidden:  true,
+		// TODO(485) temporary workaround to not hit api rate limits
 	},
 }

@@ -65,6 +65,10 @@ Some versions need some changes to the server configuration or the pipeline conf
   +    setting2: bar
   ```
 
+- `WOODPECKER_DEBUG` option for server and agent got removed in favor of `WOODPECKER_LOG_LEVEL=debug`
+
+- Remove unused server flags which can safely be removed from your server config: `WOODPECKER_QUIC`,  `WOODPECKER_GITHUB_SCOPE`, `WOODPECKER_GITHUB_GIT_USERNAME`, `WOODPECKER_GITHUB_GIT_PASSWORD`, `WOODPECKER_GITHUB_PRIVATE_MODE`, `WOODPECKER_GITEA_GIT_USERNAME`, `WOODPECKER_GITEA_GIT_PASSWORD`, `WOODPECKER_GITEA_PRIVATE_MODE`, `WOODPECKER_GITLAB_GIT_USERNAME`, `WOODPECKER_GITLAB_GIT_PASSWORD`, `WOODPECKER_GITLAB_PRIVATE_MODE`
+
 - Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`. The platform is now automatically detected.
 
 - Use `WOODPECKER_STATUS_CONTEXT` instead of the deprecated options `WOODPECKER_GITHUB_CONTEXT` and `WOODPECKER_GITEA_CONTEXT`.
