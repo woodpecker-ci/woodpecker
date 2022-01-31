@@ -70,8 +70,9 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 				t.FailNow()
 			}
 
-			if engine.Dialect().URI().DBType == schemas.MYSQL {
-				// wait for mysql to sync ...
+			dbType := engine.Dialect().URI().DBType
+			if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+				// wait for mysql/postgres to sync ...
 				time.Sleep(10 * time.Millisecond)
 			}
 		}
