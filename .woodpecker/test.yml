@@ -52,7 +52,7 @@ pipeline:
     environment:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
-      - make test-server-datastore
+      - make test-server-datastore-coverage
     when:
       path:
         # related config files
@@ -92,6 +92,18 @@ pipeline:
         # go source code
         - "**/*.go"
         - "go.*"
+
+  codecov:
+    pull: true
+    image: woodpeckerci/plugin-codecov:next-alpine
+    settings:
+      files:
+        - agent-coverage.out
+        - cli-coverage.out
+        - server-coverage.out
+        - datastore-coverage.out
+      token:
+        from_secret: codecov_token
 
 services:
   service-postgres:
