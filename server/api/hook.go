@@ -78,7 +78,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	tmpRepo, build, err := server.Config.Services.Remote.Hook(c.Request)
+	tmpRepo, build, err := server.Config.Services.Remote.Hook(c, c.Request)
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
@@ -245,7 +245,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	if build.Status == model.StatusBlocked {
-		if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
+		if err := publishToTopic(c, build, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
@@ -288,6 +288,7 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 			return false, nil
 		}
 	}
+
 	return true, nil
 }
 
@@ -346,7 +347,7 @@ func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYa
 }
 
 // publishes message to UI clients
-func publishToTopic(c context.Context, build *model.Build, repo *model.Repo, event model.EventType) (err error) {
+func publishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -359,7 +360,6 @@ func publishToTopic(c context.Context, build *model.Build, repo *model.Repo, eve
 	}
 
 	message.Data, _ = json.Marshal(model.Event{
-		Type:  model.Enqueued,
 		Repo:  *repo,
 		Build: buildCopy,
 	})

@@ -24,6 +24,14 @@ services:
 
 Register your application with Gitea to create your client id and secret. You can find the OAuth applications settings of Gitea at `https://gitea.<host>/user/settings/`. It is very import the authorization callback URL matches your http(s) scheme and hostname exactly with `https://<host>/authorize` as the path.
 
+If you run the Woodpecker CI server on the same host as the Gitea instance, you might also need to allow local connections in Gitea, since version `v1.16`. Otherwise webhooks will fail. Add the following lines to your Gitea configuration (usually at `/etc/gitea/conf/app.ini`).
+```ini
+...
+[webhook]
+ALLOWED_HOST_LIST=external,loopback
+```
+For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config-cheat-sheet/#webhook-webhook).
+
 ![gitea oauth setup](gitea_oauth.gif)
 
 
@@ -39,14 +47,6 @@ WOODPECKER_GITEA_URL=https://try.gitea.io # Gitea server address
 WOODPECKER_GITEA_CLIENT=... # Gitea oauth2 client id
 
 WOODPECKER_GITEA_SECRET=... # Gitea oauth2 client secret
-
-WOODPECKER_GITEA_CONTEXT=continuous-integration/woodpecker # Customize the Gitea status message context
-
-WOODPECKER_GITEA_GIT_USERNAME=... # Optional. Use a single machine account username to clone all repositories.
-
-WOODPECKER_GITEA_GIT_PASSWORD=... # Optional. Use a single machine account password to clone all repositories.
-
-WOODPECKER_GITEA_PRIVATE_MODE=true # Set to true if Gitea is running in private mode.
 
 WOODPECKER_GITEA_SKIP_VERIFY=false # Set to true to disable SSL verification.
 ```

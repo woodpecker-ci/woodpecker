@@ -180,6 +180,30 @@ func GetProcLogs(c *gin.Context) {
 	}
 }
 
+func GetBuildConfig(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	build, err := _store.GetBuildNumber(repo, num)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	configs, err := _store.ConfigsForBuild(build.ID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, configs)
+}
+
 // DeleteBuild cancels a build
 func DeleteBuild(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -269,7 +293,7 @@ func DeleteBuild(c *gin.Context) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		if err := publishToTopic(c, killedBuild, repo, model.Canceled); err != nil {
+		if err := publishToTopic(c, killedBuild, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 	}
@@ -364,6 +388,10 @@ func PostDecline(c *gin.Context) {
 
 	if err := updateBuildStatus(c, build, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
+	}
+
+	if err := publishToTopic(c, build, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
 	c.JSON(200, build)
@@ -609,7 +637,7 @@ func startBuild(ctx context.Context, store store.Store, build *model.Build, user
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, build, repo, model.Enqueued); err != nil {
+	if err := publishToTopic(ctx, build, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 

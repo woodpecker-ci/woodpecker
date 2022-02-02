@@ -5,6 +5,7 @@
       type="checkbox"
       class="
         checkbox
+        flex-shrink-0
         relative
         border border-gray-400
         dark:border-gray-600

@@ -26,12 +26,15 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v39/github"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -41,16 +44,11 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string   // GitHub server url.
-	Context     string   // Context to display in status check
-	Client      string   // GitHub oauth client id.
-	Secret      string   // GitHub oauth client secret.
-	Scopes      []string // GitHub oauth scopes
-	Username    string   // Optional machine account username.
-	Password    string   // Optional machine account password.
-	PrivateMode bool     // GitHub is running in private mode.
-	SkipVerify  bool     // Skip ssl verification.
-	MergeRef    bool     // Clone pull requests using the merge ref.
+	URL        string // GitHub server url.
+	Client     string // GitHub oauth client id.
+	Secret     string // GitHub oauth client secret.
+	SkipVerify bool   // Skip ssl verification.
+	MergeRef   bool   // Clone pull requests using the merge ref.
 }
 
 // New returns a Remote implementation that integrates with a GitHub Cloud or
@@ -65,18 +63,13 @@ func New(opts Opts) (remote.Remote, error) {
 		u.Host = host
 	}
 	r := &client{
-		API:         defaultAPI,
-		URL:         defaultURL,
-		Context:     opts.Context,
-		Client:      opts.Client,
-		Secret:      opts.Secret,
-		Scopes:      opts.Scopes,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
-		MergeRef:    opts.MergeRef,
-		Machine:     u.Host,
-		Username:    opts.Username,
-		Password:    opts.Password,
+		API:        defaultAPI,
+		URL:        defaultURL,
+		Client:     opts.Client,
+		Secret:     opts.Secret,
+		SkipVerify: opts.SkipVerify,
+		MergeRef:   opts.MergeRef,
+		Machine:    u.Host,
 	}
 	if opts.URL != defaultURL {
 		r.URL = strings.TrimSuffix(opts.URL, "/")
@@ -87,18 +80,13 @@ func New(opts Opts) (remote.Remote, error) {
 }
 
 type client struct {
-	URL         string
-	Context     string
-	API         string
-	Client      string
-	Secret      string
-	Scopes      []string
-	Machine     string
-	Username    string
-	Password    string
-	PrivateMode bool
-	SkipVerify  bool
-	MergeRef    bool
+	URL        string
+	API        string
+	Client     string
+	Secret     string
+	Machine    string
+	SkipVerify bool
+	MergeRef   bool
 }
 
 // Login authenticates the session and returns the remote user details.
@@ -188,7 +176,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo, c.PrivateMode), nil
+	return convertRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for GitHub account, including
@@ -206,7 +194,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		if err != nil {
 			return nil, err
 		}
-		repos = append(repos, convertRepoList(list, c.PrivateMode)...)
+		repos = append(repos, convertRepoList(list)...)
 		opts.Page = resp.NextPage
 	}
 	return repos, nil
@@ -219,7 +207,7 @@ func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 	if err != nil {
 		return nil, err
 	}
-	return convertPerm(repo), nil
+	return convertPerm(repo.GetPermissions()), nil
 }
 
 // File fetches the file from the GitHub repository and returns its contents.
@@ -287,16 +275,17 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 // cloning GitHub repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if c.Password != "" {
-		return &model.Netrc{
-			Login:    c.Username,
-			Password: c.Password,
-			Machine:  c.Machine,
-		}, nil
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = u.Token
+		token = "x-oauth-basic"
 	}
+
 	return &model.Netrc{
-		Login:    u.Token,
-		Password: "x-oauth-basic",
+		Login:    login,
+		Password: token,
 		Machine:  c.Machine,
 	}, nil
 }
@@ -347,7 +336,7 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       c.Scopes,
+		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
@@ -491,6 +480,54 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
-	return parseHook(r, c.MergeRef)
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+	pull, repo, build, err := parseHook(r, c.MergeRef)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if pull != nil && len(build.ChangedFiles) == 0 {
+		build, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, build)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return repo, build, nil
+}
+
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return build, nil
+	}
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := &github.ListOptions{Page: 1}
+	fileList := make([]string, 0, 16)
+	for opts.Page > 0 {
+		files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, file := range files {
+			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+		}
+
+		opts.Page = resp.NextPage
+	}
+	build.ChangedFiles = utils.DedupStrings(fileList)
+
+	return build, nil
 }

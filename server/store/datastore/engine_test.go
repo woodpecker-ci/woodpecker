@@ -17,8 +17,10 @@ package datastore
 import (
 	"os"
 	"testing"
+	"time"
 
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -53,6 +55,12 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 	return &storage{
 			engine: engine,
 		}, func() {
+			for _, bean := range tables {
+				if err := engine.DropIndexes(bean); err != nil {
+					t.Error(err)
+					t.FailNow()
+				}
+			}
 			if err := engine.DropTables(tables...); err != nil {
 				t.Error(err)
 				t.FailNow()
@@ -60,6 +68,12 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 			if err := engine.Close(); err != nil {
 				t.Error(err)
 				t.FailNow()
+			}
+
+			dbType := engine.Dialect().URI().DBType
+			if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+				// wait for mysql/postgres to sync ...
+				time.Sleep(10 * time.Millisecond)
 			}
 		}
 }

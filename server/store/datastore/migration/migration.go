@@ -26,12 +26,29 @@ import (
 
 // APPEND NEW MIGRATIONS
 // they are executed in order and if one fail woodpecker try to rollback and quit
-var migrationTasks = []task{
-	legacy2Xorm,
-	alterTableReposDropFallback,
-	alterTableReposDropAllowDeploysAllowTags,
-	fixPRSecretEventName,
-	alterTableReposDropCounter,
+var migrationTasks = []*task{
+	&legacy2Xorm,
+	&alterTableReposDropFallback,
+	&alterTableReposDropAllowDeploysAllowTags,
+	&fixPRSecretEventName,
+	&alterTableReposDropCounter,
+}
+
+var allBeans = []interface{}{
+	new(model.Agent),
+	new(model.Build),
+	new(model.BuildConfig),
+	new(model.Config),
+	new(model.File),
+	new(model.Logs),
+	new(model.Perm),
+	new(model.Proc),
+	new(model.Registry),
+	new(model.Repo),
+	new(model.Secret),
+	new(model.Sender),
+	new(model.Task),
+	new(model.User),
 }
 
 type migrations struct {
@@ -39,8 +56,9 @@ type migrations struct {
 }
 
 type task struct {
-	name string
-	fn   func(sess *xorm.Session) error
+	name     string
+	required bool
+	fn       func(sess *xorm.Session) error
 }
 
 // initNew create tables for new instance
@@ -94,7 +112,7 @@ func Migrate(e *xorm.Engine) error {
 	return syncAll(e)
 }
 
-func runTasks(sess *xorm.Session, tasks []task) error {
+func runTasks(sess *xorm.Session, tasks []*task) error {
 	// cache migrations in db
 	migCache := make(map[string]bool)
 	var migList []*migrations
@@ -115,7 +133,11 @@ func runTasks(sess *xorm.Session, tasks []task) error {
 
 		if task.fn != nil {
 			if err := task.fn(sess); err != nil {
-				return err
+				if task.required {
+					return err
+				}
+				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
+				continue
 			}
 			log.Info().Msgf("migration task '%s' done", task.name)
 		} else {
@@ -135,22 +157,7 @@ type syncEngine interface {
 }
 
 func syncAll(sess syncEngine) error {
-	for _, bean := range []interface{}{
-		new(model.Agent),
-		new(model.Build),
-		new(model.BuildConfig),
-		new(model.Config),
-		new(model.File),
-		new(model.Logs),
-		new(model.Perm),
-		new(model.Proc),
-		new(model.Registry),
-		new(model.Repo),
-		new(model.Secret),
-		new(model.Sender),
-		new(model.Task),
-		new(model.User),
-	} {
+	for _, bean := range allBeans {
 		if err := sess.Sync2(bean); err != nil {
 			return fmt.Errorf("sync2 error '%s': %v", reflect.TypeOf(bean), err)
 		}
