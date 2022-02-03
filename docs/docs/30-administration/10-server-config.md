@@ -167,7 +167,7 @@ Configures the session expiration time.
 ### `WOODPECKER_ESCALATE`
 > Default: `plugins/docker,plugins/gcr,plugins/ecr,woodpeckerci/plugin-docker,woodpeckerci/plugin-docker-buildx`
 
-Docker images to run in privileged mode.
+Docker images to run in privileged mode. Only change if you are sure what you do!
 
 ### `WOODPECKER_VOLUME`
 > Default: empty
