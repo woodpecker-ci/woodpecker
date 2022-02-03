@@ -76,11 +76,6 @@ services:
 
 The following list describes all available server configuration options.
 
-### `WOODPECKER_DEBUG`
-> Default: `false`
-
-Enable server debug mode.
-
 ### `WOODPECKER_LOG_LEVEL`
 > Default: empty
 
@@ -122,15 +117,16 @@ Path to an SSL certificate key used by the server to accept HTTPS requests.
 
 Example: `WOODPECKER_SERVER_KEY=/path/to/key.pem`
 
+### `WOODPECKER_LETS_ENCRYPT`
+> Default: `false`
+
+Automatically generates an SSL certificate using Let's Encrypt, and configures the server to accept HTTPS requests.
+
 ### `WOODPECKER_GRPC_ADDR`
 > Default: `:9000`
 
 Configures the gRPC listener port.
 
-### `WOODPECKER_LETS_ENCRYPT`
-> Default: `false`
-
-Automatically generates an SSL certificate using Let's Encrypt, and configures the server to accept HTTPS requests.
 
 ### `WOODPECKER_ADMIN`
 > Default: empty
@@ -149,7 +145,7 @@ Example: `org1,org2`
 ### `WOODPECKER_REPO_OWNERS`
 > Default: empty
 
-Comma-separated list of syncable repo owners.
+Comma-separated list of syncable repo owners. ???
 
 Example: `user1,user2`
 
@@ -161,7 +157,7 @@ Enable to allow user registration.
 ### `WOODPECKER_DOCS`
 > Default: `https://woodpecker-ci.org/`
 
-Link to user documentation.
+Link to documentation in the UI.
 
 ### `WOODPECKER_SESSION_EXPIRES`
 > Default: `72h`
@@ -211,11 +207,6 @@ Server-side enforcement policy on the minimum amount of time a client should wai
 
 Example: `WOODPECKER_KEEPALIVE_MIN_TIME=10s`
 
-### `WOODPECKER_GATEKEEPER_ENDPOINT`
-> Default: empty
-
-TODO
-
 ### `WOODPECKER_DATABASE_DRIVER`
 > Default: `sqlite3`
 
@@ -227,20 +218,27 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 The database connection string. The default value is the path of the embedded sqlite database file.
 
 Example:
-```
-// MySQL
-// https://github.com/go-sql-driver/mysql#dsn-data-source-name
+```bash
+# MySQL
+# https://github.com/go-sql-driver/mysql#dsn-data-source-name
 WOODPECKER_DATABASE_DATASOURCE=root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
 
-// PostgreSQL
-// https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
+# PostgreSQL
+# https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
 WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?sslmode=disable
 ```
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 > Default: empty
 
-|Token to secure the Prometheus metrics endpoint.
+Token to secure the Prometheus metrics endpoint.
+
+### `WOODPECKER_STATUS_CONTEXT`
+> Default: `ci/woodpecker`
+
+Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
+
+---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`
 > Default: `0`
@@ -274,6 +272,8 @@ Comma-separated list to limit the specific CPUs or cores a pipeline container ca
 
 Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
+---
+
 ### `WOODPECKER_GITHUB`
 > Default: `false`
 
@@ -283,11 +283,6 @@ Enables the GitHub driver.
 > Default: `https://github.com`
 
 Configures the GitHub server address.
-
-### `WOODPECKER_GITHUB_CONTEXT`
-> Default: `continuous-integration/woodpecker`
-
-TODO
 
 ### `WOODPECKER_GITHUB_CLIENT`
 > Default: empty
@@ -299,28 +294,8 @@ Configures the GitHub OAuth client id. This is used to authorize access.
 
 Configures the GitHub OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_GITHUB_SCOPE`
-> Default: `repo, repo:status, user:email, read:org`
-
-Comma-separated list of OAuth scopes.
-
-### `WOODPECKER_GITHUB_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GITHUB_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
 ### `WOODPECKER_GITHUB_MERGE_REF`
 > Default: `true`
-
-TODO
-
-### `WOODPECKER_GITHUB_PRIVATE_MODE`
-> Default: `false`
 
 TODO
 
@@ -328,6 +303,8 @@ TODO
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+---
 
 ### `WOODPECKER_GOGS`
 > Default: `false`
@@ -359,6 +336,8 @@ TODO
 
 Configure if SSL verification should be skipped.
 
+---
+
 ### `WOODPECKER_GITEA`
 > Default: `false`
 
@@ -379,30 +358,12 @@ Configures the Gitea OAuth client id. This is used to authorize access.
 
 Configures the Gitea OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_GITEA_CONTEXT`
-> Default: `continuous-integration/woodpecker`
-
-TODO
-
-### `WOODPECKER_GITEA_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GITEA_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GITEA_PRIVATE_MODE`
-> Default: `false`
-
-TODO
-
 ### `WOODPECKER_GITEA_SKIP_VERIFY`
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+---
 
 ### `WOODPECKER_BITBUCKET`
 > Default: `false`
@@ -418,6 +379,8 @@ Configures the Bitbucket OAuth client id. This is used to authorize access.
 > Default: empty
 
 Configures the Bitbucket OAuth client secret. This is used to authorize access.
+
+---
 
 ### `WOODPECKER_GITLAB`
 > Default: `false`
@@ -439,25 +402,12 @@ Configures the GitLab OAuth client id. This is used to authorize access.
 
 Configures the GitLab OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_GITLAB_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GITLAB_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
 ### `WOODPECKER_GITLAB_SKIP_VERIFY`
 > Default: `false`
 
 Configure if SSL verification should be skipped.
 
-### `WOODPECKER_GITLAB_PRIVATE_MODE`
-> Default: `false`
-
-TODO
+---
 
 ### `WOODPECKER_STASH`
 > Default: `false`
@@ -498,6 +448,8 @@ The password is used to authenticate and clone all private repositories.
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+---
 
 ### `WOODPECKER_CODING`
 > Default: `false`
