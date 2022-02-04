@@ -9,9 +9,9 @@
     "build": "tsc && tsc -p tsconfig.jsx.json"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.0.0-beta.13",
-    "@docusaurus/theme-classic": "^2.0.0-beta.13",
-    "@docusaurus/types": "^2.0.0-beta.13",
+    "@docusaurus/module-type-aliases": "^2.0.0-beta.15",
+    "@docusaurus/theme-classic": "^2.0.0-beta.15",
+    "@docusaurus/types": "^2.0.0-beta.15",
     "@octokit/openapi-types": "^11.2.0",
     "@octokit/rest": "^18.12.0",
     "@tsconfig/docusaurus": "^1.0.4",
