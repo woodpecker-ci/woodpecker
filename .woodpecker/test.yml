@@ -104,6 +104,15 @@ pipeline:
         - datastore-coverage.out
       token:
         from_secret: codecov_token
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
 services:
   service-postgres:
