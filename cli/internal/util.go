@@ -75,7 +75,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
-	var parts = strings.Split(str, "/")
+	parts := strings.Split(str, "/")
 	if len(parts) != 2 {
 		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
 		return

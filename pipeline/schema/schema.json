@@ -185,6 +185,19 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "repo": {
+          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/conditional-execution#repo",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
+            },
+            { "type": "string" }
+          ]
+        },
         "branch": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
           "type": "string"
@@ -247,6 +260,12 @@
           "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
           "oneOf": [
             { "type": "string" },
+            {
+              "type" :"array",
+              "items": {
+                "type": "string"
+              }
+            },
             {
               "type": "object",
               "properties": {

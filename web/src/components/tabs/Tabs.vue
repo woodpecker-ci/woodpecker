@@ -1,18 +1,20 @@
 <template>
   <div class="flex flex-col">
-    <div class="flex w-full pt-4 mb-4">
+    <div class="flex w-full md:pt-4 flex-wrap">
       <div
         v-for="tab in tabs"
         :key="tab.id"
         class="
+          w-full
+          py-2
+          md:w-auto md:pt-0 md:pb-2 md:px-8
           flex
           cursor-pointer
-          pb-2
-          px-8
-          border-b-2
+          md:border-b-2
           text-gray-500
           hover:text-gray-700
           dark:text-gray-500 dark:hover:text-gray-400
+          items-center
         "
         :class="{
           'border-gray-400 dark:border-gray-600': activeTab === tab.id,
@@ -20,6 +22,8 @@
         }"
         @click="selectTab(tab)"
       >
+        <Icon v-if="activeTab === tab.id" name="chevron-right" class="md:hidden" />
+        <Icon v-else name="blank" class="md:hidden" />
         <span>{{ tab.title }}</span>
       </div>
     </div>
@@ -34,11 +38,13 @@
 import { computed, defineComponent, onMounted, provide, ref, toRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import Icon from '~/components/atomic/Icon.vue';
+
 import { Tab } from './types';
 
 export default defineComponent({
   name: 'Tabs',
-
+  components: { Icon },
   props: {
     // used by toRef
     // eslint-disable-next-line vue/no-unused-properties
@@ -62,7 +68,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const router = useRouter();
     const route = useRoute();
-
     const disableHashMode = toRef(props, 'disableHashMode');
     const modelValue = toRef(props, 'modelValue');
     const tabs = ref<Tab[]>([]);
@@ -72,35 +77,28 @@ export default defineComponent({
       'active-tab',
       computed(() => activeTab.value),
     );
-
     async function selectTab(tab: Tab) {
       if (tab.id === undefined) {
         return;
       }
-
       activeTab.value = tab.id;
       emit('update:modelValue', activeTab.value);
-
       if (!disableHashMode.value) {
         await router.replace({ params: route.params, hash: `#${tab.id}` });
       }
     }
-
     onMounted(() => {
       if (modelValue.value) {
         activeTab.value = modelValue.value;
         return;
       }
-
       const hashTab = route.hash.replace(/^#/, '');
       if (hashTab) {
         activeTab.value = hashTab;
         return;
       }
-
       activeTab.value = tabs.value[0].id;
     });
-
     return { tabs, activeTab, selectTab };
   },
 });

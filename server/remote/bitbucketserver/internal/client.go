@@ -105,7 +105,7 @@ func (c *Client) FindCurrentUser() (*User, error) {
 	return &user, nil
 }
 
-func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
+func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	urlString := fmt.Sprintf(pathRepo, c.base, owner, name)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -130,7 +130,7 @@ func (c *Client) FindRepos() ([]*Repo, error) {
 	return c.paginatedRepos(0)
 }
 
-func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
+func (c *Client) FindRepoPerms(owner, repo string) (*model.Perm, error) {
 	perms := new(model.Perm)
 	// If you don't have access return none right away
 	_, err := c.FindRepo(owner, repo)
@@ -150,7 +150,7 @@ func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
 	return perms, nil
 }
 
-func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref string) ([]byte, error) {
+func (c *Client) FindFileForRepo(owner, repo, fileName, ref string) ([]byte, error) {
 	response, err := c.doGet(fmt.Sprintf(pathSource, c.base, owner, repo, fileName, ref))
 	if response != nil {
 		defer response.Body.Close()
@@ -168,7 +168,7 @@ func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref
 	return responseBytes, nil
 }
 
-func (c *Client) CreateHook(owner string, name string, callBackLink string) error {
+func (c *Client) CreateHook(owner, name, callBackLink string) error {
 	hookDetails, err := c.GetHookDetails(owner, name)
 	if err != nil {
 		return err
@@ -198,7 +198,7 @@ func (c *Client) CreateStatus(revision string, status *BuildStatus) error {
 	return c.doPost(uri, status)
 }
 
-func (c *Client) DeleteHook(owner string, name string, link string) error {
+func (c *Client) DeleteHook(owner, name, link string) error {
 	hookSettings, err := c.GetHooks(owner, name)
 	if err != nil {
 		return err
@@ -214,7 +214,7 @@ func (c *Client) DeleteHook(owner string, name string, link string) error {
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
-func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, error) {
+func (c *Client) GetHookDetails(owner, name string) (*HookPluginDetails, error) {
 	urlString := fmt.Sprintf(pathHookDetails, c.base, owner, name, hookName)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -229,7 +229,7 @@ func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, 
 	return &hookDetails, err
 }
 
-func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
+func (c *Client) GetHooks(owner, name string) (*HookSettings, error) {
 	urlString := fmt.Sprintf(pathHookSettings, c.base, owner, name, hookName)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -244,9 +244,9 @@ func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
 	return &hookSettings, err
 }
 
-//TODO: make these as as general do with the action
+// TODO: make these as as general do with the action
 
-//Helper function to help create get
+// Helper function to help create get
 func (c *Client) doGet(url string) (*http.Response, error) {
 	request, err := http.NewRequestWithContext(c.ctx, "GET", url, nil)
 	if err != nil {
@@ -256,7 +256,7 @@ func (c *Client) doGet(url string) (*http.Response, error) {
 	return c.client.Do(request)
 }
 
-//Helper function to help create the hook
+// Helper function to help create the hook
 func (c *Client) doPut(url string, body []byte) error {
 	request, err := http.NewRequestWithContext(c.ctx, "PUT", url, bytes.NewBuffer(body))
 	if err != nil {
@@ -273,7 +273,7 @@ func (c *Client) doPut(url string, body []byte) error {
 	return nil
 }
 
-//Helper function to help create the hook
+// Helper function to help create the hook
 func (c *Client) doPost(url string, status *BuildStatus) error {
 	// write it to the body of the request.
 	var buf io.ReadWriter
@@ -296,7 +296,7 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 	return err
 }
 
-//Helper function to get repos paginated
+// Helper function to get repos paginated
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
 	requestURL := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
@@ -332,7 +332,7 @@ func filter(vs []string, f func(string) bool) []string {
 	return vsf
 }
 
-//TODO: find a clean way of doing these next two methods- bitbucket server hooks only support 20 cb hooks
+// TODO: find a clean way of doing these next two methods- bitbucket server hooks only support 20 cb hooks
 func arrayToHookSettings(hooks []string) HookSettings {
 	hookSettings := HookSettings{}
 	for loc, value := range hooks {
@@ -378,7 +378,7 @@ func arrayToHookSettings(hooks []string) HookSettings {
 		case 19:
 			hookSettings.HookURL19 = value
 
-			//Since there's only 19 hooks it will add to the latest if it doesn't exist :/
+			// Since there's only 19 hooks it will add to the latest if it doesn't exist :/
 		default:
 			hookSettings.HookURL19 = value
 		}

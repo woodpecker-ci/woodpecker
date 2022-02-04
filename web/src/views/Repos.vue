@@ -1,9 +1,9 @@
 <template>
   <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b pb-4 mb-4 items-center dark:border-dark-200">
+    <div class="flex flex-row flex-wrap border-b pb-4 mb-4 items-center dark:border-dark-200">
       <h1 class="text-xl text-gray-500">Repositories</h1>
-      <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
-      <Button class="ml-auto" :to="{ name: 'repo-add' }" start-icon="plus" text="Add repository" />
+      <TextField v-model="search" class="w-auto md:ml-auto" placeholder="Search ..." />
+      <Button class="md:ml-auto" :to="{ name: 'repo-add' }" start-icon="plus" text="Add repository" />
     </div>
 
     <div class="space-y-4">

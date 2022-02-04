@@ -1,6 +1,7 @@
 ### IDEs ###
 .idea/
 .vscode/*
+!.vscode/settings.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
@@ -41,3 +42,7 @@ server/swagger/files/*.json
 server/swagger/swagger_gen.go
 
 docs/venv
+
+# helm charts
+.cr-index/
+.cr-release-packages/

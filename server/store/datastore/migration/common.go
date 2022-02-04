@@ -212,8 +212,10 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 	return nil
 }
 
-var whitespaces = regexp.MustCompile(`\s+`)
-var columnSeparator = regexp.MustCompile(`\s?,\s?`)
+var (
+	whitespaces     = regexp.MustCompile(`\s+`)
+	columnSeparator = regexp.MustCompile(`\s?,\s?`)
+)
 
 func removeColumnFromSQLITETableSchema(schema string, names ...string) string {
 	if len(names) == 0 {

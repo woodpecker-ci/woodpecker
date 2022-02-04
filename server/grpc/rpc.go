@@ -321,6 +321,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
+	log.Trace().
+		Str("repo_id", fmt.Sprint(repo.ID)).
+		Str("build_id", fmt.Sprint(build.ID)).
+		Str("proc_id", id).
+		Msgf("gRPC Done with state: %#v", state)
+
 	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
@@ -341,19 +347,13 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	}
 	s.completeChildrenIfParentCompleted(procs, proc)
 
-	if !isThereRunningStage(procs) {
-		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
+	if !model.IsThereRunningStage(procs) {
+		if build, err = shared.UpdateStatusToDone(s.store, *build, model.BuildStatus(procs), proc.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", build.ID)
 		}
-
-		if !isMultiPipeline(procs) {
-			s.updateRemoteStatus(c, repo, build, nil)
-		}
 	}
 
-	if isMultiPipeline(procs) {
-		s.updateRemoteStatus(c, repo, build, proc)
-	}
+	s.updateRemoteStatus(c, repo, build, proc)
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
@@ -367,21 +367,11 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.buildCount.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Inc()
 		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Set(float64(build.Finished - build.Started))
 	}
-	if isMultiPipeline(procs) {
+	if model.IsMultiPipeline(procs) {
 		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(proc.State), proc.Name).Set(float64(proc.Stopped - proc.Started))
 	}
 
 	return nil
-}
-
-func isMultiPipeline(procs []*model.Proc) bool {
-	countPPIDZero := 0
-	for _, proc := range procs {
-		if proc.PPID == 0 {
-			countPPIDZero++
-		}
-	}
-	return countPPIDZero > 1
 }
 
 // Log implements the rpc.Log function
@@ -404,48 +394,29 @@ func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedPr
 	}
 }
 
-func isThereRunningStage(procs []*model.Proc) bool {
-	for _, p := range procs {
-		if p.PPID == 0 {
-			if p.Running() {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func buildStatus(procs []*model.Proc) model.StatusValue {
-	status := model.StatusSuccess
-
-	for _, p := range procs {
-		if p.PPID == 0 {
-			if p.Failing() {
-				status = p.State
-			}
-		}
-	}
-
-	return status
-}
-
 func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
-	if err == nil {
-		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, err := refresher.Refresh(ctx, user)
-			if err != nil {
-				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-			} else if ok {
-				if err := s.store.UpdateUser(user); err != nil {
-					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-				}
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		return
+	}
+
+	if refresher, ok := s.remote.(remote.Refresher); ok {
+		ok, err := refresher.Refresh(ctx, user)
+		if err != nil {
+			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+		} else if ok {
+			if err := s.store.UpdateUser(user); err != nil {
+				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = s.remote.Status(ctx, user, repo, build, uri, proc)
+	}
+
+	// only do status updates for parent procs
+	if proc != nil && proc.IsParent() {
+		err = s.remote.Status(ctx, user, repo, build, proc)
 		if err != nil {
-			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
 		}
 	}
 }

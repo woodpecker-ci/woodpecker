@@ -79,6 +79,15 @@ pipeline:
     when:
       path: "folder/**"
 
+  when-path-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      path:
+        - "folder/**"
+        - "**/*.c"
+
   when-path-include-exclude:
     image: alpine
     commands:
@@ -88,3 +97,10 @@ pipeline:
         include: [ '.woodpecker/*.yml', '*.ini' ]
         exclude: [ '*.md', 'docs/**' ]
         ignore_message: "[ALL]"
+
+  when-repo:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      repo: test/test

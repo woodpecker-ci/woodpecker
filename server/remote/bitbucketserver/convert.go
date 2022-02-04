@@ -34,13 +34,6 @@ const (
 	statusFailure = "FAILED"
 )
 
-const (
-	descPending = "this build is pending"
-	descSuccess = "the build was successful"
-	descFailure = "the build failed"
-	descError   = "oops, something went wrong"
-)
-
 // convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
 func convertStatus(status model.StatusValue) string {
@@ -51,21 +44,6 @@ func convertStatus(status model.StatusValue) string {
 		return statusSuccess
 	default:
 		return statusFailure
-	}
-}
-
-// convertDesc is a helper function used to convert a Woodpecker status to a
-// Bitbucket status description.
-func convertDesc(status model.StatusValue) string {
-	switch status {
-	case model.StatusPending, model.StatusRunning:
-		return descPending
-	case model.StatusSuccess:
-		return descSuccess
-	case model.StatusFailure:
-		return descFailure
-	default:
-		return descError
 	}
 }
 
@@ -110,7 +88,7 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
 		"refs/tags/",
 	)
 
-	//Ensuring the author label is not longer then 40 for the label of the commit author (default size in the db)
+	// Ensuring the author label is not longer then 40 for the label of the commit author (default size in the db)
 	authorLabel := hook.Changesets.Values[0].ToCommit.Author.Name
 	if len(authorLabel) > 40 {
 		authorLabel = authorLabel[0:37] + "..."
@@ -119,7 +97,7 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
 	build := &model.Build{
 		Commit:    hook.RefChanges[0].ToHash, // TODO check for index value
 		Branch:    branch,
-		Message:   hook.Changesets.Values[0].ToCommit.Message, //TODO check for index Values
+		Message:   hook.Changesets.Values[0].ToCommit.Message, // TODO check for index Values
 		Avatar:    avatarLink(hook.Changesets.Values[0].ToCommit.Author.EmailAddress),
 		Author:    authorLabel,
 		Email:     hook.Changesets.Values[0].ToCommit.Author.EmailAddress,

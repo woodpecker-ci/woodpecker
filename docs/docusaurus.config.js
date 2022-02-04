@@ -26,7 +26,7 @@ module.exports = {
       items: [
         {
           to: 'docs/intro',
-          activeBaseRegex: 'docs/(?!migrations)',
+          activeBaseRegex: 'docs/(?!migrations|awesome)',
           position: 'left',
           label: 'Docs',
         },
@@ -45,6 +45,12 @@ module.exports = {
           to: '/faq',
           position: 'left',
           label: 'FAQ',
+        },
+        {
+          to: 'docs/awesome',
+          activeBaseRegex: 'docs/awesome',
+          position: 'left',
+          label: 'Awesome',
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -85,6 +91,10 @@ module.exports = {
             {
               label: 'Discord',
               href: 'https://discord.gg/fcMQqSMXJy',
+            },
+            {
+              label: 'Matrix',
+              href: 'https://matrix.to/#/#woodpecker:matrix.org',
             },
             {
               label: 'Mastodon',

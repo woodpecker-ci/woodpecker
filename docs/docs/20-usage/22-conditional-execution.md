@@ -1,8 +1,20 @@
 # Conditional Step Execution
 
-Woodpecker supports defining conditional pipeline steps in the `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
+Woodpecker supports defining conditions for pipeline step by a `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
 
-This can also be utilised on a playbook level if you have multi-arch agents and require specific pipelines to be run on specific architectures. See [platform](#platform) below.
+## `repo`
+
+Example conditional execution by repository:
+
+```diff
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      repo: test/test
+```
 
 ## `branch`
 
@@ -145,7 +157,11 @@ when:
 
 ## `path`
 
-> NOTE: This feature is currently only available for GitHub and Gitea repositories.
+:::info
+This feature is currently only available for GitHub, GitLab and Gitea.
+Pull requests aren't supported by gitea at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).  
+Path conditions are ignored for tag events.
+:::
 
 Execute a step only on a pipeline with certain files being changed:
 

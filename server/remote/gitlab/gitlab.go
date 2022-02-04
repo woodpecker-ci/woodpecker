@@ -24,18 +24,21 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
-	defaultScope  = "api"
-	perPage       = 100
-	statusContext = "ci/drone"
+	defaultScope = "api"
+	perPage      = 100
 )
 
 // Opts defines configuration options.
@@ -43,9 +46,6 @@ type Opts struct {
 	URL          string // Gitlab server url.
 	ClientID     string // Oauth2 client id.
 	ClientSecret string // Oauth2 client secret.
-	Username     string // Optional machine account username.
-	Password     string // Optional machine account password.
-	PrivateMode  bool   // Gogs is running in private mode.
 	SkipVerify   bool   // Skip ssl verification.
 }
 
@@ -55,9 +55,6 @@ type Gitlab struct {
 	ClientID     string
 	ClientSecret string
 	Machine      string
-	Username     string
-	Password     string
-	PrivateMode  bool
 	SkipVerify   bool
 	HideArchives bool
 	Search       bool
@@ -79,9 +76,6 @@ func New(opts Opts) (remote.Remote, error) {
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		Machine:      u.Host,
-		Username:     opts.Username,
-		Password:     opts.Password,
-		PrivateMode:  opts.PrivateMode,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -89,7 +83,7 @@ func New(opts Opts) (remote.Remote, error) {
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	var config = &oauth2.Config{
+	config := &oauth2.Config{
 		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
@@ -108,17 +102,21 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	// get the OAuth code
-	var code = req.FormValue("code")
+	code := req.FormValue("code")
 	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("drone"), http.StatusSeeOther)
+		authCodeURL, err := config.AuthCodeURL("drone")
+		if err != nil {
+			return nil, fmt.Errorf("authCodeURL error: %v", err)
+		}
+		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
 		return nil, nil
 	}
 
-	var trans = &oauth2.Transport{Config: config, Transport: &http.Transport{
+	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
 		Proxy:           http.ProxyFromEnvironment,
 	}}
-	var token, err = trans.Exchange(code)
+	token, err := trans.Exchange(code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -249,6 +247,13 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 			if err != nil {
 				return nil, err
 			}
+
+			// TODO(648) remove when woodpecker understands nested repos
+			if strings.Count(repo.FullName, "/") > 1 {
+				log.Debug().Msgf("Skipping nested repository %s for user %s, because they are not supported, yet (see #648).", repo.FullName, user.Login)
+				continue
+			}
+
 			repos = append(repos, repo)
 		}
 
@@ -261,12 +266,12 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 }
 
 // Perm fetches the named repository from the remote system.
-func (g *Gitlab) Perm(ctx context.Context, user *model.User, owner, name string) (*model.Perm, error) {
+func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
-	repo, err := g.getProject(ctx, client, owner, name)
+	repo, err := g.getProject(ctx, client, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +352,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 }
 
 // Status sends the commit status back to gitlab.
-func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, link string, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -359,12 +364,11 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
-		Ref:         gitlab.String(strings.ReplaceAll(build.Ref, "refs/heads/", "")),
-		State:       getStatus(build.Status),
-		Description: gitlab.String(getDesc(build.Status)),
-		TargetURL:   &link,
-		Name:        nil,
-		Context:     gitlab.String(statusContext),
+		State:       getStatus(proc.State),
+		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
+		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
+		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		PipelineID:  gitlab.Int(int(build.Number)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -374,21 +378,22 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 // cloning Gitlab repositories. The netrc will use the global machine account
 // when configured.
 func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if g.Password != "" {
-		return &model.Netrc{
-			Login:    g.Username,
-			Password: g.Password,
-			Machine:  g.Machine,
-		}, nil
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = "oauth2"
+		token = u.Token
 	}
+
 	return &model.Netrc{
-		Login:    "oauth2",
-		Password: u.Token,
+		Login:    login,
+		Password: token,
 		Machine:  g.Machine,
 	}, nil
 }
 
-func (g *Gitlab) getTokenAndWebURL(link string) (token string, webURL string, err error) {
+func (g *Gitlab) getTokenAndWebURL(link string) (token, webURL string, err error) {
 	uri, err := url.Parse(link)
 	if err != nil {
 		return "", "", err
@@ -513,7 +518,7 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
+func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
 	payload, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -527,12 +532,62 @@ func (g *Gitlab) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		return convertMergeRequestHock(event, req)
+		mergeIID, repo, build, err := convertMergeRequestHook(event, req)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build, mergeIID); err != nil {
+			return nil, nil, err
+		}
+
+		return repo, build, nil
 	case *gitlab.PushEvent:
-		return convertPushHock(event)
+		return convertPushHook(event)
 	case *gitlab.TagEvent:
-		return convertTagHock(event)
+		return convertTagHook(event)
 	default:
 		return nil, nil, nil
 	}
+}
+
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return build, nil
+	}
+
+	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, mergeIID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]string, 0, len(changes.Changes)*2)
+	for _, file := range changes.Changes {
+		files = append(files, file.NewPath, file.OldPath)
+	}
+	build.ChangedFiles = utils.DedupStrings(files)
+
+	return build, nil
 }

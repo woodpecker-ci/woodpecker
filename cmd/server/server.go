@@ -60,13 +60,8 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.Bool("debug") {
-		log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -226,7 +221,7 @@ func run(c *cli.Context) error {
 	}
 
 	dir := cacheDir()
-	if err := os.MkdirAll(dir, 0700); err != nil {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
 
@@ -256,7 +251,6 @@ func run(c *cli.Context) error {
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// storage
 	server.Config.Storage.Files = v
-	server.Config.Storage.Config = v
 
 	// remote
 	server.Config.Services.Remote = r
@@ -297,6 +291,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
+	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")

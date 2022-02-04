@@ -50,16 +50,19 @@ lint-frontend:
 	(cd web/; yarn lint --quiet)
 
 test-agent:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
+	go test -race -cover -coverprofile agent-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
 test-server:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
+	go test -race -cover -coverprofile server-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
 test-cli:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
+	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore:
-	go test -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+
+test-server-datastore-coverage:
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-frontend: frontend-dependencies
 	(cd web/; yarn run lint)
@@ -128,7 +131,7 @@ release-cli:
 
 release-checksums:
 	# generate shas for tar files
-	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
+	(cd dist/; sha256sum *.* > checksums.txt)
 
 release: release-frontend release-server release-agent release-cli
 

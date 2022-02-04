@@ -7,9 +7,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-var (
-	engines map[string]types.Engine
-)
+var engines map[string]types.Engine
 
 func init() {
 	engines = make(map[string]types.Engine)
@@ -32,7 +30,7 @@ func FindEngine(engineName string) (types.Engine, error) {
 			}
 		}
 
-		return nil, fmt.Errorf("Can't detect an avivable backend engine")
+		return nil, fmt.Errorf("Can't detect an available backend engine")
 	}
 
 	engine, ok := engines[engineName]

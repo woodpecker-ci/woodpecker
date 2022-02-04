@@ -4,9 +4,11 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	// blank imports to register the sql drivers
 	_ "github.com/go-sql-driver/mysql"
@@ -36,7 +38,7 @@ func createSQLiteDB(t *testing.T) string {
 		t.FailNow()
 	}
 
-	if !assert.NoError(t, ioutil.WriteFile(tmpF.Name(), dbF, 0644)) {
+	if !assert.NoError(t, ioutil.WriteFile(tmpF.Name(), dbF, 0o644)) {
 		t.FailNow()
 	}
 	return tmpF.Name()
@@ -79,10 +81,21 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 }
 
 func TestMigrate(t *testing.T) {
+	// make all tasks required for tests
+	for _, task := range migrationTasks {
+		task.required = true
+	}
+
 	// init new db
 	engine, close := testDB(t, true)
 	assert.NoError(t, Migrate(engine))
 	close()
+
+	dbType := engine.Dialect().URI().DBType
+	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+		// wait for mysql/postgres to sync ...
+		time.Sleep(100 * time.Millisecond)
+	}
 
 	// migrate old db
 	engine, close = testDB(t, false)

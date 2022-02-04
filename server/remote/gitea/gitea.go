@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -43,26 +44,18 @@ const (
 
 type Gitea struct {
 	URL          string
-	Context      string
 	Machine      string
 	ClientID     string
 	ClientSecret string
-	Username     string
-	Password     string
-	PrivateMode  bool
 	SkipVerify   bool
 }
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Gitea server url.
-	Context     string // Context to display in status check
-	Client      string // OAuth2 Client ID
-	Secret      string // OAuth2 Client Secret
-	Username    string // Optional machine account username.
-	Password    string // Optional machine account password.
-	PrivateMode bool   // Gitea is running in private mode.
-	SkipVerify  bool   // Skip ssl verification.
+	URL        string // Gitea server url.
+	Client     string // OAuth2 Client ID
+	Secret     string // OAuth2 Client Secret
+	SkipVerify bool   // Skip ssl verification.
 }
 
 // New returns a Remote implementation that integrates with Gitea,
@@ -78,13 +71,9 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:          opts.URL,
-		Context:      opts.Context,
 		Machine:      u.Host,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
-		Username:     opts.Username,
-		Password:     opts.Password,
-		PrivateMode:  opts.PrivateMode,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -232,10 +221,7 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*m
 	if err != nil {
 		return nil, err
 	}
-	if c.PrivateMode {
-		repo.Private = true
-	}
-	return toRepo(repo, c.PrivateMode), nil
+	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gitea account, including
@@ -249,7 +235,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 	}
 
 	// Gitea SDK forces us to read repo list paginated.
-	var page = 1
+	page := 1
 	for {
 		all, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
@@ -264,7 +250,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		}
 
 		for _, repo := range all {
-			repos = append(repos, toRepo(repo, c.PrivateMode))
+			repos = append(repos, toRepo(repo))
 		}
 
 		if len(all) < perPage {
@@ -278,13 +264,13 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 }
 
 // Perm returns the user permissions for the named Gitea repository.
-func (c *Gitea) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, _, err := client.GetRepo(owner, name)
+	repo, _, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -337,27 +323,23 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	client, err := c.newClientToken(ctx, u.Token)
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
 	}
 
-	status := getStatus(b.Status)
-	desc := getDesc(b.Status)
-
 	_, _, err = client.CreateStatus(
-		r.Owner,
-		r.Name,
-		b.Commit,
+		repo.Owner,
+		repo.Name,
+		build.Commit,
 		gitea.CreateStatusOption{
-			State:       status,
-			TargetURL:   link,
-			Description: desc,
-			Context:     c.Context,
+			State:       getStatus(proc.State),
+			TargetURL:   common.GetBuildStatusLink(repo, build, proc),
+			Description: common.GetBuildStatusDescription(proc.State),
+			Context:     common.GetBuildStatusContext(repo, build, proc),
 		},
 	)
-
 	return err
 }
 
@@ -365,16 +347,17 @@ func (c *Gitea) Status(ctx context.Context, u *model.User, r *model.Repo, b *mod
 // cloning Gitea repositories. The netrc will use the global machine account
 // when configured.
 func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	if c.Password != "" {
-		return &model.Netrc{
-			Login:    c.Username,
-			Password: c.Password,
-			Machine:  c.Machine,
-		}, nil
+	login := ""
+	token := ""
+
+	if u != nil {
+		login = u.Login
+		token = u.Token
 	}
+
 	return &model.Netrc{
-		Login:    u.Login,
-		Password: u.Token,
+		Login:    login,
+		Password: token,
 		Machine:  c.Machine,
 	}, nil
 }
@@ -445,7 +428,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 
@@ -459,16 +442,6 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 	}
 	return gitea.NewClient(c.URL, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
 }
-
-const (
-	DescPending  = "the build is pending"
-	DescRunning  = "the build is running"
-	DescSuccess  = "the build was successful"
-	DescFailure  = "the build failed"
-	DescCanceled = "the build canceled"
-	DescBlocked  = "the build is pending approval"
-	DescDeclined = "the build was rejected"
-)
 
 // getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
@@ -488,28 +461,5 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 		return gitea.StatusWarning
 	default:
 		return gitea.StatusFailure
-	}
-}
-
-// getDesc is a helper function that generates a description
-// message for the build based on the status.
-func getDesc(status model.StatusValue) string {
-	switch status {
-	case model.StatusPending:
-		return DescPending
-	case model.StatusRunning:
-		return DescRunning
-	case model.StatusSuccess:
-		return DescSuccess
-	case model.StatusFailure, model.StatusError:
-		return DescFailure
-	case model.StatusKilled:
-		return DescCanceled
-	case model.StatusBlocked:
-		return DescBlocked
-	case model.StatusDeclined:
-		return DescDeclined
-	default:
-		return DescFailure
 	}
 }

@@ -54,7 +54,7 @@ func Config(c *gin.Context) {
 	}
 
 	// default func map with json parser.
-	var funcMap = template.FuncMap{
+	funcMap := template.FuncMap{
 		"json": func(v interface{}) string {
 			a, _ := json.Marshal(v)
 			return string(a)

@@ -43,9 +43,8 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Config model.ConfigStore
-		Files  model.FileStore
-		Procs  model.ProcStore
+		Files model.FileStore
+		Procs model.ProcStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
 	}
@@ -57,6 +56,7 @@ var Config = struct {
 		Port           string
 		Pass           string
 		Docs           string
+		StatusContext  string
 		SessionExpires time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
