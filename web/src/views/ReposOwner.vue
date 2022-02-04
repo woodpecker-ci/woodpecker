@@ -5,7 +5,7 @@
       <TextField v-model="search" class="w-auto md:ml-auto md:mr-auto" placeholder="Search ..." />
     </div>
 
-    <div>
+    <div class="space-y-4">
       <ListItem
         v-for="repo in searchedRepos"
         :key="repo.id"
