@@ -296,7 +296,7 @@ See [Bitbucket configuration](vcs/bitbucket/#configuration)
 
 ### `WOODPECKER_STASH_...`
 
-See [Bitbucket server configuration](vcs/bitbucket-server/#configuration)
+See [Bitbucket server configuration](vcs/bitbucket_server/#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
