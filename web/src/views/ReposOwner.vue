@@ -48,6 +48,7 @@ export default defineComponent({
 
   setup(props) {
     const repoStore = RepoStore();
+    // TODO: filter server side
     const repos = computed(() => Object.values(repoStore.repos).filter((v) => v.owner === props.repoOwner));
     const search = ref('');
 
