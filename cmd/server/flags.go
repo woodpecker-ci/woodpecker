@@ -60,16 +60,16 @@ var flags = []cli.Flag{
 		Name:    "server-key",
 		Usage:   "server ssl key path",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
+		Name:    "lets-encrypt",
+		Usage:   "enable let's encrypt",
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_GRPC_ADDR"},
 		Name:    "grpc-addr",
 		Usage:   "grpc address",
 		Value:   ":9000",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
-		Name:    "lets-encrypt",
-		Usage:   "enable let's encrypt",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
@@ -130,6 +130,11 @@ var flags = []cli.Flag{
 		Name:    "agent-secret",
 		Usage:   "server-agent shared password",
 	},
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
+		Name:    "keepalive-min-time",
+		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},
 		Name:    "secret-service",
@@ -162,6 +167,12 @@ var flags = []cli.Flag{
 		Name:    "prometheus-auth-token",
 		Usage:   "token to secure prometheus metrics endpoint",
 		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
+		Name:    "status-context",
+		Usage:   "status context prefix",
+		Value:   "ci/woodpecker",
 	},
 	//
 	// resource limit parameters
@@ -199,12 +210,6 @@ var flags = []cli.Flag{
 	//
 	// Github
 	//
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
-		Name:    "status-context",
-		Usage:   "status context prefix",
-		Value:   "ci/woodpecker",
-	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",
@@ -444,11 +449,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_CODING_SKIP_VERIFY"},
 		Name:    "coding-skip-verify",
 		Usage:   "coding skip ssl verification",
-	},
-	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
-		Name:    "keepalive-min-time",
-		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	//
 	// development flags
