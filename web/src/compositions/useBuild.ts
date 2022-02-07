@@ -97,9 +97,7 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  const started = computed(() => {
-    return new Date(sinceRaw.value).toISOString();
-  });
+  const started = computed(() => new Date(sinceRaw.value).toISOString());
 
   return { since, duration, message, prettyRef, started };
 };
