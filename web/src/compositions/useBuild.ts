@@ -97,7 +97,7 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  const started = computed(() => new Date(sinceRaw.value).toISOString());
-
+  // sv-SE is in format YYYY-MM-DD HH:m:s
+  const started = computed(() => new Date(sinceRaw.value).toLocaleString('sv-SE'));
   return { since, duration, message, prettyRef, started };
 };
