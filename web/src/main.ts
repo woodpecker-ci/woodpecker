@@ -16,6 +16,7 @@ const app = createApp(App);
 app.use(router);
 app.use(notifications);
 app.use(FloatingVue);
+app.directive('tooltip', FloatingVue.VTooltip);
 app.use(createPinia());
 app.mount('#app');
 
