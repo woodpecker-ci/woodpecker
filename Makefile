@@ -8,7 +8,12 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   .ONESHELL:
   in_docker:
 	docker build -f ./docker/Dockerfile.make -t woodpecker/make:local .
-	docker run -it -v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
+	docker run -it \
+		-e CI_COMMIT_SHA=$(CI_COMMIT_SHA)
+		-e GO_PACKAGES=$(GO_PACKAGES)
+		-e TARGETOS=$(TARGETOS)
+		-e TARGETARCH=$(TARGETARCH)
+		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
 # Proceed with normal make
