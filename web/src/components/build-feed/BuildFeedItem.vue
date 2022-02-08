@@ -7,7 +7,10 @@
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
-          <span v-tooltip="'Started at ' + started">{{ since }}</span>
+          <Tooltip>
+            <span>{{ since }}</span>
+            <template #popper><span class="font-bold">Started</span> {{ started }}</template>
+          </Tooltip>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="duration" />
@@ -19,6 +22,7 @@
 </template>
 
 <script lang="ts">
+import { Tooltip } from 'floating-vue';
 import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -29,7 +33,7 @@ import { BuildFeed } from '~/lib/api/types';
 export default defineComponent({
   name: 'BuildFeedItem',
 
-  components: { BuildStatusIcon, Icon },
+  components: { BuildStatusIcon, Icon, Tooltip },
 
   props: {
     build: {
