@@ -102,7 +102,11 @@ func PostHook(c *gin.Context) {
 	// wrapped in square brackets appear in the commit message
 	skipMatch := skipRe.FindString(build.Message)
 	if len(skipMatch) > 0 {
-		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, build.Commit)
+		ref := build.Commit
+		if len(ref) == 0 {
+			ref = build.Ref
+		}
+		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, ref)
 		log.Debug().Msg(msg)
 		c.String(http.StatusNoContent, msg)
 		return

@@ -9,5 +9,14 @@
   "go.lintTool":"golangci-lint",
   "go.lintFlags": [
     "--fast"
+  ],
+  "spellright.language": [
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "latex",
+    "plaintext",
+    "go"
   ]
 }

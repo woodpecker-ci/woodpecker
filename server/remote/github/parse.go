@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v39/github"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
@@ -51,7 +52,8 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 		return nil, nil, nil, err
 	}
 
-	payload, err := github.ParseWebHook(github.WebHookType(r), raw)
+	var webhookType string = github.WebHookType(r)
+	payload, err := github.ParseWebHook(webhookType, raw)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -63,10 +65,15 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 	case *github.DeploymentEvent:
 		repo, build, err := parseDeployHook(hook)
 		return nil, repo, build, err
+	case *github.ReleaseEvent:
+		repo, build, err := parseReleaseHook(hook)
+		return nil, repo, build, err
 	case *github.PullRequestEvent:
 		return parsePullHook(hook, merge)
+	default:
+		log.Debug().Msg("Github event ignored, and will not be parsed " + webhookType)
+		return nil, nil, nil, nil
 	}
-	return nil, nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Build details.
@@ -138,6 +145,36 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Build, e
 	// if the ref is a branch we should make sure it has refs/heads prefix
 	if !strings.HasPrefix(build.Ref, "refs/") { // branch or tag
 		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
+	}
+
+	return convertRepo(hook.GetRepo()), build, nil
+}
+
+// parseDeployHook parses a deployment and returns the Repo and Build details.
+// If the commit type is unsupported nil values are returned.
+func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, error) {
+	release := hook.GetRelease()
+	build := &model.Build{
+		Event: model.EventRelease,
+		// Commit: "",
+		// Cannot retrieve the commit since
+		// it is hidden in the tag. It seems that github dose
+		// not provide the commit SHA with a release.
+		ID:      release.GetID(),
+		Created: release.CreatedAt.UTC().Unix(),
+		Link:    release.GetURL(),
+		Message: release.GetBody(), // Use the body of the release. There is no message.
+		Title:   release.GetName(),
+		// Tag name here is the ref. We should add the refs/tags so
+		// it is known is a tag (git-plugin looks for it)
+		Ref: "refs/tags/" + release.GetTagName(),
+		// Branch:  *release.TagName, Dose not exist here. Github releases
+		// is always a tag
+
+		Avatar: hook.GetSender().GetAvatarURL(),
+		Author: hook.GetSender().GetLogin(),
+		Sender: hook.GetSender().GetLogin(),
+		Remote: hook.GetRepo().GetCloneURL(),
 	}
 
 	return convertRepo(hook.GetRepo()), build, nil

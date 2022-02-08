@@ -17,10 +17,11 @@ package model
 type WebhookEvent string
 
 const (
-	EventPush   WebhookEvent = "push"
-	EventPull   WebhookEvent = "pull_request"
-	EventTag    WebhookEvent = "tag"
-	EventDeploy WebhookEvent = "deployment"
+	EventPush    WebhookEvent = "push"
+	EventPull    WebhookEvent = "pull_request"
+	EventTag     WebhookEvent = "tag"
+	EventDeploy  WebhookEvent = "deployment"
+	EventRelease WebhookEvent = "release"
 )
 
 func ValidateWebhookEvent(s WebhookEvent) bool {
