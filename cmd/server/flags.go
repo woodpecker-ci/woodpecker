@@ -91,6 +91,11 @@ var flags = []cli.Flag{
 		Name:    "open",
 		Usage:   "enable open user registration",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_AUTHENTICATE_PUBLIC_REPOS"},
+		Name:    "authenticate-public-repos",
+		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
 		Name:    "docs",
