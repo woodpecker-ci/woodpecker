@@ -1,4 +1,3 @@
-
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   # use the rest as arguments for "in_docker"
