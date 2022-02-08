@@ -91,7 +91,6 @@ var flags = []cli.Flag{
 		Name:    "open",
 		Usage:   "enable open user registration",
 	},
-	// added it here but not sure
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_AUTHENTICATE_PUBLIC_REPOS"},
 		Name:    "authenticate-public-repos",
