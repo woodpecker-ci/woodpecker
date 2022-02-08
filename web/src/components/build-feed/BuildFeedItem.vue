@@ -7,7 +7,7 @@
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
-          <span v-tooltip="'Started at ' + started">{{ since }}</span>
+          <span v-tooltip="'Created at ' + created">{{ since }}</span>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="duration" />
@@ -40,9 +40,9 @@ export default defineComponent({
 
   setup(props) {
     const build = toRef(props, 'build');
-    const { since, duration, message, started } = useBuild(build);
+    const { since, duration, message, created } = useBuild(build);
 
-    return { since, duration, message, started };
+    return { since, duration, message, created };
   },
 });
 </script>

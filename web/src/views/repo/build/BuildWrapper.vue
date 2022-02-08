@@ -51,7 +51,7 @@
         <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
-            <span v-tooltip="'Started at ' + started">{{ since }}</span>
+            <span v-tooltip="'Created at ' + created">{{ since }}</span>
           </div>
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="duration" />
@@ -153,7 +153,7 @@ export default defineComponent({
     }
 
     const build = buildStore.getBuild(repoOwner, repoName, buildId);
-    const { since, duration, started } = useBuild(build);
+    const { since, duration, created } = useBuild(build);
     provide('build', build);
 
     const { message } = useBuild(build);
@@ -245,7 +245,7 @@ export default defineComponent({
       cancelBuild,
       restartBuild,
       goBack: useRouteBackOrDefault({ name: 'repo' }),
-      started,
+      created,
     };
   },
 });
