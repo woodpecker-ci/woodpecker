@@ -168,8 +168,6 @@ bundle-cli: bundle-prepare
 
 bundle: bundle-agent bundle-server bundle-cli
 
-
-
 .PHONY: version
 version:
 	@echo ${BUILD_VERSION}
