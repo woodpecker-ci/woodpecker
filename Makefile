@@ -1,3 +1,19 @@
+
+# If the first argument is "in_docker"...
+ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "in_docker"
+  MAKE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # Ignore the next args
+  $(eval $(MAKE_ARGS):;@:)
+
+  .ONESHELL:
+  in_docker:
+	docker build -f ./docker/Dockerfile.make -t woodpecker/make:local .
+	docker run -it -v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
+else
+
+# Proceed with normal make
+
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
@@ -152,6 +168,10 @@ bundle-cli: bundle-prepare
 
 bundle: bundle-agent bundle-server bundle-cli
 
+
+
 .PHONY: version
 version:
 	@echo ${BUILD_VERSION}
+
+endif

@@ -1,16 +1,4 @@
 # docker build --rm  -f docker/Dockerfile.server -t woodpeckerci/woodpecker-server .
-FROM golang:1.16 as golang_image
-FROM node:16-alpine as build_image
-
-# Build packages.
-COPY --from=golang /usr/local/go /usr/local/
-ENV PATH=$PATH:/usr/local/go/bin
-
-WORKDIR /build
-COPY ./* /build/
-
-RUN npm install -g yarn
-RUN make release
 
 # use golang image to copy ssl certs later
 FROM golang:1.16
