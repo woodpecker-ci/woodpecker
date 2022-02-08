@@ -166,7 +166,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, err
 		Message: release.GetBody(), // Use the body of the release. There is no message.
 		Title:   release.GetName(),
 		// Tag name here is the ref. We should add the refs/tags so
-		// it is known is a tag (git-plugin looks for it)
+		// it is known its a tag (git-plugin looks for it)
 		Ref: "refs/tags/" + release.GetTagName(),
 		// Branch:  *release.TagName, Dose not exist here. Github releases
 		// is always a tag
