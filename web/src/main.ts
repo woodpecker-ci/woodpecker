@@ -2,7 +2,7 @@ import 'windi.css';
 import 'floating-vue/dist/style.css'; // eslint-disable-line no-restricted-imports
 import '~/compositions/useFavicon';
 
-import FloatingVue from 'floating-vue';
+import { Tooltip, VClosePopper, VTooltip } from 'floating-vue';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
@@ -15,8 +15,13 @@ const app = createApp(App);
 
 app.use(router);
 app.use(notifications);
-app.use(FloatingVue);
-app.directive('tooltip', FloatingVue.VTooltip);
+
+app.directive('tooltip', VTooltip);
+app.directive('close-popper', VClosePopper);
+// eslint-disable-next-line vue/component-definition-name-casing
+app.component('v-tooltip', Tooltip);
+app.component('VTooltip', Tooltip);
+
 app.use(createPinia());
 app.mount('#app');
 

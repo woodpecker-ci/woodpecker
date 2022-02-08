@@ -97,7 +97,15 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  // sv-SE is in format YYYY-MM-DD HH:m:s
-  const started = computed(() => new Date(sinceRaw.value).toLocaleString('sv-SE'));
+  const started = computed(() => {
+    if (!build.value) {
+      return undefined;
+    }
+
+    const start = build.value.created_at || 0;
+
+    // sv-SE is in format YYYY-MM-DD HH:m:s
+    return new Date(start * 1000).toLocaleString('sv-SE');
+  });
   return { since, duration, message, prettyRef, started };
 };
