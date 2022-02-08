@@ -66,10 +66,11 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
+		AuthenticatePublicRepos bool
+		Limits                  model.ResourceLimit
+		Volumes                 []string
+		Networks                []string
+		Privileged              []string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}
