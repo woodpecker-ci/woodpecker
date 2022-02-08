@@ -160,10 +160,9 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, err
 		// Cannot retrieve the commit since
 		// it is hidden in the tag. It seems that github dose
 		// not provide the commit SHA with a release.
-		ID:      release.GetID(),
 		Created: release.CreatedAt.UTC().Unix(),
 		Link:    release.GetURL(),
-		Message: release.GetBody(), // Use the body of the release. There is no message.
+		Message: release.GetName(),
 		Title:   release.GetName(),
 		// Tag name here is the ref. We should add the refs/tags so
 		// it is known its a tag (git-plugin looks for it)
