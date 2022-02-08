@@ -18,8 +18,7 @@ app.use(notifications);
 
 app.directive('tooltip', VTooltip);
 app.directive('close-popper', VClosePopper);
-// eslint-disable-next-line vue/component-definition-name-casing
-app.component('v-tooltip', Tooltip);
+app.component('v-tooltip', Tooltip); // eslint-disable-line vue/component-definition-name-casing
 app.component('VTooltip', Tooltip);
 
 app.use(createPinia());
