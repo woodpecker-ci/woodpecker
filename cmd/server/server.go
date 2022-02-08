@@ -271,6 +271,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
 	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")

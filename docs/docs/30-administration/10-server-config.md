@@ -159,6 +159,11 @@ Enable to allow user registration.
 
 Link to documentation in the UI.
 
+### `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
+> Default: `false`
+
+Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.
+
 ### `WOODPECKER_SESSION_EXPIRES`
 > Default: `72h`
 
