@@ -9,7 +9,7 @@
           <Icon name="since" />
           <Tooltip>
             <span>{{ since }}</span>
-            <template #popper><span class="font-bold">Started</span> {{ started }}</template>
+            <template #popper><span class="font-bold">Created</span> {{ created }}</template>
           </Tooltip>
         </div>
         <div class="flex space-x-2 items-center">
@@ -44,9 +44,9 @@ export default defineComponent({
 
   setup(props) {
     const build = toRef(props, 'build');
-    const { since, duration, message, started } = useBuild(build);
+    const { since, duration, message, created } = useBuild(build);
 
-    return { since, duration, message, started };
+    return { since, duration, message, created };
   },
 });
 </script>

@@ -100,7 +100,7 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  const started = computed(() => {
+  const created = computed(() => {
     if (!build.value) {
       return undefined;
     }
@@ -110,5 +110,5 @@ export default (build: Ref<Build | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, prettyRef, started };
+  return { since, duration, message, prettyRef, created };
 };
