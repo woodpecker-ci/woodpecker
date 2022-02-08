@@ -162,7 +162,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, err
 		// not provide the commit SHA with a release.
 		Created: release.CreatedAt.UTC().Unix(),
 		Link:    release.GetURL(),
-		Message: release.GetName(),
+		Message: "Release (" + hook.GetAction() + "):" + release.GetName(), // Use the body of the release. There is no message.
 		Title:   release.GetName(),
 		// Tag name here is the ref. We should add the refs/tags so
 		// it is known its a tag (git-plugin looks for it)
