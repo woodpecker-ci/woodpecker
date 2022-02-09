@@ -189,20 +189,20 @@ func PostHook(c *gin.Context) {
 	filtered, err := checkIfFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		msg := "failure to parse yaml from hook"
-		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
+		log.Info().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
 	if filtered {
-		msg := "ignoring hook: branch/event does not match restrictions defined in yaml"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
+		msg := "ignoring hook: branch/event does not match restrictions defined in (any) yaml"
+		log.Info().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
 	}
 
 	if zeroSteps(build, remoteYamlConfigs) {
 		msg := "ignoring hook: step conditions yield zero runnable steps"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
+		log.Info().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
 	}
