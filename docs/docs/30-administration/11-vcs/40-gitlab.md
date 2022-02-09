@@ -11,9 +11,9 @@ services:
     [...]
     environment:
 +     - WOODPECKER_GITLAB=true
++     - WOODPECKER_GITLAB_URL=http://gitlab.mycompany.com
 +     - WOODPECKER_GITLAB_CLIENT=95c0282573633eb25e82
 +     - WOODPECKER_GITLAB_SECRET=30f5064039e6b359e075
-+     - WOODPECKER_GITLAB_URL=http://gitlab.mycompany.com
 
   woodpecker-agent:
     [...]
@@ -31,14 +31,27 @@ If you run the Woodpecker CI server on the same host as the GitLab instance, you
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-```shell
-WOODPECKER_GITLAB=true # Set to true to enable the GitLab driver
+### `WOODPECKER_GITLAB`
+> Default: `false`
 
-WOODPECKER_GITLAB_URL=https://gitlab.com # GitLab Server address
+Enables the GitLab driver.
 
-WOODPECKER_GITLAB_CLIENT=... # GitLab oauth2 client id
+### `WOODPECKER_GITLAB_URL`
+> Default: `https://gitlab.com`
 
-WOODPECKER_GITLAB_SECRET=... # GitLab oauth2 client secret.
+Configures the GitLab server address.
 
-WOODPECKER_GITLAB_SKIP_VERIFY=false # Set to true to disable SSL verification
-```
+### `WOODPECKER_GITLAB_CLIENT`
+> Default: empty
+
+Configures the GitLab OAuth client id. This is used to authorize access.
+
+### `WOODPECKER_GITLAB_SECRET`
+> Default: empty
+
+Configures the GitLab OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITLAB_SKIP_VERIFY`
+> Default: `false`
+
+Configure if SSL verification should be skipped.
