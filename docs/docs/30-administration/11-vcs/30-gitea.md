@@ -39,14 +39,27 @@ For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-```shell
-WOODPECKER_GITEA=true # Set to true to enable the Gitea driver
+### `WOODPECKER_GITEA`
+> Default: `false`
 
-WOODPECKER_GITEA_URL=https://try.gitea.io # Gitea server address
+Enables the Gitea driver.
 
-WOODPECKER_GITEA_CLIENT=... # Gitea oauth2 client id
+### `WOODPECKER_GITEA_URL`
+> Default: `https://try.gitea.io`
 
-WOODPECKER_GITEA_SECRET=... # Gitea oauth2 client secret
+Configures the Gitea server address.
 
-WOODPECKER_GITEA_SKIP_VERIFY=false # Set to true to disable SSL verification.
-```
+### `WOODPECKER_GITEA_CLIENT`
+> Default: empty
+
+Configures the Gitea OAuth client id. This is used to authorize access.
+
+### `WOODPECKER_GITEA_SECRET`
+> Default: empty
+
+Configures the Gitea OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITEA_SKIP_VERIFY`
+> Default: `false`
+
+Configure if SSL verification should be skipped.
