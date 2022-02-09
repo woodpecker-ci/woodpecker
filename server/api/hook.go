@@ -269,6 +269,7 @@ func PostHook(c *gin.Context) {
 }
 
 // TODO: parse yaml once and not for each filter function
+// Check if at least one pipeline config will be execute otherwise we will just ignore this webhook
 func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
