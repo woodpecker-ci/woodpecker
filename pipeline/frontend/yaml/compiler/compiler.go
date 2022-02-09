@@ -82,10 +82,8 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	config := new(backend.Config)
 
 	if !conf.Constraints.Match(c.metadata) {
-		// basically dont do nothing. No need to run in this case.
-		// This would also remove this item from the UI
-		// which seems to be as the case for each of the container
-		// contraints.
+		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
+		// An empty pipeline will just be skipped and wont be shown in the UI as well. 
 		return config
 	}
 
