@@ -285,18 +285,7 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		// if was filtered by the constraints (event) continue
-		if !parsedPipelineConfig.Constraints.Event.Match(string(build.Event)) {
-			continue
-		}
-
-		// if was filtered by the constraints (branch) continue
-		if !parsedPipelineConfig.Constraints.Branch.Match(build.Branch) {
-			continue
-		}
-
-		// if was filtered by the branch (legacy) continue
-		if !parsedPipelineConfig.Branches.Match(build.Branch) {
+		if !parsedPipelineConfig.Constraints.Match(c.Metadata) {
 			continue
 		}
 
