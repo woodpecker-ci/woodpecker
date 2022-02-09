@@ -194,7 +194,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if filtered {
-		msg := "ignoring hook: branch/event does not match restrictions defined in (any) yaml"
+		msg := "ignoring hook: none of the pipelines of the project would be triggered by this event"
 		log.Info().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
