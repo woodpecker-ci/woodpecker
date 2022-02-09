@@ -60,7 +60,7 @@
 
         <div class="flex space-x-2 items-center min-w-0">
           <Icon name="since" />
-          <span class="truncate">{{ since }}</span>
+          <span v-tooltip="'Created at ' + created" class="truncate">{{ since }}</span>
         </div>
       </div>
     </div>
@@ -92,9 +92,9 @@ export default defineComponent({
 
   setup(props) {
     const build = toRef(props, 'build');
-    const { since, duration, message, prettyRef } = useBuild(build);
+    const { since, duration, message, prettyRef, created } = useBuild(build);
 
-    return { since, duration, message, prettyRef, buildStatusColors };
+    return { since, duration, message, prettyRef, buildStatusColors, created };
   },
 });
 </script>
