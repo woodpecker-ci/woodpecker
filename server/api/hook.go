@@ -300,11 +300,11 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		}
 
 		// at least one config yielded in a valid run.
-		return true, nil
+		return false, nil
 	}
 
 	// no configs yielded a valid run.
-	return false, nil
+	return true, nil
 }
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
