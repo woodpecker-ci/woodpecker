@@ -83,6 +83,9 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	if !conf.Constraints.Match(c.metadata) {
 		// basically dont do nothing. No need to run in this case.
+		// This would also remove this item from the UI
+		// which seems to be as the case for each of the container
+		// contraints.
 		return config
 	}
 

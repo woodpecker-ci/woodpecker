@@ -186,7 +186,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	filtered, err := branchFiltered(build, remoteYamlConfigs)
+	filtered, err := checkIfFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
@@ -194,7 +194,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if filtered {
-		msg := "ignoring hook: branch does not match restrictions defined in yaml"
+		msg := "ignoring hook: branch/event does not match restrictions defined in yaml"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
@@ -269,7 +269,7 @@ func PostHook(c *gin.Context) {
 }
 
 // TODO: parse yaml once and not for each filter function
-func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
 	if build.Event == model.EventTag || build.Event == model.EventDeploy {
@@ -284,12 +284,19 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		if parsedPipelineConfig.Branches.Match(build.Branch) {
-			return false, nil
+		if !parsedPipelineConfig.Constraints.Event.Match(string(build.Event)) {
+			continue
 		}
+
+		if parsedPipelineConfig.Branches.Match(build.Branch) {
+			continue
+		}
+
+		// at least one config yielded in a valid run.
+		return true, nil
 	}
 
-	return true, nil
+	return false, nil
 }
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {

@@ -106,6 +106,12 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				return nil, err
 			}
 
+			// checking if filtered.
+			if !parsed.Constraints.Match((metadata)) {
+				proc.State = model.StatusSkipped
+			}
+
+			// legacy check.
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
 				proc.State = model.StatusSkipped
 			}
