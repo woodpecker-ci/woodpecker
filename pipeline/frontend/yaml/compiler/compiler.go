@@ -81,6 +81,11 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	config := new(backend.Config)
 
+	if !conf.Constraints.Match(c.metadata) {
+		// basically dont do nothing. No need to run in this case.
+		return config
+	}
+
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend.Volume{
 		Name:   fmt.Sprintf("%s_default", c.prefix),

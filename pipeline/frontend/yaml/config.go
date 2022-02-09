@@ -10,19 +10,21 @@ import (
 type (
 	// Config defines a pipeline configuration.
 	Config struct {
-		Cache     types.Stringorslice
-		Platform  string
-		Branches  constraint.List
-		Workspace Workspace
-		Clone     Containers
-		Pipeline  Containers
-		Services  Containers
-		Networks  Networks
-		Volumes   Volumes
-		Labels    types.SliceorMap
-		DependsOn []string `yaml:"depends_on,omitempty"`
-		RunsOn    []string `yaml:"runs_on,omitempty"`
-		SkipClone bool     `yaml:"skip_clone"`
+		// TODO: change to When (also in Pipeline)
+		Constraints constraint.Constraints `yaml:"when,omitempty"`
+		Cache       types.Stringorslice
+		Platform    string
+		Branches    constraint.List
+		Workspace   Workspace
+		Clone       Containers
+		Pipeline    Containers
+		Services    Containers
+		Networks    Networks
+		Volumes     Volumes
+		Labels      types.SliceorMap
+		DependsOn   []string `yaml:"depends_on,omitempty"`
+		RunsOn      []string `yaml:"runs_on,omitempty"`
+		SkipClone   bool     `yaml:"skip_clone"`
 	}
 
 	// Workspace defines a pipeline workspace.

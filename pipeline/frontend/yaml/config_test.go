@@ -19,6 +19,8 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
+				g.Assert(out.Constraints.Event.Match("push")).Equal(true)
+
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
 				g.Assert(out.Volumes.Volumes[0].Name).Equal("custom")
@@ -72,6 +74,9 @@ func TestParse(t *testing.T) {
 
 var sampleYaml = `
 image: hello-world
+when:
+  event: 
+    - push
 build:
   context: .
   dockerfile: Dockerfile
