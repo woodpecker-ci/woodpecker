@@ -179,12 +179,14 @@ Configures the session expiration time.
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 
+<!--
 ### `WOODPECKER_VOLUME`
 > Default: empty
 
 Comma-separated list of Docker volumes that are mounted into every pipeline step.
 
 Example: `WOODPECKER_VOLUME=/path/on/host:/path/in/container:rw`|
+-->
 
 ### `WOODPECKER_DOCKER_CONFIG`
 > Default: empty
@@ -193,6 +195,7 @@ Configures a specific private registry config for all pipelines.
 
 Example: `WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json`
 
+<!--
 ### `WOODPECKER_ENVIRONMENT`
 > Default: empty
 
@@ -204,6 +207,7 @@ TODO
 Comma-separated list of Docker networks that are attached to every pipeline step.
 
 Example: `WOODPECKER_NETWORK=network1,network2`
+-->
 
 ### `WOODPECKER_AGENT_SECRET`
 > Default: empty
@@ -284,224 +288,30 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ---
 
-### `WOODPECKER_GITHUB`
-> Default: `false`
+### `WOODPECKER_GITHUB_...`
 
-Enables the GitHub driver.
+See [Github configuration](vcs/github/#configuration)
 
-### `WOODPECKER_GITHUB_URL`
-> Default: `https://github.com`
+### `WOODPECKER_GOGS_...`
 
-Configures the GitHub server address.
+See [Gogs configuration](vcs/gogs/#configuration)
 
-### `WOODPECKER_GITHUB_CLIENT`
-> Default: empty
+### `WOODPECKER_GITEA_...`
 
-Configures the GitHub OAuth client id. This is used to authorize access.
+See [Gitea configuration](vcs/gitea/#configuration)
 
-### `WOODPECKER_GITHUB_SECRET`
-> Default: empty
+### `WOODPECKER_BITBUCKET_...`
 
-Configures the GitHub OAuth client secret. This is used to authorize access.
+See [Bitbucket configuration](vcs/bitbucket/#configuration)
 
-### `WOODPECKER_GITHUB_MERGE_REF`
-> Default: `true`
+### `WOODPECKER_STASH_...`
 
-TODO
+See [Bitbucket server configuration](vcs/bitbucket_server/#configuration)
 
-### `WOODPECKER_GITHUB_SKIP_VERIFY`
-> Default: `false`
+### `WOODPECKER_GITLAB_...`
 
-Configure if SSL verification should be skipped.
+See [Gitlab configuration](vcs/gitlab/#configuration)
 
----
+### `WOODPECKER_CODING_...`
 
-### `WOODPECKER_GOGS`
-> Default: `false`
-
-Enables the Gogs driver.
-
-### `WOODPECKER_GOGS_URL`
-> Default: `https://github.com`
-
-Configures the Gogs server address.
-
-### `WOODPECKER_GOGS_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GOGS_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GOGS_PRIVATE_MODE`
-> Default: `false`
-
-TODO
-
-### `WOODPECKER_GOGS_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
-
----
-
-### `WOODPECKER_GITEA`
-> Default: `false`
-
-Enables the Gitea driver.
-
-### `WOODPECKER_GITEA_URL`
-> Default: `https://try.gitea.io`
-
-Configures the Gitea server address.
-
-### `WOODPECKER_GITEA_CLIENT`
-> Default: empty
-
-Configures the Gitea OAuth client id. This is used to authorize access.
-
-### `WOODPECKER_GITEA_SECRET`
-> Default: empty
-
-Configures the Gitea OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_GITEA_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
-
----
-
-### `WOODPECKER_BITBUCKET`
-> Default: `false`
-
-Enables the Bitbucket driver.
-
-### `WOODPECKER_BITBUCKET_CLIENT`
-> Default: empty
-
-Configures the Bitbucket OAuth client id. This is used to authorize access.
-
-### `WOODPECKER_BITBUCKET_SECRET`
-> Default: empty
-
-Configures the Bitbucket OAuth client secret. This is used to authorize access.
-
----
-
-### `WOODPECKER_GITLAB`
-> Default: `false`
-
-Enables the GitLab driver.
-
-### `WOODPECKER_GITLAB_URL`
-> Default: `https://gitlab.com`
-
-Configures the GitLab server address.
-
-### `WOODPECKER_GITLAB_CLIENT`
-> Default: empty
-
-Configures the GitLab OAuth client id. This is used to authorize access.
-
-### `WOODPECKER_GITLAB_SECRET`
-> Default: empty
-
-Configures the GitLab OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_GITLAB_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
-
----
-
-### `WOODPECKER_STASH`
-> Default: `false`
-
-Enables the Bitbucket Server driver.
-
-### `WOODPECKER_STASH_URL`
-> Default: empty
-
-Configures the Bitbucket Server address.
-
-### `WOODPECKER_STASH_CONSUMER_KEY`
-> Default: empty
-
-Configures your Bitbucket Server consumer key.
-
-### `WOODPECKER_STASH_CONSUMER_RSA`
-> Default: empty
-
-Configures the path to your Bitbucket Server private key file.
-
-### `WOODPECKER_STASH_CONSUMER_RSA_STRING`
-> Default: empty
-
-Configures your Bitbucket Server private key.
-
-### `WOODPECKER_STASH_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_STASH_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_STASH_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
-
----
-
-### `WOODPECKER_CODING`
-> Default: `false`
-
-Enables the Coding driver.
-
-### `WOODPECKER_CODING_URL`
-> Default: `https://coding.net`
-
-Configures the Coding server address.
-
-### `WOODPECKER_CODING_CLIENT`
-> Default: empty
-
-Configures the Coding OAuth client id. This is used to authorize access.
-
-### `WOODPECKER_CODING_SECRET`
-> Default: empty
-
-Configures the Coding OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_CODING_SCOPE`
-> Default: `user, project, project:depot`
-
-Comma-separated list of OAuth scopes.
-
-### `WOODPECKER_CODING_GIT_MACHINE`
-> Default: `git.coding.net`
-
-TODO
-
-### `WOODPECKER_CODING_GIT_USERNAME`
-> Default: empty
-
-This username is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_CODING_GIT_PASSWORD`
-> Default: empty
-
-The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_CODING_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
+See [Coding configuration](vcs/coding/#configuration)

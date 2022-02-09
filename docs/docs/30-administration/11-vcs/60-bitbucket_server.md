@@ -96,23 +96,46 @@ You must register your application with Bitbucket Server in order to generate a 
 
 Please use http://woodpecker.mycompany.com/authorize as the Authorization callback URL.
 
-
 ## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-```shell
-WOODPECKER_STASH=true # Set to true to enable the Bitbucket Server (Stash) driver
+### `WOODPECKER_STASH`
+> Default: `false`
 
-WOODPECKER_STASH_URL # Bitbucket Server address.
+Enables the Bitbucket Server driver.
 
-WOODPECKER_STASH_CONSUMER_KEY=... # Bitbucket Server oauth1 consumer key
+### `WOODPECKER_STASH_URL`
+> Default: empty
 
-WOODPECKER_STASH_CONSUMER_RSA=... # Bitbucket Server oauth1 private key file
+Configures the Bitbucket Server address.
 
-WOODPECKER_STASH_CONSUMER_RSA_STRING=... # Bibucket Server oauth1 private key as a string
+### `WOODPECKER_STASH_CONSUMER_KEY`
+> Default: empty
 
-WOODPECKER_STASH_GIT_USERNAME=... # Machine account username used to clone repositories
+Configures your Bitbucket Server consumer key.
 
-WOODPECKER_STASH_GIT_PASSWORD=... # Machine account password used to clone repositories
-```
+### `WOODPECKER_STASH_CONSUMER_RSA`
+> Default: empty
+
+Configures the path to your Bitbucket Server private key file.
+
+### `WOODPECKER_STASH_CONSUMER_RSA_STRING`
+> Default: empty
+
+Configures your Bitbucket Server private key.
+
+### `WOODPECKER_STASH_GIT_USERNAME`
+> Default: empty
+
+This username is used to authenticate and clone all private repositories.
+
+### `WOODPECKER_STASH_GIT_PASSWORD`
+> Default: empty
+
+The password is used to authenticate and clone all private repositories.
+
+### `WOODPECKER_STASH_SKIP_VERIFY`
+> Default: `false`
+
+Configure if SSL verification should be skipped.

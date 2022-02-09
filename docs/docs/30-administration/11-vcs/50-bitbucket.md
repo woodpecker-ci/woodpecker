@@ -43,13 +43,20 @@ Webhooks:Read and Write
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-```shell
-WOODPECKER_BITBUCKET=true # Set to true to enable the Bitbucket driver
+### `WOODPECKER_BITBUCKET`
+> Default: `false`
 
-WOODPECKER_BITBUCKET_CLIENT=... # Bitbucket oauth2 client id
+Enables the Bitbucket driver.
 
-WOODPECKER_BITBUCKET_SECRET=... # Bitbucket oauth2 client secret
-```
+### `WOODPECKER_BITBUCKET_CLIENT`
+> Default: empty
+
+Configures the Bitbucket OAuth client id. This is used to authorize access.
+
+### `WOODPECKER_BITBUCKET_SECRET`
+> Default: empty
+
+Configures the Bitbucket OAuth client secret. This is used to authorize access.
 
 ## Missing Features
 
