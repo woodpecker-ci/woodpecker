@@ -100,6 +100,10 @@ const secretEventsOptions: CheckboxOption[] = [
     description:
       'Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets.',
   },
+  {
+    value: WebhookEvents.Release,
+    text: 'Release',
+  },
   { value: WebhookEvents.Deploy, text: 'Deploy' },
 ];
 
