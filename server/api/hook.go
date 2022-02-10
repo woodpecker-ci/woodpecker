@@ -273,10 +273,6 @@ func PostHook(c *gin.Context) {
 func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
-	if build.Event == model.EventTag || build.Event == model.EventDeploy {
-		return false, nil
-	}
-
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
 		if err != nil {
