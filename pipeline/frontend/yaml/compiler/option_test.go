@@ -240,6 +240,15 @@ func TestWithVolumeCacher(t *testing.T) {
 	}
 }
 
+func TestWithDefaultCloneImage(t *testing.T) {
+	compiler := New(
+		WithDefaultCloneImage("not-an-image"),
+	)
+	if compiler.defaultCloneImage != "not-an-image" {
+		t.Errorf("Expected default clone image 'not-an-image' not found")
+	}
+}
+
 func TestWithS3Cacher(t *testing.T) {
 	compiler := New(
 		WithS3Cacher("some-access-key", "some-secret-key", "some-region", "some-bucket"),
