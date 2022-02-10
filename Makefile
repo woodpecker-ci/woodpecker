@@ -9,6 +9,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   in_docker:
 	docker build -f ./docker/Dockerfile.make -t woodpecker/make:local .
 	docker run -it \
+		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
 		-e GO_PACKAGES="$(GO_PACKAGES)" \
