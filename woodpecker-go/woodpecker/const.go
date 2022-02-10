@@ -2,10 +2,11 @@ package woodpecker
 
 // Event values.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+	EventPush    = "push"
+	EventPull    = "pull_request"
+	EventTag     = "tag"
+	EventDeploy  = "deployment"
+	EventRelease = "release"
 )
 
 // Status values.

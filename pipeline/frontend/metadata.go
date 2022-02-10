@@ -10,10 +10,11 @@ import (
 
 // Event types corresponding to scm hooks.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
+	EventPush    = "push"
+	EventPull    = "pull_request"
+	EventTag     = "tag"
+	EventDeploy  = "deployment"
+	EventRelease = "release"
 )
 
 type (
