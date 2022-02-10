@@ -26,7 +26,7 @@ const (
 
 func ValidateWebhookEvent(s WebhookEvent) bool {
 	switch s {
-	case EventPush, EventPull, EventTag, EventDeploy:
+	case EventPush, EventPull, EventTag, EventDeploy, EventRelease:
 		return true
 	default:
 		return false
