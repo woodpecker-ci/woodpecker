@@ -199,6 +199,12 @@ func WithResourceLimit(swap, mem, shmsize, cpuQuota, cpuShares int64, cpuSet str
 	}
 }
 
+func WithDefaultCloneImage(cloneImage string) Option {
+	return func(compiler *Compiler) {
+		compiler.defaultCloneImage = cloneImage
+	}
+}
+
 // TODO(bradrydzewski) consider an alternate approach to
 // WithProxy where the proxy strings are passed directly
 // to the function as named parameters.
