@@ -1,10 +1,13 @@
 import { computed, Ref } from 'vue';
 
+import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Build } from '~/lib/api/types';
 import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
 import timeAgo from '~/utils/timeAgo';
+
+const { toLocaleString } = useDate();
 
 export default (build: Ref<Build | undefined>) => {
   const sinceRaw = computed(() => {
@@ -104,8 +107,8 @@ export default (build: Ref<Build | undefined>) => {
 
     const start = build.value.created_at || 0;
 
-    // sv-SE is in format YYYY-MM-DD HH:m:s
-    return new Date(start * 1000).toLocaleString('sv-SE');
+    return toLocaleString(new Date(start * 1000));
   });
+
   return { since, duration, message, prettyRef, created };
 };
