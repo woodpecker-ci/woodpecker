@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubectl"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
@@ -13,13 +14,14 @@ func init() {
 	engines = make(map[string]types.Engine)
 
 	// TODO: disabled for now as kubernetes backend has not been implemented yet
-	// kubernetes
-	// engine = kubernetes.New("", "", "")
-	// engines[engine.Name()] = engine
+	loadedEngines := []types.Engine{
+		docker.New(),
+		kubectl.New("kubectl", kubectl.KubeCtlClientCoreArgs{}),
+	}
 
-	// docker
-	engine := docker.New()
-	engines[engine.Name()] = engine
+	for _, engine := range loadedEngines {
+		engines[engine.Name()] = engine
+	}
 }
 
 func FindEngine(engineName string) (types.Engine, error) {

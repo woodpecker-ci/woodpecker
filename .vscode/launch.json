@@ -9,6 +9,7 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
+      "envFile": "${workspaceFolder}/.env",
       "program": "${workspaceFolder}/cmd/server/",
       "cwd": "${workspaceFolder}"
     },
@@ -17,7 +18,22 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
+      "envFile": "${workspaceFolder}/.env",
       "program": "${workspaceFolder}/cmd/agent/",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Woodpecker run test pipeline cli",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "envFile": "${workspaceFolder}/.env",
+      "program": "${workspaceFolder}/cmd/cli/",
+      "console": "integratedTerminal",
+      "args": [
+        "exec",
+        "${workspaceFolder}/cmd/cli/test.yaml"
+      ],
       "cwd": "${workspaceFolder}"
     },
     {
@@ -28,6 +44,7 @@
       "runtimeArgs": [
         "start",
       ],
+      "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceFolder}/web",
       "port": 3000,
       "resolveSourceMapLocations": [

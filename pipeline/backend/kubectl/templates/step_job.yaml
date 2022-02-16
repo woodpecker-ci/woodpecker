@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .JobName }}"
+  {{- if .Engine.Namespace}}
+  namespace: "{{.Engine.Namespace}}"
+  {{- end }}
+  labels:
+    jobid: "{{.JobID}}"
+    app: "{{.Engine.ID}}"
+spec:
+  # Number of times to run is one.
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        woodpecker-job: "true"
+        jobid: "{{.JobID}}"
+        app: "{{.Engine.ID}}"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: runner
+          image: "{{ .Image }}"
+          imagePullPolicy: Always
+          command:
+            - bash
+            - -c
+            - |
+              echo "Started"
+              
+              for i in $(seq 1 10); do
+                echo "Waiting # $i"
+                sleep 1
+              done
+
+              echo "Ended"
+              exit 0
+          resources: {}

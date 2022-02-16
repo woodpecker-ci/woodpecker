@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ .VolumeName }}"
+  {{- if .Engine.Namespace}}
+  namespace: "{{.Engine.Namespace}}"
+  {{- end }}
+  labels:
+    app: "{{.Engine.ID}}"
+spec:
+  {{- if .StorageClassName}}
+  storageClassName: "{{.StorageClassName}}"
+  {{- end }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "{{ or .StorageSize "1Gi"}}"
