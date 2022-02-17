@@ -151,9 +151,13 @@ func (this *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 			)
 
 			logsCmd.Stdout = pipeWriter
-			// logsCmd.Stderr = pipeWriter
+			err := logsCmd.Start()
+			if err != nil {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
 
-			err := logsCmd.Run()
+			err = logsCmd.Wait()
 
 			if err != nil {
 				time.Sleep(100 * time.Millisecond)

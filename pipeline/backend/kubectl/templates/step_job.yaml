@@ -33,9 +33,6 @@ spec:
             - sh
             - -c
             - |
-              echo "$CI_SCRIPT" | base64 -d
-              echo 
-              echo
               {{ .ShellCommand }}
           # {{- if .HasEnvironmentVariables }}
           env:
