@@ -3,19 +3,26 @@ package kubectl
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os/exec"
-	"sync"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
+const (
+	IfFailed    = "iffailed"
+	IfSucceeded = "ifsucceeded"
+	Always      = "always"
+	Never       = "never"
+)
+
 type KubeCtlBackend struct {
-	Client *KubeCtlClient // The kubernetes client
-	RunID  string         // the random run id
-	Config *types.Config  // the run config
+	Client       *KubeCtlClient // The kubernetes client
+	RunID        string         // the random run id
+	Config       *types.Config  // the run config
+	DeletePolicy string         // The job delete policy
 }
 
 var _ types.Engine = &KubeCtlBackend{}
@@ -33,7 +40,8 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		Client: client,
 		Config: &types.Config{},
 		// the engine id must be randomized in order not to clobber/error other runs.
-		RunID: createRandomId(10),
+		RunID:        createRandomId(10),
+		DeletePolicy: IfSucceeded,
 	}
 }
 
@@ -95,11 +103,10 @@ func (this *KubeCtlBackend) Destroy(_ context.Context, cfg *types.Config) error 
 }
 
 // Exec the pipeline step.
-func (this *KubeCtlBackend) Exec(_ context.Context, step *types.Step) error {
+func (this *KubeCtlBackend) Exec(ctx context.Context, step *types.Step) error {
 	jobTemplate := KubeJobTemplate{
 		Engine: this,
-		Image:  step.Image,
-		Name:   step.Name,
+		Step:   step,
 	}
 
 	jobAsYaml, err := jobTemplate.Render()
@@ -113,7 +120,7 @@ func (this *KubeCtlBackend) Exec(_ context.Context, step *types.Step) error {
 		return err
 	}
 
-	log.Debug().Msgf("Pipeline exec job %s initialized with\n %s", jobTemplate.Name, output)
+	log.Debug().Msgf("Pipeline exec job %s initialized with\n %s", jobTemplate.JobID(), output)
 
 	return nil
 }
@@ -125,101 +132,58 @@ func (this *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 
 	jobTemplate := KubeJobTemplate{
 		Engine: this,
-		Image:  step.Image,
-		Name:   step.Name,
+		Step:   step,
 	}
 
-	logsCmd := this.Client.GetKubectlCommandContext(ctx,
-		"logs", "-f",
-		"-l", "jobid="+jobTemplate.JobID(),
-	)
+	pipeReader, pipeWriter := io.Pipe()
 
-	logsReader, err := logsCmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
+	go func() {
+		log.Debug().Msgf(
+			"Waiting for job '%s' pod to be ready before reading logs",
+			jobTemplate.JobID(),
+		)
 
-	err = logsCmd.Start()
-	if err != nil {
-		return nil, err
-	}
+		// run until stopped.
+		for {
+			logsCmd := this.Client.GetKubectlCommandContext(ctx,
+				"logs", "-f",
+				"-l", "jobid="+jobTemplate.JobID(),
+			)
 
-	return logsReader, nil
+			logsCmd.Stdout = pipeWriter
+			// logsCmd.Stderr = pipeWriter
+
+			err := logsCmd.Run()
+
+			if err != nil {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+			break
+		}
+	}()
+
+	return pipeReader, nil
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (this *KubeCtlBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
-
 	jobTemplate := KubeJobTemplate{
 		Engine: this,
-		Image:  step.Image,
-		Name:   step.Name,
+		Step:   step,
 	}
 
-	// There will be two
-	waitCommand := this.Client.ComposeKubectlCommand(
-		"wait",
-		this.Client.CoreArgs.ToArgsList(),
-		"--timeout", fmt.Sprint(60*60*24*7)+"s",
+	condition, waitError := this.Client.WaitForConditions(
+		ctx,
 		"job/"+jobTemplate.JobName(),
+		[]string{"Complete", "Failed"},
+		1, time.Hour*24*7,
 	)
 
-	successCmd := this.Client.GetKubectlCommandContext(ctx, waitCommand, "--for", "condition=Complete")
-	failureCmd := this.Client.GetKubectlCommandContext(ctx, waitCommand, "--for", "condition=Failed")
-
-	var waiter sync.WaitGroup
-	var waitError error
-
-	completed := false
-	succeeded := false
-
-	// run failure
-	go func() {
-		out, err := failureCmd.CombinedOutput()
-		if completed {
-			return
-		}
-		completed = true
-		if err != nil {
-			waitError = errors.New(string(out) + "\n" + err.Error())
-		}
-		waiter.Done()
-	}()
-
-	// Run success
-	go func() {
-		out, err := successCmd.CombinedOutput()
-		if completed {
-			return
-		}
-		succeeded = true
-		completed = true
-		if err != nil {
-			waitError = errors.New(string(out) + "\n" + err.Error())
-		}
-		waiter.Done()
-	}()
-
-	// Wait for conditions.
-	waiter.Add(1)
-	waiter.Wait()
-	completed = true
-
-	if waitError != nil {
-		log.Debug().Err(waitError).Msg("Error while waiting for job to complete")
-	}
-
-	// Stopping process if exists
-	if successCmd.Process != nil {
-		_ = failureCmd.Process.Kill()
-	}
-	if failureCmd.Process != nil {
-		_ = failureCmd.Process.Kill()
-	}
-
-	// currently we are not reading the proper exit code from the pods.
-	// this is to support future implement of retries (Maybe?)
+	// currently we are not reading the proper exit code from the pods
+	// but rather checking the job error.
+	// TODO: Support error codes.
 	state := &types.State{
 		ExitCode:  99, // timeout
 		Exited:    false,
@@ -228,11 +192,43 @@ func (this *KubeCtlBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	if waitError == nil {
 		state.Exited = true
-		if succeeded {
+		if condition == "Complete" {
 			state.ExitCode = 0
 		} else {
 			state.ExitCode = 1
 		}
+	}
+
+	// Checking what to do for state
+	doDelete := false
+	switch this.DeletePolicy {
+	case IfFailed:
+		if state.ExitCode != 0 {
+			doDelete = true
+		}
+		break
+	case IfSucceeded:
+		if state.ExitCode == 0 {
+			doDelete = true
+		}
+		break
+	case Always:
+		doDelete = true
+		break
+	}
+
+	if doDelete {
+		asJobYaml, err := jobTemplate.Render()
+		if err != nil {
+			return state, err
+		}
+
+		out, err := this.Client.DeployKubectlYaml("delete", asJobYaml)
+		if err != nil {
+			return state, errors.New(out + ". " + err.Error())
+		}
+
+		log.Debug().Msgf("Job %s deleted", jobTemplate.JobID())
 	}
 
 	return state, nil

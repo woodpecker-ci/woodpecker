@@ -2,10 +2,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ .JobName }}"
-  {{- if .Engine.Namespace}}
+  # {{- if .Engine.Namespace}}
   namespace: "{{.Engine.Namespace}}"
-  {{- end }}
+  # {{- end }}
   labels:
+    woodpecker: "true"
+    woodpecker-job: "true"
     jobid: "{{.JobID}}"
     app: "{{.Engine.ID}}"
 spec:
@@ -14,26 +16,32 @@ spec:
   template:
     metadata:
       labels:
-        woodpecker-job: "true"
+        woodpecker: "true"
+        woodpecker-pod: "true"
         jobid: "{{.JobID}}"
         app: "{{.Engine.ID}}"
     spec:
       restartPolicy: Never
       containers:
         - name: runner
-          image: "{{ .Image }}"
+          image: "{{ .Step.Image }}"
+          # {{- if .Step.WorkingDir }}
+          workingDir: "{{ .Step.WorkingDir }}"
+          # {{- end }}
           imagePullPolicy: Always
           command:
-            - bash
+            - sh
             - -c
             - |
-              echo "Started"
-              
-              for i in $(seq 1 10); do
-                echo "Waiting # $i"
-                sleep 1
-              done
-
-              echo "Ended"
-              exit 0
+              echo "$CI_SCRIPT" | base64 -d
+              echo 
+              echo
+              {{ .ShellCommand }}
+          # {{- if .HasEnvironmentVariables }}
+          env:
+            # {{- range $env := .EnvironmentVariables }}
+            - name: "{{- $env.Key -}}"
+              value: "{{- $env.Value -}}"
+            # {{- end }}
+          # {{- end }}
           resources: {}

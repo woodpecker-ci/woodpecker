@@ -1,11 +1,16 @@
 package kubectl
 
 import (
+	"bufio"
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
+	"time"
 )
 
 type KubeCtlClientCoreArgs struct {
@@ -126,4 +131,135 @@ func (this *KubeCtlClient) DeployKubectlYaml(command, yaml string) (string, erro
 	}
 
 	return output, err
+}
+
+func (this *KubeCtlClient) WaitForConditions(
+	ctx context.Context,
+	resource string, conditions []string,
+	count int, timeout time.Duration,
+) (string, error) {
+	waitCommand := this.ComposeKubectlCommand(
+		"wait",
+		this.CoreArgs.ToArgsList(),
+		"--timeout", fmt.Sprint(timeout.Seconds()+1)+"s",
+		resource,
+	)
+
+	waitContext, cancel := context.WithTimeout(ctx, timeout)
+	completed := false
+
+	var foundCondition string
+	var waitError error
+
+	done := make(chan struct{})
+
+	for _, condition := range conditions {
+		cmnd := this.GetKubectlCommandContext(
+			waitContext,
+			waitCommand,
+			"--for",
+			"condition="+condition,
+		)
+
+		go func(condition string) {
+			out, err := cmnd.CombinedOutput()
+			if completed {
+				return
+			}
+			completed = true
+			foundCondition = condition
+			if err != nil {
+				waitError = errors.New(string(out) + "\n" + err.Error())
+			}
+			cancel()
+			done <- struct{}{}
+		}(condition)
+	}
+
+	<-done
+	cancel()
+
+	if waitError != nil {
+		return foundCondition, waitError
+	}
+	return foundCondition, nil
+}
+
+func (this *KubeCtlClient) WaitForResourceEventWithContext(
+	ctx context.Context,
+	resourceNameRegex string,
+	matchEventNames []string,
+	count int,
+) (chan struct{}, error) {
+	splitBySpaces, err := regexp.Compile(`\s+`)
+	if err != nil {
+		return nil, err
+	}
+	resourceRegex, err := regexp.Compile(resourceNameRegex)
+	if err != nil {
+		return nil, err
+	}
+	matched := 0
+
+	eventsCmnd := this.GetKubectlCommandContext(ctx,
+		"get", "events", "-o", "--watch-only",
+		`custom-columns=":involvedObject.name,:reason"`,
+	)
+	pr, err := eventsCmnd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	lineScanner := bufio.NewScanner(pr)
+
+	done := make(chan struct{})
+
+	err = eventsCmnd.Start()
+	if err != nil {
+		return done, err
+	}
+
+	go func() {
+		for lineScanner.Scan() {
+			line := strings.TrimSpace(lineScanner.Text())
+			if len(line) == 0 {
+				continue
+			}
+
+			eventArgs := splitBySpaces.Split(line, -1)
+			if len(eventArgs) < 2 {
+				continue
+			}
+
+			resource := eventArgs[0]
+			eventName := eventArgs[1]
+
+			if !resourceRegex.Match([]byte(resource)) {
+				continue
+			}
+
+			matchedName := false
+
+			for _, name := range matchEventNames {
+				if name != eventName {
+					matchedName = true
+				}
+			}
+
+			if !matchedName {
+				continue
+			}
+
+			matched++
+			if matched >= count {
+				break
+			}
+		}
+
+		_ = eventsCmnd.Process.Kill()
+
+		done <- struct{}{}
+	}()
+
+	return done, nil
 }

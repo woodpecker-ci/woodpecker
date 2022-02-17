@@ -3,9 +3,12 @@ package kubectl
 import (
 	"bytes"
 	"errors"
-	"html/template"
+	"fmt"
 	"regexp"
 	"strings"
+	"text/template"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 type KubeTemplate interface {
@@ -83,9 +86,13 @@ func (t *KubeVolumeTemplate) Render() (string, error) {
 	return renderTemplate("templates/volume_claim.yaml", t)
 }
 
+type KubeJobTemplateEnv struct {
+	Key   string
+	Value string
+}
+
 type KubeJobTemplate struct {
-	Image  string          // the job image
-	Name   string          // the job name
+	Step   *types.Step     // The executing step
 	Engine *KubeCtlBackend // the executing engine
 }
 
@@ -94,9 +101,28 @@ func (t *KubeJobTemplate) Render() (string, error) {
 }
 
 func (t *KubeJobTemplate) JobName() string {
-	return toKuberenetesValidName(t.Engine.ID()+"-"+t.Name, 60)
+	return toKuberenetesValidName(t.Engine.ID()+"-"+t.Step.Name, 60)
 }
 
 func (t *KubeJobTemplate) JobID() string {
-	return t.Engine.RunID + "-" + t.JobName()
+	return t.Engine.RunID + "-" + t.Step.Name
+}
+
+func (t *KubeJobTemplate) HasEnvironmentVariables() bool {
+	return len(t.Step.Environment) > 0
+}
+
+func (t *KubeJobTemplate) EnvironmentVariables() []KubeJobTemplateEnv {
+	arr := []KubeJobTemplateEnv{}
+	for k, v := range t.Step.Environment {
+		arr = append(arr, KubeJobTemplateEnv{
+			Key:   k,
+			Value: fmt.Sprint(v) + "",
+		})
+	}
+	return arr
+}
+
+func (t *KubeJobTemplate) ShellCommand() string {
+	return strings.Join(t.Step.Command, ";")
 }

@@ -1,0 +1,50 @@
+when:
+  event:
+    - release
+    - pull_request
+
+build_image: &build_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.2
+
+clone:
+  git:
+    image: artprod.dev.bloomberg.com/sdae/woodpecker/plugins/git:0.0.7
+
+pipeline:
+  build_make_image:
+    image: *build_image
+    environment:
+      - DOCKER_HOST=docker.service:2375
+      - DOCKER_API_VERSION=1.23
+    commands:
+      - cd bloomberg/images/make
+      - cat Dockerfile
+      - docker build -t build_image:local .
+
+  compile:
+    image: *build_image
+    environment:
+      - DOCKER_HOST=docker.service:2375
+      - DOCKER_API_VERSION=1.23
+    commands:
+      - docker images build_image
+      - docker run -i --rm -v $PWD:/build build_image:local
+
+  release:
+    image: *build_image
+    when:
+      event:
+        - release
+    environment:
+      - DOCKER_HOST=docker.service:2375
+      - DOCKER_API_VERSION=1.23
+    secrets:
+      - DOCKER_USERNAME
+      - DOCKER_PASSWORD
+    commands:
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD artprod.dev.bloomberg.com
+      - bloomberg/images/woodpecker/build
+
+services:
+  docker.service:
+    image: artprod.dev.bloomberg.com/sdae/docker:0.2.0
+    privileged: true

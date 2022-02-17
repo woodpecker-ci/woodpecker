@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 func TestEngineCore(t *testing.T) {
 	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeCtlBackend)
-
 	g := goblin.Goblin(t)
 
 	g.Describe("Engine core:", func() {
@@ -25,7 +25,14 @@ func TestEngineCore(t *testing.T) {
 		g.It("render a job template", func() {
 			tmpl := KubeJobTemplate{
 				Engine: backend,
-				Image:  "artprod.dev.bloomberg.com/ubuntu20:latest",
+				Step: &types.Step{
+					Name:  "lama",
+					Image: "artprod.dev.bloomberg.com/ubuntu20:latest",
+					Environment: map[string]string{
+						"test":   "asd+asd+a",
+						"tester": "b",
+					},
+				},
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {
