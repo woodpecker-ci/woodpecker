@@ -1,0 +1,15 @@
+skip_clone: true
+
+pipeline:
+  first:
+    image: artprod.dev.bloomberg.com/ubuntu20:latest
+    commands:
+      - echo "first" >| loaded_message
+      - cat loaded_message
+  second:
+    image: artprod.dev.bloomberg.com/ubuntu20:latest
+    commands:
+      - |
+        echo "From first command: $(cat loaded_message)"
+      - echo "second"
+      - exit 2

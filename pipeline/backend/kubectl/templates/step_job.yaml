@@ -2,14 +2,13 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ .JobName }}"
-  # {{- if .Engine.Namespace}}
-  namespace: "{{.Engine.Namespace}}"
+  # {{- if .Backend.Namespace}}
+  namespace: "{{.Backend.Namespace}}"
   # {{- end }}
   labels:
     woodpecker: "true"
-    woodpecker-job: "true"
-    jobid: "{{.JobID}}"
-    app: "{{.Engine.ID}}"
+    woodpecker-run: "{{.Backend.ID}}"
+    woodpecker-job-id: "{{.JobID}}"
 spec:
   # Number of times to run is one.
   backoffLimit: 0
@@ -17,11 +16,18 @@ spec:
     metadata:
       labels:
         woodpecker: "true"
-        woodpecker-pod: "true"
-        jobid: "{{.JobID}}"
-        app: "{{.Engine.ID}}"
+        woodpecker-run: "{{.Backend.ID}}"
+        woodpecker-job-id: "{{.JobID}}"
     spec:
       restartPolicy: Never
+      # {{- if ne (len .Step.Volumes) 0 }}
+      volumes:
+        # {{- range $mnt := .Mounts }}
+        - name: "{{ $mnt.PVC.MountName }}"
+          persistentVolumeClaim:
+            claimName: "{{ $mnt.PVC.VolumeName }}"
+        # {{- end }}
+      # {{- end }}
       containers:
         - name: runner
           image: "{{ .Step.Image }}"
@@ -33,12 +39,21 @@ spec:
             - sh
             - -c
             - |
+              echo "Running: {{ .ShellCommand }}"
+              sleep 3
               {{ .ShellCommand }}
-          # {{- if .HasEnvironmentVariables }}
+          # {{- if ne (len .Step.Environment) 0 }}
           env:
-            # {{- range $env := .EnvironmentVariables }}
-            - name: "{{- $env.Key -}}"
-              value: "{{- $env.Value -}}"
+            # {{- range $k, $v := .Step.Environment }}
+            - name: "{{- $k -}}"
+              value: "{{- $v -}}"
             # {{- end }}
           # {{- end }}
           resources: {}
+          # {{- if ne (len .Step.Volumes) 0 }}
+          volumeMounts:
+            # {{- range $mnt := .Mounts }}
+            - name: "{{ $mnt.PVC.MountName }}"
+              mountPath: "{{ $mnt.MountPath }}"
+            # {{- end }}
+          # {{- end }}

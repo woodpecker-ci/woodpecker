@@ -24,7 +24,7 @@ func TestEngineCore(t *testing.T) {
 
 		g.It("render a job template", func() {
 			tmpl := KubeJobTemplate{
-				Engine: backend,
+				Backend: backend,
 				Step: &types.Step{
 					Name:  "lama",
 					Image: "artprod.dev.bloomberg.com/ubuntu20:latest",
@@ -43,8 +43,8 @@ func TestEngineCore(t *testing.T) {
 		})
 
 		g.It("render a volume template (with values)", func() {
-			tmpl := KubeVolumeTemplate{
-				Engine:           backend,
+			tmpl := KubePVCTemplate{
+				Backend:          backend,
 				StorageClassName: "default",
 				StorageSize:      "3Gi",
 			}
@@ -57,8 +57,8 @@ func TestEngineCore(t *testing.T) {
 		})
 
 		g.It("render a volume template (missing values)", func() {
-			tmpl := KubeVolumeTemplate{
-				Engine: backend,
+			tmpl := KubePVCTemplate{
+				Backend: backend,
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {

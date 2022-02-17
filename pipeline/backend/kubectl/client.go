@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"time"
 )
 
 type KubeCtlClientCoreArgs struct {
@@ -18,13 +17,13 @@ type KubeCtlClientCoreArgs struct {
 	Context   string // the default context
 }
 
-func (this *KubeCtlClientCoreArgs) ToArgsList() []string {
+func (clientArgs *KubeCtlClientCoreArgs) ToArgsList() []string {
 	cmnd := []string{}
-	if len(this.Namespace) > 0 {
-		cmnd = append(cmnd, "--namespace", this.Namespace)
+	if len(clientArgs.Namespace) > 0 {
+		cmnd = append(cmnd, "--namespace", clientArgs.Namespace)
 	}
-	if len(this.Context) > 0 {
-		cmnd = append(cmnd, "--context", this.Context)
+	if len(clientArgs.Context) > 0 {
+		cmnd = append(cmnd, "--context", clientArgs.Context)
 	}
 	return cmnd
 }
@@ -44,10 +43,10 @@ func firstNotNil(args ...interface{}) interface{} {
 	return nil
 }
 
-func (this *KubeCtlClientCoreArgs) Merge(args KubeCtlClientCoreArgs) KubeCtlClientCoreArgs {
+func (clientArgs *KubeCtlClientCoreArgs) Merge(args KubeCtlClientCoreArgs) KubeCtlClientCoreArgs {
 	return KubeCtlClientCoreArgs{
-		Namespace: firstNotNil(args.Namespace, this.Namespace).(string),
-		Context:   firstNotNil(args.Context, this.Context).(string),
+		Namespace: firstNotNil(args.Namespace, clientArgs.Namespace).(string),
+		Context:   firstNotNil(args.Context, clientArgs.Context).(string),
 	}
 }
 
@@ -56,16 +55,19 @@ type KubeCtlClient struct {
 	CoreArgs   KubeCtlClientCoreArgs // the default args
 }
 
-func (this *KubeCtlClient) GetExecutable() string {
-	if len(this.Executable) == 0 {
+func (client *KubeCtlClient) GetExecutable() string {
+	if len(client.Executable) == 0 {
 		return "kubectl"
 	}
-	return this.Executable
+	return client.Executable
 }
 
 // run a kubectl command
-func (e *KubeCtlClient) RunKubectlCommand(args ...interface{}) (string, error) {
-	rslt, err := exec.Command(e.GetExecutable(), e.ComposeKubectlCommand(args...)...).CombinedOutput()
+func (client *KubeCtlClient) RunKubectlCommand(
+	ctx context.Context, args ...interface{},
+) (string, error) {
+	cmnd := client.CreateKubectlCommand(ctx, args...)
+	rslt, err := cmnd.CombinedOutput()
 	if err != nil {
 		return "", errors.New(string(rslt) + err.Error())
 	}
@@ -73,11 +75,11 @@ func (e *KubeCtlClient) RunKubectlCommand(args ...interface{}) (string, error) {
 }
 
 // create a kubectl command context
-func (e *KubeCtlClient) GetKubectlCommandContext(ctx context.Context, args ...interface{}) *exec.Cmd {
-	return exec.CommandContext(ctx, e.GetExecutable(), e.ComposeKubectlCommand(args...)...)
+func (client *KubeCtlClient) CreateKubectlCommand(ctx context.Context, args ...interface{}) *exec.Cmd {
+	return exec.CommandContext(ctx, client.GetExecutable(), client.ComposeKubectlCommand(args...)...)
 }
 
-func (this *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
+func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
 	command := []string{}
 	for _, ar := range args {
 		switch ar.(type) {
@@ -103,7 +105,46 @@ func (this *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
 	return command
 }
 
-func (this *KubeCtlClient) DeployKubectlYaml(command, yaml string) (string, error) {
+// Get resource names from selector (with kind)
+func (client *KubeCtlClient) GetResourceNames(
+	ctx context.Context,
+	resourceType string,
+	selector string,
+) ([]string, error) {
+	resourceNames := []string{}
+	output, err := client.RunKubectlCommand(
+		ctx,
+		"get", resourceType,
+		"-o",
+		`custom-columns=:kind,:metadata.name`,
+		"-l", selector,
+	)
+	if err != nil {
+		return resourceNames, err
+	}
+
+	lineSplit, err := regexp.Compile(`\s+`)
+	if err != nil {
+		return resourceNames, err
+	}
+
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		lineArgs := lineSplit.Split(line, -1)
+		if len(lineArgs) != 2 {
+			continue
+		}
+		resourceNames = append(
+			resourceNames,
+			fmt.Sprintf("%s/%s", strings.ToLower(lineArgs[0]), lineArgs[1]),
+		)
+	}
+	return resourceNames, nil
+}
+
+func (client *KubeCtlClient) DeployKubectlYaml(
+	ctx context.Context, command, yaml string,
+) (string, error) {
 	yamlFile, err := ioutil.TempFile(os.TempDir(), "wp.setup.kubectl.*.bat")
 	if err != nil {
 		return "", err
@@ -119,7 +160,12 @@ func (this *KubeCtlClient) DeployKubectlYaml(command, yaml string) (string, erro
 	}
 
 	yamlFilename := yamlFile.Name()
-	output, err := this.RunKubectlCommand(command, "-f", yamlFilename)
+	output, err := client.RunKubectlCommand(
+		ctx,
+		command,
+		"--wait=false",
+		"-f", yamlFilename,
+	)
 	removeErr := os.Remove(yamlFilename)
 
 	if err != nil {
@@ -133,28 +179,26 @@ func (this *KubeCtlClient) DeployKubectlYaml(command, yaml string) (string, erro
 	return output, err
 }
 
-func (this *KubeCtlClient) WaitForConditions(
+func (client *KubeCtlClient) WaitForConditions(
 	ctx context.Context,
 	resource string, conditions []string,
-	count int, timeout time.Duration,
+	count int,
 ) (string, error) {
-	waitCommand := this.ComposeKubectlCommand(
+	waitCommand := client.ComposeKubectlCommand(
 		"wait",
-		this.CoreArgs.ToArgsList(),
-		"--timeout", fmt.Sprint(timeout.Seconds()+1)+"s",
+		client.CoreArgs.ToArgsList(),
+		"--timeout", fmt.Sprint(60*60*24*7)+"s",
 		resource,
 	)
 
-	waitContext, cancel := context.WithTimeout(ctx, timeout)
+	waitContext, cancel := context.WithCancel(ctx)
 	completed := false
 
 	var foundCondition string
 	var waitError error
 
-	done := make(chan struct{})
-
 	for _, condition := range conditions {
-		cmnd := this.GetKubectlCommandContext(
+		cmnd := client.CreateKubectlCommand(
 			waitContext,
 			waitCommand,
 			"--for",
@@ -172,11 +216,10 @@ func (this *KubeCtlClient) WaitForConditions(
 				waitError = errors.New(string(out) + "\n" + err.Error())
 			}
 			cancel()
-			done <- struct{}{}
 		}(condition)
 	}
 
-	<-done
+	<-waitContext.Done()
 	cancel()
 
 	if waitError != nil {
@@ -185,12 +228,12 @@ func (this *KubeCtlClient) WaitForConditions(
 	return foundCondition, nil
 }
 
-func (this *KubeCtlClient) WaitForResourceEventWithContext(
+func (client *KubeCtlClient) WaitForResourceEvents(
 	ctx context.Context,
 	resourceNameRegex string,
 	matchEventNames []string,
 	count int,
-) (chan struct{}, error) {
+) (context.Context, error) {
 	splitBySpaces, err := regexp.Compile(`\s+`)
 	if err != nil {
 		return nil, err
@@ -199,55 +242,67 @@ func (this *KubeCtlClient) WaitForResourceEventWithContext(
 	if err != nil {
 		return nil, err
 	}
-	matched := 0
 
-	eventsCmnd := this.GetKubectlCommandContext(ctx,
-		"get", "events", "-o", "--watch-only",
+	eventsContext, eventsContextCancel := context.WithCancel(ctx)
+
+	eventsCmnd := client.CreateKubectlCommand(
+		eventsContext,
+		"get", "events", "--watch-only", "-o",
 		`custom-columns=":involvedObject.name,:reason"`,
 	)
+
 	pr, err := eventsCmnd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		eventsContextCancel()
+		return eventsContext, err
 	}
 
 	lineScanner := bufio.NewScanner(pr)
-
-	done := make(chan struct{})
-
 	err = eventsCmnd.Start()
+
 	if err != nil {
-		return done, err
+		eventsContextCancel()
+		return eventsContext, err
+	}
+
+	matchLine := func(line string) bool {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 {
+			return false
+		}
+
+		eventArgs := splitBySpaces.Split(line, -1)
+		if len(eventArgs) < 2 {
+			return false
+		}
+
+		resource := eventArgs[0]
+		eventName := eventArgs[1]
+
+		if !resourceRegex.Match([]byte(resource)) {
+			return false
+		}
+
+		matchedName := false
+
+		for _, name := range matchEventNames {
+			if name != eventName {
+				matchedName = true
+			}
+		}
+
+		return matchedName
 	}
 
 	go func() {
+		matched := 0
 		for lineScanner.Scan() {
-			line := strings.TrimSpace(lineScanner.Text())
-			if len(line) == 0 {
-				continue
+			if matchLine(lineScanner.Text()) {
+				matched++
 			}
 
-			eventArgs := splitBySpaces.Split(line, -1)
-			if len(eventArgs) < 2 {
-				continue
-			}
-
-			resource := eventArgs[0]
-			eventName := eventArgs[1]
-
-			if !resourceRegex.Match([]byte(resource)) {
-				continue
-			}
-
-			matchedName := false
-
-			for _, name := range matchEventNames {
-				if name != eventName {
-					matchedName = true
-				}
-			}
-
-			if !matchedName {
-				continue
+			if matched >= count {
+				break
 			}
 
 			matched++
@@ -256,10 +311,8 @@ func (this *KubeCtlClient) WaitForResourceEventWithContext(
 			}
 		}
 
-		_ = eventsCmnd.Process.Kill()
-
-		done <- struct{}{}
+		eventsContextCancel()
 	}()
 
-	return done, nil
+	return eventsContext, nil
 }

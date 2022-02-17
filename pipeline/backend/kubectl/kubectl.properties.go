@@ -1,11 +1,11 @@
 package kubectl
 
 // The run id
-func (this *KubeCtlBackend) ID() string {
-	return "wp-" + this.RunID
+func (backend *KubeCtlBackend) ID() string {
+	return "wp-" + backend.RunID
 }
 
 // The run namespace
-func (this *KubeCtlBackend) Namespace() string {
-	return this.Client.CoreArgs.Namespace
+func (backend *KubeCtlBackend) Namespace() string {
+	return backend.Client.CoreArgs.Namespace
 }

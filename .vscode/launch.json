@@ -32,7 +32,7 @@
       "console": "integratedTerminal",
       "args": [
         "exec",
-        "${workspaceFolder}/cmd/cli/test.yaml"
+        "${workspaceFolder}/pipeline/pipeline_test.yaml"
       ],
       "cwd": "${workspaceFolder}"
     },
