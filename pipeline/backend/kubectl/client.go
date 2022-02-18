@@ -106,20 +106,18 @@ func (client *KubeCtlClient) LoadDefaults(ctx context.Context) error {
 			ctx, "config", "view", "--minify", "--output",
 			"jsonpath={..namespace}",
 		)
-		if err != nil {
-			return err
+		if err == nil {
+			client.CoreArgs.Namespace = strings.TrimSpace(namespace)
 		}
-		client.CoreArgs.Namespace = strings.TrimSpace(namespace)
 	}
 
 	if len(client.CoreArgs.Context) == 0 {
 		context, err := client.RunKubectlCommand(
 			ctx, "config", "current-context",
 		)
-		if err != nil {
-			return err
+		if err == nil {
+			client.CoreArgs.Context = strings.TrimSpace(context)
 		}
-		client.CoreArgs.Context = strings.TrimSpace(context)
 	}
 
 	return nil
