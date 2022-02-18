@@ -18,6 +18,9 @@ spec:
         woodpecker: "true"
         woodpecker-run: "{{.Backend.ID}}"
         woodpecker-job-id: "{{.JobID}}"
+        # {{- range $k, $v := .Step.Labels }}
+        "{{- $k -}}": "{{- $v -}}"
+        # {{- end }}
     spec:
       restartPolicy: Never
       # {{- if ne (len .Step.Volumes) 0 }}
@@ -28,20 +31,49 @@ spec:
             claimName: "{{ $mnt.PVC.VolumeName }}"
         # {{- end }}
       # {{- end }}
+      dnsConfig:
+        nameservers:
+          # {{- range $dns := .Step.DNS }}
+          - "{{ $dns }}"
+          # {{- end }}
+        searches:
+          # {{- range $search := .Step.DNSSearch }}
+          - "{{ $search }}"
+          # {{- end }}
+      # {{- if ne (len .Backend.DetachedJobs) 0 }}
+      hostAliases:
+        # {{- range $job := .Backend.DetachedJobs }}
+        - ip: "{{ $job.DetachedPodIP }}"
+          hostnames:
+            - "{{ $job.DetachedHostAlias }}"
+        # {{- end }}
+      # {{- end }}
       containers:
         - name: runner
           image: "{{ .Step.Image }}"
           # {{- if .Step.WorkingDir }}
           workingDir: "{{ .Step.WorkingDir }}"
           # {{- end }}
-          imagePullPolicy: Always
+          imagePullPolicy: "{{ .PullPolicy }}"
+          # {{- if .Step.Privileged }}
+          securityContext:
+            privileged: true
+          # {{- end }}
+          resources:
+            # Request limits
+            requests:
+              memory: 400Mi
+              cpu: 250m
+            limits:
+              memory: "{{ .Backend.JobMemoryLimit }}"
+              cpu: "{{ .Backend.JobCPULimit }}"
+          # {{- if .HasShellCommand }}
           command:
             - sh
             - -c
             - |
-              echo "Running: {{ .ShellCommand }}"
-              sleep 3
               {{ .ShellCommand }}
+          # {{- end -}}
           # {{- if ne (len .Step.Environment) 0 }}
           env:
             # {{- range $k, $v := .Step.Environment }}
@@ -49,7 +81,7 @@ spec:
               value: "{{- $v -}}"
             # {{- end }}
           # {{- end }}
-          resources: {}
+
           # {{- if ne (len .Step.Volumes) 0 }}
           volumeMounts:
             # {{- range $mnt := .Mounts }}

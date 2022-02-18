@@ -2,7 +2,7 @@ package kubectl
 
 // The run id
 func (backend *KubeCtlBackend) ID() string {
-	return "wp-" + backend.RunID
+	return toKuberenetesValidName("wp-"+backend.RunID, 30)
 }
 
 // The run namespace

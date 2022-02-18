@@ -28,25 +28,10 @@ func (clientArgs *KubeCtlClientCoreArgs) ToArgsList() []string {
 	return cmnd
 }
 
-func firstNotNil(args ...interface{}) interface{} {
-	for _, arg := range args {
-		switch arg.(type) {
-		case string:
-			if len(args) > 0 {
-				return arg
-			}
-			break
-		default:
-			return arg
-		}
-	}
-	return nil
-}
-
 func (clientArgs *KubeCtlClientCoreArgs) Merge(args KubeCtlClientCoreArgs) KubeCtlClientCoreArgs {
 	return KubeCtlClientCoreArgs{
-		Namespace: firstNotNil(args.Namespace, clientArgs.Namespace).(string),
-		Context:   firstNotNil(args.Context, clientArgs.Context).(string),
+		Namespace: FirstNotEmpty(args.Namespace, clientArgs.Namespace).(string),
+		Context:   FirstNotEmpty(args.Context, clientArgs.Context).(string),
 	}
 }
 
@@ -143,7 +128,9 @@ func (client *KubeCtlClient) GetResourceNames(
 }
 
 func (client *KubeCtlClient) DeployKubectlYaml(
-	ctx context.Context, command, yaml string,
+	ctx context.Context,
+	command, yaml string,
+	wait bool,
 ) (string, error) {
 	yamlFile, err := ioutil.TempFile(os.TempDir(), "wp.setup.kubectl.*.bat")
 	if err != nil {
@@ -163,7 +150,7 @@ func (client *KubeCtlClient) DeployKubectlYaml(
 	output, err := client.RunKubectlCommand(
 		ctx,
 		command,
-		"--wait=false",
+		Triary(wait, "--wait=true", "--wait=false"),
 		"-f", yamlFilename,
 	)
 	removeErr := os.Remove(yamlFilename)

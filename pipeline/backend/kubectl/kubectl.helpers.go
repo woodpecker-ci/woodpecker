@@ -1,6 +1,7 @@
 package kubectl
 
 import (
+	"context"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -49,4 +50,47 @@ func (backend *KubeCtlBackend) RenderSetupYaml() (string, error) {
 	}
 
 	return strings.Join(templatesAsYaml, "\n---\n"), nil
+}
+
+func (backend *KubeCtlBackend) GetJobPodName(
+	ctx context.Context,
+	jobTemplate *KubeJobTemplate,
+) ([]string, error) {
+	var podNames []string
+	var err error
+	for {
+		podNames, err = backend.Client.GetResourceNames(
+			ctx,
+			"pod",
+			"woodpecker-job-id="+jobTemplate.JobID(),
+		)
+
+		if err != nil {
+			return []string{}, err
+		}
+
+		if len(podNames) == 0 {
+			continue
+		}
+
+		break
+	}
+	return podNames, nil
+}
+
+func (backend *KubeCtlBackend) PopulateDetachedInfo(
+	ctx context.Context,
+	podName string,
+	jobTemplate *KubeJobTemplate,
+) error {
+	podIP, err := backend.Client.RunKubectlCommand(
+		ctx, "get", podName,
+		"-o",
+		"custom-columns=:status.podIP",
+	)
+	if err != nil {
+		return err
+	}
+	jobTemplate.DetachedPodIP = strings.TrimSpace(podIP)
+	return nil
 }

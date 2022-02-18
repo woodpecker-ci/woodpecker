@@ -1,15 +1,36 @@
 skip_clone: true
 
+# TODO: test bad image (image pull backoff)
+runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.3
+dind_image: &dind_image artprod.dev.bloomberg.com/sdae/docker:0.2.0
+
 pipeline:
   first:
-    image: artprod.dev.bloomberg.com/ubuntu20:latest
+    image: *runner_image
     commands:
-      - echo "first" >| loaded_message
+      - echo "first to run" >| loaded_message
       - cat loaded_message
-  second:
-    image: artprod.dev.bloomberg.com/ubuntu20:latest
+  shared_test:
+    image: *runner_image
     commands:
       - |
         echo "From first command: $(cat loaded_message)"
-      - echo "second"
-      - exit 2
+  comms_test:
+    image: *runner_image
+    commands:
+      - cat /etc/hosts
+      - echo; echo
+      - nc -zv docker.service 2375
+  docker_test:
+    image: *dind_image
+    environment:
+      - DOCKER_HOST=docker.service:2375
+      - TEST_IMAGE=artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.3
+    commands:
+      - docker ps
+      - docker run -i --rm -v $PWD:/build $TEST_IMAGE ls
+
+services:
+  docker.service:
+    image: *dind_image
+    privileged: true

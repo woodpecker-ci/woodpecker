@@ -7,8 +7,9 @@ import (
 )
 
 type KubeJobTemplate struct {
-	Step    *types.Step     // The executing step
-	Backend *KubeCtlBackend // the executing engine
+	Step          *types.Step     // The executing step
+	Backend       *KubeCtlBackend // the executing engine
+	DetachedPodIP string          // The main pod ip.
 }
 
 func (template *KubeJobTemplate) Render() (string, error) {
@@ -27,6 +28,26 @@ func (template *KubeJobTemplate) ShellCommand() string {
 	return strings.Join(template.Step.Command, ";")
 }
 
+func (template *KubeJobTemplate) HasShellCommand() bool {
+	return len(template.Step.Command) != 0
+}
+
+func (template *KubeJobTemplate) PullPolicy() string {
+	return Triary(template.Step.Pull, "Always", "IfNotPresent").(string)
+}
+
+func (template *KubeJobTemplate) DetachedHostAlias() string {
+	return Triary(
+		len(template.Step.Alias) > 0,
+		template.Step.Alias,
+		toKuberenetesValidName(template.Step.Name, 50),
+	).(string)
+}
+
+func (template *KubeJobTemplate) HasDNSCondig() bool {
+	return len(template.Step.DNS) > 0 || len(template.Step.DNSSearch) > 0
+}
+
 type KubeJobTemplateMount struct {
 	MountPath string
 	PVC       KubePVCTemplate
@@ -34,6 +55,11 @@ type KubeJobTemplateMount struct {
 
 func (template *KubeJobTemplate) Mounts() []KubeJobTemplateMount {
 	mounts := []KubeJobTemplateMount{}
+	if template.Step.Detached && !template.Backend.PVCAllowOnDetached {
+		// To use detached mounts change the storage class.
+		return mounts
+	}
+
 	for _, vol := range template.Step.Volumes {
 		volArgs := strings.Split(vol, ":")
 		if len(volArgs) < 2 {

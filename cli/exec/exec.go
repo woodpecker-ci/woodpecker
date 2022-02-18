@@ -167,7 +167,8 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithPrefix(
 			c.String("prefix"),
 		),
-		compiler.WithProxy(),
+		// TODO: should not be here, or use flag. Confusing when local testing.
+		// compiler.WithProxy(),
 		compiler.WithLocal(
 			c.Bool("local"),
 		),

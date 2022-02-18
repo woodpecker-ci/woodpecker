@@ -1,8 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: test-network-policy
-  namespace: default
+  name: "{{ .Backend.ID }}"
+  # {{- if .Backend.Namespace}}
+  namespace: "{{.Backend.Namespace}}"
+  # {{- end }}
+  labels:
+    woodpecker: "true"
+    woodpecker-run: "{{.Backend.ID}}"
 spec:
   podSelector:
     matchLabels:
@@ -11,20 +16,6 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - from:
-        - ipBlock:
-            cidr: 172.17.0.0/16
-            except:
-              - 172.17.1.0/24
-        - namespaceSelector:
-            matchLabels:
-              project: myproject
-        - podSelector:
-            matchLabels:
-              role: frontend
-      ports:
-        - protocol: TCP
-          port: 6379
   egress:
     - to:
         - ipBlock:

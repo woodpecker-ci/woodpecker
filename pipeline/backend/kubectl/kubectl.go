@@ -18,17 +18,23 @@ const (
 )
 
 type KubeCtlBackend struct {
-	Client         *KubeCtlClient              // The kubernetes client
-	RunID          string                      // the random run id
-	Config         *types.Config               // the run config
-	DeletePolicy   string                      // The job delete policy
+	Client         *KubeCtlClient // The kubernetes client
+	Config         *types.Config  // the run config
+	RunID          string         // the random run id
+	DeletePolicy   string         // The job delete policy
+	JobMemoryLimit string         // The runner container memory limit (1Gi)
+	JobCPULimit    string         // The runner container cpu limit (200m)
+
 	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
 	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
 	SetupTemplates []KubeTemplate              // Loaded setup templates
+	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
 	RequestTimeout time.Duration               // The kubectl request timeout
 
-	// internal
+	// flags
+	PVCAllowOnDetached bool // Allow pvc's on detached containers
 
+	// internal
 	podLogsContext context.Context    // The log waiter for non detached pods
 	podLogsStop    context.CancelFunc // The log context reader cancel function
 }
@@ -48,9 +54,12 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		Client: client,
 		Config: &types.Config{},
 		// the engine id must be randomized in order not to clobber/error other runs.
-		RunID:          CreateRandomId(10),
-		DeletePolicy:   IfSucceeded,
-		RequestTimeout: 10 * time.Second,
+		RunID:              CreateRandomID(10),
+		DeletePolicy:       IfSucceeded,
+		RequestTimeout:     10 * time.Second,
+		PVCAllowOnDetached: false,
+		JobMemoryLimit:     "1Gi",
+		JobCPULimit:        "500m", // half a cpu
 	}
 }
 
@@ -82,7 +91,7 @@ func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) err
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", setupYaml)
+	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", setupYaml, false)
 
 	if err != nil {
 		return err
@@ -96,13 +105,25 @@ func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) err
 // Destroy the pipeline environment.
 func (backend *KubeCtlBackend) Destroy(ctx context.Context, cfg *types.Config) error {
 	logger := backend.MakeLogger("")
-	setupYaml, err := backend.RenderSetupYaml()
+	destoryYaml, err := backend.RenderSetupYaml()
 
 	if err != nil {
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "delete", setupYaml)
+	if len(backend.DetachedJobs) > 0 {
+		logger.Debug().Msg("Destroying detached jobs")
+		for _, job := range backend.DetachedJobs {
+			jobYaml, err := job.Render()
+			if err != nil {
+				return err
+			}
+			// adding to the destroy command
+			destoryYaml += "\n---\n" + jobYaml
+		}
+	}
+
+	output, err := backend.Client.DeployKubectlYaml(ctx, "delete", destoryYaml, false)
 	if err != nil {
 		return err
 	}
@@ -118,6 +139,12 @@ func (backend *KubeCtlBackend) Exec(ctx context.Context, step *types.Step) error
 		Step:    step,
 	}
 
+	if step.Detached {
+		step.Alias = Triary(
+			len(step.Alias) > 0, step.Alias, toKuberenetesValidName(step.Name, 50),
+		).(string)
+	}
+
 	logger := backend.MakeLogger(jobTemplate.JobID())
 
 	jobAsYaml, err := jobTemplate.Render()
@@ -125,13 +152,44 @@ func (backend *KubeCtlBackend) Exec(ctx context.Context, step *types.Step) error
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", jobAsYaml)
+	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", jobAsYaml, false)
 
 	if err != nil {
 		return err
 	}
 
 	logger.Debug().Msgf("Job initialized with\n %s", output)
+
+	if step.Detached {
+		backend.DetachedJobs = append(backend.DetachedJobs, &jobTemplate)
+
+		// loaded a detached service. We need to wait for it to start,
+		// and load the IP from it. The add that to the DetachedJobs.
+		logger.Debug().Msg("Waiting for detached job pod to exist")
+		podNames, err := backend.GetJobPodName(ctx, &jobTemplate)
+		if err != nil {
+			return err
+		}
+		podName := podNames[0]
+
+		logger.Debug().Msg("Waiting for detached job pod to be ready (Initialized)")
+		_, err = backend.Client.WaitForConditions(
+			ctx,
+			podName, []string{"Initialized"},
+			1,
+		)
+		if err != nil {
+			return err
+		}
+
+		logger.Debug().Msg("Reading detached pod info")
+		err = backend.PopulateDetachedInfo(ctx, podName, &jobTemplate)
+		if err != nil {
+			return err
+		}
+
+		logger.Debug().Msg("Detached step configured")
+	}
 
 	return nil
 }
@@ -160,29 +218,12 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 
 	go func() {
 		logger.Debug().Msg("Waiting for pod to exist")
+		podNames, err := backend.GetJobPodName(logsContext, &jobTemplate)
 
-		var podNames []string
-		var err error
-
-		for {
-			podNames, err = backend.Client.GetResourceNames(
-				logsContext,
-				"pod",
-				"woodpecker-job-id="+jobTemplate.JobID(),
-			)
-
-			if err != nil {
-				logger.Error().Err(err).Msg("Error getting job pod names. Log reader failed.")
-				stopLogger()
-				return
-			}
-
-			if len(podNames) == 0 {
-				logger.Error().Msg("Pods not ready. Retry [50 ms]")
-				continue
-			}
-
-			break
+		if err != nil {
+			logger.Error().Err(err).Msg("Failed to retrieve job pod name(s). Log reader failed.")
+			stopLogger()
+			return
 		}
 
 		// only wait for first pod ready.
@@ -192,7 +233,7 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 		logger.Debug().Msg("Waiting for pod to be ready (Initialized)")
 		_, err = backend.Client.WaitForConditions(
 			logsContext,
-			podName, []string{"Ready"},
+			podName, []string{"Initialized"},
 			1,
 		)
 
@@ -258,20 +299,18 @@ func (backend *KubeCtlBackend) Wait(ctx context.Context, step *types.Step) (*typ
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
 	// wait for logs (or give error after the request timeout)
-	if !step.Detached {
-		select {
-		case <-time.After(backend.RequestTimeout):
-			logger.Error().Msg(
-				"Error reading logs, request timeout or kubectl logger stuck.",
-			)
-			break
-		case <-backend.podLogsContext.Done():
-			logger.Debug().Msg("Read job logs: OK!")
-			break
-		}
-
-		backend.podLogsStop()
+	select {
+	case <-time.After(backend.RequestTimeout):
+		logger.Error().Msg(
+			"Error reading logs, request timeout or kubectl logger stuck.",
+		)
+		break
+	case <-backend.podLogsContext.Done():
+		logger.Debug().Msg("Read job logs: OK!")
+		break
 	}
+
+	backend.podLogsStop()
 
 	// currently we are not reading the proper exit code from the pods
 	// but rather checking the job error.
@@ -315,7 +354,7 @@ func (backend *KubeCtlBackend) Wait(ctx context.Context, step *types.Step) (*typ
 			return state, err
 		}
 
-		out, err := backend.Client.DeployKubectlYaml(ctx, "delete", asJobYaml)
+		out, err := backend.Client.DeployKubectlYaml(ctx, "delete", asJobYaml, true)
 		if err != nil {
 			return state, errors.New(out + ". " + err.Error())
 		}
