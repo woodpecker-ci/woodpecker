@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -25,6 +26,11 @@ type KubeCtlBackend struct {
 	JobMemoryLimit string         // The runner container memory limit (1Gi)
 	JobCPULimit    string         // The runner container cpu limit (200m)
 
+	// A delay before the pod start. Various reasons.
+	// Most notably some backend CNI's (like flannel)
+	// require this to apply egress network policy to the pod.
+	ContainerStartDelay int64
+
 	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
 	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
 	SetupTemplates []KubeTemplate              // Loaded setup templates
@@ -32,7 +38,8 @@ type KubeCtlBackend struct {
 	RequestTimeout time.Duration               // The kubectl request timeout
 
 	// flags
-	PVCAllowOnDetached bool // Allow pvc's on detached containers
+	PVCAllowOnDetached     bool // Allow pvc's on detached containers
+	EnableRunNetworkPolicy bool // Do not implement a network policy when running a pipeline.
 
 	// internal
 	podLogsContext context.Context    // The log waiter for non detached pods
@@ -47,19 +54,28 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 
 	client := &KubeCtlClient{
 		Executable: execuatble,
-		CoreArgs:   args,
+		CoreArgs: args.Merge(KubeCtlClientCoreArgs{
+			Namespace: getWPKEnv("NAMESPACE", "").(string),
+			Context:   getWPKEnv("CONTEXT", "").(string),
+		}),
 	}
+
+	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
+	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
 
 	return &KubeCtlBackend{
 		Client: client,
 		Config: &types.Config{},
 		// the engine id must be randomized in order not to clobber/error other runs.
-		RunID:              CreateRandomID(10),
-		DeletePolicy:       IfSucceeded,
-		RequestTimeout:     10 * time.Second,
-		PVCAllowOnDetached: false,
-		JobMemoryLimit:     "1Gi",
-		JobCPULimit:        "500m", // half a cpu
+		RunID:        CreateRandomID(10),
+		DeletePolicy: getWPKEnv("DELETE_POLICY", IfSucceeded).(string),
+
+		RequestTimeout:         time.Duration(requestTimeoutSeconds) * time.Second,
+		PVCAllowOnDetached:     getWPKEnv("ALLOW_PVC_ON_DETACHED", "false").(string) == "true",
+		EnableRunNetworkPolicy: getWPKEnv("ENABLE_NETWORK_POLICY", "false").(string) == "true",
+		ContainerStartDelay:    containerStartDelaySeconds,
+		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),
+		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
 	}
 }
 
@@ -86,6 +102,12 @@ func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) err
 	backend.InitializeConfig(cfg)
 	logger := backend.MakeLogger("")
 
+	logger.Debug().Msg("Loading kube client defaults")
+	err := backend.Client.LoadDefaults(ctx)
+	if err != nil {
+		return err
+	}
+
 	setupYaml, err := backend.RenderSetupYaml()
 	if err != nil {
 		return err
@@ -97,7 +119,13 @@ func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) err
 		return err
 	}
 
-	logger.Debug().Msgf("Pipeline setup complete with:\n %s", output)
+	logger.Info().Str(
+		"namespace", backend.Namespace(),
+	).Str(
+		"context", backend.Client.CoreArgs.Context,
+	).Msgf("Started pipeline execution")
+
+	logger.Debug().Msgf("Kubectl setup response:\n %s", output)
 
 	return nil
 }
@@ -207,10 +235,27 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 	errorReader, errorWriter := io.Pipe()
 	logsContext, logsContextCancel := context.WithCancel(ctx)
 
-	stopLogger := func() {
+	stopLoggerWithError := func(err error, msg string) {
 		logsContextCancel()
 		errorWriter.Close()
 		logsWriter.Close()
+
+		if err != nil {
+			event := logger.Error()
+			stderr, _ := GetReaderContents(errorReader)
+			stdout, _ := GetReaderContents(logsReader)
+			if len(stdout) > 0 {
+				event = event.Str("stdout", stdout)
+			}
+			if len(stderr) > 0 {
+				event = event.Str("stderr", stderr)
+			}
+			event.Err(err).Msg(msg)
+		}
+	}
+
+	stopLogger := func() {
+		stopLoggerWithError(nil, "")
 	}
 
 	backend.podLogsContext = logsContext
@@ -221,8 +266,7 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 		podNames, err := backend.GetJobPodName(logsContext, &jobTemplate)
 
 		if err != nil {
-			logger.Error().Err(err).Msg("Failed to retrieve job pod name(s). Log reader failed.")
-			stopLogger()
+			stopLoggerWithError(err, "Failed to retrieve job pod name(s). Log reader failed.")
 			return
 		}
 
@@ -238,8 +282,7 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 		)
 
 		if err != nil {
-			logger.Error().Err(err).Msg("Failed to wait for job pod to start. Log reader failed.")
-			stopLogger()
+			stopLoggerWithError(err, "Failed to wait for job pod to start. Log reader failed.")
 			return
 		}
 
@@ -261,19 +304,11 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 
 		stderr, _ := GetReaderContents(errorReader)
 
-		if err != nil {
-			if len(stderr) > 0 {
-				err = errors.New(stderr + "; " + err.Error())
-			}
-			logger.Error().Err(err).Msg("Error reading logs")
+		if err != nil || len(stderr) > 0 {
+			stopLoggerWithError(err, "Error while reading logs")
+		} else {
+			stopLogger()
 		}
-
-		if len(stderr) != 0 {
-			logger.Error().Err(errors.New(stderr)).Msg("Error reading logs")
-		}
-
-		stopLogger()
-
 	}()
 
 	return logsReader, nil

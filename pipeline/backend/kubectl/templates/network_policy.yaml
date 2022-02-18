@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: "{{ .Backend.ID }}"
+  name: "{{ .Backend.ID }}-run"
   # {{- if .Backend.Namespace}}
   namespace: "{{.Backend.Namespace}}"
   # {{- end }}
@@ -11,15 +11,12 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      role: db
+      woodpecker-run: "{{.Backend.ID}}"
   policyTypes:
-    - Ingress
     - Egress
-  ingress:
   egress:
     - to:
-        - ipBlock:
-            cidr: 10.0.0.0/24
-      ports:
-        - protocol: TCP
-          port: 5978
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              woodpecker-run: "{{.Backend.ID}}"

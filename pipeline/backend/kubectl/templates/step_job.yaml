@@ -72,6 +72,9 @@ spec:
             - sh
             - -c
             - |
+              {{- if ne .Backend.ContainerStartDelay 0 }}
+              sleep {{ .Backend.ContainerStartDelay }}
+              {{- end }}
               {{ .ShellCommand }}
           # {{- end -}}
           # {{- if ne (len .Step.Environment) 0 }}

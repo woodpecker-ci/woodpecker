@@ -9,3 +9,7 @@ func (backend *KubeCtlBackend) ID() string {
 func (backend *KubeCtlBackend) Namespace() string {
 	return backend.Client.CoreArgs.Namespace
 }
+
+func (backend *KubeCtlBackend) Context() string {
+	return backend.Client.CoreArgs.Context
+}

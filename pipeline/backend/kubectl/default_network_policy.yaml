@@ -1,0 +1,33 @@
+# EXAMPLE!!
+# This a default network policy example, for when EnableRunNetworkPolicy true which
+# Denies network between the job pods and other pods in the kube system.
+#
+# You MUST apply this policy, or some other combination of it
+# otherwise the JOB pods would not be able to access the internet.
+#
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  # namespace: [your cicd namespace]
+  name: woodpecker-jobs
+spec:
+  podSelector:
+    matchLabels:
+      woodpecker: "true"
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        # Allow specific services and pods. In this case
+        # Allows dns resolution.
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+        - ipBlock:
+            cidr: 0.0.0.0/0 # Allow all ips
+            except:
+              # Your service(s) CIDR, to block
+              # networking to internal services and pods. E.g.
+              - 172.0.0.0/8 # All pods
+              - 173.0.0.0/8 # All services

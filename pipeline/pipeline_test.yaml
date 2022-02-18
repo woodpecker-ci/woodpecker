@@ -18,18 +18,9 @@ pipeline:
   comms_test:
     image: *runner_image
     commands:
-      - cat /etc/hosts
-      - echo; echo
-      - nc -zv docker.service 2375
-  docker_test:
-    image: *dind_image
-    environment:
-      - DOCKER_HOST=docker.service:2375
-      - TEST_IMAGE=artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.3
-    commands:
-      - docker ps
-      - docker run -i --rm -v $PWD:/build $TEST_IMAGE ls
-
+      - nc -zv docker.service 2375 # Access detached
+      - nc -zv artprod.dev.bloomberg.com 80 # Access external
+      - nc -zv kbb-api.kube-bb.svc 80 # Access internal service.
 services:
   docker.service:
     image: *dind_image

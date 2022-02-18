@@ -66,11 +66,15 @@ func (client *KubeCtlClient) CreateKubectlCommand(ctx context.Context, args ...i
 
 func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
 	command := []string{}
+	hasContext := false
 	for _, ar := range args {
 		switch ar.(type) {
 		case string:
 			if len(ar.(string)) == 0 {
 				continue
+			}
+			if ar.(string) == "--context" {
+				hasContext = true
 			}
 			command = append(command, ar.(string))
 			break
@@ -87,7 +91,38 @@ func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string
 		}
 	}
 
+	if len(client.CoreArgs.Context) > 0 && !hasContext {
+		// adding the context
+		command = append([]string{"--context", client.CoreArgs.Context}, command...)
+	}
+
 	return command
+}
+
+// Loads default configuration for the client.
+func (client *KubeCtlClient) LoadDefaults(ctx context.Context) error {
+	if len(client.CoreArgs.Namespace) == 0 {
+		namespace, err := client.RunKubectlCommand(
+			ctx, "config", "view", "--minify", "--output",
+			"jsonpath={..namespace}",
+		)
+		if err != nil {
+			return err
+		}
+		client.CoreArgs.Namespace = strings.TrimSpace(namespace)
+	}
+
+	if len(client.CoreArgs.Context) == 0 {
+		context, err := client.RunKubectlCommand(
+			ctx, "config", "current-context",
+		)
+		if err != nil {
+			return err
+		}
+		client.CoreArgs.Context = strings.TrimSpace(context)
+	}
+
+	return nil
 }
 
 // Get resource names from selector (with kind)
@@ -150,6 +185,7 @@ func (client *KubeCtlClient) DeployKubectlYaml(
 	output, err := client.RunKubectlCommand(
 		ctx,
 		command,
+		Triary(command == "delete", "--ignore-not-found=true", ""),
 		Triary(wait, "--wait=true", "--wait=false"),
 		"-f", yamlFilename,
 	)

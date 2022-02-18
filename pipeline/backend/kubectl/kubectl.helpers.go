@@ -19,11 +19,19 @@ func (backend *KubeCtlBackend) MakeLogger(jobId string) zerolog.Logger {
 
 // Initializes the configuration for the kube backend
 // and populates the basic parameters for that config.
-func (backend *KubeCtlBackend) InitializeConfig(cfg *types.Config) {
+func (backend *KubeCtlBackend) InitializeConfig(cfg *types.Config) error {
 	backend.Config = cfg
 
 	// resetting
 	backend.SetupTemplates = []KubeTemplate{}
+
+	// add network policy
+	if backend.EnableRunNetworkPolicy {
+		backend.SetupTemplates = append(backend.SetupTemplates, &KubeNetworkPolicyTemplate{
+			Backend: backend,
+		})
+	}
+
 	backend.PVCs = []*KubePVCTemplate{}
 	backend.PVCByName = make(map[string]*KubePVCTemplate)
 
@@ -36,6 +44,7 @@ func (backend *KubeCtlBackend) InitializeConfig(cfg *types.Config) {
 		backend.PVCByName[vol.Name] = pvc
 		backend.SetupTemplates = append(backend.SetupTemplates, pvc)
 	}
+	return nil
 }
 
 func (backend *KubeCtlBackend) RenderSetupYaml() (string, error) {

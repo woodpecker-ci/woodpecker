@@ -111,5 +111,17 @@ func TestTemplates(t *testing.T) {
 			g.Assert(err).Equal(nil)
 			t.Log(rslt)
 		})
+
+		g.It("Render a network policy template", func() {
+			tmpl := KubeNetworkPolicyTemplate{
+				Backend: backend,
+			}
+			rslt, err := tmpl.Render()
+			if err != nil {
+				t.Error(err)
+			}
+			g.Assert(err).Equal(nil)
+			t.Log(rslt)
+		})
 	})
 }

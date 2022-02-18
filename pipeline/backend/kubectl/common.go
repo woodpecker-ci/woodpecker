@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -53,4 +55,17 @@ func Triary(
 		return a
 	}
 	return b
+}
+
+// Returns an env if exists otherwise returns default value.
+func getEnv(name string, defaultValue interface{}) interface{} {
+	val, exists := os.LookupEnv(name)
+	return Triary(exists, val, defaultValue)
+}
+
+// Returns an env if exists otherwise returns default value.
+// NOTE: prepends WOODPECKER_KUBECTL_ to name, and uppercase the name.
+func getWPKEnv(name string, defaultValue interface{}) interface{} {
+	name = strings.ToUpper("WOODPECKER_KUBECTL_" + name)
+	return getEnv(name, defaultValue)
 }
