@@ -36,6 +36,9 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable() bool {
+	if os.Getenv("DOCKER_HOST") != "" {
+		return true
+	}
 	_, err := os.Stat("/var/run/docker.sock")
 	return err == nil
 }

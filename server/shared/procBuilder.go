@@ -244,8 +244,9 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 				b.Netrc.Password,
 				b.Netrc.Machine,
 			),
-			b.Repo.IsSCMPrivate,
+			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
+		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(

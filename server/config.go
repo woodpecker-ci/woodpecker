@@ -56,6 +56,7 @@ var Config = struct {
 		Port           string
 		Pass           string
 		Docs           string
+		StatusContext  string
 		SessionExpires time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
@@ -65,10 +66,12 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
+		AuthenticatePublicRepos bool
+		DefaultCloneImage       string
+		Limits                  model.ResourceLimit
+		Volumes                 []string
+		Networks                []string
+		Privileged              []string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

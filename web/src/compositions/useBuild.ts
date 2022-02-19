@@ -1,10 +1,13 @@
 import { computed, Ref } from 'vue';
 
+import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Build } from '~/lib/api/types';
 import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
 import timeAgo from '~/utils/timeAgo';
+
+const { toLocaleString } = useDate();
 
 export default (build: Ref<Build | undefined>) => {
   const sinceRaw = computed(() => {
@@ -40,13 +43,14 @@ export default (build: Ref<Build | undefined>) => {
     }
 
     const start = build.value.started_at || 0;
-    const end = build.value.finished_at || 0;
+    const end = build.value.finished_at || build.value.updated_at || 0;
 
-    if (start === 0) {
+    if (start === 0 || end === 0) {
       return 0;
     }
 
-    if (end === 0) {
+    // only calculate time based no now() for running builds
+    if (build.value.status === 'running') {
       return Date.now() - start * 1000;
     }
 
@@ -96,5 +100,15 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  return { since, duration, message, prettyRef };
+  const created = computed(() => {
+    if (!build.value) {
+      return undefined;
+    }
+
+    const start = build.value.created_at || 0;
+
+    return toLocaleString(new Date(start * 1000));
+  });
+
+  return { since, duration, message, prettyRef, created };
 };

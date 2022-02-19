@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <div v-if="build.procs === undefined || build.procs.length === 0" class="m-auto">
+    <div v-if="build.procs === undefined || build.procs.length === 0" class="m-auto mt-4">
       <span>No pipeline steps available!</span>
     </div>
 
