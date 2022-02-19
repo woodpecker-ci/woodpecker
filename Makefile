@@ -10,13 +10,36 @@ ifneq ($(CI_COMMIT_TAG),)
 endif
 
 # append commit-sha to next version
-BUILD_VERSION := $(VERSION)
+BUILD_VERSION ?= $(VERSION)
 ifeq ($(BUILD_VERSION),next)
 	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+
+# If the first argument is "in_docker"...
+ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "in_docker"
+  MAKE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # Ignore the next args
+  $(eval $(MAKE_ARGS):;@:)
+
+  in_docker:
+	@[ "1" == "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@echo run in docker:
+	@docker run -it \
+		--user $(shell id -u):$(shell id -g) \
+		-e VERSION="$(VERSION)" \
+		-e BUILD_VERSION="$(BUILD_VERSION)" \
+		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
+		-e GO_PACKAGES="$(GO_PACKAGES)" \
+		-e TARGETOS="$(TARGETOS)" \
+		-e TARGETARCH="$(TARGETARCH)" \
+		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
+else
+
+# Proceed with normal make
 
 all: build
 
@@ -31,6 +54,7 @@ format:
 clean:
 	go clean -i ./...
 	rm -rf build
+	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: lint
 lint:
@@ -50,16 +74,19 @@ lint-frontend:
 	(cd web/; yarn lint --quiet)
 
 test-agent:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
+	go test -race -cover -coverprofile agent-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
 test-server:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
+	go test -race -cover -coverprofile server-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
 test-cli:
-	go test -race -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
+	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore:
-	go test -cover -coverprofile coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+
+test-server-datastore-coverage:
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-frontend: frontend-dependencies
 	(cd web/; yarn run lint)
@@ -128,7 +155,7 @@ release-cli:
 
 release-checksums:
 	# generate shas for tar files
-	(cd dist/; sha256sum *.{tar.gz,apk,deb,rpm} > checksums.txt)
+	(cd dist/; sha256sum *.* > checksums.txt)
 
 release: release-frontend release-server release-agent release-cli
 
@@ -152,3 +179,5 @@ bundle: bundle-agent bundle-server bundle-cli
 .PHONY: version
 version:
 	@echo ${BUILD_VERSION}
+
+endif

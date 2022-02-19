@@ -8,6 +8,9 @@
   <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
+  <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+  </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
   </a>
@@ -28,6 +31,9 @@
   </a>
   <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+  </a>
+  <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
+    <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
   </a>
 </p>
 <br/>

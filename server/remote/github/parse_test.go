@@ -46,7 +46,7 @@ func Test_parser(t *testing.T) {
 	g.Describe("GitHub parser", func() {
 		g.It("should ignore unsupported hook events", func() {
 			req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
-			p, r, b, err := parseHook(req, false, false)
+			p, r, b, err := parseHook(req, false)
 			g.Assert(r).IsNil()
 			g.Assert(b).IsNil()
 			g.Assert(err).IsNil()
@@ -56,7 +56,7 @@ func Test_parser(t *testing.T) {
 		g.Describe("given a push hook", func() {
 			g.It("should skip when action is deleted", func() {
 				req := testHookRequest([]byte(fixtures.HookPushDeleted), hookPush)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
@@ -64,7 +64,7 @@ func Test_parser(t *testing.T) {
 			})
 			g.It("should extract repository and build details", func() {
 				req := testHookRequest([]byte(fixtures.HookPush), hookPush)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
 				g.Assert(p).IsNil()
 				g.Assert(r).IsNotNil()
@@ -78,7 +78,7 @@ func Test_parser(t *testing.T) {
 		g.Describe("given a pull request hook", func() {
 			g.It("should skip when action is not open or sync", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidAction), hookPull)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
@@ -86,7 +86,7 @@ func Test_parser(t *testing.T) {
 			})
 			g.It("should skip when state is not open", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidState), hookPull)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
@@ -94,7 +94,7 @@ func Test_parser(t *testing.T) {
 			})
 			g.It("should extract repository and build details", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
@@ -106,7 +106,7 @@ func Test_parser(t *testing.T) {
 		g.Describe("given a deployment hook", func() {
 			g.It("should extract repository and build details", func() {
 				req := testHookRequest([]byte(fixtures.HookDeploy), hookDeploy)
-				p, r, b, err := parseHook(req, false, false)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()

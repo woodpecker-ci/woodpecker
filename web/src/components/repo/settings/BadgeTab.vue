@@ -20,7 +20,7 @@
 
       <div>
         <h2 class="text-lg text-gray-500 ml-2">Markdown</h2>
-        <pre class="box">![status-badge]({{ baseUrl }}{{ badgeUrl }})</pre>
+        <pre class="box">[![status-badge]({{ baseUrl }}{{ badgeUrl }})]({{ baseUrl }}{{ repoUrl }})</pre>
       </div>
     </div>
   </Panel>
@@ -47,8 +47,15 @@ export default defineComponent({
 
       return `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`;
     });
+    const repoUrl = computed(() => {
+      if (!repo) {
+        throw new Error('Unexpected: "repo" should be provided at this place');
+      }
 
-    return { baseUrl, badgeUrl };
+      return `/${repo.value.owner}/${repo.value.name}`;
+    });
+
+    return { baseUrl, badgeUrl, repoUrl };
   },
 });
 </script>

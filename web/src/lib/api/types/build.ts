@@ -18,6 +18,9 @@ export type Build = {
   // When the build request was received.
   created_at: number;
 
+  // When the build was updated last time in database.
+  updated_at: number;
+
   // When the build was enqueued.
   enqueued_at: number;
 

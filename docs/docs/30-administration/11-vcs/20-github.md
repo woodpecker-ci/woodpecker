@@ -31,26 +31,32 @@ Please use this screenshot for reference:
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-```shell
-WOODPECKER_GITHUB=true # Set to true to enable the GitHub driver
+### `WOODPECKER_GITHUB`
+> Default: `false`
 
-WOODPECKER_GITHUB_URL=https://github.com # GitHub server address
+Enables the GitHub driver.
 
-WOODPECKER_GITHUB_CLIENT=... # GitHub oauth2 client id
+### `WOODPECKER_GITHUB_URL`
+> Default: `https://github.com`
 
-WOODPECKER_GITHUB_SECRET=... # GitHub oauth2 client secret.
+Configures the GitHub server address.
 
-WOODPECKER_GITHUB_SCOPE=repo,repo:status,user:email,read:org # Comma-separated GitHub oauth scope.
+### `WOODPECKER_GITHUB_CLIENT`
+> Default: empty
 
-WOODPECKER_GITHUB_GIT_USERNAME=... # Optional. Use a single machine account username to clone all repositories.
+Configures the GitHub OAuth client id. This is used to authorize access.
 
-WOODPECKER_GITHUB_GIT_PASSWORD=... # Optional. Use a single machine account password to clone all repositories.
+### `WOODPECKER_GITHUB_SECRET`
+> Default: empty
 
-WOODPECKER_GITHUB_PRIVATE_MODE=false # Set to true if GitHub is running in private mode.
+Configures the GitHub OAuth client secret. This is used to authorize access.
 
-WOODPECKER_GITHUB_MERGE_REF=true # Set to true to use the `refs/pulls/%d/merge` vs `refs/pulls/%d/head`
+### `WOODPECKER_GITHUB_MERGE_REF`
+> Default: `true`
 
-WOODPECKER_GITHUB_CONTEXT=continuous-integration/woodpecker # Customize the GitHub status message context
+TODO
 
-WOODPECKER_GITHUB_SKIP_VERIFY=false # Set to true to disable SSL verification
-```
+### `WOODPECKER_GITHUB_SKIP_VERIFY`
+> Default: `false`
+
+Configure if SSL verification should be skipped.

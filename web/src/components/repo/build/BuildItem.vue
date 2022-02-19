@@ -60,7 +60,10 @@
 
         <div class="flex space-x-2 items-center min-w-0">
           <Icon name="since" />
-          <span class="truncate">{{ since }}</span>
+          <Tooltip>
+            <span>{{ since }}</span>
+            <template #popper><span class="font-bold">Created</span> {{ created }}</template>
+          </Tooltip>
         </div>
       </div>
     </div>
@@ -68,6 +71,7 @@
 </template>
 
 <script lang="ts">
+import { Tooltip } from 'floating-vue';
 import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -81,7 +85,7 @@ import { Build } from '~/lib/api/types';
 export default defineComponent({
   name: 'BuildItem',
 
-  components: { Icon, BuildStatusIcon, ListItem, BuildRunningIcon },
+  components: { Icon, BuildStatusIcon, ListItem, BuildRunningIcon, Tooltip },
 
   props: {
     build: {
@@ -92,9 +96,9 @@ export default defineComponent({
 
   setup(props) {
     const build = toRef(props, 'build');
-    const { since, duration, message, prettyRef } = useBuild(build);
+    const { since, duration, message, prettyRef, created } = useBuild(build);
 
-    return { since, duration, message, prettyRef, buildStatusColors };
+    return { since, duration, message, prettyRef, buildStatusColors, created };
   },
 });
 </script>

@@ -80,7 +80,7 @@ func convertDesc(status model.StatusValue) string {
 
 // convertRepo is a helper function used to convert a GitHub repository
 // structure to the common Woodpecker repository structure.
-func convertRepo(from *github.Repository, private bool) *model.Repo {
+func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
 		Name:         from.GetName(),
 		FullName:     from.GetFullName(),
@@ -95,9 +95,6 @@ func convertRepo(from *github.Repository, private bool) *model.Repo {
 	}
 	if len(repo.Branch) == 0 {
 		repo.Branch = defaultBranch
-	}
-	if private {
-		repo.IsSCMPrivate = true
 	}
 	return repo
 }
@@ -114,10 +111,10 @@ func convertPerm(perm map[string]bool) *model.Perm {
 
 // convertRepoList is a helper function used to convert a GitHub repository
 // list to the common Woodpecker repository structure.
-func convertRepoList(from []*github.Repository, private bool) []*model.Repo {
+func convertRepoList(from []*github.Repository) []*model.Repo {
 	var repos []*model.Repo
 	for _, repo := range from {
-		repos = append(repos, convertRepo(repo, private))
+		repos = append(repos, convertRepo(repo))
 	}
 	return repos
 }
