@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 type local struct {
@@ -51,17 +52,36 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 		}
 	}
 
-	// Use "image name" as run command
-	Command = append(Command, proc.Image[18:len(proc.Image)-7])
-	Command = append(Command, "-c")
+	// Get default clone image
+	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
+	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
+		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
+	}
 
-	// Decode script and remove initial lines
-	Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-	Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
+	if proc.Image == defaultCloneImage {
+		// Default clone step
+		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
+		Command = append(Command, "plugin-git")
+	} else {
+		// Use "image name" as run command
+		Command = append(Command, proc.Image[18:len(proc.Image)-7])
+		Command = append(Command, "-c")
 
-	// Prepare command and working directory
+		// Decode script and delete initial lines
+		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
+		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
+		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
+	}
+
+	// Prepare command
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
-	e.cmd.Dir = "/tmp/" + proc.Environment["CI_REPO"]
+
+	// Prepare working directory
+    if proc.Image == defaultCloneImage {
+		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
+	} else {
+		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
+	}
 	_ = os.MkdirAll(e.cmd.Dir, 0o700)
 
 	// Get output and redirect Stderr to Stdout
