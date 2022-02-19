@@ -164,7 +164,9 @@ pipeline:
 
 ### `image`
 
-Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
+With the `docker` backend, Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
+
+When using the `local` backend, the `image` entry is used to specify the shell, such as Bash or Fish, that is used to run the commands.
 
 ```diff
  pipeline:
