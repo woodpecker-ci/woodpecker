@@ -408,7 +408,9 @@ For more details check the [matrix build docs](/docs/usage/matrix-builds/).
 
 ### `clone`
 
-Woodpecker automatically configures a default clone step if not explicitly defined. You can manually configure the clone step in your pipeline for customization:
+Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
+
+You can manually configure the clone step in your pipeline for customization:
 
 ```diff
 +clone:
