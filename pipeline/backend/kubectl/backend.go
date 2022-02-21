@@ -19,12 +19,13 @@ const (
 )
 
 type KubeBackend struct {
-	Client         *KubeCtlClient // The kubernetes client
-	Config         *types.Config  // the run config
-	RunID          string         // the random run id
-	DeletePolicy   string         // The job delete policy
-	JobMemoryLimit string         // The runner container memory limit (1Gi)
-	JobCPULimit    string         // The runner container cpu limit (200m)
+	Client           *KubeCtlClient // The kubernetes client
+	Config           *types.Config  // the run config
+	RunID            string         // the random run id
+	DeletePolicy     string         // The job delete policy
+	JobMemoryLimit   string         // The runner container memory limit (1Gi)
+	JobCPULimit      string         // The runner container cpu limit (200m)
+	LogStartAttempts int            // The number of logging restart attepmts
 
 	// A delay before the pod start. Various reasons.
 	// Most notably some backend CNI's (like flannel)
@@ -42,8 +43,7 @@ type KubeBackend struct {
 	EnableRunNetworkPolicy bool // Do not implement a network policy when running a pipeline.
 
 	// internal
-	podLogsContext context.Context    // The log waiter for non detached pods
-	podLogsStop    context.CancelFunc // The log context reader cancel function
+	podLogger *KubePodLogger // The internal pod logger.
 }
 
 var _ types.Engine = &KubeBackend{}
@@ -62,6 +62,7 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
+	logStartAttempts, _ := strconv.Atoi(getWPKEnv("LOG_START_ATTEMPTS", "5").(string))
 
 	return &KubeBackend{
 		Client: client,
@@ -76,6 +77,7 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		ContainerStartDelay:    containerStartDelaySeconds,
 		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),
 		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
+		LogStartAttempts:       logStartAttempts,                        // half a cpu
 	}
 }
 
@@ -180,7 +182,12 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", jobAsYaml, false)
+	output, err := backend.Client.DeployKubectlYaml(
+		ctx,
+		"apply",
+		jobAsYaml,
+		false,
+	)
 
 	if err != nil {
 		return err
@@ -230,100 +237,37 @@ func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 	}
 
 	logger := backend.MakeLogger(jobTemplate.JobID())
+	logger.Debug().Msg("Waiting for pod to exist")
 
-	logsReader, logsWriter := io.Pipe()
-	errorReader, errorWriter := io.Pipe()
-	logsContext, logsContextCancel := context.WithCancel(ctx)
+	podNames, err := backend.GetJobPodName(ctx, &jobTemplate)
 
-	stderr := ""
-	stderrWasRead := false
-	readStderr := func() {
-		if stderrWasRead {
-			return
-		}
-		var err error
-		stderr, err = GetReaderContents(errorReader)
-		if err != nil {
-			logger.Error().Err(err).Msg("Error while reading stderr")
-		}
-		stderrWasRead = true
+	if err != nil {
+		return nil, err
 	}
 
-	stopLoggerWithError := func(err error, msg string) {
-		logsContextCancel()
-		errorWriter.Close()
-		logsWriter.Close()
+	// only wait for first pod ready.
+	podName := podNames[0]
 
-		if err != nil {
-			event := logger.Error()
+	// wait for pod to be ready.
+	logger.Debug().Msg("Waiting for pod to be ready (Initialized)")
+	_, err = backend.Client.WaitForConditions(
+		ctx,
+		podName, []string{"Initialized"},
+		1,
+	)
 
-			readStderr()
-
-			if len(stderr) > 0 {
-				event = event.Str("stderr", stderr)
-			}
-			event.Err(err).Msg(msg)
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	stopLogger := func() {
-		stopLoggerWithError(nil, "")
+	logger.Debug().Msgf("Reading logs (%s)", podName)
+
+	backend.podLogger = &KubePodLogger{
+		Backend: backend,
+		PodName: podName,
 	}
 
-	backend.podLogsContext = logsContext
-	backend.podLogsStop = stopLogger
-
-	go func() {
-		logger.Debug().Msg("Waiting for pod to exist")
-		podNames, err := backend.GetJobPodName(logsContext, &jobTemplate)
-
-		if err != nil {
-			stopLoggerWithError(err, "Failed to retrieve job pod name(s). Log reader failed.")
-			return
-		}
-
-		// only wait for first pod ready.
-		podName := podNames[0]
-
-		// wait for pod to be ready.
-		logger.Debug().Msg("Waiting for pod to be ready (Initialized)")
-		_, err = backend.Client.WaitForConditions(
-			logsContext,
-			podName, []string{"Initialized"},
-			1,
-		)
-
-		if err != nil {
-			stopLoggerWithError(err, "Failed to wait for job pod to start. Log reader failed.")
-			return
-		}
-
-		logger.Debug().Msgf("Reading logs (%s)", podName)
-
-		logsCmd := backend.Client.CreateKubectlCommand(logsContext,
-			"logs",
-			podName,
-			"-f",
-		)
-
-		logsCmd.Stdout = logsWriter
-		logsCmd.Stderr = errorWriter
-
-		err = logsCmd.Run()
-
-		logsWriter.Close()
-		errorWriter.Close()
-
-		readStderr()
-
-		if err != nil || len(stderr) > 0 {
-			stopLoggerWithError(err, "Error while reading logs")
-		} else {
-			stopLogger()
-		}
-	}()
-
-	return logsReader, nil
+	return backend.podLogger.Start(ctx)
 }
 
 // Wait for the pipeline step to complete and returns
@@ -345,19 +289,24 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
-	// wait for logs (or give error after the request timeout)
-	select {
-	case <-time.After(backend.RequestTimeout):
-		logger.Error().Msg(
-			"Error reading logs, request timeout or kubectl logger stuck.",
-		)
-		break
-	case <-backend.podLogsContext.Done():
-		logger.Debug().Msg("Read job logs: OK!")
-		break
+	if backend.podLogger.IsRunning() {
+		// wait for logs (or give error after the request timeout)
+		select {
+		case <-time.After(backend.RequestTimeout):
+			logger.Error().Msg(
+				"Error reading logs, request timeout or kubectl logger stuck.",
+			)
+			break
+		case <-backend.podLogger.Done():
+			logger.Debug().Msg("Read job logs: OK!")
+			break
+		}
 	}
 
-	backend.podLogsStop()
+	err := backend.podLogger.Stop()
+	if err != nil {
+		logger.Err(err).Msg("Errors occurred whilst reading logs")
+	}
 
 	// currently we are not reading the proper exit code from the pods
 	// but rather checking the job error.
@@ -384,15 +333,12 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		if state.ExitCode != 0 {
 			doDelete = true
 		}
-		break
 	case IfSucceeded:
 		if state.ExitCode == 0 {
 			doDelete = true
 		}
-		break
 	case Always:
 		doDelete = true
-		break
 	}
 
 	if doDelete {
