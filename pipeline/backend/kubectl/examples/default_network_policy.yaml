@@ -2,7 +2,7 @@
 # This a default network policy example, for when EnableRunNetworkPolicy true which
 # Denies network between the job pods and other pods in the kube system.
 #
-# You MUST apply this policy, or some other combination of it
+# If EnableRunNetworkPolicy=true, you MUST apply this policy (or some other combination of it)
 # otherwise the JOB pods would not be able to access the internet.
 #
 kind: NetworkPolicy
@@ -27,7 +27,9 @@ spec:
         - ipBlock:
             cidr: 0.0.0.0/0 # Allow all ips
             except:
-              # Your service(s) CIDR, to block
+              # Your services and pods CIDR, to block
               # networking to internal services and pods. E.g.
               - 172.0.0.0/8 # All pods
               - 173.0.0.0/8 # All services
+              # Without this, or another NetworkPolicy, all the pods in
+              # the kuberentes backend would be accessibale!
