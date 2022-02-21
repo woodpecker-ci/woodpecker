@@ -19,13 +19,13 @@ const (
 )
 
 type KubeBackendRun struct {
-	RunID          string                      // the random run id
-	Config         *types.Config               // the run config
-	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
-	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
-	SetupTemplates []KubeTemplate              // Loaded setup templates
-	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
-	ResourceLogger *KubeResourceLogger         // The logger for the current task run.
+	RunID          string                         // the random run id
+	Config         *types.Config                  // the run config
+	PVCs           []*KubePVCTemplate             // Loaded pvc's (via setup)
+	PVCByName      map[string]*KubePVCTemplate    // Loaded pvc's by name
+	SetupTemplates []KubeTemplate                 // Loaded setup templates
+	DetachedJobs   []*KubeJobTemplate             // Loaded detached template (services, etc..)
+	StepLoggers    map[string]*KubeResourceLogger // A collection of loggers per step.
 }
 
 type KubeBackend struct {
@@ -33,8 +33,8 @@ type KubeBackend struct {
 	DeletePolicy     string         // The job delete policy
 	JobMemoryLimit   string         // The runner container memory limit (1Gi)
 	JobCPULimit      string         // The runner container cpu limit (200m)
-	LogStartAttempts int            // The number of logging restart attempts
-	LogAttemptWait   time.Duration  // Wait time between log attempts
+	CommandRetries   int            // The number of times to retry commands.
+	CommandRetryWait time.Duration  // The wait time between command retries.
 	RequestTimeout   time.Duration  // The kubectl request timeout
 
 	// A delay before the pod start. Various reasons.
@@ -65,8 +65,8 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
-	logStartAttempts, _ := strconv.Atoi(getWPKEnv("LOG_START_ATTEMPTS", "5").(string))
-	logStartAttemptWait, _ := strconv.ParseFloat(getWPKEnv("LOG_ATTEMPT_WAIT_TIME", "1").(string), 64)
+	commandRetries, _ := strconv.Atoi(getWPKEnv("COMMAND_RETRIES", "5").(string))
+	commandRetriesWait, _ := strconv.ParseFloat(getWPKEnv("COMMAND_RETRIES_WAIT", "1").(string), 64)
 
 	return &KubeBackend{
 		Client:       client,
@@ -78,16 +78,17 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		ContainerStartDelay:    containerStartDelaySeconds,
 		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),
 		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
-		LogStartAttempts:       logStartAttempts,                        // half a cpu
-		LogAttemptWait:         time.Duration(logStartAttemptWait) * time.Second,
+		CommandRetries:         commandRetries,                          // half a cpu
+		CommandRetryWait:       time.Duration(commandRetriesWait) * time.Second,
 	}
 }
 
 func (backend *KubeBackend) Reset() {
 	// setup a new active run.
 	backend.activeRun = &KubeBackendRun{
-		Config: &types.Config{},
-		RunID:  CreateRandomID(10),
+		Config:      &types.Config{},
+		RunID:       CreateRandomID(10),
+		StepLoggers: make(map[string]*KubeResourceLogger),
 	}
 }
 
@@ -165,6 +166,18 @@ func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) erro
 		}
 	}
 
+	// stopping all step loggers
+	for stepName, stepLogger := range backend.activeRun.StepLoggers {
+		if stepLogger.IsRunning() {
+			err := stepLogger.Stop()
+			if err != nil {
+				logger.Error().Err(err).Msgf("Error whist terminating logger for %s", stepName)
+			} else {
+				logger.Debug().Msgf("Terminated step logger for %s", stepName)
+			}
+		}
+	}
+
 	output, err := backend.Client.DeployKubectlYaml(ctx, "delete", destoryYaml, false)
 	if err != nil {
 		return err
@@ -207,27 +220,27 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 
 	logger.Debug().Msgf("Job initialized with\n %s", output)
 
+	// wait for the job to start.
+	logger.Debug().Msg("Waiting for job pod to be created")
+	podNames, err := backend.GetJobPodName(ctx, &jobTemplate)
+	if err != nil {
+		return err
+	}
+	podName := podNames[0]
+
+	logger.Debug().Msg("Waiting for job pod to be ready (Initialized)")
+	_, err = backend.Client.WaitForConditions(
+		ctx,
+		podName, []string{"Initialized"},
+		1,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	if step.Detached {
 		backend.activeRun.DetachedJobs = append(backend.activeRun.DetachedJobs, &jobTemplate)
-
-		// loaded a detached service. We need to wait for it to start,
-		// and load the IP from it. The add that to the DetachedJobs.
-		logger.Debug().Msg("Waiting for detached job pod to exist")
-		podNames, err := backend.GetJobPodName(ctx, &jobTemplate)
-		if err != nil {
-			return err
-		}
-		podName := podNames[0]
-
-		logger.Debug().Msg("Waiting for detached job pod to be ready (Initialized)")
-		_, err = backend.Client.WaitForConditions(
-			ctx,
-			podName, []string{"Initialized"},
-			1,
-		)
-		if err != nil {
-			return err
-		}
 
 		logger.Debug().Msg("Reading detached pod info")
 		err = backend.PopulateDetachedInfo(ctx, podName, &jobTemplate)
@@ -235,7 +248,7 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 			return err
 		}
 
-		logger.Debug().Msg("Detached step configured")
+		logger.Debug().Msg("Detached job is running configured")
 	}
 
 	return nil
@@ -249,37 +262,17 @@ func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 	}
 
 	logger := backend.MakeLogger(jobTemplate.JobID())
-	logger.Debug().Msg("Waiting for pod to exist")
 
-	podNames, err := backend.GetJobPodName(ctx, &jobTemplate)
+	logger.Debug().Msg("Reading logs")
 
-	if err != nil {
-		return nil, err
-	}
-
-	// only wait for first pod ready.
-	podName := podNames[0]
-
-	// wait for pod to be ready.
-	logger.Debug().Msg("Waiting for pod to be ready (Initialized)")
-	_, err = backend.Client.WaitForConditions(
-		ctx,
-		podName, []string{"Initialized"},
-		1,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Debug().Msgf("Reading logs (%s)", podName)
-
-	backend.activeRun.ResourceLogger = &KubeResourceLogger{
+	stepLogger := &KubeResourceLogger{
 		Backend:      backend,
-		ResourceName: podName,
+		ResourceName: "job.batch/" + jobTemplate.JobName(),
 	}
 
-	return backend.activeRun.ResourceLogger.Start(ctx)
+	backend.activeRun.StepLoggers[step.Name] = stepLogger
+
+	return stepLogger.Start(ctx)
 }
 
 // Wait for the pipeline step to complete and returns
@@ -301,7 +294,9 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
-	if backend.activeRun.ResourceLogger.IsRunning() {
+	stepLogger := backend.activeRun.StepLoggers[step.Name]
+
+	if stepLogger.IsRunning() {
 		// wait for logs (or give error after the request timeout)
 		select {
 		case <-time.After(backend.RequestTimeout):
@@ -309,13 +304,13 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 				"Error reading logs, request timeout or kubectl logger stuck.",
 			)
 			break
-		case <-backend.activeRun.ResourceLogger.Done():
+		case <-stepLogger.Done():
 			logger.Debug().Msg("Read job logs: OK!")
 			break
 		}
 	}
 
-	err := backend.activeRun.ResourceLogger.Stop()
+	err := stepLogger.Stop()
 	if err != nil {
 		logger.Err(err).Msg("Errors occurred whilst reading logs")
 	}

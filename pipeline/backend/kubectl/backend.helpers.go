@@ -2,19 +2,21 @@ package kubectl
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func (backend *KubeBackend) MakeLogger(jobId string) zerolog.Logger {
+func (backend *KubeBackend) MakeLogger(jobID string) *zerolog.Logger {
 	logger := log.With().Str("RunID", backend.activeRun.RunID).Logger()
-	if len(jobId) > 0 {
-		logger = logger.With().Str("JobID", jobId).Logger()
+	if len(jobID) > 0 {
+		logger = logger.With().Str("JobID", jobID).Logger()
 	}
-	return logger
+	return &logger
 }
 
 // Initializes the configuration for the kube backend
@@ -92,14 +94,44 @@ func (backend *KubeBackend) PopulateDetachedInfo(
 	podName string,
 	jobTemplate *KubeJobTemplate,
 ) error {
-	podIP, err := backend.Client.RunKubectlCommand(
-		ctx, "get", podName,
-		"-o",
-		"custom-columns=:status.podIP",
-	)
-	if err != nil {
-		return err
+	logger := backend.MakeLogger(jobTemplate.JobID()).With().Str("PodName", podName).Logger()
+	attempts := 0
+	for {
+		podIP, err := backend.Client.RunKubectlCommand(
+			ctx, "get", podName,
+			"-o",
+			"custom-columns=:status.podIP",
+		)
+
+		podIP = strings.TrimSpace(podIP)
+		isInvalid := err == nil && !IsIP(podIP)
+		attempts++
+
+		if err != nil || isInvalid {
+			if isInvalid {
+				err = fmt.Errorf(
+					"Invalid IP returned: %s", podIP,
+				)
+			}
+
+			if attempts > backend.CommandRetries {
+				logger.Error().Err(err).Msg(
+					"Max number of retries found whist attempting to retrieve pod IP. Aborted",
+				)
+				return err
+			}
+
+			logger.Debug().Err(err).Msgf(
+				"Failed to retrieve detached info, pod may not be ready. Retry in %.2f [seconds]",
+				backend.CommandRetryWait.Seconds(),
+			)
+
+			time.Sleep(backend.CommandRetryWait)
+			continue
+		}
+
+		jobTemplate.DetachedPodIP = podIP
+		break
 	}
-	jobTemplate.DetachedPodIP = strings.TrimSpace(podIP)
 	return nil
 }

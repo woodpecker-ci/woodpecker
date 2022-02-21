@@ -124,12 +124,12 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				}
 
 				restarts++
-				if restarts > resLogger.Backend.LogStartAttempts {
+				if restarts > resLogger.Backend.CommandRetries {
 					stop(
 						err,
 						fmt.Sprintf(
 							"Error starting log reading. Too many attempts (%d)",
-							resLogger.Backend.LogStartAttempts,
+							resLogger.Backend.CommandRetries,
 						),
 					)
 					break
@@ -138,14 +138,14 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				logger.Debug().Err(fromStderr(err, stderr)).Msg(
 					fmt.Sprintf(
 						"Failed to start logger. Retry in %.2f [second], %d/%d",
-						resLogger.Backend.LogAttemptWait.Seconds(),
+						resLogger.Backend.CommandRetryWait.Seconds(),
 						restarts,
-						resLogger.Backend.LogStartAttempts,
+						resLogger.Backend.CommandRetries,
 					),
 				)
 
 				// sleep before next attempt.
-				time.Sleep(resLogger.Backend.LogAttemptWait)
+				time.Sleep(resLogger.Backend.CommandRetryWait)
 				continue
 			}
 			// completed. Stopping
