@@ -16,6 +16,10 @@ func Filesystem(params []string) model.EnvironService {
 
 	for _, item := range params {
 		kvPair := strings.SplitN(item, ":", 2)
+		if len(kvPair) != 2 {
+			// ignore items only containing a key and no value
+			continue
+		}
 		globals = append(globals, &model.Environ{Name: kvPair[0], Value: kvPair[1]})
 	}
 	return &builtin{globals}
