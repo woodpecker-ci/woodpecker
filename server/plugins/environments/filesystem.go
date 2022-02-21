@@ -3,6 +3,8 @@ package environments
 import (
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -10,14 +12,15 @@ type builtin struct {
 	globals []*model.Environ
 }
 
-// Filesystem returns a new local registry service.
-func Filesystem(params []string) model.EnvironService {
+// Parse returns a EnvironService based on a string slice where key and value are separated by a ":" delimeter.
+func Parse(params []string) model.EnvironService {
 	var globals []*model.Environ
 
 	for _, item := range params {
 		kvPair := strings.SplitN(item, ":", 2)
 		if len(kvPair) != 2 {
 			// ignore items only containing a key and no value
+			log.Warn().Msgf("key '%s' has no value, will be ignored", kvPair[0])
 			continue
 		}
 		globals = append(globals, &model.Environ{Name: kvPair[0], Value: kvPair[1]})
