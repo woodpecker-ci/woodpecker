@@ -381,7 +381,12 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	if err != nil {
 		return err
 	}
-	_, _, err = client.CreateRepoHook(r.Owner, r.Name, hook)
+	_, response, err := client.CreateRepoHook(r.Owner, r.Name, hook)
+	if (err != nil && response.StatusCode == 200) || response.StatusCode == 404 {
+		// if repo was renamed, Gitea redirects as a GET request which
+		// results in an error of the SDK which can not parse the response
+		return fmt.Errorf("Could not find repository")
+	}
 	return err
 }
 
