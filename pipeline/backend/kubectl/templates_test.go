@@ -9,7 +9,7 @@ import (
 )
 
 func composeValidTestKubeJobTemplate(
-	backend *KubeCtlBackend,
+	backend *KubeBackend,
 ) *KubeJobTemplate {
 	return &KubeJobTemplate{
 		Backend: backend,

@@ -45,10 +45,10 @@ func renderTemplate(name string, data interface{}) (string, error) {
 }
 
 type KubeTemplateConfig struct {
-	ID        string          // the run id
-	Name      string          // the run name
-	Namespace string          // the run namespace
-	Backend   *KubeCtlBackend // the backend
+	ID        string       // the run id
+	Name      string       // the run name
+	Namespace string       // the run namespace
+	Backend   *KubeBackend // the backend
 }
 
 type KubePodConfig struct {

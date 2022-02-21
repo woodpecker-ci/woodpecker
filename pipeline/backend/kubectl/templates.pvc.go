@@ -4,7 +4,7 @@ type KubePVCTemplate struct {
 	StorageClassName string
 	StorageSize      string
 	Name             string
-	Backend          *KubeCtlBackend // the executing engine
+	Backend          *KubeBackend // the executing engine
 }
 
 func (template *KubePVCTemplate) VolumeName() string {

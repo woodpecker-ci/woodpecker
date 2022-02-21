@@ -7,9 +7,9 @@ import (
 )
 
 type KubeJobTemplate struct {
-	Step          *types.Step     // The executing step
-	Backend       *KubeCtlBackend // the executing engine
-	DetachedPodIP string          // The main pod ip.
+	Step          *types.Step  // The executing step
+	Backend       *KubeBackend // the executing engine
+	DetachedPodIP string       // The main pod ip.
 }
 
 func (template *KubeJobTemplate) Render() (string, error) {

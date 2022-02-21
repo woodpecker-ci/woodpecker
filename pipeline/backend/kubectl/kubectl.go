@@ -18,7 +18,7 @@ const (
 	Never       = "never"
 )
 
-type KubeCtlBackend struct {
+type KubeBackend struct {
 	Client         *KubeCtlClient // The kubernetes client
 	Config         *types.Config  // the run config
 	RunID          string         // the random run id
@@ -46,7 +46,7 @@ type KubeCtlBackend struct {
 	podLogsStop    context.CancelFunc // The log context reader cancel function
 }
 
-var _ types.Engine = &KubeCtlBackend{}
+var _ types.Engine = &KubeBackend{}
 
 func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 	// create a new kubectl (exec based) engine. Allows for execution pods
@@ -63,7 +63,7 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
 
-	return &KubeCtlBackend{
+	return &KubeBackend{
 		Client: client,
 		Config: &types.Config{},
 		// the engine id must be randomized in order not to clobber/error other runs.
@@ -79,25 +79,25 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 	}
 }
 
-func (backend *KubeCtlBackend) Name() string {
+func (backend *KubeBackend) Name() string {
 	return "kubectl"
 }
 
-func (backend *KubeCtlBackend) IsAvailable() bool {
+func (backend *KubeBackend) IsAvailable() bool {
 	// check if the executable exists. Otherwise false.
 	// May need connection check afterwards.
 	_, err := exec.LookPath(backend.Client.GetExecutable())
 	return err != nil
 }
 
-func (backend *KubeCtlBackend) Load() error {
+func (backend *KubeBackend) Load() error {
 	// nothing to load.
 	return nil
 }
 
 // Setup the pipeline environment. Creates the volumes and the other
 // run artifacts used for the run.
-func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) error {
+func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
 	// updating parameters
 	backend.InitializeConfig(cfg)
 	logger := backend.MakeLogger("")
@@ -131,7 +131,7 @@ func (backend *KubeCtlBackend) Setup(ctx context.Context, cfg *types.Config) err
 }
 
 // Destroy the pipeline environment.
-func (backend *KubeCtlBackend) Destroy(ctx context.Context, cfg *types.Config) error {
+func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) error {
 	logger := backend.MakeLogger("")
 	destoryYaml, err := backend.RenderSetupYaml()
 
@@ -161,7 +161,7 @@ func (backend *KubeCtlBackend) Destroy(ctx context.Context, cfg *types.Config) e
 }
 
 // Exec the pipeline step.
-func (backend *KubeCtlBackend) Exec(ctx context.Context, step *types.Step) error {
+func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 	jobTemplate := KubeJobTemplate{
 		Backend: backend,
 		Step:    step,
@@ -223,7 +223,7 @@ func (backend *KubeCtlBackend) Exec(ctx context.Context, step *types.Step) error
 }
 
 // Tail the pipeline step logs.
-func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
 	jobTemplate := KubeJobTemplate{
 		Backend: backend,
 		Step:    step,
@@ -235,6 +235,20 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 	errorReader, errorWriter := io.Pipe()
 	logsContext, logsContextCancel := context.WithCancel(ctx)
 
+	stderr := ""
+	stderrWasRead := false
+	readStderr := func() {
+		if stderrWasRead {
+			return
+		}
+		var err error
+		stderr, err = GetReaderContents(errorReader)
+		if err != nil {
+			logger.Error().Err(err).Msg("Error while reading stderr")
+		}
+		stderrWasRead = true
+	}
+
 	stopLoggerWithError := func(err error, msg string) {
 		logsContextCancel()
 		errorWriter.Close()
@@ -242,11 +256,9 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 
 		if err != nil {
 			event := logger.Error()
-			stderr, _ := GetReaderContents(errorReader)
-			stdout, _ := GetReaderContents(logsReader)
-			if len(stdout) > 0 {
-				event = event.Str("stdout", stdout)
-			}
+
+			readStderr()
+
 			if len(stderr) > 0 {
 				event = event.Str("stderr", stderr)
 			}
@@ -302,7 +314,7 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 		logsWriter.Close()
 		errorWriter.Close()
 
-		stderr, _ := GetReaderContents(errorReader)
+		readStderr()
 
 		if err != nil || len(stderr) > 0 {
 			stopLoggerWithError(err, "Error while reading logs")
@@ -316,7 +328,7 @@ func (backend *KubeCtlBackend) Tail(ctx context.Context, step *types.Step) (io.R
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (backend *KubeCtlBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
 	jobTemplate := KubeJobTemplate{
 		Backend: backend,
 		Step:    step,

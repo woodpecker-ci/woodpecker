@@ -7,8 +7,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func prepareTestBackend() *KubeCtlBackend {
-	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeCtlBackend)
+func prepareTestBackend() *KubeBackend {
+	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeBackend)
 
 	backend.InitializeConfig(&types.Config{
 		Volumes: []*types.Volume{
@@ -22,7 +22,7 @@ func prepareTestBackend() *KubeCtlBackend {
 }
 
 func TestEngineCore(t *testing.T) {
-	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeCtlBackend)
+	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeBackend)
 	g := goblin.Goblin(t)
 
 	g.Describe("Engine core:", func() {

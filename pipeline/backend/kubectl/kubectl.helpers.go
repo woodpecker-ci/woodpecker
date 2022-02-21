@@ -9,7 +9,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func (backend *KubeCtlBackend) MakeLogger(jobId string) zerolog.Logger {
+func (backend *KubeBackend) MakeLogger(jobId string) zerolog.Logger {
 	logger := log.With().Str("RunID", backend.RunID).Logger()
 	if len(jobId) > 0 {
 		logger = logger.With().Str("JobID", jobId).Logger()
@@ -19,7 +19,7 @@ func (backend *KubeCtlBackend) MakeLogger(jobId string) zerolog.Logger {
 
 // Initializes the configuration for the kube backend
 // and populates the basic parameters for that config.
-func (backend *KubeCtlBackend) InitializeConfig(cfg *types.Config) error {
+func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
 	backend.Config = cfg
 
 	// resetting
@@ -47,7 +47,7 @@ func (backend *KubeCtlBackend) InitializeConfig(cfg *types.Config) error {
 	return nil
 }
 
-func (backend *KubeCtlBackend) RenderSetupYaml() (string, error) {
+func (backend *KubeBackend) RenderSetupYaml() (string, error) {
 	var templatesAsYaml []string
 
 	for _, template := range backend.SetupTemplates {
@@ -61,7 +61,7 @@ func (backend *KubeCtlBackend) RenderSetupYaml() (string, error) {
 	return strings.Join(templatesAsYaml, "\n---\n"), nil
 }
 
-func (backend *KubeCtlBackend) GetJobPodName(
+func (backend *KubeBackend) GetJobPodName(
 	ctx context.Context,
 	jobTemplate *KubeJobTemplate,
 ) ([]string, error) {
@@ -87,7 +87,7 @@ func (backend *KubeCtlBackend) GetJobPodName(
 	return podNames, nil
 }
 
-func (backend *KubeCtlBackend) PopulateDetachedInfo(
+func (backend *KubeBackend) PopulateDetachedInfo(
 	ctx context.Context,
 	podName string,
 	jobTemplate *KubeJobTemplate,
