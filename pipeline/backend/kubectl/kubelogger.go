@@ -11,7 +11,7 @@ import (
 
 type KubeResourceLogger struct {
 	Backend      *KubeBackend // the kubernetes backend
-	ResourceName string       // the name of the pod to read
+	ResourceName string       // the name of the resource to read
 
 	// internal properties
 	cancelLogContext context.CancelFunc // cancel the executing logs context
@@ -19,35 +19,35 @@ type KubeResourceLogger struct {
 	lastError        error              // The last logging error
 }
 
-func (rLogger *KubeResourceLogger) IsRunning() bool {
-	return rLogger.logContext != nil
+func (resLogger *KubeResourceLogger) IsRunning() bool {
+	return resLogger.logContext != nil
 }
 
-func (rLogger *KubeResourceLogger) LastError() error {
-	return rLogger.lastError
+func (resLogger *KubeResourceLogger) LastError() error {
+	return resLogger.lastError
 }
 
-func (rLogger *KubeResourceLogger) Stop() error {
-	if rLogger.IsRunning() {
-		rLogger.cancelLogContext()
-		rLogger.logContext = nil
-		rLogger.cancelLogContext = nil
+func (resLogger *KubeResourceLogger) Stop() error {
+	if resLogger.IsRunning() {
+		resLogger.cancelLogContext()
+		resLogger.logContext = nil
+		resLogger.cancelLogContext = nil
 	}
-	return rLogger.lastError
+	return resLogger.lastError
 }
 
-func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, error) {
-	if rLogger.IsRunning() {
-		return nil, errors.New("Pod logger is running. Cannot start")
+func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, error) {
+	if resLogger.IsRunning() {
+		return nil, errors.New("Resource logger is running. Cannot start")
 	}
 
-	logger := rLogger.Backend.MakeLogger("").With().Str(
-		"Resource", rLogger.ResourceName,
+	logger := resLogger.Backend.MakeLogger("").With().Str(
+		"Resource", resLogger.ResourceName,
 	).Logger()
 
 	// initializing.
-	rLogger.logContext, rLogger.cancelLogContext = context.WithCancel(ctx)
-	rLogger.lastError = nil
+	resLogger.logContext, resLogger.cancelLogContext = context.WithCancel(ctx)
+	resLogger.lastError = nil
 
 	// Pipes and buffers
 	logsReaer, logsWriter := io.Pipe() // logs lines output.
@@ -66,7 +66,7 @@ func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, e
 	stop := func(err error, msg string) {
 		_ = logsWriter.Close()
 		_ = rawWriter.Close()
-		_ = rLogger.Stop()
+		_ = resLogger.Stop()
 		if err != nil {
 			logger.Error().Err(err).Msg(msg)
 		}
@@ -89,10 +89,10 @@ func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, e
 		// may fail reading the logs.
 		// in that case we are required to restart the logger.
 		for {
-			logsCmd := rLogger.Backend.Client.CreateKubectlCommand(
-				rLogger.logContext,
+			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
+				resLogger.logContext,
 				"logs",
-				rLogger.ResourceName,
+				resLogger.ResourceName,
 				"-f",
 			)
 
@@ -124,12 +124,12 @@ func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, e
 				}
 
 				restarts++
-				if restarts > rLogger.Backend.LogStartAttempts {
+				if restarts > resLogger.Backend.LogStartAttempts {
 					stop(
 						err,
 						fmt.Sprintf(
 							"Error starting log reading. Too many attempts (%d)",
-							rLogger.Backend.LogStartAttempts,
+							resLogger.Backend.LogStartAttempts,
 						),
 					)
 					break
@@ -138,14 +138,14 @@ func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, e
 				logger.Debug().Err(fromStderr(err, stderr)).Msg(
 					fmt.Sprintf(
 						"Failed to start logger. Retry in %.2f [second], %d/%d",
-						rLogger.Backend.LogAttemptWait.Seconds(),
+						resLogger.Backend.LogAttemptWait.Seconds(),
 						restarts,
-						rLogger.Backend.LogStartAttempts,
+						resLogger.Backend.LogStartAttempts,
 					),
 				)
 
 				// sleep before next attempt.
-				time.Sleep(rLogger.Backend.LogAttemptWait)
+				time.Sleep(resLogger.Backend.LogAttemptWait)
 				continue
 			}
 			// completed. Stopping
@@ -157,26 +157,26 @@ func (rLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader, e
 	return logsReaer, nil
 }
 
-func (rLogger *KubeResourceLogger) Done() <-chan struct{} {
-	return rLogger.logContext.Done()
+func (resLogger *KubeResourceLogger) Done() <-chan struct{} {
+	return resLogger.logContext.Done()
 }
 
-func (rLogger *KubeResourceLogger) Wait() error {
-	if !rLogger.IsRunning() {
+func (resLogger *KubeResourceLogger) Wait() error {
+	if !resLogger.IsRunning() {
 		return errors.New(
-			"Pod logger is not running. Cannot wait",
+			"Resource logger is not running",
 		)
 	}
-	<-rLogger.logContext.Done()
-	return rLogger.lastError
+	<-resLogger.logContext.Done()
+	return resLogger.lastError
 }
 
-func (rLogger *KubeResourceLogger) ReadWithContext(ctx context.Context) (string, error) {
-	reader, err := rLogger.Start(ctx)
+func (resLogger *KubeResourceLogger) ReadWithContext(ctx context.Context) (string, error) {
+	reader, err := resLogger.Start(ctx)
 	if err != nil {
 		return "", err
 	}
-	err = rLogger.Wait()
+	err = resLogger.Wait()
 	if err != nil {
 		return "", err
 	}
@@ -189,6 +189,6 @@ func (rLogger *KubeResourceLogger) ReadWithContext(ctx context.Context) (string,
 	return output, nil
 }
 
-func (rLogger *KubeResourceLogger) Read(ctx context.Context) (string, error) {
-	return rLogger.ReadWithContext(context.Background())
+func (resLogger *KubeResourceLogger) Read(ctx context.Context) (string, error) {
+	return resLogger.ReadWithContext(context.Background())
 }

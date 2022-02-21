@@ -10,7 +10,7 @@ import (
 )
 
 func (backend *KubeBackend) MakeLogger(jobId string) zerolog.Logger {
-	logger := log.With().Str("RunID", backend.RunID).Logger()
+	logger := log.With().Str("RunID", backend.activeRun.RunID).Logger()
 	if len(jobId) > 0 {
 		logger = logger.With().Str("JobID", jobId).Logger()
 	}
@@ -20,29 +20,29 @@ func (backend *KubeBackend) MakeLogger(jobId string) zerolog.Logger {
 // Initializes the configuration for the kube backend
 // and populates the basic parameters for that config.
 func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
-	backend.Config = cfg
+	backend.activeRun.Config = cfg
 
 	// resetting
-	backend.SetupTemplates = []KubeTemplate{}
+	backend.activeRun.SetupTemplates = []KubeTemplate{}
 
 	// add network policy
 	if backend.EnableRunNetworkPolicy {
-		backend.SetupTemplates = append(backend.SetupTemplates, &KubeNetworkPolicyTemplate{
+		backend.activeRun.SetupTemplates = append(backend.activeRun.SetupTemplates, &KubeNetworkPolicyTemplate{
 			Backend: backend,
 		})
 	}
 
-	backend.PVCs = []*KubePVCTemplate{}
-	backend.PVCByName = make(map[string]*KubePVCTemplate)
+	backend.activeRun.PVCs = []*KubePVCTemplate{}
+	backend.activeRun.PVCByName = make(map[string]*KubePVCTemplate)
 
-	for _, vol := range backend.Config.Volumes {
+	for _, vol := range backend.activeRun.Config.Volumes {
 		pvc := &KubePVCTemplate{
 			Backend: backend,
 			Name:    vol.Name,
 		}
-		backend.PVCs = append(backend.PVCs, pvc)
-		backend.PVCByName[vol.Name] = pvc
-		backend.SetupTemplates = append(backend.SetupTemplates, pvc)
+		backend.activeRun.PVCs = append(backend.activeRun.PVCs, pvc)
+		backend.activeRun.PVCByName[vol.Name] = pvc
+		backend.activeRun.SetupTemplates = append(backend.activeRun.SetupTemplates, pvc)
 	}
 	return nil
 }
@@ -50,7 +50,7 @@ func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
 func (backend *KubeBackend) RenderSetupYaml() (string, error) {
 	var templatesAsYaml []string
 
-	for _, template := range backend.SetupTemplates {
+	for _, template := range backend.activeRun.SetupTemplates {
 		asYaml, err := template.Render()
 		if err != nil {
 			return "", err

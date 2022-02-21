@@ -21,7 +21,7 @@ func (template *KubeJobTemplate) JobName() string {
 }
 
 func (template *KubeJobTemplate) JobID() string {
-	return template.Backend.RunID + "-" + template.Step.Name
+	return template.Backend.activeRun.RunID + "-" + template.Step.Name
 }
 
 func (template *KubeJobTemplate) ShellCommand() string {
@@ -72,7 +72,7 @@ func (template *KubeJobTemplate) Mounts() []KubeJobTemplateMount {
 			continue
 		}
 
-		if pvc, ok := template.Backend.PVCByName[name]; ok {
+		if pvc, ok := template.Backend.activeRun.PVCByName[name]; ok {
 			mounts = append(mounts, KubeJobTemplateMount{
 				MountPath: mountPath,
 				PVC:       *pvc,

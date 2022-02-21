@@ -18,32 +18,35 @@ const (
 	Never       = "never"
 )
 
+type KubeBackendRun struct {
+	RunID          string                      // the random run id
+	Config         *types.Config               // the run config
+	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
+	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
+	SetupTemplates []KubeTemplate              // Loaded setup templates
+	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
+	ResourceLogger *KubeResourceLogger         // The logger for the current task run.
+}
+
 type KubeBackend struct {
 	Client           *KubeCtlClient // The kubernetes client
-	Config           *types.Config  // the run config
-	RunID            string         // the random run id
 	DeletePolicy     string         // The job delete policy
 	JobMemoryLimit   string         // The runner container memory limit (1Gi)
 	JobCPULimit      string         // The runner container cpu limit (200m)
-	LogStartAttempts int            // The number of logging restart attepmts
+	LogStartAttempts int            // The number of logging restart attempts
+	LogAttemptWait   time.Duration  // Wait time between log attempts
+	RequestTimeout   time.Duration  // The kubectl request timeout
 
 	// A delay before the pod start. Various reasons.
 	// Most notably some backend CNI's (like flannel)
 	// require this to apply egress network policy to the pod.
 	ContainerStartDelay int64
 
-	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
-	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
-	SetupTemplates []KubeTemplate              // Loaded setup templates
-	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
-	RequestTimeout time.Duration               // The kubectl request timeout
-
 	// flags
 	PVCAllowOnDetached     bool // Allow pvc's on detached containers
 	EnableRunNetworkPolicy bool // Do not implement a network policy when running a pipeline.
 
-	// internal
-	podLogger *KubePodLogger // The internal pod logger.
+	activeRun *KubeBackendRun // The current kubectl engine active run.
 }
 
 var _ types.Engine = &KubeBackend{}
@@ -63,12 +66,10 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
 	logStartAttempts, _ := strconv.Atoi(getWPKEnv("LOG_START_ATTEMPTS", "5").(string))
+	logStartAttemptWait, _ := strconv.ParseFloat(getWPKEnv("LOG_ATTEMPT_WAIT_TIME", "1").(string), 64)
 
 	return &KubeBackend{
-		Client: client,
-		Config: &types.Config{},
-		// the engine id must be randomized in order not to clobber/error other runs.
-		RunID:        CreateRandomID(10),
+		Client:       client,
 		DeletePolicy: getWPKEnv("DELETE_POLICY", IfSucceeded).(string),
 
 		RequestTimeout:         time.Duration(requestTimeoutSeconds) * time.Second,
@@ -78,6 +79,15 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),
 		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
 		LogStartAttempts:       logStartAttempts,                        // half a cpu
+		LogAttemptWait:         time.Duration(logStartAttemptWait) * time.Second,
+	}
+}
+
+func (backend *KubeBackend) Reset() {
+	// setup a new active run.
+	backend.activeRun = &KubeBackendRun{
+		Config: &types.Config{},
+		RunID:  CreateRandomID(10),
 	}
 }
 
@@ -100,6 +110,8 @@ func (backend *KubeBackend) Load() error {
 // Setup the pipeline environment. Creates the volumes and the other
 // run artifacts used for the run.
 func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
+	backend.Reset()
+
 	// updating parameters
 	backend.InitializeConfig(cfg)
 	logger := backend.MakeLogger("")
@@ -141,9 +153,9 @@ func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) erro
 		return err
 	}
 
-	if len(backend.DetachedJobs) > 0 {
+	if len(backend.activeRun.DetachedJobs) > 0 {
 		logger.Debug().Msg("Destroying detached jobs")
-		for _, job := range backend.DetachedJobs {
+		for _, job := range backend.activeRun.DetachedJobs {
 			jobYaml, err := job.Render()
 			if err != nil {
 				return err
@@ -196,7 +208,7 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 	logger.Debug().Msgf("Job initialized with\n %s", output)
 
 	if step.Detached {
-		backend.DetachedJobs = append(backend.DetachedJobs, &jobTemplate)
+		backend.activeRun.DetachedJobs = append(backend.activeRun.DetachedJobs, &jobTemplate)
 
 		// loaded a detached service. We need to wait for it to start,
 		// and load the IP from it. The add that to the DetachedJobs.
@@ -262,12 +274,12 @@ func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 
 	logger.Debug().Msgf("Reading logs (%s)", podName)
 
-	backend.podLogger = &KubePodLogger{
-		Backend: backend,
-		PodName: podName,
+	backend.activeRun.ResourceLogger = &KubeResourceLogger{
+		Backend:      backend,
+		ResourceName: podName,
 	}
 
-	return backend.podLogger.Start(ctx)
+	return backend.activeRun.ResourceLogger.Start(ctx)
 }
 
 // Wait for the pipeline step to complete and returns
@@ -289,7 +301,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
-	if backend.podLogger.IsRunning() {
+	if backend.activeRun.ResourceLogger.IsRunning() {
 		// wait for logs (or give error after the request timeout)
 		select {
 		case <-time.After(backend.RequestTimeout):
@@ -297,13 +309,13 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 				"Error reading logs, request timeout or kubectl logger stuck.",
 			)
 			break
-		case <-backend.podLogger.Done():
+		case <-backend.activeRun.ResourceLogger.Done():
 			logger.Debug().Msg("Read job logs: OK!")
 			break
 		}
 	}
 
-	err := backend.podLogger.Stop()
+	err := backend.activeRun.ResourceLogger.Stop()
 	if err != nil {
 		logger.Err(err).Msg("Errors occurred whilst reading logs")
 	}

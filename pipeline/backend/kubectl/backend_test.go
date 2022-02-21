@@ -9,6 +9,8 @@ import (
 
 func prepareTestBackend() *KubeBackend {
 	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeBackend)
+	// reset a new run.
+	backend.Reset()
 
 	backend.InitializeConfig(&types.Config{
 		Volumes: []*types.Volume{
@@ -22,7 +24,7 @@ func prepareTestBackend() *KubeBackend {
 }
 
 func TestEngineCore(t *testing.T) {
-	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeBackend)
+	backend := prepareTestBackend()
 	g := goblin.Goblin(t)
 
 	g.Describe("Engine core:", func() {
