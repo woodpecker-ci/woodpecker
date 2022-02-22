@@ -215,7 +215,7 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 	yaml string,
 	wait bool,
 ) (string, error) {
-	yamlFile, err := ioutil.TempFile(os.TempDir(), "wp.setup.kubectl.*.bat")
+	yamlFile, err := ioutil.TempFile(os.TempDir(), "wp.setup.kubectl.*.yaml")
 	if err != nil {
 		return "", err
 	}
