@@ -328,7 +328,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		logger.Error().Err(jobEndConditionError).Msg("Wait for job error whilst executing step")
 	}
 
-	condition = Triary(len(condition) == 0, "Errored", condition).(string)
+	condition = Triary(len(condition) == 0, "Error", condition).(string)
 
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
@@ -373,7 +373,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	// Checking what to do for state
 	doDelete := false
-	if condition == "Errored" {
+	if condition == "Error" {
 		// always delete if condition was not met.
 		doDelete = true
 	} else {

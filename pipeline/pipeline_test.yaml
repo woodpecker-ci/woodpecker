@@ -5,20 +5,19 @@ runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ub
 dind_image: &dind_image artprod.dev.bloomberg.com/sdae/docker:0.2.0
 
 pipeline:
-  fast_error:
-    image: *runner_image
-    commands:
-      - sleep 20
-      - |
-        for i in $(seq 1 122); do 
-          echo "DUMMY $i"; 
-        done
-      - exit 22
   first:
     image: *runner_image
     commands:
       - echo "first to run" >| loaded_message
       - cat loaded_message
+  fast_error:
+    image: *runner_image
+    commands:
+      - |
+        for i in $(seq 1 122); do 
+          echo "DUMMY $i"; 
+        done
+      - exit 22
   shared_test:
     image: *runner_image
     commands:
