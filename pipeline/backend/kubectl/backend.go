@@ -221,7 +221,7 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 		).(string)
 	} else {
 		backend.activeRun.JobPendingWait = &jobTemplate
-		logger.Debug().Msg("Set job as pending wait")
+		logger.Debug().Msg("Job is pending")
 	}
 
 	jobAsYaml, err := jobTemplate.Render()
@@ -303,6 +303,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		Backend: backend,
 		Step:    step,
 	}
+	logger := backend.MakeLogger(jobTemplate.JobID())
 
 	if backend.activeRun.JobPendingWait.JobID() != jobTemplate.JobID() {
 		return nil, errors.New(
@@ -313,8 +314,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 	// clear pending
 	backend.activeRun.JobPendingWait = nil
 
-	logger := backend.MakeLogger(jobTemplate.JobID())
-
+	logger.Debug().Msg("Job is running. Waiting for completion")
 	condition, jobEndConditionError := backend.Client.WaitForConditions(
 		ctx,
 		"job/"+jobTemplate.JobName(),
