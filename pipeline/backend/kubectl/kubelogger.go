@@ -119,7 +119,6 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 	go func() {
 		// this needs a loop since the logging command may fail.
-		// NOTE: We only restart the logger if no lines were read.
 		for {
 			// If is not running. Must return.
 			sinceArg := []string{}
