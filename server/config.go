@@ -67,6 +67,7 @@ var Config = struct {
 	}
 	Pipeline struct {
 		AuthenticatePublicRepos bool
+		DefaultCloneImage       string
 		Limits                  model.ResourceLimit
 		Volumes                 []string
 		Networks                []string
