@@ -124,11 +124,14 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 	backend.InitializeConfig(cfg)
 	logger := backend.MakeLogger("")
 
-	logger.Debug().Msg("Loading kube client defaults")
 	err := backend.Client.LoadDefaults(ctx)
 	if err != nil {
 		return err
 	}
+	logger.Debug().
+		Str("Context", backend.Client.CoreArgs.Context).
+		Str("Namespace", backend.Client.CoreArgs.Namespace).
+		Msg("Loaded kube client defaults")
 
 	setupYaml, err := backend.RenderSetupYaml()
 	if err != nil {

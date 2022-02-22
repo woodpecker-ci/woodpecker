@@ -232,6 +232,10 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 		"-f", yamlFilename,
 	)
 
+	if err != nil {
+		err = errors.New("Failed to deploy yaml. " + err.Error())
+	}
+
 	return output, err
 }
 
