@@ -58,6 +58,9 @@ func (client *KubeClient) RunKubectlCommand(
 	cmnd := client.CreateKubectlCommand(ctx, args...)
 	rslt, err := cmnd.CombinedOutput()
 	if err != nil {
+		log.Debug().Err(err).Str("Args", strings.Join(cmnd.Args, " ")).Msg(
+			"kubectl command failed",
+		)
 		return "", errors.New(string(rslt) + err.Error())
 	}
 	return string(rslt), err
