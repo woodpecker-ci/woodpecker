@@ -97,6 +97,12 @@ var flags = []cli.Flag{
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
+		Name:    "default-clone-image",
+		Usage:   "The default docker image to be used when cloning the repo",
+		Value:   "woodpeckerci/plugin-git:latest",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
 		Name:    "docs",
 		Usage:   "link to user documentation",
