@@ -305,7 +305,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 			)
 			break
 		case <-stepLogger.Done():
-			logger.Debug().Msg("Read job logs: OK!")
+			logger.Debug().Msg("Log reading complete.")
 			break
 		}
 	}

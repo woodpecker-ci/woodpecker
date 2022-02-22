@@ -81,6 +81,20 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		_ = resLogger.Stop()
 	}
 
+	// listen for context cancel.
+	go func() {
+		<-resLogger.logContext.Done()
+		if resLogger.IsRunning() {
+			err := resLogger.Stop()
+			debug := logger.Debug()
+			if err != nil {
+				debug = debug.Err(err)
+			}
+			debug.Msg("Resource logger context was canceled. Resource logger stopped.")
+		}
+	}()
+
+	// listen for lines.
 	go func() {
 		for lineScanner.Scan() {
 			// mark lines as read.
