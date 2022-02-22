@@ -2,6 +2,7 @@ package kubectl
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -126,15 +127,12 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				"-f",
 			)
 
-			stdErrPipe, err := logsCmd.StderrPipe()
-			if err != nil {
-				stop(err, "Error creating pipe")
-				break
-			}
+			var stdErrBuffer bytes.Buffer
 
+			logsCmd.Stderr = &stdErrBuffer
 			logsCmd.Stdout = rawWriter
 
-			err = logsCmd.Run()
+			err := logsCmd.Run()
 
 			if err == context.Canceled {
 				// the context was canceled.
@@ -145,7 +143,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 			if err != nil {
 				// something else went wrong.
-				stderr, _ := GetReaderContents(stdErrPipe)
+				stderr := stdErrBuffer.String()
 				err := fromStderr(err, stderr)
 
 				if !resLogger.IsRunning() {
