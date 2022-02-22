@@ -26,6 +26,7 @@ type KubeBackendRun struct {
 	SetupTemplates []KubeTemplate                 // Loaded setup templates
 	DetachedJobs   []*KubeJobTemplate             // Loaded detached template (services, etc..)
 	StepLoggers    map[string]*KubeResourceLogger // A collection of loggers per step.
+	JobPendingWait *KubeJobTemplate               // The executed job where wait was not initialized.
 }
 
 type KubeBackend struct {
@@ -134,7 +135,7 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "apply", setupYaml, false)
+	output, err := backend.Client.DeployKubectlYamlWithContext(ctx, "apply", setupYaml, false)
 
 	if err != nil {
 		return err
@@ -162,16 +163,24 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 		return err
 	}
 
+	destroyJobs := []*KubeJobTemplate{}
 	if len(backend.activeRun.DetachedJobs) > 0 {
-		logger.Debug().Msg("Destroying detached jobs")
-		for _, job := range backend.activeRun.DetachedJobs {
-			jobYaml, err := job.Render()
-			if err != nil {
-				return err
-			}
-			// adding to the destroy command
-			destoryYaml += "\n---\n" + jobYaml
+		destroyJobs = append(destroyJobs, backend.activeRun.DetachedJobs...)
+		logger.Debug().Msgf("Destroying %d detached jobs", len(backend.activeRun.DetachedJobs))
+	}
+
+	if backend.activeRun.JobPendingWait != nil {
+		destroyJobs = append(destroyJobs, backend.activeRun.JobPendingWait)
+		logger.Debug().Msg("A job, pending wait, still exists. Destroying.")
+	}
+
+	for _, job := range destroyJobs {
+		jobYaml, err := job.Render()
+		if err != nil {
+			return err
 		}
+		// adding to the destroy command
+		destoryYaml += "\n---\n" + jobYaml
 	}
 
 	// stopping all step loggers
@@ -188,12 +197,7 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 
 	// Destroy context is different then other execution context since
 	// it should be called even if the pipeline context is canceled.
-	destoryContext, _ := context.WithTimeout(
-		context.Background(),
-		backend.Client.RequestTimeout,
-	)
-
-	output, err := backend.Client.DeployKubectlYaml(destoryContext, "delete", destoryYaml, false)
+	output, err := backend.Client.DeployKubectlYaml("delete", destoryYaml, false)
 	if err != nil {
 		return err
 	}
@@ -209,20 +213,23 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 		Step:    step,
 	}
 
+	logger := backend.MakeLogger(jobTemplate.JobID())
+
 	if step.Detached {
 		step.Alias = Triary(
 			len(step.Alias) > 0, step.Alias, toKuberenetesValidName(step.Name, 50),
 		).(string)
+	} else {
+		backend.activeRun.JobPendingWait = &jobTemplate
+		logger.Debug().Msg("Set job as pending wait")
 	}
-
-	logger := backend.MakeLogger(jobTemplate.JobID())
 
 	jobAsYaml, err := jobTemplate.Render()
 	if err != nil {
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(
+	output, err := backend.Client.DeployKubectlYamlWithContext(
 		ctx,
 		"apply",
 		jobAsYaml,
@@ -265,7 +272,6 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 
 		logger.Debug().Msg("Detached job configured")
 	}
-
 	return nil
 }
 
@@ -298,6 +304,15 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		Step:    step,
 	}
 
+	if backend.activeRun.JobPendingWait.JobID() != jobTemplate.JobID() {
+		return nil, errors.New(
+			"Invalid wait on job. The job pending wait dose not match current step",
+		)
+	}
+
+	// clear pending
+	backend.activeRun.JobPendingWait = nil
+
 	logger := backend.MakeLogger(jobTemplate.JobID())
 
 	condition, jobEndConditionError := backend.Client.WaitForConditions(
@@ -306,6 +321,14 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		[]string{"Complete", "Failed"},
 		1,
 	)
+
+	if jobEndConditionError == context.Canceled {
+		logger.Debug().Msg("Step execution context canceled.")
+	} else if jobEndConditionError != nil {
+		logger.Error().Err(jobEndConditionError).Msg("Wait for job error whilst executing step")
+	}
+
+	condition = Triary(len(condition) == 0, "Errored", condition).(string)
 
 	logger.Debug().Msgf("Job ended with '%s'", condition)
 
@@ -350,17 +373,22 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	// Checking what to do for state
 	doDelete := false
-	switch backend.DeletePolicy {
-	case IfFailed:
-		if state.ExitCode != 0 {
-			doDelete = true
-		}
-	case IfSucceeded:
-		if state.ExitCode == 0 {
-			doDelete = true
-		}
-	case Always:
+	if condition == "Errored" {
+		// always delete if condition was not met.
 		doDelete = true
+	} else {
+		switch backend.DeletePolicy {
+		case IfFailed:
+			if state.ExitCode != 0 {
+				doDelete = true
+			}
+		case IfSucceeded:
+			if state.ExitCode == 0 {
+				doDelete = true
+			}
+		case Always:
+			doDelete = true
+		}
 	}
 
 	if doDelete {
@@ -369,14 +397,17 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 			return state, err
 		}
 
-		out, err := backend.Client.DeployKubectlYaml(ctx, "delete", asJobYaml, true)
+		// deploy in new context since this must happen
+		out, err := backend.Client.DeployKubectlYaml("delete", asJobYaml, true)
 		if err != nil {
 			return state, errors.New(out + ". " + err.Error())
 		}
 
-		logger.Debug().Msgf("Job DELETD with: \n" + out)
+		logger.Debug().Str("DeletePolicy", backend.DeletePolicy).Msgf("Job DELETD with: \n" + out)
 	} else {
-		logger.Info().Msgf("Job artifact kept in cluster (%s)", backend.DeletePolicy)
+		logger.Info().Str("DeletePolicy", backend.DeletePolicy).Msg(
+			"Job artifact kept in cluster",
+		)
 	}
 
 	logger.Debug().Msg("Job DONE")

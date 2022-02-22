@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type KubeClientCoreArgs struct {
@@ -183,16 +185,36 @@ func (client *KubeClient) GetResourceNames(
 	}
 	return resourceNames, nil
 }
-
 func (client *KubeClient) DeployKubectlYaml(
+	command,
+	yaml string,
+	wait bool,
+) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), client.RequestTimeout)
+	out, err := client.DeployKubectlYamlWithContext(ctx, command, yaml, wait)
+	cancel()
+	return out, err
+}
+
+func (client *KubeClient) DeployKubectlYamlWithContext(
 	ctx context.Context,
-	command, yaml string,
+	command,
+	yaml string,
 	wait bool,
 ) (string, error) {
 	yamlFile, err := ioutil.TempFile(os.TempDir(), "wp.setup.kubectl.*.bat")
 	if err != nil {
 		return "", err
 	}
+	yamlFilename := yamlFile.Name()
+
+	defer func() {
+		removeErr := os.Remove(yamlFilename)
+
+		if err != nil {
+			log.Error().Err(removeErr).Msg("Failed to remove yaml temp. File still exists.")
+		}
+	}()
 
 	_, err = yamlFile.WriteString(yaml)
 	if err != nil {
@@ -203,7 +225,6 @@ func (client *KubeClient) DeployKubectlYaml(
 		return "", err
 	}
 
-	yamlFilename := yamlFile.Name()
 	output, err := client.RunKubectlCommand(
 		ctx,
 		command,
@@ -211,15 +232,6 @@ func (client *KubeClient) DeployKubectlYaml(
 		Triary(wait, "--wait=true", "--wait=false"),
 		"-f", yamlFilename,
 	)
-	removeErr := os.Remove(yamlFilename)
-
-	if err != nil {
-		return "", err
-	}
-
-	if removeErr != nil {
-		return "", removeErr
-	}
 
 	return output, err
 }

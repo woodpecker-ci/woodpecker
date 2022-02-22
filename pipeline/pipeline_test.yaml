@@ -8,6 +8,7 @@ pipeline:
   fast_error:
     image: *runner_image
     commands:
+      - sleep 20
       - |
         for i in $(seq 1 122); do 
           echo "DUMMY $i"; 
