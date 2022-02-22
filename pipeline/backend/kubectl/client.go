@@ -56,12 +56,22 @@ func (client *KubeClient) RunKubectlCommand(
 	ctx context.Context, args ...interface{},
 ) (string, error) {
 	cmnd := client.CreateKubectlCommand(ctx, args...)
+
 	rslt, err := cmnd.Output()
 	if err != nil {
+		switch err.(type) {
+		case *exec.ExitError:
+			exitError := err.(*exec.ExitError)
+			if len(exitError.Stderr) > 0 {
+				err = errors.New(string(exitError.Stderr) + "(" + ")")
+			}
+			break
+		}
+
 		log.Debug().Err(err).Str("Args", strings.Join(cmnd.Args, " ")).Msg(
 			"kubectl command failed",
 		)
-		return "", errors.New(string(rslt) + err.Error())
+		return "", err
 	}
 	return string(rslt), err
 }

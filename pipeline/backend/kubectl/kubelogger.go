@@ -59,7 +59,6 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	logsReaer, logsWriter := io.Pipe() // logs lines output.
 	rawReader, rawWriter := io.Pipe()  // logs raw writer/reader
 	lineBreak := "\n"
-	linesRead := false                         // if lines were read
 	lineScanner := bufio.NewScanner(rawReader) // the scanner for lines
 
 	fromStderr := func(err error, stderr string) error {
@@ -100,11 +99,17 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		}
 	}()
 
+	lastLineScanned := int64(0)
+
+	consecutiveRestarts := 0
+
 	// listen for lines.
 	go func() {
 		for lineScanner.Scan() {
-			// mark lines as read.
-			linesRead = true
+			// line was read. Reseting restarts and time.
+			consecutiveRestarts = 0
+			lastLineScanned = time.Now().Unix()
+
 			err := writeLine(lineScanner.Bytes())
 			if err != nil {
 				stop(err, "Error while reading lines")
@@ -113,14 +118,22 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	}()
 
 	go func() {
-		restarts := 0
 		// this needs a loop since the logging command may fail.
 		// NOTE: We only restart the logger if no lines were read.
 		for {
 			// If is not running. Must return.
+			sinceArg := []string{}
+			if lastLineScanned > 0 {
+				sinceArg = []string{
+					"--since",
+					fmt.Sprintf("%ds", time.Now().Unix()-lastLineScanned),
+				}
+			}
+
 			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
 				logContext,
 				"--request-timeout",
+				sinceArg,
 				fmt.Sprintf("%ds", (60*60*24)),
 				"logs",
 				resLogger.ResourceName,
@@ -151,13 +164,8 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 					break
 				}
 
-				if linesRead {
-					stop(err, "Error while reading logs")
-					break
-				}
-
-				restarts++
-				if restarts > resLogger.Backend.CommandRetries {
+				consecutiveRestarts++
+				if consecutiveRestarts > resLogger.Backend.CommandRetries {
 					stop(
 						err,
 						fmt.Sprintf(
@@ -170,9 +178,9 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 				logger.Debug().Err(fromStderr(err, stderr)).Msg(
 					fmt.Sprintf(
-						"Failed to start logger. Retry in %.2f [second], %d/%d",
+						"Logger failed. Retry in %.2f [second], %d/%d",
 						resLogger.Backend.CommandRetryWait.Seconds(),
-						restarts,
+						consecutiveRestarts,
 						resLogger.Backend.CommandRetries,
 					),
 				)
