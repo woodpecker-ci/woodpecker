@@ -8,7 +8,7 @@ import (
 )
 
 func prepareTestBackend() *KubeBackend {
-	backend := New("kubectl", KubeCtlClientCoreArgs{}).(*KubeBackend)
+	backend := New("kubectl", KubeClientCoreArgs{}).(*KubeBackend)
 	// reset a new run.
 	backend.Reset()
 

@@ -110,9 +110,8 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 	go func() {
 		restarts := 0
-		// this needs a loop since the logger here
-		// may fail reading the logs.
-		// in that case we are required to restart the logger.
+		// this needs a loop since the logging command may fail.
+		// NOTE: We only restart the logger if no lines were read.
 		for {
 			// If is not running. Must return.
 			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
@@ -146,6 +145,11 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				stderr, _ := GetReaderContents(stdErrPipe)
 				err := fromStderr(err, stderr)
 
+				if !resLogger.IsRunning() {
+					// terminated.
+					break
+				}
+
 				if linesRead {
 					stop(err, "Error while reading logs")
 					break
@@ -177,7 +181,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				continue
 			}
 			// completed. Stopping
-			stop(nil, "Log reading complete")
+			stop(nil, "")
 			break
 		}
 	}()

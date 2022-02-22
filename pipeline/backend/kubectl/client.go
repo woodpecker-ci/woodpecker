@@ -13,12 +13,12 @@ import (
 	"time"
 )
 
-type KubeCtlClientCoreArgs struct {
+type KubeClientCoreArgs struct {
 	Namespace string // the default namespace
 	Context   string // the default context
 }
 
-func (clientArgs *KubeCtlClientCoreArgs) ToArgsList() []string {
+func (clientArgs *KubeClientCoreArgs) ToArgsList() []string {
 	cmnd := []string{}
 	if len(clientArgs.Namespace) > 0 {
 		cmnd = append(cmnd, "--namespace", clientArgs.Namespace)
@@ -29,20 +29,20 @@ func (clientArgs *KubeCtlClientCoreArgs) ToArgsList() []string {
 	return cmnd
 }
 
-func (clientArgs *KubeCtlClientCoreArgs) Merge(args KubeCtlClientCoreArgs) KubeCtlClientCoreArgs {
-	return KubeCtlClientCoreArgs{
+func (clientArgs *KubeClientCoreArgs) Merge(args KubeClientCoreArgs) KubeClientCoreArgs {
+	return KubeClientCoreArgs{
 		Namespace: FirstNotEmpty(args.Namespace, clientArgs.Namespace).(string),
 		Context:   FirstNotEmpty(args.Context, clientArgs.Context).(string),
 	}
 }
 
-type KubeCtlClient struct {
-	Executable     string                // the default executable
-	CoreArgs       KubeCtlClientCoreArgs // the default args
-	RequestTimeout time.Duration         // The kubectl request timeout
+type KubeClient struct {
+	Executable     string             // the default executable
+	CoreArgs       KubeClientCoreArgs // the default args
+	RequestTimeout time.Duration      // The kubectl request timeout
 }
 
-func (client *KubeCtlClient) GetExecutable() string {
+func (client *KubeClient) GetExecutable() string {
 	if len(client.Executable) == 0 {
 		return "kubectl"
 	}
@@ -50,7 +50,7 @@ func (client *KubeCtlClient) GetExecutable() string {
 }
 
 // run a kubectl command
-func (client *KubeCtlClient) RunKubectlCommand(
+func (client *KubeClient) RunKubectlCommand(
 	ctx context.Context, args ...interface{},
 ) (string, error) {
 	cmnd := client.CreateKubectlCommand(ctx, args...)
@@ -61,12 +61,18 @@ func (client *KubeCtlClient) RunKubectlCommand(
 	return string(rslt), err
 }
 
-// create a kubectl command context
-func (client *KubeCtlClient) CreateKubectlCommand(ctx context.Context, args ...interface{}) *exec.Cmd {
-	return exec.CommandContext(ctx, client.GetExecutable(), client.ComposeKubectlCommand(args...)...)
+func (client *KubeClient) CreateKubectlCommand(
+	ctx context.Context,
+	args ...interface{},
+) *exec.Cmd {
+	return exec.CommandContext(
+		ctx,
+		client.GetExecutable(),
+		client.ComposeKubectlCommand(args...)...,
+	)
 }
 
-func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
+func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 	flat := []string{}
 	for _, ar := range args {
 		switch ar.(type) {
@@ -118,7 +124,7 @@ func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string
 }
 
 // Loads default configuration for the client.
-func (client *KubeCtlClient) LoadDefaults(ctx context.Context) error {
+func (client *KubeClient) LoadDefaults(ctx context.Context) error {
 	if len(client.CoreArgs.Namespace) == 0 {
 		namespace, err := client.RunKubectlCommand(
 			ctx, "config", "view", "--minify", "--output",
@@ -142,7 +148,7 @@ func (client *KubeCtlClient) LoadDefaults(ctx context.Context) error {
 }
 
 // Get resource names from selector (with kind)
-func (client *KubeCtlClient) GetResourceNames(
+func (client *KubeClient) GetResourceNames(
 	ctx context.Context,
 	resourceType string,
 	selector string,
@@ -178,7 +184,7 @@ func (client *KubeCtlClient) GetResourceNames(
 	return resourceNames, nil
 }
 
-func (client *KubeCtlClient) DeployKubectlYaml(
+func (client *KubeClient) DeployKubectlYaml(
 	ctx context.Context,
 	command, yaml string,
 	wait bool,
@@ -218,7 +224,7 @@ func (client *KubeCtlClient) DeployKubectlYaml(
 	return output, err
 }
 
-func (client *KubeCtlClient) WaitForConditions(
+func (client *KubeClient) WaitForConditions(
 	ctx context.Context,
 	resource string, conditions []string,
 	count int,
@@ -267,7 +273,7 @@ func (client *KubeCtlClient) WaitForConditions(
 	return foundCondition, nil
 }
 
-func (client *KubeCtlClient) WaitForResourceEvents(
+func (client *KubeClient) WaitForResourceEvents(
 	ctx context.Context,
 	resourceNameRegex string,
 	matchEventNames []string,

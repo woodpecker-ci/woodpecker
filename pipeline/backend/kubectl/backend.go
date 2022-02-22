@@ -29,12 +29,12 @@ type KubeBackendRun struct {
 }
 
 type KubeBackend struct {
-	Client           *KubeCtlClient // The kubernetes client
-	DeletePolicy     string         // The job delete policy
-	JobMemoryLimit   string         // The runner container memory limit (1Gi)
-	JobCPULimit      string         // The runner container cpu limit (200m)
-	CommandRetries   int            // The number of times to retry commands.
-	CommandRetryWait time.Duration  // The wait time between command retries.
+	Client           *KubeClient   // The kubernetes client
+	DeletePolicy     string        // The job delete policy
+	JobMemoryLimit   string        // The runner container memory limit (1Gi)
+	JobCPULimit      string        // The runner container cpu limit (200m)
+	CommandRetries   int           // The number of times to retry commands.
+	CommandRetryWait time.Duration // The wait time between command retries.
 
 	// A delay before the pod start. Various reasons.
 	// Most notably some backend CNI's (like flannel)
@@ -55,14 +55,14 @@ type KubeBackend struct {
 
 var _ types.Engine = &KubeBackend{}
 
-func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
+func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 	// create a new kubectl (exec based) engine. Allows for execution pods
 	// as commands. Assumes running inside a cluster or kubectl is configured.
 
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
-	client := &KubeCtlClient{
+	client := &KubeClient{
 		Executable: execuatble,
-		CoreArgs: args.Merge(KubeCtlClientCoreArgs{
+		CoreArgs: args.Merge(KubeClientCoreArgs{
 			Namespace: getWPKEnv("NAMESPACE", "").(string),
 			Context:   getWPKEnv("CONTEXT", "").(string),
 		}),
@@ -178,11 +178,11 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 	for stepName, stepLogger := range backend.activeRun.StepLoggers {
 		if stepLogger.IsRunning() {
 			err := stepLogger.Stop()
+			event := logger.Debug().Str("Step", stepName)
 			if err != nil {
-				logger.Error().Err(err).Msgf("Error whist terminating logger for %s", stepName)
-			} else {
-				logger.Debug().Msgf("Terminated step logger for %s", stepName)
+				event.Err(err)
 			}
+			event.Msgf("Terminated logger")
 		}
 	}
 
