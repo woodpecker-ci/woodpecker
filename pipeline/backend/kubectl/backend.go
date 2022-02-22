@@ -410,7 +410,10 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		)
 	}
 
-	logger.Debug().Msg("Job DONE")
+	logger.Info().
+		Str("Status", condition).
+		Str("Deleted", strconv.FormatBool(doDelete)).
+		Msg("Job DONE")
 
 	return state, nil
 }
