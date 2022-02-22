@@ -274,6 +274,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
 	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
