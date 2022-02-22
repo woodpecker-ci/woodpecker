@@ -63,20 +63,29 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		return err
 	}
 
+	writeLine := func(line []byte) error {
+		_, err := logsWriter.Write(append(line, []byte(lineBreak)...))
+		return err
+	}
+
 	stop := func(err error, msg string) {
+		if err != nil {
+			logger.Error().Err(err).Msg(msg)
+			_ = writeLine([]byte(
+				fmt.Sprintf("Error reading logs from stage (%s): %s", resLogger.ResourceName, msg),
+			))
+			_ = writeLine([]byte(err.Error()))
+		}
 		_ = logsWriter.Close()
 		_ = rawWriter.Close()
 		_ = resLogger.Stop()
-		if err != nil {
-			logger.Error().Err(err).Msg(msg)
-		}
 	}
 
 	go func() {
 		for lineScanner.Scan() {
 			// mark lines as read.
 			linesRead = true
-			_, err := logsWriter.Write(append(lineScanner.Bytes(), []byte(lineBreak)...))
+			err := writeLine(lineScanner.Bytes())
 			if err != nil {
 				stop(err, "Error while reading lines")
 			}

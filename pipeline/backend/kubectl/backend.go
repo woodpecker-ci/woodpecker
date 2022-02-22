@@ -228,10 +228,10 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 	}
 	podName := podNames[0]
 
-	logger.Debug().Msg("Waiting for job pod to be ready (Initialized)")
+	logger.Debug().Msg("Waiting for job pod to be ready")
 	_, err = backend.Client.WaitForConditions(
 		ctx,
-		podName, []string{"Initialized"},
+		podName, []string{"ContainersReady", "Ready"},
 		1,
 	)
 
@@ -248,7 +248,7 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 			return err
 		}
 
-		logger.Debug().Msg("Detached job is running configured")
+		logger.Debug().Msg("Detached job configured")
 	}
 
 	return nil

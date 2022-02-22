@@ -1,10 +1,18 @@
 skip_clone: true
 
 # TODO: test bad image (image pull backoff)
-runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.3
+runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.6
 dind_image: &dind_image artprod.dev.bloomberg.com/sdae/docker:0.2.0
 
 pipeline:
+  fast_error:
+    image: *runner_image
+    commands:
+      - |
+        for i in $(seq 1 122); do 
+          echo "DUMMY $i"; 
+        done
+      - exit 22
   first:
     image: *runner_image
     commands:
