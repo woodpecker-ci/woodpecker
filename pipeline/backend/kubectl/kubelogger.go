@@ -29,9 +29,12 @@ func (resLogger *KubeResourceLogger) LastError() error {
 
 func (resLogger *KubeResourceLogger) Stop() error {
 	if resLogger.IsRunning() {
-		resLogger.cancelLogContext()
+		cancel := resLogger.cancelLogContext
+		// clear.
 		resLogger.logContext = nil
 		resLogger.cancelLogContext = nil
+		// cancel existing
+		cancel()
 	}
 	return resLogger.lastError
 }

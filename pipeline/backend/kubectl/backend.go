@@ -76,7 +76,7 @@ func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 
 	return &KubeBackend{
 		Client:       client,
-		DeletePolicy: getWPKEnv("DELETE_POLICY", IfSucceeded).(string),
+		DeletePolicy: getWPKEnv("DELETE_POLICY", Always).(string),
 
 		PVCAllowOnDetached:     getWPKEnv("ALLOW_PVC_ON_DETACHED", "false").(string) == "true",
 		EnableRunNetworkPolicy: getWPKEnv("ENABLE_NETWORK_POLICY", "false").(string) == "true",
