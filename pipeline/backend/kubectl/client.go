@@ -209,10 +209,9 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 	yamlFilename := yamlFile.Name()
 
 	defer func() {
-		removeErr := os.Remove(yamlFilename)
-
+		err := os.Remove(yamlFilename)
 		if err != nil {
-			log.Error().Err(removeErr).Msg("Failed to remove yaml temp. File still exists.")
+			log.Error().Err(err).Msg("Failed to remove yaml temp. File still exists.")
 		}
 	}()
 
