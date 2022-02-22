@@ -146,7 +146,7 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 }
 
 // Destroy the pipeline environment.
-func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) error {
+func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error {
 	logger := backend.MakeLogger("")
 	destoryYaml, err := backend.RenderSetupYaml()
 
@@ -178,7 +178,14 @@ func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) erro
 		}
 	}
 
-	output, err := backend.Client.DeployKubectlYaml(ctx, "delete", destoryYaml, false)
+	// Destroy context is different then other execution context since
+	// it should be called even if the pipeline context is canceled.
+	destoryContext, _ := context.WithTimeout(
+		context.Background(),
+		backend.RequestTimeout,
+	)
+
+	output, err := backend.Client.DeployKubectlYaml(destoryContext, "delete", destoryYaml, false)
 	if err != nil {
 		return err
 	}
