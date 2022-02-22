@@ -107,6 +107,10 @@ func (backend *KubeBackend) PopulateDetachedInfo(
 		isInvalid := err == nil && !IsIP(podIP)
 		attempts++
 
+		if err == context.Canceled {
+			logger.Debug().Err(err).Msg("Aborted reading pod IP")
+		}
+
 		if err != nil || isInvalid {
 			if isInvalid {
 				err = fmt.Errorf(

@@ -35,12 +35,16 @@ type KubeBackend struct {
 	JobCPULimit      string         // The runner container cpu limit (200m)
 	CommandRetries   int            // The number of times to retry commands.
 	CommandRetryWait time.Duration  // The wait time between command retries.
-	RequestTimeout   time.Duration  // The kubectl request timeout
 
 	// A delay before the pod start. Various reasons.
 	// Most notably some backend CNI's (like flannel)
 	// require this to apply egress network policy to the pod.
 	ContainerStartDelay int64
+
+	// The grace period (seconds) to allow pods to exit.
+	// This will determine the canceled/errored memory overhead.
+	// Recommended 5 seconds.
+	TerminationGracePeriod int64
 
 	// flags
 	PVCAllowOnDetached     bool // Allow pvc's on detached containers
@@ -55,16 +59,18 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 	// create a new kubectl (exec based) engine. Allows for execution pods
 	// as commands. Assumes running inside a cluster or kubectl is configured.
 
+	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	client := &KubeCtlClient{
 		Executable: execuatble,
 		CoreArgs: args.Merge(KubeCtlClientCoreArgs{
 			Namespace: getWPKEnv("NAMESPACE", "").(string),
 			Context:   getWPKEnv("CONTEXT", "").(string),
 		}),
+		RequestTimeout: time.Duration(requestTimeoutSeconds) * time.Second,
 	}
 
-	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
+	terminationGracePeriodSeconds, _ := strconv.ParseInt(getWPKEnv("TERMINATION_GRACE_PERIOD", "5").(string), 0, 64)
 	commandRetries, _ := strconv.Atoi(getWPKEnv("COMMAND_RETRIES", "5").(string))
 	commandRetriesWait, _ := strconv.ParseFloat(getWPKEnv("COMMAND_RETRIES_WAIT", "1").(string), 64)
 
@@ -72,9 +78,9 @@ func New(execuatble string, args KubeCtlClientCoreArgs) types.Engine {
 		Client:       client,
 		DeletePolicy: getWPKEnv("DELETE_POLICY", IfSucceeded).(string),
 
-		RequestTimeout:         time.Duration(requestTimeoutSeconds) * time.Second,
 		PVCAllowOnDetached:     getWPKEnv("ALLOW_PVC_ON_DETACHED", "false").(string) == "true",
 		EnableRunNetworkPolicy: getWPKEnv("ENABLE_NETWORK_POLICY", "false").(string) == "true",
+		TerminationGracePeriod: terminationGracePeriodSeconds,
 		ContainerStartDelay:    containerStartDelaySeconds,
 		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),
 		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
@@ -148,6 +154,8 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 // Destroy the pipeline environment.
 func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error {
 	logger := backend.MakeLogger("")
+	logger.Debug().Msg("Destroying run setup")
+
 	destoryYaml, err := backend.RenderSetupYaml()
 
 	if err != nil {
@@ -182,7 +190,7 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 	// it should be called even if the pipeline context is canceled.
 	destoryContext, _ := context.WithTimeout(
 		context.Background(),
-		backend.RequestTimeout,
+		backend.Client.RequestTimeout,
 	)
 
 	output, err := backend.Client.DeployKubectlYaml(destoryContext, "delete", destoryYaml, false)
@@ -306,7 +314,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 	if stepLogger.IsRunning() {
 		// wait for logs (or give error after the request timeout)
 		select {
-		case <-time.After(backend.RequestTimeout):
+		case <-time.After(backend.Client.RequestTimeout):
 			logger.Error().Msg(
 				"Error reading logs, request timeout or kubectl logger stuck.",
 			)

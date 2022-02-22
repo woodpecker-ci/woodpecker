@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type KubeCtlClientCoreArgs struct {
@@ -36,8 +37,9 @@ func (clientArgs *KubeCtlClientCoreArgs) Merge(args KubeCtlClientCoreArgs) KubeC
 }
 
 type KubeCtlClient struct {
-	Executable string                // the default executable
-	CoreArgs   KubeCtlClientCoreArgs // the default args
+	Executable     string                // the default executable
+	CoreArgs       KubeCtlClientCoreArgs // the default args
+	RequestTimeout time.Duration         // The kubectl request timeout
 }
 
 func (client *KubeCtlClient) GetExecutable() string {
@@ -65,35 +67,51 @@ func (client *KubeCtlClient) CreateKubectlCommand(ctx context.Context, args ...i
 }
 
 func (client *KubeCtlClient) ComposeKubectlCommand(args ...interface{}) []string {
-	command := []string{}
-	hasContext := false
+	flat := []string{}
 	for _, ar := range args {
 		switch ar.(type) {
 		case string:
-			if len(ar.(string)) == 0 {
-				continue
-			}
-			if ar.(string) == "--context" {
-				hasContext = true
-			}
-			command = append(command, ar.(string))
-			break
+			arVal := ar.(string)
+			flat = append(flat, arVal)
 		case []string:
-			for _, part := range ar.([]string) {
-				if len(part) == 0 {
-					continue
-				}
-				command = append(command, part)
-			}
-			break
+			arValArray := ar.([]string)
+			flat = append(flat, arValArray...)
 		default:
-			continue
+			break
 		}
 	}
 
-	if len(client.CoreArgs.Context) > 0 && !hasContext {
-		// adding the context
-		command = append([]string{"--context", client.CoreArgs.Context}, command...)
+	command := []string{}
+	for _, ar := range flat {
+		if len(ar) == 0 {
+			continue
+		}
+		command = append(command, ar)
+	}
+
+	hasArg := func(markers ...string) bool {
+		for _, marker := range markers {
+			for _, ar := range command {
+				if marker == ar {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	if client.CoreArgs.Context != "" && !hasArg("--context") {
+		command = append([]string{
+			"--context",
+			client.CoreArgs.Context,
+		}, command...)
+	}
+
+	if client.RequestTimeout.Seconds() > 0 && !hasArg("--request-timeout") {
+		command = append([]string{
+			"--request-timeout",
+			fmt.Sprintf("%ds", int(client.RequestTimeout.Seconds())),
+		}, command...)
 	}
 
 	return command

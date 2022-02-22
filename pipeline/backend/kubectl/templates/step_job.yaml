@@ -12,6 +12,7 @@ metadata:
 spec:
   # Number of times to run is one.
   backoffLimit: 0
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -23,6 +24,9 @@ spec:
         # {{- end }}
     spec:
       restartPolicy: Never
+      # {{- if gt .Backend.TerminationGracePeriod 0 }}
+      terminationGracePeriodSeconds: {{ .Backend.TerminationGracePeriod }}
+      # {{- end }} 
       # {{- if ne (len .Step.Volumes) 0 }}
       volumes:
         # {{- range $mnt := .Mounts }}

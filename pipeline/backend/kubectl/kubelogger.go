@@ -46,7 +46,9 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	).Logger()
 
 	// initializing.
-	resLogger.logContext, resLogger.cancelLogContext = context.WithCancel(ctx)
+	logContext, cancelLogContext := context.WithCancel(ctx)
+	resLogger.logContext = logContext
+	resLogger.cancelLogContext = cancelLogContext
 	resLogger.lastError = nil
 
 	// Pipes and buffers
@@ -83,7 +85,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 	// listen for context cancel.
 	go func() {
-		<-resLogger.logContext.Done()
+		<-logContext.Done()
 		if resLogger.IsRunning() {
 			err := resLogger.Stop()
 			debug := logger.Debug()
@@ -112,8 +114,11 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		// may fail reading the logs.
 		// in that case we are required to restart the logger.
 		for {
+			// If is not running. Must return.
 			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
-				resLogger.logContext,
+				logContext,
+				"--request-timeout",
+				fmt.Sprintf("%ds", (60*60*24)),
 				"logs",
 				resLogger.ResourceName,
 				"-f",
