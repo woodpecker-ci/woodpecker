@@ -1,8 +1,8 @@
 skip_clone: true
 
 # TODO: test bad image (image pull backoff)
-runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ubuntu20:0.0.6
-dind_image: &dind_image artprod.dev.bloomberg.com/sdae/docker:0.2.0
+runner_image: &runner_image ubuntu:latest
+dind_image: &dind_image docker:latest
 
 pipeline:
   first:
