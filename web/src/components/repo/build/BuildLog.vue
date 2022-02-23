@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="font-mono bg-gray-700 pt-14 md:pt-4 dark:bg-dark-gray-700 p-4 overflow-y-scroll">
+  <div v-if="build" class="flex flex-col bg-gray-300 dark:bg-dark-gray-700 pt-10 md:pt-0">
     <div
       class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
       @click="$emit('update:proc-id', null)"
@@ -8,34 +8,38 @@
       <Icon name="close" class="ml-auto" />
     </div>
 
-    <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
-      <div class="text-gray-500 text-sm w-4">{{ (logLine.pos || 0) + 1 }}</div>
-      <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="mx-4 text-gray-200 dark:text-gray-400" v-html="logLine.out" />
-      <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
-    </div>
-    <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
-      exit code {{ proc.exit_code }}
+    <div class="flex flex-grow w-full p-2 pr-0 md:p-4 md:pr-2">
+      <div v-show="loadedLogs" id="terminal" class="w-full" />
+
+      <div class="text-gray-300 m-auto text-xl">
+        <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
+        <span v-else-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
+          >This step has been skipped.</span
+        >
+        <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
+        <div v-else-if="!loadedLogs" class="text-xl">Loading ...</div>
+      </div>
     </div>
 
-    <div class="text-gray-300 mx-auto">
-      <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
-      <span v-else-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
-        >This step has been canceled.</span
-      >
-      <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
+    <div v-if="proc?.end_time !== undefined" class="w-full dark:bg-dark-gray-800 text-gray-300 text-md md:mt-4 p-4">
+      exit code {{ proc.exit_code }}
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import AnsiConvert from 'ansi-to-html';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, toRef, watch } from 'vue';
+import 'xterm/css/xterm.css';
+
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
+import { Terminal } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import { WebLinksAddon } from 'xterm-addon-web-links';
 
 import Icon from '~/components/atomic/Icon.vue';
-import useBuildProc from '~/compositions/useBuildProc';
+import useApiClient from '~/compositions/useApiClient';
+import { useDarkMode } from '~/compositions/useDarkMode';
 import { Build, Repo } from '~/lib/api/types';
-import { findProc } from '~/utils/helpers';
+import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'BuildLog',
@@ -65,37 +69,140 @@ export default defineComponent({
     const build = toRef(props, 'build');
     const procId = toRef(props, 'procId');
     const repo = inject<Ref<Repo>>('repo');
-    const buildProc = useBuildProc();
+    const apiClient = useApiClient();
 
-    const ansiConvert = new AnsiConvert();
-    const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
+    const loadedProcSlug = ref<string>();
+    const procSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${build.value.id} - ${procId.value}`);
     const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
+    const stream = ref<EventSource>();
+    const term = ref(
+      new Terminal({
+        convertEol: true,
+        disableStdin: true,
+        theme: {
+          cursor: 'transparent',
+        },
+      }),
+    );
+    const fitAddon = ref(new FitAddon());
+    const loadedLogs = ref(true);
+    const autoScroll = ref(true); // TODO
 
-    function loadBuildProc() {
+    async function loadLogs() {
+      if (loadedProcSlug.value === procSlug.value) {
+        return;
+      }
+      loadedProcSlug.value = procSlug.value;
+      loadedLogs.value = false;
+      term.value.reset();
+      term.value.write('\x1b[?25l');
+
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      if (!repo.value || !build.value || !proc.value) {
+      if (stream.value) {
+        stream.value.close();
+      }
+
+      // we do not have logs for skipped jobs
+      if (
+        !repo.value ||
+        !build.value ||
+        !proc.value ||
+        proc.value.state === 'skipped' ||
+        proc.value.state === 'killed'
+      ) {
         return;
       }
 
-      buildProc.load(repo.value.owner, repo.value.name, build.value.number, proc.value);
+      if (isProcFinished(proc.value)) {
+        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
+        term.value.write(
+          logs
+            .slice(Math.max(logs.length, 0) - 300, logs.length) // TODO: think about way to lazy-loading (#776)
+            .map((l) => l.out)
+            .join(''),
+        );
+        loadedLogs.value = true;
+      }
+
+      if (isProcRunning(proc.value)) {
+        // load stream of parent process (which receives all child processes logs)
+        // TODO: change stream to only send data of single child process
+        stream.value = apiClient.streamLogs(
+          repo.value.owner,
+          repo.value.name,
+          build.value.number,
+          proc.value.ppid,
+          (l) => {
+            loadedLogs.value = true;
+            term.value.write(l.out, () => {
+              if (autoScroll.value) {
+                term.value.scrollToBottom();
+              }
+            });
+          },
+        );
+      }
     }
 
-    onMounted(() => {
-      loadBuildProc();
+    function resize() {
+      fitAddon.value.fit();
+    }
+
+    onMounted(async () => {
+      term.value.loadAddon(fitAddon.value);
+      term.value.loadAddon(new WebLinksAddon());
+
+      const element = document.getElementById('terminal');
+      if (element === null) {
+        throw new Error('Unexpected: "terminal" should be provided at this place');
+      }
+      term.value.open(element);
+      fitAddon.value.fit();
+
+      window.addEventListener('resize', resize);
+
+      loadLogs();
     });
 
-    watch([repo, build, procId], () => {
-      loadBuildProc();
+    watch(procSlug, () => {
+      loadLogs();
     });
+
+    const { darkMode } = useDarkMode();
+    watch(
+      darkMode,
+      () => {
+        if (darkMode.value) {
+          term.value.options = {
+            theme: {
+              background: '#303440', // dark-gray-700
+              foreground: '#d3d3d3', // gray-...
+            },
+          };
+        } else {
+          term.value.options = {
+            theme: {
+              background: 'rgb(209,213,219)', // gray-300
+              foreground: '#000',
+              selection: '#000',
+            },
+          };
+        }
+      },
+      { immediate: true },
+    );
 
     onBeforeUnmount(() => {
-      buildProc.unload();
+      if (stream.value) {
+        stream.value.close();
+      }
+      window.removeEventListener('resize', resize);
     });
 
-    return { logLines, proc };
+    return { proc, loadedLogs };
   },
 });
 </script>

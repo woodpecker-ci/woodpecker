@@ -1,17 +1,16 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 text-gray-200 dark:text-gray-400 bg-gray-600 dark:bg-dark-gray-800">
+  <div class="flex flex-col w-full md:w-3/12 text-gray-600 dark:text-gray-400">
     <div
       class="
         flex
         py-4
-        px-2
-        mx-2
+        px-4
         space-x-1
         justify-between
         flex-shrink-0
-        text-gray-500
         border-b-1
-        dark:border-dark-gray-600
+        bg-gray-300
+        dark:border-b-dark-gray-600 dark:bg-dark-gray-700
       "
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
@@ -38,7 +37,7 @@
           <Icon name="commit" />
           <span>{{ build.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-link flex items-center" :href="build.link_url" target="_blank">
+        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="build.link_url" target="_blank">
           <Icon name="commit" />
           <span>{{ build.commit.slice(0, 10) }}</span>
         </a>
@@ -53,7 +52,16 @@
       <div class="md:absolute top-0 left-0 w-full">
         <div v-for="proc in build.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <span>{{ proc.name }}</span>
+            <div class="flex items-center">
+              <div v-if="['success'].includes(proc.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
+              <div v-if="['pending', 'skipped'].includes(proc.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
+              <div
+                v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(proc.state)"
+                class="w-2 h-2 bg-red-400 rounded-full"
+              />
+              <div v-if="['started', 'running'].includes(proc.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
+              <span class="ml-2">{{ proc.name }}</span>
+            </div>
             <div v-if="proc.environ" class="text-xs">
               <div v-for="(value, key) in proc.environ" :key="key">
                 <span
@@ -78,8 +86,18 @@
           <div
             v-for="job in proc.children"
             :key="job.pid"
-            class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-900"
-            :class="{ 'bg-gray-700 !dark:bg-dark-gray-600': selectedProcId && selectedProcId === job.pid }"
+            class="
+              flex
+              mx-2
+              mb-1
+              p-2
+              pl-6
+              cursor-pointer
+              rounded-md
+              items-center
+              hover:bg-gray-300 hover:dark:bg-dark-gray-700
+            "
+            :class="{ 'bg-gray-300 !dark:bg-dark-gray-700': selectedProcId && selectedProcId === job.pid }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
             <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
