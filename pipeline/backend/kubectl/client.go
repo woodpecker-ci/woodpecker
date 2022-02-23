@@ -20,6 +20,7 @@ type KubeClientCoreArgs struct {
 	Context   string // the default context
 }
 
+// Merge configurations
 func (clientArgs *KubeClientCoreArgs) ToArgsList() []string {
 	cmnd := []string{}
 	if len(clientArgs.Namespace) > 0 {
@@ -31,6 +32,7 @@ func (clientArgs *KubeClientCoreArgs) ToArgsList() []string {
 	return cmnd
 }
 
+// Merge configurations
 func (clientArgs *KubeClientCoreArgs) Merge(args KubeClientCoreArgs) KubeClientCoreArgs {
 	return KubeClientCoreArgs{
 		Namespace: FirstNotEmpty(args.Namespace, clientArgs.Namespace).(string),
@@ -45,11 +47,13 @@ type KubeClient struct {
 	AllowClientConfiguration bool               // If true, Allows configurations like --request-timeout
 }
 
+// Loads the client.
 func (client *KubeClient) Load() error {
 	return nil
 }
 
-func (client *KubeClient) GetExecutable() string {
+// The kubectl executable path.
+func (client *KubeClient) GetExecutablePath() string {
 	if len(client.Executable) == 0 {
 		return "kubectl"
 	}
@@ -81,13 +85,14 @@ func (client *KubeClient) RunKubectlCommand(
 	return string(rslt), err
 }
 
+// Creates a new kubectl exec command.
 func (client *KubeClient) CreateKubectlCommand(
 	ctx context.Context,
 	args ...interface{},
 ) *exec.Cmd {
 	cmd := exec.CommandContext(
 		ctx,
-		client.GetExecutable(),
+		client.GetExecutablePath(),
 		client.ComposeKubectlCommand(args...)...,
 	)
 
@@ -97,6 +102,8 @@ func (client *KubeClient) CreateKubectlCommand(
 	return cmd
 }
 
+// Compose a new kubectl command from a list of args.
+// The args can be either string|[]string
 func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 	flat := []string{}
 	for _, ar := range args {
@@ -210,6 +217,8 @@ func (client *KubeClient) GetResourceNames(
 	}
 	return resourceNames, nil
 }
+
+// Deploy kubernetes yaml (apply, create, delete)
 func (client *KubeClient) DeployKubectlYaml(
 	command,
 	yaml string,
@@ -221,6 +230,7 @@ func (client *KubeClient) DeployKubectlYaml(
 	return out, err
 }
 
+// Deploy kubernetes yaml in a specific context (apply, create, delete)
 func (client *KubeClient) DeployKubectlYamlWithContext(
 	ctx context.Context,
 	command,
@@ -236,7 +246,10 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 	defer func() {
 		err := os.Remove(yamlFilename)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to remove yaml temp. File still exists.")
+			log.Error().
+				Str("Path", yamlFilename).
+				Err(err).
+				Msg("Failed to remove yaml temp. File still exists.")
 		}
 	}()
 
@@ -264,20 +277,22 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 	return output, err
 }
 
+// wait for resource conditions to be me.
+// resource = [kind]/[resource name]
+// if kind not provided assumes pod
 func (client *KubeClient) WaitForConditions(
 	ctx context.Context,
 	resource string, conditions []string,
 	count int,
 ) (string, error) {
+	completed := false
+	waitContext, cancel := context.WithCancel(ctx)
 	waitCommand := client.ComposeKubectlCommand(
 		"wait",
 		client.CoreArgs.ToArgsList(),
 		"--timeout", fmt.Sprint(60*60*24*7)+"s",
 		resource,
 	)
-
-	waitContext, cancel := context.WithCancel(ctx)
-	completed := false
 
 	var foundCondition string
 	var waitError error
@@ -313,11 +328,13 @@ func (client *KubeClient) WaitForConditions(
 	return foundCondition, nil
 }
 
+// Wait for events for a specific resource name regex
+// By reading all events from this point in time on.
 func (client *KubeClient) WaitForResourceEvents(
 	ctx context.Context,
 	resourceNameRegex string,
 	matchEventNames []string,
-	count int,
+	count int, // number of events to match
 ) (context.Context, error) {
 	splitBySpaces, err := regexp.Compile(`\s+`)
 	if err != nil {

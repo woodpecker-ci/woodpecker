@@ -7,14 +7,16 @@ type KubePVCTemplate struct {
 	Backend          *KubeBackend // the executing engine
 }
 
+// The pvc volume name.
 func (template *KubePVCTemplate) VolumeName() string {
-	return toKuberenetesValidName(template.Backend.ID()+"-"+template.Name, 60)
+	return ToKuberenetesValidName(template.Backend.ID()+"-"+template.Name, 60)
 }
 
+// The pvc mount name.
 func (template *KubePVCTemplate) MountName() string {
-	return toKuberenetesValidName(template.Name, 60)
+	return ToKuberenetesValidName(template.Name, 60)
 }
 
 func (template *KubePVCTemplate) Render() (string, error) {
-	return renderTemplate("templates/volume_claim.yaml", template)
+	return RenderTextTemplate("templates/volume_claim.yaml", template)
 }

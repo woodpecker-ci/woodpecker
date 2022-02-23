@@ -6,6 +6,7 @@ import (
 	"io"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -58,10 +59,9 @@ type KubeBackend struct {
 
 var _ types.Engine = &KubeBackend{}
 
+// Create a new kubectl (exec based) engine. Allows for execution pods
+// as commands. Assumes running inside a cluster or kubectl is configured.
 func New(execuatble string, args KubeClientCoreArgs) types.Engine {
-	// create a new kubectl (exec based) engine. Allows for execution pods
-	// as commands. Assumes running inside a cluster or kubectl is configured.
-
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	client := &KubeClient{
 		Executable: execuatble,
@@ -71,8 +71,9 @@ func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 		}),
 		RequestTimeout: time.Duration(requestTimeoutSeconds) * time.Second,
 
-		// TODO: There is an error that dose not allow this in cluster.
-		// therefore by default its false.
+		// TODO: There is an error that dose not allow these type of setting
+		// whilst running in-cluster. I set this default to false, but can be
+		// changed for newer version of kubectl.
 		// ERROR: https://github.com/kubernetes/kubernetes/issues/93474
 		AllowClientConfiguration: getWPKEnv("ALLOW_CLIENT_CONFIG", "false").(string) == "true",
 	}
@@ -98,8 +99,8 @@ func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 	}
 }
 
+// Reset parameters for the active run.
 func (backend *KubeBackend) Reset() {
-	// setup a new active run.
 	backend.activeRun = &KubeBackendRun{
 		Config:      &types.Config{},
 		RunID:       CreateRandomID(10),
@@ -107,19 +108,21 @@ func (backend *KubeBackend) Reset() {
 	}
 }
 
+// Name of the engine.
 func (backend *KubeBackend) Name() string {
 	return "kubectl"
 }
 
+// Check if the engine is available.
 func (backend *KubeBackend) IsAvailable() bool {
 	// check if the executable exists. Otherwise false.
 	// May need connection check afterwards.
-	_, err := exec.LookPath(backend.Client.GetExecutable())
+	_, err := exec.LookPath(backend.Client.GetExecutablePath())
 	return err != nil
 }
 
+// Load the engine backend.
 func (backend *KubeBackend) Load() error {
-	// nothing to load.
 	err := backend.Client.Load()
 	if err != nil {
 		return err
@@ -127,22 +130,31 @@ func (backend *KubeBackend) Load() error {
 	return nil
 }
 
-// Setup the pipeline environment. Creates the volumes and the other
-// run artifacts used for the run.
+// Setup the pipeline environment, by applying the templated
+// setup yaml. Will consume cluster resources and would need
+// to be cleaned up.
 func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
+	logger := backend.MakeLogger(nil)
+	logger.Debug().Msg("Creating active run setup")
+
 	backend.Reset()
 
-	// updating parameters
-	backend.InitializeConfig(cfg)
-	logger := backend.MakeLogger("")
-
-	err := backend.Client.LoadDefaults(ctx)
+	// Load the configuration for the active run.
+	err := backend.InitializeConfig(cfg)
 	if err != nil {
 		return err
 	}
+
+	logger.Debug().Msg("Active run reset and initialized")
+
+	err = backend.Client.LoadDefaults(ctx)
+	if err != nil {
+		return err
+	}
+
 	logger.Debug().
-		Str("Context", backend.Client.CoreArgs.Context).
-		Str("Namespace", backend.Client.CoreArgs.Namespace).
+		Str("Context", backend.Context()).
+		Str("Namespace", backend.Namespace()).
 		Msg("Loaded kube client defaults")
 
 	setupYaml, err := backend.RenderSetupYaml()
@@ -156,27 +168,19 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 		return err
 	}
 
-	logger.Info().Str(
-		"namespace", backend.Namespace(),
-	).Str(
-		"context", backend.Client.CoreArgs.Context,
-	).Msgf("Started pipeline execution")
-
-	logger.Debug().Msgf("Kubectl setup response:\n %s", output)
+	logger.Debug().Msgf("Pipeline setup with:\n %s", output)
+	logger.Info().
+		Str("Context", backend.Context()).
+		Str("Namespace", backend.Namespace()).
+		Msg("Started pipeline execution")
 
 	return nil
 }
 
 // Destroy the pipeline environment.
 func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error {
-	logger := backend.MakeLogger("")
-	logger.Debug().Msg("Destroying run setup")
-
-	destoryYaml, err := backend.RenderSetupYaml()
-
-	if err != nil {
-		return err
-	}
+	logger := backend.MakeLogger(nil)
+	logger.Debug().Msg("Destroying active run setup")
 
 	destroyJobs := []*KubeJobTemplate{}
 	if len(backend.activeRun.DetachedJobs) > 0 {
@@ -189,13 +193,22 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 		logger.Debug().Msg("A job, pending wait, still exists. Destroying.")
 	}
 
+	yamlsToDeploy := []string{}
+
+	setupYaml, err := backend.RenderSetupYaml()
+	yamlsToDeploy = append(yamlsToDeploy, setupYaml)
+
+	if err != nil {
+		return err
+	}
+
 	for _, job := range destroyJobs {
 		jobYaml, err := job.Render()
 		if err != nil {
 			return err
 		}
 		// adding to the destroy command
-		destoryYaml += "\n---\n" + jobYaml
+		yamlsToDeploy = append(yamlsToDeploy, jobYaml)
 	}
 
 	// stopping all step loggers
@@ -210,14 +223,27 @@ func (backend *KubeBackend) Destroy(_ context.Context, cfg *types.Config) error 
 		}
 	}
 
-	// Destroy context is different then other execution context since
-	// it should be called even if the pipeline context is canceled.
-	output, err := backend.Client.DeployKubectlYaml("delete", destoryYaml, false)
+	// Destroy is different then other operations since it should be
+	// always be attempted (even if the pipeline context is canceled).
+	// It therefore executes in its own (background) context.
+	output, err := backend.Client.DeployKubectlYaml(
+		"delete",
+		strings.Join(yamlsToDeploy, "\n---\n"),
+		false,
+	)
+
 	if err != nil {
+		logger.Error().Err(err).Msgf("Pipeline destruction failed")
 		return err
 	}
 
-	logger.Debug().Msgf("Pipeline setup destroyed with:\n %s", output)
+	logger.Debug().Msgf("Pipeline destroyed with:\n %s", output)
+
+	logger.Info().
+		Str("Context", backend.Context()).
+		Str("Namespace", backend.Namespace()).
+		Msg("Ended pipeline execution")
+
 	return nil
 }
 
@@ -228,12 +254,13 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 		Step:    step,
 	}
 
-	logger := backend.MakeLogger(jobTemplate.JobID())
+	logger := backend.MakeLogger(step)
 
 	if step.Detached {
 		step.Alias = Triary(
-			len(step.Alias) > 0, step.Alias, toKuberenetesValidName(step.Name, 50),
+			len(step.Alias) > 0, step.Alias, ToKuberenetesValidName(step.Name, 50),
 		).(string)
+		logger.Debug().Msg("Starting detached job")
 	} else {
 		backend.activeRun.JobPendingWait = &jobTemplate
 		logger.Debug().Msg("Job is pending")
@@ -263,6 +290,8 @@ func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
 	if err != nil {
 		return err
 	}
+
+	// the pod name, with the kind.
 	podName := podNames[0]
 
 	logger.Debug().Msg("Waiting for job pod to be ready")
@@ -297,17 +326,16 @@ func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.Read
 		Step:    step,
 	}
 
-	logger := backend.MakeLogger(jobTemplate.JobID())
-
-	logger.Debug().Msg("Reading logs")
-
+	logger := backend.MakeLogger(step)
 	stepLogger := &KubeResourceLogger{
 		Backend:      backend,
 		ResourceName: "job.batch/" + jobTemplate.JobName(),
 	}
 
+	// Used for destroy.
 	backend.activeRun.StepLoggers[step.Name] = stepLogger
 
+	logger.Debug().Msg("Reading logs")
 	return stepLogger.Start(ctx)
 }
 
@@ -318,54 +346,83 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 		Backend: backend,
 		Step:    step,
 	}
-	logger := backend.MakeLogger(jobTemplate.JobID())
+	logger := backend.MakeLogger(step)
 
+	// Assert and clear pending job
 	if backend.activeRun.JobPendingWait.JobID() != jobTemplate.JobID() {
 		return nil, errors.New(
 			"Invalid wait on job. The job pending wait dose not match current step",
 		)
 	}
-
-	// clear pending
 	backend.activeRun.JobPendingWait = nil
 
-	logger.Debug().Msg("Job is running. Waiting for completion")
+	logger.Info().
+		Str("Context", backend.Context()).
+		Str("Namespace", backend.Namespace()).
+		Msg("Waiting for job to complete")
+
 	condition, jobEndConditionError := backend.Client.WaitForConditions(
 		ctx,
 		"job/"+jobTemplate.JobName(),
 		[]string{"Complete", "Failed"},
 		1,
 	)
-
-	if jobEndConditionError == context.Canceled {
-		logger.Debug().Msg("Step execution context canceled.")
-	} else if jobEndConditionError != nil {
-		logger.Error().Err(jobEndConditionError).Msg("Wait for job error whilst executing step")
-	}
-
 	condition = Triary(len(condition) == 0, "Error", condition).(string)
 
-	logger.Debug().Msgf("Job ended with '%s'", condition)
+	if jobEndConditionError == context.Canceled {
+		logger.Debug().Msg("Step execution context canceled")
+	} else if jobEndConditionError != nil {
+		logger.Error().Err(jobEndConditionError).Msg("Error while waiting for job")
+	}
 
+	// From this point job has ended.
+	logger.Debug().Msgf("Job ended with '%s'", condition)
 	stepLogger := backend.activeRun.StepLoggers[step.Name]
 
 	if stepLogger.IsRunning() {
-		// wait for logs (or give error after the request timeout)
+		logger.Debug().Msg("Job ended but reader is still active. Waiting for logs.")
 		select {
 		case <-time.After(backend.Client.RequestTimeout):
 			logger.Error().Msg(
-				"Error reading logs, request timeout or kubectl logger stuck.",
+				"Timed out waiting for logs to complete. Partial/empty logs",
 			)
 			break
 		case <-stepLogger.Done():
-			logger.Debug().Msg("Log reading complete.")
+			logger.Debug().Msg("Logger completed.")
 			break
 		}
 	}
 
 	err := stepLogger.Stop()
 	if err != nil {
-		logger.Err(err).Msg("Errors occurred whilst reading logs")
+		logger.Err(err).Msg("Error(s) occurred while reading logs.")
+	}
+
+	// Checking status.
+	forceDelete := false
+	doDelete := false
+	hasFailed := false
+	switch condition {
+	case "Complete":
+		break
+	case "Failed":
+		hasFailed = true
+	default:
+		forceDelete = true
+		hasFailed = true
+	}
+
+	if forceDelete {
+		doDelete = true
+	} else {
+		switch backend.DeletePolicy {
+		case IfFailed:
+			doDelete = hasFailed
+		case IfSucceeded:
+			doDelete = !hasFailed
+		case Always:
+			doDelete = true
+		}
 	}
 
 	// currently we are not reading the proper exit code from the pods
@@ -379,31 +436,7 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 
 	if jobEndConditionError == nil {
 		state.Exited = true
-		if condition == "Complete" {
-			state.ExitCode = 0
-		} else {
-			state.ExitCode = 1
-		}
-	}
-
-	// Checking what to do for state
-	doDelete := false
-	if condition == "Error" {
-		// always delete if condition was not met.
-		doDelete = true
-	} else {
-		switch backend.DeletePolicy {
-		case IfFailed:
-			if state.ExitCode != 0 {
-				doDelete = true
-			}
-		case IfSucceeded:
-			if state.ExitCode == 0 {
-				doDelete = true
-			}
-		case Always:
-			doDelete = true
-		}
+		state.ExitCode = Triary(hasFailed, 1, 0).(int)
 	}
 
 	if doDelete {
@@ -426,6 +459,8 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 	}
 
 	logger.Info().
+		Str("Context", backend.Context()).
+		Str("Namespace", backend.Namespace()).
 		Str("Status", condition).
 		Str("Deleted", strconv.FormatBool(doDelete)).
 		Msg("Job DONE")

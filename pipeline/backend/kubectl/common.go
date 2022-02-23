@@ -12,6 +12,7 @@ import (
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 
+// Creates a time seeded random id.
 func CreateRandomID(
 	n int,
 ) string {
@@ -23,7 +24,27 @@ func CreateRandomID(
 	return string(b)
 }
 
-func GetReaderContents(reader io.Reader) (string, error) {
+// Converts a string into a kubernetes valid FQDN name.
+func ToKuberenetesValidName(name string, maxChars int) string {
+	name = strings.ToLower(name)
+
+	// cleanup chars
+	re, _ := regexp.Compile("[^a-z0-9]+")
+	name = string(re.ReplaceAll([]byte(name), []byte("-")))
+
+	if len(name) > maxChars {
+		name = name[len(name)-maxChars:]
+	}
+
+	// cleanup starters and enders
+	re, _ = regexp.Compile("^-+|-+$")
+	name = string(re.ReplaceAll([]byte(name), []byte("")))
+
+	return name
+}
+
+// Returns the string representation of a pipe content.
+func ReadPipeAsString(reader io.Reader) (string, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(reader)
 	if err != nil {
@@ -32,14 +53,19 @@ func GetReaderContents(reader io.Reader) (string, error) {
 	return buf.String(), nil
 }
 
+// Selects the first non empty interface.
 func FirstNotEmpty(args ...interface{}) interface{} {
 	for _, arg := range args {
 		switch arg.(type) {
 		case string:
-			if len(args) > 0 {
-				return arg
+			if len(args) == 0 {
+				continue
 			}
+			return arg
 		default:
+			if arg == nil {
+				continue
+			}
 			return arg
 		}
 	}

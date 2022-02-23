@@ -1,19 +1,21 @@
 package kubectl
 
-// The run id
+// The run kubernetes id
 func (backend *KubeBackend) ID() string {
-	return toKuberenetesValidName("wp-"+backend.activeRun.RunID, 30)
+	return ToKuberenetesValidName("wp-"+backend.activeRun.RunID, 30)
 }
 
-// The run namespace
+// The kubernetes namespace
 func (backend *KubeBackend) Namespace() string {
 	return backend.Client.CoreArgs.Namespace
 }
 
-func (backend *KubeBackend) DetachedJobs() []*KubeJobTemplate {
-	return backend.activeRun.DetachedJobs
-}
-
+// The kubernetes context
 func (backend *KubeBackend) Context() string {
 	return backend.Client.CoreArgs.Context
+}
+
+// The current active run detached jobs
+func (backend *KubeBackend) DetachedJobs() []*KubeJobTemplate {
+	return backend.activeRun.DetachedJobs
 }

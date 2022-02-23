@@ -13,25 +13,30 @@ type KubeJobTemplate struct {
 }
 
 func (template *KubeJobTemplate) Render() (string, error) {
-	return renderTemplate("templates/step_job.yaml", template)
+	return RenderTextTemplate("templates/step_job.yaml", template)
 }
 
+// The job kubernetes name.
 func (template *KubeJobTemplate) JobName() string {
-	return toKuberenetesValidName(template.Backend.ID()+"-"+template.Step.Name, 60)
+	return ToKuberenetesValidName(template.Backend.ID()+"-"+template.Step.Name, 60)
 }
 
+// The job id
 func (template *KubeJobTemplate) JobID() string {
 	return template.Backend.activeRun.RunID + "-" + template.Step.Name
 }
 
-func (template *KubeJobTemplate) ShellCommand() string {
-	return strings.Join(template.Step.Command, ";")
-}
-
+// If true a shell command exists.
 func (template *KubeJobTemplate) HasShellCommand() bool {
 	return len(template.Step.Command) != 0
 }
 
+// The shell command to execute the job (from the step)
+func (template *KubeJobTemplate) ShellCommand() string {
+	return strings.Join(template.Step.Command, ";")
+}
+
+// The active kubernetes pull policy.
 func (template *KubeJobTemplate) PullPolicy() string {
 	if len(template.Backend.ForcePullPolicy) > 0 {
 		return template.Backend.ForcePullPolicy
@@ -39,14 +44,16 @@ func (template *KubeJobTemplate) PullPolicy() string {
 	return Triary(template.Step.Pull, "Always", "IfNotPresent").(string)
 }
 
+// The alias name for the current job.
 func (template *KubeJobTemplate) DetachedHostAlias() string {
 	return Triary(
 		len(template.Step.Alias) > 0,
 		template.Step.Alias,
-		toKuberenetesValidName(template.Step.Name, 50),
+		ToKuberenetesValidName(template.Step.Name, 50),
 	).(string)
 }
 
+// If true, has a DNS config.
 func (template *KubeJobTemplate) HasDNSCondig() bool {
 	return len(template.Step.DNS) > 0 || len(template.Step.DNSSearch) > 0
 }
@@ -56,6 +63,7 @@ type KubeJobTemplateMount struct {
 	PVC       KubePVCTemplate
 }
 
+// A list of mounts for the current job.
 func (template *KubeJobTemplate) Mounts() []KubeJobTemplateMount {
 	mounts := []KubeJobTemplateMount{}
 	if template.Step.Detached && !template.Backend.PVCAllowOnDetached {

@@ -11,11 +11,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func (backend *KubeBackend) MakeLogger(jobID string) *zerolog.Logger {
-	logger := log.With().Str("RunID", backend.activeRun.RunID).Logger()
-	if len(jobID) > 0 {
-		logger = logger.With().Str("JobID", jobID).Logger()
+// Create a new logger context for the step.
+func (backend *KubeBackend) MakeLogger(step *types.Step) *zerolog.Logger {
+	context := log.With()
+	if backend.activeRun != nil {
+		context = context.Str("RunID", backend.activeRun.RunID)
 	}
+	if step != nil {
+		context = context.Str("Step", step.Name)
+	}
+
+	logger := context.Logger()
 	return &logger
 }
 
@@ -24,7 +30,7 @@ func (backend *KubeBackend) MakeLogger(jobID string) *zerolog.Logger {
 func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
 	backend.activeRun.Config = cfg
 
-	// resetting
+	// Resetting
 	backend.activeRun.SetupTemplates = []KubeTemplate{}
 
 	// add network policy
@@ -49,6 +55,7 @@ func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
 	return nil
 }
 
+// Renders the setup yaml.
 func (backend *KubeBackend) RenderSetupYaml() (string, error) {
 	var templatesAsYaml []string
 
@@ -63,6 +70,8 @@ func (backend *KubeBackend) RenderSetupYaml() (string, error) {
 	return strings.Join(templatesAsYaml, "\n---\n"), nil
 }
 
+// Returns the pod name for a job. Will wait for
+// the pod to be ready.
 func (backend *KubeBackend) GetJobPodName(
 	ctx context.Context,
 	jobTemplate *KubeJobTemplate,
@@ -89,12 +98,14 @@ func (backend *KubeBackend) GetJobPodName(
 	return podNames, nil
 }
 
+// Populates detached info for an executing job pod (like ip)
+// Allows for alias naming and detached service access.
 func (backend *KubeBackend) PopulateDetachedInfo(
 	ctx context.Context,
 	podName string,
 	jobTemplate *KubeJobTemplate,
 ) error {
-	logger := backend.MakeLogger(jobTemplate.JobID()).With().Str("PodName", podName).Logger()
+	logger := backend.MakeLogger(jobTemplate.Step).With().Str("PodName", podName).Logger()
 	attempts := 0
 	for {
 		podIP, err := backend.Client.RunKubectlCommand(

@@ -57,7 +57,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		return nil, errors.New("Resource logger is running. Cannot start")
 	}
 
-	logger := resLogger.Backend.MakeLogger("").With().Str(
+	logger := resLogger.Backend.MakeLogger(nil).With().Str(
 		"Resource", resLogger.ResourceName,
 	).Logger()
 
@@ -92,7 +92,11 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		if err != nil {
 			logger.Error().Err(err).Msg(msg)
 			_ = writeLine([]byte(
-				fmt.Sprintf("Logger stopped. Error reading logs from stage (%s): %s", resLogger.ResourceName, msg),
+				fmt.Sprintf(
+					"Logger stopped with ERROR (resource: %s). %s",
+					resLogger.ResourceName,
+					msg,
+				),
 			))
 			_ = writeLine([]byte(err.Error()))
 		} else {
@@ -240,7 +244,7 @@ func (resLogger *KubeResourceLogger) ReadWithContext(ctx context.Context) (strin
 		return "", err
 	}
 
-	output, err := GetReaderContents(reader)
+	output, err := ReadPipeAsString(reader)
 	if err != nil {
 		return "", err
 	}
