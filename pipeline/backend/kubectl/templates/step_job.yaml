@@ -2,12 +2,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ .JobName }}"
-  # {{- if .Backend.Namespace}}
-  namespace: "{{.Backend.Namespace}}"
+  # {{- if .Run.Namespace}}
+  namespace: "{{.Run.Namespace}}"
   # {{- end }}
   labels:
     woodpecker: "true"
-    woodpecker-run: "{{.Backend.ID}}"
+    woodpecker-run: "{{.Run.ID}}"
     woodpecker-job-id: "{{.JobID}}"
 spec:
   # Number of times to run is one.
@@ -17,15 +17,15 @@ spec:
     metadata:
       labels:
         woodpecker: "true"
-        woodpecker-run: "{{.Backend.ID}}"
+        woodpecker-run: "{{.Run.ID}}"
         woodpecker-job-id: "{{.JobID}}"
         # {{- range $k, $v := .Step.Labels }}
         "{{- $k -}}": "{{- $v -}}"
         # {{- end }}
     spec:
       restartPolicy: Never
-      # {{- if gt .Backend.TerminationGracePeriod 0 }}
-      terminationGracePeriodSeconds: {{ .Backend.TerminationGracePeriod }}
+      # {{- if gt .Run.Backend.TerminationGracePeriod 0 }}
+      terminationGracePeriodSeconds: {{ .Run.Backend.TerminationGracePeriod }}
       # {{- end }} 
       # {{- if ne (len .Step.Volumes) 0 }}
       volumes:
@@ -44,9 +44,9 @@ spec:
           # {{- range $search := .Step.DNSSearch }}
           - "{{ $search }}"
           # {{- end }}
-      # {{- if ne (len .Backend.DetachedJobs) 0 }}
+      # {{- if ne (len .Run.DetachedJobs) 0 }}
       hostAliases:
-        # {{- range $job := .Backend.DetachedJobs }}
+        # {{- range $job := .Run.DetachedJobs }}
         - ip: "{{ $job.DetachedPodIP }}"
           hostnames:
             - "{{ $job.DetachedHostAlias }}"
@@ -69,15 +69,15 @@ spec:
               memory: 400Mi
               cpu: 250m
             limits:
-              memory: "{{ .Backend.JobMemoryLimit }}"
-              cpu: "{{ .Backend.JobCPULimit }}"
+              memory: "{{ .Run.Backend.JobMemoryLimit }}"
+              cpu: "{{ .Run.Backend.JobCPULimit }}"
           # {{- if .HasShellCommand }}
           command:
             - sh
             - -c
             - |
-              {{- if ne .Backend.ContainerStartDelay 0 }}
-              sleep {{ .Backend.ContainerStartDelay }}
+              {{- if ne .Run.Backend.ContainerStartDelay 0 }}
+              sleep {{ .Run.Backend.ContainerStartDelay }}
               {{- end }}
               {{ .ShellCommand }}
           # {{- end -}}

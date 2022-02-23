@@ -1,13 +1,13 @@
 package kubectl
 
 type KubePVCTemplate struct {
-	Name    string
-	Backend *KubeBackend // the executing engine
+	Name string
+	Run  *KubeBackendRun // the executing engine
 }
 
 // The pvc volume name.
 func (template *KubePVCTemplate) VolumeName() string {
-	return ToKuberenetesValidName(template.Backend.ID()+"-"+template.Name, 60)
+	return ToKuberenetesValidName(template.Run.ID()+"-"+template.Name, 60)
 }
 
 // The pvc mount name.

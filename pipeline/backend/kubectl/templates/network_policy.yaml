@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: "{{ .Backend.ID }}-run"
-  # {{- if .Backend.Namespace}}
-  namespace: "{{.Backend.Namespace}}"
+  name: "{{ .Run.ID }}-run"
+  # {{- if .Run.Namespace}}
+  namespace: "{{.Run.Namespace}}"
   # {{- end }}
   labels:
     woodpecker: "true"
-    woodpecker-run: "{{.Backend.ID}}"
+    woodpecker-run: "{{.Run.ID}}"
 spec:
   podSelector:
     matchLabels:
-      woodpecker-run: "{{.Backend.ID}}"
+      woodpecker-run: "{{.Run.ID}}"
   policyTypes:
     - Egress
   egress:
@@ -19,4 +19,4 @@ spec:
         - namespaceSelector: {}
           podSelector:
             matchLabels:
-              woodpecker-run: "{{.Backend.ID}}"
+              woodpecker-run: "{{.Run.ID}}"

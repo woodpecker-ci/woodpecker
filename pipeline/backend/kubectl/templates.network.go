@@ -1,7 +1,7 @@
 package kubectl
 
 type KubeNetworkPolicyTemplate struct {
-	Backend *KubeBackend // the executing engine
+	Run *KubeBackendRun // the executing engine
 }
 
 func (template *KubeNetworkPolicyTemplate) Render() (string, error) {

@@ -13,8 +13,8 @@ import (
 const LineBreak = "\n"
 
 type KubeResourceLogger struct {
-	Backend      *KubeBackend // the kubernetes backend
-	ResourceName string       // the name of the resource to read
+	Run          *KubeBackendRun // the kubernetes backend
+	ResourceName string          // the name of the resource to read
 
 	// internal properties
 	stopLogger context.CancelFunc // cancel the executing logs context
@@ -57,7 +57,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		return nil, errors.New("Resource logger is running. Cannot start")
 	}
 
-	logger := resLogger.Backend.MakeLogger(nil).With().Str(
+	logger := resLogger.Run.MakeLogger(nil).With().Str(
 		"Resource", resLogger.ResourceName,
 	).Logger()
 
@@ -162,14 +162,14 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				)
 			}
 
-			if resLogger.Backend.Client.AllowKubectlClientConfiguration {
+			if resLogger.Run.Backend.Client.AllowKubectlClientConfiguration {
 				extraArgs = append(extraArgs,
 					"--request-timeout",
 					fmt.Sprintf("%ds", (60*60*24)),
 				)
 			}
 
-			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
+			logsCmd := resLogger.Run.Backend.Client.CreateKubectlCommand(
 				logContext,
 				extraArgs,
 				"logs",
@@ -201,12 +201,12 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				}
 
 				consecutiveRestarts++
-				if consecutiveRestarts > resLogger.Backend.CommandRetries {
+				if consecutiveRestarts > resLogger.Run.Backend.CommandRetries {
 					stopWithError(
 						err,
 						fmt.Sprintf(
 							"Error starting log reading. Too many attempts (%d)",
-							resLogger.Backend.CommandRetries,
+							resLogger.Run.Backend.CommandRetries,
 						),
 					)
 					break
@@ -215,14 +215,14 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				logger.Debug().Err(fromStderr(err, stderr)).Msg(
 					fmt.Sprintf(
 						"Logger failed. Retry in %.2f [second], %d/%d",
-						resLogger.Backend.CommandRetryWait.Seconds(),
+						resLogger.Run.Backend.CommandRetryWait.Seconds(),
 						consecutiveRestarts,
-						resLogger.Backend.CommandRetries,
+						resLogger.Run.Backend.CommandRetries,
 					),
 				)
 
 				// sleep before next attempt.
-				time.Sleep(resLogger.Backend.CommandRetryWait)
+				time.Sleep(resLogger.Run.Backend.CommandRetryWait)
 				continue
 			}
 

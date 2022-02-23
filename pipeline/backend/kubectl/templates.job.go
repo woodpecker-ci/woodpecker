@@ -7,9 +7,9 @@ import (
 )
 
 type KubeJobTemplate struct {
-	Step          *types.Step  // The executing step
-	Backend       *KubeBackend // the executing engine
-	DetachedPodIP string       // The main pod ip.
+	Step          *types.Step     // The executing step
+	Run           *KubeBackendRun // the executing engine
+	DetachedPodIP string          // The main pod ip.
 }
 
 func (template *KubeJobTemplate) Render() (string, error) {
@@ -18,12 +18,12 @@ func (template *KubeJobTemplate) Render() (string, error) {
 
 // The job kubernetes name.
 func (template *KubeJobTemplate) JobName() string {
-	return ToKuberenetesValidName(template.Backend.ID()+"-"+template.Step.Name, 60)
+	return ToKuberenetesValidName(template.Run.ID()+"-"+template.Step.Name, 60)
 }
 
 // The job id
 func (template *KubeJobTemplate) JobID() string {
-	return template.Backend.activeRun.RunID + "-" + template.Step.Name
+	return template.Run.RunID + "-" + template.Step.Name
 }
 
 // If true a shell command exists.
@@ -38,8 +38,8 @@ func (template *KubeJobTemplate) ShellCommand() string {
 
 // The active kubernetes pull policy.
 func (template *KubeJobTemplate) PullPolicy() string {
-	if len(template.Backend.ForcePullPolicy) > 0 {
-		return template.Backend.ForcePullPolicy
+	if len(template.Run.Backend.ForcePullPolicy) > 0 {
+		return template.Run.Backend.ForcePullPolicy
 	}
 	return Triary(template.Step.Pull, "Always", "IfNotPresent").(string)
 }
@@ -66,7 +66,7 @@ type KubeJobTemplateMount struct {
 // A list of mounts for the current job.
 func (template *KubeJobTemplate) Mounts() []KubeJobTemplateMount {
 	mounts := []KubeJobTemplateMount{}
-	if template.Step.Detached && !template.Backend.PVCAllowOnDetached {
+	if template.Step.Detached && !template.Run.Backend.PVCAllowOnDetached {
 		// To use detached mounts change the storage class.
 		return mounts
 	}
@@ -83,7 +83,7 @@ func (template *KubeJobTemplate) Mounts() []KubeJobTemplateMount {
 			continue
 		}
 
-		if pvc, ok := template.Backend.activeRun.PVCByName[name]; ok {
+		if pvc, ok := template.Run.PVCByName[name]; ok {
 			mounts = append(mounts, KubeJobTemplateMount{
 				MountPath: mountPath,
 				PVC:       *pvc,

@@ -2,19 +2,19 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: "{{ .VolumeName }}"
-  # {{- if .Backend.Namespace}}
-  namespace: "{{.Backend.Namespace}}"
+  # {{- if .Run.Namespace}}
+  namespace: "{{.Run.Namespace}}"
   # {{- end }}
   labels:
     woodpecker: "true"
-    woodpecker-run: "{{.Backend.ID}}"
+    woodpecker-run: "{{.Run.ID}}"
 spec:
-  # {{- if .Backend.PVCStorageClassName}}
-  storageClassName: "{{.Backend.PVCStorageClassName}}"
+  # {{- if .Run.Backend.PVCStorageClassName}}
+  storageClassName: "{{.Run.Backend.PVCStorageClassName}}"
   # {{- end }}
   accessModes:
     # By default ReadWriteOnce
-    - "{{ .Backend.PVCAccessMode }}"
+    - "{{ .Run.Backend.PVCAccessMode }}"
   resources:
     requests:
-      storage: "{{ .Backend.PVCStorageSize }}"
+      storage: "{{ .Run.Backend.PVCStorageSize }}"

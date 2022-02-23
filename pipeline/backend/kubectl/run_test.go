@@ -7,12 +7,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func prepareTestBackend() *KubeBackend {
+func prepareTestBackendRun() *KubeBackendRun {
 	backend := New().(*KubeBackend)
 	// reset a new run.
-	backend.Reset()
-
-	backend.InitializeConfig(&types.Config{
+	run := backend.CreateRun()
+	run.InitializeConfig(&types.Config{
 		Volumes: []*types.Volume{
 			&(types.Volume{
 				Name: "default_volume",
@@ -20,16 +19,16 @@ func prepareTestBackend() *KubeBackend {
 		},
 	})
 
-	return backend
+	return run
 }
 
 func TestEngineCore(t *testing.T) {
-	backend := prepareTestBackend()
+	run := prepareTestBackendRun()
 	g := goblin.Goblin(t)
 
 	g.Describe("Engine core:", func() {
 		g.It("Render setup yaml", func() {
-			rslt, err := backend.RenderSetupYaml()
+			rslt, err := run.RenderSetupYaml()
 			if err != nil {
 				t.Error(err)
 			}

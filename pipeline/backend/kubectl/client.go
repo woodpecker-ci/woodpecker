@@ -24,7 +24,12 @@ type KubeClient struct {
 }
 
 // Loads the client.
-func (client *KubeClient) Load() error {
+func (client *KubeClient) Load(ctx context.Context) error {
+	err := client.LoadDefaults(ctx)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

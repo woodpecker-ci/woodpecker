@@ -12,11 +12,10 @@ import (
 )
 
 // Create a new logger context for the step.
-func (backend *KubeBackend) MakeLogger(step *types.Step) *zerolog.Logger {
-	context := log.With()
-	if backend.activeRun != nil {
-		context = context.Str("RunID", backend.activeRun.RunID)
-	}
+func (run *KubeBackendRun) MakeLogger(step *types.Step) *zerolog.Logger {
+	context := log.With().Str("RunID", run.RunID)
+	context = context
+
 	if step != nil {
 		context = context.Str("Step", step.Name)
 	}
@@ -27,39 +26,39 @@ func (backend *KubeBackend) MakeLogger(step *types.Step) *zerolog.Logger {
 
 // Initializes the configuration for the kube backend
 // and populates the basic parameters for that config.
-func (backend *KubeBackend) InitializeConfig(cfg *types.Config) error {
-	backend.activeRun.Config = cfg
+func (run *KubeBackendRun) InitializeConfig(cfg *types.Config) error {
+	run.Config = cfg
 
 	// Resetting
-	backend.activeRun.SetupTemplates = []KubeTemplate{}
+	run.SetupTemplates = []KubeTemplate{}
 
 	// add network policy
-	if backend.EnableRunNetworkPolicy {
-		backend.activeRun.SetupTemplates = append(backend.activeRun.SetupTemplates, &KubeNetworkPolicyTemplate{
-			Backend: backend,
+	if run.Backend.EnableRunNetworkPolicy {
+		run.SetupTemplates = append(run.SetupTemplates, &KubeNetworkPolicyTemplate{
+			Run: run,
 		})
 	}
 
-	backend.activeRun.PVCs = []*KubePVCTemplate{}
-	backend.activeRun.PVCByName = make(map[string]*KubePVCTemplate)
+	run.PVCs = []*KubePVCTemplate{}
+	run.PVCByName = make(map[string]*KubePVCTemplate)
 
-	for _, vol := range backend.activeRun.Config.Volumes {
+	for _, vol := range run.Config.Volumes {
 		pvc := &KubePVCTemplate{
-			Backend: backend,
-			Name:    vol.Name,
+			Run:  run,
+			Name: vol.Name,
 		}
-		backend.activeRun.PVCs = append(backend.activeRun.PVCs, pvc)
-		backend.activeRun.PVCByName[vol.Name] = pvc
-		backend.activeRun.SetupTemplates = append(backend.activeRun.SetupTemplates, pvc)
+		run.PVCs = append(run.PVCs, pvc)
+		run.PVCByName[vol.Name] = pvc
+		run.SetupTemplates = append(run.SetupTemplates, pvc)
 	}
 	return nil
 }
 
 // Renders the setup yaml.
-func (backend *KubeBackend) RenderSetupYaml() (string, error) {
+func (run *KubeBackendRun) RenderSetupYaml() (string, error) {
 	var templatesAsYaml []string
 
-	for _, template := range backend.activeRun.SetupTemplates {
+	for _, template := range run.SetupTemplates {
 		asYaml, err := template.Render()
 		if err != nil {
 			return "", err
@@ -72,14 +71,14 @@ func (backend *KubeBackend) RenderSetupYaml() (string, error) {
 
 // Returns the pod name for a job. Will wait for
 // the pod to be ready.
-func (backend *KubeBackend) GetJobPodName(
+func (run *KubeBackendRun) GetJobPodName(
 	ctx context.Context,
 	jobTemplate *KubeJobTemplate,
 ) ([]string, error) {
 	var podNames []string
 	var err error
 	for {
-		podNames, err = backend.Client.GetResourceNames(
+		podNames, err = run.Backend.Client.GetResourceNames(
 			ctx,
 			"pod",
 			"woodpecker-job-id="+jobTemplate.JobID(),
@@ -100,15 +99,15 @@ func (backend *KubeBackend) GetJobPodName(
 
 // Populates detached info for an executing job pod (like ip)
 // Allows for alias naming and detached service access.
-func (backend *KubeBackend) PopulateDetachedInfo(
+func (run *KubeBackendRun) PopulateDetachedInfo(
 	ctx context.Context,
 	podName string,
 	jobTemplate *KubeJobTemplate,
 ) error {
-	logger := backend.MakeLogger(jobTemplate.Step).With().Str("PodName", podName).Logger()
+	logger := run.MakeLogger(jobTemplate.Step).With().Str("PodName", podName).Logger()
 	attempts := 0
 	for {
-		podIP, err := backend.Client.RunKubectlCommand(
+		podIP, err := run.Backend.Client.RunKubectlCommand(
 			ctx, "get", podName,
 			"-o",
 			"custom-columns=:status.podIP",
@@ -129,7 +128,7 @@ func (backend *KubeBackend) PopulateDetachedInfo(
 				)
 			}
 
-			if attempts > backend.CommandRetries {
+			if attempts > run.Backend.CommandRetries {
 				logger.Error().Err(err).Msg(
 					"Max number of retries found whist attempting to retrieve pod IP. Aborted",
 				)
@@ -138,10 +137,10 @@ func (backend *KubeBackend) PopulateDetachedInfo(
 
 			logger.Debug().Err(err).Msgf(
 				"Failed to retrieve detached info, pod may not be ready. Retry in %.2f [seconds]",
-				backend.CommandRetryWait.Seconds(),
+				run.Backend.CommandRetryWait.Seconds(),
 			)
 
-			time.Sleep(backend.CommandRetryWait)
+			time.Sleep(run.Backend.CommandRetryWait)
 			continue
 		}
 

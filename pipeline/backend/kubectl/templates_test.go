@@ -9,10 +9,10 @@ import (
 )
 
 func composeValidTestKubeJobTemplate(
-	backend *KubeBackend,
+	run *KubeBackendRun,
 ) *KubeJobTemplate {
 	return &KubeJobTemplate{
-		Backend: backend,
+		Run: run,
 		Step: &types.Step{
 			// Only these values are supported/considered
 			Name:  "lama",
@@ -49,7 +49,7 @@ func composeValidTestKubeJobTemplate(
 }
 
 func TestTemplates(t *testing.T) {
-	backend := prepareTestBackend()
+	run := prepareTestBackendRun()
 	g := goblin.Goblin(t)
 
 	g.Describe("Templates test:", func() {
@@ -61,7 +61,7 @@ func TestTemplates(t *testing.T) {
 
 		g.It("render a job template (without values)", func() {
 			tmpl := KubeJobTemplate{
-				Backend: backend,
+				Run: run,
 				Step: &types.Step{
 					Name:  "lama",
 					Image: "ubuntu:latest",
@@ -76,7 +76,7 @@ func TestTemplates(t *testing.T) {
 		})
 
 		g.It("render a job template (with values)", func() {
-			tmpl := composeValidTestKubeJobTemplate(backend)
+			tmpl := composeValidTestKubeJobTemplate(run)
 			rslt, err := tmpl.Render()
 			if err != nil {
 				t.Error(err)
@@ -88,7 +88,7 @@ func TestTemplates(t *testing.T) {
 
 		g.It("render a volume template (with values)", func() {
 			tmpl := KubePVCTemplate{
-				Backend: backend,
+				Run: run,
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {
@@ -100,7 +100,7 @@ func TestTemplates(t *testing.T) {
 
 		g.It("render a volume template (missing values)", func() {
 			tmpl := KubePVCTemplate{
-				Backend: backend,
+				Run: run,
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {
@@ -112,7 +112,7 @@ func TestTemplates(t *testing.T) {
 
 		g.It("Render a network policy template", func() {
 			tmpl := KubeNetworkPolicyTemplate{
-				Backend: backend,
+				Run: run,
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {
