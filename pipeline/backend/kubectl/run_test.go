@@ -11,7 +11,7 @@ func prepareTestBackendRun() *KubeBackendRun {
 	backend := New().(*KubeBackend)
 	// reset a new run.
 	run := backend.CreateRun()
-	run.InitializeConfig(&types.Config{
+	_ = run.InitializeConfig(&types.Config{
 		Volumes: []*types.Volume{
 			&(types.Volume{
 				Name: "default_volume",

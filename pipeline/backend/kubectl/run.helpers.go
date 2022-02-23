@@ -14,7 +14,6 @@ import (
 // Create a new logger context for the step.
 func (run *KubeBackendRun) MakeLogger(step *types.Step) *zerolog.Logger {
 	context := log.With().Str("RunID", run.RunID)
-	context = context
 
 	if step != nil {
 		context = context.Str("Step", step.Name)
