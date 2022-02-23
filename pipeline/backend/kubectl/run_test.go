@@ -7,7 +7,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func prepareTestBackendRun() *KubeBackendRun {
+func prepareTestBackendRun() *KubePiplineRun {
 	backend := New().(*KubeBackend)
 	// reset a new run.
 	run := backend.CreateRun()

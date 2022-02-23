@@ -8,7 +8,7 @@ import (
 
 type KubeJobTemplate struct {
 	Step          *types.Step     // The executing step
-	Run           *KubeBackendRun // the executing engine
+	Run           *KubePiplineRun // the executing engine
 	DetachedPodIP string          // The main pod ip.
 }
 

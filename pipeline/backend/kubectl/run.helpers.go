@@ -12,7 +12,7 @@ import (
 )
 
 // Create a new logger context for the step.
-func (run *KubeBackendRun) MakeLogger(step *types.Step) *zerolog.Logger {
+func (run *KubePiplineRun) MakeLogger(step *types.Step) *zerolog.Logger {
 	context := log.With().Str("RunID", run.RunID)
 
 	if step != nil {
@@ -25,7 +25,7 @@ func (run *KubeBackendRun) MakeLogger(step *types.Step) *zerolog.Logger {
 
 // Initializes the configuration for the kube backend
 // and populates the basic parameters for that config.
-func (run *KubeBackendRun) InitializeConfig(cfg *types.Config) error {
+func (run *KubePiplineRun) InitializeConfig(cfg *types.Config) error {
 	run.Config = cfg
 
 	// Resetting
@@ -54,7 +54,7 @@ func (run *KubeBackendRun) InitializeConfig(cfg *types.Config) error {
 }
 
 // Renders the setup yaml.
-func (run *KubeBackendRun) RenderSetupYaml() (string, error) {
+func (run *KubePiplineRun) RenderSetupYaml() (string, error) {
 	var templatesAsYaml []string
 
 	for _, template := range run.SetupTemplates {
@@ -70,7 +70,7 @@ func (run *KubeBackendRun) RenderSetupYaml() (string, error) {
 
 // Returns the pod name for a job. Will wait for
 // the pod to be ready.
-func (run *KubeBackendRun) GetJobPodName(
+func (run *KubePiplineRun) GetJobPodName(
 	ctx context.Context,
 	jobTemplate *KubeJobTemplate,
 ) ([]string, error) {
@@ -98,7 +98,7 @@ func (run *KubeBackendRun) GetJobPodName(
 
 // Populates detached info for an executing job pod (like ip)
 // Allows for alias naming and detached service access.
-func (run *KubeBackendRun) PopulateDetachedInfo(
+func (run *KubePiplineRun) PopulateDetachedInfo(
 	ctx context.Context,
 	podName string,
 	jobTemplate *KubeJobTemplate,

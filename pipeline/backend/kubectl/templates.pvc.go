@@ -2,7 +2,7 @@ package kubectl
 
 type KubePVCTemplate struct {
 	Name string
-	Run  *KubeBackendRun // the executing engine
+	Run  *KubePiplineRun // the executing engine
 }
 
 // The pvc volume name.

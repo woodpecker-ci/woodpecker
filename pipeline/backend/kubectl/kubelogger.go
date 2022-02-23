@@ -13,7 +13,7 @@ import (
 const LineBreak = "\n"
 
 type KubeResourceLogger struct {
-	Run          *KubeBackendRun // the kubernetes backend
+	Run          *KubePiplineRun // the kubernetes backend
 	ResourceName string          // the name of the resource to read
 
 	// internal properties

@@ -11,7 +11,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-type KubeBackendRun struct {
+type KubePiplineRun struct {
 	Backend        *KubeBackend                   // The kubectl backend
 	RunID          string                         // the random run id
 	Config         *types.Config                  // the run config
@@ -26,7 +26,7 @@ type KubeBackendRun struct {
 // Setup the pipeline environment, by applying the templated
 // setup yaml. Will consume cluster resources and would need
 // to be cleaned up.
-func (run *KubeBackendRun) Setup(ctx context.Context, cfg *types.Config) error {
+func (run *KubePiplineRun) Setup(ctx context.Context, cfg *types.Config) error {
 	err := run.InitializeConfig(cfg)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (run *KubeBackendRun) Setup(ctx context.Context, cfg *types.Config) error {
 }
 
 // Destroy the pipeline environment.
-func (run *KubeBackendRun) Destroy(ctx context.Context, cfg *types.Config) error {
+func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error {
 	logger := run.MakeLogger(nil)
 	logger.Debug().Msg("Destroying active run setup")
 
@@ -128,7 +128,7 @@ func (run *KubeBackendRun) Destroy(ctx context.Context, cfg *types.Config) error
 }
 
 // Exec the pipeline step.
-func (run *KubeBackendRun) Exec(ctx context.Context, step *types.Step) error {
+func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 	logger := run.MakeLogger(step)
 
 	jobTemplate := KubeJobTemplate{
@@ -200,7 +200,7 @@ func (run *KubeBackendRun) Exec(ctx context.Context, step *types.Step) error {
 }
 
 // Tail the pipeline step logs.
-func (run *KubeBackendRun) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (run *KubePiplineRun) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
 	logger := run.MakeLogger(step)
 	jobTemplate := KubeJobTemplate{
 		Run:  run,
@@ -221,7 +221,7 @@ func (run *KubeBackendRun) Tail(ctx context.Context, step *types.Step) (io.ReadC
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (run *KubeBackendRun) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
 	logger := run.MakeLogger(step)
 	jobTemplate := KubeJobTemplate{
 		Run:  run,

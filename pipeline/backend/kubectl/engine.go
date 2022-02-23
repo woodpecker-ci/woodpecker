@@ -44,8 +44,9 @@ type KubeBackend struct {
 	PVCAllowOnDetached     bool // Allow pvc's on detached containers
 	EnableRunNetworkPolicy bool // Do not implement a network policy when running a pipeline.
 
-	// there could be multiple active runs. Therefore we need somehow to
-	ActiveRuns map[context.Context]*KubeBackendRun // The current kubectl engine active run.
+	// There could be multiple active runs for each context.
+	// Active runs should be destroyed as so not to keep memory.
+	activeRuns map[context.Context]*KubePiplineRun
 }
 
 var _ types.Engine = &KubeBackend{}
@@ -89,12 +90,14 @@ func New() types.Engine {
 		JobCPULimit:            getWPKEnv("CPU_LIMIT", "500m").(string), // half a cpu
 		CommandRetries:         commandRetries,                          // half a cpu
 		CommandRetryWait:       time.Duration(commandRetriesWait) * time.Second,
+
+		activeRuns: make(map[context.Context]*KubePiplineRun),
 	}
 }
 
 // Create parameters for the active run.
-func (backend *KubeBackend) CreateRun() *KubeBackendRun {
-	run := &KubeBackendRun{
+func (backend *KubeBackend) CreateRun() *KubePiplineRun {
+	run := &KubePiplineRun{
 		Backend:     backend,
 		Config:      &types.Config{},
 		RunID:       CreateRandomID(10),
@@ -138,29 +141,32 @@ func (backend *KubeBackend) Load() error {
 
 // Setup the pipeline environment.
 func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
-	backend.ActiveRuns[ctx] = backend.CreateRun()
-	return backend.ActiveRuns[ctx].Setup(ctx, cfg)
+	backend.activeRuns[ctx] = backend.CreateRun()
+	return backend.activeRuns[ctx].Setup(ctx, cfg)
 }
 
 // Exec start the pipeline step.
 func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
-	return backend.ActiveRuns[ctx].Backend.Exec(ctx, step)
+	run := backend.activeRuns[ctx]
+	return run.Exec(ctx, step)
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
-	return backend.ActiveRuns[ctx].Backend.Wait(ctx, step)
+	run := backend.activeRuns[ctx]
+	return run.Wait(ctx, step)
 }
 
 // Tail the pipeline step logs.
 func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
-	return backend.ActiveRuns[ctx].Backend.Tail(ctx, step)
+	run := backend.activeRuns[ctx]
+	return run.Tail(ctx, step)
 }
 
 // Destroy the pipeline environment.
 func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) error {
-	run := backend.ActiveRuns[ctx]
-	delete(backend.ActiveRuns, ctx)
+	run := backend.activeRuns[ctx]
+	delete(backend.activeRuns, ctx)
 	return run.Destroy(ctx, cfg)
 }

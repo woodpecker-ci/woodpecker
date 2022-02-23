@@ -1,16 +1,16 @@
 package kubectl
 
 // The run kubernetes id
-func (run *KubeBackendRun) ID() string {
+func (run *KubePiplineRun) ID() string {
 	return ToKuberenetesValidName("wp-"+run.RunID, 30)
 }
 
 // The kubernetes namespace
-func (run *KubeBackendRun) Namespace() string {
+func (run *KubePiplineRun) Namespace() string {
 	return run.Backend.Client.Namespace
 }
 
 // The kubernetes context
-func (run *KubeBackendRun) Context() string {
+func (run *KubePiplineRun) Context() string {
 	return run.Backend.Client.Context
 }
