@@ -71,6 +71,13 @@ Job:
 1. `WOODPECKER_KUBECTL_TERMINATION_GRACE_PERIOD` The number of seconds before a job is forcefully terminated (SIGKILL).
 1. `WOODPECKER_KUBECTL_ENABLE_NETWORK_POLICY` If true, will deploy a network policy for the run. See [Network Isolation](#network-isolation)
 
+Persistent volumes:
+
+1. `PVC_STORAGE_SIZE` The volume size, by default `1Gi`
+1. `PVC_ACCESS_MODE` The access mode for the pvc. Defaults to `ReadWriteOnce`.
+1. `PVC_STORAGE_CLASS` The storage class. By default empty and uses default.
+1. `WOODPECKER_KUBECTL_PVC_ALLOW_ON_DETACHED` If true, allows detached jobs/pods to be mounted with a PVC. If used, you **must** provide a pvc storage class that allows for [ReadWriteMany](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) (for example NFS).
+
 #### Advanced
 
 1. `WOODPECKER_KUBECTL_REQUEST_TIMEOUT` The kubectl request timeout. Applies in,
@@ -80,4 +87,3 @@ Job:
 1. `WOODPECKER_KUBECTL_ALLOW_KUBECTL_CLIENT_CONFIG` If true, allows the backend to configure the kubernetes client options (Relates to this [error](https://github.com/kubernetes/kubernetes/issues/93474)).
 1. `WOODPECKER_KUBECTL_COMMAND_RETRIES_WAIT` The wait time between kubectl commands that may fail.
 1. `WOODPECKER_KUBECTL_COMMAND_RETRIES` The number of retries for kubectl commands that may fail.
-1. `WOODPECKER_KUBECTL_PVC_ALLOW_ON_DETACHED` If true, allows detached jobs/pods to be mounted with a PVC. **NOTE** By default, PVC's are loaded with readwrite once.
