@@ -42,43 +42,10 @@ type KubeClient struct {
 	Executable               string             // the default executable
 	CoreArgs                 KubeClientCoreArgs // the default args
 	RequestTimeout           time.Duration      // The kubectl request timeout
-	EnvironmentValues        []string           // A collection kubernetes environment values
 	AllowClientConfiguration bool               // If true, Allows configurations like --request-timeout
 }
 
 func (client *KubeClient) Load() error {
-	// nothing to load.
-	loadEnvsMap := make(map[string]bool)
-	loadEnvsMap["HOME"] = true
-
-	loadEnvsFromPrefix := []string{
-		"KUBE",
-	}
-
-	hasPrefix := func(key string) bool {
-		for _, p := range loadEnvsFromPrefix {
-			if strings.HasPrefix(key, p) {
-				return true
-			}
-		}
-		return false
-	}
-
-	// To ignore
-	// loadEnvsMap["KUBERNETES_NOT_A_VALUE"] = false
-
-	for _, env := range os.Environ() {
-		keyAndValue := strings.SplitN(env, "=", 2)
-		key := keyAndValue[0]
-		value := keyAndValue[1]
-
-		if included, ok := loadEnvsMap[key]; (!ok && !hasPrefix(key)) || (!included && ok) {
-			continue
-		}
-
-		client.EnvironmentValues = append(client.EnvironmentValues, env)
-		log.Debug().Str(key, value).Msg("Loaded kubectl client environment value")
-	}
 	return nil
 }
 
@@ -123,7 +90,10 @@ func (client *KubeClient) CreateKubectlCommand(
 		client.GetExecutable(),
 		client.ComposeKubectlCommand(args...)...,
 	)
-	cmd.Env = append(cmd.Env, client.EnvironmentValues...)
+
+	// run in current environment.
+	cmd.Env = os.Environ()
+
 	return cmd
 }
 
