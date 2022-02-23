@@ -31,6 +31,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // TODO: Implement log streaming.
@@ -59,14 +60,14 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run(pipelineCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
-	meta, _ := metadata.FromOutgoingContext(ctx)
+	meta, _ := metadata.FromOutgoingContext(pipelineCtx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next job from the queue
-	work, err := r.client.Next(ctx, r.filter)
+	work, err := r.client.Next(pipelineCtx, r.filter)
 	if err != nil {
 		return err
 	}
@@ -95,14 +96,18 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().Msg("received execution")
 
-	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
+	pipelineCtx, cancel := context.WithTimeout(ctxmeta, timeout)
+
+	// add sigterm support
+	pipelineCtx = utils.WithContextSigterm(pipelineCtx)
+
 	defer cancel()
 
 	canceled := abool.New()
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(ctx, work.ID); werr != nil {
+		if werr := r.client.Wait(pipelineCtx, work.ID); werr != nil {
 			canceled.SetTo(true)
 			logger.Warn().Err(werr).Msg("cancel signal received")
 
@@ -115,14 +120,14 @@ func (r *Runner) Run(ctx context.Context) error {
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
+			case <-pipelineCtx.Done():
 				logger.Debug().Msg("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
 
-				if err := r.client.Extend(ctx, work.ID); err != nil {
+				if err := r.client.Extend(pipelineCtx, work.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
 			}
@@ -288,7 +293,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	})
 
 	err = pipeline.New(work.Config,
-		pipeline.WithContext(ctx),
+		pipeline.WithContext(pipelineCtx),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
