@@ -52,6 +52,7 @@ type KubeBackend struct {
 	EnableRunNetworkPolicy bool // Do not implement a network policy when running a pipeline.
 
 	activeRun *KubeBackendRun // The current kubectl engine active run.
+
 }
 
 var _ types.Engine = &KubeBackend{}
@@ -112,6 +113,10 @@ func (backend *KubeBackend) IsAvailable() bool {
 
 func (backend *KubeBackend) Load() error {
 	// nothing to load.
+	err := backend.Client.Load()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
