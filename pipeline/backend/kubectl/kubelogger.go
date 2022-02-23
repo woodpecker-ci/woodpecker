@@ -121,19 +121,24 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		// this needs a loop since the logging command may fail.
 		for {
 			// If is not running. Must return.
-			sinceArg := []string{}
+			extraArgs := []string{}
 			if lastLineScanned > 0 {
-				sinceArg = []string{
+				extraArgs = append(extraArgs,
 					"--since",
 					fmt.Sprintf("%ds", time.Now().Unix()-lastLineScanned),
-				}
+				)
+			}
+
+			if resLogger.Backend.Client.AllowClientConfiguration {
+				extraArgs = append(extraArgs,
+					"--request-timeout",
+					fmt.Sprintf("%ds", (60*60*24)),
+				)
 			}
 
 			logsCmd := resLogger.Backend.Client.CreateKubectlCommand(
 				logContext,
-				"--request-timeout",
-				sinceArg,
-				fmt.Sprintf("%ds", (60*60*24)),
+				extraArgs,
 				"logs",
 				resLogger.ResourceName,
 				"-f",
