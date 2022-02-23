@@ -162,7 +162,9 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 		return err
 	}
 
-	output, err := backend.Client.DeployKubectlYamlWithContext(ctx, "apply", setupYaml, false)
+	output, err := backend.Client.DeployKubectlYamlWithContext(
+		ctx, "apply", setupYaml, false,
+	)
 
 	if err != nil {
 		return err

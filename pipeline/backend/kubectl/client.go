@@ -74,7 +74,7 @@ func (client *KubeClient) RunKubectlCommand(
 			if len(exitError.Stderr) > 0 {
 				err = errors.New(string(exitError.Stderr) + "(" + ")")
 			}
-			break
+
 		}
 
 		log.Debug().Err(err).Str("Args", strings.Join(cmnd.Args, " ")).Msg(
