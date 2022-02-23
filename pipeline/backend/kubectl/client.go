@@ -39,16 +39,30 @@ func (clientArgs *KubeClientCoreArgs) Merge(args KubeClientCoreArgs) KubeClientC
 }
 
 type KubeClient struct {
-	Executable        string             // the default executable
-	CoreArgs          KubeClientCoreArgs // the default args
-	RequestTimeout    time.Duration      // The kubectl request timeout
-	EnvironmentValues []string           // A collection kubernetes environment values
+	Executable               string             // the default executable
+	CoreArgs                 KubeClientCoreArgs // the default args
+	RequestTimeout           time.Duration      // The kubectl request timeout
+	EnvironmentValues        []string           // A collection kubernetes environment values
+	AllowClientConfiguration bool               // If true, Allows configurations like --request-timeout
 }
 
 func (client *KubeClient) Load() error {
 	// nothing to load.
 	loadEnvsMap := make(map[string]bool)
 	loadEnvsMap["HOME"] = true
+
+	loadEnvsFromPrefix := []string{
+		"KUBE",
+	}
+
+	hasPrefix := func(key string) bool {
+		for _, p := range loadEnvsFromPrefix {
+			if strings.HasPrefix(key, p) {
+				return true
+			}
+		}
+		return false
+	}
 
 	// To ignore
 	// loadEnvsMap["KUBERNETES_NOT_A_VALUE"] = false
@@ -58,7 +72,7 @@ func (client *KubeClient) Load() error {
 		key := keyAndValue[0]
 		value := keyAndValue[1]
 
-		if included, ok := loadEnvsMap[key]; (!ok && !strings.HasPrefix(key, "KUBERNETES_")) || (!included && ok) {
+		if included, ok := loadEnvsMap[key]; (!ok && !hasPrefix(key)) || (!included && ok) {
 			continue
 		}
 
@@ -154,11 +168,13 @@ func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 		}, command...)
 	}
 
-	if client.RequestTimeout.Seconds() > 0 && !hasArg("--request-timeout") {
-		command = append([]string{
-			"--request-timeout",
-			fmt.Sprintf("%ds", int(client.RequestTimeout.Seconds())),
-		}, command...)
+	if client.AllowClientConfiguration {
+		if client.RequestTimeout.Seconds() > 0 && !hasArg("--request-timeout") {
+			command = append([]string{
+				"--request-timeout",
+				fmt.Sprintf("%ds", int(client.RequestTimeout.Seconds())),
+			}, command...)
+		}
 	}
 
 	return command

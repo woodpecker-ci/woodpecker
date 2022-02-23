@@ -69,6 +69,11 @@ func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 			Context:   getWPKEnv("CONTEXT", "").(string),
 		}),
 		RequestTimeout: time.Duration(requestTimeoutSeconds) * time.Second,
+
+		// TODO: There is an error that dose not allow this in cluster.
+		// therefore by default its false.
+		// ERROR: https://github.com/kubernetes/kubernetes/issues/93474
+		AllowClientConfiguration: getWPKEnv("ALLOW_CLIENT_CONFIG", "false").(string) == "true",
 	}
 
 	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
