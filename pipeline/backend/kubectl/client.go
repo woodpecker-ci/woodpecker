@@ -80,11 +80,13 @@ func (client *KubeClient) CreateKubectlCommand(
 	ctx context.Context,
 	args ...interface{},
 ) *exec.Cmd {
-	return exec.CommandContext(
+	cmd := exec.CommandContext(
 		ctx,
 		client.GetExecutable(),
 		client.ComposeKubectlCommand(args...)...,
 	)
+	cmd.Env = os.Environ()
+	return cmd
 }
 
 func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
