@@ -2,6 +2,7 @@ package kubectl
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os/exec"
 	"strconv"
@@ -139,6 +140,15 @@ func (backend *KubeBackend) Load() error {
 	return nil
 }
 
+func (backend *KubeBackend) GetRun(ctx context.Context) (*KubePiplineRun, error) {
+	if run, ok := backend.activeRuns[ctx]; ok {
+		return run, nil
+	}
+	return nil, errors.New(
+		"Could not find active run for pipeline context. Not found or destroyed",
+	)
+}
+
 // Setup the pipeline environment.
 func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
 	backend.activeRuns[ctx] = backend.CreateRun()
@@ -147,26 +157,38 @@ func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error 
 
 // Exec start the pipeline step.
 func (backend *KubeBackend) Exec(ctx context.Context, step *types.Step) error {
-	run := backend.activeRuns[ctx]
+	run, err := backend.GetRun(ctx)
+	if err != nil {
+		return err
+	}
 	return run.Exec(ctx, step)
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
-	run := backend.activeRuns[ctx]
+	run, err := backend.GetRun(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return run.Wait(ctx, step)
 }
 
 // Tail the pipeline step logs.
 func (backend *KubeBackend) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
-	run := backend.activeRuns[ctx]
+	run, err := backend.GetRun(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return run.Tail(ctx, step)
 }
 
 // Destroy the pipeline environment.
 func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) error {
-	run := backend.activeRuns[ctx]
+	run, err := backend.GetRun(ctx)
+	if err != nil {
+		return err
+	}
 	delete(backend.activeRuns, ctx)
 	return run.Destroy(ctx, cfg)
 }
