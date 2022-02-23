@@ -34,6 +34,7 @@ type KubeBackend struct {
 	DeletePolicy     string        // The job delete policy
 	JobMemoryLimit   string        // The runner container memory limit (1Gi)
 	JobCPULimit      string        // The runner container cpu limit (200m)
+	ForcePullPolicy  string        // Forces a pull policy on all jobs
 	CommandRetries   int           // The number of times to retry commands.
 	CommandRetryWait time.Duration // The wait time between command retries.
 
@@ -87,6 +88,7 @@ func New(execuatble string, args KubeClientCoreArgs) types.Engine {
 
 		PVCAllowOnDetached:     getWPKEnv("ALLOW_PVC_ON_DETACHED", "false").(string) == "true",
 		EnableRunNetworkPolicy: getWPKEnv("ENABLE_NETWORK_POLICY", "false").(string) == "true",
+		ForcePullPolicy:        getWPKEnv("FORCE_PULL_POLICY", "").(string),
 		TerminationGracePeriod: terminationGracePeriodSeconds,
 		ContainerStartDelay:    containerStartDelaySeconds,
 		JobMemoryLimit:         getWPKEnv("MEMORY_LIMIT", "1Gi").(string),

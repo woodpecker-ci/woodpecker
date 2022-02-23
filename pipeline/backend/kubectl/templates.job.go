@@ -33,6 +33,9 @@ func (template *KubeJobTemplate) HasShellCommand() bool {
 }
 
 func (template *KubeJobTemplate) PullPolicy() string {
+	if len(template.Backend.ForcePullPolicy) > 0 {
+		return template.Backend.ForcePullPolicy
+	}
 	return Triary(template.Step.Pull, "Always", "IfNotPresent").(string)
 }
 
