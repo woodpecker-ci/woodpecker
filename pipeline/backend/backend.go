@@ -16,7 +16,7 @@ func init() {
 	// TODO: disabled for now as kubernetes backend has not been implemented yet
 	loadedEngines := []types.Engine{
 		docker.New(),
-		kubectl.New("kubectl", kubectl.KubeClientCoreArgs{}),
+		kubectl.New(),
 	}
 
 	for _, engine := range loadedEngines {

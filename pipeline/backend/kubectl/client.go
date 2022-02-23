@@ -15,36 +15,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type KubeClientCoreArgs struct {
-	Namespace string // the default namespace
-	Context   string // the default context
-}
-
-// Merge configurations
-func (clientArgs *KubeClientCoreArgs) ToArgsList() []string {
-	cmnd := []string{}
-	if len(clientArgs.Namespace) > 0 {
-		cmnd = append(cmnd, "--namespace", clientArgs.Namespace)
-	}
-	if len(clientArgs.Context) > 0 {
-		cmnd = append(cmnd, "--context", clientArgs.Context)
-	}
-	return cmnd
-}
-
-// Merge configurations
-func (clientArgs *KubeClientCoreArgs) Merge(args KubeClientCoreArgs) KubeClientCoreArgs {
-	return KubeClientCoreArgs{
-		Namespace: FirstNotEmpty(args.Namespace, clientArgs.Namespace).(string),
-		Context:   FirstNotEmpty(args.Context, clientArgs.Context).(string),
-	}
-}
-
 type KubeClient struct {
-	Executable               string             // the default executable
-	CoreArgs                 KubeClientCoreArgs // the default args
-	RequestTimeout           time.Duration      // The kubectl request timeout
-	AllowClientConfiguration bool               // If true, Allows configurations like --request-timeout
+	Executable               string        // the default executable
+	Namespace                string        // the default namespace
+	Context                  string        // the default context
+	RequestTimeout           time.Duration // The kubectl request timeout
+	AllowClientConfiguration bool          // If true, Allows configurations like --request-timeout
 }
 
 // Loads the client.
@@ -138,10 +114,17 @@ func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 		return false
 	}
 
-	if client.CoreArgs.Context != "" && !hasArg("--context") {
+	if client.Namespace != "" && !hasArg("--namespace", "-n") {
+		command = append([]string{
+			"--namespace",
+			client.Namespace,
+		}, command...)
+	}
+
+	if client.Context != "" && !hasArg("--context") {
 		command = append([]string{
 			"--context",
-			client.CoreArgs.Context,
+			client.Context,
 		}, command...)
 	}
 
@@ -159,22 +142,22 @@ func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 
 // Loads default configuration for the client.
 func (client *KubeClient) LoadDefaults(ctx context.Context) error {
-	if len(client.CoreArgs.Namespace) == 0 {
-		namespace, err := client.RunKubectlCommand(
-			ctx, "config", "view", "--minify", "--output",
-			"jsonpath={..namespace}",
-		)
-		if err == nil {
-			client.CoreArgs.Namespace = strings.TrimSpace(namespace)
-		}
-	}
-
-	if len(client.CoreArgs.Context) == 0 {
+	if len(client.Context) == 0 {
 		context, err := client.RunKubectlCommand(
 			ctx, "config", "current-context",
 		)
 		if err == nil {
-			client.CoreArgs.Context = strings.TrimSpace(context)
+			client.Context = strings.TrimSpace(context)
+		}
+	}
+
+	if len(client.Namespace) == 0 {
+		namespace, err := client.RunKubectlCommand(
+			ctx, "config", "view", "--minify", "--output",
+			"jsonpath={.contexts[0].context.namespace}",
+		)
+		if err == nil {
+			client.Namespace = strings.TrimSpace(namespace)
 		}
 	}
 
@@ -289,7 +272,6 @@ func (client *KubeClient) WaitForConditions(
 	waitContext, cancel := context.WithCancel(ctx)
 	waitCommand := client.ComposeKubectlCommand(
 		"wait",
-		client.CoreArgs.ToArgsList(),
 		"--timeout", fmt.Sprint(60*60*24*7)+"s",
 		resource,
 	)

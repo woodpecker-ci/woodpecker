@@ -61,14 +61,12 @@ var _ types.Engine = &KubeBackend{}
 
 // Create a new kubectl (exec based) engine. Allows for execution pods
 // as commands. Assumes running inside a cluster or kubectl is configured.
-func New(execuatble string, args KubeClientCoreArgs) types.Engine {
+func New() types.Engine {
 	requestTimeoutSeconds, _ := strconv.ParseFloat(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 64)
 	client := &KubeClient{
-		Executable: execuatble,
-		CoreArgs: args.Merge(KubeClientCoreArgs{
-			Namespace: getWPKEnv("NAMESPACE", "").(string),
-			Context:   getWPKEnv("CONTEXT", "").(string),
-		}),
+		Executable:     getWPKEnv("EXECUTABLE", "kubectl").(string),
+		Namespace:      getWPKEnv("NAMESPACE", "").(string),
+		Context:        getWPKEnv("CONTEXT", "").(string),
 		RequestTimeout: time.Duration(requestTimeoutSeconds) * time.Second,
 
 		// TODO: There is an error that dose not allow these type of setting

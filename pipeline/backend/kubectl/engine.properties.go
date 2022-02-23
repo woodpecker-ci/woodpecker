@@ -7,12 +7,12 @@ func (backend *KubeBackend) ID() string {
 
 // The kubernetes namespace
 func (backend *KubeBackend) Namespace() string {
-	return backend.Client.CoreArgs.Namespace
+	return backend.Client.Namespace
 }
 
 // The kubernetes context
 func (backend *KubeBackend) Context() string {
-	return backend.Client.CoreArgs.Context
+	return backend.Client.Context
 }
 
 // The current active run detached jobs
