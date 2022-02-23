@@ -10,32 +10,44 @@ import (
 	"time"
 )
 
+const LineBreak = "\n"
+
 type KubeResourceLogger struct {
 	Backend      *KubeBackend // the kubernetes backend
 	ResourceName string       // the name of the resource to read
 
 	// internal properties
-	cancelLogContext context.CancelFunc // cancel the executing logs context
-	logContext       context.Context    // The active log context.
-	lastError        error              // The last logging error
+	stopLogger context.CancelFunc // cancel the executing logs context
+	logContext context.Context    // The active log context.
+	lastError  error              // The last logging error
+	isRunning  bool               // If true, the logger is running
 }
 
 func (resLogger *KubeResourceLogger) IsRunning() bool {
-	return resLogger.logContext != nil
+	return resLogger.isRunning
 }
 
 func (resLogger *KubeResourceLogger) LastError() error {
 	return resLogger.lastError
 }
 
+func (resLogger *KubeResourceLogger) Done() <-chan struct{} {
+	return resLogger.logContext.Done()
+}
+
+func (resLogger *KubeResourceLogger) Wait() error {
+	if !resLogger.IsRunning() {
+		return errors.New(
+			"Resource logger is not running",
+		)
+	}
+	<-resLogger.logContext.Done()
+	return resLogger.lastError
+}
+
 func (resLogger *KubeResourceLogger) Stop() error {
 	if resLogger.IsRunning() {
-		cancel := resLogger.cancelLogContext
-		// clear.
-		resLogger.logContext = nil
-		resLogger.cancelLogContext = nil
-		// cancel existing
-		cancel()
+		resLogger.stopLogger()
 	}
 	return resLogger.lastError
 }
@@ -51,14 +63,8 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 	// initializing.
 	logContext, cancelLogContext := context.WithCancel(ctx)
-	resLogger.logContext = logContext
-	resLogger.cancelLogContext = cancelLogContext
-	resLogger.lastError = nil
-
-	// Pipes and buffers
-	logsReaer, logsWriter := io.Pipe() // logs lines output.
-	rawReader, rawWriter := io.Pipe()  // logs raw writer/reader
-	lineBreak := "\n"
+	logsReaer, logsWriter := io.Pipe()         // logs lines output.
+	rawReader, rawWriter := io.Pipe()          // logs raw writer/reader
 	lineScanner := bufio.NewScanner(rawReader) // the scanner for lines
 
 	fromStderr := func(err error, stderr string) error {
@@ -69,22 +75,45 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	}
 
 	writeLine := func(line []byte) error {
-		_, err := logsWriter.Write(append(line, []byte(lineBreak)...))
+		_, err := logsWriter.Write(append(line, []byte(LineBreak)...))
 		return err
 	}
 
-	stop := func(err error, msg string) {
+	// Main stopWithError function.
+	// When the log is canceled this is called.
+	stopWithError := func(err error, msg string) {
+		if !resLogger.IsRunning() {
+			return
+		}
+
+		resLogger.isRunning = false
+		cancelLogContext()
+
 		if err != nil {
 			logger.Error().Err(err).Msg(msg)
 			_ = writeLine([]byte(
-				fmt.Sprintf("Error reading logs from stage (%s): %s", resLogger.ResourceName, msg),
+				fmt.Sprintf("Logger stopped. Error reading logs from stage (%s): %s", resLogger.ResourceName, msg),
 			))
 			_ = writeLine([]byte(err.Error()))
+		} else {
+			logger.Debug().Msg("Logger stopped")
 		}
+
 		_ = logsWriter.Close()
 		_ = rawWriter.Close()
-		_ = resLogger.Stop()
+
+		// the last error will be defined as the stop error. If any
+		resLogger.lastError = err
 	}
+
+	stop := func() {
+		stopWithError(nil, "")
+	}
+
+	resLogger.isRunning = true
+	resLogger.logContext = logContext
+	resLogger.stopLogger = stop
+	resLogger.lastError = nil
 
 	// listen for context cancel.
 	go func() {
@@ -100,7 +129,6 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	}()
 
 	lastLineScanned := int64(0)
-
 	consecutiveRestarts := 0
 
 	// listen for lines.
@@ -112,9 +140,10 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 			err := writeLine(lineScanner.Bytes())
 			if err != nil {
-				stop(err, "Error while reading lines")
+				stopWithError(err, "Error while reading lines")
 			}
 		}
+		logger.Debug().Msg("Logger line listener exited.")
 	}()
 
 	go func() {
@@ -153,8 +182,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 			if err == context.Canceled {
 				// the context was canceled.
-				logger.Warn().Msg("Logger context canceled. Aborting read")
-				stop(nil, "")
+				stop()
 				break
 			}
 
@@ -170,7 +198,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 
 				consecutiveRestarts++
 				if consecutiveRestarts > resLogger.Backend.CommandRetries {
-					stop(
+					stopWithError(
 						err,
 						fmt.Sprintf(
 							"Error starting log reading. Too many attempts (%d)",
@@ -193,27 +221,13 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				time.Sleep(resLogger.Backend.CommandRetryWait)
 				continue
 			}
-			// completed. Stopping
-			stop(nil, "")
+
+			stop()
 			break
 		}
 	}()
 
 	return logsReaer, nil
-}
-
-func (resLogger *KubeResourceLogger) Done() <-chan struct{} {
-	return resLogger.logContext.Done()
-}
-
-func (resLogger *KubeResourceLogger) Wait() error {
-	if !resLogger.IsRunning() {
-		return errors.New(
-			"Resource logger is not running",
-		)
-	}
-	<-resLogger.logContext.Done()
-	return resLogger.lastError
 }
 
 func (resLogger *KubeResourceLogger) ReadWithContext(ctx context.Context) (string, error) {
