@@ -22,7 +22,7 @@ func composeValidTestKubeJobTemplate(
 				"SOME_VALUE":    "a",
 			},
 			Pull:       true,
-			Detached:   true,
+			Detached:   false,
 			Privileged: true,
 			Alias:      "a-tester", // valid for values
 			WorkingDir: "/woodpecker",
@@ -88,9 +88,7 @@ func TestTemplates(t *testing.T) {
 
 		g.It("render a volume template (with values)", func() {
 			tmpl := KubePVCTemplate{
-				Backend:          backend,
-				StorageClassName: "default",
-				StorageSize:      "3Gi",
+				Backend: backend,
 			}
 			rslt, err := tmpl.Render()
 			if err != nil {

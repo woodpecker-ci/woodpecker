@@ -16,11 +16,11 @@ import (
 )
 
 type KubeClient struct {
-	Executable               string        // the default executable
-	Namespace                string        // the default namespace
-	Context                  string        // the default context
-	RequestTimeout           time.Duration // The kubectl request timeout
-	AllowClientConfiguration bool          // If true, Allows configurations like --request-timeout
+	Executable                      string        // the default executable
+	Namespace                       string        // the default namespace
+	Context                         string        // the default context
+	RequestTimeout                  time.Duration // The kubectl request timeout
+	AllowKubectlClientConfiguration bool          // If true, Allows configurations like --request-timeout
 }
 
 // Loads the client.
@@ -128,7 +128,7 @@ func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 		}, command...)
 	}
 
-	if client.AllowClientConfiguration {
+	if client.AllowKubectlClientConfiguration {
 		if client.RequestTimeout.Seconds() > 0 && !hasArg("--request-timeout") {
 			command = append([]string{
 				"--request-timeout",

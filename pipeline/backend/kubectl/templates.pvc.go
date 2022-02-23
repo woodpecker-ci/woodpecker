@@ -1,10 +1,8 @@
 package kubectl
 
 type KubePVCTemplate struct {
-	StorageClassName string
-	StorageSize      string
-	Name             string
-	Backend          *KubeBackend // the executing engine
+	Name    string
+	Backend *KubeBackend // the executing engine
 }
 
 // The pvc volume name.

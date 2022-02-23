@@ -31,13 +31,16 @@ type KubeBackendRun struct {
 }
 
 type KubeBackend struct {
-	Client           *KubeClient   // The kubernetes client
-	DeletePolicy     string        // The job delete policy
-	JobMemoryLimit   string        // The runner container memory limit (1Gi)
-	JobCPULimit      string        // The runner container cpu limit (200m)
-	ForcePullPolicy  string        // Forces a pull policy on all jobs
-	CommandRetries   int           // The number of times to retry commands.
-	CommandRetryWait time.Duration // The wait time between command retries.
+	Client              *KubeClient   // The kubernetes client
+	DeletePolicy        string        // The job delete policy
+	JobMemoryLimit      string        // The runner container memory limit (1Gi)
+	JobCPULimit         string        // The runner container cpu limit (200m)
+	PVCStorageSize      string        // The storage size for the PVC.
+	PVCAccessMode       string        // The access mode for PVC's
+	PVCStorageClassName string        // The pvc storage class name.
+	ForcePullPolicy     string        // Forces a pull policy on all jobs
+	CommandRetries      int           // The number of times to retry commands.
+	CommandRetryWait    time.Duration // The wait time between command retries.
 
 	// A delay before the pod start. Various reasons.
 	// Most notably some backend CNI's (like flannel)
@@ -73,10 +76,10 @@ func New() types.Engine {
 		// whilst running in-cluster. I set this default to false, but can be
 		// changed for newer version of kubectl.
 		// ERROR: https://github.com/kubernetes/kubernetes/issues/93474
-		AllowClientConfiguration: getWPKEnv("ALLOW_CLIENT_CONFIG", "false").(string) == "true",
+		AllowKubectlClientConfiguration: getWPKEnv("ALLOW_KUBECTL_CLIENT_CONFIG", "false").(string) == "true",
 	}
 
-	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("REQUEST_TIMEOUT", "10").(string), 0, 64)
+	containerStartDelaySeconds, _ := strconv.ParseInt(getWPKEnv("CONTAINER_START_DELAY", "1").(string), 0, 64)
 	terminationGracePeriodSeconds, _ := strconv.ParseInt(getWPKEnv("TERMINATION_GRACE_PERIOD", "5").(string), 0, 64)
 	commandRetries, _ := strconv.Atoi(getWPKEnv("COMMAND_RETRIES", "5").(string))
 	commandRetriesWait, _ := strconv.ParseFloat(getWPKEnv("COMMAND_RETRIES_WAIT", "1").(string), 64)
@@ -85,7 +88,11 @@ func New() types.Engine {
 		Client:       client,
 		DeletePolicy: getWPKEnv("DELETE_POLICY", Always).(string),
 
-		PVCAllowOnDetached:     getWPKEnv("ALLOW_PVC_ON_DETACHED", "false").(string) == "true",
+		PVCAllowOnDetached:  getWPKEnv("PVC_ALLOW_ON_DETACHED", "false").(string) == "true",
+		PVCStorageSize:      getWPKEnv("PVC_STORAGE_SIZE", "1Gi").(string),
+		PVCAccessMode:       getWPKEnv("PVC_ACCESS_MODE", "ReadWriteOnce").(string),
+		PVCStorageClassName: getWPKEnv("PVC_STORAGE_CLASS", "").(string),
+
 		EnableRunNetworkPolicy: getWPKEnv("ENABLE_NETWORK_POLICY", "false").(string) == "true",
 		ForcePullPolicy:        getWPKEnv("FORCE_PULL_POLICY", "").(string),
 		TerminationGracePeriod: terminationGracePeriodSeconds,
@@ -422,6 +429,8 @@ func (backend *KubeBackend) Wait(ctx context.Context, step *types.Step) (*types.
 			doDelete = !hasFailed
 		case Always:
 			doDelete = true
+		case Never:
+			doDelete = false
 		}
 	}
 

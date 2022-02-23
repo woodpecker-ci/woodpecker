@@ -162,7 +162,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 				)
 			}
 
-			if resLogger.Backend.Client.AllowClientConfiguration {
+			if resLogger.Backend.Client.AllowKubectlClientConfiguration {
 				extraArgs = append(extraArgs,
 					"--request-timeout",
 					fmt.Sprintf("%ds", (60*60*24)),
