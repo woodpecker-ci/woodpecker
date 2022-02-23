@@ -102,13 +102,14 @@ check-xgo:
 
 cross-compile-server: cross-compile-server-build-loop
 	tree dist
+	tree /build
 	@$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make normalize-server-artifacts || exit 1;)
 
 cross-compile-server-build-loop:
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make release-server-xgo || exit 1;)
 
 normalize-server-artifacts:
-	mv dist/server/$(TARGETOS)/$(TARGETARCH)/$(shell ls dist/server/$(TARGETOS)/$(TARGETARCH)/) dist/server/$(TARGETOS)/$(TARGETARCH)/woodpecker-server
+	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH) dist/server/$(TARGETOS)/$(TARGETARCH)/woodpecker-server
 
 release-server-xgo: check-xgo
 	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH) ;\
