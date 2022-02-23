@@ -10,14 +10,6 @@ pipeline:
     commands:
       - echo "first to run" >| loaded_message
       - cat loaded_message
-  fast_error:
-    image: *runner_image
-    commands:
-      - |
-        for i in $(seq 1 122); do 
-          echo "DUMMY $i"; 
-        done
-      - exit 22
   shared_test:
     image: *runner_image
     commands:
@@ -27,8 +19,8 @@ pipeline:
     image: *runner_image
     commands:
       - nc -zv docker.service 2375 # Access detached
-      - nc -zv artprod.dev.bloomberg.com 80 # Access external
-      - nc -zv kbb-api.kube-bb.svc 80 # Access internal service.
+      - nc -zv google.com 80 # Access external
+      # Check Access internal service.
 services:
   docker.service:
     image: *dind_image
