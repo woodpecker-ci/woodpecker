@@ -52,6 +52,47 @@ Once finished (failed or succeeded), the resources are deleted according to the 
 1.  Always
 1.  Never
 
+# Networking isolation (with internet access)
+
+**ONLY applies when**: `WOODPECKER_KUBECTL_ENABLE_NETWORK_POLICY=true`
+
+<a name="network-isolation"></a>
+
+To allow networking isolation, with internet access, you **must** have in the **same** namespace as the pod execution a global network policy that would act on all woodpecker pods. If you do not allow this policy, the pod would only be allowed to access
+services running in the pipeline.
+
+Example policy:
+
+```yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  # namespace: [your cicd namespace]
+  name: woodpecker-jobs
+spec:
+  podSelector:
+    matchLabels:
+      # Match all woodpecker pods.
+      woodpecker: "true"
+  policyTypes:
+    - Egress
+  egress:
+    # Allow specific services and pods.
+    - to:
+        # Allows dns resolution.
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+          # Allows internet acces, except for internal pods.
+        - ipBlock:
+            cidr: 0.0.0.0/0 # Allow all ips
+            # Your services and pods CIDR, that would be excluded.
+            except:
+              - 172.0.0.0/8 # All pods
+              - 173.0.0.0/8 # All services (svc)
+```
+
 ## Environment variables
 
 <a name="envs"></a>
@@ -73,9 +114,9 @@ Job:
 
 Persistent volumes:
 
-1. `PVC_STORAGE_SIZE` The volume size, by default `1Gi`
-1. `PVC_ACCESS_MODE` The access mode for the pvc. Defaults to `ReadWriteOnce`.
-1. `PVC_STORAGE_CLASS` The storage class. By default empty and uses default.
+1. `WOODPECKER_KUBECTL_PVC_STORAGE_SIZE` The volume size, by default `1Gi`. See [PVC](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
+1. `WOODPECKER_KUBECTL_PVC_ACCESS_MODE` The access mode for the pvc. Defaults to `ReadWriteOnce`.
+1. `WOODPECKER_KUBECTL_PVC_STORAGE_CLASS` The storage class. By default empty and uses default.
 1. `WOODPECKER_KUBECTL_PVC_ALLOW_ON_DETACHED` If true, allows detached jobs/pods to be mounted with a PVC. If used, you **must** provide a pvc storage class that allows for [ReadWriteMany](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) (for example NFS).
 
 #### Advanced
