@@ -119,9 +119,6 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
-		Vargs: map[string]interface{}{
-			"deprecated_setting": "fallback",
-		},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)

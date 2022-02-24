@@ -87,7 +87,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	return store, nil
 }
 
-// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: remove it in v1.1.0
 // TODO: add it to the "how to migrate from drone docs"
 func fallbackSqlite3File(path string) (string, error) {
 	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
