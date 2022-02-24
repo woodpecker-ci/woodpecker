@@ -144,14 +144,13 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node, deprecated_setting: fallback, settings: { normal_setting: true } }",
+			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
 					Settings: map[string]interface{}{
-						"deprecated_setting": "fallback",
-						"normal_setting":     true,
+						"normal_setting": true,
 					},
 				},
 			},
@@ -160,11 +159,12 @@ func TestUnmarshalContainers(t *testing.T) {
 			from: `publish-agent:
     group: bundle
     image: print/env
-    repo: woodpeckerci/woodpecker-agent
-    dockerfile: docker/Dockerfile.agent
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent
+      tag: [next, latest]
+      dry_run: true
     secrets: [docker_username, docker_password]
-    tag: [next, latest]
-    dry_run: true
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,
