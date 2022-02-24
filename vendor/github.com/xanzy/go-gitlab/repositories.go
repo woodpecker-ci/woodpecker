@@ -67,7 +67,7 @@ func (s *RepositoriesService) ListTree(pid interface{}, opt *ListTreeOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tree", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/tree", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *RepositoriesService) Blob(pid interface{}, sha string, options ...Reque
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/blobs/%s", pathEscape(project), url.PathEscape(sha))
+	u := fmt.Sprintf("projects/%s/repository/blobs/%s", PathEscape(project), url.PathEscape(sha))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *RepositoriesService) RawBlobContent(pid interface{}, sha string, option
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/blobs/%s/raw", pathEscape(project), url.PathEscape(sha))
+	u := fmt.Sprintf("projects/%s/repository/blobs/%s/raw", PathEscape(project), url.PathEscape(sha))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -152,7 +152,7 @@ func (s *RepositoriesService) Archive(pid interface{}, opt *ArchiveOptions, opti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/archive", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/archive", PathEscape(project))
 
 	// Set an optional format for the archive.
 	if opt != nil && opt.Format != nil {
@@ -183,7 +183,7 @@ func (s *RepositoriesService) StreamArchive(pid interface{}, w io.Writer, opt *A
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/archive", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/archive", PathEscape(project))
 
 	// Set an optional format for the archive.
 	if opt != nil && opt.Format != nil {
@@ -233,7 +233,7 @@ func (s *RepositoriesService) Compare(pid interface{}, opt *CompareOptions, opti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/compare", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/compare", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -281,7 +281,7 @@ func (s *RepositoriesService) Contributors(pid interface{}, opt *ListContributor
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/contributors", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/contributors", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -302,7 +302,7 @@ func (s *RepositoriesService) Contributors(pid interface{}, opt *ListContributor
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/repositories.html#merge-base
 type MergeBaseOptions struct {
-	Ref []string `url:"refs[],omitempty" json:"refs,omitempty"`
+	Ref *[]string `url:"refs[],omitempty" json:"refs,omitempty"`
 }
 
 // MergeBase gets the common ancestor for 2 refs (commit SHAs, branch
@@ -315,7 +315,7 @@ func (s *RepositoriesService) MergeBase(pid interface{}, opt *MergeBaseOptions, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/merge_base", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/merge_base", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {

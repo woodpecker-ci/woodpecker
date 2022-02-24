@@ -72,8 +72,8 @@ func (s *RepositoryFilesService) GetFile(pid interface{}, fileName string, opt *
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
@@ -110,8 +110,8 @@ func (s *RepositoryFilesService) GetFileMetaData(pid interface{}, fileName strin
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodHead, u, opt, options)
@@ -187,8 +187,8 @@ func (s *RepositoryFilesService) GetFileBlame(pid interface{}, file string, opt 
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s/blame",
-		pathEscape(project),
-		pathEscape(file),
+		PathEscape(project),
+		PathEscape(file),
 	)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
@@ -224,8 +224,8 @@ func (s *RepositoryFilesService) GetRawFile(pid interface{}, fileName string, op
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s/raw",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
@@ -279,8 +279,8 @@ func (s *RepositoryFilesService) CreateFile(pid interface{}, fileName string, op
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
@@ -323,8 +323,8 @@ func (s *RepositoryFilesService) UpdateFile(pid interface{}, fileName string, op
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
@@ -365,8 +365,8 @@ func (s *RepositoryFilesService) DeleteFile(pid interface{}, fileName string, op
 	}
 	u := fmt.Sprintf(
 		"projects/%s/repository/files/%s",
-		pathEscape(project),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, opt, options)

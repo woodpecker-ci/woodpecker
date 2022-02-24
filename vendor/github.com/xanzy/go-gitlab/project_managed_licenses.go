@@ -47,7 +47,7 @@ func (s *ManagedLicensesService) ListManagedLicenses(pid interface{}, options ..
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/managed_licenses", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/managed_licenses", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *ManagedLicensesService) GetManagedLicense(pid, mlid interface{}, option
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/managed_licenses/%s", pathEscape(project), pathEscape(license))
+	u := fmt.Sprintf("projects/%s/managed_licenses/%s", PathEscape(project), PathEscape(license))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -110,7 +110,7 @@ func (s *ManagedLicensesService) AddManagedLicense(pid interface{}, opt *AddMana
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/managed_licenses", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/managed_licenses", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -139,7 +139,7 @@ func (s *ManagedLicensesService) DeleteManagedLicense(pid, mlid interface{}, opt
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/managed_licenses/%s", pathEscape(project), pathEscape(license))
+	u := fmt.Sprintf("projects/%s/managed_licenses/%s", PathEscape(project), PathEscape(license))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -171,7 +171,7 @@ func (s *ManagedLicensesService) EditManagedLicense(pid, mlid interface{}, opt *
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/managed_licenses/%s", pathEscape(project), pathEscape(license))
+	u := fmt.Sprintf("projects/%s/managed_licenses/%s", PathEscape(project), PathEscape(license))
 
 	req, err := s.client.NewRequest(http.MethodPatch, u, opt, options)
 	if err != nil {

@@ -17,9 +17,13 @@ func NewVarnamelen(settings *config.VarnamelenSettings) *goanalysis.Linter {
 	cfg := map[string]map[string]interface{}{}
 	if settings != nil {
 		vnlCfg := map[string]interface{}{
-			"checkReceiver": strconv.FormatBool(settings.CheckReceiver),
-			"checkReturn":   strconv.FormatBool(settings.CheckReturn),
-			"ignoreNames":   strings.Join(settings.IgnoreNames, ","),
+			"checkReceiver":      strconv.FormatBool(settings.CheckReceiver),
+			"checkReturn":        strconv.FormatBool(settings.CheckReturn),
+			"ignoreNames":        strings.Join(settings.IgnoreNames, ","),
+			"ignoreTypeAssertOk": strconv.FormatBool(settings.IgnoreTypeAssertOk),
+			"ignoreMapIndexOk":   strconv.FormatBool(settings.IgnoreMapIndexOk),
+			"ignoreChanRecvOk":   strconv.FormatBool(settings.IgnoreChanRecvOk),
+			"ignoreDecls":        strings.Join(settings.IgnoreDecls, ","),
 		}
 
 		if settings.MaxDistance > 0 {
@@ -37,5 +41,5 @@ func NewVarnamelen(settings *config.VarnamelenSettings) *goanalysis.Linter {
 		"checks that the length of a variable's name matches its scope",
 		[]*analysis.Analyzer{a},
 		cfg,
-	).WithLoadMode(goanalysis.LoadModeSyntax)
+	).WithLoadMode(goanalysis.LoadModeTypesInfo)
 }
