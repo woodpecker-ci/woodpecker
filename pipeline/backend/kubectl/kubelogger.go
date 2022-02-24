@@ -2,7 +2,6 @@ package kubectl
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -66,13 +65,6 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	logsReaer, logsWriter := io.Pipe()         // logs lines output.
 	rawReader, rawWriter := io.Pipe()          // logs raw writer/reader
 	lineScanner := bufio.NewScanner(rawReader) // the scanner for lines
-
-	fromStderr := func(err error, stderr string) error {
-		if stderr != "" {
-			err = errors.New(err.Error() + "\nstderr: " + stderr)
-		}
-		return err
-	}
 
 	writeLine := func(line []byte) error {
 		_, err := logsWriter.Write(append(line, []byte(LineBreak)...))
@@ -153,36 +145,17 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 	go func() {
 		// this needs a loop since the logging command may fail.
 		for {
-			// If is not running. Must return.
-			extraArgs := []string{}
-			if lastLineScanned > 0 {
-				extraArgs = append(extraArgs,
-					"--since",
-					fmt.Sprintf("%ds", time.Now().Unix()-lastLineScanned),
-				)
-			}
-
-			if resLogger.Run.Backend.Client.AllowKubectlClientConfiguration {
-				extraArgs = append(extraArgs,
-					"--request-timeout",
-					fmt.Sprintf("%ds", (60*60*24)),
-				)
-			}
-
-			logsCmd := resLogger.Run.Backend.Client.CreateKubectlCommand(
+			logsError := resLogger.Run.Backend.Client.ReadResourceLogsToWriter(
 				logContext,
-				extraArgs,
-				"logs",
+				rawWriter,
 				resLogger.ResourceName,
-				"-f",
+				true,
+				Triary(lastLineScanned <= 0, "",
+					fmt.Sprintf("%ds", time.Now().Unix()-lastLineScanned),
+				).(string),
 			)
 
-			var stdErrBuffer bytes.Buffer
-
-			logsCmd.Stderr = &stdErrBuffer
-			logsCmd.Stdout = rawWriter
-
-			err := logsCmd.Run()
+			err := <-logsError
 
 			if err == context.Canceled {
 				// the context was canceled.
@@ -191,10 +164,6 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 			}
 
 			if err != nil {
-				// something else went wrong.
-				stderr := stdErrBuffer.String()
-				err := fromStderr(err, stderr)
-
 				if !resLogger.IsRunning() {
 					// terminated.
 					break
@@ -212,7 +181,7 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 					break
 				}
 
-				logger.Debug().Err(fromStderr(err, stderr)).Msg(
+				logger.Debug().Err(err).Msg(
 					fmt.Sprintf(
 						"Logger failed. Retry in %.2f [second], %d/%d",
 						resLogger.Run.Backend.CommandRetryWait.Seconds(),

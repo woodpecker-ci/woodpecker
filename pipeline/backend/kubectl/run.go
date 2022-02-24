@@ -20,13 +20,14 @@ type KubePiplineRun struct {
 	SetupTemplates []KubeTemplate                 // Loaded setup templates
 	DetachedJobs   []*KubeJobTemplate             // Loaded detached template (services, etc..)
 	StepLoggers    map[string]*KubeResourceLogger // A collection of loggers per step.
-	PendingJob     *KubeJobTemplate               // The executed job where wait was not initialized.
+	PendingJobs    map[string]*KubeJobTemplate    // The executed job where wait was not initialized.
 }
 
 // Setup the pipeline environment, by applying the templated
 // setup yaml. Will consume cluster resources and would need
 // to be cleaned up.
 func (run *KubePiplineRun) Setup(ctx context.Context, cfg *types.Config) error {
+	run.PendingJobs = make(map[string]*KubeJobTemplate)
 	err := run.InitializeConfig(cfg)
 	if err != nil {
 		return err
@@ -80,9 +81,9 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 		logger.Debug().Msgf("Destroying %d detached jobs", len(run.DetachedJobs))
 	}
 
-	if run.PendingJob != nil {
-		destroyJobs = append(destroyJobs, run.PendingJob)
-		logger.Debug().Msg("A job, pending wait, still exists. Destroying.")
+	for _, job := range run.PendingJobs {
+		destroyJobs = append(destroyJobs, job)
+		logger.Debug().Msgf("Destroying pending job %s", job.Step.Name)
 	}
 
 	yamlsToDeploy := []string{}
@@ -135,6 +136,7 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		Run:  run,
 		Step: step,
 	}
+	run.PendingJobs[step.Name] = &jobTemplate
 
 	if step.Detached {
 		step.Alias = Triary(
@@ -142,7 +144,6 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		).(string)
 		logger.Debug().Msg("Starting detached job")
 	} else {
-		run.PendingJob = &jobTemplate
 		logger.Debug().Msg("Job is pending")
 	}
 
@@ -151,6 +152,10 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		return err
 	}
 
+	// first create the wait
+	podWaiter := run.WaitForRunJobPod(ctx, &jobTemplate)
+
+	// deploy the job.
 	output, err := run.Backend.Client.DeployKubectlYamlWithContext(
 		ctx,
 		"apply",
@@ -162,39 +167,28 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		return err
 	}
 
-	logger.Debug().Msgf("Job initialized with\n %s", output)
+	logger.Debug().Msg("Waiting for pod to be ready")
+	podWaitResult := <-podWaiter
 
-	// wait for the job to start.
-	logger.Debug().Msg("Waiting for job pod to be created")
-	podNames, err := run.GetJobPodName(ctx, &jobTemplate)
-	if err != nil {
-		return err
+	if podWaitResult.Error != nil {
+		return podWaitResult.Error
 	}
 
-	// the pod name, with the kind.
-	podName := podNames[0]
-
-	logger.Debug().Msg("Waiting for job pod to be ready")
-	_, err = run.Backend.Client.WaitForConditions(
-		ctx,
-		podName, []string{"ContainersReady", "Ready"},
-		1,
-	)
+	logger.Debug().Msgf("Job initialized with\n %s", output)
 
 	if err != nil {
 		return err
 	}
 
 	if step.Detached {
-		run.DetachedJobs = append(run.DetachedJobs, &jobTemplate)
-
 		logger.Debug().Msg("Reading detached pod info")
-		err = run.PopulateDetachedInfo(ctx, podName, &jobTemplate)
+		err = run.PopulateDetachedInfo(ctx, podWaitResult.PodName, &jobTemplate)
 		if err != nil {
 			return err
 		}
-
-		logger.Debug().Msg("Detached job configured")
+		run.DetachedJobs = append(run.DetachedJobs, &jobTemplate)
+		delete(run.PendingJobs, jobTemplate.Step.Name)
+		logger.Debug().Msg("Detached job started.")
 	}
 	return nil
 }
@@ -228,31 +222,27 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 		Step: step,
 	}
 
-	// Assert and clear pending job
-	if run.PendingJob.JobID() != jobTemplate.JobID() {
-		return nil, errors.New(
-			"Invalid wait on job. The job pending wait dose not match current step",
-		)
-	}
-	run.PendingJob = nil
+	// Clear pending job
+	delete(run.PendingJobs, jobTemplate.Step.Name)
 
 	logger.Info().
 		Str("Context", run.Context()).
 		Str("Namespace", run.Namespace()).
 		Msg("Waiting for job to complete")
 
-	condition, jobEndConditionError := run.Backend.Client.WaitForConditions(
+	jobEndCondition := <-run.Backend.Client.WaitForConditions(
 		ctx,
 		"job/"+jobTemplate.JobName(),
 		[]string{"Complete", "Failed"},
 		1,
 	)
-	condition = Triary(len(condition) == 0, "Error", condition).(string)
 
-	if jobEndConditionError == context.Canceled {
+	condition := Triary(len(jobEndCondition.condition) == 0, "Error", jobEndCondition.condition).(string)
+
+	if jobEndCondition.err == context.Canceled {
 		logger.Debug().Msg("Step execution context canceled")
-	} else if jobEndConditionError != nil {
-		logger.Error().Err(jobEndConditionError).Msg("Error while waiting for job")
+	} else if jobEndCondition.err != nil {
+		logger.Error().Err(jobEndCondition.err).Msg("Error while waiting for job")
 	}
 
 	// From this point job has ended.
@@ -316,7 +306,7 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 		OOMKilled: false,
 	}
 
-	if jobEndConditionError == nil {
+	if jobEndCondition.err == nil {
 		state.Exited = true
 		state.ExitCode = Triary(hasFailed, 1, 0).(int)
 	}
