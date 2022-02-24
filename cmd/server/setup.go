@@ -145,7 +145,6 @@ func fallbackSqlite3File(path string) (string, error) {
 	_, err = os.Stat(dockerOldPath)
 	if err == nil {
 		log.Fatal().Msgf("found sqlite3 file at old path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
-		return dockerOldPath, fmt.Errorf("sqlite3 file at old path '%s'", dockerOldPath)
 	}
 
 	// file does not exist at all
