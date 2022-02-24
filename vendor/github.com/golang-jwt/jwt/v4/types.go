@@ -3,6 +3,7 @@ package jwt
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"time"
@@ -41,15 +42,20 @@ func NewNumericDate(t time.Time) *NumericDate {
 // newNumericDateFromSeconds creates a new *NumericDate out of a float64 representing a
 // UNIX epoch with the float fraction representing non-integer seconds.
 func newNumericDateFromSeconds(f float64) *NumericDate {
-	return NewNumericDate(time.Unix(0, int64(f*float64(time.Second))))
+	round, frac := math.Modf(f)
+	return NewNumericDate(time.Unix(int64(round), int64(frac*1e9)))
 }
 
 // MarshalJSON is an implementation of the json.RawMessage interface and serializes the UNIX epoch
 // represented in NumericDate to a byte array, using the precision specified in TimePrecision.
 func (date NumericDate) MarshalJSON() (b []byte, err error) {
+	var prec int
+	if TimePrecision < time.Second {
+		prec = int(math.Log10(float64(time.Second) / float64(TimePrecision)))
+	}
 	f := float64(date.Truncate(TimePrecision).UnixNano()) / float64(time.Second)
 
-	return []byte(strconv.FormatFloat(f, 'f', -1, 64)), nil
+	return []byte(strconv.FormatFloat(f, 'f', prec, 64)), nil
 }
 
 // UnmarshalJSON is an implementation of the json.RawMessage interface and deserializses a

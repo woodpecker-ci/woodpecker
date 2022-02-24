@@ -207,20 +207,20 @@ type LabelDetails struct {
 type ListIssuesOptions struct {
 	ListOptions
 	State              *string    `url:"state,omitempty" json:"state,omitempty"`
-	Labels             Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	NotLabels          Labels     `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
+	Labels             *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	NotLabels          *Labels    `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
 	WithLabelDetails   *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
 	Milestone          *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
 	NotMilestone       *string    `url:"not[milestone],omitempty" json:"not[milestone],omitempty"`
 	Scope              *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID           *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	NotAuthorID        []int      `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
+	NotAuthorID        *[]int     `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
 	AssigneeID         *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	NotAssigneeID      []int      `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
+	NotAssigneeID      *[]int     `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
 	AssigneeUsername   *string    `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji    *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	NotMyReactionEmoji []string   `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
-	IIDs               []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	NotMyReactionEmoji *[]string  `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
+	IIDs               *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
 	In                 *string    `url:"in,omitempty" json:"in,omitempty"`
 	OrderBy            *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort               *string    `url:"sort,omitempty" json:"sort,omitempty"`
@@ -258,21 +258,21 @@ func (s *IssuesService) ListIssues(opt *ListIssuesOptions, options ...RequestOpt
 type ListGroupIssuesOptions struct {
 	ListOptions
 	State              *string    `url:"state,omitempty" json:"state,omitempty"`
-	Labels             Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	NotLabels          Labels     `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
+	Labels             *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	NotLabels          *Labels    `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
 	WithLabelDetails   *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
-	IIDs               []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	IIDs               *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
 	Milestone          *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
 	NotMilestone       *string    `url:"not[milestone],omitempty" json:"not[milestone],omitempty"`
 	Scope              *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID           *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	NotAuthorID        []int      `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
+	NotAuthorID        *[]int     `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
 	AuthorUsername     *string    `url:"author_username,omitempty" json:"author_username,omitempty"`
 	AssigneeID         *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	NotAssigneeID      []int      `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
+	NotAssigneeID      *[]int     `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
 	AssigneeUsername   *string    `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji    *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	NotMyReactionEmoji []string   `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
+	NotMyReactionEmoji *[]string  `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
 	OrderBy            *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort               *string    `url:"sort,omitempty" json:"sort,omitempty"`
 	Search             *string    `url:"search,omitempty" json:"search,omitempty"`
@@ -293,7 +293,7 @@ func (s *IssuesService) ListGroupIssues(pid interface{}, opt *ListGroupIssuesOpt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/issues", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/issues", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -314,21 +314,21 @@ func (s *IssuesService) ListGroupIssues(pid interface{}, opt *ListGroupIssuesOpt
 // GitLab API docs: https://docs.gitlab.com/ce/api/issues.html#list-project-issues
 type ListProjectIssuesOptions struct {
 	ListOptions
-	IIDs               []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	IIDs               *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
 	State              *string    `url:"state,omitempty" json:"state,omitempty"`
-	Labels             Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	NotLabels          Labels     `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
+	Labels             *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	NotLabels          *Labels    `url:"not[labels],comma,omitempty" json:"not[labels],omitempty"`
 	WithLabelDetails   *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
 	Milestone          *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
-	NotMilestone       []string   `url:"not[milestone],omitempty" json:"not[milestone],omitempty"`
+	NotMilestone       *[]string  `url:"not[milestone],omitempty" json:"not[milestone],omitempty"`
 	Scope              *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID           *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	NotAuthorID        []int      `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
+	NotAuthorID        *[]int     `url:"not[author_id],omitempty" json:"not[author_id],omitempty"`
 	AssigneeID         *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	NotAssigneeID      []int      `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
+	NotAssigneeID      *[]int     `url:"not[assignee_id],omitempty" json:"not[assignee_id],omitempty"`
 	AssigneeUsername   *string    `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji    *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	NotMyReactionEmoji []string   `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
+	NotMyReactionEmoji *[]string  `url:"not[my_reaction_emoji],omitempty" json:"not[my_reaction_emoji],omitempty"`
 	OrderBy            *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort               *string    `url:"sort,omitempty" json:"sort,omitempty"`
 	Search             *string    `url:"search,omitempty" json:"search,omitempty"`
@@ -351,7 +351,7 @@ func (s *IssuesService) ListProjectIssues(pid interface{}, opt *ListProjectIssue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/issues", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -375,7 +375,7 @@ func (s *IssuesService) GetIssue(pid interface{}, issue int, options ...RequestO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -399,9 +399,9 @@ type CreateIssueOptions struct {
 	Title                              *string    `url:"title,omitempty" json:"title,omitempty"`
 	Description                        *string    `url:"description,omitempty" json:"description,omitempty"`
 	Confidential                       *bool      `url:"confidential,omitempty" json:"confidential,omitempty"`
-	AssigneeIDs                        []int      `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
+	AssigneeIDs                        *[]int     `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
 	MilestoneID                        *int       `url:"milestone_id,omitempty" json:"milestone_id,omitempty"`
-	Labels                             Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Labels                             *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	CreatedAt                          *time.Time `url:"created_at,omitempty" json:"created_at,omitempty"`
 	DueDate                            *ISOTime   `url:"due_date,omitempty" json:"due_date,omitempty"`
 	MergeRequestToResolveDiscussionsOf *int       `url:"merge_request_to_resolve_discussions_of,omitempty" json:"merge_request_to_resolve_discussions_of,omitempty"`
@@ -418,7 +418,7 @@ func (s *IssuesService) CreateIssue(pid interface{}, opt *CreateIssueOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/issues", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -441,11 +441,11 @@ type UpdateIssueOptions struct {
 	Title            *string    `url:"title,omitempty" json:"title,omitempty"`
 	Description      *string    `url:"description,omitempty" json:"description,omitempty"`
 	Confidential     *bool      `url:"confidential,omitempty" json:"confidential,omitempty"`
-	AssigneeIDs      []int      `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
+	AssigneeIDs      *[]int     `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
 	MilestoneID      *int       `url:"milestone_id,omitempty" json:"milestone_id,omitempty"`
-	Labels           Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	AddLabels        Labels     `url:"add_labels,comma,omitempty" json:"add_labels,omitempty"`
-	RemoveLabels     Labels     `url:"remove_labels,comma,omitempty" json:"remove_labels,omitempty"`
+	Labels           *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	AddLabels        *Labels    `url:"add_labels,comma,omitempty" json:"add_labels,omitempty"`
+	RemoveLabels     *Labels    `url:"remove_labels,comma,omitempty" json:"remove_labels,omitempty"`
 	StateEvent       *string    `url:"state_event,omitempty" json:"state_event,omitempty"`
 	UpdatedAt        *time.Time `url:"updated_at,omitempty" json:"updated_at,omitempty"`
 	DueDate          *ISOTime   `url:"due_date,omitempty" json:"due_date,omitempty"`
@@ -463,7 +463,7 @@ func (s *IssuesService) UpdateIssue(pid interface{}, issue int, opt *UpdateIssue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -487,7 +487,7 @@ func (s *IssuesService) DeleteIssue(pid interface{}, issue int, options ...Reque
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -513,7 +513,7 @@ func (s *IssuesService) MoveIssue(pid interface{}, issue int, opt *MoveIssueOpti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/move", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/move", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -540,7 +540,7 @@ func (s *IssuesService) SubscribeToIssue(pid interface{}, issue int, options ...
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/subscribe", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/subscribe", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -567,7 +567,7 @@ func (s *IssuesService) UnsubscribeFromIssue(pid interface{}, issue int, options
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/unsubscribe", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/unsubscribe", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -594,7 +594,7 @@ func (s *IssuesService) CreateTodo(pid interface{}, issue int, options ...Reques
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/todo", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/todo", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -627,7 +627,7 @@ func (s *IssuesService) ListMergeRequestsClosingIssue(pid interface{}, issue int
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("/projects/%s/issues/%d/closed_by", pathEscape(project), issue)
+	u := fmt.Sprintf("/projects/%s/issues/%d/closed_by", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -661,7 +661,7 @@ func (s *IssuesService) ListMergeRequestsRelatedToIssue(pid interface{}, issue i
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("/projects/%s/issues/%d/related_merge_requests",
-		pathEscape(project),
+		PathEscape(project),
 		issue,
 	)
 
@@ -728,7 +728,7 @@ func (s *IssuesService) GetParticipants(pid interface{}, issue int, options ...R
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/participants", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/participants", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {

@@ -48,7 +48,7 @@ func (s *ExternalStatusChecksService) ListMergeStatusChecks(pid interface{}, mr 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/status_checks", pathEscape(project), mr)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/status_checks", PathEscape(project), mr)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -73,7 +73,7 @@ func (s *ExternalStatusChecksService) ListProjectStatusChecks(pid interface{}, o
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/external_status_checks", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/external_status_checks", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {

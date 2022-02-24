@@ -91,7 +91,7 @@ func (s *ValidateService) ProjectNamespaceLint(pid interface{}, opt *ProjectName
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/ci/lint", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/ci/lint", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, &opt, options)
 	if err != nil {
@@ -124,7 +124,7 @@ func (s *ValidateService) ProjectLint(pid interface{}, opt *ProjectLintOptions, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/ci/lint", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/ci/lint", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, &opt, options)
 	if err != nil {
