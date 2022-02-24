@@ -109,7 +109,8 @@ cross-compile-server-build-loop:
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make release-server-xgo || exit 1;)
 
 normalize-server-artifacts:
-	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH) dist/server/$(TARGETOS)/$(TARGETARCH)/woodpecker-server
+    # TODO: use cleaner way of converting arm arch syntaxes
+	mv /build/woodpecker-server-$(TARGETOS)-$(subst arm64/v8,arm64,$(subst arm/v,arm-,$(TARGETARCH))) dist/server/$(TARGETOS)/$(TARGETARCH)/woodpecker-server
 
 release-server-xgo: check-xgo
 	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH) ;\
