@@ -10,7 +10,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/docker/cli v20.10.12+incompatible
 	github.com/docker/distribution v2.8.0+incompatible
-	github.com/docker/docker v20.10.10+incompatible
+	github.com/docker/docker v20.10.12+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0
