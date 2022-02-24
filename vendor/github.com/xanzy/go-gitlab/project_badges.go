@@ -27,6 +27,7 @@ import (
 // https://docs.gitlab.com/ee/api/project_badges.html#list-all-badges-of-a-project
 type ProjectBadge struct {
 	ID               int    `json:"id"`
+	Name             string `json:"name"`
 	LinkURL          string `json:"link_url"`
 	ImageURL         string `json:"image_url"`
 	RenderedLinkURL  string `json:"rendered_link_url"`
@@ -48,7 +49,10 @@ type ProjectBadgesService struct {
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/project_badges.html#list-all-badges-of-a-project
-type ListProjectBadgesOptions ListOptions
+type ListProjectBadgesOptions struct {
+	ListOptions
+	Name *string `url:"name,omitempty" json:"name,omitempty"`
+}
 
 // ListProjectBadges gets a list of a project's badges and its group badges.
 //
@@ -59,7 +63,7 @@ func (s *ProjectBadgesService) ListProjectBadges(pid interface{}, opt *ListProje
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/badges", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -84,7 +88,7 @@ func (s *ProjectBadgesService) GetProjectBadge(pid interface{}, badge int, optio
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges/%d", pathEscape(project), badge)
+	u := fmt.Sprintf("projects/%s/badges/%d", PathEscape(project), badge)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -107,6 +111,7 @@ func (s *ProjectBadgesService) GetProjectBadge(pid interface{}, badge int, optio
 type AddProjectBadgeOptions struct {
 	LinkURL  *string `url:"link_url,omitempty" json:"link_url,omitempty"`
 	ImageURL *string `url:"image_url,omitempty" json:"image_url,omitempty"`
+	Name     *string `url:"name,omitempty" json:"name,omitempty"`
 }
 
 // AddProjectBadge adds a badge to a project.
@@ -118,7 +123,7 @@ func (s *ProjectBadgesService) AddProjectBadge(pid interface{}, opt *AddProjectB
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/badges", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -141,6 +146,7 @@ func (s *ProjectBadgesService) AddProjectBadge(pid interface{}, opt *AddProjectB
 type EditProjectBadgeOptions struct {
 	LinkURL  *string `url:"link_url,omitempty" json:"link_url,omitempty"`
 	ImageURL *string `url:"image_url,omitempty" json:"image_url,omitempty"`
+	Name     *string `url:"name,omitempty" json:"name,omitempty"`
 }
 
 // EditProjectBadge updates a badge of a project.
@@ -152,7 +158,7 @@ func (s *ProjectBadgesService) EditProjectBadge(pid interface{}, badge int, opt 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges/%d", pathEscape(project), badge)
+	u := fmt.Sprintf("projects/%s/badges/%d", PathEscape(project), badge)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -178,7 +184,7 @@ func (s *ProjectBadgesService) DeleteProjectBadge(pid interface{}, badge int, op
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges/%d", pathEscape(project), badge)
+	u := fmt.Sprintf("projects/%s/badges/%d", PathEscape(project), badge)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -207,7 +213,7 @@ func (s *ProjectBadgesService) PreviewProjectBadge(pid interface{}, opt *Project
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/badges/render", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/badges/render", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {

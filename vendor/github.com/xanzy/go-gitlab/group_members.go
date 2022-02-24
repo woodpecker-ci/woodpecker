@@ -77,7 +77,7 @@ func (s *GroupsService) ListGroupMembers(gid interface{}, opt *ListGroupMembersO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *GroupsService) ListAllGroupMembers(gid interface{}, opt *ListGroupMembe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/all", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members/all", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -138,7 +138,7 @@ func (s *GroupMembersService) GetGroupMember(gid interface{}, user int, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", PathEscape(group), user)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *GroupsService) ListBillableGroupMembers(gid interface{}, opt *ListBilla
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/billable_members", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/billable_members", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -213,7 +213,7 @@ func (s *GroupsService) RemoveBillableGroupMember(gid interface{}, user int, opt
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/billable_members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/billable_members/%d", PathEscape(group), user)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -232,7 +232,7 @@ func (s *GroupMembersService) AddGroupMember(gid interface{}, opt *AddGroupMembe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -257,7 +257,7 @@ func (s *GroupMembersService) ShareWithGroup(gid interface{}, opt *ShareWithGrou
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/share", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/share", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -282,7 +282,7 @@ func (s *GroupMembersService) DeleteShareWithGroup(gid interface{}, groupID int,
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/share/%d", pathEscape(group), groupID)
+	u := fmt.Sprintf("groups/%s/share/%d", PathEscape(group), groupID)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -311,7 +311,7 @@ func (s *GroupMembersService) EditGroupMember(gid interface{}, user int, opt *Ed
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", PathEscape(group), user)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -336,7 +336,7 @@ func (s *GroupMembersService) RemoveGroupMember(gid interface{}, user int, optio
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", PathEscape(group), user)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
