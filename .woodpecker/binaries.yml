@@ -22,7 +22,7 @@ pipeline:
 
   build-server:
     group: build
-    image: golang:1.16
+    image: golang:${GO_VERSION}
     commands:
       - make release-server
     when:
@@ -38,7 +38,7 @@ pipeline:
 
   build-agent:
     group: build
-    image: golang:1.16
+    image: golang:${GO_VERSION}
     commands:
       - make release-agent
     when:
@@ -54,7 +54,7 @@ pipeline:
 
   build-cli:
     group: build
-    image: golang:1.16
+    image: golang:${GO_VERSION}
     commands:
       - make release-cli
     when:
@@ -70,7 +70,7 @@ pipeline:
 
   build-deb-rpm:
     group: bundle
-    image: golang:1.16
+    image: golang:1.17
     commands:
       - make bundle
     when:
@@ -85,7 +85,7 @@ pipeline:
         - "web/**"
 
   checksums:
-    image: golang:1.16
+    image: golang:1.17
     commands:
       - make release-checksums
     when:
@@ -102,7 +102,7 @@ pipeline:
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
   release-dryrun:
-    image: golang:1.16
+    image: golang:1.17
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt
@@ -132,3 +132,8 @@ pipeline:
     when:
       event: tag
       # path conditions are ignored for tag events
+
+matrix:
+  GO_VERSION:
+    - 1.16
+    - 1.17
