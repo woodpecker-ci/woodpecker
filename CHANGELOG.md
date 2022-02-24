@@ -1,24 +1,6 @@
 # Changelog
 
-## [v0.15.0-rc2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc2) - 2022-01-31
-
-* BUGFIXES
-  * Fix pipeline timestamps (#730)
-  * Remove "panic()" as much as possible from code (#682)
-* ENHANCEMENTS
-  * Let non required migration tasks fail and continue (#729)
-  * Improve pipeline compiler (#699)
-  * Support ChangedFiles for Github & Gitlab PRs and Gitea pushes (#697)
-  * Remove unused flags / options (#693)
-  * Automatically determine platform of agent (#690)
-* DOCUMENTATION
-  * Minor updates to docs (#712)
-  * Add note about Gitlab & Gitea internal connections to docs (#711)
-* MISC
-  * Update deps (#724)
-  * Compile for more platforms on release (#703)
-
-## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-11
+## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-02-24
 
 * BREAKING
   * Change paths to use woodpecker instead of drone (#494)
@@ -31,6 +13,8 @@
   * Change pipeline config path resolution (#299)
   * Remove push, tag and deployment webhook filters (#281)
   * Clean up config environment variables for server and agent (#218)
+* SECURITY
+  * Add linter bidichk to prevent malicious utf8 chars (#516)
 * FEATURES
   * Show changed files of pipeline in UI (#650)
   * Show yml config of pipeline in UI (#649)
@@ -41,9 +25,10 @@
   * Add repo permission endpoint (#436)
   * Add web-config endpoint (#433)
   * Replace www-path with www-proxy option for development (#248)
-* SECURITY
-  * Add linter bidichk to prevent malicious utf8 chars (#516)
 * BUGFIXES
+  * make gRPC error "to many keepalive pings" only show up in trace logs (#787)
+  * WOODPECKER_ENVIRONMENT: ignore items only containing a key and no value (#781)
+  * Fix pipeline timestamps (#730)
   * Remove "panic()" as much as possible from code (#682)
   * Send decline events back to UI (#680)
   * Notice all changed files of all related commits for gitea push webhooks (#675)
@@ -64,6 +49,18 @@
   * Append trailing slash to default GH API URL (#411)
   * Fix filter pipeline config files (#279)
 * ENHANCEMENTS
+  * View better error if repo was deleted/renamed (#780)
+  * Add support for default clone image environment variable (#769)
+  * Add flag to always authenticate when cloning public repositories (#760)
+  * UI: show date time on hover over time items (#756)
+  * Add repo-link to badge markdown in UI (#753)
+  * Allow specifying dind container in values (#750)
+  * Add page to view all projects of a user / group (#741)
+  * Let non required migration tasks fail and continue (#729)
+  * Improve pipeline compiler (#699)
+  * Support ChangedFiles for Github & Gitlab PRs and Gitea pushes (#697)
+  * Remove unused flags / options (#693)
+  * Automatically determine platform of agent (#690)
   * Build ref link point to commit not compare if only one commit was pushed (#673)
   * Hide multi line secrets from log (#671)
   * Do not exclude repo owner from gated rule (#641)
@@ -139,6 +136,7 @@
   * Improve CI tests (#353)
   * Compile on pull too (#287)
 * DOCUMENTATION
+  * Add note about Gitlab & Gitea internal connections to docs (#711)
   * Add registries docs (#679)
   * Add documentation of all agent configuration options (#667)
   * Add WoodpeckerCI tag to README (#663)
@@ -172,6 +170,8 @@
   * Migrate docs framework to Docusaurus (#282)
   * Use woodpecker env variable instead of drone in docker-compose (#264)
 * MISC
+  * Add support for building in docker (#759)
+  * Compile for more platforms on release (#703)
   * github.com/xanzy/go-gitlab v0.51.1 -> v0.52.2 (#599)
   * Update gogs client (#487)
   * Update Dependencies (#486)
