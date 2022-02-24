@@ -47,7 +47,7 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 		if err == nil {
 			break
 		} else {
-      // TODO: remove after adding continuous data exchange by something like #536
+			// TODO: remove after adding continuous data exchange by something like #536
 			if strings.Contains(err.Error(), "\"too_many_pings\"") {
 				// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 				log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
