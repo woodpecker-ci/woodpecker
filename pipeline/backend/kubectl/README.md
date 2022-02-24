@@ -58,8 +58,7 @@ Once finished (failed or succeeded), the resources are deleted according to the 
 
 <a name="network-isolation"></a>
 
-To allow networking isolation, with internet access, you **must** have in the **same** namespace as the pod execution a global network policy that would act on all woodpecker pods. If you do not allow this policy, the pod would only be allowed to access
-services running in the pipeline.
+To allow networking isolation, with internet access, there **must** exist in the **same** namespace where the pods are executed a global network policy that would act on all woodpecker pods. If the policy dose not exist, the pod would **only be allowed to access** pods which are part of the same pipeline.
 
 Example policy:
 
@@ -89,8 +88,9 @@ spec:
             cidr: 0.0.0.0/0 # Allow all ips
             # Your services and pods CIDR, that would be excluded.
             except:
-              - 172.0.0.0/8 # All pods
-              - 173.0.0.0/8 # All services (svc)
+              - 172.0.0.0/8 # All pods in the cluster
+              - 173.0.0.0/8 # All services (svc) in the cluster.
+              # anything else?
 ```
 
 ## Environment variables
