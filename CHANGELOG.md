@@ -26,7 +26,7 @@
   * Add web-config endpoint (#433)
   * Replace www-path with www-proxy option for development (#248)
 * BUGFIXES
-  * make gRPC error "to many keepalive pings" only show up in trace logs (#787)
+  * Make gRPC error "too many keepalive pings" only show up in trace logs (#787)
   * WOODPECKER_ENVIRONMENT: ignore items only containing a key and no value (#781)
   * Fix pipeline timestamps (#730)
   * Remove "panic()" as much as possible from code (#682)
