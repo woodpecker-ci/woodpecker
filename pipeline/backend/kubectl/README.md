@@ -1,6 +1,6 @@
 # Kubernetes backend using `kubectl`
 
-This backend executes tasks on a kubernetes managed pods. See [environment variables](#envs) for configuration.
+This backend executes tasks on kubernetes managed pods. See [environment variables](#envs) for configuration.
 
 Backend name: `kubectl`
 
@@ -30,7 +30,7 @@ Backend name: `kubectl`
 
 1. Local volumes.
 1. Multiple volumes.
-1. Volumes on detached steps (or services)
+1. Volumes on detached steps (or services), without a special PVC class
 1. Configuration control through CLI commands.
 
 ### Mode of operation

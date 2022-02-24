@@ -134,11 +134,11 @@ func (client *KubeClient) WaitForResourceEvents(
 		events []string
 		err    error
 	})
-	waitForCmndStart := make(chan bool)
+	waitForCommandToStart := make(chan bool)
 
 	stop := func(err error) {
 		eventsContextCancel()
-		waitForCmndStart <- false
+		waitForCommandToStart <- false
 
 		if len(eventsMatched) < count {
 			message := "Error, context canceled before sufficient events matched"
@@ -206,7 +206,7 @@ func (client *KubeClient) WaitForResourceEvents(
 		}
 
 		// marking command as startd
-		waitForCmndStart <- true
+		waitForCommandToStart <- true
 
 		for lineScanner.Scan() {
 			addLineIfMatches(lineScanner.Text())
@@ -223,13 +223,11 @@ func (client *KubeClient) WaitForResourceEvents(
 		<-eventsContext.Done()
 
 		// checking status.
-		err = eventsContext.Err()
-
-		stop(err)
+		stop(eventsContext.Err())
 	}()
 
 	// waiting for command to start.
-	<-waitForCmndStart
+	<-waitForCommandToStart
 
 	return resultChan
 }
