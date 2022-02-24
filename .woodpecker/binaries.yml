@@ -22,7 +22,7 @@ pipeline:
 
   build-server:
     group: build
-    image: golang:${GO_VERSION}
+    image: golang:1.17
     commands:
       - make release-server
     when:
@@ -38,7 +38,7 @@ pipeline:
 
   build-agent:
     group: build
-    image: golang:${GO_VERSION}
+    image: golang:1.17
     commands:
       - make release-agent
     when:
@@ -54,7 +54,7 @@ pipeline:
 
   build-cli:
     group: build
-    image: golang:${GO_VERSION}
+    image: golang:1.17
     commands:
       - make release-cli
     when:
@@ -132,8 +132,3 @@ pipeline:
     when:
       event: tag
       # path conditions are ignored for tag events
-
-matrix:
-  GO_VERSION:
-    - 1.16
-    - 1.17
