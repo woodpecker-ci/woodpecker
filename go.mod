@@ -31,7 +31,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.4
-	github.com/mattn/go-sqlite3 v1.14.9
+	github.com/mattn/go-sqlite3 v1.14.11
 	github.com/mattn/goveralls v0.0.2 // indirect
 	github.com/moby/moby v20.10.10+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
