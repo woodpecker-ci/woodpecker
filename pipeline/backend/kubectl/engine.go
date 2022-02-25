@@ -6,6 +6,7 @@ import (
 	"io"
 	"os/exec"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -48,6 +49,9 @@ type KubeBackend struct {
 	// There could be multiple active runs for each context.
 	// Active runs should be destroyed as so not to keep memory.
 	activeRuns map[context.Context]*KubePiplineRun
+
+	// mutex for concurrent operations.
+	concurrentMutex sync.Mutex
 }
 
 var _ types.Engine = &KubeBackend{}
@@ -103,6 +107,7 @@ func (backend *KubeBackend) CreateRun() *KubePiplineRun {
 		Config:      &types.Config{},
 		RunID:       CreateRandomID(10),
 		StepLoggers: make(map[string]*KubeResourceLogger),
+		PendingJobs: make(map[string]*KubeJobTemplate),
 	}
 	return run
 }
@@ -151,7 +156,9 @@ func (backend *KubeBackend) GetRun(ctx context.Context) (*KubePiplineRun, error)
 
 // Setup the pipeline environment.
 func (backend *KubeBackend) Setup(ctx context.Context, cfg *types.Config) error {
+	backend.concurrentMutex.Lock()
 	backend.activeRuns[ctx] = backend.CreateRun()
+	backend.concurrentMutex.Unlock()
 	return backend.activeRuns[ctx].Setup(ctx, cfg)
 }
 
@@ -189,6 +196,10 @@ func (backend *KubeBackend) Destroy(ctx context.Context, cfg *types.Config) erro
 	if err != nil {
 		return err
 	}
+
+	backend.concurrentMutex.Lock()
 	delete(backend.activeRuns, ctx)
+	backend.concurrentMutex.Unlock()
+
 	return run.Destroy(ctx, cfg)
 }

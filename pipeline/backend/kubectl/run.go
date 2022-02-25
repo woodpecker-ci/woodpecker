@@ -6,28 +6,31 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 type KubePiplineRun struct {
-	Backend        *KubeBackend                   // The kubectl backend
-	RunID          string                         // the random run id
-	Config         *types.Config                  // the run config
-	PVCs           []*KubePVCTemplate             // Loaded pvc's (via setup)
-	PVCByName      map[string]*KubePVCTemplate    // Loaded pvc's by name
-	SetupTemplates []KubeTemplate                 // Loaded setup templates
-	DetachedJobs   []*KubeJobTemplate             // Loaded detached template (services, etc..)
-	StepLoggers    map[string]*KubeResourceLogger // A collection of loggers per step.
-	PendingJobs    map[string]*KubeJobTemplate    // The executed job where wait was not initialized.
+	Backend        *KubeBackend                // The kubectl backend
+	RunID          string                      // the random run id
+	Config         *types.Config               // the run config
+	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
+	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
+	SetupTemplates []KubeTemplate              // Loaded setup templates
+	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
+
+	StepLoggers map[string]*KubeResourceLogger // A collection of loggers per step.
+	PendingJobs map[string]*KubeJobTemplate    // A collection of jobs which have not reached the wait stage.
+
+	concurrentMutext sync.Mutex // a locking mutex for concurrent opperations.
 }
 
 // Setup the pipeline environment, by applying the templated
 // setup yaml. Will consume cluster resources and would need
 // to be cleaned up.
 func (run *KubePiplineRun) Setup(ctx context.Context, cfg *types.Config) error {
-	run.PendingJobs = make(map[string]*KubeJobTemplate)
 	err := run.InitializeConfig(cfg)
 	if err != nil {
 		return err
@@ -136,7 +139,9 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		Run:  run,
 		Step: step,
 	}
+	run.concurrentMutext.Lock()
 	run.PendingJobs[step.Name] = &jobTemplate
+	run.concurrentMutext.Unlock()
 
 	if step.Detached {
 		step.Alias = Triary(
@@ -186,7 +191,9 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		if err != nil {
 			return err
 		}
+		run.concurrentMutext.Lock()
 		run.DetachedJobs = append(run.DetachedJobs, &jobTemplate)
+		run.concurrentMutext.Unlock()
 		delete(run.PendingJobs, jobTemplate.Step.Name)
 		logger.Debug().Msg("Detached job started.")
 	}
@@ -207,7 +214,9 @@ func (run *KubePiplineRun) Tail(ctx context.Context, step *types.Step) (io.ReadC
 	}
 
 	// Used for destroy.
+	run.concurrentMutext.Lock()
 	run.StepLoggers[step.Name] = stepLogger
+	run.concurrentMutext.Unlock()
 
 	logger.Debug().Msg("Reading logs")
 	return stepLogger.Start(ctx)
