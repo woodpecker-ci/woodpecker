@@ -167,12 +167,11 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		jobAsYaml,
 		false,
 	)
-
 	if err != nil {
 		return err
 	}
+	logger.Debug().Msg("Job applied")
 
-	logger.Debug().Msg("Waiting for pod to be ready")
 	podWaitResult := <-podWaiter
 
 	if podWaitResult.Error != nil {
@@ -186,6 +185,19 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 	}
 
 	if step.Detached {
+		// Unlike regular pods, which can execute async. We need this
+		// pod to be ready before continue. Or timeout/cancel.
+		logger.Debug().Msg("Waiting for detached pod to be ready")
+		ready := <-run.Backend.Client.WaitForConditions(
+			ctx,
+			podWaitResult.PodName,
+			[]string{"Ready"}, 1,
+		)
+		// check if ready.
+		if ready.err != nil {
+			return ready.err
+		}
+
 		logger.Debug().Msg("Reading detached pod info")
 		err = run.PopulateDetachedInfo(ctx, podWaitResult.PodName, &jobTemplate)
 		if err != nil {

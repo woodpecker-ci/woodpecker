@@ -58,53 +58,74 @@ func (client *KubeClient) WaitForConditions(
 	condition string
 	err       error
 } {
-	waitForCommandToStart := WaitOnce{}
 	resultChan := make(chan struct {
 		condition string
 		err       error
 	})
 
-	completed := false
-	waitContext, cancel := context.WithCancel(ctx)
 	waitCommand := client.ComposeKubectlCommand(
 		"wait",
 		"--timeout", fmt.Sprint(60*60*24*7)+"s",
 		resource,
 	)
 
-	// TODO: replace this wait command with a resource get + event watch?
-
-	for _, condition := range conditions {
-		cmnd := client.CreateKubectlCommand(
-			waitContext,
-			waitCommand,
-			"--for",
-			"condition="+condition,
-		)
-
-		go func(condition string) {
-			waitForCommandToStart.MarkComplete(nil)
-			_, err := cmnd.Output()
-			if completed {
-				return
-			}
-			completed = true
-			cancel()
-
+	action := ActionContext{}
+	action.OnStop = func(err error) {
+		if err != nil {
 			resultChan <- struct {
 				condition string
 				err       error
 			}{
-				condition: condition,
-				err:       err,
+				err: err,
 			}
-		}(condition)
+		}
 	}
 
-	// waiting for the first checks to start.
-	_ = waitForCommandToStart.Wait()
+	action.Start(
+		ctx,
+		func() {
+			for _, condition := range conditions {
+				cmnd := client.CreateKubectlCommand(
+					action.Context(),
+					waitCommand,
+					"--for",
+					"condition="+condition,
+				)
 
-	// returning the result chan
+				go func(condition string) {
+					err := cmnd.Start()
+					if err != nil {
+						action.Stop(err)
+						return
+					}
+					action.MarkActionStarted()
+					err = cmnd.Wait()
+
+					wasStopped := action.Stop(err)
+
+					// stop and check if it was stopped
+					// return if there was an error as well.
+					if !wasStopped {
+						return
+					}
+
+					resultChan <- struct {
+						condition string
+						err       error
+					}{
+						condition: condition,
+						err:       err,
+					}
+				}(condition)
+			}
+
+			// wait for the action to be stopped by one of the internal functions.
+			_ = action.Wait()
+		},
+	)
+
+	_ = action.WaitForActionStarted()
+
 	return resultChan
 }
 
@@ -119,52 +140,17 @@ func (client *KubeClient) WaitForResourceEvents(
 	events []string
 	err    error
 } {
-	eventsContext, eventsContextCancel := context.WithCancel(ctx)
-
-	eventsCmnd := client.CreateKubectlCommand(
-		eventsContext,
-		"get", "events",
-		"--watch=true", "--watch-only=true",
-		"--output", `custom-columns=:involvedObject.name,:reason`,
-	)
-
-	eventsMatched := []string{}
-
 	resultChan := make(chan struct {
 		events []string
 		err    error
 	})
 
-	waitForCommandToStart := WaitOnce{}
+	eventsMatched := []string{}
+	action := ActionContext{}
+	splitBySpaces := regexp.MustCompile(`\s+`)
 
-	stop := func(err error) {
-		eventsContextCancel()
-		waitForCommandToStart.MarkComplete(err)
-
-		if len(eventsMatched) < count {
-			message := "Error, context canceled before sufficient events matched"
-			if err != nil {
-				message += ". " + err.Error()
-			}
-			err = errors.New(message)
-		}
-
-		resultChan <- struct {
-			events []string
-			err    error
-		}{err: err, events: eventsMatched}
-	}
-
-	splitBySpaces, err := regexp.Compile(`\s+`)
-	if err != nil {
-		stop(err)
-		return resultChan
-	}
-	resourceRegex, err := regexp.Compile(resourceNameRegex)
-	if err != nil {
-		stop(err)
-		return resultChan
-	}
+	var resourceRegex *regexp.Regexp
+	var err error
 
 	addLineIfMatches := func(line string) {
 		line = strings.TrimSpace(line)
@@ -192,43 +178,63 @@ func (client *KubeClient) WaitForResourceEvents(
 		}
 	}
 
-	go func() {
-		stdoutPipe, err := eventsCmnd.StdoutPipe()
-		if err != nil {
-			stop(err)
-			return
+	action.OnStop = func(err error) {
+		if len(eventsMatched) < count {
+			message := "Error, context canceled before sufficient events matched"
+			if err != nil {
+				message += ". " + err.Error()
+			}
+			err = errors.New(message)
 		}
 
-		lineScanner := bufio.NewScanner(stdoutPipe)
-		err = eventsCmnd.Start()
-		if err != nil {
-			stop(err)
-			return
-		}
+		resultChan <- struct {
+			events []string
+			err    error
+		}{err: err, events: eventsMatched}
+	}
 
-		// marking command as started
-		waitForCommandToStart.MarkComplete(err)
+	action.Start(
+		ctx,
+		func() {
+			eventsCmnd := client.CreateKubectlCommand(
+				action.Context(),
+				"get", "events",
+				"--watch=true", "--watch-only=true",
+				"--output", `custom-columns=:involvedObject.name,:reason`,
+			)
 
-		for lineScanner.Scan() {
-			addLineIfMatches(lineScanner.Text())
-			if len(eventsMatched) >= count {
-				stop(nil)
+			resourceRegex, err = regexp.Compile(resourceNameRegex)
+			if err != nil {
+				action.Stop(err)
 				return
 			}
-		}
 
-		// should have not reached here unless pipe was closed
-		// or context have been canceled.
+			stdoutPipe, err := eventsCmnd.StdoutPipe()
+			if err != nil {
+				action.Stop(err)
+				return
+			}
 
-		// wait for context to be done.
-		<-eventsContext.Done()
+			lineScanner := bufio.NewScanner(stdoutPipe)
+			err = eventsCmnd.Start()
+			if err != nil {
+				action.Stop(err)
+				return
+			}
 
-		// checking status.
-		stop(eventsContext.Err())
-	}()
+			action.MarkActionStarted()
 
-	// waiting for command to start.
-	waitForCommandToStart.Wait()
+			for lineScanner.Scan() {
+				addLineIfMatches(lineScanner.Text())
+				if len(eventsMatched) >= count {
+					action.Stop(nil)
+					return
+				}
+			}
+		},
+	)
+
+	_ = action.WaitForActionStarted()
 
 	return resultChan
 }

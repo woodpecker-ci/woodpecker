@@ -84,23 +84,13 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 	PodName string
 	Error   error
 } {
-	logger := run.MakeLogger(jobTemplate.Step)
-	waitContext, waitContextCancel := context.WithCancel(ctx)
+	podName := ""
+	action := ActionContext{}
 	result := make(chan struct {
 		PodName string
 		Error   error
 	})
-	waitForCommandToStart := WaitOnce{}
-	completed := false
-	podName := ""
-
-	stop := func(err error) {
-		waitForCommandToStart.MarkComplete(err)
-		waitContextCancel()
-		if completed {
-			return
-		}
-		completed = true
+	action.OnStop = func(err error) {
 		result <- struct {
 			PodName string
 			Error   error
@@ -110,70 +100,48 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 		}
 	}
 
-	// Catch canceled context.
-	go func() {
-		<-waitContext.Done()
-		if !completed {
-			stop(errors.New("Context cancelled"))
-		}
-	}()
+	waitEvents := []string{"Started", "BackOff"}
+	action.Start(
+		ctx,
+		func() {
+			eventsChan := run.Backend.Client.WaitForResourceEvents(
+				action.Context(),
+				fmt.Sprintf(`^%s.*$`, jobTemplate.JobName()),
+				waitEvents,
+				1,
+			)
 
-	go func() {
-		waitEvents := []string{"Started", "BackOff"}
+			action.MarkActionStarted()
 
-		logger.Debug().
-			Str("Events", strings.Join(waitEvents, ",")).
-			Msg("Waiting for resource events")
+			// wait for the events.
+			matchedEvents := <-eventsChan
+			event := matchedEvents.events[0]
 
-		eventsChan := run.Backend.Client.WaitForResourceEvents(
-			waitContext,
-			fmt.Sprintf(`^%s.*$`, jobTemplate.JobName()),
-			waitEvents,
-			1,
-		)
+			if matchedEvents.err != nil {
+				action.Stop(matchedEvents.err)
+				return
+			} else if event == "BackOff" {
+				action.Stop(errors.New("Received pull BackOff from executing pod, execution error"))
+				return
+			}
 
-		waitForCommandToStart.MarkComplete(nil)
+			podNames, err := run.Backend.Client.GetResourceNames(
+				action.Context(),
+				"pod",
+				"woodpecker-job-id="+jobTemplate.JobID(),
+			)
 
-		// wait for the events.
-		matchedEvents := <-eventsChan
-		event := matchedEvents.events[0]
+			if err != nil {
+				action.Stop(err)
+				return
+			}
 
-		logger.Debug().
-			Str("Event", event).
-			Msg("Resource event matched")
+			podName = podNames[0]
+			action.Stop(nil)
+		},
+	)
 
-		if matchedEvents.err != nil {
-			stop(matchedEvents.err)
-			return
-		} else if event == "BackOff" {
-			stop(errors.New("Received pull BackOff from executing pod, execution error"))
-			return
-		}
-
-		podNames, err := run.Backend.Client.GetResourceNames(
-			waitContext,
-			"pod",
-			"woodpecker-job-id="+jobTemplate.JobID(),
-		)
-
-		if err != nil {
-			stop(err)
-			return
-		}
-
-		podName = podNames[0]
-
-		// waiting until the pod is ready.
-		ready := <-run.Backend.Client.WaitForConditions(
-			waitContext,
-			podName, []string{"ContainersReady", "Ready"},
-			1,
-		)
-
-		stop(ready.err)
-	}()
-
-	waitForCommandToStart.Wait()
+	_ = action.WaitForActionStarted()
 
 	return result
 }
