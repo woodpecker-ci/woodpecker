@@ -23,7 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
@@ -187,7 +186,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = interrupt.WithContext(ctx)
+	ctx = registerInterruptSignal(ctx)
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
