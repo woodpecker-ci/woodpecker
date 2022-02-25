@@ -138,7 +138,7 @@ func (s *NotificationSettingsService) GetSettingsForGroup(gid interface{}, optio
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/notification_settings", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/notification_settings", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -163,7 +163,7 @@ func (s *NotificationSettingsService) GetSettingsForProject(pid interface{}, opt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/notification_settings", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/notification_settings", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *NotificationSettingsService) UpdateSettingsForGroup(gid interface{}, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/notification_settings", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/notification_settings", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -213,7 +213,7 @@ func (s *NotificationSettingsService) UpdateSettingsForProject(pid interface{}, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/notification_settings", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/notification_settings", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {

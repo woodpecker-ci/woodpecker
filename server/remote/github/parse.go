@@ -39,7 +39,7 @@ const (
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge, privateMode bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
+func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -61,10 +61,10 @@ func parseHook(r *http.Request, merge, privateMode bool) (*github.PullRequest, *
 		repo, build, err := parsePushHook(hook)
 		return nil, repo, build, err
 	case *github.DeploymentEvent:
-		repo, build, err := parseDeployHook(hook, privateMode)
+		repo, build, err := parseDeployHook(hook)
 		return nil, repo, build, err
 	case *github.PullRequestEvent:
-		return parsePullHook(hook, merge, privateMode)
+		return parsePullHook(hook, merge)
 	}
 	return nil, nil, nil, nil
 }
@@ -114,7 +114,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Build, error) {
 
 // parseDeployHook parses a deployment and returns the Repo and Build details.
 // If the commit type is unsupported nil values are returned.
-func parseDeployHook(hook *github.DeploymentEvent, privateMode bool) (*model.Repo, *model.Build, error) {
+func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Build, error) {
 	build := &model.Build{
 		Event:   model.EventDeploy,
 		Commit:  hook.GetDeployment().GetSHA(),
@@ -140,12 +140,12 @@ func parseDeployHook(hook *github.DeploymentEvent, privateMode bool) (*model.Rep
 		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
 	}
 
-	return convertRepo(hook.GetRepo(), privateMode), build, nil
+	return convertRepo(hook.GetRepo()), build, nil
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Build
 // details. If the pull request is closed nil values are returned.
-func parsePullHook(hook *github.PullRequestEvent, merge, privateMode bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
+func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
 	// only listen to new merge-requests and pushes to open ones
 	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync {
 		return nil, nil, nil, nil
@@ -175,7 +175,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge, privateMode bool) (*git
 		build.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
 	}
 
-	return hook.GetPullRequest(), convertRepo(hook.GetRepo(), privateMode), build, nil
+	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), build, nil
 }
 
 func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {

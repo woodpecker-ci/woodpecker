@@ -1,3 +1,7 @@
+depends_on:
+  - test
+  - web
+
 pipeline:
   ###############
   # S e r v e r #
@@ -69,6 +73,30 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
+  publish-release-branch-server:
+    image: plugins/docker
+    group: docker
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
+  publish-release-branch-server-alpine:
+    image: plugins/docker
+    group: docker
+    secrets: [ docker_username, docker_password ]
+    settings:
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
   release-server:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
@@ -109,7 +137,7 @@ pipeline:
     when:
       event: pull_request
 
-  publish-agent:
+  publish-next-agent:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
@@ -122,7 +150,7 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-agent-alpine:
+  publish-next-agent-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
@@ -135,6 +163,32 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
+  publish-release-branch-agent:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
+  publish-release-branch-agent-alpine:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
   release-agent:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
@@ -143,6 +197,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64
+      # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
@@ -155,6 +210,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
@@ -175,7 +231,7 @@ pipeline:
     when:
       event: pull_request
 
-  publish-cli:
+  publish-next-cli:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
@@ -188,7 +244,7 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-cli-alpine:
+  publish-next-cli-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
@@ -201,6 +257,32 @@ pipeline:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
+  publish-release-branch-cli:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
+  publish-release-branch-cli-alpine:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      tag: ${CI_COMMIT_BRANCH##release/}
+    when:
+      branch: release/*
+      event: push
+
   release-cli:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
@@ -209,6 +291,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64
+      # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
       event: tag
@@ -221,10 +304,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
       event: tag
-
-depends_on:
-  - test
-  - web

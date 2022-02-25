@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.15
+ARG GO_VERSION=1.16
 
 FROM golang:${GO_VERSION}-alpine AS builder
 RUN apk add --update --no-cache make git curl gcc libc-dev

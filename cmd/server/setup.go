@@ -173,7 +173,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return environments.Filesystem(c.StringSlice("environment"))
+	return environments.Parse(c.StringSlice("environment"))
 }
 
 // setupRemote helper function to setup the remote from the CLI arguments.
@@ -228,14 +228,10 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		return nil, err
 	}
 	opts := gitea.Opts{
-		URL:         strings.TrimRight(server.String(), "/"),
-		Context:     c.String("gitea-context"),
-		Username:    c.String("gitea-git-username"),
-		Password:    c.String("gitea-git-password"),
-		Client:      c.String("gitea-client"),
-		Secret:      c.String("gitea-secret"),
-		PrivateMode: c.Bool("gitea-private-mode"),
-		SkipVerify:  c.Bool("gitea-skip-verify"),
+		URL:        strings.TrimRight(server.String(), "/"),
+		Client:     c.String("gitea-client"),
+		Secret:     c.String("gitea-secret"),
+		SkipVerify: c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
 		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
@@ -265,9 +261,6 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
 		ClientSecret: c.String("gitlab-secret"),
-		Username:     c.String("gitlab-git-username"),
-		Password:     c.String("gitlab-git-password"),
-		PrivateMode:  c.Bool("gitlab-private-mode"),
 		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
@@ -275,16 +268,11 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 // helper function to setup the GitHub remote from the CLI arguments.
 func setupGithub(c *cli.Context) (remote.Remote, error) {
 	opts := github.Opts{
-		URL:         c.String("github-server"),
-		Context:     c.String("github-context"),
-		Client:      c.String("github-client"),
-		Secret:      c.String("github-secret"),
-		Scopes:      c.StringSlice("github-scope"),
-		Username:    c.String("github-git-username"),
-		Password:    c.String("github-git-password"),
-		PrivateMode: c.Bool("github-private-mode"),
-		SkipVerify:  c.Bool("github-skip-verify"),
-		MergeRef:    c.Bool("github-merge-ref"),
+		URL:        c.String("github-server"),
+		Client:     c.String("github-client"),
+		Secret:     c.String("github-secret"),
+		SkipVerify: c.Bool("github-skip-verify"),
+		MergeRef:   c.Bool("github-merge-ref"),
 	}
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)

@@ -328,7 +328,7 @@ func (s *SearchService) searchByGroup(gid interface{}, scope, query string, resu
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/-/search", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/-/search", PathEscape(group))
 
 	opts := &searchOptions{SearchOptions: *opt, Scope: scope, Search: query}
 
@@ -345,7 +345,7 @@ func (s *SearchService) searchByProject(pid interface{}, scope, query string, re
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/-/search", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/-/search", PathEscape(project))
 
 	opts := &searchOptions{SearchOptions: *opt, Scope: scope, Search: query}
 

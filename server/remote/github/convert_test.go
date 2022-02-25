@@ -82,7 +82,7 @@ func Test_helper(t *testing.T) {
 				},
 			}
 
-			to := convertRepoList(from, false)
+			to := convertRepoList(from)
 			g.Assert(to[0].Avatar).Equal("http://...")
 			g.Assert(to[0].FullName).Equal("octocat/hello-world")
 			g.Assert(to[0].Owner).Equal("octocat")
@@ -108,7 +108,7 @@ func Test_helper(t *testing.T) {
 				},
 			}
 
-			to := convertRepo(&from, false)
+			to := convertRepo(&from)
 			g.Assert(to.Avatar).Equal("http://...")
 			g.Assert(to.FullName).Equal("octocat/hello-world")
 			g.Assert(to.Owner).Equal("octocat")
@@ -204,7 +204,7 @@ func Test_helper(t *testing.T) {
 					Login: github.String("octocat"),
 				},
 			}
-			pull, _, build, err := parsePullHook(from, true, false)
+			pull, _, build, err := parsePullHook(from, true)
 			g.Assert(err).IsNil()
 			g.Assert(pull).IsNotNil()
 			g.Assert(build.Event).Equal(model.EventPull)
@@ -231,7 +231,7 @@ func Test_helper(t *testing.T) {
 			from.Sender.Login = github.String("octocat")
 			from.Sender.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
 
-			_, build, err := parseDeployHook(from, false)
+			_, build, err := parseDeployHook(from)
 			g.Assert(err).IsNil()
 			g.Assert(build.Event).Equal(model.EventDeploy)
 			g.Assert(build.Branch).Equal("master")

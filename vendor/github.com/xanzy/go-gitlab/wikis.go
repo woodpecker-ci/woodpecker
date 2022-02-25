@@ -61,7 +61,7 @@ func (s *WikisService) ListWikis(pid interface{}, opt *ListWikisOptions, options
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/wikis", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/wikis", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *WikisService) GetWikiPage(pid interface{}, slug string, options ...Requ
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/wikis/%s", pathEscape(project), url.PathEscape(slug))
+	u := fmt.Sprintf("projects/%s/wikis/%s", PathEscape(project), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -122,7 +122,7 @@ func (s *WikisService) CreateWikiPage(pid interface{}, opt *CreateWikiPageOption
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/wikis", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/wikis", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -158,7 +158,7 @@ func (s *WikisService) EditWikiPage(pid interface{}, slug string, opt *EditWikiP
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/wikis/%s", pathEscape(project), url.PathEscape(slug))
+	u := fmt.Sprintf("projects/%s/wikis/%s", PathEscape(project), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -183,7 +183,7 @@ func (s *WikisService) DeleteWikiPage(pid interface{}, slug string, options ...R
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/wikis/%s", pathEscape(project), url.PathEscape(slug))
+	u := fmt.Sprintf("projects/%s/wikis/%s", PathEscape(project), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
