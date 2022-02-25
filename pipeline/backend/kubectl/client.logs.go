@@ -48,7 +48,7 @@ func (client *KubeClient) ReadResourceLogsToWriter(
 	cmndArgs = append(cmndArgs, resourceName)
 
 	errChan := make(chan error)
-	commandStarted := make(chan bool)
+	waitForCommandToStart := WaitOnce{}
 	stderr := &bytes.Buffer{}
 
 	cmnd := client.CreateKubectlCommand(ctx, cmndArgs...)
@@ -56,7 +56,7 @@ func (client *KubeClient) ReadResourceLogsToWriter(
 	cmnd.Stderr = stderr
 
 	stop := func(err error) {
-		commandStarted <- false
+		waitForCommandToStart.MarkComplete(err)
 		if err != nil && stderr.Len() > 0 {
 			err = errors.New(stderr.String() + "; " + err.Error())
 		}
@@ -69,9 +69,12 @@ func (client *KubeClient) ReadResourceLogsToWriter(
 			stop(err)
 			return
 		}
+		waitForCommandToStart.MarkComplete(err)
 		err = cmnd.Wait()
 		stop(err)
 	}()
+
+	waitForCommandToStart.Wait()
 
 	return errChan
 }

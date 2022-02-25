@@ -84,17 +84,18 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 	PodName string
 	Error   error
 } {
+	logger := run.MakeLogger(jobTemplate.Step)
 	waitContext, waitContextCancel := context.WithCancel(ctx)
 	result := make(chan struct {
 		PodName string
 		Error   error
 	})
-	waitForCommandToStart := make(chan bool)
+	waitForCommandToStart := WaitOnce{}
 	completed := false
 	podName := ""
 
 	stop := func(err error) {
-		waitForCommandToStart <- false
+		waitForCommandToStart.MarkComplete(err)
 		waitContextCancel()
 		if completed {
 			return
@@ -109,7 +110,7 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 		}
 	}
 
-	// Catch cancelled context.
+	// Catch canceled context.
 	go func() {
 		<-waitContext.Done()
 		if !completed {
@@ -118,24 +119,34 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 	}()
 
 	go func() {
+		waitEvents := []string{"Started", "BackOff"}
+
+		logger.Debug().
+			Str("Events", strings.Join(waitEvents, ",")).
+			Msg("Waiting for resource events")
+
 		eventsChan := run.Backend.Client.WaitForResourceEvents(
 			waitContext,
 			fmt.Sprintf(`^%s.*$`, jobTemplate.JobName()),
-			[]string{"Started", "BackOff"},
+			waitEvents,
 			1,
 		)
 
-		waitForCommandToStart <- true
+		waitForCommandToStart.MarkComplete(nil)
 
 		// wait for the events.
 		matchedEvents := <-eventsChan
 		event := matchedEvents.events[0]
 
+		logger.Debug().
+			Str("Event", event).
+			Msg("Resource event matched")
+
 		if matchedEvents.err != nil {
 			stop(matchedEvents.err)
 			return
 		} else if event == "BackOff" {
-			stop(errors.New("Received pull backoff from executing pod, execution error"))
+			stop(errors.New("Received pull BackOff from executing pod, execution error"))
 			return
 		}
 
@@ -161,6 +172,8 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 
 		stop(ready.err)
 	}()
+
+	waitForCommandToStart.Wait()
 
 	return result
 }
