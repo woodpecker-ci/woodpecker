@@ -20,7 +20,7 @@ pipeline:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
+      PLATFORMS: linux|arm;linux|arm64;linux|amd64;linux|ppc64le
       TAGS: bindata sqlite sqlite_unlock_notify
 
   publish-server-dryrun:
@@ -30,7 +30,7 @@ pipeline:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
-      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      platforms: linux/arm,linux/arm64,linux/amd64,linux/ppc64le
       tag: test
     when:
       event: pull_request
@@ -42,7 +42,7 @@ pipeline:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      platforms: linux/arm,linux/arm64,linux/amd64,linux/ppc64le
       tag: next-alpine
     when:
       event: pull_request
