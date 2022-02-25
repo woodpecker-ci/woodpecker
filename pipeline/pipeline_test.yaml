@@ -10,14 +10,14 @@ pipeline:
     commands:
       - echo "first to run" >| loaded_message
       - cat loaded_message
-  fast_error:
-    image: *runner_image
-    commands:
-      - |
-        for i in $(seq 1 122); do 
-          echo "DUMMY $i"; 
-        done
-      - exit 22
+  # fast_error:
+  #   image: *runner_image
+  #   commands:
+  #     - |
+  #       for i in $(seq 1 122); do 
+  #         echo "DUMMY $i"; 
+  #       done
+  #     - exit 22
   shared_test:
     image: *runner_image
     commands:
