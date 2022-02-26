@@ -56,27 +56,19 @@ func Test_github(t *testing.T) {
 				g.Assert(remote.(*client).Secret).Equal("I1NiIsInR5")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)
 			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
-			})
 		})
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{
-					URL: "http://github.com:443",
-				})
-				netrc, _ := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("github.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 			})
 			g.It("Should return a netrc with the machine account", func() {
-				remote, _ := New(Opts{
-					URL: "http://github.com:443",
-				})
-				netrc, _ := remote.Netrc(nil, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("github.com")
 				g.Assert(netrc.Login).Equal("")
 				g.Assert(netrc.Password).Equal("")
