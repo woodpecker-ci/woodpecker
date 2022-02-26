@@ -39,6 +39,11 @@ func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
 		}
 
 		for k, v := range filter.Labels {
+			// if platform is not set ignore that filter
+			if k == "platform" && task.Labels[k] == "" {
+				continue
+			}
+
 			if task.Labels[k] != v {
 				return false
 			}
