@@ -258,8 +258,21 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	token := ""
+	if (u != nil) {
+		token = u.Token
+	}
+	client := c.newClientToken(token)
+	gogsBranches, err := client.ListRepoBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gogsBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build
