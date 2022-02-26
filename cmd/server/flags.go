@@ -162,6 +162,16 @@ var flags = []cli.Flag{
 		Usage:   "gated build endpoint",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_YAML_ENDPOINT"},
+		Name:    "configuration-service",
+		Usage:   "configuration service endpoint",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_YAML_SECRET"},
+		Name:    "configuration-service-secret",
+		Usage:   "configuration service secret",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
 		Name:    "driver",
 		Usage:   "database driver",
