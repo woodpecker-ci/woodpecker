@@ -464,7 +464,11 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	client := c.newClientToken(ctx, u.Token)
+	token := ""
+	if (u != nil) {
+		token = u.Token
+	}
+	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
 	if err != nil {
