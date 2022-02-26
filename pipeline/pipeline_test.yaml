@@ -33,12 +33,12 @@ services:
   docker.service:
     image: *dind_image
     privileged: true
-  logging.service:
-    image: *runner_image
-    commands:
-      - |
-        while true; do
-          echo "Logging service: $(date)"
-          sleep 1
-        done
-    privileged: true
+  # logging.service:
+  #   image: *runner_image
+  #   commands:
+  #     - |
+  #       while true; do
+  #         echo "Logging service: $(date)"
+  #         sleep 1
+  #       done
+  #   privileged: true

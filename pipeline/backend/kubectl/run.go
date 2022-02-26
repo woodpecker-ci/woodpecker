@@ -19,10 +19,11 @@ type KubePiplineRun struct {
 	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
 	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
 	SetupTemplates []KubeTemplate              // Loaded setup templates
-	DetachedJobs   []*KubeJobTemplate          // Loaded detached template (services, etc..)
 
-	StepLoggers map[string]*KubeResourceLogger // A collection of loggers per step.
-	PendingJobs map[string]*KubeJobTemplate    // A collection of jobs which have not reached the wait stage.
+	// Dynamic collections
+	DetachedJobs []*KubeJobTemplate             // Loaded detached template (services, etc..)
+	StepLoggers  map[string]*KubeResourceLogger // A collection of loggers per step.
+	PendingJobs  map[string]*KubeJobTemplate    // A collection of jobs which have not reached the wait stage.
 
 	concurrentMutext sync.Mutex // a locking mutex for concurrent opperations.
 }
@@ -170,7 +171,8 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 	if err != nil {
 		return err
 	}
-	logger.Debug().Msg("Job applied")
+
+	logger.Debug().Msgf("Job applied with:\n%s", output)
 
 	podWaitResult := <-podWaiter
 
@@ -178,7 +180,7 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		return podWaitResult.Error
 	}
 
-	logger.Debug().Msgf("Job initialized with\n %s", output)
+	logger.Debug().Msgf("Job running")
 
 	if err != nil {
 		return err
@@ -203,11 +205,14 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		if err != nil {
 			return err
 		}
+
+		// updating records.
 		run.concurrentMutext.Lock()
 		run.DetachedJobs = append(run.DetachedJobs, &jobTemplate)
-		run.concurrentMutext.Unlock()
 		delete(run.PendingJobs, jobTemplate.Step.Name)
-		logger.Debug().Msg("Detached job started.")
+		run.concurrentMutext.Unlock()
+
+		logger.Debug().Msg("Detached job ready")
 	}
 	return nil
 }
@@ -244,7 +249,9 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 	}
 
 	// Clear pending job
+	run.concurrentMutext.Lock()
 	delete(run.PendingJobs, jobTemplate.Step.Name)
+	run.concurrentMutext.Unlock()
 
 	logger.Info().
 		Str("Context", run.Context()).
