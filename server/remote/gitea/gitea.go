@@ -44,7 +44,6 @@ const (
 
 type Gitea struct {
 	URL          string
-	Machine      string
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
@@ -71,7 +70,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:          opts.URL,
-		Machine:      u.Host,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
 		SkipVerify:   opts.SkipVerify,
@@ -355,10 +353,15 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = u.Token
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
