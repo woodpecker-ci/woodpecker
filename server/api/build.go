@@ -453,18 +453,36 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	// fetch the pipeline config from database
+	var yamls []*remote.FileMeta
+
+	// fetch the old pipeline config from database
 	configs, err := _store.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		_ = c.AbortWithError(404, err)
 		return
 	}
-	var yamls []*remote.FileMeta
-	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
+
+	useOld := false
+	// If config extension is active we should refetch the config in case something changed
+	if server.Config.Services.ConfigurationAPI.IsConfigured() {
+		newConfig := ""
+		newConfig, useOld, err = server.Config.Services.ConfigurationAPI.FetchExternalConfig(c, repo, build)
+		if err != nil {
+			msg := fmt.Sprintf("On fetching external build config: %s", err)
+			c.String(http.StatusBadRequest, msg)
+			return
+		}
+		if !useOld {
+			yamls = append(yamls, &remote.FileMeta{Data: []byte(newConfig), Name: "api"})
+		}
 	}
 
+	if server.Config.Services.ConfigurationAPI.IsConfigured() == useOld {
+		for _, y := range configs {
+			yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		}
+	}
 	build.ID = 0
 	build.Number = 0
 	build.Parent = num
