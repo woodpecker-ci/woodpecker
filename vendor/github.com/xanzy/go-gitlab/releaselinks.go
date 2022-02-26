@@ -54,7 +54,7 @@ func (s *ReleaseLinksService) ListReleaseLinks(pid interface{}, tagName string, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/releases/%s/assets/links", pathEscape(project), pathEscape(tagName))
+	u := fmt.Sprintf("projects/%s/releases/%s/assets/links", PathEscape(project), PathEscape(tagName))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -79,8 +79,8 @@ func (s *ReleaseLinksService) GetReleaseLink(pid interface{}, tagName string, li
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/releases/%s/assets/links/%d",
-		pathEscape(project),
-		pathEscape(tagName),
+		PathEscape(project),
+		PathEscape(tagName),
 		link)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
@@ -115,7 +115,7 @@ func (s *ReleaseLinksService) CreateReleaseLink(pid interface{}, tagName string,
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/releases/%s/assets/links", pathEscape(project), pathEscape(tagName))
+	u := fmt.Sprintf("projects/%s/releases/%s/assets/links", PathEscape(project), PathEscape(tagName))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -152,8 +152,8 @@ func (s *ReleaseLinksService) UpdateReleaseLink(pid interface{}, tagName string,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/releases/%s/assets/links/%d",
-		pathEscape(project),
-		pathEscape(tagName),
+		PathEscape(project),
+		PathEscape(tagName),
 		link)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
@@ -179,8 +179,8 @@ func (s *ReleaseLinksService) DeleteReleaseLink(pid interface{}, tagName string,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/releases/%s/assets/links/%d",
-		pathEscape(project),
-		pathEscape(tagName),
+		PathEscape(project),
+		PathEscape(tagName),
 		link,
 	)
 

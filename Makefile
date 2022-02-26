@@ -5,8 +5,10 @@ TARGETOS ?= linux
 TARGETARCH ?= amd64
 
 VERSION ?= next
+VERSION_NUMBER ?= 0.0.0
 ifneq ($(CI_COMMIT_TAG),)
 	VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION_NUMBER := ${VERSION}
 endif
 
 # append commit-sha to next version
