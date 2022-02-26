@@ -259,7 +259,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
 	token := ""
-	if (u != nil) {
+	if u != nil {
 		token = u.Token
 	}
 	client := c.newClientToken(token)

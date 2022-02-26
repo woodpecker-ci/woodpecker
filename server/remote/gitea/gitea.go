@@ -410,7 +410,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 // Branches returns the names of all branches for the named repository.
 func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
 	token := ""
-	if (u != nil) {
+	if u != nil {
 		token = u.Token
 	}
 	client, err := c.newClientToken(ctx, token)

@@ -495,7 +495,7 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 // Branches returns the names of all branches for the named repository.
 func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
 	token := ""
-	if (user != nil) {
+	if user != nil {
 		token = user.Token
 	}
 	client, err := newClient(g.URL, token, g.SkipVerify)
