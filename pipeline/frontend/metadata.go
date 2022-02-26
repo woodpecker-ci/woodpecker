@@ -218,8 +218,5 @@ func (m *Metadata) Environ() map[string]string {
 var pullRegexp = regexp.MustCompile(`\d+`)
 
 func (m *Metadata) SetPlatform(platform string) {
-	if platform == "" {
-		platform = "linux/amd64"
-	}
 	m.Sys.Arch = platform
 }
