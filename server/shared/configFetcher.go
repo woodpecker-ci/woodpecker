@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -18,18 +19,20 @@ type ConfigFetcher interface {
 }
 
 type configFetcher struct {
-	remote remote.Remote
-	user   *model.User
-	repo   *model.Repo
-	build  *model.Build
+	remote    remote.Remote
+	user      *model.User
+	repo      *model.Repo
+	build     *model.Build
+	configAPI configuration.ConfigAPI
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+func NewConfigFetcher(remote remote.Remote, configurationService configuration.ConfigAPI, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
-		remote: remote,
-		user:   user,
-		repo:   repo,
-		build:  build,
+		remote:    remote,
+		user:      user,
+		repo:      repo,
+		build:     build,
+		configAPI: configurationService,
 	}
 }
 
@@ -59,6 +62,22 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
+
+	if cf.configAPI.IsConfigured() {
+		log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service '%s'", cf.repo.FullName)
+		newConfig, useOld, err := cf.configAPI.FetchExternalConfig(ctx, cf.repo, cf.build)
+		if err != nil {
+			log.Error().Msg("Got errror " + err.Error())
+			return nil, fmt.Errorf("On Fetching config '%s': %s", config, err)
+		}
+
+		if !useOld {
+			return []*remote.FileMeta{{
+				Name: "api",
+				Data: []byte(newConfig),
+			}}, nil
+		}
+	}
 
 	if len(config) > 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)

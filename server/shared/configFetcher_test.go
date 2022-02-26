@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -237,6 +238,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
+				configuration.NewAPI("", ""),
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
