@@ -49,7 +49,6 @@ func Test_gitea(t *testing.T) {
 					SkipVerify: true,
 				})
 				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
 				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {

@@ -52,7 +52,6 @@ func Test_gogs(t *testing.T) {
 					PrivateMode: true,
 				})
 				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*client).Machine).Equal("localhost")
 				g.Assert(remote.(*client).Username).Equal("someuser")
 				g.Assert(remote.(*client).Password).Equal("password")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)

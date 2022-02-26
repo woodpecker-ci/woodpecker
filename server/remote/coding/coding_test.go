@@ -48,7 +48,6 @@ func Test_coding(t *testing.T) {
 					Client:     "KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP",
 					Secret:     "zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp",
 					Scopes:     []string{"user", "project", "project:depot"},
-					Machine:    "git.coding.net",
 					Username:   "someuser",
 					Password:   "password",
 					SkipVerify: true,
@@ -57,7 +56,6 @@ func Test_coding(t *testing.T) {
 				g.Assert(remote.(*Coding).Client).Equal("KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP")
 				g.Assert(remote.(*Coding).Secret).Equal("zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp")
 				g.Assert(remote.(*Coding).Scopes).Equal([]string{"user", "project", "project:depot"})
-				g.Assert(remote.(*Coding).Machine).Equal("git.coding.net")
 				g.Assert(remote.(*Coding).Username).Equal("someuser")
 				g.Assert(remote.(*Coding).Password).Equal("password")
 				g.Assert(remote.(*Coding).SkipVerify).Equal(true)
@@ -172,21 +170,18 @@ func Test_coding(t *testing.T) {
 		g.Describe("When requesting a netrc config", func() {
 			g.It("Should return the netrc file for global credential", func() {
 				remote, _ := New(Opts{
-					Machine:  "git.coding.net",
 					Username: "someuser",
 					Password: "password",
 				})
-				netrc, err := remote.Netrc(fakeUser, nil)
+				netrc, err := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal("someuser")
 				g.Assert(netrc.Password).Equal("password")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
 			})
 			g.It("Should return the netrc file for specified user", func() {
-				remote, _ := New(Opts{
-					Machine: "git.coding.net",
-				})
-				netrc, err := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, err := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
