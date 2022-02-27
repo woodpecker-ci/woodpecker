@@ -10,8 +10,8 @@ Every request sent by Woodpecker is signed using a http-signature using the prov
 ```shell
 # Server
 # ...
-WOODPECKER_YAML_ENDPOINT=https://example.com/ciconfig
-WOODPECKER_YAML_SECRET=mysecretsigningkey
+WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
+WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
 
 ```
 
