@@ -272,8 +272,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
-	if endpoint := c.String("configuration-service"); endpoint != "" {
-		secret := c.String("configuration-service-secret")
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		secret := c.String("config-service-secret")
 		if secret == "" {
 			log.Error().Msg("could not configure configuration service, missing secret")
 		} else {

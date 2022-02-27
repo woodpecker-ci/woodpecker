@@ -162,14 +162,14 @@ var flags = []cli.Flag{
 		Usage:   "gated build endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_YAML_ENDPOINT"},
-		Name:    "configuration-service",
+		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
+		Name:    "config-service-endpoint",
 		Usage:   "configuration service endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_YAML_SECRET"},
-		Name:    "configuration-service-secret",
-		Usage:   "configuration service secret",
+		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_SECRET"},
+		Name:    "config-service-secret",
+		Usage:   "secret to sign requests send to configuration service",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
