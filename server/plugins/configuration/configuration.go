@@ -54,7 +54,7 @@ func (cp *ConfigAPI) FetchExternalConfig(ctx context.Context, repo *model.Repo, 
 
 	status, err := sendRequest(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build, Configuration: currentYamls}, &response)
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to fetch config via http %w", err)
+		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
 	}
 
 	yamls := make([]*remote.FileMeta, len(response.Pipelines))
@@ -112,6 +112,10 @@ func sendRequest(ctx context.Context, method, path, signkey string, in, out inte
 		}
 
 		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
+	}
+
+	if resp.StatusCode == 204 {
+		return resp.StatusCode, nil
 	}
 
 	// if no other errors parse and return the json response.
