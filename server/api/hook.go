@@ -177,7 +177,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigurationAPI, repoUser, repo, build)
+	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
@@ -191,7 +191,7 @@ func PostHook(c *gin.Context) {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
-		return
+		// return
 	}
 	if filtered {
 		msg := "ignoring hook: branch does not match restrictions defined in yaml"

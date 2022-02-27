@@ -16,7 +16,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type ConfigAPI struct {
+type ConfigService struct {
 	endpoint string
 	secret   string
 }
@@ -33,44 +33,46 @@ type requestStructure struct {
 	Configuration []*config    `json:"config"`
 }
 
-func NewAPI(endpoint, secret string) ConfigAPI {
-	return ConfigAPI{endpoint: endpoint, secret: secret}
+type responseStructure struct {
+	Configs []config `json:"pipelines"`
 }
 
-func (cp *ConfigAPI) IsConfigured() bool {
+func NewAPI(endpoint, secret string) ConfigService {
+	return ConfigService{endpoint: endpoint, secret: secret}
+}
+
+func (cp *ConfigService) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *ConfigAPI) FetchExternalConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentConfig []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
-	// Create request, needs repo
-	response := struct {
-		Pipelines []config `json:"pipelines"`
-	}{}
-
-	currentYamls := make([]*config, len(currentConfig))
-	for i, pipe := range currentConfig {
-		currentYamls[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}
+func (cp *ConfigService) FetchExternalConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
+	currentConfigs := make([]*config, len(currentFileMeta))
+	for i, pipe := range currentFileMeta {
+		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}
 	}
 
-	status, err := sendRequest(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build, Configuration: currentYamls}, &response)
+	response, status, err := sendRequest(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build, Configuration: currentConfigs})
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
 	}
 
-	yamls := make([]*remote.FileMeta, len(response.Pipelines))
-	for i, pipe := range response.Pipelines {
-		yamls[i] = &remote.FileMeta{Name: pipe.Name, Data: []byte(pipe.Data)}
+	var newFileMeta []*remote.FileMeta
+	if response != nil {
+		newFileMeta = make([]*remote.FileMeta, len(response.Configs))
+		for i, pipe := range response.Configs {
+			newFileMeta[i] = &remote.FileMeta{Name: pipe.Name, Data: []byte(pipe.Data)}
+		}
+	} else {
+		newFileMeta = make([]*remote.FileMeta, 0)
 	}
 
-	return yamls, status == 204, nil
+	return newFileMeta, status == 204, nil
 }
 
-// Send makes an http request to the given endpoint, writing the input
-// to the request body and unmarshaling the output from the response body.
-func sendRequest(ctx context.Context, method, path, signkey string, in, out interface{}) (statuscode int, err error) {
+func sendRequest(ctx context.Context, method, path, signkey string, in interface{}) (response *responseStructure, statuscode int, err error) {
 	uri, err := url.Parse(path)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 
 	// if we are posting or putting data, we need to
@@ -80,14 +82,14 @@ func sendRequest(ctx context.Context, method, path, signkey string, in, out inte
 		buf = new(bytes.Buffer)
 		jsonerr := json.NewEncoder(buf).Encode(in)
 		if jsonerr != nil {
-			return 0, jsonerr
+			return nil, 0, jsonerr
 		}
 	}
 
 	// creates a new http request to bitbucket.
 	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 	if in != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -96,32 +98,30 @@ func sendRequest(ctx context.Context, method, path, signkey string, in, out inte
 	// Sign using the 'Signature' header
 	err = httpsignatures.DefaultSha256Signer.SignRequest("hmac-key", signkey, req)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return resp.StatusCode, err
+			return nil, resp.StatusCode, err
 		}
 
-		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
+		return nil, resp.StatusCode, fmt.Errorf("Response: %s", string(body))
 	}
 
 	if resp.StatusCode == 204 {
-		return resp.StatusCode, nil
+		return nil, resp.StatusCode, nil
 	}
 
 	// if no other errors parse and return the json response.
-	if out != nil {
-		return resp.StatusCode, json.NewDecoder(resp.Body).Decode(out)
-	}
-
-	return resp.StatusCode, nil
+	decodedResponse := new(responseStructure)
+	err = json.NewDecoder(resp.Body).Decode(decodedResponse)
+	return decodedResponse, resp.StatusCode, err
 }
