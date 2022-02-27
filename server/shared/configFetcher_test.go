@@ -70,7 +70,7 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:       "Use old config by 204 response",
+			name:       "Use old config on 204 response",
 			repoConfig: "",
 			files: []file{{
 				name: ".drone.yml",
