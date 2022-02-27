@@ -5,7 +5,7 @@ Before the run or restart of any pipeline Woodpecker will make a POST request to
 
 Every request sent by Woodpecker is signed using a http-signature using the provided secret from `WOODPECKER_CONFIG_SERVICE_SECRET`. This way the external api can verify the authenticity request from the Woodpecker instance.
 
-A simplistic example configuration service can be found here: [https://github.com/s00500/woodpecker-config-service](https://github.com/s00500/woodpecker-config-service)
+A simplistic example configuration service can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
 
 ## Config
 
