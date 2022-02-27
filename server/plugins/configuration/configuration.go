@@ -30,11 +30,11 @@ type config struct {
 type requestStructure struct {
 	Repo          *model.Repo  `json:"repo"`
 	Build         *model.Build `json:"build"`
-	Configuration []*config    `json:"config"`
+	Configuration []*config    `json:"configs"`
 }
 
 type responseStructure struct {
-	Configs []config `json:"pipelines"`
+	Configs []config `json:"configs"`
 }
 
 func NewAPI(endpoint, secret string) ConfigService {
