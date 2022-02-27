@@ -390,7 +390,7 @@ func TestFetchFromConfigService(t *testing.T) {
 		}
 
 		fmt.Fprint(w, `{
-			"pipelines": [
+			"configs": [
 					{
 							"name": "override1",
 							"data": "some new pipelineconfig \n pipe, pipe, pipe"
