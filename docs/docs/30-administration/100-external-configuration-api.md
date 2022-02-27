@@ -1,7 +1,7 @@
 # External Configuration API
 
-To provide additional management and preprocessing capabilities for pipeline configuration Woodpecker supports an API for external configuration.
-Before the run or restart of any pipeline Woodpecker will make a POST request to an external REST API with the current repo and build information, and the current config file. The external API can then send back new pipeline configurations that will be used immediately or responsnd with `HTTP 204` to tell the system to use the existing configuration.
+To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP api which can be enabled to call an external config service.
+Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP api sending the current repository, build information and all current config files retrieved from the repository. The external api can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
 
 Every request sent by Woodpecker is signed using a http-signature created with a provided secret. This way the external api can verify the authenticity request from the Woodpecker Instance
 
