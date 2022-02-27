@@ -24,6 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Command exports the exec command.
@@ -186,7 +187,9 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = registerInterruptSignal(ctx)
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		println("ctrl+c received, terminating process")
+	})
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
