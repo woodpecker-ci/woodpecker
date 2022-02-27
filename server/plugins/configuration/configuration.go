@@ -11,7 +11,9 @@ import (
 	"net/url"
 
 	"github.com/99designs/httpsignatures-go"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 type ConfigAPI struct {
@@ -19,9 +21,16 @@ type ConfigAPI struct {
 	secret   string
 }
 
+// Same as remote.FileMeta but with json tags and string data
+type config struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
+}
+
 type requestStructure struct {
-	Repo  *model.Repo  `json:"repo"`
-	Build *model.Build `json:"build"`
+	Repo          *model.Repo  `json:"repo"`
+	Build         *model.Build `json:"build"`
+	Configuration []*config    `json:"config"`
 }
 
 func NewAPI(endpoint, secret string) ConfigAPI {
@@ -32,22 +41,28 @@ func (cp *ConfigAPI) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *ConfigAPI) FetchExternalConfig(ctx context.Context, repo *model.Repo, build *model.Build) (configData string, useOld bool, err error) {
+func (cp *ConfigAPI) FetchExternalConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentConfig []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
 	// Create request, needs repo
 	response := struct {
-		Data string `json:"data"`
+		Pipelines []config `json:"pipelines"`
 	}{}
 
-	status, err := sendRequest(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build}, &response)
+	currentYamls := make([]*config, len(currentConfig))
+	for i, pipe := range currentConfig {
+		currentYamls[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}
+	}
+
+	status, err := sendRequest(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build, Configuration: currentYamls}, &response)
 	if err != nil {
-		return "", false, err
+		return nil, false, fmt.Errorf("Failed to fetch config via http %w", err)
 	}
 
-	if status != 204 && status != 200 {
-		return response.Data, status == 204, fmt.Errorf("Failed to fetch config")
+	yamls := make([]*remote.FileMeta, len(response.Pipelines))
+	for i, pipe := range response.Pipelines {
+		yamls[i] = &remote.FileMeta{Name: pipe.Name, Data: []byte(pipe.Data)}
 	}
 
-	return response.Data, status == 204, nil
+	return yamls, status == 204, nil
 }
 
 // Send makes an http request to the given endpoint, writing the input
@@ -68,8 +83,6 @@ func sendRequest(ctx context.Context, method, path, signkey string, in, out inte
 			return 0, jsonerr
 		}
 	}
-
-	fmt.Printf("%v", in)
 
 	// creates a new http request to bitbucket.
 	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
@@ -92,17 +105,16 @@ func sendRequest(ctx context.Context, method, path, signkey string, in, out inte
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 204 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err
 		}
-		fmt.Print(string(body))
-		return resp.StatusCode, nil
+
+		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
 	}
 
-	// if a json response is expected, parse and return
-	// the json response.
+	// if no other errors parse and return the json response.
 	if out != nil {
 		return resp.StatusCode, json.NewDecoder(resp.Body).Decode(out)
 	}

@@ -37,21 +37,38 @@ func NewConfigFetcher(remote remote.Remote, configurationService configuration.C
 }
 
 // configFetchTimeout determine seconds the configFetcher wait until cancel fetch process
-var configFetchTimeout = 3 // seconds
+var configFetchTimeout = time.Second * 3
 
 // Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
-	// try to fetch 3 times, timeout is one second longer each time
+	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, configFetchTimeout, strings.TrimSpace(cf.repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
 		}
+
+		if cf.configAPI.IsConfigured() {
+			fetchCtx, cancel := context.WithTimeout(ctx, configFetchTimeout)
+			defer cancel() // ok here as we only try http fetching once, returning on fail and success
+
+			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
+			newConfigs, useOld, err := cf.configAPI.FetchExternalConfig(fetchCtx, cf.repo, cf.build, files)
+			if err != nil {
+				log.Error().Msg("Got errror " + err.Error())
+				return nil, fmt.Errorf("On Fetching config via http : %s", err)
+			}
+
+			if !useOld {
+				return newConfigs, nil
+			}
+		}
+
 		return
 	}
 	return
@@ -62,22 +79,6 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
-
-	if cf.configAPI.IsConfigured() {
-		log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service '%s'", cf.repo.FullName)
-		newConfig, useOld, err := cf.configAPI.FetchExternalConfig(ctx, cf.repo, cf.build)
-		if err != nil {
-			log.Error().Msg("Got errror " + err.Error())
-			return nil, fmt.Errorf("On Fetching config '%s': %s", config, err)
-		}
-
-		if !useOld {
-			return []*remote.FileMeta{{
-				Name: "api",
-				Data: []byte(newConfig),
-			}}, nil
-		}
-	}
 
 	if len(config) > 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
