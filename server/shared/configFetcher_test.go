@@ -265,7 +265,7 @@ func TestFetch(t *testing.T) {
 	}
 }
 
-func TestFetchFromConfigurationAPI(t *testing.T) {
+func TestFetchFromConfigService(t *testing.T) {
 	t.Parallel()
 
 	type file struct {

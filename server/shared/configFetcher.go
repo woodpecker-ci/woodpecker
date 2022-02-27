@@ -19,20 +19,20 @@ type ConfigFetcher interface {
 }
 
 type configFetcher struct {
-	remote    remote.Remote
-	user      *model.User
-	repo      *model.Repo
-	build     *model.Build
-	configAPI configuration.ConfigService
+	remote        remote.Remote
+	user          *model.User
+	repo          *model.Repo
+	build         *model.Build
+	configService configuration.ConfigService
 }
 
 func NewConfigFetcher(remote remote.Remote, configurationService configuration.ConfigService, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
-		remote:    remote,
-		user:      user,
-		repo:      repo,
-		build:     build,
-		configAPI: configurationService,
+		remote:        remote,
+		user:          user,
+		repo:          repo,
+		build:         build,
+		configService: configurationService,
 	}
 }
 
@@ -53,12 +53,12 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			continue
 		}
 
-		if cf.configAPI.IsConfigured() {
+		if cf.configService.IsConfigured() {
 			fetchCtx, cancel := context.WithTimeout(ctx, configFetchTimeout)
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
-			newConfigs, useOld, err := cf.configAPI.FetchExternalConfig(fetchCtx, cf.repo, cf.build, files)
+			newConfigs, useOld, err := cf.configService.FetchExternalConfig(fetchCtx, cf.repo, cf.build, files)
 			if err != nil {
 				log.Error().Msg("Got errror " + err.Error())
 				return nil, fmt.Errorf("On Fetching config via http : %s", err)
