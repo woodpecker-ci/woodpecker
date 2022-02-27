@@ -191,7 +191,7 @@ func PostHook(c *gin.Context) {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
-		return
+		// No return here, we create the entry in the database to show a failed run in the woodpecker webui
 	}
 	if filtered {
 		msg := "ignoring hook: branch does not match restrictions defined in yaml"
