@@ -59,6 +59,8 @@ tmpfs:
   - /var/lib/test
 when:
   branch: master
+whenArray:
+  - branch: masterArray
 settings:
   foo: bar
   baz: false
@@ -113,6 +115,13 @@ func TestUnmarshalContainer(t *testing.T) {
 		Constraints: constraint.Constraints{
 			Branch: constraint.List{
 				Include: []string{"master"},
+			},
+		},
+		ConstraintsArray: []constraint.Constraints{
+			{
+				Branch: constraint.List{
+					Include: []string{"masterArray"},
+				},
 			},
 		},
 		Settings: map[string]interface{}{
