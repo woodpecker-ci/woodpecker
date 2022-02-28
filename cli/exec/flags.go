@@ -46,17 +46,7 @@ var flags = []cli.Flag{
 		Usage:   "external networks",
 	},
 	&cli.StringFlag{
-<<<<<<< HEAD
-		EnvVars: []string{"WOODPECKER_BACKEND"},
-		Name:    "backend-engine",
-		Usage:   "backend engine to run pipelines on",
-		Value:   "auto-detect",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_PREFIX"},
-=======
 		EnvVars: []string{"WOODPECKER_PREFIX"},
->>>>>>> public/master
 		Name:    "prefix",
 		Value:   "woodpecker",
 		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
