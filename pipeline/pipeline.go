@@ -134,7 +134,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			// if we got a nil process but an error state
 			// then we need to log the internal error to the step.
-			if err == nil && processState == nil {
+			if r.logger != nil && err != nil && processState == nil {
 				_ = r.logger.Log(step, multipart.New(strings.NewReader(
 					"Backend engine error while running step: "+err.Error(),
 				)))
