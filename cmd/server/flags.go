@@ -164,7 +164,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
-		Usage:   "configuration service endpoint",
+		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_SECRET"},
