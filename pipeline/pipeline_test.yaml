@@ -5,6 +5,10 @@ runner_image: &runner_image artprod.dev.bloomberg.com/sdae/woodpecker/runners/ub
 dind_image: &dind_image artprod.dev.bloomberg.com/sdae/docker:0.2.0
 
 pipeline:
+  test_error_image:
+    image: not-an-image:latest
+    commands:
+      - lama
   first:
     image: *runner_image
     commands:
@@ -14,8 +18,8 @@ pipeline:
   #   image: *runner_image
   #   commands:
   #     - |
-  #       for i in $(seq 1 122); do 
-  #         echo "DUMMY $i"; 
+  #       for i in $(seq 1 122); do
+  #         echo "DUMMY $i";
   #       done
   #     - exit 22
   shared_test:
