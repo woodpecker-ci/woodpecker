@@ -193,7 +193,9 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = utils.WithContextSigterm(ctx)
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		println("ctrl+c received, terminating process")
+	})
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),

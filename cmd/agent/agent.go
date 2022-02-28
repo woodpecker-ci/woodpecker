@@ -121,6 +121,7 @@ func loop(c *cli.Context) error {
 		metadata.Pairs("hostname", hostname),
 	)
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})
 
