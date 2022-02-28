@@ -52,15 +52,15 @@ func (n IssuesStatistics) String() string {
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/issues_statistics.html#get-issues-statistics
 type GetIssuesStatisticsOptions struct {
-	Labels           Labels     `url:"labels,omitempty" json:"labels,omitempty"`
+	Labels           *Labels    `url:"labels,omitempty" json:"labels,omitempty"`
 	Milestone        *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
 	Scope            *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID         *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
 	AuthorUsername   *string    `url:"author_username,omitempty" json:"author_username,omitempty"`
 	AssigneeID       *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	AssigneeUsername []string   `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
+	AssigneeUsername *[]string  `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji  *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	IIDs             []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	IIDs             *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
 	Search           *string    `url:"search,omitempty" json:"search,omitempty"`
 	In               *string    `url:"in,omitempty" json:"in,omitempty"`
 	CreatedAfter     *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
@@ -96,14 +96,14 @@ func (s *IssuesStatisticsService) GetIssuesStatistics(opt *GetIssuesStatisticsOp
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/issues_statistics.html#get-group-issues-statistics
 type GetGroupIssuesStatisticsOptions struct {
-	Labels           Labels     `url:"labels,omitempty" json:"labels,omitempty"`
-	IIDs             []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	Labels           *Labels    `url:"labels,omitempty" json:"labels,omitempty"`
+	IIDs             *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
 	Milestone        *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
 	Scope            *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID         *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
 	AuthorUsername   *string    `url:"author_username,omitempty" json:"author_username,omitempty"`
 	AssigneeID       *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	AssigneeUsername []string   `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
+	AssigneeUsername *[]string  `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji  *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
 	Search           *string    `url:"search,omitempty" json:"search,omitempty"`
 	CreatedAfter     *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
@@ -122,7 +122,7 @@ func (s *IssuesStatisticsService) GetGroupIssuesStatistics(gid interface{}, opt 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/issues_statistics", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/issues_statistics", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -144,14 +144,14 @@ func (s *IssuesStatisticsService) GetGroupIssuesStatistics(gid interface{}, opt 
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/issues_statistics.html#get-project-issues-statistics
 type GetProjectIssuesStatisticsOptions struct {
-	IIDs             []int      `url:"iids[],omitempty" json:"iids,omitempty"`
-	Labels           Labels     `url:"labels,omitempty" json:"labels,omitempty"`
+	IIDs             *[]int     `url:"iids[],omitempty" json:"iids,omitempty"`
+	Labels           *Labels    `url:"labels,omitempty" json:"labels,omitempty"`
 	Milestone        *Milestone `url:"milestone,omitempty" json:"milestone,omitempty"`
 	Scope            *string    `url:"scope,omitempty" json:"scope,omitempty"`
 	AuthorID         *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
 	AuthorUsername   *string    `url:"author_username,omitempty" json:"author_username,omitempty"`
 	AssigneeID       *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	AssigneeUsername []string   `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
+	AssigneeUsername *[]string  `url:"assignee_username,omitempty" json:"assignee_username,omitempty"`
 	MyReactionEmoji  *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
 	Search           *string    `url:"search,omitempty" json:"search,omitempty"`
 	CreatedAfter     *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
@@ -170,7 +170,7 @@ func (s *IssuesStatisticsService) GetProjectIssuesStatistics(pid interface{}, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues_statistics", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/issues_statistics", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {

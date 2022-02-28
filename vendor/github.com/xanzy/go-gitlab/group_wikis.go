@@ -61,7 +61,7 @@ func (s *GroupWikisService) ListGroupWikis(gid interface{}, opt *ListGroupWikisO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/wikis", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/wikis", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *GroupWikisService) GetGroupWikiPage(gid interface{}, slug string, optio
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/wikis/%s", pathEscape(group), url.PathEscape(slug))
+	u := fmt.Sprintf("groups/%s/wikis/%s", PathEscape(group), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -122,7 +122,7 @@ func (s *GroupWikisService) CreateGroupWikiPage(gid interface{}, opt *CreateGrou
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/wikis", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/wikis", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -158,7 +158,7 @@ func (s *GroupWikisService) EditGroupWikiPage(gid interface{}, slug string, opt 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/wikis/%s", pathEscape(group), url.PathEscape(slug))
+	u := fmt.Sprintf("groups/%s/wikis/%s", PathEscape(group), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -183,7 +183,7 @@ func (s *GroupWikisService) DeleteGroupWikiPage(gid interface{}, slug string, op
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/wikis/%s", pathEscape(group), url.PathEscape(slug))
+	u := fmt.Sprintf("groups/%s/wikis/%s", PathEscape(group), url.PathEscape(slug))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

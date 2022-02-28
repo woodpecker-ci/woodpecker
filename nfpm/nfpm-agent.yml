@@ -1,7 +1,7 @@
 name: woodpecker-agent
 arch: amd64
 platform: linux
-version: v${WOODPECKER_VERSION}
+version: ${VERSION_NUMBER}
 description: Woodpecker Agent
 homepage: https://github.com/woodpecker-ci/woodpecker
 license: Apache 2.0

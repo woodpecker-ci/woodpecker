@@ -89,7 +89,7 @@ func (s *LabelsService) ListLabels(pid interface{}, opt *ListLabelsOptions, opti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/labels", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *LabelsService) GetLabel(pid interface{}, labelID interface{}, options .
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels/%s", pathEscape(project), label)
+	u := fmt.Sprintf("projects/%s/labels/%s", PathEscape(project), PathEscape(label))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -151,7 +151,7 @@ func (s *LabelsService) CreateLabel(pid interface{}, opt *CreateLabelOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/labels", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -182,7 +182,7 @@ func (s *LabelsService) DeleteLabel(pid interface{}, opt *DeleteLabelOptions, op
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/labels", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, opt, options)
 	if err != nil {
@@ -211,7 +211,7 @@ func (s *LabelsService) UpdateLabel(pid interface{}, opt *UpdateLabelOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/labels", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -242,7 +242,7 @@ func (s *LabelsService) SubscribeToLabel(pid interface{}, labelID interface{}, o
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels/%s/subscribe", pathEscape(project), label)
+	u := fmt.Sprintf("projects/%s/labels/%s/subscribe", PathEscape(project), PathEscape(label))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -273,7 +273,7 @@ func (s *LabelsService) UnsubscribeFromLabel(pid interface{}, labelID interface{
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels/%s/unsubscribe", pathEscape(project), label)
+	u := fmt.Sprintf("projects/%s/labels/%s/unsubscribe", PathEscape(project), PathEscape(label))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -296,7 +296,7 @@ func (s *LabelsService) PromoteLabel(pid interface{}, labelID interface{}, optio
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/labels/%s/promote", pathEscape(project), label)
+	u := fmt.Sprintf("projects/%s/labels/%s/promote", PathEscape(project), PathEscape(label))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, nil, options)
 	if err != nil {

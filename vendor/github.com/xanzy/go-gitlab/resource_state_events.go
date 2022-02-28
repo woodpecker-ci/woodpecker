@@ -61,7 +61,7 @@ func (s *ResourceStateEventsService) ListIssueStateEvents(pid interface{}, issue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/resource_state_events", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/resource_state_events", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *ResourceStateEventsService) GetIssueStateEvent(pid interface{}, issue i
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/resource_state_events/%d", pathEscape(project), issue, event)
+	u := fmt.Sprintf("projects/%s/issues/%d/resource_state_events/%d", PathEscape(project), issue, event)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -112,7 +112,7 @@ func (s *ResourceStateEventsService) ListMergeStateEvents(pid interface{}, reque
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/resource_state_events", pathEscape(project), request)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/resource_state_events", PathEscape(project), request)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -137,7 +137,7 @@ func (s *ResourceStateEventsService) GetMergeRequestStateEvent(pid interface{}, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/resource_state_events/%d", pathEscape(project), request, event)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/resource_state_events/%d", PathEscape(project), request, event)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {

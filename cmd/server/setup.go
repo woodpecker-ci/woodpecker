@@ -173,7 +173,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return environments.Filesystem(c.StringSlice("environment"))
+	return environments.Parse(c.StringSlice("environment"))
 }
 
 // setupRemote helper function to setup the remote from the CLI arguments.
