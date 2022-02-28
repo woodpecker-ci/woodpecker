@@ -16,7 +16,7 @@ pipeline:
 
   # TODO: needed until https://github.com/woodpecker-ci/woodpecker/pull/635
   build-server:
-    image: golang:1.16
+    image: golang:1.17
     commands:
       - make release-server
 
