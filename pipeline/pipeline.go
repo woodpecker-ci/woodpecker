@@ -83,9 +83,18 @@ func (r *Runtime) Run() error {
 
 // Updates the current status of a step
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
+	if r.tracer == nil {
+		// no tracer nothing to trace :)
+		return nil
+	}
+
 	if processState == nil {
 		processState = new(backend.State)
+		if err != nil {
+			processState.ExitCode = 1
+		}
 	}
+
 	state := new(State)
 	state.Pipeline.Time = r.started
 	state.Pipeline.Error = r.err
@@ -122,6 +131,15 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 			}
 
 			processState, err := r.exec(step)
+
+			// if we got a nil process but an error state
+			// then we need to log the internal error to the step.
+			if err == nil && processState == nil {
+				_ = r.logger.Log(step, multipart.New(strings.NewReader(
+					"Backend engine error while running step: "+err.Error(),
+				)))
+			}
+
 			// Return the error after tracing it.
 			return r.traceStep(processState, err, step)
 		})
@@ -166,22 +184,22 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
-	processState, err := r.engine.Wait(r.ctx, step)
+	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
 		return nil, err
 	}
 
-	if processState.OOMKilled {
-		return processState, &OomError{
+	if waitState.OOMKilled {
+		return waitState, &OomError{
 			Name: step.Name,
-			Code: processState.ExitCode,
+			Code: waitState.ExitCode,
 		}
-	} else if processState.ExitCode != 0 {
-		return processState, &ExitError{
+	} else if waitState.ExitCode != 0 {
+		return waitState, &ExitError{
 			Name: step.Name,
-			Code: processState.ExitCode,
+			Code: waitState.ExitCode,
 		}
 	}
 
-	return processState, nil
+	return waitState, nil
 }
