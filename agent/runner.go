@@ -97,7 +97,6 @@ func (r *Runner) Run(pipelineCtx context.Context) error {
 	logger.Debug().Msg("received execution")
 
 	pipelineCtx, cancel := context.WithTimeout(ctxmeta, timeout)
-
 	defer cancel()
 
 	// Add sigterm support for internal context.
