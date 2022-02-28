@@ -47,20 +47,21 @@ type ResourceLimit struct {
 
 // Compiler compiles the yaml
 type Compiler struct {
-	local      bool
-	escalated  []string
-	prefix     string
-	volumes    []string
-	networks   []string
-	env        map[string]string
-	cloneEnv   map[string]string
-	base       string
-	path       string
-	metadata   frontend.Metadata
-	registries []Registry
-	secrets    map[string]Secret
-	cacher     Cacher
-	reslimit   ResourceLimit
+	local             bool
+	escalated         []string
+	prefix            string
+	volumes           []string
+	networks          []string
+	env               map[string]string
+	cloneEnv          map[string]string
+	base              string
+	path              string
+	metadata          frontend.Metadata
+	registries        []Registry
+	secrets           map[string]Secret
+	cacher            Cacher
+	reslimit          ResourceLimit
+	defaultCloneImage string
 }
 
 // New creates a new Compiler with options.
@@ -126,9 +127,13 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
+		cloneImage := defaultCloneImage
+		if len(c.defaultCloneImage) > 0 {
+			cloneImage = c.defaultCloneImage
+		}
 		container := &yaml.Container{
 			Name:        defaultCloneName,
-			Image:       defaultCloneImage,
+			Image:       cloneImage,
 			Settings:    map[string]interface{}{"depth": "0"},
 			Environment: c.cloneEnv,
 		}

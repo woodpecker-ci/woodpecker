@@ -27,6 +27,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Opts defines configuration options.
@@ -40,7 +41,6 @@ type Opts struct {
 
 type client struct {
 	URL         string
-	Machine     string
 	Username    string
 	Password    string
 	PrivateMode bool
@@ -60,7 +60,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &client{
 		URL:         opts.URL,
-		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,
@@ -217,17 +216,22 @@ func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 // cloning Gogs repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -258,8 +262,21 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(token)
+	gogsBranches, err := client.ListRepoBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gogsBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build

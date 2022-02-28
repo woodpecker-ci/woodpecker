@@ -44,7 +44,7 @@ func (s *GroupImportExportService) ScheduleExport(gid interface{}, options ...Re
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/export", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/export", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *GroupImportExportService) ExportDownload(gid interface{}, options ...Re
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/export/download", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/export/download", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {

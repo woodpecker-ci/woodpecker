@@ -49,7 +49,6 @@ func Test_gitea(t *testing.T) {
 					SkipVerify: true,
 				})
 				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
 				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
@@ -60,19 +59,15 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{
-					URL: "http://gitea.com",
-				})
-				netrc, _ := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Login)
 				g.Assert(netrc.Password).Equal(fakeUser.Token)
 			})
 			g.It("Should return a netrc with the machine account", func() {
-				remote, _ := New(Opts{
-					URL: "http://gitea.com",
-				})
-				netrc, _ := remote.Netrc(nil, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
 				g.Assert(netrc.Login).Equal("")
 				g.Assert(netrc.Password).Equal("")
@@ -172,6 +167,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
+		Clone:    "http://gitea.com/test_name/repo_name.git",
 		Owner:    "test_name",
 		Name:     "repo_name",
 		FullName: "test_name/repo_name",

@@ -20,6 +20,7 @@
     "@kyvg/vue3-notification": "2.3.4",
     "@meforma/vue-toaster": "1.2.2",
     "ansi-to-html": "0.7.2",
+    "dayjs": "1.10.7",
     "floating-vue": "2.0.0-beta.5",
     "fuse.js": "6.4.6",
     "humanize-duration": "3.27.0",

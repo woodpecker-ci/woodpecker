@@ -1,7 +1,7 @@
 name: woodpecker-cli
 arch: amd64
 platform: linux
-version: v${WOODPECKER_VERSION}
+version: ${VERSION_NUMBER}
 description: Woodpecker CLI
 homepage: https://github.com/woodpecker-ci/woodpecker
 license: Apache 2.0

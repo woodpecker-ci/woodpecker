@@ -34,7 +34,7 @@ func (s *PagesService) UnpublishPages(gid interface{}, options ...RequestOptionF
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages", pathEscape(page))
+	u := fmt.Sprintf("projects/%s/pages", PathEscape(page))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

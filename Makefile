@@ -5,18 +5,43 @@ TARGETOS ?= linux
 TARGETARCH ?= amd64
 
 VERSION ?= next
+VERSION_NUMBER ?= 0.0.0
 ifneq ($(CI_COMMIT_TAG),)
 	VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION_NUMBER := ${VERSION}
 endif
 
 # append commit-sha to next version
-BUILD_VERSION := $(VERSION)
+BUILD_VERSION ?= $(VERSION)
 ifeq ($(BUILD_VERSION),next)
 	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+
+# If the first argument is "in_docker"...
+ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "in_docker"
+  MAKE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # Ignore the next args
+  $(eval $(MAKE_ARGS):;@:)
+
+  in_docker:
+	@[ "1" == "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@echo run in docker:
+	@docker run -it \
+		--user $(shell id -u):$(shell id -g) \
+		-e VERSION="$(VERSION)" \
+		-e BUILD_VERSION="$(BUILD_VERSION)" \
+		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
+		-e GO_PACKAGES="$(GO_PACKAGES)" \
+		-e TARGETOS="$(TARGETOS)" \
+		-e TARGETARCH="$(TARGETARCH)" \
+		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
+else
+
+# Proceed with normal make
 
 all: build
 
@@ -31,6 +56,7 @@ format:
 clean:
 	go clean -i ./...
 	rm -rf build
+	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: lint
 lint:
@@ -155,3 +181,5 @@ bundle: bundle-agent bundle-server bundle-cli
 .PHONY: version
 version:
 	@echo ${BUILD_VERSION}
+
+endif
