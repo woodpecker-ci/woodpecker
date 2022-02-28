@@ -369,7 +369,7 @@ var flags = []cli.Flag{
 		EnvVars:  []string{"WOODPECKER_GITLAB_SECRET"},
 		Name:     "gitlab-secret",
 		Usage:    "gitlab oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_SECRET"),
+		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
@@ -448,7 +448,7 @@ var flags = []cli.Flag{
 		EnvVars:  []string{"WOODPECKER_CODING_SECRET"},
 		Name:     "coding-secret",
 		Usage:    "coding oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_CODING_CLIENT_FILE"),
+		FilePath: os.Getenv("WOODPECKER_CODING_SECRET_FILE"),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_CODING_SCOPE"},
