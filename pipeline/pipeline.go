@@ -91,15 +91,17 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	if processState == nil {
 		processState = new(backend.State)
 		if err != nil {
-			processState.ExitCode = 1
+			processState.Exited = true
+			processState.OOMKilled = false
+			processState.ExitCode = 126 // command invoked cannot be executed.
 		}
 	}
 
 	state := new(State)
 	state.Pipeline.Time = r.started
-	state.Pipeline.Error = r.err
 	state.Pipeline.Step = step
 	state.Process = processState // empty
+	state.Pipeline.Error = r.err
 
 	traceErr := r.tracer.Trace(state)
 	if traceErr != nil {
