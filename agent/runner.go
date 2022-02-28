@@ -99,7 +99,9 @@ func (r *Runner) Run(pipelineCtx context.Context) error {
 	pipelineCtx, cancel := context.WithTimeout(ctxmeta, timeout)
 
 	// add sigterm support
-	pipelineCtx = utils.WithContextSigterm(pipelineCtx)
+	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
 
 	defer cancel()
 
