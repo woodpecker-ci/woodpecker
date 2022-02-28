@@ -100,7 +100,7 @@ func (r *Runner) Run(pipelineCtx context.Context) error {
 	defer cancel()
 
 	// Add sigterm support for internal context.
-	// Required when the pipline is terminated by external signals
+	// Required when the pipeline is terminated by external signals
 	// like kubernetes.
 	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
 		logger.Error().Msg("Received sigterm termination signal")
