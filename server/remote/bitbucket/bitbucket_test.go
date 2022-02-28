@@ -52,7 +52,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should return the netrc file", func() {
 			remote, _ := New(&Opts{})
-			netrc, _ := remote.Netrc(fakeUser, nil)
+			netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 			g.Assert(netrc.Machine).Equal("bitbucket.org")
 			g.Assert(netrc.Login).Equal("x-token-auth")
 			g.Assert(netrc.Password).Equal(fakeUser.Token)

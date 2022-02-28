@@ -3,6 +3,9 @@
 # code.gitea.io/sdk/gitea v0.15.0
 ## explicit
 code.gitea.io/sdk/gitea
+# github.com/99designs/httpsignatures-go v0.0.0-20170731043157-88528bf4ca7e
+## explicit
+github.com/99designs/httpsignatures-go
 # github.com/Antonboom/errname v0.1.5
 github.com/Antonboom/errname/pkg/analyzer
 # github.com/Antonboom/nilnil v0.1.0

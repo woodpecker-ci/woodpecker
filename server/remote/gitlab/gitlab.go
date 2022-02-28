@@ -19,7 +19,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -54,7 +53,6 @@ type Gitlab struct {
 	URL          string
 	ClientID     string
 	ClientSecret string
-	Machine      string
 	SkipVerify   bool
 	HideArchives bool
 	Search       bool
@@ -63,19 +61,10 @@ type Gitlab struct {
 // New returns a Remote implementation that integrates with Gitlab, an open
 // source Git service. See https://gitlab.com
 func New(opts Opts) (remote.Remote, error) {
-	u, err := url.Parse(opts.URL)
-	if err != nil {
-		return nil, err
-	}
-	host, _, err := net.SplitHostPort(u.Host)
-	if err == nil {
-		u.Host = host
-	}
 	return &Gitlab{
 		URL:          opts.URL,
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
-		Machine:      u.Host,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -386,10 +375,15 @@ func (g *Gitlab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = u.Token
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  g.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -494,7 +488,11 @@ func (g *Gitlab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 
 // Branches returns the names of all branches for the named repository.
 func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	token := ""
+	if user != nil {
+		token = user.Token
+	}
+	client, err := newClient(g.URL, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
