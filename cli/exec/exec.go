@@ -8,14 +8,13 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
+	osRuntime "runtime"
 	"strings"
 
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -24,6 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/pipeline/runtime"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
@@ -43,7 +43,7 @@ func run(c *cli.Context) error {
 func execDir(c *cli.Context, dir string) error {
 	// TODO: respect pipeline dependency
 	repoPath, _ := filepath.Abs(filepath.Dir(dir))
-	if runtime.GOOS == "windows" {
+	if osRuntime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
@@ -65,7 +65,7 @@ func execDir(c *cli.Context, dir string) error {
 
 func execFile(c *cli.Context, file string) error {
 	repoPath, _ := filepath.Abs(filepath.Dir(file))
-	if runtime.GOOS == "windows" {
+	if osRuntime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return runExec(c, file, repoPath)
@@ -196,11 +196,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		println("ctrl+c received, terminating process")
 	})
 
-	return pipeline.New(compiled,
-		pipeline.WithContext(ctx),
-		pipeline.WithTracer(pipeline.DefaultTracer),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithEngine(engine),
+	return runtime.New(compiled,
+		runtime.WithContext(ctx),
+		runtime.WithTracer(runtime.DefaultTracer),
+		runtime.WithLogger(defaultLogger),
+		runtime.WithEngine(engine),
 	).Run()
 }
 
@@ -280,7 +280,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
+var defaultLogger = runtime.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
 	part, err := rc.NextPart()
 	if err != nil {
 		return err

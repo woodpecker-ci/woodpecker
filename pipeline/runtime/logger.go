@@ -1,4 +1,4 @@
-package pipeline
+package runtime
 
 import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"

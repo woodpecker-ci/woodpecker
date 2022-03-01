@@ -27,10 +27,10 @@ import (
 	"github.com/tevino/abool"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/pipeline/runtime"
 )
 
 // TODO: Implement log streaming.
@@ -138,7 +138,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	var uploads sync.WaitGroup
-	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
+	defaultLogger := runtime.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
 			Str("image", proc.Image).
 			Str("stage", proc.Alias).
@@ -237,7 +237,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		return nil
 	})
 
-	defaultTracer := pipeline.TraceFunc(func(state *pipeline.State) error {
+	defaultTracer := runtime.TraceFunc(func(state *runtime.State) error {
 		proclogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
@@ -287,18 +287,18 @@ func (r *Runner) Run(ctx context.Context) error {
 		return nil
 	})
 
-	err = pipeline.New(work.Config,
-		pipeline.WithContext(ctx),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithTracer(defaultTracer),
-		pipeline.WithEngine(*r.engine),
+	err = runtime.New(work.Config,
+		runtime.WithContext(ctx),
+		runtime.WithLogger(defaultLogger),
+		runtime.WithTracer(defaultTracer),
+		runtime.WithEngine(*r.engine),
 	).Run()
 
 	state.Finished = time.Now().Unix()
 	state.Exited = true
 	if err != nil {
 		switch xerr := err.(type) {
-		case *pipeline.ExitError:
+		case *runtime.ExitError:
 			state.ExitCode = xerr.Code
 		default:
 			state.ExitCode = 1
