@@ -40,7 +40,7 @@ const (
 
 // parseHook parses a GitHub hook from an http.Request request and returns
 // Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
+func parseHook(r *http.Request, c *client) (*github.PullRequest, *model.Repo, *model.Build, error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -66,12 +66,30 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 		repo, build, err := parseDeployHook(hook)
 		return nil, repo, build, err
 	case *github.ReleaseEvent:
+		hasAction := false
+		for _, actionType := range c.ReleaseActions {
+			if actionType == *hook.Action {
+				hasAction = true
+				break
+			}
+		}
+		if !hasAction {
+			log.Debug().
+				Str("Hook", webhookType).
+				Str("Action", *hook.Action).
+				Msg(
+					"Github release action ignored. " +
+						"See WOODPECKER_GITHUB_RELEASE_ACTIONS")
+			return nil, nil, nil, nil
+		}
 		repo, build, err := parseReleaseHook(hook)
 		return nil, repo, build, err
 	case *github.PullRequestEvent:
-		return parsePullHook(hook, merge)
+		return parsePullHook(hook, c.MergeRef)
 	default:
-		log.Debug().Msg("Github event ignored, and will not be parsed " + webhookType)
+		log.Debug().
+			Str("Hook", webhookType).
+			Msg("Github event ignored, and will not be parsed")
 		return nil, nil, nil, nil
 	}
 }
@@ -154,7 +172,9 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Build, e
 // If the commit type is unsupported nil values are returned.
 func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, error) {
 	release := hook.GetRelease()
+
 	build := &model.Build{
+
 		Event: model.EventRelease,
 		// Commit: "",
 		// Cannot retrieve the commit since

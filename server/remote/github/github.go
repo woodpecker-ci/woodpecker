@@ -41,6 +41,17 @@ const (
 	defaultAPI = "https://api.github.com/" // Default GitHub API URL
 )
 
+// Release events.
+/*
+	published: a release, pre-release, or draft of a release is published
+	unpublished: a release or pre-release is deleted
+	created: a draft is saved, or a release or pre-release is published without previously being saved as a draft
+	edited: a release, pre-release, or draft release is edited
+	deleted: a release, pre-release, or draft release is deleted
+	prereleased: a pre-release is created
+	released: a release or draft of a release is published, or a pre-release is changed to a release
+*/
+
 // Opts defines configuration options.
 type Opts struct {
 	URL        string // GitHub server url.
@@ -48,18 +59,25 @@ type Opts struct {
 	Secret     string // GitHub oauth client secret.
 	SkipVerify bool   // Skip ssl verification.
 	MergeRef   bool   // Clone pull requests using the merge ref.
+
+	/*
+		On which actions to trigger a release.
+		Can be: published, unpublished, created, edited, deleted, prereleased, released
+	*/
+	ReleaseActions []string
 }
 
 // New returns a Remote implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
 	r := &client{
-		API:        defaultAPI,
-		URL:        defaultURL,
-		Client:     opts.Client,
-		Secret:     opts.Secret,
-		SkipVerify: opts.SkipVerify,
-		MergeRef:   opts.MergeRef,
+		API:            defaultAPI,
+		URL:            defaultURL,
+		Client:         opts.Client,
+		Secret:         opts.Secret,
+		SkipVerify:     opts.SkipVerify,
+		MergeRef:       opts.MergeRef,
+		ReleaseActions: opts.ReleaseActions,
 	}
 	if opts.URL != defaultURL {
 		r.URL = strings.TrimSuffix(opts.URL, "/")
@@ -70,12 +88,13 @@ func New(opts Opts) (remote.Remote, error) {
 }
 
 type client struct {
-	URL        string
-	API        string
-	Client     string
-	Secret     string
-	SkipVerify bool
-	MergeRef   bool
+	URL            string
+	API            string
+	Client         string
+	Secret         string
+	SkipVerify     bool
+	MergeRef       bool
+	ReleaseActions []string // On which actions to trigger a release.
 }
 
 // Login authenticates the session and returns the remote user details.
@@ -479,7 +498,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	pull, repo, build, err := parseHook(r, c.MergeRef)
+	pull, repo, build, err := parseHook(r, c)
 	if err != nil {
 		return nil, nil, err
 	}
