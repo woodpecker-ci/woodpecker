@@ -115,10 +115,10 @@ Configures the Bitbucket Server address.
 
 Configures your Bitbucket Server consumer key.
 
-### `WOODPECKER_GITHUB_SECRET_FILE`
+### `WOODPECKER_STASH_CONSUMER_KEY_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
+Read the value for `WOODPECKER_STASH_CONSUMER_KEY` from the specified filepath
 
 ### `WOODPECKER_STASH_CONSUMER_RSA`
 > Default: empty
