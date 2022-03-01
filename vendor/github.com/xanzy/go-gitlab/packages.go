@@ -30,7 +30,7 @@ type PackagesService struct {
 	client *Client
 }
 
-// Package represents a GitLab single package.
+// Package represents a GitLab package.
 //
 // GitLab API docs: https://docs.gitlab.com/ee/api/packages.html
 type Package struct {
@@ -38,11 +38,26 @@ type Package struct {
 	Name        string        `json:"name"`
 	Version     string        `json:"version"`
 	PackageType string        `json:"package_type"`
+	Status      string        `json:"status"`
 	Links       *PackageLinks `json:"_links"`
 	CreatedAt   *time.Time    `json:"created_at"`
+	Tags        []string      `json:"tags"`
 }
 
 func (s Package) String() string {
+	return Stringify(s)
+}
+
+// GroupPackage represents a GitLab group package.
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/packages.html
+type GroupPackage struct {
+	Package
+	ProjectID   int    `json:"project_id"`
+	ProjectPath string `json:"project_path"`
+}
+
+func (s GroupPackage) String() string {
 	return Stringify(s)
 }
 
@@ -74,7 +89,8 @@ func (s PackageFile) String() string {
 	return Stringify(s)
 }
 
-// ListProjectPackagesOptions are the parameters available in a ListProjectPackages() Operation.
+// ListProjectPackagesOptions represents the available ListProjectPackages()
+// options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/packages.html#within-a-project
@@ -85,6 +101,7 @@ type ListProjectPackagesOptions struct {
 	PackageType        *string `url:"package_type,omitempty" json:"package_type,omitempty"`
 	PackageName        *string `url:"package_name,omitempty" json:"package_name,omitempty"`
 	IncludeVersionless *bool   `url:"include_versionless,omitempty" json:"include_versionless,omitempty"`
+	Status             *string `url:"status,omitempty" json:"status,omitempty"`
 }
 
 // ListProjectPackages gets a list of packages in a project.
@@ -96,7 +113,7 @@ func (s *PackagesService) ListProjectPackages(pid interface{}, opt *ListProjectP
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/packages", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/packages", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -112,8 +129,49 @@ func (s *PackagesService) ListProjectPackages(pid interface{}, opt *ListProjectP
 	return ps, resp, err
 }
 
-// ListPackageFilesOptions represents the available
-// ListPackageFiles() options.
+// ListGroupPackagesOptions represents the available ListGroupPackages()
+// options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/packages.html#within-a-group
+type ListGroupPackagesOptions struct {
+	ListOptions
+	ExcludeSubgroups   *bool   `url:"exclude_subgroups,omitempty" json:"exclude_subgroups,omitempty"`
+	OrderBy            *string `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Sort               *string `url:"sort,omitempty" json:"sort,omitempty"`
+	PackageType        *string `url:"package_type,omitempty" json:"package_type,omitempty"`
+	PackageName        *string `url:"package_name,omitempty" json:"package_name,omitempty"`
+	IncludeVersionless *bool   `url:"include_versionless,omitempty" json:"include_versionless,omitempty"`
+	Status             *string `url:"status,omitempty" json:"status,omitempty"`
+}
+
+// ListGroupPackages gets a list of packages in a group.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/packages.html#within-a-group
+func (s *PackagesService) ListGroupPackages(gid interface{}, opt *ListGroupPackagesOptions, options ...RequestOptionFunc) ([]*GroupPackage, *Response, error) {
+	group, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/packages", PathEscape(group))
+
+	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var ps []*GroupPackage
+	resp, err := s.client.Do(req, &ps)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return ps, resp, err
+}
+
+// ListPackageFilesOptions represents the available ListPackageFiles()
+// options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/packages.html#list-package-files
@@ -130,7 +188,7 @@ func (s *PackagesService) ListPackageFiles(pid interface{}, pkg int, opt *ListPa
 	}
 	u := fmt.Sprintf(
 		"projects/%s/packages/%d/package_files",
-		pathEscape(project),
+		PathEscape(project),
 		pkg,
 	)
 
@@ -157,7 +215,7 @@ func (s *PackagesService) DeleteProjectPackage(pid interface{}, pkg int, options
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/packages/%d", pathEscape(project), pkg)
+	u := fmt.Sprintf("projects/%s/packages/%d", PathEscape(project), pkg)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

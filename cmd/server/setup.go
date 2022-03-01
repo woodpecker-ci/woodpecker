@@ -173,7 +173,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return environments.Filesystem(c.StringSlice("environment"))
+	return environments.Parse(c.StringSlice("environment"))
 }
 
 // setupRemote helper function to setup the remote from the CLI arguments.
@@ -285,7 +285,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Client:     c.String("coding-client"),
 		Secret:     c.String("coding-secret"),
 		Scopes:     c.StringSlice("coding-scope"),
-		Machine:    c.String("coding-git-machine"),
 		Username:   c.String("coding-git-username"),
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),

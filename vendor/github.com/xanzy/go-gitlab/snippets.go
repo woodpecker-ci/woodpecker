@@ -51,6 +51,10 @@ type Snippet struct {
 	CreatedAt *time.Time `json:"created_at"`
 	WebURL    string     `json:"web_url"`
 	RawURL    string     `json:"raw_url"`
+	Files     []struct {
+		Path   string `json:"path"`
+		RawURL string `json:"raw_url"`
+	} `json:"files"`
 }
 
 func (s Snippet) String() string {
@@ -101,6 +105,15 @@ func (s *SnippetsService) GetSnippet(snippet int, options ...RequestOptionFunc) 
 	return ps, resp, err
 }
 
+// SnippetFile represents the object that is used to create snippets
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/snippets.html#create-new-snippet
+type SnippetFile struct {
+	FilePath *string `url:"file_path,omitempty" json:"file_path,omitempty"`
+	Content  *string `url:"content,omitempty" json:"content,omitempty"`
+}
+
 // CreateSnippetOptions represents the available CreateSnippet() options.
 //
 // GitLab API docs:
@@ -111,6 +124,7 @@ type CreateSnippetOptions struct {
 	Description *string          `url:"description,omitempty" json:"description,omitempty"`
 	Content     *string          `url:"content,omitempty" json:"content,omitempty"`
 	Visibility  *VisibilityValue `url:"visibility,omitempty" json:"visibility,omitempty"`
+	Files       *[]*SnippetFile  `url:"files,omitempty" json:"files,omitempty"`
 }
 
 // CreateSnippet creates a new snippet. The user must have permission
@@ -216,7 +230,7 @@ type ExploreSnippetsOptions ListOptions
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/snippets.html#explore-all-public-snippets
 func (s *SnippetsService) ExploreSnippets(opt *ExploreSnippetsOptions, options ...RequestOptionFunc) ([]*Snippet, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, "snippets/public", nil, options)
+	req, err := s.client.NewRequest(http.MethodGet, "snippets/public", opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
