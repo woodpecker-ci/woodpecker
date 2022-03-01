@@ -35,6 +35,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func loop(c *cli.Context) error {
@@ -119,7 +120,7 @@ func loop(c *cli.Context) error {
 		context.Background(),
 		metadata.Pairs("hostname", hostname),
 	)
-	ctx = WithContextFunc(ctx, func() {
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
 		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})

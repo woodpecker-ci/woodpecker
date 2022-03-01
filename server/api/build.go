@@ -453,16 +453,36 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	// fetch the pipeline config from database
+	var pipelineFiles []*remote.FileMeta
+
+	// fetch the old pipeline config from database
 	configs, err := _store.ConfigsForBuild(build.ID)
 	if err != nil {
 		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
 		_ = c.AbortWithError(404, err)
 		return
 	}
-	var yamls []*remote.FileMeta
+
 	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		pipelineFiles = append(pipelineFiles, &remote.FileMeta{Data: y.Data, Name: y.Name})
+	}
+
+	// If config extension is active we should refetch the config in case something changed
+	if server.Config.Services.ConfigService.IsConfigured() {
+		currentFileMeta := make([]*remote.FileMeta, len(configs))
+		for i, cfg := range configs {
+			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
+		}
+
+		newConfig, useOld, err := server.Config.Services.ConfigService.FetchExternalConfig(c, repo, build, currentFileMeta)
+		if err != nil {
+			msg := fmt.Sprintf("On fetching external build config: %s", err)
+			c.String(http.StatusBadRequest, msg)
+			return
+		}
+		if !useOld {
+			pipelineFiles = newConfig
+		}
 	}
 
 	build.ID = 0
@@ -515,7 +535,7 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls, envs)
+	build, buildItems, err := createBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
