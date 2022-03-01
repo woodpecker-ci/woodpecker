@@ -53,6 +53,10 @@ type (
 	}
 )
 
+func (constraints *Constraints) IsEmpty() bool {
+	return len(constraints.MatchList) == 0
+}
+
 // Returns true if any of the internal constraint in the match list
 // is true.
 func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
@@ -61,7 +65,7 @@ func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
 			return true
 		}
 	}
-	return len(constraints.MatchList) == 0
+	return constraints.IsEmpty()
 }
 
 func (constraints *Constraints) MatchStatus(status string) bool {
@@ -75,7 +79,7 @@ func (constraints *Constraints) MatchStatus(status string) bool {
 // True if (any) local
 func (constraints *Constraints) IsLocal() bool {
 	for _, c := range constraints.MatchList {
-		if c.Local.Bool() == true {
+		if c.Local.Bool() {
 			return true
 		}
 	}
