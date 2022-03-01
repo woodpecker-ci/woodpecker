@@ -12,7 +12,7 @@ pipeline:
        - ".woodpecker/docs.yml"
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview
+    image: woodpeckerci/plugin-surge-preview:next
     settings:
       path: docs/build/
       surge_token:
