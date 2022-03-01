@@ -101,7 +101,12 @@ check-xgo:
 	fi
 
 cross-compile-server:
-	$(foreach platform,$(subst ;, ,$(PLATFORMS)),TARGETOS=$(firstword $(subst |, ,$(platform))) TARGETARCH=$(word 2,$(subst |, ,$(platform))) make release-server-xgo || exit 1;)
+	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
+		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
+		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
+		make release-server-xgo || exit 1; \
+	)
 	tree dist
 	tree /build
 
@@ -109,12 +114,14 @@ release-server-xgo: check-xgo
 	@echo "Building for:"
 	@echo "os:$(TARGETOS)"
 	@echo "arch orgi:$(TARGETARCH)"
-	@echo "arch:$(subst arm64/v8,arm64,$(subst arm/v,arm-,$(TARGETARCH)))"
-	mkdir -p ./dist/server/$(TARGETOS)-$(TARGETARCH)
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(subst arm/v,arm-,$(TARGETARCH))' -out woodpecker-server -pkg cmd/server .
+	@echo "arch (xgo):$(TARGETARCH_XGO)"
+	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
+
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
     # TODO: use cleaner way of converting arm arch syntaxes
 	tree /build
-	mv /build/woodpecker-server-$(TARGETOS)-$(subst arm64/v8,arm64,$(subst arm/v,arm-,$(TARGETARCH))) ./dist/server/$(TARGETOS)-$(TARGETARCH)/woodpecker-server
+	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
+	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH_XGO) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server
 
 release-server:
 	# compile
