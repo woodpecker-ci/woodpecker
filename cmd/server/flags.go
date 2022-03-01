@@ -170,10 +170,11 @@ var flags = []cli.Flag{
 		Value:   "sqlite3",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DATABASE_DATASOURCE"},
-		Name:    "datasource",
-		Usage:   "database driver configuration string",
-		Value:   "woodpecker.sqlite",
+		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
+		Name:     "datasource",
+		Usage:    "database driver configuration string",
+		Value:    "woodpecker.sqlite",
+		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
@@ -396,16 +397,14 @@ var flags = []cli.Flag{
 		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_RSA"},
-		Name:     "stash-consumer-rsa",
-		Usage:    "stash oauth1 private key file",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_RSA_FILE"),
+		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
+		Name:    "stash-consumer-rsa",
+		Usage:   "stash oauth1 private key file",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
-		Name:     "stash-consumer-rsa-string",
-		Usage:    "stash oauth1 private key string",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_RSA_STRING_FILE"),
+		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
+		Name:    "stash-consumer-rsa-string",
+		Usage:   "stash oauth1 private key string",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},

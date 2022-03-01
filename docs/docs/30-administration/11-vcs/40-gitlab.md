@@ -46,10 +46,20 @@ Configures the GitLab server address.
 
 Configures the GitLab OAuth client id. This is used to authorize access.
 
+### `WOODPECKER_GITHUB_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
+
 ### `WOODPECKER_GITLAB_SECRET`
 > Default: empty
 
 Configures the GitLab OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITHUB_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
 
 ### `WOODPECKER_GITLAB_SKIP_VERIFY`
 > Default: `false`
