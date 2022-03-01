@@ -132,28 +132,31 @@ func loop(c *cli.Context) error {
 	for i := 0; i < parallel; i++ {
 		go func() {
 			defer wg.Done()
+
+			// new engine
+			engine, err := backend.FindEngine(c.String("backend-engine"))
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
+				return
+			}
+
+			// load engine (e.g. init api client)
+			err = engine.Load()
+			if err != nil {
+				log.Error().Err(err).Msg("cannot load backend engine")
+				return
+			}
+
+			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+
+			log.Debug().Msgf("loaded %s backend engine", engine.Name())
+
 			for {
 				if sigterm.IsSet() {
 					return
 				}
 
-				// new engine
-				engine, err := backend.FindEngine(c.String("backend-engine"))
-				if err != nil {
-					log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
-					return
-				}
-
-				// load engine (e.g. init api client)
-				err = engine.Load()
-				if err != nil {
-					log.Error().Err(err).Msg("cannot load backend engine")
-					return
-				}
-
-				log.Debug().Msgf("loaded %s backend engine", engine.Name())
-
-				r := agent.NewRunner(client, filter, hostname, counter, &engine)
+				log.Debug().Msg("polling new jobs")
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
