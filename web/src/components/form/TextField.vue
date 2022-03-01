@@ -22,6 +22,7 @@
         focus:outline-none focus:border-blue-400
         dark:placeholder-gray-600 dark:text-gray-500
       "
+      :disabled="disabled"
       :type="type"
       :placeholder="placeholder"
     />
@@ -36,6 +37,7 @@
         focus:outline-none focus:border-blue-400
         dark:placeholder-gray-600 dark:text-gray-500
       "
+      :disabled="disabled"
       :placeholder="placeholder"
       :rows="lines"
     />
@@ -69,6 +71,10 @@ export default defineComponent({
     lines: {
       type: Number,
       default: 1,
+    },
+
+    disabled: {
+      type: Boolean,
     },
   },
 
