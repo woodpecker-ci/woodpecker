@@ -1,13 +1,17 @@
 import useConfig from '~/compositions/useConfig';
+import useUserConfig from '~/compositions/useUserConfig';
 
 export default () =>
   ({
-    isAuthenticated: useConfig().user,
+    isAuthenticated: !!useConfig().user,
 
     user: useConfig().user,
 
-    authenticate(origin?: string) {
-      const url = `/login?url=${origin || ''}`;
-      window.location.href = url;
+    authenticate(url?: string) {
+      if (url) {
+        const config = useUserConfig();
+        config.setUserConfig('redirectUrl', url);
+      }
+      window.location.href = '/login';
     },
   } as const);
