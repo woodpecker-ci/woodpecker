@@ -25,6 +25,7 @@
     "fuse.js": "6.4.6",
     "humanize-duration": "3.27.0",
     "javascript-time-ago": "2.3.10",
+    "lodash": "^4.17.21",
     "node-emoji": "1.11.0",
     "pinia": "2.0.0",
     "vue": "v3.2.20",
