@@ -19,6 +19,13 @@ ifeq ($(BUILD_VERSION),next)
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+CGO_CFLAGS ?=
+
+HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
+ifeq ($(HAS_GO), GO)
+	XGO_VERSION ?= go-1.17.x
+	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
+endif
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -116,6 +123,31 @@ build-cli:
 build: build-agent build-server build-cli
 
 release-frontend: build-frontend
+
+check-xgo:
+	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) install src.techknowlogick.com/xgo@latest; \
+	fi
+
+cross-compile-server:
+	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
+		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
+		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
+		make release-server-xgo || exit 1; \
+	)
+	tree dist
+
+release-server-xgo: check-xgo
+	@echo "Building for:"
+	@echo "os:$(TARGETOS)"
+	@echo "arch orgi:$(TARGETARCH)"
+	@echo "arch (xgo):$(TARGETARCH_XGO)"
+	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
+
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
+	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH_XGO) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server
 
 release-server:
 	# compile
