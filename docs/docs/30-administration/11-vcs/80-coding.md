@@ -19,10 +19,20 @@ Configures the Coding server address.
 
 Configures the Coding OAuth client id. This is used to authorize access.
 
+### `WOODPECKER_CODING_CLIENT_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_CODING_CLIENT` from the specified filepath
+
 ### `WOODPECKER_CODING_SECRET`
 > Default: empty
 
 Configures the Coding OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_CODING_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_CODING_SECRET` from the specified filepath
 
 ### `WOODPECKER_CODING_SCOPE`
 > Default: `user, project, project:depot`
@@ -39,10 +49,20 @@ TODO
 
 This username is used to authenticate and clone all private repositories.
 
+### `WOODPECKER_CODING_GIT_USERNAME_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_CODING_GIT_USERNAME` from the specified filepath
+
 ### `WOODPECKER_CODING_GIT_PASSWORD`
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
+
+### `WOODPECKER_CODING_GIT_PASSWORD_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_CODING_GIT_PASSWORD` from the specified filepath
 
 ### `WOODPECKER_CODING_SKIP_VERIFY`
 > Default: `false`
