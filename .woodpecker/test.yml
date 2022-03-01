@@ -1,26 +1,35 @@
 pipeline:
   dummy-web:
-    image: golang:1.16
+    image: golang:1.17
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   lint:
-    image: golang:1.16
+    image: golang:1.17
     group: test
     commands:
       - make lint
     when:
       path:
-        include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
-          - "**/*.go"
-          - ".golangci.yml"
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   test:
-    image: golang:1.16
+    image: golang:1.17
     group: test
     commands:
       - make test-agent
@@ -29,37 +38,81 @@ pipeline:
       - make test-lib
     when:
       path:
-        include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
-          - "**/*.go"
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   sqlite:
-    image: golang:1.16
+    image: golang:1.17
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
-      - make test-server-datastore
+      - make test-server-datastore-coverage
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   postgres:
-    image: golang:1.16
+    image: golang:1.17
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   mysql:
-    image: golang:1.16
+    image: golang:1.17
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+
+  codecov:
+    pull: true
+    image: woodpeckerci/plugin-codecov:next-alpine
+    settings:
+      files:
+        - agent-coverage.out
+        - cli-coverage.out
+        - server-coverage.out
+        - datastore-coverage.out
+      token:
+        from_secret: codecov_token
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
 services:
   service-postgres:
@@ -68,9 +121,24 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+
   service-mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"

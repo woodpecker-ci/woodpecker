@@ -41,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -60,13 +61,8 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	// debug level if requested by user
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if c.Bool("debug") {
-		log.Warn().Msg("--debug is deprecated, use --log-level instead")
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -276,6 +272,21 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
 
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		secret := c.String("config-service-secret")
+		if secret == "" {
+			log.Error().Msg("could not configure configuration service, missing secret")
+		} else {
+			server.Config.Services.ConfigService = configuration.NewAPI(endpoint, secret)
+		}
+	}
+
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
 	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
@@ -296,6 +307,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
+	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")

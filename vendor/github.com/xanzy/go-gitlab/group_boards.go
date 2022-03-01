@@ -62,7 +62,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoards(gid interface{}, opt *Lis
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/boards", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -96,7 +96,7 @@ func (s *GroupIssueBoardsService) CreateGroupIssueBoard(gid interface{}, opt *Cr
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/boards", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -121,7 +121,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoard(gid interface{}, board int,
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d", PathEscape(group), board)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -145,7 +145,7 @@ type UpdateGroupIssueBoardOptions struct {
 	Name        *string `url:"name,omitempty" json:"name,omitempty"`
 	AssigneeID  *int    `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
 	MilestoneID *int    `url:"milestone_id,omitempty" json:"milestone_id,omitempty"`
-	Labels      Labels  `url:"labels,omitempty" json:"labels,omitempty"`
+	Labels      *Labels `url:"labels,omitempty" json:"labels,omitempty"`
 	Weight      *int    `url:"weight,omitempty" json:"weight,omitempty"`
 }
 
@@ -158,7 +158,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoard(gid interface{}, board int, o
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d", PathEscape(group), board)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -183,7 +183,7 @@ func (s *GroupIssueBoardsService) DeleteIssueBoard(gid interface{}, board int, o
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d", PathEscape(group), board)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -209,7 +209,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoardLists(gid interface{}, boar
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d/lists", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d/lists", PathEscape(group), board)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -235,7 +235,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoardList(gid interface{}, board,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		PathEscape(group),
 		board,
 		list,
 	)
@@ -272,7 +272,7 @@ func (s *GroupIssueBoardsService) CreateGroupIssueBoardList(gid interface{}, boa
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d/lists", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d/lists", PathEscape(group), board)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -308,7 +308,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoardList(gid interface{}, board, l
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		PathEscape(group),
 		board,
 		list,
 	)
@@ -338,7 +338,7 @@ func (s *GroupIssueBoardsService) DeleteGroupIssueBoardList(gid interface{}, boa
 		return nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		PathEscape(group),
 		board,
 		list,
 	)

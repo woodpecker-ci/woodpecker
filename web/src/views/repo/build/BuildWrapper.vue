@@ -51,7 +51,10 @@
         <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
-            <span>{{ since }}</span>
+            <Tooltip>
+              <span>{{ since }}</span>
+              <template #popper><span class="font-bold">Created</span> {{ created }}</template>
+            </Tooltip>
           </div>
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="duration" />
@@ -66,6 +69,7 @@
 </template>
 
 <script lang="ts">
+import { Tooltip } from 'floating-vue';
 import {
   computed,
   defineComponent,
@@ -105,6 +109,7 @@ export default defineComponent({
     IconButton,
     Tabs,
     Tab,
+    Tooltip,
   },
 
   props: {
@@ -153,7 +158,7 @@ export default defineComponent({
     }
 
     const build = buildStore.getBuild(repoOwner, repoName, buildId);
-    const { since, duration } = useBuild(build);
+    const { since, duration, created } = useBuild(build);
     provide('build', build);
 
     const { message } = useBuild(build);
@@ -245,6 +250,7 @@ export default defineComponent({
       cancelBuild,
       restartBuild,
       goBack: useRouteBackOrDefault({ name: 'repo' }),
+      created,
     };
   },
 });

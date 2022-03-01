@@ -69,20 +69,20 @@ type GeoNodesService struct {
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/geo_nodes.html#create-a-new-geo-node
 type CreateGeoNodesOptions struct {
-	Primary                          *bool    `url:"primary,omitempty" json:"primary,omitempty"`
-	Enabled                          *bool    `url:"enabled,omitempty" json:"enabled,omitempty"`
-	Name                             *string  `url:"name,omitempty" json:"name,omitempty"`
-	URL                              *string  `url:"url,omitempty" json:"url,omitempty"`
-	InternalURL                      *string  `url:"internal_url,omitempty" json:"internal_url,omitempty"`
-	FilesMaxCapacity                 *int     `url:"files_max_capacity,omitempty" json:"files_max_capacity,omitempty"`
-	ReposMaxCapacity                 *int     `url:"repos_max_capacity,omitempty" json:"repos_max_capacity,omitempty"`
-	VerificationMaxCapacity          *int     `url:"verification_max_capacity,omitempty" json:"verification_max_capacity,omitempty"`
-	ContainerRepositoriesMaxCapacity *int     `url:"container_repositories_max_capacity,omitempty" json:"container_repositories_max_capacity,omitempty"`
-	SyncObjectStorage                *bool    `url:"sync_object_storage,omitempty" json:"sync_object_storage,omitempty"`
-	SelectiveSyncType                *string  `url:"selective_sync_type,omitempty" json:"selective_sync_type,omitempty"`
-	SelectiveSyncShards              []string `url:"selective_sync_shards,omitempty" json:"selective_sync_shards,omitempty"`
-	SelectiveSyncNamespaceIds        []int    `url:"selective_sync_namespace_ids,omitempty" json:"selective_sync_namespace_ids,omitempty"`
-	MinimumReverificationInterval    *int     `url:"minimum_reverification_interval,omitempty" json:"minimum_reverification_interval,omitempty"`
+	Primary                          *bool     `url:"primary,omitempty" json:"primary,omitempty"`
+	Enabled                          *bool     `url:"enabled,omitempty" json:"enabled,omitempty"`
+	Name                             *string   `url:"name,omitempty" json:"name,omitempty"`
+	URL                              *string   `url:"url,omitempty" json:"url,omitempty"`
+	InternalURL                      *string   `url:"internal_url,omitempty" json:"internal_url,omitempty"`
+	FilesMaxCapacity                 *int      `url:"files_max_capacity,omitempty" json:"files_max_capacity,omitempty"`
+	ReposMaxCapacity                 *int      `url:"repos_max_capacity,omitempty" json:"repos_max_capacity,omitempty"`
+	VerificationMaxCapacity          *int      `url:"verification_max_capacity,omitempty" json:"verification_max_capacity,omitempty"`
+	ContainerRepositoriesMaxCapacity *int      `url:"container_repositories_max_capacity,omitempty" json:"container_repositories_max_capacity,omitempty"`
+	SyncObjectStorage                *bool     `url:"sync_object_storage,omitempty" json:"sync_object_storage,omitempty"`
+	SelectiveSyncType                *string   `url:"selective_sync_type,omitempty" json:"selective_sync_type,omitempty"`
+	SelectiveSyncShards              *[]string `url:"selective_sync_shards,omitempty" json:"selective_sync_shards,omitempty"`
+	SelectiveSyncNamespaceIds        *[]int    `url:"selective_sync_namespace_ids,omitempty" json:"selective_sync_namespace_ids,omitempty"`
+	MinimumReverificationInterval    *int      `url:"minimum_reverification_interval,omitempty" json:"minimum_reverification_interval,omitempty"`
 }
 
 // CreateGeoNode creates a new Geo Node.
@@ -155,20 +155,20 @@ func (s *GeoNodesService) GetGeoNode(id int, options ...RequestOptionFunc) (*Geo
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/geo_nodes.html#edit-a-geo-node
 type UpdateGeoNodesOptions struct {
-	ID                               *int     `url:"primary,omitempty" json:"primary,omitempty"`
-	Enabled                          *bool    `url:"enabled,omitempty" json:"enabled,omitempty"`
-	Name                             *string  `url:"name,omitempty" json:"name,omitempty"`
-	URL                              *string  `url:"url,omitempty" json:"url,omitempty"`
-	InternalURL                      *string  `url:"internal_url,omitempty" json:"internal_url,omitempty"`
-	FilesMaxCapacity                 *int     `url:"files_max_capacity,omitempty" json:"files_max_capacity,omitempty"`
-	ReposMaxCapacity                 *int     `url:"repos_max_capacity,omitempty" json:"repos_max_capacity,omitempty"`
-	VerificationMaxCapacity          *int     `url:"verification_max_capacity,omitempty" json:"verification_max_capacity,omitempty"`
-	ContainerRepositoriesMaxCapacity *int     `url:"container_repositories_max_capacity,omitempty" json:"container_repositories_max_capacity,omitempty"`
-	SyncObjectStorage                *bool    `url:"sync_object_storage,omitempty" json:"sync_object_storage,omitempty"`
-	SelectiveSyncType                *string  `url:"selective_sync_type,omitempty" json:"selective_sync_type,omitempty"`
-	SelectiveSyncShards              []string `url:"selective_sync_shards,omitempty" json:"selective_sync_shards,omitempty"`
-	SelectiveSyncNamespaceIds        []int    `url:"selective_sync_namespace_ids,omitempty" json:"selective_sync_namespace_ids,omitempty"`
-	MinimumReverificationInterval    *int     `url:"minimum_reverification_interval,omitempty" json:"minimum_reverification_interval,omitempty"`
+	ID                               *int      `url:"primary,omitempty" json:"primary,omitempty"`
+	Enabled                          *bool     `url:"enabled,omitempty" json:"enabled,omitempty"`
+	Name                             *string   `url:"name,omitempty" json:"name,omitempty"`
+	URL                              *string   `url:"url,omitempty" json:"url,omitempty"`
+	InternalURL                      *string   `url:"internal_url,omitempty" json:"internal_url,omitempty"`
+	FilesMaxCapacity                 *int      `url:"files_max_capacity,omitempty" json:"files_max_capacity,omitempty"`
+	ReposMaxCapacity                 *int      `url:"repos_max_capacity,omitempty" json:"repos_max_capacity,omitempty"`
+	VerificationMaxCapacity          *int      `url:"verification_max_capacity,omitempty" json:"verification_max_capacity,omitempty"`
+	ContainerRepositoriesMaxCapacity *int      `url:"container_repositories_max_capacity,omitempty" json:"container_repositories_max_capacity,omitempty"`
+	SyncObjectStorage                *bool     `url:"sync_object_storage,omitempty" json:"sync_object_storage,omitempty"`
+	SelectiveSyncType                *string   `url:"selective_sync_type,omitempty" json:"selective_sync_type,omitempty"`
+	SelectiveSyncShards              *[]string `url:"selective_sync_shards,omitempty" json:"selective_sync_shards,omitempty"`
+	SelectiveSyncNamespaceIds        *[]int    `url:"selective_sync_namespace_ids,omitempty" json:"selective_sync_namespace_ids,omitempty"`
+	MinimumReverificationInterval    *int      `url:"minimum_reverification_interval,omitempty" json:"minimum_reverification_interval,omitempty"`
 }
 
 // EditGeoNode updates settings of an existing Geo node.

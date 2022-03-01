@@ -22,6 +22,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -29,14 +30,15 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub     pubsub.Publisher
-		Queue      queue.Queue
-		Logs       logging.Log
-		Senders    model.SenderService
-		Secrets    model.SecretService
-		Registries model.RegistryService
-		Environ    model.EnvironService
-		Remote     remote.Remote
+		Pubsub        pubsub.Publisher
+		Queue         queue.Queue
+		Logs          logging.Log
+		Senders       model.SenderService
+		Secrets       model.SecretService
+		Registries    model.RegistryService
+		Environ       model.EnvironService
+		Remote        remote.Remote
+		ConfigService configuration.ConfigService
 	}
 	Storage struct {
 		// Users  model.UserStore
@@ -56,6 +58,7 @@ var Config = struct {
 		Port           string
 		Pass           string
 		Docs           string
+		StatusContext  string
 		SessionExpires time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
@@ -65,10 +68,12 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
+		AuthenticatePublicRepos bool
+		DefaultCloneImage       string
+		Limits                  model.ResourceLimit
+		Volumes                 []string
+		Networks                []string
+		Privileged              []string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

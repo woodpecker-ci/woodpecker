@@ -131,7 +131,7 @@ func (s *EventsService) ListProjectVisibleEvents(pid interface{}, opt *ListContr
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/events", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/events", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {

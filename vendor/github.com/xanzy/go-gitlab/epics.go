@@ -63,6 +63,7 @@ type Epic struct {
 	DueDateFromMilestones   *ISOTime    `json:"due_date_from_milestones"`
 	CreatedAt               *time.Time  `json:"created_at"`
 	UpdatedAt               *time.Time  `json:"updated_at"`
+	ClosedAt                *time.Time  `json:"closed_at"`
 	Labels                  []string    `json:"labels"`
 	Upvotes                 int         `json:"upvotes"`
 	Downvotes               int         `json:"downvotes"`
@@ -80,7 +81,7 @@ func (e Epic) String() string {
 type ListGroupEpicsOptions struct {
 	ListOptions
 	AuthorID                *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	Labels                  Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Labels                  *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	WithLabelDetails        *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
 	OrderBy                 *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort                    *string    `url:"sort,omitempty" json:"sort,omitempty"`
@@ -104,7 +105,7 @@ func (s *EpicsService) ListGroupEpics(gid interface{}, opt *ListGroupEpicsOption
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/epics", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -128,7 +129,7 @@ func (s *EpicsService) GetEpic(gid interface{}, epic int, options ...RequestOpti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d", pathEscape(group), epic)
+	u := fmt.Sprintf("groups/%s/epics/%d", PathEscape(group), epic)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -152,7 +153,7 @@ func (s *EpicsService) GetEpicLinks(gid interface{}, epic int, options ...Reques
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d/epics", pathEscape(group), epic)
+	u := fmt.Sprintf("groups/%s/epics/%d/epics", PathEscape(group), epic)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -174,7 +175,7 @@ func (s *EpicsService) GetEpicLinks(gid interface{}, epic int, options ...Reques
 type CreateEpicOptions struct {
 	Title            *string  `url:"title,omitempty" json:"title,omitempty"`
 	Description      *string  `url:"description,omitempty" json:"description,omitempty"`
-	Labels           Labels   `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Labels           *Labels  `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	StartDateIsFixed *bool    `url:"start_date_is_fixed,omitempty" json:"start_date_is_fixed,omitempty"`
 	StartDateFixed   *ISOTime `url:"start_date_fixed,omitempty" json:"start_date_fixed,omitempty"`
 	DueDateIsFixed   *bool    `url:"due_date_is_fixed,omitempty" json:"due_date_is_fixed,omitempty"`
@@ -189,7 +190,7 @@ func (s *EpicsService) CreateEpic(gid interface{}, opt *CreateEpicOptions, optio
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/epics", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -211,7 +212,7 @@ func (s *EpicsService) CreateEpic(gid interface{}, opt *CreateEpicOptions, optio
 type UpdateEpicOptions struct {
 	Title            *string  `url:"title,omitempty" json:"title,omitempty"`
 	Description      *string  `url:"description,omitempty" json:"description,omitempty"`
-	Labels           Labels   `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Labels           *Labels  `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	StartDateIsFixed *bool    `url:"start_date_is_fixed,omitempty" json:"start_date_is_fixed,omitempty"`
 	StartDateFixed   *ISOTime `url:"start_date_fixed,omitempty" json:"start_date_fixed,omitempty"`
 	DueDateIsFixed   *bool    `url:"due_date_is_fixed,omitempty" json:"due_date_is_fixed,omitempty"`
@@ -228,7 +229,7 @@ func (s *EpicsService) UpdateEpic(gid interface{}, epic int, opt *UpdateEpicOpti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d", pathEscape(group), epic)
+	u := fmt.Sprintf("groups/%s/epics/%d", PathEscape(group), epic)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -252,7 +253,7 @@ func (s *EpicsService) DeleteEpic(gid interface{}, epic int, options ...RequestO
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d", pathEscape(group), epic)
+	u := fmt.Sprintf("groups/%s/epics/%d", PathEscape(group), epic)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

@@ -46,16 +46,22 @@ var flags = []cli.Flag{
 		Usage:   "external networks",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_PREFIX"},
+		EnvVars: []string{"WOODPECKER_PREFIX"},
 		Name:    "prefix",
 		Value:   "woodpecker",
-		Usage:   "prefix containers created by woodpecker",
+		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
 		Hidden:  true,
 	},
 	&cli.StringSliceFlag{
 		Name:  "privileged",
 		Usage: "privileged plugins",
 		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Name:    "backend-engine",
+		Usage:   "backend engine to run pipelines on",
+		Value:   "auto-detect",
 	},
 
 	//

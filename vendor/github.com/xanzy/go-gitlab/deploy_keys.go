@@ -78,7 +78,7 @@ func (s *DeployKeysService) ListProjectDeployKeys(pid interface{}, opt *ListProj
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/deploy_keys", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *DeployKeysService) GetDeployKey(pid interface{}, deployKey int, options
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys/%d", pathEscape(project), deployKey)
+	u := fmt.Sprintf("projects/%s/deploy_keys/%d", PathEscape(project), deployKey)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -140,7 +140,7 @@ func (s *DeployKeysService) AddDeployKey(pid interface{}, opt *AddDeployKeyOptio
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/deploy_keys", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *DeployKeysService) DeleteDeployKey(pid interface{}, deployKey int, opti
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys/%d", pathEscape(project), deployKey)
+	u := fmt.Sprintf("projects/%s/deploy_keys/%d", PathEscape(project), deployKey)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -184,7 +184,7 @@ func (s *DeployKeysService) EnableDeployKey(pid interface{}, deployKey int, opti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys/%d/enable", pathEscape(project), deployKey)
+	u := fmt.Sprintf("projects/%s/deploy_keys/%d/enable", PathEscape(project), deployKey)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -218,7 +218,7 @@ func (s *DeployKeysService) UpdateDeployKey(pid interface{}, deployKey int, opt 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deploy_keys/%d", pathEscape(project), deployKey)
+	u := fmt.Sprintf("projects/%s/deploy_keys/%d", PathEscape(project), deployKey)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
