@@ -37,15 +37,16 @@ type (
 )
 
 func (c *Config) MatchConstraints(meta frontend.Metadata) bool {
-	if c.Constraints.Match(meta) {
+	if len(c.ConstraintsArray) > 0 {
+		for _, c := range c.ConstraintsArray {
+			if c.Match(meta) {
+				return true
+			}
+		}
+	} else if c.Constraints.Match(meta) {
 		return true
 	}
 
-	for _, c := range c.ConstraintsArray {
-		if c.Match(meta) {
-			return true
-		}
-	}
 	return false
 }
 
