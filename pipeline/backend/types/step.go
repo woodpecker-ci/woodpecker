@@ -2,17 +2,21 @@ package types
 
 // Step defines a container process.
 type Step struct {
-	Name         string            `json:"name"`
+	Name        string            `json:"name"`
+	Image       string            `json:"image,omitempty"`
+	Pull        bool              `json:"pull,omitempty"`
+	Detached    bool              `json:"detach,omitempty"`
+	Privileged  bool              `json:"privileged,omitempty"`
+	WorkingDir  string            `json:"working_dir,omitempty"`
+	Environment map[string]string `json:"environment,omitempty"`
+	Entrypoint  []string          `json:"entrypoint,omitempty"`
+	Command     []string          `json:"command,omitempty"`
+	OnFailure   bool              `json:"on_failure,omitempty"`
+	OnSuccess   bool              `json:"on_success,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+
+	// Docker backend specific configuration.
 	Alias        string            `json:"alias,omitempty"`
-	Image        string            `json:"image,omitempty"`
-	Pull         bool              `json:"pull,omitempty"`
-	Detached     bool              `json:"detach,omitempty"`
-	Privileged   bool              `json:"privileged,omitempty"`
-	WorkingDir   string            `json:"working_dir,omitempty"`
-	Environment  map[string]string `json:"environment,omitempty"`
-	Labels       map[string]string `json:"labels,omitempty"`
-	Entrypoint   []string          `json:"entrypoint,omitempty"`
-	Command      []string          `json:"command,omitempty"`
 	ExtraHosts   []string          `json:"extra_hosts,omitempty"`
 	Volumes      []string          `json:"volumes,omitempty"`
 	Tmpfs        []string          `json:"tmpfs,omitempty"`
@@ -26,8 +30,6 @@ type Step struct {
 	CPUQuota     int64             `json:"cpu_quota,omitempty"`
 	CPUShares    int64             `json:"cpu_shares,omitempty"`
 	CPUSet       string            `json:"cpu_set,omitempty"`
-	OnFailure    bool              `json:"on_failure,omitempty"`
-	OnSuccess    bool              `json:"on_success,omitempty"`
 	AuthConfig   Auth              `json:"auth_config,omitempty"`
 	NetworkMode  string            `json:"network_mode,omitempty"`
 	IpcMode      string            `json:"ipc_mode,omitempty"`

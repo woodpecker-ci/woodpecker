@@ -146,17 +146,23 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	return &backend.Step{
-		Name:         name,
+		Name:        name,
+		Image:       image,
+		Pull:        container.Pull,
+		Detached:    detached,
+		Privileged:  privileged,
+		WorkingDir:  workingdir,
+		Environment: environment,
+		Entrypoint:  entrypoint,
+		Command:     command,
+		Labels:      container.Labels,
+		OnSuccess:   container.Constraints.Status.Match("success"),
+		OnFailure: (len(container.Constraints.Status.Include)+
+			len(container.Constraints.Status.Exclude) != 0) &&
+			container.Constraints.Status.Match("failure"),
+
+		// docker specific settings
 		Alias:        container.Name,
-		Image:        image,
-		Pull:         container.Pull,
-		Detached:     detached,
-		Privileged:   privileged,
-		WorkingDir:   workingdir,
-		Environment:  environment,
-		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
 		Tmpfs:        container.Tmpfs,
@@ -172,11 +178,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.Status.Match("success"),
-		OnFailure: (len(container.Constraints.Status.Include)+
-			len(container.Constraints.Status.Exclude) != 0) &&
-			container.Constraints.Status.Match("failure"),
-		NetworkMode: networkMode,
-		IpcMode:     ipcMode,
+		NetworkMode:  networkMode,
+		IpcMode:      ipcMode,
 	}
 }
