@@ -13,6 +13,7 @@ spec:
   # Number of times to run is one.
   backoffLimit: 0
   parallelism: 1
+  completions: 1
   template:
     metadata:
       labels:

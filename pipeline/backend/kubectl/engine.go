@@ -103,11 +103,10 @@ func New() types.Engine {
 // Create parameters for the active run.
 func (backend *KubeBackend) CreateRun() *KubePiplineRun {
 	run := &KubePiplineRun{
-		Backend:     backend,
-		Config:      &types.Config{},
-		RunID:       CreateRandomID(10),
-		StepLoggers: make(map[string]*KubeResourceLogger),
-		PendingJobs: make(map[string]*KubeJobTemplate),
+		Backend:        backend,
+		Config:         &types.Config{},
+		RunID:          CreateRandomID(10),
+		ExecutingSteps: make(map[string]*KubePiplineRunStep),
 	}
 	return run
 }

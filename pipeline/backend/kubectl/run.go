@@ -13,19 +13,17 @@ import (
 )
 
 type KubePiplineRun struct {
-	Backend        *KubeBackend                // The kubectl backend
 	RunID          string                      // the random run id
+	Backend        *KubeBackend                // The kubectl backend
 	Config         *types.Config               // the run config
 	PVCs           []*KubePVCTemplate          // Loaded pvc's (via setup)
 	PVCByName      map[string]*KubePVCTemplate // Loaded pvc's by name
 	SetupTemplates []KubeTemplate              // Loaded setup templates
 
-	// Dynamic collections
-	DetachedJobs []*KubeJobTemplate             // Loaded detached template (services, etc..)
-	StepLoggers  map[string]*KubeResourceLogger // A collection of loggers per step.
-	PendingJobs  map[string]*KubeJobTemplate    // A collection of jobs which have not reached the wait stage.
+	// Currently running steps
+	ExecutingSteps map[string]*KubePiplineRunStep // A collection of jobs which have not reached the wait stage.
 
-	concurrentMutext sync.Mutex // a locking mutex for concurrent opperations.
+	stepMutex sync.Mutex // a locking mutex for concurrent opperations.
 }
 
 // Setup the pipeline environment, by applying the templated
@@ -67,37 +65,29 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 	logger := run.MakeLogger(nil)
 	logger.Debug().Msg("Destroying active run setup")
 
-	// stopping all step loggers
-	for stepName, stepLogger := range run.StepLoggers {
-		if stepLogger.IsRunning() {
-			err := stepLogger.Stop()
-			event := logger.Debug().Str("Step", stepName)
+	destroyJobs := []*KubeJobTemplate{}
+
+	// adding all jobs to destroy and
+	for _, runStep := range run.ExecutingSteps {
+		logger.Debug().Str("Step", runStep.Step.Name).Msgf("Destroying executing job")
+		destroyJobs = append(destroyJobs, runStep.Job)
+		if runStep.Logger.IsRunning() {
+			err := runStep.Logger.Stop()
+			event := logger.Debug().Str("Step", runStep.Step.Name)
 			if err != nil {
 				event.Err(err)
 			}
-			event.Msgf("Terminated logger")
+			event.Msgf("Stopped logger")
 		}
 	}
 
-	destroyJobs := []*KubeJobTemplate{}
-	if len(run.DetachedJobs) > 0 {
-		destroyJobs = append(destroyJobs, run.DetachedJobs...)
-		logger.Debug().Msgf("Destroying %d detached jobs", len(run.DetachedJobs))
-	}
-
-	for _, job := range run.PendingJobs {
-		destroyJobs = append(destroyJobs, job)
-		logger.Debug().Msgf("Destroying pending job %s", job.Step.Name)
-	}
-
 	yamlsToDeploy := []string{}
-
 	setupYaml, err := run.RenderSetupYaml()
-	yamlsToDeploy = append(yamlsToDeploy, setupYaml)
-
 	if err != nil {
 		return err
 	}
+
+	yamlsToDeploy = append(yamlsToDeploy, setupYaml)
 
 	for _, job := range destroyJobs {
 		jobYaml, err := job.Render()
@@ -135,14 +125,7 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 // Exec the pipeline step.
 func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 	logger := run.MakeLogger(step)
-
-	jobTemplate := KubeJobTemplate{
-		Run:  run,
-		Step: step,
-	}
-	run.concurrentMutext.Lock()
-	run.PendingJobs[step.Name] = &jobTemplate
-	run.concurrentMutext.Unlock()
+	runStep := run.CreateRunStep(step)
 
 	if step.Detached {
 		step.Alias = Triary(
@@ -153,13 +136,13 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		logger.Debug().Msg("Job is pending")
 	}
 
-	jobAsYaml, err := jobTemplate.Render()
+	jobAsYaml, err := runStep.Job.Render()
 	if err != nil {
 		return err
 	}
 
 	// first create the wait
-	podWaiter := run.WaitForRunJobPod(ctx, &jobTemplate)
+	podWaiter := run.WaitForRunJobPod(ctx, runStep.Job)
 
 	// deploy the job.
 	output, err := run.Backend.Client.DeployKubectlYamlWithContext(
@@ -201,57 +184,32 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 		}
 
 		logger.Debug().Msg("Reading detached pod info")
-		err = run.PopulateDetachedInfo(ctx, podWaitResult.PodName, &jobTemplate)
+		err = run.PopulateDetachedInfo(ctx, podWaitResult.PodName, runStep.Job)
 		if err != nil {
 			return err
 		}
 
-		// updating records.
-		run.concurrentMutext.Lock()
-		run.DetachedJobs = append(run.DetachedJobs, &jobTemplate)
-		delete(run.PendingJobs, jobTemplate.Step.Name)
-		run.concurrentMutext.Unlock()
-
 		logger.Debug().Msg("Detached job ready")
 	}
+
+	runStep.Started = true
+
 	return nil
 }
 
 // Tail the pipeline step logs.
 func (run *KubePiplineRun) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+	runStep := run.GetRunStep(step)
 	logger := run.MakeLogger(step)
-	jobTemplate := KubeJobTemplate{
-		Run:  run,
-		Step: step,
-	}
-
-	stepLogger := &KubeResourceLogger{
-		Run:          run,
-		ResourceName: "job.batch/" + jobTemplate.JobName(),
-	}
-
-	// Used for destroy.
-	run.concurrentMutext.Lock()
-	run.StepLoggers[step.Name] = stepLogger
-	run.concurrentMutext.Unlock()
-
 	logger.Debug().Msg("Reading logs")
-	return stepLogger.Start(ctx)
+	return runStep.Logger.Start(ctx)
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+	runStep := run.GetRunStep(step)
 	logger := run.MakeLogger(step)
-	jobTemplate := KubeJobTemplate{
-		Run:  run,
-		Step: step,
-	}
-
-	// Clear pending job
-	run.concurrentMutext.Lock()
-	delete(run.PendingJobs, jobTemplate.Step.Name)
-	run.concurrentMutext.Unlock()
 
 	logger.Info().
 		Str("Context", run.Context()).
@@ -260,7 +218,7 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 
 	jobEndCondition := <-run.Backend.Client.WaitForConditions(
 		ctx,
-		"job/"+jobTemplate.JobName(),
+		"job/"+runStep.Job.JobName(),
 		[]string{"Complete", "Failed"},
 		1,
 	)
@@ -275,9 +233,8 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 
 	// From this point job has ended.
 	logger.Debug().Msgf("Job ended with '%s'", condition)
-	stepLogger := run.StepLoggers[step.Name]
 
-	if stepLogger.IsRunning() {
+	if runStep.Logger.IsRunning() {
 		logger.Debug().Msg("Job ended but reader is still active. Waiting for logs.")
 		select {
 		case <-time.After(run.Backend.Client.RequestTimeout):
@@ -285,13 +242,13 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 				"Timed out waiting for logs to complete. Partial/empty logs",
 			)
 			break
-		case <-stepLogger.Done():
+		case <-runStep.Logger.Done():
 			logger.Debug().Msg("Logger completed.")
 			break
 		}
 	}
 
-	err := stepLogger.Stop()
+	err := runStep.Logger.Stop()
 	if err != nil {
 		logger.Err(err).Msg("Error(s) occurred while reading logs.")
 	}
@@ -340,7 +297,7 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 	}
 
 	if doDelete {
-		asJobYaml, err := jobTemplate.Render()
+		asJobYaml, err := runStep.Job.Render()
 		if err != nil {
 			return state, err
 		}
@@ -359,6 +316,9 @@ func (run *KubePiplineRun) Wait(ctx context.Context, step *types.Step) (*types.S
 			Str("DeletePolicy", run.Backend.DeletePolicy).
 			Msg("Job artifact kept in cluster")
 	}
+
+	// Clear the current running step.
+	run.DeleteRunStep(runStep)
 
 	logger.Info().
 		Str("Context", run.Context()).

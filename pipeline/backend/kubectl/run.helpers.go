@@ -115,12 +115,18 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 
 			// wait for the events.
 			matchedEvents := <-eventsChan
-			event := matchedEvents.events[0]
-
 			if matchedEvents.err != nil {
 				action.Stop(matchedEvents.err)
 				return
-			} else if event == "BackOff" {
+			}
+
+			if len(matchedEvents.events) == 0 {
+				action.Stop(errors.New("No event found but wait stopped"))
+			}
+
+			event := matchedEvents.events[0]
+
+			if event == "BackOff" {
 				action.Stop(errors.New("Received pull BackOff from executing pod, execution error"))
 				return
 			}
