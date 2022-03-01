@@ -5,6 +5,7 @@ import (
 
 	"github.com/franela/goblin"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -18,6 +19,8 @@ func TestParse(t *testing.T) {
 				if err != nil {
 					g.Fail(err)
 				}
+
+				g.Assert(out.Constraints.Event.Match("push")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -66,12 +69,60 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
 				g.Assert(out.Pipeline.Containers[1].Constraints.Event.Include).Equal([]string{"success"})
 			})
+
+			matchConfig, err := ParseString(sampleYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.It("Should match event tester", func() {
+				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "tester",
+					},
+				})).Equal(true)
+			})
+
+			g.It("Should match event tester2", func() {
+				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "tester2",
+					},
+				})).Equal(true)
+			})
+
+			g.It("Should match branch master", func() {
+				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+					Curr: frontend.Build{
+						Commit: frontend.Commit{
+							Branch: "tester",
+						},
+					},
+				})).Equal(true)
+			})
+
+			g.It("Should not match event push", func() {
+				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "push",
+					},
+				})).Equal(false)
+			})
 		})
 	})
 }
 
 var sampleYaml = `
 image: hello-world
+when: # Should be ignored
+  event: 
+    - push
+whenArray:
+  - event:
+    - tester
+    - tester2
+  - branch:
+    - tester
 build:
   context: .
   dockerfile: Dockerfile

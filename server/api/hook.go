@@ -186,23 +186,23 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	filtered, err := branchFiltered(build, remoteYamlConfigs)
+	filtered, err := checkIfFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		msg := "failure to parse yaml from hook"
-		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
+		log.Info().Err(err).Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
 	if filtered {
-		msg := "ignoring hook: branch does not match restrictions defined in yaml"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
+		msg := "ignoring hook: none of the pipelines of the project would be triggered by this event"
+		log.Info().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
 	}
 
 	if zeroSteps(build, remoteYamlConfigs) {
 		msg := "ignoring hook: step conditions yield zero runnable steps"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
+		log.Info().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
 	}
@@ -269,12 +269,9 @@ func PostHook(c *gin.Context) {
 }
 
 // TODO: parse yaml once and not for each filter function
-func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+// Check if at least one pipeline config will be execute otherwise we will just ignore this webhook
+func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
-
-	if build.Event == model.EventTag || build.Event == model.EventDeploy {
-		return false, nil
-	}
 
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
@@ -284,11 +281,26 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		if parsedPipelineConfig.Branches.Match(build.Branch) {
-			return false, nil
+		// if was filtered by the constraints (event) continue
+		if !parsedPipelineConfig.Constraints.Event.Match(string(build.Event)) {
+			continue
 		}
+
+		// if was filtered by the constraints (branch) continue
+		if !parsedPipelineConfig.Constraints.Branch.Match(build.Branch) {
+			continue
+		}
+
+		// if was filtered by the branch (legacy) continue
+		if !parsedPipelineConfig.Branches.Match(build.Branch) {
+			continue
+		}
+
+		// at least one config yielded in a valid run.
+		return false, nil
 	}
 
+	// no configs yielded a valid run.
 	return true, nil
 }
 
