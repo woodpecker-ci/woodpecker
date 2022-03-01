@@ -269,7 +269,7 @@ var flags = []cli.Flag{
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
 	},
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_RELEASE_ACTIONS"},
 		Name:    "github-release-actions",
 		Usage:   "On which actions to trigger a release pipeline",
