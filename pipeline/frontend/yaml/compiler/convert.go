@@ -172,9 +172,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.MatchStatus("success"),
-		OnFailure:    container.Constraints.MatchStatus("failure"),
-		NetworkMode:  networkMode,
-		IpcMode:      ipcMode,
+		OnSuccess: len(container.Constraints.MatchList) == 0 ||
+			container.Constraints.MatchStatus("success"),
+		OnFailure: len(container.Constraints.MatchList) != 0 &&
+			container.Constraints.MatchStatus("failure"),
+		NetworkMode: networkMode,
+		IpcMode:     ipcMode,
 	}
 }

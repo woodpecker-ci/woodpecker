@@ -64,14 +64,12 @@ func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
 	return len(constraints.MatchList) == 0
 }
 
-// Matches all result statues.
 func (constraints *Constraints) MatchStatus(status string) bool {
-	for _, c := range constraints.MatchList {
-		if !c.Status.Match(status) {
-			return false
-		}
-	}
-	return len(constraints.MatchList) != 0
+	return constraints.Match(frontend.Metadata{
+		Curr: frontend.Build{
+			Status: status,
+		},
+	})
 }
 
 // True if (any) local
