@@ -137,7 +137,6 @@ cross-compile-server:
 		make release-server-xgo || exit 1; \
 	)
 	tree dist
-	tree /build
 
 release-server-xgo: check-xgo
 	@echo "Building for:"
@@ -147,8 +146,6 @@ release-server-xgo: check-xgo
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
-    # TODO: use cleaner way of converting arm arch syntaxes
-	tree /build
 	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
 	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH_XGO) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server
 
