@@ -15,6 +15,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/urfave/cli/v2"
@@ -34,9 +35,10 @@ var flags = []cli.Flag{
 		Value:   "x-oauth-basic",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
-		Name:    "grpc-password",
-		Usage:   "server-agent shared password",
+		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
+		Name:     "grpc-password",
+		Usage:    "server-agent shared password",
+		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},

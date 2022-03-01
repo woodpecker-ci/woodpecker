@@ -11,7 +11,7 @@ FROM alpine:3.14
 RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
 
-COPY --from=build src/dist/woodpecker-cli /bin/
+COPY --from=build /src/dist/woodpecker-cli /bin/
 
 HEALTHCHECK CMD ["/bin/woodpecker-cli", "ping"]
 ENTRYPOINT ["/bin/woodpecker-cli"]
