@@ -60,7 +60,7 @@ func (s *DiscussionsService) ListIssueDiscussions(pid interface{}, issue int, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/discussions", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/discussions", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *DiscussionsService) GetIssueDiscussion(pid interface{}, issue int, disc
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/issues/%d/discussions/%s",
-		pathEscape(project),
+		PathEscape(project),
 		issue,
 		discussion,
 	)
@@ -124,7 +124,7 @@ func (s *DiscussionsService) CreateIssueDiscussion(pid interface{}, issue int, o
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/discussions", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/discussions", PathEscape(project), issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -160,7 +160,7 @@ func (s *DiscussionsService) AddIssueDiscussionNote(pid interface{}, issue int, 
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/issues/%d/discussions/%s/notes",
-		pathEscape(project),
+		PathEscape(project),
 		issue,
 		discussion,
 	)
@@ -199,7 +199,7 @@ func (s *DiscussionsService) UpdateIssueDiscussionNote(pid interface{}, issue in
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/issues/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		issue,
 		discussion,
 		note,
@@ -229,7 +229,7 @@ func (s *DiscussionsService) DeleteIssueDiscussionNote(pid interface{}, issue in
 		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/issues/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		issue,
 		discussion,
 		note,
@@ -260,7 +260,7 @@ func (s *DiscussionsService) ListSnippetDiscussions(pid interface{}, snippet int
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/snippets/%d/discussions", pathEscape(project), snippet)
+	u := fmt.Sprintf("projects/%s/snippets/%d/discussions", PathEscape(project), snippet)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -286,7 +286,7 @@ func (s *DiscussionsService) GetSnippetDiscussion(pid interface{}, snippet int, 
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/snippets/%d/discussions/%s",
-		pathEscape(project),
+		PathEscape(project),
 		snippet,
 		discussion,
 	)
@@ -325,7 +325,7 @@ func (s *DiscussionsService) CreateSnippetDiscussion(pid interface{}, snippet in
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/snippets/%d/discussions", pathEscape(project), snippet)
+	u := fmt.Sprintf("projects/%s/snippets/%d/discussions", PathEscape(project), snippet)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -362,7 +362,7 @@ func (s *DiscussionsService) AddSnippetDiscussionNote(pid interface{}, snippet i
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/snippets/%d/discussions/%s/notes",
-		pathEscape(project),
+		PathEscape(project),
 		snippet,
 		discussion,
 	)
@@ -401,7 +401,7 @@ func (s *DiscussionsService) UpdateSnippetDiscussionNote(pid interface{}, snippe
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/snippets/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		snippet,
 		discussion,
 		note,
@@ -431,7 +431,7 @@ func (s *DiscussionsService) DeleteSnippetDiscussionNote(pid interface{}, snippe
 		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/snippets/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		snippet,
 		discussion,
 		note,
@@ -463,7 +463,7 @@ func (s *DiscussionsService) ListGroupEpicDiscussions(gid interface{}, epic int,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 	)
 
@@ -491,7 +491,7 @@ func (s *DiscussionsService) GetEpicDiscussion(gid interface{}, epic int, discus
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions/%s",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 		discussion,
 	)
@@ -531,7 +531,7 @@ func (s *DiscussionsService) CreateEpicDiscussion(gid interface{}, epic int, opt
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 	)
 
@@ -569,7 +569,7 @@ func (s *DiscussionsService) AddEpicDiscussionNote(gid interface{}, epic int, di
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions/%s/notes",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 		discussion,
 	)
@@ -608,7 +608,7 @@ func (s *DiscussionsService) UpdateEpicDiscussionNote(gid interface{}, epic int,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions/%s/notes/%d",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 		discussion,
 		note,
@@ -638,7 +638,7 @@ func (s *DiscussionsService) DeleteEpicDiscussionNote(gid interface{}, epic int,
 		return nil, err
 	}
 	u := fmt.Sprintf("groups/%s/epics/%d/discussions/%s/notes/%d",
-		pathEscape(group),
+		PathEscape(group),
 		epic,
 		discussion,
 		note,
@@ -670,7 +670,7 @@ func (s *DiscussionsService) ListMergeRequestDiscussions(pid interface{}, mergeR
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 	)
 
@@ -699,7 +699,7 @@ func (s *DiscussionsService) GetMergeRequestDiscussion(pid interface{}, mergeReq
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions/%s",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 		discussion,
 	)
@@ -741,7 +741,7 @@ func (s *DiscussionsService) CreateMergeRequestDiscussion(pid interface{}, merge
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 	)
 
@@ -779,7 +779,7 @@ func (s *DiscussionsService) ResolveMergeRequestDiscussion(pid interface{}, merg
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions/%s",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 		discussion,
 	)
@@ -819,7 +819,7 @@ func (s *DiscussionsService) AddMergeRequestDiscussionNote(pid interface{}, merg
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions/%s/notes",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 		discussion,
 	)
@@ -860,7 +860,7 @@ func (s *DiscussionsService) UpdateMergeRequestDiscussionNote(pid interface{}, m
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 		discussion,
 		note,
@@ -891,7 +891,7 @@ func (s *DiscussionsService) DeleteMergeRequestDiscussionNote(pid interface{}, m
 		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/merge_requests/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		mergeRequest,
 		discussion,
 		note,
@@ -923,7 +923,7 @@ func (s *DiscussionsService) ListCommitDiscussions(pid interface{}, commit int, 
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 	)
 
@@ -952,7 +952,7 @@ func (s *DiscussionsService) GetCommitDiscussion(pid interface{}, commit int, di
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 		discussion,
 	)
@@ -992,7 +992,7 @@ func (s *DiscussionsService) CreateCommitDiscussion(pid interface{}, commit int,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 	)
 
@@ -1030,7 +1030,7 @@ func (s *DiscussionsService) AddCommitDiscussionNote(pid interface{}, commit int
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 		discussion,
 	)
@@ -1069,7 +1069,7 @@ func (s *DiscussionsService) UpdateCommitDiscussionNote(pid interface{}, commit 
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 		discussion,
 		note,
@@ -1099,7 +1099,7 @@ func (s *DiscussionsService) DeleteCommitDiscussionNote(pid interface{}, commit 
 		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/repository/commits/%d/discussions/%s/notes/%d",
-		pathEscape(project),
+		PathEscape(project),
 		commit,
 		discussion,
 		note,

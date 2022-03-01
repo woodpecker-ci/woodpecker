@@ -48,7 +48,7 @@ func (s *EpicIssuesService) ListEpicIssues(gid interface{}, epic int, opt *ListO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d/issues", pathEscape(group), epic)
+	u := fmt.Sprintf("groups/%s/epics/%d/issues", PathEscape(group), epic)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -73,7 +73,7 @@ func (s *EpicIssuesService) AssignEpicIssue(gid interface{}, epic, issue int, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", pathEscape(group), epic, issue)
+	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", PathEscape(group), epic, issue)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -98,7 +98,7 @@ func (s *EpicIssuesService) RemoveEpicIssue(gid interface{}, epic, epicIssue int
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", pathEscape(group), epic, epicIssue)
+	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", PathEscape(group), epic, epicIssue)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -135,7 +135,7 @@ func (s *EpicIssuesService) UpdateEpicIssueAssignment(gid interface{}, epic, epi
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", pathEscape(group), epic, epicIssue)
+	u := fmt.Sprintf("groups/%s/epics/%d/issues/%d", PathEscape(group), epic, epicIssue)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {

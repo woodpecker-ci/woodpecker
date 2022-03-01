@@ -67,7 +67,7 @@ func (s *ProtectedEnvironmentsService) ListProtectedEnvironments(pid interface{}
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/protected_environments", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/protected_environments", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -92,7 +92,7 @@ func (s *ProtectedEnvironmentsService) GetProtectedEnvironment(pid interface{}, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/protected_environments/%s", pathEscape(project), pathEscape(environment))
+	u := fmt.Sprintf("projects/%s/protected_environments/%s", PathEscape(project), PathEscape(environment))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -114,8 +114,8 @@ func (s *ProtectedEnvironmentsService) GetProtectedEnvironment(pid interface{}, 
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/protected_environments.html#protect-repository-environments
 type ProtectRepositoryEnvironmentsOptions struct {
-	Name               *string                     `url:"name,omitempty" json:"name,omitempty"`
-	DeployAccessLevels []*EnvironmentAccessOptions `url:"deploy_access_levels,omitempty" json:"deploy_access_levels,omitempty"`
+	Name               *string                      `url:"name,omitempty" json:"name,omitempty"`
+	DeployAccessLevels *[]*EnvironmentAccessOptions `url:"deploy_access_levels,omitempty" json:"deploy_access_levels,omitempty"`
 }
 
 // EnvironmentAccessOptions represents the options for an access decription for
@@ -139,7 +139,7 @@ func (s *ProtectedEnvironmentsService) ProtectRepositoryEnvironments(pid interfa
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/protected_environments", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/protected_environments", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *ProtectedEnvironmentsService) UnprotectEnvironment(pid interface{}, env
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/protected_environments/%s", pathEscape(project), pathEscape(environment))
+	u := fmt.Sprintf("projects/%s/protected_environments/%s", PathEscape(project), PathEscape(environment))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

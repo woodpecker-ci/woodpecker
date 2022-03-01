@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -46,7 +47,13 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 		if err == nil {
 			break
 		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+			// TODO: remove after adding continuous data exchange by something like #536
+			if strings.Contains(err.Error(), "\"too_many_pings\"") {
+				// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
+				log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
+			} else {
+				log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+			}
 		}
 		switch status.Code(err) {
 		case

@@ -46,10 +46,20 @@ Configures the GitHub server address.
 
 Configures the GitHub OAuth client id. This is used to authorize access.
 
+### `WOODPECKER_GITHUB_CLIENT_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath
+
 ### `WOODPECKER_GITHUB_SECRET`
 > Default: empty
 
 Configures the GitHub OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITHUB_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
 
 ### `WOODPECKER_GITHUB_MERGE_REF`
 > Default: `true`

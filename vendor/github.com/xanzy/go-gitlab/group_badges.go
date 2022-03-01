@@ -66,7 +66,7 @@ func (s *GroupBadgesService) ListGroupBadges(gid interface{}, opt *ListGroupBadg
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/badges", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *GroupBadgesService) GetGroupBadge(gid interface{}, badge int, options .
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges/%d", pathEscape(group), badge)
+	u := fmt.Sprintf("groups/%s/badges/%d", PathEscape(group), badge)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -125,7 +125,7 @@ func (s *GroupBadgesService) AddGroupBadge(gid interface{}, opt *AddGroupBadgeOp
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/badges", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -159,7 +159,7 @@ func (s *GroupBadgesService) EditGroupBadge(gid interface{}, badge int, opt *Edi
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges/%d", pathEscape(group), badge)
+	u := fmt.Sprintf("groups/%s/badges/%d", PathEscape(group), badge)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -184,7 +184,7 @@ func (s *GroupBadgesService) DeleteGroupBadge(gid interface{}, badge int, option
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges/%d", pathEscape(group), badge)
+	u := fmt.Sprintf("groups/%s/badges/%d", PathEscape(group), badge)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -213,7 +213,7 @@ func (s *GroupBadgesService) PreviewGroupBadge(gid interface{}, opt *GroupBadgeP
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/badges/render", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/badges/render", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
