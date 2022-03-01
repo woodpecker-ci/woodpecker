@@ -116,7 +116,6 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	done := make(chan error)
 
 	for _, step := range steps {
-		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
 			switch {
