@@ -36,16 +36,16 @@ import (
 )
 
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
-type ProcBuilder struct {
-	Repo  *model.Repo
-	Curr  *model.Build
-	Last  *model.Build
-	Netrc *model.Netrc
-	Secs  []*model.Secret
-	Regs  []*model.Registry
-	Link  string
-	Yamls []*remote.FileMeta
-	Envs  map[string]string
+type PipelineBuilder struct {
+	Repo       *model.Repo
+	Curr       *model.Build
+	Last       *model.Build
+	Netrc      *model.Netrc
+	Secs       []*model.Secret
+	Regs       []*model.Registry
+	Link       string
+	RawConfigs []*remote.FileMeta
+	Envs       map[string]string
 }
 
 type BuildItem struct {
@@ -57,14 +57,14 @@ type BuildItem struct {
 	Config    *backend.Config
 }
 
-func (b *ProcBuilder) Build() ([]*BuildItem, error) {
+func (b *PipelineBuilder) Build() ([]*BuildItem, error) {
 	var items []*BuildItem
 
-	sort.Sort(remote.ByName(b.Yamls))
+	sort.Sort(remote.ByName(b.RawConfigs))
 
 	pidSequence := 1
 
-	for _, y := range b.Yamls {
+	for _, y := range b.RawConfigs {
 		// matrix axes
 		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
@@ -81,7 +81,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				PGID:    pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
-				Name:    SanitizePath(y.Name),
+				Name:    sanitizePipelinePath(y.Name),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -146,50 +146,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 	return items, nil
 }
 
-func procListContainsItemsToRun(items []*BuildItem) bool {
-	for i := range items {
-		if items[i].Proc.State == model.StatusPending {
-			return true
-		}
-	}
-	return false
-}
-
-func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
-	itemsToRemove := make([]*BuildItem, 0)
-
-	for _, item := range items {
-		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
-			}
-		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*BuildItem, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
-	}
-
-	return items
-}
-
-func containsItemWithName(name string, items []*BuildItem) bool {
-	for _, item := range items {
-		if name == item.Proc.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
+func (b *PipelineBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -199,7 +156,7 @@ func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, err
 	})
 }
 
-func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *PipelineBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
@@ -207,7 +164,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *PipelineBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -234,9 +191,9 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
-		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
-		compiler.WithNetworks(server.Config.Pipeline.Networks...),
+		// compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
+		// compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+		// compiler.WithNetworks(server.Config.Pipeline.Networks...),
 		compiler.WithLocal(false),
 		compiler.WithOption(
 			compiler.WithNetrc(
@@ -368,14 +325,57 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name: "woodpecker",
 			Link: link,
 			Host: host,
-			Arch: "linux/amd64",
+			Arch: "linux/amd64", // TODO don't hardcode
 		},
 	}
 }
 
-func SanitizePath(path string) string {
+func sanitizePipelinePath(path string) string {
 	path = filepath.Base(path)
 	path = strings.TrimSuffix(path, ".yml")
 	path = strings.TrimPrefix(path, ".")
 	return path
+}
+
+func procListContainsItemsToRun(items []*BuildItem) bool {
+	for i := range items {
+		if items[i].Proc.State == model.StatusPending {
+			return true
+		}
+	}
+	return false
+}
+
+func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
+	itemsToRemove := make([]*BuildItem, 0)
+
+	for _, item := range items {
+		for _, dep := range item.DependsOn {
+			if !containsItemWithName(dep, items) {
+				itemsToRemove = append(itemsToRemove, item)
+			}
+		}
+	}
+
+	if len(itemsToRemove) > 0 {
+		filtered := make([]*BuildItem, 0)
+		for _, item := range items {
+			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
+				filtered = append(filtered, item)
+			}
+		}
+		// Recursive to handle transitive deps
+		return filterItemsWithMissingDependencies(filtered)
+	}
+
+	return items
+}
+
+func containsItemWithName(name string, items []*BuildItem) bool {
+	for _, item := range items {
+		if name == item.Proc.Name {
+			return true
+		}
+	}
+	return false
 }

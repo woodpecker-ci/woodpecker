@@ -25,12 +25,6 @@ type Build struct {
 	Parent       int64        `json:"parent"                  xorm:"build_parent"`
 	Event        WebhookEvent `json:"event"                   xorm:"build_event"`
 	Status       StatusValue  `json:"status"                  xorm:"INDEX 'build_status'"`
-	Error        string       `json:"error"                   xorm:"build_error"`
-	Enqueued     int64        `json:"enqueued_at"             xorm:"build_enqueued"`
-	Created      int64        `json:"created_at"              xorm:"build_created"`
-	Updated      int64        `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
-	Started      int64        `json:"started_at"              xorm:"build_started"`
-	Finished     int64        `json:"finished_at"             xorm:"build_finished"`
 	Deploy       string       `json:"deploy_to"               xorm:"build_deploy"`
 	Commit       string       `json:"commit"                  xorm:"build_commit"`
 	Branch       string       `json:"branch"                  xorm:"build_branch"`
@@ -48,9 +42,17 @@ type Build struct {
 	Verified     bool         `json:"verified"                xorm:"build_verified"` // deprecate
 	Reviewer     string       `json:"reviewed_by"             xorm:"build_reviewer"`
 	Reviewed     int64        `json:"reviewed_at"             xorm:"build_reviewed"`
-	Procs        []*Proc      `json:"procs,omitempty"         xorm:"-"`
 	Files        []*File      `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
+
+	// execution data
+	Error    string  `json:"error"                   xorm:"build_error"`
+	Enqueued int64   `json:"enqueued_at"             xorm:"build_enqueued"`
+	Created  int64   `json:"created_at"              xorm:"build_created"`
+	Updated  int64   `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
+	Started  int64   `json:"started_at"              xorm:"build_started"`
+	Finished int64   `json:"finished_at"             xorm:"build_finished"`
+	Procs    []*Proc `json:"procs,omitempty"         xorm:"-"`
 }
 
 // TableName return database table name for xorm

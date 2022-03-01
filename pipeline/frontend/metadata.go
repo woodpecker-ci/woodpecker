@@ -17,7 +17,7 @@ const (
 )
 
 type (
-	// Metadata defines runtime m.
+	// Metadata defines runtime metadata.
 	Metadata struct {
 		ID   string `json:"id,omitempty"`
 		Repo Repo   `json:"repo,omitempty"`
