@@ -12,21 +12,20 @@ type (
 	// Config defines a pipeline configuration.
 	Config struct {
 		// TODO: change to When (also in Pipeline)
-		ConstraintsArray []constraint.Constraints `yaml:"whenArray,omitempty"`
-		Constraints      constraint.Constraints   `yaml:"when,omitempty"`
-		Cache            types.Stringorslice
-		Platform         string
-		Branches         constraint.List
-		Workspace        Workspace
-		Clone            Containers
-		Pipeline         Containers
-		Services         Containers
-		Networks         Networks
-		Volumes          Volumes
-		Labels           types.SliceorMap
-		DependsOn        []string `yaml:"depends_on,omitempty"`
-		RunsOn           []string `yaml:"runs_on,omitempty"`
-		SkipClone        bool     `yaml:"skip_clone"`
+		Constraints constraint.Constraints `yaml:"when,omitempty"`
+		Cache       types.Stringorslice
+		Platform    string
+		Branches    constraint.List
+		Workspace   Workspace
+		Clone       Containers
+		Pipeline    Containers
+		Services    Containers
+		Networks    Networks
+		Volumes     Volumes
+		Labels      types.SliceorMap
+		DependsOn   []string `yaml:"depends_on,omitempty"`
+		RunsOn      []string `yaml:"runs_on,omitempty"`
+		SkipClone   bool     `yaml:"skip_clone"`
 	}
 
 	// Workspace defines a pipeline workspace.
@@ -37,17 +36,7 @@ type (
 )
 
 func (c *Config) MatchConstraints(meta frontend.Metadata) bool {
-	if len(c.ConstraintsArray) > 0 {
-		for _, c := range c.ConstraintsArray {
-			if c.Match(meta) {
-				return true
-			}
-		}
-	} else if c.Constraints.Match(meta) {
-		return true
-	}
-
-	return false
+	return c.Constraints.Match(meta)
 }
 
 // ParseBytes parses the configuration from bytes b.

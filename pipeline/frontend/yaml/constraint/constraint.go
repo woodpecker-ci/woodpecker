@@ -14,6 +14,12 @@ import (
 type (
 	// Constraints defines a set of runtime constraints.
 	Constraints struct {
+		// If true then read from a list of constraint
+		FromList  bool
+		MatchList []Constraint
+	}
+
+	Constraint struct {
 		Ref         List
 		Repo        List
 		Instance    List
@@ -47,9 +53,51 @@ type (
 	}
 )
 
+// Returns true if any of the internal constraint in the match list
+// is true.
+func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
+	for _, c := range constraints.MatchList {
+		if c.Match(metadata) {
+			return true
+		}
+	}
+	return len(constraints.MatchList) == 0
+}
+
+func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
+	unmarshelAsList := func() error {
+		lst := []Constraint{}
+		err := value.Decode(&lst)
+		if err != nil {
+			return err
+		}
+		constraints.FromList = true
+		constraints.MatchList = lst
+		return nil
+	}
+
+	unmarshelAsDict := func() error {
+		c := Constraint{}
+		err := value.Decode(&c)
+		if err != nil {
+			return err
+		}
+		constraints.FromList = false
+		constraints.MatchList = append(constraints.MatchList, c)
+		return nil
+	}
+
+	err := unmarshelAsList()
+	if err != nil {
+		err = unmarshelAsDict()
+	}
+
+	return err
+}
+
 // Match returns true if all constraints match the given input. If a single
-// constraint fails a false value is returned.
-func (c *Constraints) Match(metadata frontend.Metadata) bool {
+// constraint failsa false value is returned.
+func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	match := c.Platform.Match(metadata.Sys.Arch) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
@@ -59,7 +107,7 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 		c.Instance.Match(metadata.Sys.Host) &&
 		c.Matrix.Match(metadata.Job.Matrix)
 
-	// changed files filter do only apply for pull-request and push events
+	// changed files filter apply only for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 	}

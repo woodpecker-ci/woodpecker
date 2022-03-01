@@ -59,8 +59,6 @@ tmpfs:
   - /var/lib/test
 when:
   branch: master
-whenArray:
-  - branch: masterArray
 settings:
   foo: bar
   baz: false
@@ -113,14 +111,11 @@ func TestUnmarshalContainer(t *testing.T) {
 			},
 		},
 		Constraints: constraint.Constraints{
-			Branch: constraint.List{
-				Include: []string{"master"},
-			},
-		},
-		ConstraintsArray: []constraint.Constraints{
-			{
-				Branch: constraint.List{
-					Include: []string{"masterArray"},
+			MatchList: []constraint.Constraint{
+				{
+					Branch: constraint.List{
+						Include: []string{"master"},
+					},
 				},
 			},
 		},
@@ -199,8 +194,10 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dry_run":    true,
 					},
 					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						MatchList: []constraint.Constraint{{
+							Event:  constraint.List{Include: []string{"push"}},
+							Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						}},
 					},
 				},
 			},
@@ -227,8 +224,10 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next"),
 					},
 					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						MatchList: []constraint.Constraint{{
+							Event:  constraint.List{Include: []string{"push"}},
+							Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+						}},
 					},
 				},
 			},

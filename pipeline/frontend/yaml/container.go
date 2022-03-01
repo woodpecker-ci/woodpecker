@@ -25,59 +25,49 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		AuthConfig       AuthConfig               `yaml:"auth_config,omitempty"`
-		CapAdd           []string                 `yaml:"cap_add,omitempty"`
-		CapDrop          []string                 `yaml:"cap_drop,omitempty"`
-		Command          types.Command            `yaml:"command,omitempty"`
-		Commands         types.Stringorslice      `yaml:"commands,omitempty"`
-		CPUQuota         types.StringorInt        `yaml:"cpu_quota,omitempty"`
-		CPUSet           string                   `yaml:"cpuset,omitempty"`
-		CPUShares        types.StringorInt        `yaml:"cpu_shares,omitempty"`
-		Detached         bool                     `yaml:"detach,omitempty"`
-		Devices          []string                 `yaml:"devices,omitempty"`
-		Tmpfs            []string                 `yaml:"tmpfs,omitempty"`
-		DNS              types.Stringorslice      `yaml:"dns,omitempty"`
-		DNSSearch        types.Stringorslice      `yaml:"dns_search,omitempty"`
-		Entrypoint       types.Command            `yaml:"entrypoint,omitempty"`
-		Environment      types.SliceorMap         `yaml:"environment,omitempty"`
-		ExtraHosts       []string                 `yaml:"extra_hosts,omitempty"`
-		Group            string                   `yaml:"group,omitempty"`
-		Image            string                   `yaml:"image,omitempty"`
-		Isolation        string                   `yaml:"isolation,omitempty"`
-		Labels           types.SliceorMap         `yaml:"labels,omitempty"`
-		MemLimit         types.MemStringorInt     `yaml:"mem_limit,omitempty"`
-		MemSwapLimit     types.MemStringorInt     `yaml:"memswap_limit,omitempty"`
-		MemSwappiness    types.MemStringorInt     `yaml:"mem_swappiness,omitempty"`
-		Name             string                   `yaml:"name,omitempty"`
-		NetworkMode      string                   `yaml:"network_mode,omitempty"`
-		IpcMode          string                   `yaml:"ipc_mode,omitempty"`
-		Networks         types.Networks           `yaml:"networks,omitempty"`
-		Privileged       bool                     `yaml:"privileged,omitempty"`
-		Pull             bool                     `yaml:"pull,omitempty"`
-		ShmSize          types.MemStringorInt     `yaml:"shm_size,omitempty"`
-		Ulimits          types.Ulimits            `yaml:"ulimits,omitempty"`
-		Volumes          types.Volumes            `yaml:"volumes,omitempty"`
-		Secrets          Secrets                  `yaml:"secrets,omitempty"`
-		Sysctls          types.SliceorMap         `yaml:"sysctls,omitempty"`
-		Constraints      constraint.Constraints   `yaml:"when,omitempty"`
-		ConstraintsArray []constraint.Constraints `yaml:"whenArray,omitempty"`
-		Settings         map[string]interface{}   `yaml:"settings"`
+		AuthConfig    AuthConfig             `yaml:"auth_config,omitempty"`
+		CapAdd        []string               `yaml:"cap_add,omitempty"`
+		CapDrop       []string               `yaml:"cap_drop,omitempty"`
+		Command       types.Command          `yaml:"command,omitempty"`
+		Commands      types.Stringorslice    `yaml:"commands,omitempty"`
+		CPUQuota      types.StringorInt      `yaml:"cpu_quota,omitempty"`
+		CPUSet        string                 `yaml:"cpuset,omitempty"`
+		CPUShares     types.StringorInt      `yaml:"cpu_shares,omitempty"`
+		Detached      bool                   `yaml:"detach,omitempty"`
+		Devices       []string               `yaml:"devices,omitempty"`
+		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
+		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
+		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
+		Entrypoint    types.Command          `yaml:"entrypoint,omitempty"`
+		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
+		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
+		Group         string                 `yaml:"group,omitempty"`
+		Image         string                 `yaml:"image,omitempty"`
+		Isolation     string                 `yaml:"isolation,omitempty"`
+		Labels        types.SliceorMap       `yaml:"labels,omitempty"`
+		MemLimit      types.MemStringorInt   `yaml:"mem_limit,omitempty"`
+		MemSwapLimit  types.MemStringorInt   `yaml:"memswap_limit,omitempty"`
+		MemSwappiness types.MemStringorInt   `yaml:"mem_swappiness,omitempty"`
+		Name          string                 `yaml:"name,omitempty"`
+		NetworkMode   string                 `yaml:"network_mode,omitempty"`
+		IpcMode       string                 `yaml:"ipc_mode,omitempty"`
+		Networks      types.Networks         `yaml:"networks,omitempty"`
+		Privileged    bool                   `yaml:"privileged,omitempty"`
+		Pull          bool                   `yaml:"pull,omitempty"`
+		ShmSize       types.MemStringorInt   `yaml:"shm_size,omitempty"`
+		Ulimits       types.Ulimits          `yaml:"ulimits,omitempty"`
+		Volumes       types.Volumes          `yaml:"volumes,omitempty"`
+		Secrets       Secrets                `yaml:"secrets,omitempty"`
+		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
+		Constraints   constraint.Constraints `yaml:"when,omitempty"`
+		Settings      map[string]interface{} `yaml:"settings"`
 		// Deprecated
 		Vargs map[string]interface{} `yaml:",inline"` // TODO: remove deprecated with v0.16.0
 	}
 )
 
 func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
-	if c.Constraints.Match(meta) {
-		return true
-	}
-
-	for _, c := range c.ConstraintsArray {
-		if c.Match(meta) {
-			return true
-		}
-	}
-	return false
+	return c.Constraints.Match(meta)
 }
 
 // UnmarshalYAML implements the Unmarshaler interface.

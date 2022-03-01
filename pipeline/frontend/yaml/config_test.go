@@ -20,7 +20,7 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
-				g.Assert(out.Constraints.Event.Match("push")).Equal(true)
+				g.Assert(out.Constraints.MatchList[0].Event.Match("tester")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -64,10 +64,11 @@ func TestParse(t *testing.T) {
 				}
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_fail")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
-				g.Assert(len(out.Pipeline.Containers[0].Constraints.Event.Include)).Equal(0)
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
-				g.Assert(out.Pipeline.Containers[1].Constraints.Event.Include).Equal([]string{"success"})
+
+				g.Assert(len(out.Pipeline.Containers[0].Constraints.MatchList)).Equal(0)
+				g.Assert(out.Pipeline.Containers[1].Constraints.MatchList[0].Event.Include).Equal([]string{"success"})
 			})
 
 			matchConfig, err := ParseString(sampleYaml)
@@ -114,10 +115,7 @@ func TestParse(t *testing.T) {
 
 var sampleYaml = `
 image: hello-world
-when: # Should be ignored
-  event: 
-    - push
-whenArray:
+when:
   - event:
     - tester
     - tester2
