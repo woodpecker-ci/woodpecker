@@ -31,6 +31,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -273,6 +274,15 @@ func PostHook(c *gin.Context) {
 func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
+	matchMetadata := frontend.Metadata{
+		Curr: frontend.Build{
+			Event: string(build.Event),
+			Commit: frontend.Commit{
+				Branch: build.Branch,
+			},
+		},
+	}
+
 	for _, remoteYamlConfig := range remoteYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
 		if err != nil {
@@ -281,13 +291,8 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		// if was filtered by the constraints (event) continue
-		if !parsedPipelineConfig.Constraints.Event.Match(string(build.Event)) {
-			continue
-		}
-
-		// if was filtered by the constraints (branch) continue
-		if !parsedPipelineConfig.Constraints.Branch.Match(build.Branch) {
+		// check filtered by match constraints.
+		if !parsedPipelineConfig.MatchConstraints(matchMetadata) {
 			continue
 		}
 
