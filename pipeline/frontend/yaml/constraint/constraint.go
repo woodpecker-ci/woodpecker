@@ -64,6 +64,26 @@ func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
 	return len(constraints.MatchList) == 0
 }
 
+// Matches all result statues.
+func (constraints *Constraints) MatchStatus(status string) bool {
+	for _, c := range constraints.MatchList {
+		if !c.Status.Match(status) {
+			return false
+		}
+	}
+	return len(constraints.MatchList) != 0
+}
+
+// True if (any) local
+func (constraints *Constraints) IsLocal() bool {
+	for _, c := range constraints.MatchList {
+		if c.Local.Bool() == true {
+			return true
+		}
+	}
+	return false
+}
+
 func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
 	unmarshelAsList := func() error {
 		lst := []Constraint{}
