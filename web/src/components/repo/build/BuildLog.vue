@@ -12,10 +12,8 @@
       <div v-show="loadedLogs" id="terminal" class="w-full" />
 
       <div class="text-gray-300 m-auto text-xl">
-        <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
-        <span v-else-if="proc?.state === 'skipped'" class="text-orange-300 dark:text-orange-800"
-          >This step has been skipped.</span
-        >
+        <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
+        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">This step has been skipped.</span>
         <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
         <div v-else-if="!loadedLogs" class="text-xl">Loading ...</div>
       </div>

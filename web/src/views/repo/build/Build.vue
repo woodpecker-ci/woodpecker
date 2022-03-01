@@ -4,9 +4,9 @@
       <BuildProcList v-model:selected-proc-id="selectedProcId" :build="build" />
 
       <div class="flex flex-grow relative">
-        <div v-if="build.error" class="flex flex-col p-4">
+        <div v-if="error" class="flex flex-col p-4">
           <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
-          <span class="text-red-400">{{ build.error }}</span>
+          <span class="text-red-400">{{ error }}</span>
         </div>
 
         <div v-else-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
@@ -46,6 +46,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Build, BuildProc, Repo, RepoPermissions } from '~/lib/api/types';
+import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'Build',
@@ -122,6 +123,19 @@ export default defineComponent({
       },
     });
 
+    const selectedProc = computed(() => findProc(build.value.procs || [], selectedProcId.value || -1));
+
+    const parentProc = computed(() => {
+      if (!selectedProcId.value) {
+        return undefined;
+      }
+
+      return build.value.procs?.find((p) => p.children?.find((c) => c.pid === selectedProcId.value));
+    });
+
+    // remove parent proc error detection
+    const error = computed(() => build.value?.error || selectedProc.value?.error || parentProc.value?.error);
+
     const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
@@ -144,6 +158,7 @@ export default defineComponent({
       repoPermissions,
       selectedProcId,
       build,
+      error,
       isApprovingBuild,
       isDecliningBuild,
       approveBuild,
