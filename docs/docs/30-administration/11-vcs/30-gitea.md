@@ -54,10 +54,20 @@ Configures the Gitea server address.
 
 Configures the Gitea OAuth client id. This is used to authorize access.
 
+### `WOODPECKER_GITEA_CLIENT_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITEA_CLIENT` from the specified filepath
+
 ### `WOODPECKER_GITEA_SECRET`
 > Default: empty
 
 Configures the Gitea OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITEA_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GITEA_SECRET` from the specified filepath
 
 ### `WOODPECKER_GITEA_SKIP_VERIFY`
 > Default: `false`
