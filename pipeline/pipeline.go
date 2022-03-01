@@ -116,6 +116,10 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	done := make(chan error)
 
 	for _, step := range steps {
+		// required since otherwise the loop variable
+		// will be captured by the function. This will
+		// recreate the step "variable"
+		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
 			switch {
