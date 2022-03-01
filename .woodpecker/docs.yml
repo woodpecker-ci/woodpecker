@@ -7,7 +7,9 @@ pipeline:
       - yarn build
     when:
       event: [push, pull_request]
-      path: "docs/**"
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview
@@ -21,7 +23,9 @@ pipeline:
         from_secret: GITHUB_REVIEW_TOKEN
     when:
       event: pull_request
-      path: "docs/**"
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
@@ -48,5 +52,7 @@ pipeline:
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      path: "docs/**"
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
 
