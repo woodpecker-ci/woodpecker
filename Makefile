@@ -165,16 +165,16 @@ bundle-prepare:
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
 
 bundle: bundle-agent bundle-server bundle-cli
 
