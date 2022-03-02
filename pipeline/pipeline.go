@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
@@ -40,12 +41,15 @@ type Runtime struct {
 	ctx    context.Context
 	tracer Tracer
 	logger Logger
+
+	Description map[string]string // The runtime descriptors.
 }
 
 // New returns a new runtime using the specified runtime
 // configuration and runtime engine.
 func New(spec *backend.Config, opts ...Option) *Runtime {
 	r := new(Runtime)
+	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
 	for _, opts := range opts {
@@ -54,16 +58,25 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	return r
 }
 
+func (r *Runtime) MakeLogger() zerolog.Logger {
+	logCtx := log.With()
+	for key, val := range r.Description {
+		logCtx = logCtx.Str(key, val)
+	}
+	return logCtx.Logger()
+}
+
 // Starts the execution of the pipeline and waits for it to complete
 func (r *Runtime) Run() error {
-	log.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
+	logger := r.MakeLogger()
+	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
 	for _, stage := range r.spec.Stages {
 		steps := []string{}
 		for _, step := range stage.Steps {
 			steps = append(steps, step.Name)
 		}
 
-		log.Debug().
+		logger.Debug().
 			Str("Stage", stage.Name).
 			Str("Steps", strings.Join(steps, ",")).
 			Msg("stage")
