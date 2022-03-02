@@ -72,10 +72,10 @@ func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
-	// TODO: Deprecate pipeline as map to achive proper yaml
-	decodeFromMap := func() ([]Container, error) {
-		containers := []Container{}
-		containersMap := map[string]Container{}
+	// TODO: Deprecate pipeline as map to achieve proper yaml
+	decodeFromMap := func() ([]*Container, error) {
+		containers := []*Container{}
+		containersMap := map[string]*Container{}
 		err := value.Decode(&containersMap)
 		if err != nil {
 			return containers, err
@@ -90,11 +90,16 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		return containers, nil
 	}
 
-	decodeFromList := func() ([]Container, error) {
-		containers := []Container{}
+	decodeFromList := func() ([]*Container, error) {
+		containers := []*Container{}
 		err := value.Decode(&containers)
 		if err != nil {
 			return containers, err
+		}
+		for i, container := range containers {
+			if container.Name == "" {
+				container.Name = fmt.Sprintf("step-%d", i)
+			}
 		}
 		return containers, nil
 	}
@@ -108,12 +113,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// Load and validate the container values.
-	for i, container := range containers {
-		if container.Name == "" {
-			container.Name = fmt.Sprintf("wp-step-%d", i)
-		}
-		c.Containers = append(c.Containers, &container)
-	}
+	c.Containers = containers
 
 	// TODO drop Vargs in favor of Settings in v0.16.0 release
 	for _, cc := range c.Containers {
