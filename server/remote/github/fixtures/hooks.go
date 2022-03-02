@@ -357,7 +357,7 @@ const HookDeploy = `
 // https://developer.github.com/v3/activity/events/types/#release
 const HookRelease = `
 {
-  "action": "published",
+  "action": "released",
   "release": {
     "url": "https://octocoders.github.io/api/v3/repos/Codertocat/Hello-World/releases/2",
     "assets_url": "https://octocoders.github.io/api/v3/repos/Codertocat/Hello-World/releases/2/assets",

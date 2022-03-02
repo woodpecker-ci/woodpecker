@@ -67,6 +67,7 @@ func parseHook(r *http.Request, c *client) (*github.PullRequest, *model.Repo, *m
 		return nil, repo, build, err
 	case *github.ReleaseEvent:
 		hasAction := false
+		println(*hook.Action)
 		for _, actionType := range c.ReleaseActions {
 			if actionType == *hook.Action {
 				hasAction = true
