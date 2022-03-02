@@ -186,7 +186,6 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 // Executes the step and returns the statem and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
-	logger := r.MakeLogger()
 
 	for key, value := range step.Environment {
 		if strings.HasPrefix(key, "CI_") {
@@ -205,8 +204,10 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		}
 
 		go func() {
+			logger := r.MakeLogger()
+
 			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
-				log.Error().Err(err).Msg("process logging failed")
+				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
 		}()
