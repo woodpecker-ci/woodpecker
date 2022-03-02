@@ -84,7 +84,7 @@ func (r *Runtime) Run() error {
 
 	defer func() {
 		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
-			log.Error().Err(err).Msg("could not destroy engine")
+			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
@@ -186,6 +186,8 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 // Executes the step and returns the statem and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
+	logger := r.MakeLogger()
+
 	for key, value := range step.Environment {
 		if strings.HasPrefix(key, "CI_") {
 			step.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
