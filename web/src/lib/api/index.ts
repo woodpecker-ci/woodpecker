@@ -111,6 +111,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/secrets`, secret);
   }
 
+  updateSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
+    return this._patch(`/api/repos/${owner}/${repo}/secrets/${secret.name}`, secret);
+  }
+
   deleteSecret(owner: string, repo: string, secretName: string): Promise<unknown> {
     return this._delete(`/api/repos/${owner}/${repo}/secrets/${secretName}`);
   }
@@ -121,6 +125,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   createRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
     return this._post(`/api/repos/${owner}/${repo}/registry`, registry);
+  }
+
+  updateRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/repos/${owner}/${repo}/registry/${registry.address}`, registry);
   }
 
   deleteRegistry(owner: string, repo: string, registryAddress: string): Promise<unknown> {
