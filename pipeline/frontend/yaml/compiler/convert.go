@@ -145,8 +145,15 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	stepName := container.Name
+	if len(stepName) == 0 {
+		stepName = name
+	} else {
+		stepName = section + "." + stepName
+	}
+
 	return &backend.Step{
-		Name:         name,
+		Name:         stepName,
 		Alias:        container.Name,
 		Image:        image,
 		Pull:         container.Pull,
@@ -172,10 +179,10 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.Status.Match("success"),
-		OnFailure: (len(container.Constraints.Status.Include)+
-			len(container.Constraints.Status.Exclude) != 0) &&
-			container.Constraints.Status.Match("failure"),
+		OnSuccess: container.Constraints.IsEmpty() ||
+			container.Constraints.MatchStatus("success"),
+		OnFailure: !container.Constraints.IsEmpty() &&
+			container.Constraints.MatchStatus("failure"),
 		NetworkMode: networkMode,
 		IpcMode:     ipcMode,
 	}
