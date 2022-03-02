@@ -67,9 +67,6 @@ func (r *Runtime) Run() error {
 		return err
 	}
 
-	// rendering order.
-	log.Debug().Str().Msg("ExecuteOrder")
-
 	for _, stage := range r.spec.Stages {
 		select {
 		case <-r.ctx.Done():
