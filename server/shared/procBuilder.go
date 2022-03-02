@@ -24,7 +24,6 @@ import (
 
 	"github.com/drone/envsubst"
 	"github.com/rs/zerolog/log"
-	"github.com/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
