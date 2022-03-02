@@ -26,6 +26,7 @@ const (
 	hookEvent       = "X-Gitea-Event"
 	hookPush        = "push"
 	hookCreated     = "create"
+	hookRelease     = "release"
 	hookPullRequest = "pull_request"
 
 	actionOpen = "opened"
@@ -47,7 +48,10 @@ func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
 		return parseCreatedHook(r.Body)
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
+	case hookRelease:
+		return parseReleaseHook(r.Body)
 	}
+
 	return nil, nil, nil
 }
 
@@ -69,7 +73,7 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = repoFromHook(&push.Repo)
 	build = buildFromPush(push)
 	return repo, build, err
 }
@@ -86,7 +90,7 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = repoFromHook(&push.Repo)
 	build = buildFromTag(push)
 	return repo, build, nil
 }
@@ -111,7 +115,24 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPullRequest(pr)
+	repo = repoFromHook(&pr.Repo)
 	build = buildFromPullRequest(pr)
+	return repo, build, err
+}
+
+// parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.
+func parseReleaseHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+	var (
+		repo  *model.Repo
+		build *model.Build
+	)
+
+	release, err := parseRelease(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	repo = repoFromHook(&release.Repo)
+	build = buildFromRelease(release)
 	return repo, build, err
 }

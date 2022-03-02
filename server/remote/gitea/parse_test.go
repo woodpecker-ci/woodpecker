@@ -53,5 +53,18 @@ func Test_parser(t *testing.T) {
 				g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 			})
 		})
+		g.Describe("given a release hook", func() {
+			g.It("should extract repository and build details", func() {
+				buf := bytes.NewBufferString(fixtures.HookRelease)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookRelease)
+				r, b, err := parseHook(req)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventRelease)
+			})
+		})
 	})
 }

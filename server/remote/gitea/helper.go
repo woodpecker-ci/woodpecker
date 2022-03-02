@@ -176,23 +176,40 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 	return build
 }
 
-// helper function that extracts the Repository data from a Gitea push hook
-func repoFromPush(hook *pushHook) *model.Repo {
-	return &model.Repo{
-		Name:     hook.Repo.Name,
-		Owner:    hook.Repo.Owner.Username,
-		FullName: hook.Repo.FullName,
-		Link:     hook.Repo.URL,
+func buildFromRelease(hook *releaseHook) *model.Build {
+	avatar := expandAvatar(
+		hook.Repo.URL,
+		fixMalformedAvatar(hook.Sender.Avatar),
+	)
+	author := hook.Sender.Login
+	if author == "" {
+		author = hook.Sender.Username
+	}
+	sender := hook.Sender.Username
+	if sender == "" {
+		sender = hook.Sender.Login
+	}
+
+	return &model.Build{
+		Event:     model.EventRelease,
+		Ref:       fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.URL, hook.Release.TagName),
+		Branch:    fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		Message:   fmt.Sprintf("created tag %s", hook.Release.TagName),
+		Avatar:    avatar,
+		Author:    author,
+		Sender:    sender,
+		Timestamp: time.Now().UTC().Unix(),
 	}
 }
 
 // helper function that extracts the Repository data from a Gitea pull_request hook
-func repoFromPullRequest(hook *pullRequestHook) *model.Repo {
+func repoFromHook(repo *giteaRepo) *model.Repo {
 	return &model.Repo{
-		Name:     hook.Repo.Name,
-		Owner:    hook.Repo.Owner.Username,
-		FullName: hook.Repo.FullName,
-		Link:     hook.Repo.URL,
+		Name:     repo.Name,
+		Owner:    repo.Owner.Username,
+		FullName: repo.FullName,
+		Link:     repo.URL,
 	}
 }
 
@@ -205,6 +222,12 @@ func parsePush(r io.Reader) (*pushHook, error) {
 
 func parsePullRequest(r io.Reader) (*pullRequestHook, error) {
 	pr := new(pullRequestHook)
+	err := json.NewDecoder(r).Decode(pr)
+	return pr, err
+}
+
+func parseRelease(r io.Reader) (*releaseHook, error) {
+	pr := new(releaseHook)
 	err := json.NewDecoder(r).Decode(pr)
 	return pr, err
 }

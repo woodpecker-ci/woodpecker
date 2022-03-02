@@ -14,6 +14,34 @@
 
 package gitea
 
+type giteaUser struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Login    string `json:"login"`
+	Avatar   string `json:"avatar_url"`
+}
+
+type giteaRepo struct {
+	ID       int64     `json:"id"`
+	Name     string    `json:"name"`
+	FullName string    `json:"full_name"`
+	URL      string    `json:"html_url"`
+	Private  bool      `json:"private"`
+	Owner    giteaUser `json:"owner,omitempty"`
+}
+
+type giteaSender struct {
+	ID       int64  `json:"id"`
+	Login    string `json:"login"`
+	Username string `json:"username"`
+	Name     string `json:"full_name"`
+	Email    string `json:"email"`
+	Avatar   string `json:"avatar_url"`
+}
+
 type pushHook struct {
 	Sha     string `json:"sha"`
 	Ref     string `json:"ref"`
@@ -22,25 +50,9 @@ type pushHook struct {
 	Compare string `json:"compare_url"`
 	RefType string `json:"ref_type"`
 
-	Pusher struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-	} `json:"pusher"`
-
-	Repo struct {
-		ID       int64  `json:"id"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		URL      string `json:"html_url"`
-		Private  bool   `json:"private"`
-		Owner    struct {
-			Name     string `json:"name"`
-			Email    string `json:"email"`
-			Username string `json:"username"`
-		} `json:"owner"`
-	} `json:"repository"`
+	Sender giteaSender `json:"sender"`
+	Repo   giteaRepo   `json:"repository"`
+	Pusher giteaUser   `json:"pusher"`
 
 	Commits []struct {
 		ID       string   `json:"id"`
@@ -50,19 +62,14 @@ type pushHook struct {
 		Removed  []string `json:"removed"`
 		Modified []string `json:"modified"`
 	} `json:"commits"`
-
-	Sender struct {
-		ID       int64  `json:"id"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Avatar   string `json:"avatar_url"`
-	} `json:"sender"`
 }
 
 type pullRequestHook struct {
-	Action      string `json:"action"`
-	Number      int64  `json:"number"`
+	Action string      `json:"action"`
+	Number int64       `json:"number"`
+	Repo   giteaRepo   `json:"repository"`
+	Sender giteaSender `json:"sender"`
+
 	PullRequest struct {
 		ID   int64 `json:"id"`
 		User struct {
@@ -84,18 +91,12 @@ type pullRequestHook struct {
 			Ref   string `json:"ref"`
 			Sha   string `json:"sha"`
 			Repo  struct {
-				ID       int64  `json:"id"`
-				Name     string `json:"name"`
-				FullName string `json:"full_name"`
-				URL      string `json:"html_url"`
-				Private  bool   `json:"private"`
-				Owner    struct {
-					ID       int64  `json:"id"`
-					Username string `json:"username"`
-					Name     string `json:"full_name"`
-					Email    string `json:"email"`
-					Avatar   string `json:"avatar_url"`
-				} `json:"owner"`
+				ID       int64     `json:"id"`
+				Name     string    `json:"name"`
+				FullName string    `json:"full_name"`
+				URL      string    `json:"html_url"`
+				Private  bool      `json:"private"`
+				Owner    giteaUser `json:"owner"`
 			} `json:"repo"`
 		} `json:"base"`
 		Head struct {
@@ -103,41 +104,36 @@ type pullRequestHook struct {
 			Ref   string `json:"ref"`
 			Sha   string `json:"sha"`
 			Repo  struct {
-				ID       int64  `json:"id"`
-				Name     string `json:"name"`
-				FullName string `json:"full_name"`
-				URL      string `json:"html_url"`
-				Private  bool   `json:"private"`
-				Owner    struct {
-					ID       int64  `json:"id"`
-					Username string `json:"username"`
-					Name     string `json:"full_name"`
-					Email    string `json:"email"`
-					Avatar   string `json:"avatar_url"`
-				} `json:"owner"`
+				ID       int64     `json:"id"`
+				Name     string    `json:"name"`
+				FullName string    `json:"full_name"`
+				URL      string    `json:"html_url"`
+				Private  bool      `json:"private"`
+				Owner    giteaUser `json:"owner"`
 			} `json:"repo"`
 		} `json:"head"`
 	} `json:"pull_request"`
-	Repo struct {
-		ID       int64  `json:"id"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		URL      string `json:"html_url"`
-		Private  bool   `json:"private"`
-		Owner    struct {
-			ID       int64  `json:"id"`
-			Username string `json:"username"`
-			Name     string `json:"full_name"`
-			Email    string `json:"email"`
-			Avatar   string `json:"avatar_url"`
-		} `json:"owner"`
-	} `json:"repository"`
-	Sender struct {
-		ID       int64  `json:"id"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-		Name     string `json:"full_name"`
-		Email    string `json:"email"`
-		Avatar   string `json:"avatar_url"`
-	} `json:"sender"`
+}
+
+type releaseHook struct {
+	Action  string      `json:"action"`
+	Repo    giteaRepo   `json:"repository"`
+	Sender  giteaSender `json:"sender"`
+	Release struct {
+		ID              int64     `json:"id"`
+		TagName         string    `json:"tag_name"`
+		TargetCommitish string    `json:"target_commitish"`
+		Name            string    `json:"name"`
+		Body            string    `json:"body"`
+		URL             string    `json:"url"`
+		HTMLURL         string    `json:"html_url"`
+		TarballURL      string    `json:"tarball_url"`
+		ZipballURL      string    `json:"zipball_url"`
+		Draft           bool      `json:"draft"`
+		Prerelease      bool      `json:"prerelease"`
+		CreatedAt       string    `json:"created_at"`
+		PublishedAt     string    `json:"published_at"`
+		Assets          []string  `json:"assets"`
+		Author          giteaUser `json:"author"`
+	}
 }

@@ -113,7 +113,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should return a Repo struct from a push hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, _ := parsePush(buf)
-			repo := repoFromPush(hook)
+			repo := repoFromHook(&hook.Repo)
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
 			g.Assert(repo.Owner).Equal(hook.Repo.Owner.Username)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
@@ -150,7 +150,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should return a Repo struct from a pull_request hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, _ := parsePullRequest(buf)
-			repo := repoFromPullRequest(hook)
+			repo := repoFromHook(&hook.Repo)
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
 			g.Assert(repo.Owner).Equal(hook.Repo.Owner.Username)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
