@@ -145,8 +145,21 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	stepName := container.Name
+	if len(stepName) == 0 {
+		stepName = name
+	} else {
+		stepName = section + "." + stepName
+	}
+
+	// all constraints must exclude success.
+	onSuccess := container.Constraints.IsEmpty() ||
+		!container.Constraints.ExcludesStatus("success")
+	// at least one constraint must include the status failure.
+	onFailure := container.Constraints.IncludesStatus("failure")
+
 	return &backend.Step{
-		Name:         name,
+		Name:         stepName,
 		Alias:        container.Name,
 		Image:        image,
 		Pull:         container.Pull,
@@ -172,11 +185,9 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess: container.Constraints.IsEmpty() ||
-			container.Constraints.MatchStatus("success"),
-		OnFailure: !container.Constraints.IsEmpty() &&
-			container.Constraints.MatchStatus("failure"),
-		NetworkMode: networkMode,
-		IpcMode:     ipcMode,
+		OnSuccess:    onSuccess,
+		OnFailure:    onFailure,
+		NetworkMode:  networkMode,
+		IpcMode:      ipcMode,
 	}
 }

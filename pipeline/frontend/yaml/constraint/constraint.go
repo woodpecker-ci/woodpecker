@@ -68,12 +68,24 @@ func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
 	return constraints.IsEmpty()
 }
 
-func (constraints *Constraints) MatchStatus(status string) bool {
-	return constraints.Match(frontend.Metadata{
-		Curr: frontend.Build{
-			Status: status,
-		},
-	})
+func (constraints *Constraints) IncludesStatus(status string) bool {
+	for _, c := range constraints.MatchList {
+		if c.Status.Includes(status) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (constraints *Constraints) ExcludesStatus(status string) bool {
+	for _, c := range constraints.MatchList {
+		if !c.Status.Excludes(status) {
+			return false
+		}
+	}
+
+	return len(constraints.MatchList) > 0
 }
 
 // False if (any) non local
