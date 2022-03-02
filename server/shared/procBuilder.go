@@ -111,10 +111,10 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				proc.State = model.StatusSkipped
 			}
 
-			// TODO: deprecated branches filter => remove after some time
-			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				proc.State = model.StatusSkipped
-			}
+			// // TODO: deprecated branches filter => remove after some time
+			// if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
+			// 	proc.State = model.StatusSkipped
+			// }
 
 			metadata.SetPlatform(parsed.Platform)
 
