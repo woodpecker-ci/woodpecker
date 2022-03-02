@@ -127,43 +127,48 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	}
 
 	// add default clone step
-	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
-		cloneImage := defaultCloneImage
-		if len(c.defaultCloneImage) > 0 {
-			cloneImage = c.defaultCloneImage
-		}
-		container := &yaml.Container{
-			Name:        defaultCloneName,
-			Image:       cloneImage,
-			Settings:    map[string]interface{}{"depth": "0"},
-			Environment: c.cloneEnv,
-		}
-		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, defaultCloneName)
-
-		stage := new(backend.Stage)
-		stage.Name = name
-		stage.Alias = defaultCloneName
-		stage.Steps = append(stage.Steps, step)
-		log.Debug().Msg("Added step")
-	} else if !c.local && !conf.SkipClone {
-		for i, container := range conf.Clone.Containers {
-			if !container.MatchConstraints(c.metadata) {
-				continue
+	if !c.local && !conf.SkipClone {
+		if len(conf.Clone.Containers) == 0 {
+			// Load from default clone
+			cloneImage := defaultCloneImage
+			if len(c.defaultCloneImage) > 0 {
+				cloneImage = c.defaultCloneImage
 			}
-			stage := new(backend.Stage)
-			stage.Name = fmt.Sprintf("%s_clone_%v", c.prefix, i)
-			stage.Alias = container.Name
-
-			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
+			container := &yaml.Container{
+				Name:        defaultCloneName,
+				Image:       cloneImage,
+				Settings:    map[string]interface{}{"depth": "0"},
+				Environment: c.cloneEnv,
+			}
+			name := fmt.Sprintf("%s_clone", c.prefix)
 			step := c.createProcess(name, container, defaultCloneName)
-			for k, v := range c.cloneEnv {
-				step.Environment[k] = v
-			}
-			stage.Steps = append(stage.Steps, step)
 
-			config.Stages = append(config.Stages, stage)
+			stage := new(backend.Stage)
+			stage.Name = name
+			stage.Alias = defaultCloneName
+			stage.Steps = append(stage.Steps, step)
+			log.Debug().Msg("Added step")
+		} else {
+			// Load from clone containers.
+			for i, container := range conf.Clone.Containers {
+				if !container.MatchConstraints(c.metadata) {
+					continue
+				}
+				stage := new(backend.Stage)
+				stage.Name = fmt.Sprintf("%s_clone_%v", c.prefix, i)
+				stage.Alias = container.Name
+
+				name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
+				step := c.createProcess(name, container, defaultCloneName)
+				for k, v := range c.cloneEnv {
+					step.Environment[k] = v
+				}
+				stage.Steps = append(stage.Steps, step)
+				config.Stages = append(config.Stages, stage)
+			}
 		}
+	} else {
+		log.Debug().Msg("Configuration has no cloaning step")
 	}
 
 	c.setupCache(conf, config)

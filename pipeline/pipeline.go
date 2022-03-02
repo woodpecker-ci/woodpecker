@@ -158,12 +158,12 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				logger.Debug().
 					Str("Step", step.Name).
 					Err(r.err).
-					Msgf("Skipped due to OnFailure=true")
+					Msgf("Skipped due to OnFailure=%t", step.OnFailure)
 				return nil
 			case r.err == nil && !step.OnSuccess:
 				logger.Debug().
 					Str("Step", step.Name).
-					Msgf("Skipped due to OnSuccess=false")
+					Msgf("Skipped due to OnSuccess=%t", step.OnSuccess)
 				return nil
 			}
 
