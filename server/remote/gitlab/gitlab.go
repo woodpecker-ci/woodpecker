@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -523,13 +524,17 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
+	gitlabEventType := gitlab.WebhookEventType(req)
+	println("Received event: " + gitlabEventType)
+	parsed, err := gitlab.ParseWebhook(gitlabEventType, payload)
+	println("Parsed event: ", parsed)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
+		println("Processing merge hook: " + reflect.TypeOf(*event).Name())
 		mergeIID, repo, build, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
@@ -540,10 +545,13 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return repo, build, nil
 	case *gitlab.PushEvent:
+		println("Processing push hook: " + reflect.TypeOf(*event).Name())
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
+		println("Processing tag hook: " + reflect.TypeOf(*event).Name())
 		return convertTagHook(event)
 	case *gitlab.ReleaseEvent:
+		println("Processing release hook: " + reflect.TypeOf(*event).Name())
 		// will create a run for all release types.
 		// TODO: add support for event action filtering.
 		return convertReleaseHook(event)

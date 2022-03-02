@@ -29,6 +29,11 @@ var (
 		"User-Agent":     []string{"GitLab/14.3.0"},
 		"X-Gitlab-Event": []string{"Service Hook"},
 	}
+	ReleaseHookHeaders = http.Header{
+		"Content-Type":   []string{"application/json"},
+		"User-Agent":     []string{"GitLab/14.3.0"},
+		"X-Gitlab-Event": []string{"Release Hook"},
+	}
 )
 
 // ServiceHookPushBody is payload of ServiceHook: Push
@@ -315,7 +320,7 @@ var WebhookMergeRequestBody = []byte(`{
 }
 `)
 
-var WebhookReleqaseBody = []byte(`
+var WebhookReleaseBody = []byte(`
 {
   "id": 4268085,
   "created_at": "2022-02-09 20:19:09 UTC",

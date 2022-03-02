@@ -228,15 +228,8 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 }
 
 func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Build, error) {
-	var err error
-	var repo_owner, repo_name string
-	if repo_owner, repo_name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
-		return nil, nil, err
-	}
 	repo := &model.Repo{
-		Name:         repo_name,
-		Owner:        repo_owner,
-		Avatar:       *hook.Project.AvatarURL,
+		Name:         hook.Project.Name,
 		Link:         hook.Project.WebURL,
 		Clone:        hook.Project.GitHTTPURL,
 		FullName:     hook.Project.PathWithNamespace,
@@ -256,9 +249,6 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Build, e
 		// Tag name here is the ref. We should add the refs/tags so
 		// it is known its a tag (git-plugin looks for it)
 		Ref: "refs/tags/" + hook.Tag,
-
-		// Since release make the avatar the project avatar
-		Avatar: *hook.Project.AvatarURL,
 	}
 
 	repo.IsSCMPrivate = false
