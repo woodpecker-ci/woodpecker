@@ -54,8 +54,21 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	return r
 }
 
-// Run starts the runtime and waits for it to complete.
+// Starts the execution of the pipeline and waits for it to complete
 func (r *Runtime) Run() error {
+	log.Debug().Msg("Executing (order):")
+	for _, stage := range r.spec.Stages {
+		steps := []string{}
+		for _, step := range stage.Steps {
+			steps = append(steps, step.Name)
+		}
+
+		log.Debug().
+			Str("Stage", stage.Name).
+			Str("Steps", strings.Join(steps, ",")).
+			Msg("stage")
+	}
+
 	defer func() {
 		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
 			log.Error().Err(err).Msg("could not destroy engine")
@@ -81,18 +94,72 @@ func (r *Runtime) Run() error {
 	return r.err
 }
 
-//
-//
-//
+// Updates the current status of a step
+func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
+	if r.tracer == nil {
+		// no tracer nothing to trace :)
+		return nil
+	}
 
-func (r *Runtime) execAll(procs []*backend.Step) <-chan error {
+	if processState == nil {
+		processState = new(backend.State)
+		if err != nil {
+			processState.Exited = true
+			processState.OOMKilled = false
+			processState.ExitCode = 126 // command invoked cannot be executed.
+		}
+	}
+
+	state := new(State)
+	state.Pipeline.Time = r.started
+	state.Pipeline.Step = step
+	state.Process = processState // empty
+	state.Pipeline.Error = r.err
+
+	traceErr := r.tracer.Trace(state)
+	if traceErr != nil {
+		return traceErr
+	}
+	return err
+}
+
+// Executes a set of parallel steps
+func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 
-	for _, proc := range procs {
-		proc := proc
+	for _, step := range steps {
+		// required since otherwise the loop variable
+		// will be captured by the function. This will
+		// recreate the step "variable"
+		step := step
 		g.Go(func() error {
-			return r.exec(proc)
+			// Case the pipeline was already complete.
+			switch {
+			case r.err != nil && !step.OnFailure:
+				return nil
+			case r.err == nil && !step.OnSuccess:
+				return nil
+			}
+
+			// Trace started.
+			err := r.traceStep(nil, nil, step)
+			if err != nil {
+				return err
+			}
+
+			processState, err := r.exec(step)
+
+			// if we got a nil process but an error state
+			// then we need to log the internal error to the step.
+			if r.logger != nil && err != nil && processState == nil {
+				_ = r.logger.Log(step, multipart.New(strings.NewReader(
+					"Backend engine error while running step: "+err.Error(),
+				)))
+			}
+
+			// Return the error after tracing it.
+			return r.traceStep(processState, err, step)
 		})
 	}
 
@@ -103,86 +170,54 @@ func (r *Runtime) execAll(procs []*backend.Step) <-chan error {
 	return done
 }
 
-//
-//
-//
-
-func (r *Runtime) exec(proc *backend.Step) error {
-	switch {
-	case r.err != nil && !proc.OnFailure:
-		return nil
-	case r.err == nil && !proc.OnSuccess:
-		return nil
-	}
-
-	if r.tracer != nil {
-		state := new(State)
-		state.Pipeline.Time = r.started
-		state.Pipeline.Error = r.err
-		state.Pipeline.Step = proc
-		state.Process = new(backend.State) // empty
-		if err := r.tracer.Trace(state); err == ErrSkip {
-			return nil
-		} else if err != nil {
-			return err
-		}
-	}
-
+// Executes the step and returns the statem and error.
+func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
-	for key, value := range proc.Environment {
+	for key, value := range step.Environment {
 		if strings.HasPrefix(key, "CI_") {
-			proc.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
+			step.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
 		}
 	}
 
-	if err := r.engine.Exec(r.ctx, proc); err != nil {
-		return err
+	if err := r.engine.Exec(r.ctx, step); err != nil {
+		return nil, err
 	}
 
 	if r.logger != nil {
-		rc, err := r.engine.Tail(r.ctx, proc)
+		rc, err := r.engine.Tail(r.ctx, step)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		go func() {
-			if err := r.logger.Log(proc, multipart.New(rc)); err != nil {
+			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
 				log.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
 		}()
 	}
 
-	if proc.Detached {
-		return nil
+	// nothing else to do, this is a detached process.
+	if step.Detached {
+		return nil, nil
 	}
 
-	wait, err := r.engine.Wait(r.ctx, proc)
+	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if r.tracer != nil {
-		state := new(State)
-		state.Pipeline.Time = r.started
-		state.Pipeline.Error = r.err
-		state.Pipeline.Step = proc
-		state.Process = wait
-		if err := r.tracer.Trace(state); err != nil {
-			return err
+	if waitState.OOMKilled {
+		return waitState, &OomError{
+			Name: step.Name,
+			Code: waitState.ExitCode,
+		}
+	} else if waitState.ExitCode != 0 {
+		return waitState, &ExitError{
+			Name: step.Name,
+			Code: waitState.ExitCode,
 		}
 	}
 
-	if wait.OOMKilled {
-		return &OomError{
-			Name: proc.Name,
-			Code: wait.ExitCode,
-		}
-	} else if wait.ExitCode != 0 {
-		return &ExitError{
-			Name: proc.Name,
-			Code: wait.ExitCode,
-		}
-	}
-	return nil
+	return waitState, nil
 }
