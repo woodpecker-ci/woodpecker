@@ -33,6 +33,7 @@
   <i-bx-bx-power-off v-else-if="name === 'turn-off'" class="h-6 w-6" />
   <i-mdi-chevron-right v-else-if="name === 'chevron-right'" class="h-6 w-6" />
   <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
+  <i-ic-baseline-edit v-else-if="name === 'edit'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -74,7 +75,8 @@ export type IconNames =
   | 'heal'
   | 'chevron-right'
   | 'turn-off'
-  | 'close';
+  | 'close'
+  | 'edit';
 
 export default defineComponent({
   name: 'Icon',

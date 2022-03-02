@@ -32,9 +32,9 @@
     @click="doClick"
   >
     <slot>
-      <Icon v-if="startIcon" :name="startIcon" class="mr-1" :class="{ invisible: isLoading }" />
+      <Icon v-if="startIcon" :name="startIcon" class="mr-1 !w-6 !h-6" :class="{ invisible: isLoading }" />
       <span :class="{ invisible: isLoading }">{{ text }}</span>
-      <Icon v-if="endIcon" :name="endIcon" class="ml-2" :class="{ invisible: isLoading }" />
+      <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
         :class="{
