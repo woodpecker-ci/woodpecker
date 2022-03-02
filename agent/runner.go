@@ -20,6 +20,7 @@ import (
 	"io"
 	"io/ioutil"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -286,6 +287,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		return nil
 	})
+
+	// parsing steps.
+	logger.Debug().Msg("Executing:")
+	for _, stage := range work.Config.Stages {
+		steps := []string{}
+		for _, step := range stage.Steps {
+			steps = append(steps, step.Name)
+		}
+
+		logger.Debug().
+			Str("Stage", stage.Name).
+			Str("Steps", strings.Join(steps, ",")).
+			Msg("stage")
+	}
 
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(ctx),
