@@ -314,3 +314,70 @@ var WebhookMergeRequestBody = []byte(`{
   ]
 }
 `)
+
+var WebhookReleqaseBody = []byte(`
+{
+  "id": 4268085,
+  "created_at": "2022-02-09 20:19:09 UTC",
+  "description": "new version desc",
+  "name": "Awesome version 0.0.2",
+  "released_at": "2022-02-09 20:19:09 UTC",
+  "tag": "0.0.2",
+  "object_kind": "release",
+  "project": {
+    "id": 32521798,
+    "name": "ci",
+    "description": "",
+    "web_url": "https://gitlab.com/anbratens-test/ci",
+    "avatar_url": null,
+    "git_ssh_url": "git@gitlab.com:anbratens-test/ci.git",
+    "git_http_url": "https://gitlab.com/anbratens-test/ci.git",
+    "namespace": "anbratens-test",
+    "visibility_level": 0,
+    "path_with_namespace": "anbratens-test/ci",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.com/anbratens-test/ci",
+    "url": "git@gitlab.com:anbratens-test/ci.git",
+    "ssh_url": "git@gitlab.com:anbratens-test/ci.git",
+    "http_url": "https://gitlab.com/anbratens-test/ci.git"
+  },
+  "url": "https://gitlab.com/anbratens-test/ci/-/releases/0.0.2",
+  "action": "create",
+  "assets": {
+    "count": 4,
+    "links": [
+
+    ],
+    "sources": [
+      {
+        "format": "zip",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.zip"
+      },
+      {
+        "format": "tar.gz",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar.gz"
+      },
+      {
+        "format": "tar.bz2",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar.bz2"
+      },
+      {
+        "format": "tar",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar"
+      }
+    ]
+  },
+  "commit": {
+    "id": "0b8c02955ba445ea70d22824d9589678852e2b93",
+    "message": "Initial commit",
+    "title": "Initial commit",
+    "timestamp": "2022-01-03T10:39:51+00:00",
+    "url": "https://gitlab.com/anbratens-test/ci/-/commit/0b8c02955ba445ea70d22824d9589678852e2b93",
+    "author": {
+      "name": "Anbraten",
+      "email": "2251488-anbraten@users.noreply.gitlab.com"
+    }
+  }
+}
+`)

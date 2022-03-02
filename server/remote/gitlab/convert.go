@@ -227,6 +227,51 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 	return repo, build, nil
 }
 
+func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Build, error) {
+	var err error
+	var repo_owner, repo_name string
+	if repo_owner, repo_name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
+	}
+	repo := &model.Repo{
+		Name:         repo_name,
+		Owner:        repo_owner,
+		Avatar:       *hook.Project.AvatarURL,
+		Link:         hook.Project.WebURL,
+		Clone:        hook.Project.GitHTTPURL,
+		FullName:     hook.Project.PathWithNamespace,
+		Branch:       hook.Project.DefaultBranch,
+		IsSCMPrivate: hook.Project.VisibilityLevel > 10,
+	}
+
+	build := &model.Build{
+		Event:   model.EventRelease,
+		Commit:  hook.Commit.ID,
+		Link:    hook.URL,
+		Message: "Release (" + hook.Action + "):" + hook.Name,
+		Title:   hook.Name,
+		Author:  hook.Commit.Author.Name,
+		Email:   hook.Commit.Author.Email,
+
+		// Tag name here is the ref. We should add the refs/tags so
+		// it is known its a tag (git-plugin looks for it)
+		Ref: "refs/tags/" + hook.Tag,
+
+		// Since release make the avatar the project avatar
+		Avatar: *hook.Project.AvatarURL,
+	}
+
+	repo.IsSCMPrivate = false
+	if hook.Project.VisibilityLevel > 10 {
+		repo.IsSCMPrivate = true
+	}
+
+	build.Commit = hook.Commit.ID
+	build.Title = hook.Name
+
+	return repo, build, nil
+}
+
 func getUserAvatar(email string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(email))

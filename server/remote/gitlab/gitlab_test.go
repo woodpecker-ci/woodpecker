@@ -227,6 +227,29 @@ func Test_Gitlab(t *testing.T) {
 					}
 				})
 			})
+
+			g.Describe("Release hook", func() {
+				g.It("Should parse merge request hook", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.WebhookReleqaseBody),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "Update client.go 🎉", build.Title)
+						assert.Len(t, build.ChangedFiles, 0) // see L217
+					}
+				})
+			})
 		})
 	})
 }

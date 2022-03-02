@@ -538,12 +538,15 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		if build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build, mergeIID); err != nil {
 			return nil, nil, err
 		}
-
 		return repo, build, nil
 	case *gitlab.PushEvent:
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
+	case *gitlab.ReleaseEvent:
+		// will create a run for all release types.
+		// TODO: add support for event action filtering.
+		return convertReleaseHook(event)
 	default:
 		return nil, nil, nil
 	}
