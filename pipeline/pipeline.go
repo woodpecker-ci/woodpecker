@@ -56,7 +56,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 
 // Starts the execution of the pipeline and waits for it to complete
 func (r *Runtime) Run() error {
-	log.Debug().Msg("Executing (order):")
+	log.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
 	for _, stage := range r.spec.Stages {
 		steps := []string{}
 		for _, step := range stage.Steps {

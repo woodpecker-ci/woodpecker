@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -144,8 +145,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Name = name
 		stage.Alias = defaultCloneName
 		stage.Steps = append(stage.Steps, step)
-
-		config.Stages = append(config.Stages, stage)
+		log.Debug().Msg("Added step")
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
 			if !container.MatchConstraints(c.metadata) {

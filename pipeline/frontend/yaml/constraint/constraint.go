@@ -76,14 +76,14 @@ func (constraints *Constraints) MatchStatus(status string) bool {
 	})
 }
 
-// True if (any) local
+// False if (any) non local
 func (constraints *Constraints) IsLocal() bool {
 	for _, c := range constraints.MatchList {
-		if c.Local.Bool() {
-			return true
+		if !c.Local.Bool() {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
