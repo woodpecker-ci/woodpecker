@@ -108,9 +108,9 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// Load and validate the container values.
-	for _, container := range containers {
+	for i, container := range containers {
 		if container.Name == "" {
-			container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
+			container.Name = fmt.Sprintf("wp-step-%d", i)
 		}
 		c.Containers = append(c.Containers, &container)
 	}
