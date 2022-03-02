@@ -140,6 +140,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
+	logger := r.MakeLogger()
 
 	for _, step := range steps {
 		// required since otherwise the loop variable
@@ -148,10 +149,21 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Prepare")
+
 			switch {
 			case r.err != nil && !step.OnFailure:
+				logger.Debug().
+					Str("Step", step.Name).
+					Err(r.err).
+					Msgf("Skipped due to OnFailure=true")
 				return nil
 			case r.err == nil && !step.OnSuccess:
+				logger.Debug().
+					Str("Step", step.Name).
+					Msgf("Skipped due to OnSuccess=false")
 				return nil
 			}
 
@@ -161,7 +173,15 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				return err
 			}
 
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Executing")
+
 			processState, err := r.exec(step)
+
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Complete")
 
 			// if we got a nil process but an error state
 			// then we need to log the internal error to the step.
