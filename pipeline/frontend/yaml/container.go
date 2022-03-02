@@ -5,6 +5,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
@@ -65,27 +66,53 @@ type (
 	}
 )
 
+func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
+	return c.Constraints.Match(meta)
+}
+
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
-	containers := map[string]Container{}
-	err := value.Decode(&containers)
+	// TODO: Deprecate pipeline as map to achive proper yaml
+	decodeFromMap := func() ([]Container, error) {
+		containers := []Container{}
+		containersMap := map[string]Container{}
+		err := value.Decode(&containersMap)
+		if err != nil {
+			return containers, err
+		}
+
+		// Update name and add to list.
+		for name, container := range containersMap {
+			container.Name = name
+			containers = append(containers, container)
+		}
+
+		return containers, nil
+	}
+
+	decodeFromList := func() ([]Container, error) {
+		containers := []Container{}
+		err := value.Decode(&containers)
+		if err != nil {
+			return containers, err
+		}
+		return containers, nil
+	}
+
+	containers, err := decodeFromMap()
+	if err != nil {
+		containers, err = decodeFromList()
+	}
 	if err != nil {
 		return err
 	}
 
-	for i, n := range value.Content {
-		if i%2 == 1 {
-			container := Container{}
-			err := n.Decode(&container)
-			if err != nil {
-				return err
-			}
-
-			if container.Name == "" {
-				container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
-			}
-			c.Containers = append(c.Containers, &container)
+	// Load and validate the container values.
+	for _, container := range containers {
+		if container.Name == "" {
+			container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
 		}
+		c.Containers = append(c.Containers, &container)
 	}
 
 	// TODO drop Vargs in favor of Settings in v0.16.0 release
