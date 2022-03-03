@@ -74,24 +74,26 @@ pipeline:
       event: push
 
   publish-release-branch-server:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
       event: push
 
   publish-release-branch-server-alpine:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
