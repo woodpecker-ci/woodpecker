@@ -73,9 +73,12 @@ func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	// TODO: Deprecate pipeline as map to achieve proper yaml
-	// TODO: Current list container values are errored since loaded as map.
 	decodeFromMap := func() ([]*Container, error) {
 		containers := []*Container{}
+		// We cannot use decode on specific values
+		// since if we try to load from a map, the order
+		// will not be kept. Therefore use value.Content
+		// and take the map values i%2=1
 		for i, n := range value.Content {
 			if i%2 == 1 {
 				container := Container{}
