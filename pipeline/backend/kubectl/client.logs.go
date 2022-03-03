@@ -74,7 +74,7 @@ func (client *KubeClient) ReadResourceLogsToWriter(
 		stop(err)
 	}()
 
-	waitForCommandToStart.Wait()
+	_ = waitForCommandToStart.Wait()
 
 	return errChan
 }

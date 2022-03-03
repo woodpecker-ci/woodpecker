@@ -60,7 +60,6 @@ func (client *KubeClient) DeployKubectlYamlWithContext(
 		Triary(wait, "--wait=true", "--wait=false"),
 		"-f", yamlFilename,
 	)
-
 	if err != nil {
 		err = errors.New("Failed to deploy yaml. " + err.Error())
 	}

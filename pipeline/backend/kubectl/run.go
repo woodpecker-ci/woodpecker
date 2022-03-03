@@ -46,7 +46,6 @@ func (run *KubePiplineRun) Setup(ctx context.Context, cfg *types.Config) error {
 	output, err := run.Backend.Client.DeployKubectlYamlWithContext(
 		ctx, "apply", setupYaml, false,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -73,11 +72,10 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 		destroyJobs = append(destroyJobs, runStep.Job)
 		if runStep.Logger.IsRunning() {
 			err := runStep.Logger.Stop()
-			event := logger.Debug().Str("Step", runStep.Step.Name)
-			if err != nil {
-				event.Err(err)
-			}
-			event.Msgf("Stopped logger")
+			logger.Debug().
+				Str("Step", runStep.Step.Name).
+				Err(err).
+				Msgf("Stopped logger")
 		}
 	}
 
@@ -106,7 +104,6 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 		strings.Join(yamlsToDeploy, "\n---\n"),
 		false,
 	)
-
 	if err != nil {
 		logger.Error().Err(err).Msgf("Pipeline destruction failed")
 		return err

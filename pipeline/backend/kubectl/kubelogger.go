@@ -116,11 +116,9 @@ func (resLogger *KubeResourceLogger) Start(ctx context.Context) (*io.PipeReader,
 		<-logContext.Done()
 		if resLogger.IsRunning() {
 			err := resLogger.Stop()
-			debug := logger.Debug()
-			if err != nil {
-				debug = debug.Err(err)
-			}
-			debug.Msg("Resource logger context was canceled. Resource logger stopped.")
+			logger.Debug().
+				Err(err).
+				Msg("Resource logger context was canceled. Resource logger stopped.")
 		}
 	}()
 

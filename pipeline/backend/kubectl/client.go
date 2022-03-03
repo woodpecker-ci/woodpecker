@@ -44,23 +44,21 @@ func (client *KubeClient) RunKubectlCommand(
 ) (string, error) {
 	cmnd := client.CreateKubectlCommand(ctx, args...)
 
-	rslt, err := cmnd.Output()
-	if err != nil {
-		switch err.(type) {
+	rslt, cmdErr := cmnd.Output()
+	if cmdErr != nil {
+		switch err := cmdErr.(type) {
 		case *exec.ExitError:
-			exitError := err.(*exec.ExitError)
-			if len(exitError.Stderr) > 0 {
-				err = errors.New(string(exitError.Stderr) + "(" + ")")
+			if len(err.Stderr) > 0 {
+				cmdErr = errors.New(string(err.Stderr) + "(" + ")")
 			}
-
 		}
 
-		log.Debug().Err(err).Str("Args", strings.Join(cmnd.Args, " ")).Msg(
+		log.Debug().Err(cmdErr).Str("Args", strings.Join(cmnd.Args, " ")).Msg(
 			"kubectl command failed",
 		)
-		return "", err
+		return "", cmdErr
 	}
-	return string(rslt), err
+	return string(rslt), cmdErr
 }
 
 // Creates a new kubectl exec command.
@@ -84,14 +82,12 @@ func (client *KubeClient) CreateKubectlCommand(
 // The args can be either string|[]string
 func (client *KubeClient) ComposeKubectlCommand(args ...interface{}) []string {
 	flat := []string{}
-	for _, ar := range args {
-		switch ar.(type) {
+	for _, rawAr := range args {
+		switch ar := rawAr.(type) {
 		case string:
-			arVal := ar.(string)
-			flat = append(flat, arVal)
+			flat = append(flat, ar)
 		case []string:
-			arValArray := ar.([]string)
-			flat = append(flat, arValArray...)
+			flat = append(flat, ar...)
 		default:
 			break
 		}

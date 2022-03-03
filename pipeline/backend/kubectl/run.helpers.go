@@ -136,7 +136,6 @@ func (run *KubePiplineRun) WaitForRunJobPod(
 				"pod",
 				"woodpecker-job-id="+jobTemplate.JobID(),
 			)
-
 			if err != nil {
 				action.Stop(err)
 				return

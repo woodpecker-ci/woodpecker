@@ -246,7 +246,6 @@ func (client *KubeClient) GetPodIP(ctx context.Context, podName string) (string,
 		"-o",
 		"custom-columns=:status.podIP",
 	)
-
 	if err != nil {
 		return "", err
 	}
