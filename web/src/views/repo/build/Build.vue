@@ -134,7 +134,7 @@ export default defineComponent({
     });
 
     // remove parent proc error detection
-    const error = computed(() => build.value?.error || selectedProc.value?.error || parentProc.value?.error);
+    const error = computed(() => build.value?.error || selectedProc.value?.error);
 
     const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
       if (!repo) {
