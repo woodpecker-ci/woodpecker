@@ -26,7 +26,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -664,23 +663,6 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	return build, buildItems, nil
 }
 
-func toPullRequestTargetAndSourceBranch(refspec string) (*struct {
-	source string
-	target string
-}, error) {
-	branchParts := strings.Split(refspec, ":")
-	if len(branchParts) != 2 {
-		return nil, errors.New("Invalid ref spec when attempting to cancel pr build")
-	}
-	return &struct {
-		source string
-		target string
-	}{
-		source: branchParts[0],
-		target: branchParts[1],
-	}, nil
-}
-
 func clearPreviousBuilds(
 	ctx context.Context,
 	_store store.Store,
@@ -705,19 +687,9 @@ func clearPreviousBuilds(
 	if err != nil {
 		return err
 	}
-	var pullBranches *struct {
-		source string
-		target string
-	}
-
-	if build.Event == model.EventPull {
-		pullBranches, err = toPullRequestTargetAndSourceBranch(build.Refspec)
-		if err != nil {
-			return err
-		}
-	}
 
 	buildNeedsCancel := func(active *model.Build) (bool, error) {
+		// always filter on same event.
 		if active.Event != build.Event {
 			return false, nil
 		}
@@ -725,18 +697,8 @@ func clearPreviousBuilds(
 		switch build.Event {
 		case model.EventPush:
 			return build.Branch == active.Branch, nil
-		case model.EventPull:
-			activeBranchs, err := toPullRequestTargetAndSourceBranch(active.Refspec)
-			if err != nil {
-				return false, err
-			}
-			if activeBranchs.source != pullBranches.source ||
-				activeBranchs.target != pullBranches.target {
-				return false, nil
-			}
-			return true, nil
 		default:
-			return build.Ref == active.Ref, nil
+			return build.Refspec == active.Refspec, nil
 		}
 	}
 
