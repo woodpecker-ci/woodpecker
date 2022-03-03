@@ -92,13 +92,19 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 
 	decodeFromList := func() ([]*Container, error) {
 		containers := []*Container{}
-		err := value.Decode(&containers)
-		if err != nil {
-			return containers, err
-		}
-		for i, container := range containers {
-			if container.Name == "" {
-				container.Name = fmt.Sprintf("step-%d", i)
+		for i, n := range value.Content {
+			if i%2 == 1 {
+				container := Container{}
+				err := n.Decode(&container)
+				if err != nil {
+					return containers, err
+				}
+
+				if container.Name == "" {
+					container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
+				}
+
+				containers = append(containers, &container)
 			}
 		}
 		return containers, nil
