@@ -334,6 +334,22 @@ Comma-separated list to limit the specific CPUs or cores a pipeline container ca
 
 Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
+
+### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+> Default: ``
+
+Specify a configuration service endpoint, see [Configuration Extension](docs/administration/external-configuration-api)
+
+### `WOODPECKER_CONFIG_SERVICE_SECRET`
+> Default: ``
+
+Specify a signing secret for the configuration service endpoint, see [Configuration Extension](docs/administration/external-configuration-api)
+
+### `WOODPECKER_CONFIG_SERVICE_SECRET_FILE`
+> Default: ``
+
+Read the value for `WOODPECKER_CONFIG_SERVICE_SECRET` from the specified filepath
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
