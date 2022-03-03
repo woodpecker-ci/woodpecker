@@ -86,10 +86,10 @@ export default defineComponent({
 
     async function loadRepo() {
       // TODO: remove after we fixed #485 as we should then be able to have a look on public repos as well
-      if (!isAuthenticated) {
+      /* if (!isAuthenticated) {
         await router.replace({ name: 'login', query: { url: route.fullPath } });
         return;
-      }
+      } */
 
       repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
       if (!repoPermissions.value.pull) {
