@@ -195,7 +195,7 @@ func buildFromRelease(hook *releaseHook) *model.Build {
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.URL, hook.Release.TagName),
 		Branch:    fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
-		Message:   fmt.Sprintf("created tag %s", hook.Release.TagName),
+		Message:   fmt.Sprintf("created release %s", hook.Release.TagName), <- release Title?
 		Avatar:    avatar,
 		Author:    author,
 		Sender:    sender,
