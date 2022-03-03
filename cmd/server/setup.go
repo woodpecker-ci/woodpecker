@@ -268,11 +268,10 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the GitHub remote from the CLI arguments.
 func setupGithub(c *cli.Context) (remote.Remote, error) {
-	releaseActions := []string{}
-	for _, action := range regexp.MustCompile(`[\s,]+`).
-		Split(c.String("github-release-actions"), -1) {
-		releaseActions = append(releaseActions, action)
-	}
+	releaseActions := regexp.
+		MustCompile(`[\s,]+`).
+		Split(c.String("github-release-actions"), -1)
+
 	opts := github.Opts{
 		URL:            c.String("github-server"),
 		Client:         c.String("github-client"),
@@ -281,6 +280,7 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		MergeRef:       c.Bool("github-merge-ref"),
 		ReleaseActions: releaseActions,
 	}
+
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)
 }

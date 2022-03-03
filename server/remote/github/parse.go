@@ -175,7 +175,6 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Build, err
 	release := hook.GetRelease()
 
 	build := &model.Build{
-
 		Event: model.EventRelease,
 		// Commit: "",
 		// Cannot retrieve the commit since
