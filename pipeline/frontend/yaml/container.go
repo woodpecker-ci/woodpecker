@@ -73,24 +73,8 @@ func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	// TODO: Deprecate pipeline as map to achieve proper yaml
+	// TODO: Current list container values are errored since loaded as map.
 	decodeFromMap := func() ([]*Container, error) {
-		containers := []*Container{}
-		containersMap := map[string]*Container{}
-		err := value.Decode(&containersMap)
-		if err != nil {
-			return containers, err
-		}
-
-		// Update name and add to list.
-		for name, container := range containersMap {
-			container.Name = name
-			containers = append(containers, container)
-		}
-
-		return containers, nil
-	}
-
-	decodeFromList := func() ([]*Container, error) {
 		containers := []*Container{}
 		for i, n := range value.Content {
 			if i%2 == 1 {
@@ -105,6 +89,20 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 				}
 
 				containers = append(containers, &container)
+			}
+		}
+		return containers, nil
+	}
+
+	decodeFromList := func() ([]*Container, error) {
+		containers := []*Container{}
+		err := value.Decode(&containers)
+		if err != nil {
+			return containers, err
+		}
+		for i, container := range containers {
+			if container.Name == "" {
+				container.Name = fmt.Sprintf("step-%d", i)
 			}
 		}
 		return containers, nil
