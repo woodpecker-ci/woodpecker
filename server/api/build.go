@@ -703,6 +703,11 @@ func clearPreviousBuilds(
 	}
 
 	for _, active := range activeBuilds {
+		if active.ID == build.ID {
+			// same build. e.g. self.
+			continue
+		}
+
 		cancel, err := buildNeedsCancel(active)
 		if err != nil {
 			log.Error().
