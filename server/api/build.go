@@ -230,7 +230,7 @@ func DeleteBuild(c *gin.Context) {
 	c.String(code, "")
 }
 
-// Cancells the build and returns the status.
+// Cancel the build and returns the status.
 func cancelBuild(
 	ctx context.Context,
 	_store store.Store,
