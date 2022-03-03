@@ -51,10 +51,6 @@ func UpdateStatusToDone(store UpdateBuildStore, build model.Build, status model.
 }
 
 func UpdateToStatusError(store UpdateBuildStore, build model.Build, err error) (*model.Build, error) {
-	if build.Status == model.StatusKilled {
-		return &build, nil
-	}
-
 	build.Error = err.Error()
 	build.Status = model.StatusError
 	build.Started = time.Now().Unix()
