@@ -84,8 +84,7 @@ func (s storage) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build,
 	builds := make([]*model.Build, 0, perPage)
 	query := s.engine.
 		Where("build_repo_id = ?", repo.ID).
-		Where("build_status = ?", "pending").
-		Where("build_status = ?", "running").
+		Where("build_status = ? or build_status = ?", "pending", "running").
 		Desc("build_number")
 	if page > 0 {
 		query = query.Limit(perPage, perPage*(page-1))
