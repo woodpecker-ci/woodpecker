@@ -111,9 +111,9 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		return containers, nil
 	}
 
-	containers, err := decodeFromMap()
+	containers, err := decodeFromList()
 	if err != nil {
-		containers, err = decodeFromList()
+		containers, err = decodeFromMap()
 	}
 	if err != nil {
 		return err
