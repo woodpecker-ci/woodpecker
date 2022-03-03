@@ -97,6 +97,11 @@ var flags = []cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DELETE_MULTIPLE_RUNS_ON_EVENTS"},
+		Name:    "delete-multiple-runs-on-events",
+		Usage:   "When active for an event type, multiple runs on the same id (branch, tag, pr) would cancel previous runs",
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",

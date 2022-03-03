@@ -197,6 +197,11 @@ Link to documentation in the UI.
 
 Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.
 
+### `WOODPECKER_DELETE_MULTIPLE_RUNS_ON_EVENTS`
+> Default: `pull_request, push`
+
+When active for an event type, multiple runs on the same id (branch, tag, pr) would cancel previous runs
+
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
 > Default: `woodpeckerci/plugin-git:latest`
 

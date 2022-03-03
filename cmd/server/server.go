@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -286,6 +287,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+
+	// Execution
+	server.Config.Pipeline.DeleteMultipleRunsOnEvents = regexp.
+		MustCompile(`[\s,]+`).
+		Split(c.String("delete-multiple-runs-on-events"), -1)
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
