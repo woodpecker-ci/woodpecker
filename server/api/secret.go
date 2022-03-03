@@ -88,10 +88,10 @@ func PatchSecret(c *gin.Context) {
 	if in.Value != "" {
 		secret.Value = in.Value
 	}
-	if len(in.Events) != 0 {
+	if in.Events != nil {
 		secret.Events = in.Events
 	}
-	if len(in.Images) != 0 {
+	if in.Images != nil {
 		secret.Images = in.Images
 	}
 
