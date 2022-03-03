@@ -204,7 +204,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_TAG":                     "",                                   // use CI_COMMIT_TAG
 		"CI_PULL_REQUEST":            "",                                   // use CI_COMMIT_PULL_REQUEST
 	}
-	if m.Curr.Event == EventTag {
+	if m.Curr.Event == EventTag || m.Curr.Event == EventRelease {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 		params["CI_TAG"] = params["CI_COMMIT_TAG"]
 	}
