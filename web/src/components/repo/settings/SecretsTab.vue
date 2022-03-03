@@ -137,7 +137,10 @@ export default defineComponent({
       },
       set(value) {
         if (selectedSecret.value) {
-          selectedSecret.value.image = value.split(',').map((s) => s.trim());
+          selectedSecret.value.image = value
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s !== '');
         }
       },
     });
