@@ -1,4 +1,5 @@
 // Copyright 2019 Laszlo Fogas
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package main
 
@@ -43,6 +46,11 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
 		Usage:   "server fully qualified url (<scheme>://<host>)",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HOST_INTERNAL"},
+		Name:    "server-host-internal",
+		Usage:   "server internal fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -145,6 +153,16 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITEA_REV_PROXY_AUTH"},
+		Name:    "gitea-rev-proxy-auth",
+		Usage:   "enable gitea authentication using HTTP header specified in WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER"},
+		Name:    "gitea-rev-proxy-auth-header",
+		Usage:   "HTTP header with gitea authenticated user login",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},

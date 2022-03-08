@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package token
 
@@ -52,16 +55,15 @@ func parse(raw string, fn SecretFunc) (*Token, error) {
 }
 
 func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
-	// first we attempt to get the token from the
+	// First we attempt to get the token from the
 	// authorization header.
 	token := r.Header.Get("Authorization")
 	if len(token) != 0 {
 		log.Trace().Msgf("token.ParseRequest: found token in header: %s", token)
 		bearer := token
-		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
-			return nil, err
+		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err == nil {
+			return parse(bearer, fn)
 		}
-		return parse(bearer, fn)
 	}
 
 	token = r.Header.Get("X-Gitlab-Token")

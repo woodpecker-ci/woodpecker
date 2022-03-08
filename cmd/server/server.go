@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package main
 
@@ -96,6 +99,18 @@ func run(c *cli.Context) error {
 	if strings.HasSuffix(c.String("server-host"), "/") {
 		log.Fatal().Msg(
 			"WOODPECKER_HOST must not have trailing slash",
+		)
+	}
+
+	if strings.Contains(c.String("server-host-internal"), "://localhost") {
+		log.Warn().Msg(
+			"WOODPECKER_HOST_INTERNAL should probably be publicly accessible (not localhost)",
+		)
+	}
+
+	if strings.HasSuffix(c.String("server-host-internal"), "/") {
+		log.Fatal().Msg(
+			"WOODPECKER_HOST_INTERNAL must not have trailing slash",
 		)
 	}
 
@@ -290,6 +305,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	server.Config.Server.HostInternal = c.String("server-host-internal")
+	server.Config.Server.RevProxyAuth = c.Bool("gitea-rev-proxy-auth")
+
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {

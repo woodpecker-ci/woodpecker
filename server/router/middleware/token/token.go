@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package token
 
@@ -30,6 +33,12 @@ import (
 func Refresh(c *gin.Context) {
 	user := session.User(c)
 	if user == nil {
+		c.Next()
+		return
+	}
+
+	// Don't use oAuth2 if authentication using HTTP header is enabled.
+	if server.Config.Server.RevProxyAuth {
 		c.Next()
 		return
 	}

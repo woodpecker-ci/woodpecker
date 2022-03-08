@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package main
 
@@ -228,10 +231,12 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		return nil, err
 	}
 	opts := gitea.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
-		Client:     c.String("gitea-client"),
-		Secret:     c.String("gitea-secret"),
-		SkipVerify: c.Bool("gitea-skip-verify"),
+		URL:                strings.TrimRight(server.String(), "/"),
+		Client:             c.String("gitea-client"),
+		Secret:             c.String("gitea-secret"),
+		SkipVerify:         c.Bool("gitea-skip-verify"),
+		RevProxyAuth:       c.Bool("gitea-rev-proxy-auth"),
+		RevProxyAuthHeader: c.String("gitea-rev-proxy-auth-header"),
 	}
 	if len(opts.URL) == 0 {
 		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")

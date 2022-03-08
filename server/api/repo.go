@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
@@ -79,9 +82,14 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
+	host := server.Config.Server.Host
+	if server.Config.Server.HostInternal != "" {
+		host = server.Config.Server.HostInternal
+	}
+
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		server.Config.Server.Host,
+		host,
 		sig,
 	)
 
@@ -218,7 +226,11 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	host := server.Config.Server.Host
+	if server.Config.Server.HostInternal != "" {
+		host = server.Config.Server.HostInternal
+	}
+	if err := server.Config.Services.Remote.Deactivate(c, user, repo, host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -241,6 +253,9 @@ func RepairRepo(c *gin.Context) {
 
 	// reconstruct the link
 	host := server.Config.Server.Host
+	if server.Config.Server.HostInternal != "" {
+		host = server.Config.Server.HostInternal
+	}
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
@@ -335,6 +350,9 @@ func MoveRepo(c *gin.Context) {
 
 	// reconstruct the link
 	host := server.Config.Server.Host
+	if server.Config.Server.HostInternal != "" {
+		host = server.Config.Server.HostInternal
+	}
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
 		host,
