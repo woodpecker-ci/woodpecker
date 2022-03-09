@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
@@ -192,10 +193,10 @@ func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
+			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
+			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
@@ -232,3 +233,10 @@ var (
 		Timestamps: false,
 	}
 )
+
+func isErrContainerNotFoundOrNotRunning(err error) bool {
+	// Error response from daemon: Cannot kill container: ...: No such container: ...
+	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
+	// Error: No such container: ...
+	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
+}
