@@ -44,7 +44,6 @@ const (
 
 type Gitea struct {
 	URL                     string
-	Machine                 string
 	ClientID                string
 	ClientSecret            string
 	SkipVerify              bool
@@ -76,7 +75,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:                opts.URL,
-		Machine:            u.Host,
 		ClientID:           opts.Client,
 		ClientSecret:       opts.Secret,
 		SkipVerify:         opts.SkipVerify,
@@ -407,10 +405,15 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = u.Token
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -472,7 +475,11 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 
 // Branches returns the names of all branches for the named repository.
 func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := c.newClientToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

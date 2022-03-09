@@ -290,7 +290,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Client:     c.String("coding-client"),
 		Secret:     c.String("coding-secret"),
 		Scopes:     c.StringSlice("coding-scope"),
-		Machine:    c.String("coding-git-machine"),
 		Username:   c.String("coding-git-username"),
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),

@@ -18,7 +18,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -54,14 +53,6 @@ type Opts struct {
 // New returns a Remote implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
-	u, err := url.Parse(opts.URL)
-	if err != nil {
-		return nil, err
-	}
-	host, _, err := net.SplitHostPort(u.Host)
-	if err == nil {
-		u.Host = host
-	}
 	r := &client{
 		API:        defaultAPI,
 		URL:        defaultURL,
@@ -69,7 +60,6 @@ func New(opts Opts) (remote.Remote, error) {
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
-		Machine:    u.Host,
 	}
 	if opts.URL != defaultURL {
 		r.URL = strings.TrimSuffix(opts.URL, "/")
@@ -84,7 +74,6 @@ type client struct {
 	API        string
 	Client     string
 	Secret     string
-	Machine    string
 	SkipVerify bool
 	MergeRef   bool
 }
@@ -283,10 +272,15 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = "x-oauth-basic"
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -464,7 +458,11 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	client := c.newClientToken(ctx, u.Token)
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
 	if err != nil {
