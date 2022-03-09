@@ -439,16 +439,19 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	// if the remote has a refresh token, the current access token
-	// may be stale. Therefore, we should refresh prior to dispatching
-	// the job.
-	if refresher, ok := _remote.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(c, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := _store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+	// Don't use oAuth2 if authentication using HTTP header is enabled.
+	if !server.Config.Server.RevProxyAuth {
+		// if the remote has a refresh token, the current access token
+		// may be stale. Therefore, we should refresh prior to dispatching
+		// the job.
+		if refresher, ok := _remote.(remote.Refresher); ok {
+			ok, err := refresher.Refresh(c, user)
+			if err != nil {
+				log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+			} else if ok {
+				if err := _store.UpdateUser(user); err != nil {
+					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+				}
 			}
 		}
 	}

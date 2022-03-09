@@ -401,13 +401,16 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 		return
 	}
 
-	if refresher, ok := s.remote.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(ctx, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := s.store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+	// Don't use oAuth2 if authentication using HTTP header is enabled.
+	if !server.Config.Server.RevProxyAuth {
+		if refresher, ok := s.remote.(remote.Refresher); ok {
+			ok, err := refresher.Refresh(ctx, user)
+			if err != nil {
+				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+			} else if ok {
+				if err := s.store.UpdateUser(user); err != nil {
+					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
+				}
 			}
 		}
 	}

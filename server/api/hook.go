@@ -161,17 +161,20 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	// if the remote has a refresh token, the current access token
-	// may be stale. Therefore, we should refresh prior to dispatching
-	// the build.
-	if refresher, ok := server.Config.Services.Remote.(remote.Refresher); ok {
-		refreshed, err := refresher.Refresh(c, repoUser)
-		if err != nil {
-			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
-		} else if refreshed {
-			if err := _store.UpdateUser(repoUser); err != nil {
-				log.Error().Err(err).Msgf("error while updating repoUser: %s", repoUser.Login)
-				// move forward
+	// Don't use oAuth2 if authentication using HTTP header is enabled.
+	if !server.Config.Server.RevProxyAuth {
+		// if the remote has a refresh token, the current access token
+		// may be stale. Therefore, we should refresh prior to dispatching
+		// the build.
+		if refresher, ok := server.Config.Services.Remote.(remote.Refresher); ok {
+			refreshed, err := refresher.Refresh(c, repoUser)
+			if err != nil {
+				log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
+			} else if refreshed {
+				if err := _store.UpdateUser(repoUser); err != nil {
+					log.Error().Err(err).Msgf("error while updating repoUser: %s", repoUser.Login)
+					// move forward
+				}
 			}
 		}
 	}
