@@ -77,7 +77,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
 
 	// Prepare working directory
-    if proc.Image == defaultCloneImage {
+	if proc.Image == defaultCloneImage {
 		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
 	} else {
 		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]

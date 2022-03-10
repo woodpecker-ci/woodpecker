@@ -13,7 +13,7 @@ var engines map[string]types.Engine
 func init() {
 	loadedEngines := []types.Engine{
 		docker.New(),
-    local.New(),
+		local.New(),
 		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
 	}
 
