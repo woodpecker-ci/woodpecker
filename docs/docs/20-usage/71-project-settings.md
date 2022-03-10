@@ -22,6 +22,12 @@ Every build initiated by a user (not including the project owner) needs to be ap
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
 
+:::note
+
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
+
+:::
+
 ## Project visibility
 
 You can change the visibility of your project by this setting. If a user has access to a project he can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.

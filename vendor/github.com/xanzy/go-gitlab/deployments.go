@@ -94,7 +94,7 @@ func (s *DeploymentsService) ListProjectDeployments(pid interface{}, opts *ListP
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/deployments", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opts, options)
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *DeploymentsService) GetProjectDeployment(pid interface{}, deployment in
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments/%d", pathEscape(project), deployment)
+	u := fmt.Sprintf("projects/%s/deployments/%d", PathEscape(project), deployment)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -154,7 +154,7 @@ func (s *DeploymentsService) CreateProjectDeployment(pid interface{}, opt *Creat
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/deployments", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -186,7 +186,7 @@ func (s *DeploymentsService) UpdateProjectDeployment(pid interface{}, deployment
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments/%d", pathEscape(project), deployment)
+	u := fmt.Sprintf("projects/%s/deployments/%d", PathEscape(project), deployment)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {

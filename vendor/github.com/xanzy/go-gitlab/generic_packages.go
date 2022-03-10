@@ -70,10 +70,10 @@ func (s *GenericPackagesService) FormatPackageURL(pid interface{}, packageName, 
 	}
 	u := fmt.Sprintf(
 		"projects/%s/packages/generic/%s/%s/%s",
-		pathEscape(project),
-		pathEscape(packageName),
-		pathEscape(packageVersion),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(packageName),
+		PathEscape(packageVersion),
+		PathEscape(fileName),
 	)
 	return u, nil
 }
@@ -99,10 +99,10 @@ func (s *GenericPackagesService) PublishPackageFile(pid interface{}, packageName
 	}
 	u := fmt.Sprintf(
 		"projects/%s/packages/generic/%s/%s/%s",
-		pathEscape(project),
-		pathEscape(packageName),
-		pathEscape(packageVersion),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(packageName),
+		PathEscape(packageVersion),
+		PathEscape(fileName),
 	)
 
 	// We need to create the request as a GET request to make sure the options
@@ -137,10 +137,10 @@ func (s *GenericPackagesService) DownloadPackageFile(pid interface{}, packageNam
 	}
 	u := fmt.Sprintf(
 		"projects/%s/packages/generic/%s/%s/%s",
-		pathEscape(project),
-		pathEscape(packageName),
-		pathEscape(packageVersion),
-		pathEscape(fileName),
+		PathEscape(project),
+		PathEscape(packageName),
+		PathEscape(packageVersion),
+		PathEscape(fileName),
 	)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)

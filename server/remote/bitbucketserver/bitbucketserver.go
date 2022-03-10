@@ -26,8 +26,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/mrjones/oauth"
 
@@ -201,21 +199,15 @@ func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
-	u, err := url.Parse(c.URL)
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
-	// remove the port
-	tmp := strings.Split(u.Host, ":")
-	host := tmp[0]
 
-	if err != nil {
-		return nil, err
-	}
 	return &model.Netrc{
-		Machine:  host,
 		Login:    c.Username,
 		Password: c.Password,
+		Machine:  host,
 	}, nil
 }
 

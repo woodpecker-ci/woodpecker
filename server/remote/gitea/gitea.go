@@ -44,7 +44,6 @@ const (
 
 type Gitea struct {
 	URL          string
-	Machine      string
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
@@ -71,7 +70,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &Gitea{
 		URL:          opts.URL,
-		Machine:      u.Host,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
 		SkipVerify:   opts.SkipVerify,
@@ -355,10 +353,15 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = u.Token
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -381,8 +384,19 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	if err != nil {
 		return err
 	}
-	_, _, err = client.CreateRepoHook(r.Owner, r.Name, hook)
-	return err
+	_, response, err := client.CreateRepoHook(r.Owner, r.Name, hook)
+	if err != nil {
+		if response != nil {
+			if response.StatusCode == 404 {
+				return fmt.Errorf("Could not find repository")
+			}
+			if response.StatusCode == 200 {
+				return fmt.Errorf("Could not find repository, repository was probably renamed")
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 // Deactivate deactives the repository be removing repository push hooks from
@@ -409,7 +423,11 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 
 // Branches returns the names of all branches for the named repository.
 func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := c.newClientToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

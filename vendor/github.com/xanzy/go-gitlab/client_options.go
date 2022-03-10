@@ -83,6 +83,22 @@ func WithHTTPClient(httpClient *http.Client) ClientOptionFunc {
 	}
 }
 
+// WithRequestLogHook can be used to configure a custom request log hook.
+func WithRequestLogHook(hook retryablehttp.RequestLogHook) ClientOptionFunc {
+	return func(c *Client) error {
+		c.client.RequestLogHook = hook
+		return nil
+	}
+}
+
+// WithResponseLogHook can be used to configure a custom response log hook.
+func WithResponseLogHook(hook retryablehttp.ResponseLogHook) ClientOptionFunc {
+	return func(c *Client) error {
+		c.client.ResponseLogHook = hook
+		return nil
+	}
+}
+
 // WithoutRetries disables the default retry logic.
 func WithoutRetries() ClientOptionFunc {
 	return func(c *Client) error {
