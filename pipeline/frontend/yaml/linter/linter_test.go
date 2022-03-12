@@ -30,7 +30,7 @@ services:
     command: [ -v ]
 `, `
 pipeline:
-  - build
+  - build:
       image: docker
       privileged: true
       network_mode: host
@@ -39,7 +39,7 @@ pipeline:
       commands:
         - go build
         - go test
-  - publish
+  - publish:
       image: plugins/docker
       repo: foo/bar
       settings:
