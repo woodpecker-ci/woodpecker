@@ -24,7 +24,7 @@ If you set your project to trusted, a pipeline step and by this the underlying c
 
 :::note
 
-Only server admins can set this option. If you are not a server admin this option wont be shown in your project settings.
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
 

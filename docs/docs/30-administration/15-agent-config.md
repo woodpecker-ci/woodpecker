@@ -1,6 +1,6 @@
 # Agent configuration
 
-Agents are configured by the command line or environement variables. At the minimum you need the following information:
+Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
 ```yaml
 # docker-compose.yml
@@ -153,4 +153,4 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 ### `WOODPECKER_BACKEND`
 > Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect` or `docker`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, or `local`.
