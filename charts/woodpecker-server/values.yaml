@@ -1,5 +1,11 @@
 replicaCount: 1
 
+updateStrategy:
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 0
+  type: RollingUpdate
+
 image:
   registry: docker.io
   repository: woodpeckerci/woodpecker-server
