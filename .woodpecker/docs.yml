@@ -14,11 +14,11 @@ pipeline:
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
     settings:
-      path: docs/build/
+      path: "docs/build/"
       surge_token:
         from_secret: SURGE_TOKEN
       forge_type: github
-      forge_url: https://github.com
+      forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     secrets:
