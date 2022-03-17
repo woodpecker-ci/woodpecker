@@ -21,6 +21,8 @@ pipeline:
       forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    commands:
+      - env | grep PLUGIN_ | grep -v TOKEN
     secrets:
       - SURGE_TOKEN
       - GITHUB_TOKEN_SURGE
