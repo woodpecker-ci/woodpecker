@@ -4,22 +4,23 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 var engines map[string]types.Engine
 
 func init() {
+	loadedEngines := []types.Engine{
+		docker.New(),
+		local.New(),
+		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
+	}
+
 	engines = make(map[string]types.Engine)
-
-	// TODO: disabled for now as kubernetes backend has not been implemented yet
-	// kubernetes
-	// engine = kubernetes.New("", "", "")
-	// engines[engine.Name()] = engine
-
-	// docker
-	engine := docker.New()
-	engines[engine.Name()] = engine
+	for _, engine := range loadedEngines {
+		engines[engine.Name()] = engine
+	}
 }
 
 func FindEngine(engineName string) (types.Engine, error) {
