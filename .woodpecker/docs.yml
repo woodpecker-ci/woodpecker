@@ -21,6 +21,9 @@ pipeline:
       forge_url: https://github.com
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    secrets:
+      - SURGE_TOKEN
+      - GITHUB_TOKEN_SURGE
     when:
       event: pull_request
       path:
