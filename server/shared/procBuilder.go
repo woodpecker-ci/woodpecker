@@ -112,7 +112,10 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			metadata.SetPlatform(parsed.Platform)
 
-			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			if err != nil {
+				return nil, err
+			}
 
 			if len(ir.Stages) == 0 {
 				continue
@@ -207,7 +210,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {

@@ -5,13 +5,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
+func (c *Compiler) createProcess(name string, container *yaml.Container, section string) (*backend.Step, error) {
 	var (
 		detached   bool
 		workingdir string
@@ -73,7 +71,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	if !detached {
 		if err := paramsToEnv(container.Settings, environment, c.secrets); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+			return nil, err
 		}
 	}
 
@@ -178,5 +176,5 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 			container.Constraints.Status.Match("failure"),
 		NetworkMode: networkMode,
 		IpcMode:     ipcMode,
-	}
+	}, nil
 }
