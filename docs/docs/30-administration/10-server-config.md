@@ -4,7 +4,7 @@
 
 Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-If registration is open every user with an account at the configured [SCM](docs/administration/vcs/overview) can login to Woodpecker.
+If registration is open every user with an account at the configured [SCM](/docs/administration/vcs/overview) can login to Woodpecker.
 This example enables open registration for users that are members of approved organizations:
 
 ```diff
@@ -76,9 +76,9 @@ services:
 
 To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
 
-For docker-compose you can use a .env file next to your compose condfiguration to store the secrets outside of the compose file. While this seperates configuration from secrets it is still not very secure.
+For docker-compose you can use a .env file next to your compose condfiguration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
-Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by profiding a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment varibale gets specified at the same time it will override the value read from the file.
+Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff
 # docker-compose.yml
@@ -333,6 +333,22 @@ The relative weight vs. other containers.
 Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
 
 Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
+
+
+### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+> Default: ``
+
+Specify a configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
+
+### `WOODPECKER_CONFIG_SERVICE_SECRET`
+> Default: ``
+
+Specify a signing secret for the configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
+
+### `WOODPECKER_CONFIG_SERVICE_SECRET_FILE`
+> Default: ``
+
+Read the value for `WOODPECKER_CONFIG_SERVICE_SECRET` from the specified filepath
 
 ---
 

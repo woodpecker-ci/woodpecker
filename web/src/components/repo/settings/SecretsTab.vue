@@ -9,16 +9,16 @@
         </p>
       </div>
       <Button
-        v-if="showAddSecret"
+        v-if="selectedSecret"
         class="ml-auto"
         text="Show secrets"
-        start-icon="list"
-        @click="showAddSecret = false"
+        start-icon="back"
+        @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret = true" />
+      <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret" />
     </div>
 
-    <div v-if="!showAddSecret" class="space-y-4 text-gray-500">
+    <div v-if="!selectedSecret" class="space-y-4 text-gray-500">
       <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
         <span>{{ secret.name }}</span>
         <div class="ml-auto">
@@ -29,6 +29,7 @@
             >{{ event }}</span
           >
         </div>
+        <IconButton icon="edit" class="ml-2 w-8 h-8" @click="selectedSecret = secret" />
         <IconButton
           icon="trash"
           class="ml-2 w-8 h-8 hover:text-red-400"
@@ -43,7 +44,7 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
         <InputField label="Name">
-          <TextField v-model="selectedSecret.name" placeholder="Name" required />
+          <TextField v-model="selectedSecret.name" placeholder="Name" required :disabled="isEditingSecret" />
         </InputField>
 
         <InputField label="Value">
@@ -61,14 +62,15 @@
           <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
 
-        <Button :is-loading="isSaving" type="submit" text="Add secret" />
+        <Button :is-loading="isSaving" type="submit" :text="isEditingSecret ? 'Save secret' : 'Add secret'" />
       </form>
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { cloneDeep } from 'lodash';
+import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
@@ -123,9 +125,21 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>();
-    const showAddSecret = ref(false);
-    const selectedSecret = ref<Partial<Secret>>({ ...emptySecret });
-    const images = ref('');
+    const selectedSecret = ref<Partial<Secret>>();
+    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+    const images = computed<string>({
+      get() {
+        return selectedSecret.value?.image?.join(',') || '';
+      },
+      set(value) {
+        if (selectedSecret.value) {
+          selectedSecret.value.image = value
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s !== '');
+        }
+      },
+    });
 
     async function loadSecrets() {
       if (!repo?.value) {
@@ -140,12 +154,17 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      const imageList = images.value.split(',').map((s) => s.trim());
-      selectedSecret.value.image = imageList.filter((s) => s !== '');
-      await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+      if (!selectedSecret.value) {
+        throw new Error("Unexpected: Can't get secret");
+      }
+
+      if (isEditingSecret.value) {
+        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+      } else {
+        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+      }
       notifications.notify({ title: 'Secret created', type: 'success' });
-      showAddSecret.value = false;
-      selectedSecret.value = { ...emptySecret };
+      selectedSecret.value = undefined;
       await loadSecrets();
     });
 
@@ -159,6 +178,10 @@ export default defineComponent({
       await loadSecrets();
     });
 
+    function showAddSecret() {
+      selectedSecret.value = cloneDeep(emptySecret);
+    }
+
     onMounted(async () => {
       await loadSecrets();
     });
@@ -168,9 +191,10 @@ export default defineComponent({
       selectedSecret,
       secrets,
       images,
-      showAddSecret,
+      isEditingSecret,
       isSaving,
       isDeleting,
+      showAddSecret,
       createSecret,
       deleteSecret,
     };
