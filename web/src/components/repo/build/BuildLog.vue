@@ -8,8 +8,10 @@
       <Icon name="close" class="ml-auto" />
     </div>
 
-    <div class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 m-2 mt-0 rounded-md overflow-hidden">
-      <div v-show="loadedLogs" id="terminal" class="w-full p-2" />
+    <div class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden">
+      <div v-show="loadedLogs" class="w-full flex-grow p-2">
+        <div id="terminal" class="w-full h-full" />
+      </div>
 
       <div class="m-auto text-xl text-gray-500 dark:text-gray-500">
         <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>

@@ -3,13 +3,13 @@
     <div
       class="
         flex
-        ml-2
+        md:ml-2
         p-4
         space-x-1
         justify-between
         flex-shrink-0
         border-b-1
-        rounded-md
+        md:rounded-md
         bg-gray-300
         dark:border-b-dark-gray-600 dark:bg-dark-gray-700
       "
