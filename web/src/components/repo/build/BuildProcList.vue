@@ -3,12 +3,13 @@
     <div
       class="
         flex
-        py-4
-        px-4
+        ml-2
+        p-4
         space-x-1
         justify-between
         flex-shrink-0
         border-b-1
+        rounded-md
         bg-gray-300
         dark:border-b-dark-gray-600 dark:bg-dark-gray-700
       "
@@ -53,13 +54,6 @@
         <div v-for="proc in build.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
             <div class="flex items-center">
-              <div v-if="['success'].includes(proc.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
-              <div v-if="['pending', 'skipped'].includes(proc.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
-              <div
-                v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(proc.state)"
-                class="w-2 h-2 bg-red-400 rounded-full"
-              />
-              <div v-if="['started', 'running'].includes(proc.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
               <span class="ml-2">{{ proc.name }}</span>
             </div>
             <div v-if="proc.environ" class="text-xs">

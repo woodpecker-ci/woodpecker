@@ -1,6 +1,6 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
+    <FluidContainer class="flex flex-col min-w-0 dark:border-gray-600">
       <div class="flex mb-2 items-center <md:flex-wrap">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-0 flex flex-col flex-grow">
+  <div class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <BuildProcList v-model:selected-proc-id="selectedProcId" :build="build" />
 
@@ -124,16 +124,6 @@ export default defineComponent({
     });
 
     const selectedProc = computed(() => findProc(build.value.procs || [], selectedProcId.value || -1));
-
-    const parentProc = computed(() => {
-      if (!selectedProcId.value) {
-        return undefined;
-      }
-
-      return build.value.procs?.find((p) => p.children?.find((c) => c.pid === selectedProcId.value));
-    });
-
-    // remove parent proc error detection
     const error = computed(() => build.value?.error || selectedProc.value?.error);
 
     const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {

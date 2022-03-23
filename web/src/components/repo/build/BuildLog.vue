@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="flex flex-col bg-gray-300 dark:bg-dark-gray-700 pt-10 md:pt-0">
+  <div v-if="build" class="flex flex-col pt-10 md:pt-0">
     <div
       class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
       @click="$emit('update:proc-id', null)"
@@ -8,19 +8,22 @@
       <Icon name="close" class="ml-auto" />
     </div>
 
-    <div class="flex flex-grow w-full p-2 pr-0 md:p-4 md:pr-2">
-      <div v-show="loadedLogs" id="terminal" class="w-full" />
+    <div class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 m-2 mt-0 rounded-md overflow-hidden">
+      <div v-show="loadedLogs" id="terminal" class="w-full p-2" />
 
-      <div class="text-gray-300 m-auto text-xl">
+      <div class="m-auto text-xl text-gray-500 dark:text-gray-500">
         <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
         <span v-else-if="proc?.state === 'skipped'" class="text-red-400">This step has been skipped.</span>
-        <span v-else-if="!proc?.start_time" class="dark:text-gray-500">This step hasn't started yet.</span>
-        <div v-else-if="!loadedLogs" class="text-xl">Loading ...</div>
+        <span v-else-if="!proc?.start_time">This step hasn't started yet.</span>
+        <div v-else-if="!loadedLogs">Loading ...</div>
       </div>
-    </div>
 
-    <div v-if="proc?.end_time !== undefined" class="w-full dark:bg-dark-gray-800 text-gray-300 text-md md:mt-4 p-4">
-      exit code {{ proc.exit_code }}
+      <div
+        v-if="proc?.end_time !== undefined"
+        class="w-full bg-gray-400 dark:bg-dark-gray-800 text-gray-200 text-md p-4"
+      >
+        exit code {{ proc.exit_code }}
+      </div>
     </div>
   </div>
 </template>
@@ -28,7 +31,19 @@
 <script lang="ts">
 import 'xterm/css/xterm.css';
 
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
+import {
+  computed,
+  defineComponent,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  Ref,
+  ref,
+  toRef,
+  watch,
+} from 'vue';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
@@ -153,14 +168,16 @@ export default defineComponent({
       term.value.loadAddon(fitAddon.value);
       term.value.loadAddon(new WebLinksAddon());
 
-      const element = document.getElementById('terminal');
-      if (element === null) {
-        throw new Error('Unexpected: "terminal" should be provided at this place');
-      }
-      term.value.open(element);
-      fitAddon.value.fit();
+      await nextTick(() => {
+        const element = document.getElementById('terminal');
+        if (element === null) {
+          throw new Error('Unexpected: "terminal" should be provided at this place');
+        }
+        term.value.open(element);
+        fitAddon.value.fit();
 
-      window.addEventListener('resize', resize);
+        window.addEventListener('resize', resize);
+      });
 
       loadLogs();
     });
