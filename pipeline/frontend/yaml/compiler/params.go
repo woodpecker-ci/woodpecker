@@ -69,7 +69,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if fromSecret, ok := v.(map[string]interface{}); ok {
 			if secretNameI, ok := fromSecret["from_secret"]; ok {
 				if secretName, ok := secretNameI.(string); ok {
-					if secret, ok := secrets[secretName]; ok {
+					if secret, ok := secrets[strings.ToLower(secretName)]; ok {
 						return secret.Value, nil
 					}
 					return "", fmt.Errorf("no secret found for %q", secretName)

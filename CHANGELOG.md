@@ -104,7 +104,7 @@
   * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
-  * Use std methode to get SystemCertPool (#488)
+  * Use std method to get SystemCertPool (#488)
   * Upgrade urfave/cli to v2 (#483)
   * Remove some wrapper and make code more redable (#478)
   * More logging and refactor (#457)
