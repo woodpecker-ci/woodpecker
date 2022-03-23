@@ -7,7 +7,26 @@ pipeline:
       - yarn build
     when:
       event: [push, pull_request]
-      path: "docs/**"
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
+
+  deploy-preview:
+    image: woodpeckerci/plugin-surge-preview:next
+    settings:
+      path: "docs/build/"
+      surge_token:
+        from_secret: SURGE_TOKEN
+      forge_type: github
+      forge_url: "https://github.com"
+      forge_repo_token:
+        from_secret: GITHUB_TOKEN_SURGE
+    when:
+      event: pull_request
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
+  # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
     image: alpine:3.14.2
@@ -33,5 +52,7 @@ pipeline:
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      path: "docs/**"
+      path:
+       - "docs/**"
+       - ".woodpecker/docs.yml"
 
