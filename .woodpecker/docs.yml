@@ -13,8 +13,6 @@ pipeline:
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
-    # TODO: remove pull again
-    pull: true
     settings:
       path: "docs/build/"
       surge_token:
