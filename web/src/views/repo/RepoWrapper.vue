@@ -39,7 +39,6 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
-import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
@@ -73,7 +72,6 @@ export default defineComponent({
     const buildStore = BuildStore();
     const apiClient = useApiClient();
     const notifications = useNotifications();
-    const { isAuthenticated } = useAuthentication();
     const route = useRoute();
     const router = useRouter();
 
@@ -85,7 +83,7 @@ export default defineComponent({
     provide('builds', builds);
 
     async function loadRepo() {
-      // TODO: remove after we fixed #485 as we should then be able to have a look on public repos as well
+      // TODO(anbraten): remove after we fixed #485 as we should then be able to have a look on public repos as well
       /* if (!isAuthenticated) {
         await router.replace({ name: 'login', query: { url: route.fullPath } });
         return;
