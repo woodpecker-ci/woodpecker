@@ -124,12 +124,6 @@ Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to
 git commit -m "updated README [CI SKIP]"
 ```
 
-## `services`
-
-Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
-
-For more details check the [services docs](/docs/usage/services/).
-
 ## Steps
 
 Every step of your pipeline executes arbitrary commands inside a specified docker container. The defined commands are executed serially.
@@ -204,7 +198,7 @@ Woodpecker does not automatically upgrade docker images. Example configuration t
 +    pull: true
 ```
 
-#### Images from private registries
+##### Images from private registries
 
 You must provide registry credentials on the UI in order to pull private pipeline images defined in your Yaml configuration file.
 
@@ -237,11 +231,11 @@ Example registry hostname matching logic:
 - Hostname `docker.io` matches `bradyrydzewski/golang`
 - Hostname `docker.io` matches `bradyrydzewski/golang:latest`
 
-#### Global registry support
+##### Global registry support
 
 To make a private registry globally available check the [server configuration docs](/docs/administration/server-config#global-registry-setting).
 
-#### GCR registry support
+##### GCR registry support
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
 
@@ -290,9 +284,187 @@ For more details check the [secrets docs](/docs/usage/secrets/).
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining conditional pipeline steps in the `when` block.
+Woodpecker supports defining conditions for pipeline step by a `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
 
-For more details check the [Conditional Step Execution](/docs/usage/conditional-execution/).
+#### `repo`
+
+Example conditional execution by repository:
+
+```diff
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      repo: test/test
+```
+
+#### `branch`
+
+Example conditional execution by branch:
+
+```diff
+pipeline:
+  slack:
+    image: plugins/slack
+    settings:
+      channel: dev
++   when:
++     branch: master
+```
+
+> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+
+Execute a step if the branch is `master` or `develop`:
+
+```diff
+when:
+  branch: [master, develop]
+```
+
+Execute a step if the branch starts with `prefix/*`:
+
+```diff
+when:
+  branch: prefix/*
+```
+
+Execute a step using custom include and exclude logic:
+
+```diff
+when:
+  branch:
+    include: [ master, release/* ]
+    exclude: [ release/1.0.0, release/1.1.* ]
+```
+
+#### `event`
+
+Execute a step if the build event is a `tag`:
+
+```diff
+when:
+  event: tag
+```
+
+Execute a step if the build event is a `tag` created from the specified branch:
+
+```diff
+when:
+  event: tag
++ branch: master
+```
+
+Execute a step for all non-pull request events:
+
+```diff
+when:
+  event: [push, tag, deployment]
+```
+
+Execute a step for all build events:
+
+```diff
+when:
+  event: [push, pull_request, tag, deployment]
+```
+
+#### `tag`
+
+Execute a step if the tag name starts with `release`:
+
+```diff
+when:
+  tag: release*
+```
+
+#### `status`
+
+There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
+
+```diff
+pipeline:
+  slack:
+    image: plugins/slack
+    settings:
+      channel: dev
++   when:
++     status: [ success, failure ]
+```
+
+#### `platform`
+
+Execute a step for a specific platform:
+
+```diff
+when:
+  platform: linux/amd64
+```
+
+Execute a step for a specific platform using wildcards:
+
+```diff
+when:
+  platform:  [ linux/*, windows/amd64 ]
+```
+
+#### `environment`
+
+Execute a step for deployment events matching the target deployment environment:
+
+```diff
+when:
+  environment: production
+  event: deployment
+```
+
+#### `matrix`
+
+Execute a step for a single matrix permutation:
+
+```diff
+when:
+  matrix:
+    GO_VERSION: 1.5
+    REDIS_VERSION: 2.8
+```
+
+#### `instance`
+
+Execute a step only on a certain Woodpecker instance matching the specified hostname:
+
+```diff
+when:
+  instance: stage.woodpecker.company.com
+```
+
+#### `path`
+
+:::info
+This feature is currently only available for GitHub, GitLab and Gitea.
+Pull requests aren't supported by gitea at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+Path conditions are ignored for tag events.
+:::
+
+Execute a step only on a pipeline with certain files being changed:
+
+```diff
+when:
+  path: "src/*"
+```
+
+You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
+
+```diff
+when:
+  path:
+    include: [ '.woodpecker/*.yml', '*.ini' ]
+    exclude: [ '*.md', 'docs/**' ]
+    ignore_message: "[ALL]"
+```
+
+** Hint: ** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 ### `group` - Parallel execution
 
@@ -334,9 +506,13 @@ Woodpecker gives the ability to detach steps to run them in background until the
 
 For more details check the [service docs](/docs/usage/services#detachment).
 
-## Advanced Configurations
+## `services`
 
-### `workspace`
+Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
+
+For more details check the [services docs](/docs/usage/services/).
+
+## `workspace`
 
 The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
 
@@ -400,13 +576,13 @@ git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
 
-### `matrix`
+## `matrix`
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
 For more details check the [matrix build docs](/docs/usage/matrix-builds/).
 
-### `clone`
+## `clone`
 
 Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
 
@@ -453,7 +629,7 @@ Example configuration to clone Mercurial repository:
 +      path: bitbucket.org/foo/bar
 ```
 
-#### Git Submodules
+### Git Submodules
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
 
@@ -479,7 +655,7 @@ pipeline:
   ...
 ```
 
-### Privileged mode
+## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the Yaml. You can use this parameter to launch containers with escalated capabilities.
 

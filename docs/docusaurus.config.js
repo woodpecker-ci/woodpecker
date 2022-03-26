@@ -134,6 +134,10 @@ module.exports = {
       indexName: 'woodpecker-ci',
       debug: false, // Set debug to true if you want to inspect the modal
     },
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 4,
+    },
   },
   themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
   presets: [
