@@ -164,7 +164,9 @@ pipeline:
 
 ### `image`
 
-Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
+With the `docker` backend, Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
+
+When using the `local` backend, the `image` entry is used to specify the shell, such as Bash or Fish, that is used to run the commands.
 
 ```diff
  pipeline:
@@ -406,7 +408,9 @@ For more details check the [matrix build docs](/docs/usage/matrix-builds/).
 
 ### `clone`
 
-Woodpecker automatically configures a default clone step if not explicitly defined. You can manually configure the clone step in your pipeline for customization:
+Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
+
+You can manually configure the clone step in your pipeline for customization:
 
 ```diff
 +clone:
