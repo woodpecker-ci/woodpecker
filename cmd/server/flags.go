@@ -282,7 +282,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GOGS_URL"},
 		Name:    "gogs-server",
 		Usage:   "gogs server address",
-		Value:   "https://github.com",
+		Value:   "https://try.gogs.io",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},

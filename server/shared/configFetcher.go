@@ -60,7 +60,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
 			newConfigs, useOld, err := cf.configService.FetchExternalConfig(fetchCtx, cf.repo, cf.build, files)
 			if err != nil {
-				log.Error().Msg("Got errror " + err.Error())
+				log.Error().Msg("Got error " + err.Error())
 				return nil, fmt.Errorf("On Fetching config via http : %s", err)
 			}
 
