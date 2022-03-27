@@ -35,7 +35,7 @@ module.exports = {
           label: 'Plugins',
         },
         {
-          to: 'docs/migrations',
+          to: '/docs/migrations',
           activeBaseRegex: 'docs/migrations',
           position: 'left',
           label: 'Migrations',
@@ -46,7 +46,7 @@ module.exports = {
           label: 'FAQ',
         },
         {
-          to: '/awesome',
+          to: '/docs/awesome',
           position: 'left',
           label: 'Awesome',
         },
@@ -145,15 +145,19 @@ module.exports = {
           headTags: [
             {
               tagName: 'link',
-              rel: 'icon',
-              href: '/img/favicon.svg',
-              sizes: 'any',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.ico',
+                sizes: 'any',
+              },
             },
             {
               tagName: 'link',
-              rel: 'icon',
-              href: '/img/favicon.svg',
-              type: 'image/svg+xml',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.svg',
+                type: 'image/svg+xml',
+              },
             },
           ],
         };
