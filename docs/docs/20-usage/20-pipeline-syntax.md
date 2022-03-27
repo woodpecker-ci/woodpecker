@@ -126,7 +126,7 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your pipeline executes arbitrary commands inside a specified docker container. The defined commands are executed serially.
+Every step of your pipeline executes arbitrary commands inside a specified container. The defined commands are executed serially.
 The associated commit of a current pipeline run is checked out with git to a workspace which is mounted to every step of the pipeline as the working directory.
 
 ```diff
@@ -158,7 +158,7 @@ pipeline:
 
 ### `image`
 
-With the `docker` backend, Woodpecker uses Docker images for the build environment, for plugins and for service containers. The image field is exposed in the container blocks in the Yaml:
+Woodpecker pulls the defined image and uses it as environment to execute the pipeline step commands, for plugins and for service containers.
 
 When using the `local` backend, the `image` entry is used to specify the shell, such as Bash or Fish, that is used to run the commands.
 
@@ -189,7 +189,7 @@ image: index.docker.io/library/golang
 image: index.docker.io/library/golang:1.7
 ```
 
-Woodpecker does not automatically upgrade docker images. Example configuration to always pull the latest image when updates are available:
+Woodpecker does not automatically upgrade container images. Example configuration to always pull the latest image when updates are available:
 
 ```diff
  pipeline:
@@ -262,7 +262,7 @@ go build
 go test
 ```
 
-The above shell script is then executed as the docker entrypoint. The below docker command is an (incomplete) example of how the script is executed:
+The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
 ```
 docker run --entrypoint=build.sh golang
