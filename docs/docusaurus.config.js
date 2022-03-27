@@ -11,7 +11,6 @@ module.exports = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   onDuplicateRoutes: 'throw',
-  favicon: 'img/favicon.ico',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
@@ -47,8 +46,7 @@ module.exports = {
           label: 'FAQ',
         },
         {
-          to: 'docs/awesome',
-          activeBaseRegex: 'docs/awesome',
+          to: '/awesome',
           position: 'left',
           label: 'Awesome',
         },
@@ -139,6 +137,29 @@ module.exports = {
       maxHeadingLevel: 4,
     },
   },
+  plugins: [
+    () => ({
+      name: 'docusaurus-plugin-favicon',
+      injectHtmlTags() {
+        return {
+          headTags: [
+            {
+              tagName: 'link',
+              rel: 'icon',
+              href: '/img/favicon.svg',
+              sizes: 'any',
+            },
+            {
+              tagName: 'link',
+              rel: 'icon',
+              href: '/img/favicon.svg',
+              type: 'image/svg+xml',
+            },
+          ],
+        };
+      },
+    }),
+  ],
   themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
   presets: [
     [
