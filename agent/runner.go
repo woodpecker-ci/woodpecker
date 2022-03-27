@@ -31,6 +31,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // TODO: Implement log streaming.
@@ -97,6 +98,13 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
+
+	// Add sigterm support for internal context.
+	// Required when the pipeline is terminated by external signals
+	// like kubernetes.
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
 
 	canceled := abool.New()
 	go func() {
