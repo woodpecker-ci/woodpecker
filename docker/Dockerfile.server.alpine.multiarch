@@ -1,6 +1,6 @@
 FROM alpine:3.14
 ARG TARGETOS TARGETARCH
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates docker-credential-ecr-login
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3
