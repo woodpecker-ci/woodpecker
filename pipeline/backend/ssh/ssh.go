@@ -40,7 +40,7 @@ func (e *ssh) Name() string {
 }
 
 func (e *ssh) IsAvailable() bool {
-	return true
+	return os.Getenv("WOODPECKER_SSH_KEY") != "" || os.Getenv("WOODPECKER_SSH_PASSWORD") != ""
 }
 
 func (e *ssh) Load() error {
