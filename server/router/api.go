@@ -76,9 +76,6 @@ func apiRoutes(e *gin.Engine) {
 			// requires push permissions
 			repo.DELETE("/logs/:number", session.MustPush, api.DeleteBuildLogs)
 
-			repo.GET("/files/:number", api.FileList)
-			repo.GET("/files/:number/:proc/*file", api.FileGet)
-
 			// requires push permissions
 			repo.GET("/secrets", session.MustPush, api.GetSecretList)
 			repo.POST("/secrets", session.MustPush, api.PostSecret)

@@ -102,14 +102,6 @@ type Store interface {
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
 
-	// Sender
-	SenderFind(*model.Repo, string) (*model.Sender, error)
-	// SenderList TODO: paginate
-	SenderList(*model.Repo) ([]*model.Sender, error)
-	SenderCreate(*model.Sender) error
-	SenderUpdate(*model.Sender) error
-	SenderDelete(*model.Sender) error
-
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo) ([]*model.Secret, error)
@@ -138,12 +130,6 @@ type Store interface {
 	// TODO: since we do ReadAll in any case a ioReader is not the best idear
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Proc, io.Reader) error
-
-	// Files
-	FileList(*model.Build) ([]*model.File, error)
-	FileFind(*model.Proc, string) (*model.File, error)
-	FileRead(*model.Proc, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter

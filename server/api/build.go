@@ -75,13 +75,11 @@ func GetBuild(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(build)
 	procs, _ := _store.ProcList(build)
 	if build.Procs, err = model.Tree(procs); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	build.Files = files
 
 	c.JSON(http.StatusOK, build)
 }

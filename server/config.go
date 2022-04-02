@@ -33,7 +33,6 @@ var Config = struct {
 		Pubsub        pubsub.Publisher
 		Queue         queue.Queue
 		Logs          logging.Log
-		Senders       model.SenderService
 		Secrets       model.SecretService
 		Registries    model.RegistryService
 		Environ       model.EnvironService
@@ -45,7 +44,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Procs model.ProcStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore

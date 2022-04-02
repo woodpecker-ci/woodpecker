@@ -159,11 +159,6 @@ var flags = []cli.Flag{
 		Usage:   "registry plugin endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GATEKEEPER_ENDPOINT"},
-		Name:    "gating-service",
-		Usage:   "gated build endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
