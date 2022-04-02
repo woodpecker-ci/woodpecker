@@ -56,8 +56,8 @@ type Secret struct {
 	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
 	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
 	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"`
-	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
+	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"` // TODO: deprecate
+	Conceal    bool           `json:"-"               xorm:"secret_conceal"`     // TODO: deprecate
 }
 
 // TableName return database table name for xorm

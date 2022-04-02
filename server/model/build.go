@@ -25,32 +25,35 @@ type Build struct {
 	Parent       int64        `json:"parent"                  xorm:"build_parent"`
 	Event        WebhookEvent `json:"event"                   xorm:"build_event"`
 	Status       StatusValue  `json:"status"                  xorm:"INDEX 'build_status'"`
-	Error        string       `json:"error"                   xorm:"build_error"`
-	Enqueued     int64        `json:"enqueued_at"             xorm:"build_enqueued"`
-	Created      int64        `json:"created_at"              xorm:"build_created"`
-	Updated      int64        `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
-	Started      int64        `json:"started_at"              xorm:"build_started"`
-	Finished     int64        `json:"finished_at"             xorm:"build_finished"`
-	Deploy       string       `json:"deploy_to"               xorm:"build_deploy"`
 	Commit       string       `json:"commit"                  xorm:"build_commit"`
 	Branch       string       `json:"branch"                  xorm:"build_branch"`
 	Ref          string       `json:"ref"                     xorm:"build_ref"`
-	Refspec      string       `json:"refspec"                 xorm:"build_refspec"`
 	Remote       string       `json:"remote"                  xorm:"build_remote"`
-	Title        string       `json:"title"                   xorm:"build_title"`
 	Message      string       `json:"message"                 xorm:"build_message"`
-	Timestamp    int64        `json:"timestamp"               xorm:"build_timestamp"`
 	Sender       string       `json:"sender"                  xorm:"build_sender"`
 	Avatar       string       `json:"author_avatar"           xorm:"build_avatar"`
 	Email        string       `json:"author_email"            xorm:"build_email"`
 	Link         string       `json:"link_url"                xorm:"build_link"`
-	Signed       bool         `json:"signed"                  xorm:"build_signed"`   // deprecate
-	Verified     bool         `json:"verified"                xorm:"build_verified"` // deprecate
-	Reviewer     string       `json:"reviewed_by"             xorm:"build_reviewer"`
-	Reviewed     int64        `json:"reviewed_at"             xorm:"build_reviewed"`
-	Procs        []*Proc      `json:"procs,omitempty"         xorm:"-"`
-	Files        []*File      `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
+
+	// execution data
+	Error    string `json:"error"                   xorm:"build_error"`
+	Enqueued int64  `json:"enqueued_at"             xorm:"build_enqueued"`
+	Created  int64  `json:"created_at"              xorm:"build_created"`
+	Updated  int64  `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
+	Started  int64  `json:"started_at"              xorm:"build_started"`
+	Finished int64  `json:"finished_at"             xorm:"build_finished"`
+
+	// TODO: deprecate / remove properties
+	Signed    bool    `json:"signed"                  xorm:"build_signed"`
+	Verified  bool    `json:"verified"                xorm:"build_verified"`
+	Reviewer  string  `json:"reviewed_by"             xorm:"build_reviewer"`
+	Reviewed  int64   `json:"reviewed_at"             xorm:"build_reviewed"`
+	Title     string  `json:"title"                   xorm:"build_title"`
+	Refspec   string  `json:"refspec"                 xorm:"build_refspec"`
+	Deploy    string  `json:"deploy_to"               xorm:"build_deploy"`
+	Timestamp int64   `json:"timestamp"               xorm:"build_timestamp"`
+	Procs     []*Proc `json:"procs,omitempty"         xorm:"-"`
 }
 
 // TableName return database table name for xorm

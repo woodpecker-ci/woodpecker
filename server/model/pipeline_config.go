@@ -15,6 +15,7 @@
 
 package model
 
+// TODO: rename to pipeline config
 // ConfigStore persists pipeline configuration to storage.
 type ConfigStore interface {
 	ConfigsForBuild(buildID int64) ([]*Config, error)
