@@ -160,7 +160,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		Link:    hook.GetPullRequest().GetHTMLURL(),
 		Ref:     fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:  hook.GetPullRequest().GetBase().GetRef(),
-		Message: hook.GetPullRequest().GetTitle(),
+		Message: hook.GetPullRequest().GetTitle(), // TODO: use message from last commit
 		Author:  hook.GetPullRequest().GetUser().GetLogin(),
 		Avatar:  hook.GetPullRequest().GetUser().GetAvatarURL(),
 		Title:   hook.GetPullRequest().GetTitle(),

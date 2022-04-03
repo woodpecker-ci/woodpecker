@@ -100,7 +100,7 @@ func buildFromPush(hook *pushHook) *model.Build {
 		Avatar:       avatar,
 		Author:       author,
 		Email:        hook.Sender.Email,
-		Timestamp:    time.Now().UTC().Unix(),
+		Timestamp:    time.Now().UTC().Unix(), // TODO: use timestamp of commit
 		Sender:       sender,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
@@ -143,7 +143,7 @@ func buildFromTag(hook *pushHook) *model.Build {
 		Avatar:    avatar,
 		Author:    author,
 		Sender:    sender,
-		Timestamp: time.Now().UTC().Unix(),
+		Timestamp: time.Now().UTC().Unix(), // TODO: use timestamp from git tag
 	}
 }
 
@@ -163,7 +163,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 		Link:    hook.PullRequest.URL,
 		Ref:     fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:  hook.PullRequest.Base.Ref,
-		Message: hook.PullRequest.Title,
+		Message: hook.PullRequest.Title, // TODO: use message from last commit
 		Author:  hook.PullRequest.User.Username,
 		Avatar:  avatar,
 		Sender:  sender,

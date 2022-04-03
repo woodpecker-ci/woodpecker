@@ -54,26 +54,24 @@ export type Build = {
   // The remote repository.
   remote: string;
 
+  // The title of the pull request if associated.
   title: string;
 
+  // The login of the user who triggered the webhook.
   sender: string;
 
-  // The login for the author of the commit.
+  // The login of the author of the commit.
   author: string;
 
-  // The avatar for the author of the commit.
+  // The avatar of the author of the commit.
   author_avatar: string;
 
-  //  email for the author of the commit.
+  // The email of the author of the commit.
   author_email: string;
 
   // The link to view the repository.
   // This link will point to the repository state associated with the build's commit.
   link_url: string;
-
-  signed: boolean;
-
-  verified: boolean;
 
   reviewed_by: string;
 

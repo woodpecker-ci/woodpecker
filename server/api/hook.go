@@ -209,7 +209,6 @@ func PostHook(c *gin.Context) {
 
 	// update some build fields
 	build.RepoID = repo.ID
-	build.Verified = true
 	build.Status = model.StatusPending
 
 	// TODO(336) extend gated feature with an allow/block List
