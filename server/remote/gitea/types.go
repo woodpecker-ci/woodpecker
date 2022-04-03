@@ -27,6 +27,7 @@ type pushHook struct {
 		Email    string `json:"email"`
 		Login    string `json:"login"`
 		Username string `json:"username"`
+		// Avatar   string `json:"avatar_url"` // TODO: enable field
 	} `json:"pusher"`
 
 	Repo struct {

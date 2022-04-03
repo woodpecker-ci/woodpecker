@@ -69,13 +69,13 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 func buildFromPush(hook *pushHook) *model.Build {
 	avatar := expandAvatar(
 		hook.Repo.URL,
-		fixMalformedAvatar(hook.Sender.Avatar),
+		fixMalformedAvatar(hook.Sender.Avatar), // TODO: use Pusher.Avatar
 	)
-	author := hook.Sender.Login
+	author := hook.Sender.Login // TODO: use Pusher.Login
 	if author == "" {
 		author = hook.Sender.Username
 	}
-	sender := hook.Sender.Username
+	sender := hook.Sender.Username // TODO: use Sender.Login
 	if sender == "" {
 		sender = hook.Sender.Login
 	}
@@ -122,13 +122,13 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 func buildFromTag(hook *pushHook) *model.Build {
 	avatar := expandAvatar(
 		hook.Repo.URL,
-		fixMalformedAvatar(hook.Sender.Avatar),
+		fixMalformedAvatar(hook.Sender.Avatar), // TODO: use Pusher.Avatar
 	)
-	author := hook.Sender.Login
+	author := hook.Sender.Login // TODO: use Pusher.Login
 	if author == "" {
 		author = hook.Sender.Username
 	}
-	sender := hook.Sender.Username
+	sender := hook.Sender.Username // TODO: use Sender.Login
 	if sender == "" {
 		sender = hook.Sender.Login
 	}
