@@ -54,7 +54,7 @@ func (e *ssh) Load() error {
 	} else {
 		auth = goph.Password(os.Getenv("WOODPECKER_SSH_PASSWORD"))
 	}
-	client, err := goph.New(os.Getenv("WOODPECKER_SSH_USER"), os.Getenv("WOODPECKER_SSH_HOST"), auth)
+	client, err := goph.New(os.Getenv("WOODPECKER_SSH_USER"), os.Getenv("WOODPECKER_SSH_ADDRESS"), auth)
 	if err != nil {
 		return err
 	}
