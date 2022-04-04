@@ -53,10 +53,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	}
 
 	// Get default clone image
-	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
-	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
-		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
-	}
+	defaultCloneImage := server.Config.Pipeline.DefaultCloneImage
 
 	if proc.Image == defaultCloneImage {
 		// Default clone step
