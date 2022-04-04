@@ -3,6 +3,7 @@ package ssh
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -44,6 +45,14 @@ func (e *ssh) IsAvailable() bool {
 }
 
 func (e *ssh) Load() error {
+	address := os.Getenv("WOODPECKER_SSH_ADDRESS")
+	if address == "" {
+		return fmt.Errorf("missing SSH address")
+	}
+	user := os.Getenv("WOODPECKER_SSH_USER")
+	if user == "" {
+		return fmt.Errorf("missing SSH user")
+	}
 	var auth goph.Auth
 	if file, has := os.LookupEnv("WOODPECKER_SSH_KEY"); has {
 		var err error
@@ -54,7 +63,7 @@ func (e *ssh) Load() error {
 	} else {
 		auth = goph.Password(os.Getenv("WOODPECKER_SSH_PASSWORD"))
 	}
-	client, err := goph.New(os.Getenv("WOODPECKER_SSH_USER"), os.Getenv("WOODPECKER_SSH_ADDRESS"), auth)
+	client, err := goph.New(user, address, auth)
 	if err != nil {
 		return err
 	}
