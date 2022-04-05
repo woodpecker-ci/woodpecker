@@ -607,12 +607,12 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
+	secs, err := server.Config.Services.Secrets.SecretList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
 	}

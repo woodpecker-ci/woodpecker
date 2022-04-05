@@ -16,6 +16,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"net/url"
 )
@@ -28,17 +29,17 @@ var (
 
 // RegistryService defines a service for managing registries.
 type RegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo) ([]*Registry, error)
-	RegistryCreate(*Repo, *Registry) error
-	RegistryUpdate(*Repo, *Registry) error
-	RegistryDelete(*Repo, string) error
+	RegistryFind(context.Context, *Repo, string) (*Registry, error)
+	RegistryList(context.Context, *Repo) ([]*Registry, error)
+	RegistryCreate(context.Context, *Repo, *Registry) error
+	RegistryUpdate(context.Context, *Repo, *Registry) error
+	RegistryDelete(context.Context, *Repo, string) error
 }
 
 // ReadOnlyRegistryService defines a service for managing registries.
 type ReadOnlyRegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo) ([]*Registry, error)
+	RegistryFind(context.Context, *Repo, string) (*Registry, error)
+	RegistryList(context.Context, *Repo) ([]*Registry, error)
 }
 
 // RegistryStore persists registry information to storage.

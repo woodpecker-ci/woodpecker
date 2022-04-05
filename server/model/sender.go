@@ -15,12 +15,14 @@
 
 package model
 
+import "context"
+
 type SenderService interface {
-	SenderAllowed(*User, *Repo, *Build, *Config) (bool, error)
-	SenderCreate(*Repo, *Sender) error
-	SenderUpdate(*Repo, *Sender) error
-	SenderDelete(*Repo, string) error
-	SenderList(*Repo) ([]*Sender, error)
+	SenderAllowed(context.Context, *User, *Repo, *Build, *Config) (bool, error)
+	SenderCreate(context.Context, *Repo, *Sender) error
+	SenderUpdate(context.Context, *Repo, *Sender) error
+	SenderDelete(context.Context, *Repo, string) error
+	SenderList(context.Context, *Repo) ([]*Sender, error)
 }
 
 type SenderStore interface {

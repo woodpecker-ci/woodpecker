@@ -244,7 +244,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
-				configuration.NewAPI("", ""),
+				configuration.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -409,7 +409,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := configuration.NewAPI(ts.URL, httpSigSecret)
+	configAPI := configuration.NewHTTP(ts.URL, httpSigSecret)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

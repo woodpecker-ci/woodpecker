@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,7 @@ type filesystem struct {
 	path string
 }
 
-func Filesystem(path string) model.ReadOnlyRegistryService {
+func NewFilesystem(path string) model.ReadOnlyRegistryService {
 	return &filesystem{path}
 }
 
@@ -64,11 +65,11 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	return auths, nil
 }
 
-func (b *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
+func (b *filesystem) RegistryFind(context.Context, *model.Repo, string) (*model.Registry, error) {
 	return nil, nil
 }
 
-func (b *filesystem) RegistryList(*model.Repo) ([]*model.Registry, error) {
+func (b *filesystem) RegistryList(context.Context, *model.Repo) ([]*model.Registry, error) {
 	return parseDockerConfig(b.path)
 }
 

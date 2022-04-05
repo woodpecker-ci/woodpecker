@@ -8,6 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+// TODO: migrate into secrets after renaming secrets to environment
 type builtin struct {
 	globals []*model.Environ
 }

@@ -15,6 +15,9 @@
       <Tab title="Registries">
         <RegistriesTab />
       </Tab>
+      <Tab title="Extensions">
+        <ExtensionsTab />
+      </Tab>
       <Tab title="Badge">
         <BadgeTab />
       </Tab>
@@ -33,6 +36,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
 import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
+import ExtensionsTab from '~/components/repo/settings/ExtensionsTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
@@ -55,6 +59,7 @@ export default defineComponent({
     RegistriesTab,
     ActionsTab,
     BadgeTab,
+    ExtensionsTab,
   },
 
   setup() {

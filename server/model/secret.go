@@ -16,6 +16,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -30,12 +31,11 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo) ([]*Secret, error)
-	SecretListBuild(*Repo, *Build) ([]*Secret, error)
-	SecretCreate(*Repo, *Secret) error
-	SecretUpdate(*Repo, *Secret) error
-	SecretDelete(*Repo, string) error
+	SecretFind(context.Context, *Repo, string) (*Secret, error)
+	SecretList(context.Context, *Repo) ([]*Secret, error)
+	SecretCreate(context.Context, *Repo, *Secret) error
+	SecretUpdate(context.Context, *Repo, *Secret) error
+	SecretDelete(context.Context, *Repo, string) error
 }
 
 // SecretStore persists secret information to storage.
@@ -47,8 +47,8 @@ type SecretStore interface {
 	SecretDelete(*Secret) error
 }
 
+// TODO: rename to environment_variable and make it a secret by setting conceal=true
 // Secret represents a secret variable, such as a password or token.
-// swagger:model registry
 type Secret struct {
 	ID         int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
 	RepoID     int64          `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
@@ -56,7 +56,7 @@ type Secret struct {
 	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
 	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
 	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"`
+	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"` // TODO: remove
 	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
 }
 

@@ -1,25 +1,27 @@
 package registry
 
 import (
+	"context"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type combined struct {
-	registries []model.ReadOnlyRegistryService
-	dbRegistry model.RegistryService
+	registries   []model.ReadOnlyRegistryService
+	mainRegistry model.RegistryService
 }
 
-func Combined(dbRegistry model.RegistryService, registries ...model.ReadOnlyRegistryService) model.RegistryService {
-	registries = append(registries, dbRegistry)
+func NewCombined(mainRegistry model.RegistryService, registries ...model.ReadOnlyRegistryService) model.RegistryService {
+	registries = append(registries, mainRegistry)
 	return &combined{
-		registries: registries,
-		dbRegistry: dbRegistry,
+		registries:   registries,
+		mainRegistry: mainRegistry,
 	}
 }
 
-func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, error) {
+func (c combined) RegistryFind(ctx context.Context, repo *model.Repo, name string) (*model.Registry, error) {
 	for _, registry := range c.registries {
-		res, err := registry.RegistryFind(repo, name)
+		res, err := registry.RegistryFind(ctx, repo, name)
 		if err != nil {
 			return nil, err
 		}
@@ -30,10 +32,10 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+func (c combined) RegistryList(ctx context.Context, repo *model.Repo) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
-		list, err := registry.RegistryList(repo)
+		list, err := registry.RegistryList(ctx, repo)
 		if err != nil {
 			return nil, err
 		}
@@ -42,14 +44,14 @@ func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
 	return registries, nil
 }
 
-func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {
-	return c.dbRegistry.RegistryCreate(repo, registry)
+func (c combined) RegistryCreate(ctx context.Context, repo *model.Repo, registry *model.Registry) error {
+	return c.mainRegistry.RegistryCreate(ctx, repo, registry)
 }
 
-func (c combined) RegistryUpdate(repo *model.Repo, registry *model.Registry) error {
-	return c.dbRegistry.RegistryUpdate(repo, registry)
+func (c combined) RegistryUpdate(ctx context.Context, repo *model.Repo, registry *model.Registry) error {
+	return c.mainRegistry.RegistryUpdate(ctx, repo, registry)
 }
 
-func (c combined) RegistryDelete(repo *model.Repo, name string) error {
-	return c.dbRegistry.RegistryDelete(repo, name)
+func (c combined) RegistryDelete(ctx context.Context, repo *model.Repo, name string) error {
+	return c.mainRegistry.RegistryDelete(ctx, repo, name)
 }

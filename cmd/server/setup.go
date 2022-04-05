@@ -159,17 +159,17 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	return secrets.New(c.Context, s)
+	return secrets.NewBuiltin(s)
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 	if c.String("docker-config") != "" {
-		return registry.Combined(
-			registry.New(s),
-			registry.Filesystem(c.String("docker-config")),
+		return registry.NewCombined(
+			registry.NewBuiltin(s),
+			registry.NewFilesystem(c.String("docker-config")),
 		)
 	}
-	return registry.New(s)
+	return registry.NewBuiltin(s)
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {

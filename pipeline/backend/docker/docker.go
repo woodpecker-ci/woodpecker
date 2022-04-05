@@ -148,6 +148,8 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 	// 	}
 	// }
 
+	e.client.NetworkConnect(ctx, "ci_default", proc.Name, &network.EndpointSettings{})
+
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
 
