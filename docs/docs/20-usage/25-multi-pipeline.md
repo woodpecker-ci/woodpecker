@@ -6,7 +6,7 @@ This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [
 
 By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
 
-The Multi-Pipeline feature allows the pipeline to be split into several files and placed in the `.woodpecker/` folder. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](/docs/usage/project-settings). 
+The Multi-Pipeline feature allows the pipeline to be split into several files and placed in the `.woodpecker/` folder. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](/docs/usage/project-settings).
 
 ## Rational
 
@@ -81,7 +81,7 @@ pipeline:
 
 ## Status lines
 
-Each pipeline has its own status line on GitHub.
+Each pipeline will report its own status back to your forge.
 
 ## Flow control
 
