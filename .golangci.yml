@@ -16,6 +16,16 @@ linters-settings:
       - ^log.Fatal().*$
   errorlint:
     errorf-multi: true
+  depguard:
+    additional-guards:
+      # deny server imports in pipeline
+      - list-type: denylist
+        include-go-root: true
+        packages:
+         - "github.com/woodpecker-ci/woodpecker/server"
+        ignore-file-rules:
+          - "server/**/*.go"
+          - "cmd/server/*.go"
 
 linters:
   disable-all: true
@@ -37,6 +47,7 @@ linters:
     - errorlint
     - forbidigo
     - zerologlint
+    - depguard
 
 run:
   timeout: 5m
