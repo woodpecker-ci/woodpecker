@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,8 +14,9 @@ import (
 )
 
 type local struct {
-	cmd    *exec.Cmd
-	output io.ReadCloser
+	cmd        *exec.Cmd
+	output     io.ReadCloser
+	workingdir string
 }
 
 // make sure local implements Engine
@@ -34,7 +36,9 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	return nil
+	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	e.workingdir = dir
+	return err
 }
 
 // Setup the pipeline environment.
@@ -54,7 +58,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 
 	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
+		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -72,12 +76,14 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 
 	// Prepare working directory
 	if proc.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
+		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO_OWNER"]
 	} else {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
+		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO"]
 	}
-	_ = os.MkdirAll(e.cmd.Dir, 0o700)
-
+	err := os.MkdirAll(e.cmd.Dir, 0o700)
+	if err != nil {
+		return err
+	}
 	// Get output and redirect Stderr to Stdout
 	e.output, _ = e.cmd.StdoutPipe()
 	e.cmd.Stderr = e.cmd.Stdout
