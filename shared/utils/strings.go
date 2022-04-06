@@ -31,7 +31,7 @@ func DedupStrings(list []string) []string {
 	return newList
 }
 
-// EqualStringSlice compare two string slices if they have equal values independ of how they are sorted
+// EqualStringSlice compare two string slices if they have equal values independent of how they are sorted
 func EqualStringSlice(l1, l2 []string) bool {
 	if len(l1) != len(l2) {
 		return false
