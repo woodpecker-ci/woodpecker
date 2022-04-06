@@ -10,7 +10,7 @@ This is a full list of configuration options. Please note that many of these opt
 Enables the Gogs driver.
 
 ### `WOODPECKER_GOGS_URL`
-> Default: `https://github.com`
+> Default: `https://try.gogs.io`
 
 Configures the Gogs server address.
 

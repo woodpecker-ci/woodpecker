@@ -101,7 +101,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   "woodpeckerci/plugin-git:latest",
+		Value:   constant.DefaultCloneImage,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
@@ -282,7 +282,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GOGS_URL"},
 		Name:    "gogs-server",
 		Usage:   "gogs server address",
-		Value:   "https://github.com",
+		Value:   "https://try.gogs.io",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
