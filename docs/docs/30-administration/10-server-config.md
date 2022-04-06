@@ -4,7 +4,7 @@
 
 Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-If registration is open every user with an account at the configured [SCM](/docs/administration/vcs/overview) can login to Woodpecker.
+If registration is open every user with an account at the configured [forges](/docs/administration/forges/overview) can login to Woodpecker.
 This example enables open registration for users that are members of approved organizations:
 
 ```diff
@@ -76,7 +76,7 @@ services:
 
 To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
 
-For docker-compose you can use a .env file next to your compose condfiguration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
+For docker-compose you can use a .env file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
@@ -195,7 +195,7 @@ Link to documentation in the UI.
 ### `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
 > Default: `false`
 
-Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.
+Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
 
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
 > Default: `woodpeckerci/plugin-git:latest`
@@ -354,28 +354,28 @@ Read the value for `WOODPECKER_CONFIG_SERVICE_SECRET` from the specified filepat
 
 ### `WOODPECKER_GITHUB_...`
 
-See [Github configuration](vcs/github/#configuration)
+See [Github configuration](forges/github/#configuration)
 
 ### `WOODPECKER_GOGS_...`
 
-See [Gogs configuration](vcs/gogs/#configuration)
+See [Gogs configuration](forges/gogs/#configuration)
 
 ### `WOODPECKER_GITEA_...`
 
-See [Gitea configuration](vcs/gitea/#configuration)
+See [Gitea configuration](forges/gitea/#configuration)
 
 ### `WOODPECKER_BITBUCKET_...`
 
-See [Bitbucket configuration](vcs/bitbucket/#configuration)
+See [Bitbucket configuration](forges/bitbucket/#configuration)
 
 ### `WOODPECKER_STASH_...`
 
-See [Bitbucket server configuration](vcs/bitbucket_server/#configuration)
+See [Bitbucket server configuration](forges/bitbucket_server/#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](vcs/gitlab/#configuration)
+See [Gitlab configuration](forges/gitlab/#configuration)
 
 ### `WOODPECKER_CODING_...`
 
-See [Coding configuration](vcs/coding/#configuration)
+See [Coding configuration](forges/coding/#configuration)
