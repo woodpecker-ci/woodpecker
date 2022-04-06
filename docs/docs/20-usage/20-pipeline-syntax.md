@@ -442,9 +442,9 @@ when:
 #### `path`
 
 :::info
-This feature is currently only available for GitHub, GitLab and Gitea.
-Pull requests aren't supported by gitea at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
-Path conditions are ignored for tag events.
+Path conditions are applied only to **push** and **pull_request** events.
+It is currently **only available** for GitHub, GitLab.
+Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
 :::
 
 Execute a step only on a pipeline with certain files being changed:
