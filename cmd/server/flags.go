@@ -101,7 +101,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   "woodpeckerci/plugin-git:latest",
+		Value:   constant.DefaultCloneImage,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
