@@ -6,6 +6,16 @@ linters-settings:
   gofumpt:
     lang-version: "1.16"
     extra-rules: true
+  depguard:
+    additional-guards:
+      # deny server imports in pipeline
+      - list-type: denylist
+        include-go-root: true
+        packages:
+         - "github.com/woodpecker-ci/woodpecker/server"
+        ignore-file-rules:
+          - "server/**/*.go"
+          - "cmd/server/*.go"
 
 linters:
   disable-all: true
@@ -27,6 +37,7 @@ linters:
     - varcheck
     - whitespace
     - gofumpt
+    - depguard
 
 run:
   timeout: 5m
