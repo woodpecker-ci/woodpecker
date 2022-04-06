@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type local struct {
@@ -52,13 +52,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 		}
 	}
 
-	// Get default clone image
-	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
-	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
-		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
-	}
-
-	if proc.Image == defaultCloneImage {
+	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
 		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
@@ -77,7 +71,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
 
 	// Prepare working directory
-	if proc.Image == defaultCloneImage {
+	if proc.Image == constant.DefaultCloneImage {
 		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
 	} else {
 		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
@@ -106,6 +100,6 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	os.RemoveAll(e.cmd.Dir)
+	_ = os.RemoveAll(e.cmd.Dir)
 	return nil
 }
