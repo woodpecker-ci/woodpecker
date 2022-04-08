@@ -106,6 +106,5 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	_ = os.RemoveAll(e.cmd.Dir)
-	return nil
+	return os.RemoveAll(e.cmd.Dir)
 }
