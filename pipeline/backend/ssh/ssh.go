@@ -129,6 +129,9 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 	err = sftp.MkdirAll(e.cmd.Dir, 0o700)
 	if err != nil {
 		return err
+	}
+	if err := sftp.Close(); err != nil {
+		return err
 	}*/
 
 	// Get output and redirect Stderr to Stdout
