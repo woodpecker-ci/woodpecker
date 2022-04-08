@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -18,6 +19,7 @@ type ssh struct {
 	cmd    *goph.Cmd
 	output io.ReadCloser
 	client *goph.Client
+	workingdir string
 }
 
 type readCloser struct {
@@ -45,6 +47,11 @@ func (e *ssh) IsAvailable() bool {
 }
 
 func (e *ssh) Load() error {
+	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	if err != nil {
+		return err
+	}
+	e.workingdir = dir
 	address := os.Getenv("WOODPECKER_SSH_ADDRESS")
 	if address == "" {
 		return fmt.Errorf("missing SSH address")
@@ -88,7 +95,7 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 
 	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
+		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -110,9 +117,18 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 
 	// Prepare working directory
 	/*if proc.Image == defaultCloneImage {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
+		e.cmd.Dir = e.workingdir+"/"+ proc.Environment["CI_REPO_OWNER"]
 	} else {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
+		e.cmd.Dir = e.workingdir+"/"+ proc.Environment["CI_REPO"]
+	}
+
+	sftp, err := client.NewSftp()
+	if err != nil {
+		return err
+	}
+	err = sftp.MkdirAll(e.cmd.Dir, 0o700)
+	if err != nil {
+		return err
 	}*/
 
 	// Get output and redirect Stderr to Stdout
