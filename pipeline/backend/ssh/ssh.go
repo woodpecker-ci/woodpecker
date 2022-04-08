@@ -11,7 +11,7 @@ import (
 	"github.com/melbahja/goph"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type ssh struct {
@@ -86,13 +86,7 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 		}
 	}
 
-	// Get default clone image
-	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
-	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
-		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
-	}
-
-	if proc.Image == defaultCloneImage {
+	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
 		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
@@ -145,6 +139,6 @@ func (e *ssh) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 // Destroy the pipeline environment.
 func (e *ssh) Destroy(context.Context, *types.Config) error {
 	e.client.Close()
-	// os.RemoveAll(e.cmd.Dir)
+	//_ = os.RemoveAll(e.cmd.Dir)
 	return nil
 }
