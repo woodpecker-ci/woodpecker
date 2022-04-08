@@ -16,9 +16,9 @@ import (
 )
 
 type ssh struct {
-	cmd    *goph.Cmd
-	output io.ReadCloser
-	client *goph.Client
+	cmd        *goph.Cmd
+	output     io.ReadCloser
+	client     *goph.Client
 	workingdir string
 }
 
