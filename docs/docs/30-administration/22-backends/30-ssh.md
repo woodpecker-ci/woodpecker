@@ -2,8 +2,7 @@
 
 The local backend will execute the pipelines using SSH on a remote system without any isolation of any kind.
 
-Since the code run directly in the same context as the agent (same user, same filesystem), a malicious pipeline could 
-be used to access the agent configuration especially the `WOODPECKER_AGENT_SECRET` variable.
+Since the code run directly on the SSH machine, a malicious pipeline could access and edit files the SSH user has access to. Always restrict the user as far as possible!
 
 It is recommended to use this backend only for private setup where the code and pipeline can be trusted. You shouldn't
 use it for a public facing CI where anyone can submit code or add new repositories.
