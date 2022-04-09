@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -47,11 +46,17 @@ func (e *ssh) IsAvailable() bool {
 }
 
 func (e *ssh) Load() error {
-	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	cmd, err := e.client.Command("/bin/env", "mktemp", "-d")
 	if err != nil {
 		return err
 	}
-	e.workingdir = dir
+
+	dir, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	e.workingdir = string(dir)
 	address := os.Getenv("WOODPECKER_SSH_ADDRESS")
 	if address == "" {
 		return fmt.Errorf("missing SSH address")
@@ -105,7 +110,7 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 		// Decode script and delete initial lines
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
 		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
+		Command = append(Command, "cd "+e.workingdir+"/"+proc.Environment["CI_REPO"]+" && "+string(Script)[strings.Index(string(Script), "\n\n")+2:])
 	}
 
 	// Prepare command
@@ -114,25 +119,6 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 	if err != nil {
 		return err
 	}
-
-	// Prepare working directory
-	/*if proc.Image == defaultCloneImage {
-		e.cmd.Dir = e.workingdir+"/"+ proc.Environment["CI_REPO_OWNER"]
-	} else {
-		e.cmd.Dir = e.workingdir+"/"+ proc.Environment["CI_REPO"]
-	}
-
-	sftp, err := client.NewSftp()
-	if err != nil {
-		return err
-	}
-	err = sftp.MkdirAll(e.cmd.Dir, 0o700)
-	if err != nil {
-		return err
-	}
-	if err := sftp.Close(); err != nil {
-		return err
-	}*/
 
 	// Get output and redirect Stderr to Stdout
 	std, _ := e.cmd.StdoutPipe()
