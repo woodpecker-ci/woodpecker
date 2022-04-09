@@ -180,6 +180,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		config.Stages = append(config.Stages, stage)
 	}
 
+	var stages []*backend.Stage
 	// add pipeline steps. 1 pipeline step per stage, at the moment
 	var stage *backend.Stage
 	var group string
@@ -199,12 +200,19 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			stage = new(backend.Stage)
 			stage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, i)
 			stage.Alias = container.Name
-			config.Stages = append(config.Stages, stage)
+			stages = append(stages, stage)
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
 		step := c.createProcess(name, container, "pipeline")
 		stage.Steps = append(stage.Steps, step)
+	}
+
+	if len(stages) == 0 {
+		// nothing will run, remove services and clone step
+		config.Stages = []*backend.Stage{}
+	} else {
+		config.Stages = append(config.Stages, stages...)
 	}
 
 	c.setupCacheRebuild(conf, config)

@@ -114,10 +114,6 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
-			if len(ir.Stages) == 0 {
-				continue
-			}
-
 			item := &BuildItem{
 				Proc:      proc,
 				Config:    ir,
