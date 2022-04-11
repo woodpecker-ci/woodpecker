@@ -46,7 +46,7 @@ func (e *ssh) IsAvailable() bool {
 }
 
 func (e *ssh) Load() error {
-	cmd, err := e.client.Command("/bin/env", "mktemp", "-d")
+	cmd, err := e.client.Command("/bin/env", "mktemp", "-d", "-p", "/tmp", "woodpecker-ssh-XXXXXXXXXX")
 	if err != nil {
 		return err
 	}
