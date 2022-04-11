@@ -144,6 +144,10 @@ func (e *ssh) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 // Destroy the pipeline environment.
 func (e *ssh) Destroy(context.Context, *types.Config) error {
 	e.client.Close()
-	//_ = os.RemoveAll(e.cmd.Dir)
-	return nil
+	sftp, err := e.client.NewSftp()
+	if err != nil {
+		return err
+	}
+
+	return sftp.RemoveDirectory(e.workingdir)
 }
