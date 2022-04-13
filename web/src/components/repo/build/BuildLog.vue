@@ -67,7 +67,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const buildProc = useBuildProc();
 
-    const ansiConvert = new AnsiConvert();
+    const ansiConvert = new AnsiConvert({ escapeXML: true });
     const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
     const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
 
