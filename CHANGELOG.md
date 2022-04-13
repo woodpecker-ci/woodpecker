@@ -8,7 +8,7 @@
   * Branch list enhancements (#808) (#809)
   * Get Netrc machine from clone url (#800) (#803)
 * SECURITY
-  * fix: ansi logging (#879) (#880)
+  * Escape html / xml in log view (#879) (#880)
 
 ## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-02-24
 
