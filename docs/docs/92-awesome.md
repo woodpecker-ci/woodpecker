@@ -22,7 +22,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 ## Blogs, guides, videos
 
-- [Woodpecker-CI with Gitea](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
+- [Tutorial about setup of Woodpecker-CI and Gitea](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
 
 ## Plugins
 
