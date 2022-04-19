@@ -59,6 +59,10 @@ vendor:
 format:
 	@gofmt -s -w ${GOFILES_NOVENDOR}
 
+.PHONY: docs
+docs:
+	go generate cmd/cli/app.go
+
 .PHONY: clean
 clean:
 	go clean -i ./...
