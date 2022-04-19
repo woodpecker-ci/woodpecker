@@ -3,6 +3,7 @@ package schema
 import (
 	_ "embed"
 	"fmt"
+	"io"
 
 	"github.com/xeipuuv/gojsonschema"
 
@@ -12,9 +13,10 @@ import (
 //go:embed schema.json
 var schemaDefinition []byte
 
-func Lint(file string) ([]gojsonschema.ResultError, error) {
+// Lint lints an io.Reader against the Woodpecker schema.json
+func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
-	j, err := yml.LoadYmlFileAsJSON(file)
+	j, err := yml.LoadYmlReaderAsJSON(r)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to load yml file %w", err)
 	}
