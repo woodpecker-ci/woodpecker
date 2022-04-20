@@ -2,6 +2,7 @@ package schema_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -78,7 +79,10 @@ func TestSchema(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			configErrors, err := schema.Lint(tt.testFile)
+			fi, err := os.Open(tt.testFile)
+			assert.NoError(t, err, "could not open test file")
+			defer fi.Close()
+			configErrors, err := schema.Lint(fi)
 			if tt.fail {
 				if len(configErrors) == 0 {
 					assert.Error(t, err, "Expected config errors but got none")
