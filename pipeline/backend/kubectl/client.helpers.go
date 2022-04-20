@@ -71,11 +71,7 @@ func (client *KubeClient) WaitForConditions(
 	)
 
 	action := ActionContext{}
-	var waitCommand *exec.Cmd
 	action.OnStop = func(err error) {
-		// kill the process if currently executing
-		_ = waitCommand.Process.Kill()
-		_ = waitCommand.Wait()
 		if err != nil {
 			resultChan <- struct {
 				condition string
@@ -90,7 +86,7 @@ func (client *KubeClient) WaitForConditions(
 		ctx,
 		func() {
 			for _, condition := range conditions {
-				waitCommand = client.CreateKubectlCommand(
+				waitCommand := client.CreateKubectlCommand(
 					action.Context(),
 					waitCommandArgs,
 					"--for",
@@ -105,7 +101,6 @@ func (client *KubeClient) WaitForConditions(
 					}
 					action.MarkActionStarted()
 					err = waitCommand.Wait()
-
 					wasStopped := action.Stop(err)
 
 					// stop and check if it was stopped
