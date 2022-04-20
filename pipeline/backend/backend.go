@@ -11,14 +11,13 @@ import (
 var engines map[string]types.Engine
 
 func init() {
-	engines = make(map[string]types.Engine)
-
-	// TODO: disabled for now as kubernetes backend has not been implemented yet
 	loadedEngines := []types.Engine{
 		docker.New(),
-		kubectl.New(),
+    kubectl.New(),
+		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
 	}
 
+	engines = make(map[string]types.Engine)
 	for _, engine := range loadedEngines {
 		engines[engine.Name()] = engine
 	}
