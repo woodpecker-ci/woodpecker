@@ -1,4 +1,4 @@
-// Copyright 2021 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package constant
 
-import (
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog/log"
-)
-
-func main() {
-	app := newApp()
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running cli")
-	}
+var PrivilegedPlugins = []string{
+	"plugins/docker",
+	"plugins/gcr",
+	"plugins/ecr",
+	"woodpeckerci/plugin-docker",
+	"woodpeckerci/plugin-docker-buildx",
 }
+
+const (
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:latest"
+)

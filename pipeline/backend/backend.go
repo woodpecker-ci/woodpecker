@@ -5,6 +5,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubectl"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
@@ -14,6 +15,7 @@ func init() {
 	loadedEngines := []types.Engine{
 		docker.New(),
 		kubectl.New(),
+		local.New(),
 		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
 	}
 

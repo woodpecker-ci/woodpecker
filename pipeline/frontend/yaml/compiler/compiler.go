@@ -7,6 +7,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
@@ -15,8 +16,7 @@ import (
 const (
 	windowsPrefix = "windows/"
 
-	defaultCloneImage = "woodpeckerci/plugin-git:latest"
-	defaultCloneName  = "clone"
+	defaultCloneName = "clone"
 
 	networkDriverNAT    = "nat"
 	networkDriverBridge = "bridge"
@@ -127,7 +127,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
-		cloneImage := defaultCloneImage
+		cloneImage := constant.DefaultCloneImage
 		if len(c.defaultCloneImage) > 0 {
 			cloneImage = c.defaultCloneImage
 		}
