@@ -1,6 +1,8 @@
 # SSH backend
 
+:::danger
 The SSH backend will execute the pipelines using SSH on a remote system without any isolation of any kind.
+:::
 
 Since the code run directly on the SSH machine, a malicious pipeline could access and edit files the SSH user has access to. Always restrict the user as far as possible!
 
