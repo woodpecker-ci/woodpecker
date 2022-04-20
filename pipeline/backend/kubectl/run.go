@@ -116,6 +116,8 @@ func (run *KubePiplineRun) Destroy(ctx context.Context, cfg *types.Config) error
 		Str("Namespace", run.Namespace()).
 		Msg("Ended pipeline execution")
 
+	time.Sleep(time.Second * 10)
+
 	return nil
 }
 

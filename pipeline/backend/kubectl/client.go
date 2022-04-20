@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -71,6 +72,10 @@ func (client *KubeClient) CreateKubectlCommand(
 		client.GetExecutablePath(),
 		client.ComposeKubectlCommand(args...)...,
 	)
+
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 
 	// run in current environment.
 	cmd.Env = os.Environ()

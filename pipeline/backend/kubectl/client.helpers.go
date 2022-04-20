@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os/exec"
 	"regexp"
 	"strings"
 )
@@ -63,14 +64,18 @@ func (client *KubeClient) WaitForConditions(
 		err       error
 	})
 
-	waitCommand := client.ComposeKubectlCommand(
+	waitCommandArgs := client.ComposeKubectlCommand(
 		"wait",
 		"--timeout", fmt.Sprint(60*60*24*7)+"s",
 		resource,
 	)
 
 	action := ActionContext{}
+	var waitCommand *exec.Cmd
 	action.OnStop = func(err error) {
+		// kill the process if currently executing
+		_ = waitCommand.Process.Kill()
+		_ = waitCommand.Wait()
 		if err != nil {
 			resultChan <- struct {
 				condition string
@@ -85,21 +90,21 @@ func (client *KubeClient) WaitForConditions(
 		ctx,
 		func() {
 			for _, condition := range conditions {
-				cmnd := client.CreateKubectlCommand(
+				waitCommand = client.CreateKubectlCommand(
 					action.Context(),
-					waitCommand,
+					waitCommandArgs,
 					"--for",
 					"condition="+condition,
 				)
 
 				go func(condition string) {
-					err := cmnd.Start()
+					err := waitCommand.Start()
 					if err != nil {
 						action.Stop(err)
 						return
 					}
 					action.MarkActionStarted()
-					err = cmnd.Wait()
+					err = waitCommand.Wait()
 
 					wasStopped := action.Stop(err)
 
@@ -177,7 +182,7 @@ func (client *KubeClient) WaitForResourceEvents(
 			}
 		}
 	}
-
+	var eventsCmnd *exec.Cmd
 	action.OnStop = func(err error) {
 		if len(eventsMatched) < count {
 			message := "Error, context canceled before sufficient events matched"
@@ -186,6 +191,10 @@ func (client *KubeClient) WaitForResourceEvents(
 			}
 			err = errors.New(message)
 		}
+
+		// kill the process if currently executing
+		_ = eventsCmnd.Process.Kill()
+		_ = eventsCmnd.Wait()
 
 		resultChan <- struct {
 			events []string
@@ -196,7 +205,7 @@ func (client *KubeClient) WaitForResourceEvents(
 	action.Start(
 		ctx,
 		func() {
-			eventsCmnd := client.CreateKubectlCommand(
+			eventsCmnd = client.CreateKubectlCommand(
 				action.Context(),
 				"get", "events",
 				"--watch=true", "--watch-only=true",
@@ -228,7 +237,7 @@ func (client *KubeClient) WaitForResourceEvents(
 				addLineIfMatches(lineScanner.Text())
 				if len(eventsMatched) >= count {
 					action.Stop(nil)
-					return
+					break
 				}
 			}
 		},
