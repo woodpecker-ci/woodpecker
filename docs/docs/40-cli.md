@@ -250,6 +250,10 @@ Target: {{ .Deploy }}
 
 execute a local build
 
+**--backend-docker-ipv6**: enable ipv6 for pipeline containers (steps)
+
+**--backend-docker-network**="": attach pipeline containers (steps) to an existing docker network
+
 **--backend-engine**="": backend engine to run pipelines on (default: auto-detect)
 
 **--build-created**="":  (default: 0)

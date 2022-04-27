@@ -19,7 +19,9 @@ import (
 )
 
 type docker struct {
-	client client.APIClient
+	client     client.APIClient
+	enableIPv6 bool
+	network    string
 }
 
 // make sure docker implements Engine
@@ -69,8 +71,9 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:  n.Driver,
-			Options: n.DriverOpts,
+			Driver:     n.Driver,
+			Options:    n.DriverOpts,
+			EnableIPv6: e.enableIPv6,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -137,16 +140,15 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 				return err
 			}
 		}
-	}
 
-	// if proc.Network != "host" { // or bridge, overlay, none, internal, container:<name> ....
-	// 	err = e.client.NetworkConnect(ctx, proc.Network, proc.Name, &network.EndpointSettings{
-	// 		Aliases: proc.NetworkAliases,
-	// 	})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+		// join the container to an existing network
+		if e.network != "" {
+			err = e.client.NetworkConnect(ctx, e.network, proc.Name, &network.EndpointSettings{})
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
