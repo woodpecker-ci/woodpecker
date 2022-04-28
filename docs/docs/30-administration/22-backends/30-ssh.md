@@ -4,6 +4,9 @@
 The SSH backend will execute the pipelines using SSH on a remote system without any isolation of any kind.
 :::
 
+:::note
+This backend is still pretty new and can not be treated as stable. Its implementation and configuration can change at any time.
+:::
 Since the code run directly on the SSH machine, a malicious pipeline could access and edit files the SSH user has access to. Always restrict the user as far as possible!
 
 It is recommended to use this backend only for private setup where the code and pipeline can be trusted. You shouldn't
