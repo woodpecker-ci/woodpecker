@@ -153,4 +153,8 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 ### `WOODPECKER_BACKEND`
 > Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, or `local`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `ssh`.
+
+### `WOODPECKER_BACKEND_SSH_*`
+
+See [SSH backend configuration](backends/ssh/#configuration)
