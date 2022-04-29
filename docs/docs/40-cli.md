@@ -254,37 +254,37 @@ execute a local build
 
 **--build-created**="":  (default: 0)
 
-**--build-event**="": 
+**--build-event**="":
 
 **--build-finished**="":  (default: 0)
 
-**--build-link**="": 
+**--build-link**="":
 
 **--build-number**="":  (default: 0)
 
 **--build-started**="":  (default: 0)
 
-**--build-status**="": 
+**--build-status**="":
 
-**--build-target**="": 
+**--build-target**="":
 
-**--commit-author-avatar**="": 
+**--commit-author-avatar**="":
 
-**--commit-author-email**="": 
+**--commit-author-email**="":
 
-**--commit-author-name**="": 
+**--commit-author-name**="":
 
-**--commit-branch**="": 
+**--commit-branch**="":
 
-**--commit-message**="": 
+**--commit-message**="":
 
-**--commit-ref**="": 
+**--commit-ref**="":
 
-**--commit-refspec**="": 
+**--commit-refspec**="":
 
-**--commit-sha**="": 
+**--commit-sha**="":
 
-**--env**="": 
+**--env**="":
 
 **--job-number**="":  (default: 0)
 
@@ -292,11 +292,11 @@ execute a local build
 
 **--log-level**="": set logging level (default: info)
 
-**--netrc-machine**="": 
+**--netrc-machine**="":
 
-**--netrc-password**="": 
+**--netrc-password**="":
 
-**--netrc-username**="": 
+**--netrc-username**="":
 
 **--network**="": external networks
 
@@ -304,43 +304,43 @@ execute a local build
 
 **--prev-build-created**="":  (default: 0)
 
-**--prev-build-event**="": 
+**--prev-build-event**="":
 
 **--prev-build-finished**="":  (default: 0)
 
-**--prev-build-link**="": 
+**--prev-build-link**="":
 
 **--prev-build-number**="":  (default: 0)
 
 **--prev-build-started**="":  (default: 0)
 
-**--prev-build-status**="": 
+**--prev-build-status**="":
 
-**--prev-commit-author-avatar**="": 
+**--prev-commit-author-avatar**="":
 
-**--prev-commit-author-email**="": 
+**--prev-commit-author-email**="":
 
-**--prev-commit-author-name**="": 
+**--prev-commit-author-name**="":
 
-**--prev-commit-branch**="": 
+**--prev-commit-branch**="":
 
-**--prev-commit-message**="": 
+**--prev-commit-message**="":
 
-**--prev-commit-ref**="": 
+**--prev-commit-ref**="":
 
-**--prev-commit-refspec**="": 
+**--prev-commit-refspec**="":
 
-**--prev-commit-sha**="": 
+**--prev-commit-sha**="":
 
 **--privileged**="": privileged plugins (default: [plugins/docker plugins/gcr plugins/ecr woodpeckerci/plugin-docker woodpeckerci/plugin-docker-buildx])
 
-**--repo-link**="": 
+**--repo-link**="":
 
-**--repo-name**="": 
+**--repo-name**="":
 
-**--repo-private**="": 
+**--repo-private**="":
 
-**--repo-remote-url**="": 
+**--repo-remote-url**="":
 
 **--server, -s**="": server address
 
