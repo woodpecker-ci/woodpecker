@@ -42,7 +42,7 @@ func (e *ssh) Name() string {
 }
 
 func (e *ssh) IsAvailable() bool {
-	return os.Getenv("WOODPECKER_SSH_KEY") != "" || os.Getenv("WOODPECKER_SSH_PASSWORD") != ""
+	return os.Getenv("WOODPECKER_BACKEND_SSH_KEY") != "" || os.Getenv("WOODPECKER_BACKEND_SSH_PASSWORD") != ""
 }
 
 func (e *ssh) Load() error {
@@ -57,23 +57,23 @@ func (e *ssh) Load() error {
 	}
 
 	e.workingdir = string(dir)
-	address := os.Getenv("WOODPECKER_SSH_ADDRESS")
+	address := os.Getenv("WOODPECKER_BACKEND_SSH_ADDRESS")
 	if address == "" {
 		return fmt.Errorf("missing SSH address")
 	}
-	user := os.Getenv("WOODPECKER_SSH_USER")
+	user := os.Getenv("WOODPECKER_BACKEND_SSH_USER")
 	if user == "" {
 		return fmt.Errorf("missing SSH user")
 	}
 	var auth goph.Auth
-	if file, has := os.LookupEnv("WOODPECKER_SSH_KEY"); has {
+	if file, has := os.LookupEnv("WOODPECKER_BACKEND_SSH_KEY"); has {
 		var err error
-		auth, err = goph.Key(file, os.Getenv("WOODPECKER_SSH_KEY_PASSWORD"))
+		auth, err = goph.Key(file, os.Getenv("WOODPECKER_BACKEND_SSH_KEY_PASSWORD"))
 		if err != nil {
 			return err
 		}
 	} else {
-		auth = goph.Password(os.Getenv("WOODPECKER_SSH_PASSWORD"))
+		auth = goph.Password(os.Getenv("WOODPECKER_BACKEND_SSH_PASSWORD"))
 	}
 	client, err := goph.New(user, address, auth)
 	if err != nil {
