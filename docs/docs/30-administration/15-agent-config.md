@@ -155,12 +155,6 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 
 Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, or `local`.
 
-### `WOODPECKER_DOCKER_NETWORK`
-> Default: empty
+### `WOODPECKER_BACKEND_DOCKER_*`
 
-Set to the name of an existing network which will be attached to all your pipeline containers (steps). Please be careful as this allows the containers of different piplines to access each other!
-
-### `WOODPECKER_DOCKER_IPV6`
-> Default: `false`
-
-Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
+See [Docker backend configuration](backends/docker/#configuration)

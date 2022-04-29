@@ -64,13 +64,13 @@ var flags = []cli.Flag{
 		Value:   "auto-detect",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_NETWORK"},
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
 		Name:    "backend-docker-network",
 		Usage:   "attach pipeline containers (steps) to an existing docker network",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_IPV6"},
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
 		Name:    "backend-docker-ipv6",
 		Usage:   "enable ipv6 for pipeline containers (steps)",
 		Value:   false,
