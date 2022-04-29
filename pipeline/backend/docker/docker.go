@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -54,13 +55,13 @@ func (e *docker) Load() error {
 	}
 	e.client = cli
 
-    if enableIPV6, err := strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6")); err == nil {
+	if enableIPV6, err := strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6")); err == nil {
 		e.enableIPv6 = enableIPV6
 	} else {
-		e.enableIPV6 = false
+		e.enableIPv6 = false
 	}
 
-    e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
 
 	return nil
 }
