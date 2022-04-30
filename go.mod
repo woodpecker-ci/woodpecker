@@ -22,7 +22,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
-	github.com/golang-jwt/jwt/v4 v4.3.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/golangci/golangci-lint v1.44.2
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
