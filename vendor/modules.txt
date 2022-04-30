@@ -192,7 +192,8 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/goccy/go-json v0.7.4
+# github.com/goccy/go-json v0.9.7
+## explicit
 github.com/goccy/go-json
 github.com/goccy/go-json/internal/decoder
 github.com/goccy/go-json/internal/encoder
@@ -218,7 +219,7 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/golang/snappy v0.0.3
+# github.com/golang/snappy v0.0.4
 github.com/golang/snappy
 # github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2
 github.com/golangci/check/cmd/structcheck
@@ -903,10 +904,10 @@ mvdan.cc/interfacer/check
 mvdan.cc/lint
 # mvdan.cc/unparam v0.0.0-20211214103731-d0ef000c54e5
 mvdan.cc/unparam/check
-# xorm.io/builder v0.3.9
+# xorm.io/builder v0.3.10
 ## explicit
 xorm.io/builder
-# xorm.io/xorm v1.2.5
+# xorm.io/xorm v1.3.0
 ## explicit
 xorm.io/xorm
 xorm.io/xorm/caches

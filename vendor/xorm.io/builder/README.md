@@ -146,8 +146,19 @@ sql, args, _ := ToSQL(In("a", 1, 2, 3))
 // a IN (?,?,?) [1,2,3]
 sql, args, _ := ToSQL(In("a", []int{1, 2, 3}))
 // a IN (?,?,?) [1,2,3]
-sql, args, _ := ToSQL(In("a", Expr("select id from b where c = ?", 1))))
-// a IN (select id from b where c = ?) [1]
+sql, args, _ := ToSQL(NotIn("a", Expr("select id from b where c = ?", 1))))
+// a NOT IN (select id from b where c = ?) [1]
+```
+
+* `Exists` and `NotExists`
+
+```Go
+import . "xorm.io/builder"
+
+sql, args, _ := ToSQL(Exists(Select("a").From("table")))
+// EXISTS (SELECT a FROM table)
+sql, args, _ := ToSQL(NotExists(Select("a").From("table")))
+// NOT EXISTS (SELECT a FROM table)
 ```
 
 * `IsNull` and `NotNull`
@@ -161,7 +172,7 @@ sql, args, _ := ToSQL(NotNull{"b"})
 	// b IS NOT NULL []
 ```
 
-* `And(conds ...Cond)`, And can connect one or more condtions via And
+* `And(conds ...Cond)`, And can connect one or more conditions via And
 
 ```Go
 import . "xorm.io/builder"

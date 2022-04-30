@@ -57,7 +57,7 @@ func (session *Session) FindAndCount(rowsSlicePtr interface{}, condiBean ...inte
 	if session.statement.SelectStr != "" {
 		session.statement.SelectStr = ""
 	}
-	if len(session.statement.ColumnMap) > 0 {
+	if len(session.statement.ColumnMap) > 0 && !session.statement.IsDistinct {
 		session.statement.ColumnMap = []string{}
 	}
 	if session.statement.OrderStr != "" {
@@ -71,7 +71,11 @@ func (session *Session) FindAndCount(rowsSlicePtr interface{}, condiBean ...inte
 	}
 
 	// session has stored the conditions so we use `unscoped` to avoid duplicated condition.
-	return session.Unscoped().Count(reflect.New(sliceElementType).Interface())
+	if sliceElementType.Kind() == reflect.Struct {
+		return session.Unscoped().Count(reflect.New(sliceElementType).Interface())
+	}
+
+	return session.Unscoped().Count()
 }
 
 func (session *Session) find(rowsSlicePtr interface{}, condiBean ...interface{}) error {
@@ -152,7 +156,6 @@ func (session *Session) find(rowsSlicePtr interface{}, condiBean ...interface{})
 			if err != ErrCacheFailed {
 				return err
 			}
-			err = nil // !nashtsai! reset err to nil for ErrCacheFailed
 			session.engine.logger.Warnf("Cache Find Failed")
 		}
 	}
@@ -251,9 +254,9 @@ func (session *Session) noCacheFind(table *schemas.Table, containerValue reflect
 
 		switch elemType.Kind() {
 		case reflect.Slice:
-			err = rows.ScanSlice(bean)
+			err = session.getSlice(rows, types, fields, bean)
 		case reflect.Map:
-			err = rows.ScanMap(bean)
+			err = session.getMap(rows, types, fields, bean)
 		default:
 			err = rows.Scan(bean)
 		}

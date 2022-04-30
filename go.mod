@@ -20,6 +20,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/golangci/golangci-lint v1.44.2
@@ -56,6 +57,6 @@ require (
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	xorm.io/builder v0.3.9
-	xorm.io/xorm v1.2.5
+	xorm.io/builder v0.3.10
+	xorm.io/xorm v1.3.0
 )
