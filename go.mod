@@ -32,7 +32,7 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/melbahja/goph v1.3.0
-	github.com/moby/moby v20.10.12+incompatible
+	github.com/moby/moby v20.10.14+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
