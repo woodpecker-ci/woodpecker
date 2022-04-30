@@ -8,7 +8,7 @@ require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/containerd/containerd v1.5.9 // indirect
-	github.com/docker/cli v20.10.12+incompatible
+	github.com/docker/cli v20.10.14+incompatible
 	github.com/docker/distribution v2.8.0+incompatible
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
