@@ -30,6 +30,7 @@ type GroupHook struct {
 	URL                      string     `json:"url"`
 	GroupID                  int        `json:"group_id"`
 	PushEvents               bool       `json:"push_events"`
+	PushEventsBranchFilter   string     `json:"push_events_branch_filter"`
 	IssuesEvents             bool       `json:"issues_events"`
 	ConfidentialIssuesEvents bool       `json:"confidential_issues_events"`
 	ConfidentialNoteEvents   bool       `json:"confidential_note_events"`
@@ -41,6 +42,7 @@ type GroupHook struct {
 	WikiPageEvents           bool       `json:"wiki_page_events"`
 	DeploymentEvents         bool       `json:"deployment_events"`
 	ReleasesEvents           bool       `json:"releases_events"`
+	SubGroupEvents           bool       `json:"subgroup_events"`
 	EnableSSLVerification    bool       `json:"enable_ssl_verification"`
 	CreatedAt                *time.Time `json:"created_at"`
 }
@@ -99,6 +101,7 @@ func (s *GroupsService) GetGroupHook(pid interface{}, hook int, options ...Reque
 type AddGroupHookOptions struct {
 	URL                      *string `url:"url,omitempty" json:"url,omitempty"`
 	PushEvents               *bool   `url:"push_events,omitempty"  json:"push_events,omitempty"`
+	PushEventsBranchFilter   *string `url:"push_events_branch_filter,omitempty"  json:"push_events_branch_filter,omitempty"`
 	IssuesEvents             *bool   `url:"issues_events,omitempty"  json:"issues_events,omitempty"`
 	ConfidentialIssuesEvents *bool   `url:"confidential_issues_events,omitempty"  json:"confidential_issues_events,omitempty"`
 	ConfidentialNoteEvents   *bool   `url:"confidential_note_events,omitempty"  json:"confidential_note_events,omitempty"`
@@ -110,6 +113,7 @@ type AddGroupHookOptions struct {
 	WikiPageEvents           *bool   `url:"wiki_page_events,omitempty"  json:"wiki_page_events,omitempty"`
 	DeploymentEvents         *bool   `url:"deployment_events,omitempty" json:"deployment_events,omitempty"`
 	ReleasesEvents           *bool   `url:"releases_events,omitempty" json:"releases_events,omitempty"`
+	SubGroupEvents           *bool   `url:"subgroup_events,omitempty" json:"subgroup_events,omitempty"`
 	EnableSSLVerification    *bool   `url:"enable_ssl_verification,omitempty"  json:"enable_ssl_verification,omitempty"`
 	Token                    *string `url:"token,omitempty" json:"token,omitempty"`
 }
@@ -145,6 +149,7 @@ func (s *GroupsService) AddGroupHook(gid interface{}, opt *AddGroupHookOptions, 
 type EditGroupHookOptions struct {
 	URL                      *string `url:"url,omitempty" json:"url,omitempty"`
 	PushEvents               *bool   `url:"push_events,omitempty" json:"push_events,omitempty"`
+	PushEventsBranchFilter   *string `url:"push_events_branch_filter,omitempty"  json:"push_events_branch_filter,omitempty"`
 	IssuesEvents             *bool   `url:"issues_events,omitempty" json:"issues_events,omitempty"`
 	ConfidentialIssuesEvents *bool   `url:"confidential_issues_events,omitempty" json:"confidential_issues_events,omitempty"`
 	ConfidentialNoteEvents   *bool   `url:"confidential_note_events,omitempty" json:"confidential_note_events,omitempty"`
@@ -156,6 +161,7 @@ type EditGroupHookOptions struct {
 	WikiPageEvents           *bool   `url:"wiki_page_events,omitempty" json:"wiki_page_events,omitempty"`
 	DeploymentEvents         *bool   `url:"deployment_events,omitempty" json:"deployment_events,omitempty"`
 	ReleasesEvents           *bool   `url:"releases_events,omitempty" json:"releases_events,omitempty"`
+	SubGroupEvents           *bool   `url:"subgroup_events,omitempty" json:"subgroup_events,omitempty"`
 	EnableSSLVerification    *bool   `url:"enable_ssl_verification,omitempty" json:"enable_ssl_verification,omitempty"`
 	Token                    *string `url:"token,omitempty" json:"token,omitempty"`
 }
