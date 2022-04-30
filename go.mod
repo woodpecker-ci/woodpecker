@@ -28,7 +28,7 @@ require (
 	github.com/golangci/golangci-lint v1.45.2
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
-	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.5
 	github.com/mattn/go-sqlite3 v1.14.12
@@ -46,15 +46,15 @@ require (
 	github.com/ugorji/go v1.2.7 // indirect
 	github.com/urfave/cli/v2 v2.5.1
 	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
-	github.com/xanzy/go-gitlab v0.55.1
+	github.com/xanzy/go-gitlab v0.64.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
-	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
+	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
-	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
+	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 	google.golang.org/genproto v0.0.0-20220126215142-9970aeb2e350 // indirect
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.28.0
