@@ -8,6 +8,7 @@ require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/containerd/containerd v1.5.9 // indirect
+	github.com/denis-tingajkin/go-header v0.4.2 // indirect
 	github.com/docker/cli v20.10.14+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.14+incompatible
@@ -23,7 +24,7 @@ require (
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.4.1
-	github.com/golangci/golangci-lint v1.44.2
+	github.com/golangci/golangci-lint v1.45.2
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
@@ -39,7 +40,7 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/objx v0.3.0 // indirect
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.7 // indirect
 	github.com/urfave/cli/v2 v2.3.0
