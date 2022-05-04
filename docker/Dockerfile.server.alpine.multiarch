@@ -1,0 +1,12 @@
+FROM alpine:3.14
+ARG TARGETOS TARGETARCH
+RUN apk add -U --no-cache ca-certificates
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
+ENV WOODPECKER_DATABASE_DRIVER=sqlite3
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+EXPOSE 8000 9000 80 443
+
+COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
+
+ENTRYPOINT ["/bin/woodpecker-server"]

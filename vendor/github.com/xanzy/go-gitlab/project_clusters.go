@@ -82,7 +82,7 @@ func (s *ProjectClustersService) ListClusters(pid interface{}, options ...Reques
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/clusters", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/clusters", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -107,7 +107,7 @@ func (s *ProjectClustersService) GetCluster(pid interface{}, cluster int, option
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/clusters/%d", pathEscape(project), cluster)
+	u := fmt.Sprintf("projects/%s/clusters/%d", PathEscape(project), cluster)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -155,7 +155,7 @@ func (s *ProjectClustersService) AddCluster(pid interface{}, opt *AddClusterOpti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/clusters/user", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/clusters/user", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -200,7 +200,7 @@ func (s *ProjectClustersService) EditCluster(pid interface{}, cluster int, opt *
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/clusters/%d", pathEscape(project), cluster)
+	u := fmt.Sprintf("projects/%s/clusters/%d", PathEscape(project), cluster)
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -225,7 +225,7 @@ func (s *ProjectClustersService) DeleteCluster(pid interface{}, cluster int, opt
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/clusters/%d", pathEscape(project), cluster)
+	u := fmt.Sprintf("projects/%s/clusters/%d", PathEscape(project), cluster)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

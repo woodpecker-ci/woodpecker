@@ -97,7 +97,7 @@ type ListGroupsOptions struct {
 	OrderBy              *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Owned                *bool             `url:"owned,omitempty" json:"owned,omitempty"`
 	Search               *string           `url:"search,omitempty" json:"search,omitempty"`
-	SkipGroups           []int             `url:"skip_groups,omitempty" json:"skip_groups,omitempty"`
+	SkipGroups           *[]int            `url:"skip_groups,omitempty" json:"skip_groups,omitempty"`
 	Sort                 *string           `url:"sort,omitempty" json:"sort,omitempty"`
 	Statistics           *bool             `url:"statistics,omitempty" json:"statistics,omitempty"`
 	TopLevelOnly         *bool             `url:"top_level_only,omitempty" json:"top_level_only,omitempty"`
@@ -114,13 +114,124 @@ func (s *GroupsService) ListGroups(opt *ListGroupsOptions, options ...RequestOpt
 		return nil, nil, err
 	}
 
-	var g []*Group
-	resp, err := s.client.Do(req, &g)
+	var gs []*Group
+	resp, err := s.client.Do(req, &gs)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return g, resp, err
+	return gs, resp, err
+}
+
+// ListSubgroupsOptions represents the available ListSubgroups() options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
+type ListSubgroupsOptions ListGroupsOptions
+
+// ListSubgroups gets a list of subgroups for a given group.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
+func (s *GroupsService) ListSubgroups(gid interface{}, opt *ListSubgroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
+	group, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/subgroups", PathEscape(group))
+
+	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var gs []*Group
+	resp, err := s.client.Do(req, &gs)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return gs, resp, err
+}
+
+// ListDescendantGroupsOptions represents the available ListDescendantGroups()
+// options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-descendant-groups
+type ListDescendantGroupsOptions ListGroupsOptions
+
+// ListDescendantGroups gets a list of subgroups for a given project.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-descendant-groups
+func (s *GroupsService) ListDescendantGroups(gid interface{}, opt *ListDescendantGroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
+	group, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/descendant_groups", PathEscape(group))
+
+	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var gs []*Group
+	resp, err := s.client.Do(req, &gs)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return gs, resp, err
+}
+
+// ListGroupProjectsOptions represents the available ListGroup() options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-group-39-s-projects
+type ListGroupProjectsOptions struct {
+	ListOptions
+	Archived                 *bool             `url:"archived,omitempty" json:"archived,omitempty"`
+	IncludeSubgroups         *bool             `url:"include_subgroups,omitempty" json:"include_subgroups,omitempty"`
+	MinAccessLevel           *AccessLevelValue `url:"min_access_level,omitempty" json:"min_access_level,omitempty"`
+	OrderBy                  *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Owned                    *bool             `url:"owned,omitempty" json:"owned,omitempty"`
+	Search                   *string           `url:"search,omitempty" json:"search,omitempty"`
+	Simple                   *bool             `url:"simple,omitempty" json:"simple,omitempty"`
+	Sort                     *string           `url:"sort,omitempty" json:"sort,omitempty"`
+	Starred                  *bool             `url:"starred,omitempty" json:"starred,omitempty"`
+	Visibility               *VisibilityValue  `url:"visibility,omitempty" json:"visibility,omitempty"`
+	WithCustomAttributes     *bool             `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
+	WithIssuesEnabled        *bool             `url:"with_issues_enabled,omitempty" json:"with_issues_enabled,omitempty"`
+	WithMergeRequestsEnabled *bool             `url:"with_merge_requests_enabled,omitempty" json:"with_merge_requests_enabled,omitempty"`
+	WithSecurityReports      *bool             `url:"with_security_reports,omitempty" json:"with_security_reports,omitempty"`
+	WithShared               *bool             `url:"with_shared,omitempty" json:"with_shared,omitempty"`
+}
+
+// ListGroupProjects get a list of group projects
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/groups.html#list-a-group-39-s-projects
+func (s *GroupsService) ListGroupProjects(gid interface{}, opt *ListGroupProjectsOptions, options ...RequestOptionFunc) ([]*Project, *Response, error) {
+	group, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/projects", PathEscape(group))
+
+	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var ps []*Project
+	resp, err := s.client.Do(req, &ps)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return ps, resp, err
 }
 
 // GetGroupOptions represents the available GetGroup() options.
@@ -140,7 +251,7 @@ func (s *GroupsService) GetGroup(gid interface{}, opt *GetGroupOptions, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s", pathEscape(group))
+	u := fmt.Sprintf("groups/%s", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -214,7 +325,7 @@ func (s *GroupsService) TransferGroup(gid interface{}, pid interface{}, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/projects/%s", pathEscape(group), pathEscape(project))
+	u := fmt.Sprintf("groups/%s/projects/%s", PathEscape(group), PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -267,7 +378,7 @@ func (s *GroupsService) UpdateGroup(gid interface{}, opt *UpdateGroupOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s", pathEscape(group))
+	u := fmt.Sprintf("groups/%s", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -291,7 +402,7 @@ func (s *GroupsService) DeleteGroup(gid interface{}, options ...RequestOptionFun
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s", pathEscape(group))
+	u := fmt.Sprintf("groups/%s", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -310,7 +421,7 @@ func (s *GroupsService) RestoreGroup(gid interface{}, options ...RequestOptionFu
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/restore", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/restore", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
@@ -340,124 +451,53 @@ func (s *GroupsService) SearchGroup(query string, options ...RequestOptionFunc) 
 		return nil, nil, err
 	}
 
-	var g []*Group
-	resp, err := s.client.Do(req, &g)
+	var gs []*Group
+	resp, err := s.client.Do(req, &gs)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return g, resp, err
+	return gs, resp, err
 }
 
-// ListGroupProjectsOptions represents the available ListGroup() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-group-39-s-projects
-type ListGroupProjectsOptions struct {
-	ListOptions
-	Archived                 *bool             `url:"archived,omitempty" json:"archived,omitempty"`
-	IncludeSubgroups         *bool             `url:"include_subgroups,omitempty" json:"include_subgroups,omitempty"`
-	MinAccessLevel           *AccessLevelValue `url:"min_access_level,omitempty" json:"min_access_level,omitempty"`
-	OrderBy                  *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
-	Owned                    *bool             `url:"owned,omitempty" json:"owned,omitempty"`
-	Search                   *string           `url:"search,omitempty" json:"search,omitempty"`
-	Simple                   *bool             `url:"simple,omitempty" json:"simple,omitempty"`
-	Sort                     *string           `url:"sort,omitempty" json:"sort,omitempty"`
-	Starred                  *bool             `url:"starred,omitempty" json:"starred,omitempty"`
-	Visibility               *VisibilityValue  `url:"visibility,omitempty" json:"visibility,omitempty"`
-	WithCustomAttributes     *bool             `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
-	WithIssuesEnabled        *bool             `url:"with_issues_enabled,omitempty" json:"with_issues_enabled,omitempty"`
-	WithMergeRequestsEnabled *bool             `url:"with_merge_requests_enabled,omitempty" json:"with_merge_requests_enabled,omitempty"`
-	WithSecurityReports      *bool             `url:"with_security_reports,omitempty" json:"with_security_reports,omitempty"`
-	WithShared               *bool             `url:"with_shared,omitempty" json:"with_shared,omitempty"`
-}
-
-// ListGroupProjects get a list of group projects
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-group-39-s-projects
-func (s *GroupsService) ListGroupProjects(gid interface{}, opt *ListGroupProjectsOptions, options ...RequestOptionFunc) ([]*Project, *Response, error) {
-	group, err := parseID(gid)
-	if err != nil {
-		return nil, nil, err
-	}
-	u := fmt.Sprintf("groups/%s/projects", pathEscape(group))
-
-	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var p []*Project
-	resp, err := s.client.Do(req, &p)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return p, resp, err
-}
-
-// ListSubgroupsOptions represents the available ListSubgroups() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
-type ListSubgroupsOptions ListGroupsOptions
-
-// ListSubgroups gets a list of subgroups for a given group.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
-func (s *GroupsService) ListSubgroups(gid interface{}, opt *ListSubgroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
-	group, err := parseID(gid)
-	if err != nil {
-		return nil, nil, err
-	}
-	u := fmt.Sprintf("groups/%s/subgroups", pathEscape(group))
-
-	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var g []*Group
-	resp, err := s.client.Do(req, &g)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return g, resp, err
-}
-
-// ListDescendantGroupsOptions represents the available ListDescendantGroups()
+// ListProvisionedUsersOptions represents the available ListProvisionedUsers()
 // options.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-descendant-groups
-type ListDescendantGroupsOptions ListGroupsOptions
+// https://docs.gitlab.com/ee/api/groups.html#provisioned-users-api
+type ListProvisionedUsersOptions struct {
+	ListOptions
+	Username      *string    `url:"username,omitempty" json:"username,omitempty"`
+	Search        *string    `url:"search,omitempty" json:"search,omitempty"`
+	Active        *bool      `url:"active,omitempty" json:"active,omitempty"`
+	Blocked       *bool      `url:"blocked,omitempty" json:"blocked,omitempty"`
+	CreatedAfter  *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
+	CreatedBefore *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
+}
 
-// ListDescendantGroups gets a list of subgroups for a given project.
+// ListProvisionedUsers gets a list of users provisioned by the given group.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/groups.html#list-a-groups-descendant-groups
-func (s *GroupsService) ListDescendantGroups(gid interface{}, opt *ListDescendantGroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
+// https://docs.gitlab.com/ee/api/groups.html#provisioned-users-api
+func (s *GroupsService) ListProvisionedUsers(gid interface{}, opt *ListProvisionedUsersOptions, options ...RequestOptionFunc) ([]*User, *Response, error) {
 	group, err := parseID(gid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/descendant_groups", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/provisioned_users", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var g []*Group
-	resp, err := s.client.Do(req, &g)
+	var us []*User
+	resp, err := s.client.Do(req, &us)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return g, resp, err
+	return us, resp, err
 }
 
 // ListGroupLDAPLinks lists the group's LDAP links. Available only for users who
@@ -470,20 +510,20 @@ func (s *GroupsService) ListGroupLDAPLinks(gid interface{}, options ...RequestOp
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/ldap_group_links", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/ldap_group_links", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var gl []*LDAPGroupLink
-	resp, err := s.client.Do(req, &gl)
+	var gls []*LDAPGroupLink
+	resp, err := s.client.Do(req, &gls)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return gl, resp, nil
+	return gls, resp, nil
 }
 
 // AddGroupLDAPLinkOptions represents the available AddGroupLDAPLink() options.
@@ -517,7 +557,7 @@ func (s *GroupsService) AddGroupLDAPLink(gid interface{}, opt *AddGroupLDAPLinkO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/ldap_group_links", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/ldap_group_links", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -543,7 +583,7 @@ func (s *GroupsService) DeleteGroupLDAPLink(gid interface{}, cn string, options 
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/ldap_group_links/%s", pathEscape(group), pathEscape(cn))
+	u := fmt.Sprintf("groups/%s/ldap_group_links/%s", PathEscape(group), PathEscape(cn))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -563,7 +603,7 @@ func (s *GroupsService) DeleteGroupLDAPLinkWithCNOrFilter(gid interface{}, opts 
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/ldap_group_links", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/ldap_group_links", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, opts, options)
 	if err != nil {
@@ -585,9 +625,9 @@ func (s *GroupsService) DeleteGroupLDAPLinkForProvider(gid interface{}, provider
 	}
 	u := fmt.Sprintf(
 		"groups/%s/ldap_group_links/%s/%s",
-		pathEscape(group),
-		pathEscape(provider),
-		pathEscape(cn),
+		PathEscape(group),
+		PathEscape(provider),
+		PathEscape(cn),
 	)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
@@ -617,7 +657,7 @@ func (s *GroupsService) ShareGroupWithGroup(gid interface{}, opt *ShareGroupWith
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/share", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/share", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -642,7 +682,7 @@ func (s *GroupsService) UnshareGroupFromGroup(gid interface{}, groupID int, opti
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/share/%d", pathEscape(group), groupID)
+	u := fmt.Sprintf("groups/%s/share/%d", PathEscape(group), groupID)
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -681,7 +721,7 @@ func (s *GroupsService) GetGroupPushRules(gid interface{}, options ...RequestOpt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/push_rule", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/push_rule", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -725,7 +765,7 @@ func (s *GroupsService) AddGroupPushRule(gid interface{}, opt *AddGroupPushRuleO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/push_rule", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/push_rule", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -769,7 +809,7 @@ func (s *GroupsService) EditGroupPushRule(gid interface{}, opt *EditGroupPushRul
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/push_rule", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/push_rule", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {
@@ -794,7 +834,7 @@ func (s *GroupsService) DeleteGroupPushRule(gid interface{}, options ...RequestO
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/push_rule", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/push_rule", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

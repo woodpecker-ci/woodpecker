@@ -41,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -270,6 +271,21 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	if endpoint := c.String("gating-service"); endpoint != "" {
 		server.Config.Services.Senders = sender.NewRemote(endpoint)
 	}
+
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		secret := c.String("config-service-secret")
+		if secret == "" {
+			log.Error().Msg("could not configure configuration service, missing secret")
+		} else {
+			server.Config.Services.ConfigService = configuration.NewAPI(endpoint, secret)
+		}
+	}
+
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")

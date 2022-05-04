@@ -5,18 +5,50 @@ TARGETOS ?= linux
 TARGETARCH ?= amd64
 
 VERSION ?= next
+VERSION_NUMBER ?= 0.0.0
 ifneq ($(CI_COMMIT_TAG),)
 	VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION_NUMBER := ${VERSION}
 endif
 
 # append commit-sha to next version
-BUILD_VERSION := $(VERSION)
+BUILD_VERSION ?= $(VERSION)
 ifeq ($(BUILD_VERSION),next)
 	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+CGO_CFLAGS ?=
+
+HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
+ifeq ($(HAS_GO), GO)
+	XGO_VERSION ?= go-1.17.x
+	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
+endif
+
+# If the first argument is "in_docker"...
+ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "in_docker"
+  MAKE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # Ignore the next args
+  $(eval $(MAKE_ARGS):;@:)
+
+  in_docker:
+	@[ "1" == "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@echo run in docker:
+	@docker run -it \
+		--user $(shell id -u):$(shell id -g) \
+		-e VERSION="$(VERSION)" \
+		-e BUILD_VERSION="$(BUILD_VERSION)" \
+		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
+		-e GO_PACKAGES="$(GO_PACKAGES)" \
+		-e TARGETOS="$(TARGETOS)" \
+		-e TARGETARCH="$(TARGETARCH)" \
+		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
+else
+
+# Proceed with normal make
 
 all: build
 
@@ -27,10 +59,15 @@ vendor:
 format:
 	@gofmt -s -w ${GOFILES_NOVENDOR}
 
+.PHONY: docs
+docs:
+	go generate cmd/cli/app.go
+
 .PHONY: clean
 clean:
 	go clean -i ./...
 	rm -rf build
+	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: lint
 lint:
@@ -91,6 +128,31 @@ build: build-agent build-server build-cli
 
 release-frontend: build-frontend
 
+check-xgo:
+	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) install src.techknowlogick.com/xgo@latest; \
+	fi
+
+cross-compile-server:
+	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
+		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
+		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
+		make release-server-xgo || exit 1; \
+	)
+	tree dist
+
+release-server-xgo: check-xgo
+	@echo "Building for:"
+	@echo "os:$(TARGETOS)"
+	@echo "arch orgi:$(TARGETARCH)"
+	@echo "arch (xgo):$(TARGETARCH_XGO)"
+	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
+
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
+	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH_XGO) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server
+
 release-server:
 	# compile
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
@@ -139,19 +201,21 @@ bundle-prepare:
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare
-	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-	nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
 
 bundle: bundle-agent bundle-server bundle-cli
 
 .PHONY: version
 version:
 	@echo ${BUILD_VERSION}
+
+endif

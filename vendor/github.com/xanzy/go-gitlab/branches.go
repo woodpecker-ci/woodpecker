@@ -68,7 +68,7 @@ func (s *BranchesService) ListBranches(pid interface{}, opts *ListBranchesOption
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/branches", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opts, options)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *BranchesService) GetBranch(pid interface{}, branch string, options ...R
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches/%s", pathEscape(project), url.PathEscape(branch))
+	u := fmt.Sprintf("projects/%s/repository/branches/%s", PathEscape(project), url.PathEscape(branch))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -129,7 +129,7 @@ func (s *BranchesService) ProtectBranch(pid interface{}, branch string, opts *Pr
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches/%s/protect", pathEscape(project), url.PathEscape(branch))
+	u := fmt.Sprintf("projects/%s/repository/branches/%s/protect", PathEscape(project), url.PathEscape(branch))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opts, options)
 	if err != nil {
@@ -156,7 +156,7 @@ func (s *BranchesService) UnprotectBranch(pid interface{}, branch string, option
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches/%s/unprotect", pathEscape(project), url.PathEscape(branch))
+	u := fmt.Sprintf("projects/%s/repository/branches/%s/unprotect", PathEscape(project), url.PathEscape(branch))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, nil, options)
 	if err != nil {
@@ -190,7 +190,7 @@ func (s *BranchesService) CreateBranch(pid interface{}, opt *CreateBranchOptions
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/branches", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -215,7 +215,7 @@ func (s *BranchesService) DeleteBranch(pid interface{}, branch string, options .
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/branches/%s", pathEscape(project), url.PathEscape(branch))
+	u := fmt.Sprintf("projects/%s/repository/branches/%s", PathEscape(project), url.PathEscape(branch))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -234,7 +234,7 @@ func (s *BranchesService) DeleteMergedBranches(pid interface{}, options ...Reque
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/merged_branches", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/merged_branches", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

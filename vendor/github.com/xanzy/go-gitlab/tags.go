@@ -73,7 +73,7 @@ func (s *TagsService) ListTags(pid interface{}, opt *ListTagsOptions, options ..
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/tags", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -99,7 +99,7 @@ func (s *TagsService) GetTag(pid interface{}, tag string, options ...RequestOpti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s", PathEscape(project), url.PathEscape(tag))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -136,7 +136,7 @@ func (s *TagsService) CreateTag(pid interface{}, opt *CreateTagOptions, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/tags", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -161,7 +161,7 @@ func (s *TagsService) DeleteTag(pid interface{}, tag string, options ...RequestO
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s", PathEscape(project), url.PathEscape(tag))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {
@@ -193,7 +193,7 @@ func (s *TagsService) CreateReleaseNote(pid interface{}, tag string, opt *Create
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", PathEscape(project), url.PathEscape(tag))
 
 	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
 	if err != nil {
@@ -228,7 +228,7 @@ func (s *TagsService) UpdateReleaseNote(pid interface{}, tag string, opt *Update
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", PathEscape(project), url.PathEscape(tag))
 
 	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
 	if err != nil {

@@ -108,7 +108,7 @@ func (s *AuditEventsService) ListGroupAuditEvents(gid interface{}, opt *ListAudi
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/audit_events", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/audit_events", PathEscape(group))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -132,7 +132,7 @@ func (s *AuditEventsService) GetGroupAuditEvent(gid interface{}, event int, opti
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/audit_events/%d", pathEscape(group), event)
+	u := fmt.Sprintf("groups/%s/audit_events/%d", PathEscape(group), event)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -157,7 +157,7 @@ func (s *AuditEventsService) ListProjectAuditEvents(pid interface{}, opt *ListAu
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/audit_events", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/audit_events", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
@@ -182,7 +182,7 @@ func (s *AuditEventsService) GetProjectAuditEvent(pid interface{}, event int, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/audit_events/%d", pathEscape(project), event)
+	u := fmt.Sprintf("projects/%s/audit_events/%d", PathEscape(project), event)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {

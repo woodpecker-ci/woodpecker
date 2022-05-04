@@ -9,21 +9,22 @@
         </p>
       </div>
       <Button
-        v-if="showAddRegistry"
+        v-if="selectedRegistry"
         class="ml-auto"
-        start-icon="list"
+        start-icon="back"
         text="Show registries"
-        @click="showAddRegistry = false"
+        @click="selectedRegistry = undefined"
       />
-      <Button v-else class="ml-auto" start-icon="plus" text="Add registry" @click="showAddRegistry = true" />
+      <Button v-else class="ml-auto" start-icon="plus" text="Add registry" @click="selectedRegistry = {}" />
     </div>
 
-    <div v-if="!showAddRegistry" class="space-y-4 text-gray-500">
+    <div v-if="!selectedRegistry" class="space-y-4 text-gray-500">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
+        <IconButton icon="edit" class="ml-auto w-8 h-8" @click="selectedRegistry = registry" />
         <IconButton
           icon="trash"
-          class="ml-auto w-8 h-8 hover:text-red-400"
+          class="w-8 h-8 hover:text-red-400"
           :is-loading="isDeleting"
           @click="deleteRegistry(registry)"
         />
@@ -36,7 +37,12 @@
       <form @submit.prevent="createRegistry">
         <InputField label="Address">
           <!-- TODO: check input field Address is a valid address -->
-          <TextField v-model="selectedRegistry.address" placeholder="Registry Address (e.g. docker.io)" required />
+          <TextField
+            v-model="selectedRegistry.address"
+            placeholder="Registry Address (e.g. docker.io)"
+            required
+            :disabled="isEditingRegistry"
+          />
         </InputField>
 
         <InputField label="Username">
@@ -47,14 +53,14 @@
           <TextField v-model="selectedRegistry.password" placeholder="Password" required />
         </InputField>
 
-        <Button type="submit" :is-loading="isSaving" text="Add registry" />
+        <Button type="submit" :is-loading="isSaving" :text="isEditingRegistry ? 'Save registy' : 'Add registry'" />
       </form>
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
@@ -88,8 +94,8 @@ export default defineComponent({
 
     const repo = inject<Ref<Repo>>('repo');
     const registries = ref<Registry[]>();
-    const showAddRegistry = ref(false);
-    const selectedRegistry = ref<Partial<Registry>>({});
+    const selectedRegistry = ref<Partial<Registry>>();
+    const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
     async function loadRegistries() {
       if (!repo?.value) {
@@ -104,10 +110,17 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+      if (!selectedRegistry.value) {
+        throw new Error("Unexpected: Can't get registry");
+      }
+
+      if (isEditingRegistry.value) {
+        await apiClient.updateRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+      } else {
+        await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+      }
       notifications.notify({ title: 'Registry credentials created', type: 'success' });
-      showAddRegistry.value = false;
-      selectedRegistry.value = {};
+      selectedRegistry.value = undefined;
       await loadRegistries();
     });
 
@@ -126,7 +139,7 @@ export default defineComponent({
       await loadRegistries();
     });
 
-    return { selectedRegistry, registries, showAddRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };
+    return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };
   },
 });
 </script>

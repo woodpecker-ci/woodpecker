@@ -1,4 +1,5 @@
 import 'windi.css';
+import 'floating-vue/dist/style.css'; // eslint-disable-line no-restricted-imports
 import '~/compositions/useFavicon';
 
 import { createPinia } from 'pinia';
@@ -13,6 +14,7 @@ const app = createApp(App);
 
 app.use(router);
 app.use(notifications);
+
 app.use(createPinia());
 app.mount('#app');
 

@@ -51,6 +51,7 @@ var GlobalFlags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
 		Name:    "log-level",
 		Usage:   "set logging level",
+		Value:   "info",
 	},
 }
 

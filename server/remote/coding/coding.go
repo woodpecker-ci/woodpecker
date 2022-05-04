@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -39,7 +40,6 @@ type Opts struct {
 	Client     string   // Coding oauth client id.
 	Secret     string   // Coding oauth client secret.
 	Scopes     []string // Coding oauth scopes.
-	Machine    string   // Optional machine name.
 	Username   string   // Optional machine account username.
 	Password   string   // Optional machine account password.
 	SkipVerify bool     // Skip ssl verification.
@@ -53,7 +53,6 @@ func New(opts Opts) (remote.Remote, error) {
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		Scopes:     opts.Scopes,
-		Machine:    opts.Machine,
 		Username:   opts.Username,
 		Password:   opts.Password,
 		SkipVerify: opts.SkipVerify,
@@ -70,7 +69,6 @@ type Coding struct {
 	Client     string
 	Secret     string
 	Scopes     []string
-	Machine    string
 	Username   string
 	Password   string
 	SkipVerify bool
@@ -251,17 +249,23 @@ func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 // Netrc returns a .netrc file that can be used to clone
 // private repositories from a remote system.
 func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
+
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
