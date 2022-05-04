@@ -23,10 +23,10 @@ func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Pro
 		name += "/" + proc.Name
 	}
 
-	return name
+	return fmt.Sprintf("%s - %s (%s)", server.Config.Server.StatusContext, proc.Name, build.Event)
 }
 
-// getBuildStatusDescription is a helper function that generates a description
+// GetBuildStatusDescription is a helper function that generates a description
 // message for the current build status.
 func GetBuildStatusDescription(status model.StatusValue) string {
 	switch status {
