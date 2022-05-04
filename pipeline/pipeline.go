@@ -58,7 +58,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 func (r *Runtime) Run() error {
 	defer func() {
 		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
-			log.Error().Err(err).Msg("could not destroy engine")
+			log.Error().Err(err).Msg("could not destroy pipeline")
 		}
 	}()
 
@@ -91,6 +91,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	if processState == nil {
 		processState = new(backend.State)
 		if err != nil {
+			processState.Error = err
 			processState.Exited = true
 			processState.OOMKilled = false
 			processState.ExitCode = 126 // command invoked cannot be executed.
@@ -103,11 +104,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err
 
-	traceErr := r.tracer.Trace(state)
-	if traceErr != nil {
-		return traceErr
-	}
-	return err
+	return r.tracer.Trace(state)
 }
 
 // Executes a set of parallel steps
@@ -137,16 +134,13 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			processState, err := r.exec(step)
 
-			// if we got a nil process but an error state
-			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && processState == nil {
-				_ = r.logger.Log(step, multipart.New(strings.NewReader(
-					"Backend engine error while running step: "+err.Error(),
-				)))
+			// Return the error after tracing it.
+			traceErr := r.traceStep(processState, err, step)
+			if traceErr != nil {
+				return traceErr
 			}
 
-			// Return the error after tracing it.
-			return r.traceStep(processState, err, step)
+			return err
 		})
 	}
 
@@ -157,7 +151,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	return done
 }
 
-// Executes the step and returns the statem and error.
+// Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
 	for key, value := range step.Environment {

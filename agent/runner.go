@@ -249,6 +249,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		proclogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
+			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
@@ -260,6 +261,10 @@ func (r *Runner) Run(ctx context.Context) error {
 			Started:  time.Now().Unix(), // TODO do not do this
 			Finished: time.Now().Unix(),
 		}
+		if state.Process.Error != nil {
+			procState.Error = state.Process.Error.Error()
+		}
+
 		defer func() {
 			proclogger.Debug().Msg("update step status")
 

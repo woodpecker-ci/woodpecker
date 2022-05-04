@@ -10,8 +10,7 @@ image:
 dind:
   image: "docker:20.10.12-dind"
   env:
-  - name: DOCKER_DRIVER
-    value: overlay2
+    DOCKER_DRIVER: "overlay2"
   resources: {}
 
 env:
