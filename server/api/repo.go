@@ -140,6 +140,9 @@ func PatchRepo(c *gin.Context) {
 	if in.Config != nil {
 		repo.Config = *in.Config
 	}
+	if in.CancelPreviousBuildEvents != nil {
+		repo.CancelPreviousBuildEvents = *in.CancelPreviousBuildEvents
+	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):

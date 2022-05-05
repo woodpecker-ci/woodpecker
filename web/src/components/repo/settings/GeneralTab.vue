@@ -50,6 +50,18 @@
         </div>
       </InputField>
 
+      <InputField label="Cancel previous pipelines" docs-url="docs/usage/project-settings#project-settings-1">
+        <CheckboxesField
+          v-model="repoSettings.cancel_previous_build_events"
+          :options="cancelPreviousBuildEventsOptions"
+        />
+        <template #description>
+          <p class="text-sm text-gray-400 dark:text-gray-600">
+            Enable to cancel running pipelines of the same event and context before starting the newly triggered one.
+          </p>
+        </template>
+      </InputField>
+
       <Button class="mr-auto" color="green" text="Save settings" :is-loading="isSaving" @click="saveRepoSettings" />
     </div>
   </Panel>
@@ -60,7 +72,8 @@ import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
-import { RadioOption } from '~/components/form/form.types';
+import CheckboxesField from '~/components/form/CheckboxesField.vue';
+import { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
@@ -70,7 +83,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, RepoSettings, RepoVisibility } from '~/lib/api/types';
+import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import RepoStore from '~/store/repos';
 
 const projectVisibilityOptions: RadioOption[] = [
@@ -91,10 +104,20 @@ const projectVisibilityOptions: RadioOption[] = [
   },
 ];
 
+const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: 'Push' },
+  { value: WebhookEvents.Tag, text: 'Tag' },
+  {
+    value: WebhookEvents.PullRequest,
+    text: 'Pull Request',
+  },
+  { value: WebhookEvents.Deploy, text: 'Deploy' },
+];
+
 export default defineComponent({
   name: 'GeneralTab',
 
-  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox },
+  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox, CheckboxesField },
 
   setup() {
     const apiClient = useApiClient();
@@ -117,6 +140,7 @@ export default defineComponent({
         gated: repo.value.gated,
         trusted: repo.value.trusted,
         allow_pr: repo.value.allow_pr,
+        cancel_previous_build_events: repo.value.cancel_previous_build_events || [],
       };
     }
 
@@ -153,6 +177,7 @@ export default defineComponent({
       isSaving,
       saveRepoSettings,
       projectVisibilityOptions,
+      cancelPreviousBuildEventsOptions,
     };
   },
 });

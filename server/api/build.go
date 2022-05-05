@@ -244,32 +244,32 @@ func cancelBuild(
 
 	// First cancel/evict procs in the queue in one go
 	var (
-		procToCancel []string
-		procToEvict  []string
+		procsToCancel []string
+		procsToEvict  []string
 	)
 	for _, proc := range procs {
 		if proc.PPID != 0 {
 			continue
 		}
 		if proc.State == model.StatusRunning {
-			procToCancel = append(procToCancel, fmt.Sprint(proc.ID))
+			procsToCancel = append(procsToCancel, fmt.Sprint(proc.ID))
 		}
 		if proc.State == model.StatusPending {
-			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
+			procsToEvict = append(procsToEvict, fmt.Sprint(proc.ID))
 		}
 	}
 
-	if len(procToEvict) != 0 {
-		if err := server.Config.Services.Queue.EvictAtOnce(ctx, procToEvict); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+	if len(procsToEvict) != 0 {
+		if err := server.Config.Services.Queue.EvictAtOnce(ctx, procsToEvict); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
 		}
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procToEvict, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToEvict, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
 		}
 	}
-	if len(procToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToCancel)
+	if len(procsToCancel) != 0 {
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToCancel, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToCancel)
 		}
 	}
 
@@ -663,17 +663,17 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	return build, buildItems, nil
 }
 
-func clearPreviousBuilds(
+func cancelPreviousBuilds(
 	ctx context.Context,
 	_store store.Store,
 	build *model.Build,
 	user *model.User,
 	repo *model.Repo,
 ) error {
-	// check this event is included.
+	// check this event should cancel previous pipelines
 	eventIncluded := false
-	for _, ev := range server.Config.Pipeline.DeleteMultipleRunsOnEvents {
-		if ev == string(build.Event) {
+	for _, ev := range repo.CancelPreviousBuildEvents {
+		if ev == build.Event {
 			eventIncluded = true
 			break
 		}
@@ -682,18 +682,19 @@ func clearPreviousBuilds(
 		return nil
 	}
 
-	// get all active activeBuilds.
+	// get all active activeBuilds
 	activeBuilds, err := _store.GetActiveBuildList(repo, -1)
 	if err != nil {
 		return err
 	}
 
 	buildNeedsCancel := func(active *model.Build) (bool, error) {
-		// always filter on same event.
+		// always filter on same event
 		if active.Event != build.Event {
 			return false, nil
 		}
 
+		// find events for the same context
 		switch build.Event {
 		case model.EventPush:
 			return build.Branch == active.Branch, nil
@@ -704,7 +705,7 @@ func clearPreviousBuilds(
 
 	for _, active := range activeBuilds {
 		if active.ID == build.ID {
-			// same build. e.g. self.
+			// same build. e.g. self
 			continue
 		}
 
@@ -740,8 +741,8 @@ func startBuild(
 	repo *model.Repo,
 	buildItems []*shared.BuildItem,
 ) (*model.Build, error) {
-	// call to clear previous builds if needed.
-	if err := clearPreviousBuilds(ctx, store, activeBuild, user, repo); err != nil {
+	// call to cancel previous builds if needed
+	if err := cancelPreviousBuilds(ctx, store, activeBuild, user, repo); err != nil {
 		// should be not breaking
 		log.Error().Err(err).Msg("Failed to cancel previous builds")
 	}
