@@ -90,12 +90,6 @@ func (s storage) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build,
 		query = query.Limit(perPage, perPage*(page-1))
 	}
 	return builds, query.Find(&builds)
-	// return builds, s.engine.
-	// 	Where("build_repo_id = ?", repo.ID).
-	// 	Where("build_status = ? or build_status = ?", "pending", "running").
-	// 	Desc("build_number").
-	// 	Limit(perPage, perPage*(page-1)).
-	// 	Find(&builds)
 }
 
 func (s storage) GetBuildCount() (int64, error) {
