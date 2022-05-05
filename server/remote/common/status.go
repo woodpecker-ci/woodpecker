@@ -8,21 +8,6 @@ import (
 )
 
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	name := server.Config.Server.StatusContext
-
-	switch build.Event {
-	case model.EventPull:
-		name += "/pr"
-	default:
-		if len(build.Event) > 0 {
-			name += "/" + string(build.Event)
-		}
-	}
-
-	if proc != nil {
-		name += "/" + proc.Name
-	}
-
 	return fmt.Sprintf("%s - %s (%s)", server.Config.Server.StatusContext, proc.Name, build.Event)
 }
 
