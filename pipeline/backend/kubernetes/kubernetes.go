@@ -26,7 +26,7 @@ import (
 )
 
 type kube struct {
-	logs         *bytes.Buffer
+	logs         *bytes.Buffer // TODO remove
 	namespace    string
 	storageClass string
 	volumeSize   string
@@ -34,7 +34,17 @@ type kube struct {
 }
 
 // New returns a new Kubernetes Engine.
-func New(namespace, storageClass, volumeSize string) types.Engine {
+func New() types.Engine {
+	namespace := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
+	if namespace == "" {
+		namespace = "woodpecker-ci"
+	}
+	storageClass := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
+	volumeSize := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
+	if volumeSize == "" {
+		volumeSize = "10GiB"
+	}
+
 	return &kube{
 		logs:         new(bytes.Buffer),
 		namespace:    namespace,
@@ -145,7 +155,7 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 	}
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
-	si := informers.NewSharedInformerFactory(e.client, 5*time.Second)
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.namespace))
 	si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -191,7 +201,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 	}
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
-	si := informers.NewSharedInformerFactory(e.client, 5*time.Second)
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.namespace))
 	si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,

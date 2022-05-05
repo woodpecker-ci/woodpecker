@@ -9,6 +9,11 @@ import (
 )
 
 func PersistentVolumeClaim(namespace, name string, storageClass string, size string) *v1.PersistentVolumeClaim {
+	_storageClass := &storageClass
+	if storageClass == "" {
+		_storageClass = nil
+	}
+
 	return &v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      volumeName(name),
@@ -16,7 +21,7 @@ func PersistentVolumeClaim(namespace, name string, storageClass string, size str
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
 			AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteMany},
-			StorageClassName: &storageClass,
+			StorageClassName: _storageClass,
 			Resources: v1.ResourceRequirements{
 				Requests: v1.ResourceList{
 					v1.ResourceStorage: resource.MustParse(size),

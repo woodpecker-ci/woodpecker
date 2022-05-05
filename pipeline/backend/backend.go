@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -16,7 +17,7 @@ func init() {
 		docker.New(),
 		local.New(),
 		ssh.New(),
-		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
+		kubernetes.New(),
 	}
 
 	engines = make(map[string]types.Engine)
