@@ -19,6 +19,7 @@ package gitlab
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // EnvironmentsService handles communication with the environment related methods
@@ -39,6 +40,8 @@ type Environment struct {
 	State          string      `json:"state"`
 	ExternalURL    string      `json:"external_url"`
 	Project        *Project    `json:"project"`
+	CreatedAt      *time.Time  `json:"created_at"`
+	UpdatedAt      *time.Time  `json:"updated_at"`
 	LastDeployment *Deployment `json:"last_deployment"`
 }
 

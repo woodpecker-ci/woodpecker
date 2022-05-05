@@ -136,7 +136,7 @@ func (db *DB) reflectNew(typ reflect.Type) reflect.Value {
 		cs = &cacheStruct{reflect.MakeSlice(reflect.SliceOf(typ), DefaultCacheSize, DefaultCacheSize), 0}
 		db.reflectCache[typ] = cs
 	} else {
-		cs.idx = cs.idx + 1
+		cs.idx++
 	}
 	return cs.value.Index(cs.idx).Addr()
 }

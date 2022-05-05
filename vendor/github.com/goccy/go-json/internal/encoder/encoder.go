@@ -101,6 +101,22 @@ type OpcodeSet struct {
 	InterfaceEscapeKeyCode   *Opcode
 	CodeLength               int
 	EndCode                  *Opcode
+	Code                     Code
+	QueryCache               map[string]*OpcodeSet
+	cacheMu                  sync.RWMutex
+}
+
+func (s *OpcodeSet) getQueryCache(hash string) *OpcodeSet {
+	s.cacheMu.RLock()
+	codeSet := s.QueryCache[hash]
+	s.cacheMu.RUnlock()
+	return codeSet
+}
+
+func (s *OpcodeSet) setQueryCache(hash string, codeSet *OpcodeSet) {
+	s.cacheMu.Lock()
+	s.QueryCache[hash] = codeSet
+	s.cacheMu.Unlock()
 }
 
 type CompiledCode struct {
@@ -222,33 +238,56 @@ func (m *Mapslice) Swap(i, j int) {
 	m.Items[i], m.Items[j] = m.Items[j], m.Items[i]
 }
 
+//nolint:structcheck,unused
+type mapIter struct {
+	key         unsafe.Pointer
+	elem        unsafe.Pointer
+	t           unsafe.Pointer
+	h           unsafe.Pointer
+	buckets     unsafe.Pointer
+	bptr        unsafe.Pointer
+	overflow    unsafe.Pointer
+	oldoverflow unsafe.Pointer
+	startBucket uintptr
+	offset      uint8
+	wrapped     bool
+	B           uint8
+	i           uint8
+	bucket      uintptr
+	checkBucket uintptr
+}
+
 type MapContext struct {
-	Pos   []int
+	Start int
+	First int
+	Idx   int
 	Slice *Mapslice
 	Buf   []byte
+	Len   int
+	Iter  mapIter
 }
 
 var mapContextPool = sync.Pool{
 	New: func() interface{} {
-		return &MapContext{}
+		return &MapContext{
+			Slice: &Mapslice{},
+		}
 	},
 }
 
-func NewMapContext(mapLen int) *MapContext {
+func NewMapContext(mapLen int, unorderedMap bool) *MapContext {
 	ctx := mapContextPool.Get().(*MapContext)
-	if ctx.Slice == nil {
-		ctx.Slice = &Mapslice{
-			Items: make([]MapItem, 0, mapLen),
+	if !unorderedMap {
+		if len(ctx.Slice.Items) < mapLen {
+			ctx.Slice.Items = make([]MapItem, mapLen)
+		} else {
+			ctx.Slice.Items = ctx.Slice.Items[:mapLen]
 		}
 	}
-	if cap(ctx.Pos) < (mapLen*2 + 1) {
-		ctx.Pos = make([]int, 0, mapLen*2+1)
-		ctx.Slice.Items = make([]MapItem, 0, mapLen)
-	} else {
-		ctx.Pos = ctx.Pos[:0]
-		ctx.Slice.Items = ctx.Slice.Items[:0]
-	}
 	ctx.Buf = ctx.Buf[:0]
+	ctx.Iter = mapIter{}
+	ctx.Idx = 0
+	ctx.Len = mapLen
 	return ctx
 }
 
@@ -256,17 +295,17 @@ func ReleaseMapContext(c *MapContext) {
 	mapContextPool.Put(c)
 }
 
-//go:linkname MapIterInit reflect.mapiterinit
+//go:linkname MapIterInit runtime.mapiterinit
 //go:noescape
-func MapIterInit(mapType *runtime.Type, m unsafe.Pointer) unsafe.Pointer
+func MapIterInit(mapType *runtime.Type, m unsafe.Pointer, it *mapIter)
 
 //go:linkname MapIterKey reflect.mapiterkey
 //go:noescape
-func MapIterKey(it unsafe.Pointer) unsafe.Pointer
+func MapIterKey(it *mapIter) unsafe.Pointer
 
 //go:linkname MapIterNext reflect.mapiternext
 //go:noescape
-func MapIterNext(it unsafe.Pointer)
+func MapIterNext(it *mapIter)
 
 //go:linkname MapLen reflect.maplen
 //go:noescape
@@ -374,7 +413,11 @@ func AppendMarshalJSON(ctx *RuntimeContext, code *Opcode, b []byte, v interface{
 		if !ok {
 			return AppendNull(ctx, b), nil
 		}
-		b, err := marshaler.MarshalJSON(ctx.Option.Context)
+		stdctx := ctx.Option.Context
+		if ctx.Option.Flag&FieldQueryOption != 0 {
+			stdctx = SetFieldQueryToContext(stdctx, code.FieldQuery)
+		}
+		b, err := marshaler.MarshalJSON(stdctx)
 		if err != nil {
 			return nil, &errors.MarshalerError{Type: reflect.TypeOf(v), Err: err}
 		}
@@ -546,6 +589,8 @@ func IsNilForMarshaler(v interface{}) bool {
 		return rv.IsNil()
 	case reflect.Slice:
 		return rv.IsNil() || rv.Len() == 0
+	case reflect.String:
+		return rv.Len() == 0
 	}
 	return false
 }

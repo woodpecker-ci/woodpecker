@@ -37,7 +37,7 @@ type Interface interface {
 	Exist(bean ...interface{}) (bool, error)
 	Find(interface{}, ...interface{}) error
 	FindAndCount(interface{}, ...interface{}) (int64, error)
-	Get(interface{}) (bool, error)
+	Get(...interface{}) (bool, error)
 	GroupBy(keys string) *Session
 	ID(interface{}) *Session
 	In(string, ...interface{}) *Session
@@ -99,6 +99,7 @@ type EngineInterface interface {
 	MapCacher(interface{}, caches.Cacher) error
 	NewSession() *Session
 	NoAutoTime() *Session
+	Prepare() *Session
 	Quote(string) string
 	SetCacher(string, caches.Cacher)
 	SetConnMaxLifetime(time.Duration)

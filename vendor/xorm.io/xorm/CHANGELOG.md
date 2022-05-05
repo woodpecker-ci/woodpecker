@@ -3,6 +3,32 @@
 This changelog goes through all the changes that have been made in each release
 without substantial changes to our git log.
 
+## [1.3.0](https://gitea.com/xorm/xorm/releases/tag/1.3.0) - 2022-04-14
+
+* BREAKING
+  * New Prepare useage (#2061)
+  * Make Get and Rows.Scan accept multiple parameters (#2029)
+  * Drop sync function and rename sync2 to sync (#2018)
+* FEATURES
+  * Add dameng support (#2007)
+* BUGFIXES
+  * bugfix :Oid It's a special index. You can't put it in (#2105)
+  * Fix new-lined query execution in master DB node. (#2066)
+  * Fix bug of Rows (#2048)
+  * Fix bug (#2046)
+  * fix panic when `Iterate()` fails (#2040)
+  * fix panic when convert sql and args with nil time.Time pointer (#2038)
+* ENHANCEMENTS
+  * Fix to add session.statement.IsForUpdate check in Session.queryRows() (#2064)
+  * Expose ScanString / ScanInterface and etc (#2039)
+* TESTING
+  * Add test for mysql tls (#2049)
+* BUILD
+  * Upgrade dependencies modules (#2078)
+* MISC
+  * Fix oracle keyword AS (#2109)
+  * Some performance optimization for get (#2043)
+
 ## [1.2.2](https://gitea.com/xorm/xorm/releases/tag/1.2.2) - 2021-08-11
 
 * MISC

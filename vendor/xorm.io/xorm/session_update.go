@@ -22,6 +22,7 @@ var (
 	ErrNoColumnsTobeUpdated = errors.New("no columns found to be updated")
 )
 
+//revive:disable
 func (session *Session) cacheUpdate(table *schemas.Table, tableName, sqlStr string, args ...interface{}) error {
 	if table == nil ||
 		session.tx != nil {
@@ -39,7 +40,7 @@ func (session *Session) cacheUpdate(table *schemas.Table, tableName, sqlStr stri
 
 	var nStart int
 	if len(args) > 0 {
-		if strings.Index(sqlStr, "?") > -1 {
+		if strings.Contains(sqlStr, "?") {
 			nStart = strings.Count(oldhead, "?")
 		} else {
 			// only for pq, TODO: if any other databse?
@@ -182,7 +183,7 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 			return 0, err
 		}
 
-		if len(session.statement.TableName()) <= 0 {
+		if len(session.statement.TableName()) == 0 {
 			return 0, ErrTableNotFound
 		}
 
@@ -278,7 +279,11 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 		condBeanIsStruct := false
 		if len(condiBean) > 0 {
 			if c, ok := condiBean[0].(map[string]interface{}); ok {
-				autoCond = builder.Eq(c)
+				var eq = make(builder.Eq)
+				for k, v := range c {
+					eq[session.engine.Quote(k)] = v
+				}
+				autoCond = builder.Eq(eq)
 			} else {
 				ct := reflect.TypeOf(condiBean[0])
 				k := ct.Kind()
@@ -338,7 +343,7 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 		}
 	}
 
-	if len(colNames) <= 0 {
+	if len(colNames) == 0 {
 		return 0, ErrNoColumnsTobeUpdated
 	}
 
@@ -352,7 +357,7 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 	}
 
 	if st.OrderStr != "" {
-		condSQL = condSQL + fmt.Sprintf(" ORDER BY %v", st.OrderStr)
+		condSQL += fmt.Sprintf(" ORDER BY %v", st.OrderStr)
 	}
 
 	var tableName = session.statement.TableName()
@@ -362,7 +367,7 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 		limitValue := *st.LimitN
 		switch session.engine.dialect.URI().DBType {
 		case schemas.MYSQL:
-			condSQL = condSQL + fmt.Sprintf(" LIMIT %d", limitValue)
+			condSQL += fmt.Sprintf(" LIMIT %d", limitValue)
 		case schemas.SQLITE:
 			tempCondSQL := condSQL + fmt.Sprintf(" LIMIT %d", limitValue)
 			cond = cond.And(builder.Expr(fmt.Sprintf("rowid IN (SELECT rowid FROM %v %v)",

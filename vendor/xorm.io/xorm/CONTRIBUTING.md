@@ -1,13 +1,13 @@
 ## Contributing to xorm
 
-`xorm` has a backlog of [pull requests](https://help.github.com/articles/using-pull-requests), but contributions are still very
-much welcome. You can help with patch review, submitting bug reports,
+`xorm` has a backlog of [pull requests](https://gitea.com/xorm/xorm/pulls), but contributions are still very
+much welcome. You can help with patch review, submitting [bug reports](https://gitea.com/xorm/xorm/issues),
 or adding new functionality. There is no formal style guide, but
 please conform to the style of existing code and general Go formatting
 conventions when submitting patches.
 
-* [fork a repo](https://help.github.com/articles/fork-a-repo)
-* [creating a pull request ](https://help.github.com/articles/creating-a-pull-request)
+* [fork the repo](https://gitea.com/repo/fork/2038)
+* [creating a pull request ](https://docs.gitea.io/en-us/pull-request/)
 
 ### Language
 
@@ -15,7 +15,7 @@ Since `xorm` is a world-wide open source project, please describe your issues or
 
 ### Sign your codes with comments
 ```
-// !<you github id>! your comments
+// !<your gitea.com id>! your comments
 
 e.g.,
 
@@ -65,7 +65,7 @@ And if your branch is related with cache, you could also enable it via `TEST_CAC
 
 ### Patch review
 
-Help review existing open [pull requests](https://help.github.com/articles/using-pull-requests) by commenting on the code or
+Help review existing open [pull requests](https://gitea.com/xorm/xorm/pulls) by commenting on the code or
 proposed functionality.
 
 ### Bug reports
