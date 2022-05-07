@@ -71,6 +71,14 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-workspace.yml",
 		},
 		{
+			name:     "Platform",
+			testFile: ".woodpecker/test-platform.yml",
+		},
+		{
+			name:     "Labels",
+			testFile: ".woodpecker/test-labels.yml",
+		},
+		{
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yml",
 			fail:     true,
