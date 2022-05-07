@@ -118,13 +118,20 @@ pipeline:
 
 ### `labels`
 
-You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when every label assigned to a pipeline matches the agents tags. Agents can also have `*` as a value for a label as a wildcard. To set agent labels check the [agent configuration options](/docs/administration/agent-config#) Pipeline labels with an empty value will be ignored.
-By default each pipeline will have at least two labels `repo` and `platform` like `repo=woodpecker-ci/woodpecker` and `platform=` or something like `platform=linux/amd64` if you have set the [platform](#platform) attribute for your pipeline. You can add additional labels as a key value map:
+You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
+
+To set agent additional labels check the [agent configuration options](/docs/administration/agent-config#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+
+Pipeline labels with an empty value will be ignored.
+By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
+
+You can add additional labels as a key value map:
 
 ```diff
 +labels:
-+  location: europe
++  location: europe # only agents with `location=europe` or `location=*` will be used
 +  weather: sun
++  hostname: "" # this label will be ignored as it is empty
 
 pipeline:
   build:
@@ -412,6 +419,10 @@ pipeline:
 ```
 
 #### `platform`
+
+:::note
+This condition should be used in conjunction with a [matrix](/docs/usage/matrix-builds) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
+:::
 
 Execute a step for a specific platform:
 
