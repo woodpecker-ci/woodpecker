@@ -44,7 +44,6 @@ require (
 	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.7 // indirect
 	github.com/urfave/cli/v2 v2.5.1
-	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/xanzy/go-gitlab v0.64.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0

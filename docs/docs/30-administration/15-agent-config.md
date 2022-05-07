@@ -125,6 +125,11 @@ Configures the agent hostname.
 
 Configures the number of parallel builds.
 
+### `WOODPECKER_FILTER_LABELS`
+> Default: `1`
+
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide two labels `platform=os/arch` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](/docs/usage/pipeline-syntax#labels).
+
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`
 

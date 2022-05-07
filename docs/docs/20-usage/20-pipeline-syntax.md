@@ -108,12 +108,30 @@ Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline
 ```diff
 +platform: linux/arm64
 
- pipeline:
-   build:
-     image: golang
-     commands:
-       - go build
-       - go test
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
+
+### `labels`
+
+You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when every label assigned to a pipeline matches the agents tags. Agents can also have `*` as a value for a label as a wildcard. To set agent labels check the [agent configuration options](/docs/administration/agent-config#) Pipeline labels with an empty value will be ignored.
+By default each pipeline will have at least two labels `repo` and `platform` like `repo=woodpecker-ci/woodpecker` and `platform=` or something like `platform=linux/amd64` if you have set the [platform](#platform) attribute for your pipeline. You can add additional labels as a key value map:
+
+```diff
++labels:
++  location: europe
++  weather: sun
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
 ```
 
 ### Skip Commits
@@ -442,8 +460,8 @@ when:
 #### `path`
 
 :::info
-Path conditions are applied only to **push** and **pull_request** events.  
-It is currently **only available** for GitHub, GitLab.  
+Path conditions are applied only to **push** and **pull_request** events.
+It is currently **only available** for GitHub, GitLab.
 Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
 :::
 

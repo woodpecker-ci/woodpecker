@@ -368,7 +368,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name: "woodpecker",
 			Link: link,
 			Host: host,
-			Arch: "linux/amd64",
+			Arch: "", //
 		},
 	}
 }

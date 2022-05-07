@@ -63,7 +63,6 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
-		Expr:   req.GetFilter().GetExpr(),
 	}
 
 	res := new(proto.NextReply)
