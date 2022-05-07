@@ -40,7 +40,13 @@ import (
 )
 
 func loop(c *cli.Context) error {
+	hostname := c.String("hostname")
+	if len(hostname) == 0 {
+		hostname, _ = os.Hostname()
+	}
+
 	labels := map[string]string{
+		"hostname": hostname,
 		"platform": runtime.GOOS + "/" + runtime.GOARCH,
 		"repo":     "*", // allow all repos by default
 	}
@@ -52,11 +58,6 @@ func loop(c *cli.Context) error {
 
 	filter := rpc.Filter{
 		Labels: labels,
-	}
-
-	hostname := c.String("hostname")
-	if len(hostname) == 0 {
-		hostname, _ = os.Hostname()
 	}
 
 	if c.Bool("pretty") {
