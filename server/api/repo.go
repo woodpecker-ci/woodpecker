@@ -51,6 +51,7 @@ func PostRepo(c *gin.Context) {
 	repo.IsActive = true
 	repo.UserID = user.ID
 	repo.AllowPull = true
+	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -140,8 +141,8 @@ func PatchRepo(c *gin.Context) {
 	if in.Config != nil {
 		repo.Config = *in.Config
 	}
-	if in.CancelPreviousBuildEvents != nil {
-		repo.CancelPreviousBuildEvents = *in.CancelPreviousBuildEvents
+	if in.CancelPreviousPipelineEvents != nil {
+		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {

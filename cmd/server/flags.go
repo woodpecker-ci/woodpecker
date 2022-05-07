@@ -97,11 +97,11 @@ var flags = []cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DELETE_MULTIPLE_RUNS_ON_EVENTS"},
-		Name:    "delete-multiple-runs-on-events",
-		Usage:   "When active for an event type, multiple runs on the same id (branch, tag, pr) would cancel previous runs",
-		Value:   "push, pull_request",
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"},
+		Name:    "default-cancel-previous-pipeline-events",
+		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
+		Value:   cli.NewStringSlice("push", "pull_request"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
@@ -275,12 +275,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_RELEASE_ACTIONS"},
-		Name:    "github-release-actions",
-		Usage:   "On which actions to trigger a release pipeline",
-		Value:   "prereleased, released",
 	},
 	//
 	// Gogs

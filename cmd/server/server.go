@@ -24,7 +24,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -42,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
@@ -289,9 +289,12 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
 
 	// Execution
-	server.Config.Pipeline.DeleteMultipleRunsOnEvents = regexp.
-		MustCompile(`[\s,]+`).
-		Split(c.String("delete-multiple-runs-on-events"), -1)
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")

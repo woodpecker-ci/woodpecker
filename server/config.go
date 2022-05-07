@@ -68,13 +68,13 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		AuthenticatePublicRepos    bool
-		DeleteMultipleRunsOnEvents []string
-		DefaultCloneImage          string
-		Limits                     model.ResourceLimit
-		Volumes                    []string
-		Networks                   []string
-		Privileged                 []string
+		AuthenticatePublicRepos             bool
+		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
+		DefaultCloneImage                   string
+		Limits                              model.ResourceLimit
+		Volumes                             []string
+		Networks                            []string
+		Privileged                          []string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

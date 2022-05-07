@@ -663,7 +663,7 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	return build, buildItems, nil
 }
 
-func cancelPreviousBuilds(
+func cancelPreviousPipelines(
 	ctx context.Context,
 	_store store.Store,
 	build *model.Build,
@@ -672,7 +672,7 @@ func cancelPreviousBuilds(
 ) error {
 	// check this event should cancel previous pipelines
 	eventIncluded := false
-	for _, ev := range repo.CancelPreviousBuildEvents {
+	for _, ev := range repo.CancelPreviousPipelineEvents {
 		if ev == build.Event {
 			eventIncluded = true
 			break
@@ -742,7 +742,7 @@ func startBuild(
 	buildItems []*shared.BuildItem,
 ) (*model.Build, error) {
 	// call to cancel previous builds if needed
-	if err := cancelPreviousBuilds(ctx, store, activeBuild, user, repo); err != nil {
+	if err := cancelPreviousPipelines(ctx, store, activeBuild, user, repo); err != nil {
 		// should be not breaking
 		log.Error().Err(err).Msg("Failed to cancel previous builds")
 	}

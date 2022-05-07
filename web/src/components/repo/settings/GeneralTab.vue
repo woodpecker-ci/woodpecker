@@ -52,7 +52,7 @@
 
       <InputField label="Cancel previous pipelines" docs-url="docs/usage/project-settings#cancel-previous-pipelines">
         <CheckboxesField
-          v-model="repoSettings.cancel_previous_build_events"
+          v-model="repoSettings.cancel_previous_pipeline_events"
           :options="cancelPreviousBuildEventsOptions"
         />
         <template #description>
@@ -140,7 +140,7 @@ export default defineComponent({
         gated: repo.value.gated,
         trusted: repo.value.trusted,
         allow_pr: repo.value.allow_pr,
-        cancel_previous_build_events: repo.value.cancel_previous_build_events || [],
+        cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
       };
     }
 
