@@ -50,7 +50,7 @@
         </div>
       </InputField>
 
-      <InputField label="Cancel previous pipelines" docs-url="docs/usage/project-settings#project-settings-1">
+      <InputField label="Cancel previous pipelines" docs-url="docs/usage/project-settings#cancel-previous-pipelines">
         <CheckboxesField
           v-model="repoSettings.cancel_previous_build_events"
           :options="cancelPreviousBuildEventsOptions"
