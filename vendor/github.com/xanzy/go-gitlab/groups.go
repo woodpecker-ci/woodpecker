@@ -47,6 +47,7 @@ type Group struct {
 	RequestAccessEnabled    bool                       `json:"request_access_enabled"`
 	FullName                string                     `json:"full_name"`
 	FullPath                string                     `json:"full_path"`
+	FileTemplateProjectID   int                        `json:"file_template_project_id"`
 	ParentID                int                        `json:"parent_id"`
 	Projects                []*Project                 `json:"projects"`
 	Statistics              *StorageStatistics         `json:"statistics"`
@@ -61,6 +62,7 @@ type Group struct {
 	MentionsDisabled        bool                       `json:"mentions_disabled"`
 	RunnersToken            string                     `json:"runners_token"`
 	SharedProjects          []*Project                 `json:"shared_projects"`
+	SharedRunnersEnabled    bool                       `json:"shared_runners_enabled"`
 	SharedWithGroups        []struct {
 		GroupID          int      `json:"group_id"`
 		GroupName        string   `json:"group_name"`
@@ -73,6 +75,7 @@ type Group struct {
 	LDAPGroupLinks                 []*LDAPGroupLink `json:"ldap_group_links"`
 	SharedRunnersMinutesLimit      int              `json:"shared_runners_minutes_limit"`
 	ExtraSharedRunnersMinutesLimit int              `json:"extra_shared_runners_minutes_limit"`
+	PreventForkingOutsideGroup     bool             `json:"prevent_forking_outside_group"`
 	MarkedForDeletionOn            *ISOTime         `json:"marked_for_deletion_on"`
 	CreatedAt                      *time.Time       `json:"created_at"`
 }
@@ -123,17 +126,17 @@ func (s *GroupsService) ListGroups(opt *ListGroupsOptions, options ...RequestOpt
 	return gs, resp, err
 }
 
-// ListSubgroupsOptions represents the available ListSubgroups() options.
+// ListSubGroupsOptions represents the available ListSubGroups() options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
-type ListSubgroupsOptions ListGroupsOptions
+type ListSubGroupsOptions ListGroupsOptions
 
-// ListSubgroups gets a list of subgroups for a given group.
+// ListSubGroups gets a list of subgroups for a given group.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/groups.html#list-a-groups-s-subgroups
-func (s *GroupsService) ListSubgroups(gid interface{}, opt *ListSubgroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
+func (s *GroupsService) ListSubGroups(gid interface{}, opt *ListSubGroupsOptions, options ...RequestOptionFunc) ([]*Group, *Response, error) {
 	group, err := parseID(gid)
 	if err != nil {
 		return nil, nil, err
@@ -193,7 +196,7 @@ func (s *GroupsService) ListDescendantGroups(gid interface{}, opt *ListDescendan
 type ListGroupProjectsOptions struct {
 	ListOptions
 	Archived                 *bool             `url:"archived,omitempty" json:"archived,omitempty"`
-	IncludeSubgroups         *bool             `url:"include_subgroups,omitempty" json:"include_subgroups,omitempty"`
+	IncludeSubGroups         *bool             `url:"include_subgroups,omitempty" json:"include_subgroups,omitempty"`
 	MinAccessLevel           *AccessLevelValue `url:"min_access_level,omitempty" json:"min_access_level,omitempty"`
 	OrderBy                  *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Owned                    *bool             `url:"owned,omitempty" json:"owned,omitempty"`
@@ -201,6 +204,7 @@ type ListGroupProjectsOptions struct {
 	Simple                   *bool             `url:"simple,omitempty" json:"simple,omitempty"`
 	Sort                     *string           `url:"sort,omitempty" json:"sort,omitempty"`
 	Starred                  *bool             `url:"starred,omitempty" json:"starred,omitempty"`
+	Topic                    *string           `url:"topic,omitempty" json:"topic,omitempty"`
 	Visibility               *VisibilityValue  `url:"visibility,omitempty" json:"visibility,omitempty"`
 	WithCustomAttributes     *bool             `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
 	WithIssuesEnabled        *bool             `url:"with_issues_enabled,omitempty" json:"with_issues_enabled,omitempty"`

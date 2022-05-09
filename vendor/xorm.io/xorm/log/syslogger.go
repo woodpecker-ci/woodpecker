@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !windows && !nacl && !plan9
 // +build !windows,!nacl,!plan9
 
 package log
@@ -26,42 +27,42 @@ func NewSyslogLogger(w *syslog.Writer) *SyslogLogger {
 
 // Debug log content as Debug
 func (s *SyslogLogger) Debug(v ...interface{}) {
-	s.w.Debug(fmt.Sprint(v...))
+	_ = s.w.Debug(fmt.Sprint(v...))
 }
 
 // Debugf log content as Debug and format
 func (s *SyslogLogger) Debugf(format string, v ...interface{}) {
-	s.w.Debug(fmt.Sprintf(format, v...))
+	_ = s.w.Debug(fmt.Sprintf(format, v...))
 }
 
 // Error log content as Error
 func (s *SyslogLogger) Error(v ...interface{}) {
-	s.w.Err(fmt.Sprint(v...))
+	_ = s.w.Err(fmt.Sprint(v...))
 }
 
 // Errorf log content as Errorf and format
 func (s *SyslogLogger) Errorf(format string, v ...interface{}) {
-	s.w.Err(fmt.Sprintf(format, v...))
+	_ = s.w.Err(fmt.Sprintf(format, v...))
 }
 
 // Info log content as Info
 func (s *SyslogLogger) Info(v ...interface{}) {
-	s.w.Info(fmt.Sprint(v...))
+	_ = s.w.Info(fmt.Sprint(v...))
 }
 
 // Infof log content as Infof and format
 func (s *SyslogLogger) Infof(format string, v ...interface{}) {
-	s.w.Info(fmt.Sprintf(format, v...))
+	_ = s.w.Info(fmt.Sprintf(format, v...))
 }
 
 // Warn log content as Warn
 func (s *SyslogLogger) Warn(v ...interface{}) {
-	s.w.Warning(fmt.Sprint(v...))
+	_ = s.w.Warning(fmt.Sprint(v...))
 }
 
 // Warnf log content as Warnf and format
 func (s *SyslogLogger) Warnf(format string, v ...interface{}) {
-	s.w.Warning(fmt.Sprintf(format, v...))
+	_ = s.w.Warning(fmt.Sprintf(format, v...))
 }
 
 // Level shows log level

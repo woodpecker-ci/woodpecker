@@ -140,6 +140,7 @@ type CreateLabelOptions struct {
 	Name        *string `url:"name,omitempty" json:"name,omitempty"`
 	Color       *string `url:"color,omitempty" json:"color,omitempty"`
 	Description *string `url:"description,omitempty" json:"description,omitempty"`
+	Priority    *int    `url:"priority,omitempty" json:"priority,omitempty"`
 }
 
 // CreateLabel creates a new label for given repository with given name and
@@ -200,6 +201,7 @@ type UpdateLabelOptions struct {
 	NewName     *string `url:"new_name,omitempty" json:"new_name,omitempty"`
 	Color       *string `url:"color,omitempty" json:"color,omitempty"`
 	Description *string `url:"description,omitempty" json:"description,omitempty"`
+	Priority    *int    `url:"priority,omitempty" json:"priority,omitempty"`
 }
 
 // UpdateLabel updates an existing label with new name or now color. At least

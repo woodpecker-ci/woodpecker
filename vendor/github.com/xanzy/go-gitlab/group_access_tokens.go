@@ -30,7 +30,7 @@ type GroupAccessTokensService struct {
 	client *Client
 }
 
-// GroupAccessToken represents a GitLab Group Access Token.
+// GroupAccessToken represents a GitLab group access token.
 //
 // GitLab API docs: https://docs.gitlab.com/ee/api/group_access_tokens.html
 type GroupAccessToken struct {
@@ -40,6 +40,7 @@ type GroupAccessToken struct {
 	Scopes      []string         `json:"scopes"`
 	CreatedAt   *time.Time       `json:"created_at"`
 	ExpiresAt   *ISOTime         `json:"expires_at"`
+	LastUsedAt  *time.Time       `json:"last_used_at"`
 	Active      bool             `json:"active"`
 	Revoked     bool             `json:"revoked"`
 	Token       string           `json:"token"`
@@ -57,8 +58,7 @@ func (v GroupAccessToken) String() string {
 // https://docs.gitlab.com/ee/api/group_access_tokens.html#list-group-access-tokens
 type ListGroupAccessTokensOptions ListOptions
 
-// ListGroupAccessTokens gets a list of all Group Access Tokens in a
-// group.
+// ListGroupAccessTokens gets a list of all group access tokens in a group.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/group_access_tokens.html#list-group-access-tokens
@@ -83,6 +83,31 @@ func (s *GroupAccessTokensService) ListGroupAccessTokens(gid interface{}, opt *L
 	return gats, resp, err
 }
 
+// GetGroupAccessToken gets a single group access tokens in a group.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/group_access_tokens.html#get-a-group-access-token
+func (s *GroupAccessTokensService) GetGroupAccessToken(gid interface{}, id int, options ...RequestOptionFunc) (*GroupAccessToken, *Response, error) {
+	groups, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/access_tokens/%d", PathEscape(groups), id)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	gat := new(GroupAccessToken)
+	resp, err := s.client.Do(req, &gat)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return gat, resp, err
+}
+
 // CreateGroupAccessTokenOptions represents the available CreateVariable()
 // options.
 //
@@ -95,7 +120,7 @@ type CreateGroupAccessTokenOptions struct {
 	ExpiresAt   *ISOTime          `url:"expires_at,omitempty" json:"expires_at,omitempty"`
 }
 
-// CreateGroupAccessToken creates a new Group Access Token.
+// CreateGroupAccessToken creates a new group access token.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/group_access_tokens.html#create-a-group-access-token
@@ -120,11 +145,11 @@ func (s *GroupAccessTokensService) CreateGroupAccessToken(gid interface{}, opt *
 	return pat, resp, err
 }
 
-// DeleteGroupAccessToken deletes a Group Access Token.
+// RevokeGroupAccessToken revokes a group access token.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/group_access_tokens.html#revoke-a-group-access-token
-func (s *GroupAccessTokensService) DeleteGroupAccessToken(gid interface{}, id int, options ...RequestOptionFunc) (*Response, error) {
+func (s *GroupAccessTokensService) RevokeGroupAccessToken(gid interface{}, id int, options ...RequestOptionFunc) (*Response, error) {
 	groups, err := parseID(gid)
 	if err != nil {
 		return nil, err

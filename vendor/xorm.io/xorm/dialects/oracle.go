@@ -539,6 +539,12 @@ func (db *oracle) Version(ctx context.Context, queryer core.Queryer) (*schemas.V
 	}, nil
 }
 
+func (db *oracle) Features() *DialectFeatures {
+	return &DialectFeatures{
+		AutoincrMode: SequenceAutoincrMode,
+	}
+}
+
 func (db *oracle) SQLType(c *schemas.Column) string {
 	var res string
 	switch t := c.SQLType.Name; t {
@@ -599,7 +605,7 @@ func (db *oracle) DropTableSQL(tableName string) (string, bool) {
 	return fmt.Sprintf("DROP TABLE `%s`", tableName), false
 }
 
-func (db *oracle) CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool) {
+func (db *oracle) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error) {
 	var sql = "CREATE TABLE "
 	if tableName == "" {
 		tableName = table.Name
@@ -629,7 +635,7 @@ func (db *oracle) CreateTableSQL(table *schemas.Table, tableName string) ([]stri
 	}
 
 	sql = sql[:len(sql)-2] + ")"
-	return []string{sql}, false
+	return sql, false, nil
 }
 
 func (db *oracle) SetQuotePolicy(quotePolicy QuotePolicy) {
