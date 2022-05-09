@@ -50,7 +50,7 @@ type (
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraints) Match(metadata frontend.Metadata) bool {
-	match := c.Platform.Match(metadata.Sys.Arch) &&
+	match := c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Branch.Match(metadata.Curr.Commit.Branch) &&

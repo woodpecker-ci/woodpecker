@@ -87,11 +87,11 @@ type (
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name    string `json:"name,omitempty"`
-		Host    string `json:"host,omitempty"`
-		Link    string `json:"link,omitempty"`
-		Arch    string `json:"arch,omitempty"`
-		Version string `json:"version,omitempty"`
+		Name     string `json:"name,omitempty"`
+		Host     string `json:"host,omitempty"`
+		Link     string `json:"link,omitempty"`
+		Platform string `json:"arch,omitempty"`
+		Version  string `json:"version,omitempty"`
 	}
 )
 
@@ -179,15 +179,15 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 
-		"CI_SYSTEM_NAME":    m.Sys.Name,
-		"CI_SYSTEM_LINK":    m.Sys.Link,
-		"CI_SYSTEM_HOST":    m.Sys.Host,
-		"CI_SYSTEM_ARCH":    m.Sys.Arch,
-		"CI_SYSTEM_VERSION": version.Version,
+		"CI_SYSTEM_NAME":     m.Sys.Name,
+		"CI_SYSTEM_LINK":     m.Sys.Link,
+		"CI_SYSTEM_HOST":     m.Sys.Host,
+		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
+		"CI_SYSTEM_VERSION":  version.Version,
 
 		// TODO drop for v0.16.0 development
 		// DEPRECATED
-		"CI_ARCH":                    m.Sys.Arch,                           // use CI_SYSTEM_ARCH
+		"CI_ARCH":                    m.Sys.Platform,                       // use CI_SYSTEM_ARCH
 		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
 		"CI_REMOTE_URL":              m.Repo.Remote,                        // use CI_REPO_REMOTE
 		"CI_REPO_BRANCH":             m.Repo.Branch,                        // use CI_REPO_DEFAULT_BRANCH
@@ -218,5 +218,5 @@ func (m *Metadata) Environ() map[string]string {
 var pullRegexp = regexp.MustCompile(`\d+`)
 
 func (m *Metadata) SetPlatform(platform string) {
-	m.Sys.Arch = platform
+	m.Sys.Platform = platform
 }
