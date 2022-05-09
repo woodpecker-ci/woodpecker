@@ -197,6 +197,11 @@ Link to documentation in the UI.
 
 Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
 
+### `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
+> Default: `pull_request, push`
+
+List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
+
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
 > Default: `woodpeckerci/plugin-git:latest`
 
