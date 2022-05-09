@@ -2,6 +2,11 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
+## 1.0.0
+
+- Refactored support of old agent filter labels and expression. Learn how to use the new [filter](/docs/usage/pipeline-syntax#labels).
+- Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
+
 ## 0.15.0
 
 - Default value for custom pipeline path is now empty / un-set which results in following resolution:
