@@ -449,6 +449,9 @@ func (d *simpleDecDriver) DecodeBytes(bs []byte) (bsOut []byte) {
 		for i := 0; i < len(bs); i++ {
 			bs[i] = uint8(chkOvf.UintV(d.DecodeUint64(), 8))
 		}
+		for i := len(bs); i < slen; i++ {
+			bs = append(bs, uint8(chkOvf.UintV(d.DecodeUint64(), 8)))
+		}
 		return bs
 	}
 

@@ -13,3 +13,7 @@ Set to the name of an existing network which will be attached to all your pipeli
 > Default: `false`
 
 Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
+
+## Podman support
+
+While the agent was developped with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_SOCK` to point to the podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.

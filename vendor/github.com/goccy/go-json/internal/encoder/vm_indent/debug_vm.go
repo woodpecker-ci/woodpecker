@@ -16,16 +16,17 @@ func DebugRun(ctx *encoder.RuntimeContext, b []byte, codeSet *encoder.OpcodeSet)
 
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("=============[DEBUG]===============")
-			fmt.Println("* [TYPE]")
-			fmt.Println(codeSet.Type)
-			fmt.Printf("\n")
-			fmt.Println("* [ALL OPCODE]")
-			fmt.Println(code.Dump())
-			fmt.Printf("\n")
-			fmt.Println("* [CONTEXT]")
-			fmt.Printf("%+v\n", ctx)
-			fmt.Println("===================================")
+			w := ctx.Option.DebugOut
+			fmt.Fprintln(w, "=============[DEBUG]===============")
+			fmt.Fprintln(w, "* [TYPE]")
+			fmt.Fprintln(w, codeSet.Type)
+			fmt.Fprintf(w, "\n")
+			fmt.Fprintln(w, "* [ALL OPCODE]")
+			fmt.Fprintln(w, code.Dump())
+			fmt.Fprintf(w, "\n")
+			fmt.Fprintln(w, "* [CONTEXT]")
+			fmt.Fprintf(w, "%+v\n", ctx)
+			fmt.Fprintln(w, "===================================")
 			panic(err)
 		}
 	}()

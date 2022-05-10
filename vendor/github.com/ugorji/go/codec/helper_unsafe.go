@@ -376,6 +376,7 @@ func i2rtid(i interface{}) uintptr {
 // --------------------------
 
 func unsafeCmpZero(ptr unsafe.Pointer, size int) bool {
+	// verified that size is always within right range, so no chance of OOM
 	var s1 = unsafeString{ptr, size}
 	var s2 = unsafeString{unsafeZeroAddr, size}
 	if size > len(unsafeZeroArr) {
