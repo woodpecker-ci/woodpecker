@@ -295,19 +295,15 @@ func cancelBuild(
 		return http.StatusInternalServerError, err
 	}
 
-	// For pending builds, we stream the UI the latest state.
-	// For running builds, the UI will be updated when the agents acknowledge the cancel
-	if build.Status == model.StatusPending {
-		procs, err = _store.ProcList(killedBuild)
-		if err != nil {
-			return http.StatusNotFound, err
-		}
-		if killedBuild.Procs, err = model.Tree(procs); err != nil {
-			return http.StatusInternalServerError, err
-		}
-		if err := publishToTopic(ctx, killedBuild, repo); err != nil {
-			log.Error().Err(err).Msg("publishToTopic")
-		}
+	procs, err = _store.ProcList(killedBuild)
+	if err != nil {
+		return http.StatusNotFound, err
+	}
+	if killedBuild.Procs, err = model.Tree(procs); err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
 	return http.StatusNoContent, nil
