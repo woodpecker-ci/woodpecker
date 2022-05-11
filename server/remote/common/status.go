@@ -2,13 +2,29 @@ package common
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	return fmt.Sprintf("%s - %s (%s)", server.Config.Server.StatusContext, proc.Name, build.Event)
+	ctx := server.Config.Server.StatusContextFormat
+	// replace context
+	ctx = strings.ReplaceAll(ctx, "%context", server.Config.Server.StatusContext)
+	// replace event
+	event := string(build.Event)
+	switch build.Event {
+	case model.EventPull:
+		event = "pr"
+	}
+	ctx = strings.ReplaceAll(ctx, "%event", event)
+	// replace pipeline name
+	ctx = strings.ReplaceAll(ctx, "%pipeline", proc.Name)
+	// replace repo
+	ctx = strings.ReplaceAll(ctx, "%owner", repo.Owner)
+	ctx = strings.ReplaceAll(ctx, "%repo", repo.Name)
+	return ctx
 }
 
 // GetBuildStatusDescription is a helper function that generates a description
