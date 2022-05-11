@@ -207,7 +207,7 @@ var flags = []cli.Flag{
 		Value:   "ci/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT", "WOODPECKER_GITHUB_CONTEXT_FORMAT", "WOODPECKER_GITEA_CONTEXT_FORMAT"},
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
 		Value:   "%context/%event/%pipeline",
