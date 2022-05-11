@@ -36,16 +36,17 @@ type RepositoryFilesService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/repository_files.html
 type File struct {
-	FileName     string `json:"file_name"`
-	FilePath     string `json:"file_path"`
-	Size         int    `json:"size"`
-	Encoding     string `json:"encoding"`
-	Content      string `json:"content"`
-	Ref          string `json:"ref"`
-	BlobID       string `json:"blob_id"`
-	CommitID     string `json:"commit_id"`
-	SHA256       string `json:"content_sha256"`
-	LastCommitID string `json:"last_commit_id"`
+	FileName        string `json:"file_name"`
+	FilePath        string `json:"file_path"`
+	Size            int    `json:"size"`
+	Encoding        string `json:"encoding"`
+	Content         string `json:"content"`
+	ExecuteFilemode bool   `json:"execute_filemode"`
+	Ref             string `json:"ref"`
+	BlobID          string `json:"blob_id"`
+	CommitID        string `json:"commit_id"`
+	SHA256          string `json:"content_sha256"`
+	LastCommitID    string `json:"last_commit_id"`
 }
 
 func (r File) String() string {
@@ -125,14 +126,15 @@ func (s *RepositoryFilesService) GetFileMetaData(pid interface{}, fileName strin
 	}
 
 	f := &File{
-		BlobID:       resp.Header.Get("X-Gitlab-Blob-Id"),
-		CommitID:     resp.Header.Get("X-Gitlab-Commit-Id"),
-		Encoding:     resp.Header.Get("X-Gitlab-Encoding"),
-		FileName:     resp.Header.Get("X-Gitlab-File-Name"),
-		FilePath:     resp.Header.Get("X-Gitlab-File-Path"),
-		Ref:          resp.Header.Get("X-Gitlab-Ref"),
-		SHA256:       resp.Header.Get("X-Gitlab-Content-Sha256"),
-		LastCommitID: resp.Header.Get("X-Gitlab-Last-Commit-Id"),
+		BlobID:          resp.Header.Get("X-Gitlab-Blob-Id"),
+		CommitID:        resp.Header.Get("X-Gitlab-Commit-Id"),
+		Encoding:        resp.Header.Get("X-Gitlab-Encoding"),
+		FileName:        resp.Header.Get("X-Gitlab-File-Name"),
+		FilePath:        resp.Header.Get("X-Gitlab-File-Path"),
+		ExecuteFilemode: resp.Header.Get("X-Gitlab-Execute-Filemode") == "true",
+		Ref:             resp.Header.Get("X-Gitlab-Ref"),
+		SHA256:          resp.Header.Get("X-Gitlab-Content-Sha256"),
+		LastCommitID:    resp.Header.Get("X-Gitlab-Last-Commit-Id"),
 	}
 
 	if sizeString := resp.Header.Get("X-Gitlab-Size"); sizeString != "" {
@@ -259,13 +261,14 @@ func (r FileInfo) String() string {
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/repository_files.html#create-new-file-in-repository
 type CreateFileOptions struct {
-	Branch        *string `url:"branch,omitempty" json:"branch,omitempty"`
-	StartBranch   *string `url:"start_branch,omitempty" json:"start_branch,omitempty"`
-	Encoding      *string `url:"encoding,omitempty" json:"encoding,omitempty"`
-	AuthorEmail   *string `url:"author_email,omitempty" json:"author_email,omitempty"`
-	AuthorName    *string `url:"author_name,omitempty" json:"author_name,omitempty"`
-	Content       *string `url:"content,omitempty" json:"content,omitempty"`
-	CommitMessage *string `url:"commit_message,omitempty" json:"commit_message,omitempty"`
+	Branch          *string `url:"branch,omitempty" json:"branch,omitempty"`
+	StartBranch     *string `url:"start_branch,omitempty" json:"start_branch,omitempty"`
+	Encoding        *string `url:"encoding,omitempty" json:"encoding,omitempty"`
+	AuthorEmail     *string `url:"author_email,omitempty" json:"author_email,omitempty"`
+	AuthorName      *string `url:"author_name,omitempty" json:"author_name,omitempty"`
+	Content         *string `url:"content,omitempty" json:"content,omitempty"`
+	CommitMessage   *string `url:"commit_message,omitempty" json:"commit_message,omitempty"`
+	ExecuteFilemode *bool   `url:"execute_filemode,omitempty" json:"execute_filemode,omitempty"`
 }
 
 // CreateFile creates a new file in a repository.
@@ -302,14 +305,15 @@ func (s *RepositoryFilesService) CreateFile(pid interface{}, fileName string, op
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/repository_files.html#update-existing-file-in-repository
 type UpdateFileOptions struct {
-	Branch        *string `url:"branch,omitempty" json:"branch,omitempty"`
-	StartBranch   *string `url:"start_branch,omitempty" json:"start_branch,omitempty"`
-	Encoding      *string `url:"encoding,omitempty" json:"encoding,omitempty"`
-	AuthorEmail   *string `url:"author_email,omitempty" json:"author_email,omitempty"`
-	AuthorName    *string `url:"author_name,omitempty" json:"author_name,omitempty"`
-	Content       *string `url:"content,omitempty" json:"content,omitempty"`
-	CommitMessage *string `url:"commit_message,omitempty" json:"commit_message,omitempty"`
-	LastCommitID  *string `url:"last_commit_id,omitempty" json:"last_commit_id,omitempty"`
+	Branch          *string `url:"branch,omitempty" json:"branch,omitempty"`
+	StartBranch     *string `url:"start_branch,omitempty" json:"start_branch,omitempty"`
+	Encoding        *string `url:"encoding,omitempty" json:"encoding,omitempty"`
+	AuthorEmail     *string `url:"author_email,omitempty" json:"author_email,omitempty"`
+	AuthorName      *string `url:"author_name,omitempty" json:"author_name,omitempty"`
+	Content         *string `url:"content,omitempty" json:"content,omitempty"`
+	CommitMessage   *string `url:"commit_message,omitempty" json:"commit_message,omitempty"`
+	LastCommitID    *string `url:"last_commit_id,omitempty" json:"last_commit_id,omitempty"`
+	ExecuteFilemode *bool   `url:"execute_filemode,omitempty" json:"execute_filemode,omitempty"`
 }
 
 // UpdateFile updates an existing file in a repository

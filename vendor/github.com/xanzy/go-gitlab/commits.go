@@ -399,6 +399,7 @@ type CommitStatus struct {
 	FinishedAt   *time.Time `json:"finished_at"`
 	Name         string     `json:"name"`
 	AllowFailure bool       `json:"allow_failure"`
+	Coverage     float64    `json:"coverage"`
 	Author       Author     `json:"author"`
 	Description  string     `json:"description"`
 	TargetURL    string     `json:"target_url"`

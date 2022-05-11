@@ -104,6 +104,9 @@ type Settings struct {
 	GrafanaEnabled                            bool              `json:"grafana_enabled"`
 	GrafanaURL                                string            `json:"grafana_url"`
 	GravatarEnabled                           bool              `json:"gravatar_enabled"`
+	GroupDownloadExportLimit                  int               `json:"group_download_export_limit"`
+	GroupExportLimit                          int               `json:"group_export_limit"`
+	GroupImportLimit                          int               `json:"group_import_limit"`
 	HashedStorageEnabled                      bool              `json:"hashed_storage_enabled"`
 	HelpPageHideCommercialContent             bool              `json:"help_page_hide_commercial_content"`
 	HelpPageSupportURL                        string            `json:"help_page_support_url"`
@@ -146,6 +149,9 @@ type Settings struct {
 	PlantumlURL                               string            `json:"plantuml_url"`
 	PollingIntervalMultiplier                 float64           `json:"polling_interval_multiplier,string"`
 	ProjectExportEnabled                      bool              `json:"project_export_enabled"`
+	ProjectDownloadExportLimit                int               `json:"project_download_export_limit"`
+	ProjectExportLimit                        int               `json:"project_export_limit"`
+	ProjectImportLimit                        int               `json:"project_import_limit"`
 	PrometheusMetricsEnabled                  bool              `json:"prometheus_metrics_enabled"`
 	ProtectedCIVariables                      bool              `json:"protected_ci_variables"`
 	PseudonymizerEnabled                      bool              `json:"psedonymizer_enabled"`
@@ -297,6 +303,9 @@ type UpdateSettingsOptions struct {
 	GrafanaEnabled                            *bool              `url:"grafana_enabled,omitempty" json:"grafana_enabled,omitempty"`
 	GrafanaURL                                *string            `url:"grafana_url,omitempty" json:"grafana_url,omitempty"`
 	GravatarEnabled                           *bool              `url:"gravatar_enabled,omitempty" json:"gravatar_enabled,omitempty"`
+	GroupDownloadExportLimit                  *int               `url:"group_download_export_limit,omitempty" json:"group_download_export_limit,omitempty"`
+	GroupExportLimit                          *int               `url:"group_export_limit,omitempty" json:"group_export_limit,omitempty"`
+	GroupImportLimit                          *int               `url:"group_import_limit,omitempty" json:"group_import_limit,omitempty"`
 	HashedStorageEnabled                      *bool              `url:"hashed_storage_enabled,omitempty" json:"hashed_storage_enabled,omitempty"`
 	HelpPageHideCommercialContent             *bool              `url:"help_page_hide_commercial_content,omitempty" json:"help_page_hide_commercial_content,omitempty"`
 	HelpPageSupportURL                        *string            `url:"help_page_support_url,omitempty" json:"help_page_support_url,omitempty"`
@@ -339,6 +348,9 @@ type UpdateSettingsOptions struct {
 	PlantumlURL                               *string            `url:"plantuml_url,omitempty" json:"plantuml_url,omitempty"`
 	PollingIntervalMultiplier                 *float64           `url:"polling_interval_multiplier,omitempty" json:"polling_interval_multiplier,omitempty"`
 	ProjectExportEnabled                      *bool              `url:"project_export_enabled,omitempty" json:"project_export_enabled,omitempty"`
+	ProjectDownloadExportLimit                *int               `url:"project_download_export_limit,omitempty" json:"project_download_export_limit,omitempty"`
+	ProjectExportLimit                        *int               `url:"project_export_limit,omitempty" json:"project_export_limit,omitempty"`
+	ProjectImportLimit                        *int               `url:"project_import_limit,omitempty" json:"project_import_limit,omitempty"`
 	PrometheusMetricsEnabled                  *bool              `url:"prometheus_metrics_enabled,omitempty" json:"prometheus_metrics_enabled,omitempty"`
 	ProtectedCIVariables                      *bool              `url:"protected_ci_variables,omitempty" json:"protected_ci_variables,omitempty"`
 	PseudonymizerEnabled                      *bool              `url:"psedonymizer_enabled,omitempty" json:"psedonymizer_enabled,omitempty"`

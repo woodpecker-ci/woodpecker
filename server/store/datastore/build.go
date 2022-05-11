@@ -80,6 +80,19 @@ func (s storage) GetBuildList(repo *model.Repo, page int) ([]*model.Build, error
 		Find(&builds)
 }
 
+// GetActiveBuildList get all builds that are pending, running or blocked
+func (s storage) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error) {
+	builds := make([]*model.Build, 0, perPage)
+	query := s.engine.
+		Where("build_repo_id = ?", repo.ID).
+		In("build_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
+		Desc("build_number")
+	if page > 0 {
+		query = query.Limit(perPage, perPage*(page-1))
+	}
+	return builds, query.Find(&builds)
+}
+
 func (s storage) GetBuildCount() (int64, error) {
 	return s.engine.Count(new(model.Build))
 }

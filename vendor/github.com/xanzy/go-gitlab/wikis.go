@@ -33,10 +33,11 @@ type WikisService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/wikis.html
 type Wiki struct {
-	Content string          `json:"content"`
-	Format  WikiFormatValue `json:"format"`
-	Slug    string          `json:"slug"`
-	Title   string          `json:"title"`
+	Content  string          `json:"content"`
+	Encoding string          `json:"encoding"`
+	Format   WikiFormatValue `json:"format"`
+	Slug     string          `json:"slug"`
+	Title    string          `json:"title"`
 }
 
 func (w Wiki) String() string {
@@ -77,18 +78,27 @@ func (s *WikisService) ListWikis(pid interface{}, opt *ListWikisOptions, options
 	return ws, resp, err
 }
 
+// GetWikiPageOptions represents options to GetWikiPage
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/wikis.html#get-a-wiki-page
+type GetWikiPageOptions struct {
+	RenderHTML *bool   `url:"render_html,omitempty" json:"render_html,omitempty"`
+	Version    *string `url:"version,omitempty" json:"version,omitempty"`
+}
+
 // GetWikiPage gets a wiki page for a given project.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/wikis.html#get-a-wiki-page
-func (s *WikisService) GetWikiPage(pid interface{}, slug string, options ...RequestOptionFunc) (*Wiki, *Response, error) {
+func (s *WikisService) GetWikiPage(pid interface{}, slug string, opt *GetWikiPageOptions, options ...RequestOptionFunc) (*Wiki, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/wikis/%s", PathEscape(project), url.PathEscape(slug))
 
-	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	req, err := s.client.NewRequest(http.MethodGet, u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}

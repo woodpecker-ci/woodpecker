@@ -95,6 +95,31 @@ func (s *DeployTokensService) ListProjectDeployTokens(pid interface{}, opt *List
 	return ts, resp, err
 }
 
+// GetProjectDeployToken gets a single deploy token.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/deploy_tokens.html#get-a-project-deploy-token
+func (s *DeployTokensService) GetProjectDeployToken(pid interface{}, deployToken int, options ...RequestOptionFunc) (*DeployToken, *Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("projects/%s/deploy_tokens/%d", PathEscape(project), deployToken)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	t := new(DeployToken)
+	resp, err := s.client.Do(req, t)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return t, resp, err
+}
+
 // CreateProjectDeployTokenOptions represents the available CreateProjectDeployToken() options.
 //
 // GitLab API docs:
@@ -180,6 +205,31 @@ func (s *DeployTokensService) ListGroupDeployTokens(gid interface{}, opt *ListGr
 	}
 
 	return ts, resp, err
+}
+
+// GetGroupDeployToken gets a single deploy token.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/deploy_tokens.html#get-a-group-deploy-token
+func (s *DeployTokensService) GetGroupDeployToken(gid interface{}, deployToken int, options ...RequestOptionFunc) (*DeployToken, *Response, error) {
+	group, err := parseID(gid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("groups/%s/deploy_tokens/%d", PathEscape(group), deployToken)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	t := new(DeployToken)
+	resp, err := s.client.Do(req, t)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return t, resp, err
 }
 
 // CreateGroupDeployTokenOptions represents the available CreateGroupDeployToken() options.

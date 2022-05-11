@@ -129,7 +129,7 @@ func (s *PagesDomainsService) GetPagesDomain(pid interface{}, domain string, opt
 type CreatePagesDomainOptions struct {
 	Domain         *string `url:"domain,omitempty" json:"domain,omitempty"`
 	AutoSslEnabled *bool   `url:"auto_ssl_enabled,omitempty" json:"auto_ssl_enabled,omitempty"`
-	Certificate    *string `url:"certifiate,omitempty" json:"certifiate,omitempty"`
+	Certificate    *string `url:"certificate,omitempty" json:"certificate,omitempty"`
 	Key            *string `url:"key,omitempty" json:"key,omitempty"`
 }
 
@@ -164,7 +164,7 @@ func (s *PagesDomainsService) CreatePagesDomain(pid interface{}, opt *CreatePage
 // https://docs.gitlab.com/ce/api/pages_domains.html#update-pages-domain
 type UpdatePagesDomainOptions struct {
 	AutoSslEnabled *bool   `url:"auto_ssl_enabled,omitempty" json:"auto_ssl_enabled,omitempty"`
-	Certificate    *string `url:"certifiate,omitempty" json:"certifiate,omitempty"`
+	Certificate    *string `url:"certificate,omitempty" json:"certificate,omitempty"`
 	Key            *string `url:"key,omitempty" json:"key,omitempty"`
 }
 
