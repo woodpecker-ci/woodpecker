@@ -305,6 +305,17 @@ Read the value for `WOODPECKER_PROMETHEUS_AUTH_TOKEN` from the specified filepat
 
 Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
 
+### `WOODPECKER_STATUS_CONTEXT_FORMAT`
+> Default: `{{ .context }}/{{ .event }}/{{ .pipeline }}`
+
+Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
+Supported variables:
+- `context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
+- `event`: the event which started the pipeline
+- `pipeline`: the pipeline's name
+- `owner`: the repo's owner
+- `repo`: the repo's name
+
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`
