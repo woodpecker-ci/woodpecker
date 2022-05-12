@@ -227,3 +227,11 @@ type RepoPermResp struct {
 type RepoPerm struct {
 	Permission string `json:"permission"`
 }
+
+type BranchResp struct {
+	Values []*Branch `json:"values"`
+}
+
+type Branch struct {
+	Name string `json:"name"`
+}
