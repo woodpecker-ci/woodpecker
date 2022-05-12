@@ -62,7 +62,7 @@ func (rs *Rows) ScanStructByIndex(dest ...interface{}) error {
 	for _, vvv := range vvvs {
 		for j := 0; j < vvv.NumField(); j++ {
 			newDest[i] = vvv.Field(j).Addr().Interface()
-			i = i + 1
+			i++
 		}
 	}
 

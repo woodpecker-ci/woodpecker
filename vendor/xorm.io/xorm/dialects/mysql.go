@@ -6,7 +6,6 @@ package dialects
 
 import (
 	"context"
-	"crypto/tls"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -172,16 +171,7 @@ var (
 
 type mysql struct {
 	Base
-	net               string
-	addr              string
-	params            map[string]string
-	loc               *time.Location
-	timeout           time.Duration
-	tls               *tls.Config
-	allowAllFiles     bool
-	allowOldPasswords bool
-	clientFoundRows   bool
-	rowFormat         string
+	rowFormat string
 }
 
 func (db *mysql) Init(uri *URI) error {
@@ -242,6 +232,12 @@ func (db *mysql) Version(ctx context.Context, queryer core.Queryer) (*schemas.Ve
 		Number:  fields[0],
 		Edition: edition,
 	}, nil
+}
+
+func (db *mysql) Features() *DialectFeatures {
+	return &DialectFeatures{
+		AutoincrMode: IncrAutoincrMode,
+	}
 }
 
 func (db *mysql) SetParams(params map[string]string) {
@@ -491,15 +487,15 @@ func (db *mysql) GetColumns(queryer core.Queryer, ctx context.Context, tableName
 		if _, ok := schemas.SqlTypes[colType]; ok {
 			col.SQLType = schemas.SQLType{Name: colType, DefaultLength: len1, DefaultLength2: len2}
 		} else {
-			return nil, nil, fmt.Errorf("Unknown colType %v", colType)
+			return nil, nil, fmt.Errorf("unknown colType %v", colType)
 		}
 
 		if colKey == "PRI" {
 			col.IsPrimaryKey = true
 		}
-		if colKey == "UNI" {
-			// col.is
-		}
+		// if colKey == "UNI" {
+		// col.is
+		// }
 
 		if extra == "auto_increment" {
 			col.IsAutoIncrement = true
@@ -625,7 +621,7 @@ func (db *mysql) GetIndexes(queryer core.Queryer, ctx context.Context, tableName
 	return indexes, nil
 }
 
-func (db *mysql) CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool) {
+func (db *mysql) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error) {
 	if tableName == "" {
 		tableName = table.Name
 	}
@@ -678,7 +674,14 @@ func (db *mysql) CreateTableSQL(table *schemas.Table, tableName string) ([]strin
 		b.WriteString(" ROW_FORMAT=")
 		b.WriteString(db.rowFormat)
 	}
-	return []string{b.String()}, true
+
+	if table.Comment != "" {
+		b.WriteString(" COMMENT='")
+		b.WriteString(table.Comment)
+		b.WriteString("'")
+	}
+
+	return b.String(), true, nil
 }
 
 func (db *mysql) Filters() []Filter {
@@ -772,7 +775,7 @@ func (p *mymysqlDriver) Parse(driverName, dataSourceName string) (*URI, error) {
 		// Parse protocol part of URI
 		p := strings.SplitN(pd[0], ":", 2)
 		if len(p) != 2 {
-			return nil, errors.New("Wrong protocol part of URI")
+			return nil, errors.New("wrong protocol part of URI")
 		}
 		uri.Proto = p[0]
 		options := strings.Split(p[1], ",")
@@ -795,7 +798,7 @@ func (p *mymysqlDriver) Parse(driverName, dataSourceName string) (*URI, error) {
 				}
 				uri.Timeout = to
 			default:
-				return nil, errors.New("Unknown option: " + k)
+				return nil, errors.New("unknown option: " + k)
 			}
 		}
 		// Remove protocol part

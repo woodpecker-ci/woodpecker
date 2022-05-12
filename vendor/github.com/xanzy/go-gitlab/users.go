@@ -67,6 +67,7 @@ type User struct {
 	WebURL                         string             `json:"web_url"`
 	CreatedAt                      *time.Time         `json:"created_at"`
 	Bio                            string             `json:"bio"`
+	Bot                            bool               `json:"bot"`
 	Location                       string             `json:"location"`
 	PublicEmail                    string             `json:"public_email"`
 	Skype                          string             `json:"skype"`
@@ -99,6 +100,7 @@ type User struct {
 	ExtraSharedRunnersMinutesLimit int                `json:"extra_shared_runners_minutes_limit"`
 	UsingLicenseSeat               bool               `json:"using_license_seat"`
 	CustomAttributes               []*CustomAttribute `json:"custom_attributes"`
+	NamespaceID                    int                `json:"namespace_id"`
 }
 
 // UserIdentity represents a user identity.
@@ -130,6 +132,7 @@ type ListUsersOptions struct {
 	External             *bool      `url:"external,omitempty" json:"external,omitempty"`
 	WithoutProjects      *bool      `url:"without_projects,omitempty" json:"without_projects,omitempty"`
 	WithCustomAttributes *bool      `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
+	WithoutProjectBots   *bool      `url:"without_project_bots,omitempty" json:"without_project_bots,omitempty"`
 }
 
 // ListUsers gets a list of users.
@@ -249,6 +252,7 @@ type ModifyUserOptions struct {
 	External           *bool   `url:"external,omitempty" json:"external,omitempty"`
 	PrivateProfile     *bool   `url:"private_profile,omitempty" json:"private_profile,omitempty"`
 	Note               *string `url:"note,omitempty" json:"note,omitempty"`
+	PublicEmail        *string `url:"public_email,omitempty" json:"public_email,omitempty"`
 }
 
 // ModifyUser modifies an existing user. Only administrators can change attributes
@@ -453,6 +457,26 @@ func (s *UsersService) ListSSHKeysForUser(uid interface{}, opt *ListSSHKeysForUs
 // GitLab API docs: https://docs.gitlab.com/ce/api/users.html#single-ssh-key
 func (s *UsersService) GetSSHKey(key int, options ...RequestOptionFunc) (*SSHKey, *Response, error) {
 	u := fmt.Sprintf("user/keys/%d", key)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	k := new(SSHKey)
+	resp, err := s.client.Do(req, k)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return k, resp, err
+}
+
+// GetSSHKeyForUser gets a single key for a given user.
+//
+// GitLab API docs: https://docs.gitlab.com/ee/api/users.html#single-ssh-key-for-given-user
+func (s *UsersService) GetSSHKeyForUser(user int, key int, options ...RequestOptionFunc) (*SSHKey, *Response, error) {
+	u := fmt.Sprintf("users/%d/keys/%d", user, key)
 
 	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
 	if err != nil {
@@ -921,6 +945,58 @@ func (s *UsersService) UnblockUser(user int, options ...RequestOptionFunc) error
 	}
 }
 
+// BanUser bans the specified user. Available only for admin.
+//
+// GitLab API docs: https://docs.gitlab.com/ce/api/users.html#ban-user
+func (s *UsersService) BanUser(user int, options ...RequestOptionFunc) error {
+	u := fmt.Sprintf("users/%d/ban", user)
+
+	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil && resp == nil {
+		return err
+	}
+
+	switch resp.StatusCode {
+	case 201:
+		return nil
+	case 404:
+		return ErrUserNotFound
+	default:
+		return fmt.Errorf("Received unexpected result code: %d", resp.StatusCode)
+	}
+}
+
+// UnbanUser unbans the specified user. Available only for admin.
+//
+// GitLab API docs: https://docs.gitlab.com/ce/api/users.html#unban-user
+func (s *UsersService) UnbanUser(user int, options ...RequestOptionFunc) error {
+	u := fmt.Sprintf("users/%d/unban", user)
+
+	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil && resp == nil {
+		return err
+	}
+
+	switch resp.StatusCode {
+	case 201:
+		return nil
+	case 404:
+		return ErrUserNotFound
+	default:
+		return fmt.Errorf("Received unexpected result code: %d", resp.StatusCode)
+	}
+}
+
 // DeactivateUser deactivate the specified user. Available only for admin.
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/users.html#deactivate-user
@@ -1147,22 +1223,6 @@ func (s *UsersService) RevokeImpersonationToken(user, token int, options ...Requ
 	}
 
 	return s.client.Do(req, nil)
-}
-
-// PersonalAccessToken represents a personal access token.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-personal-access-token
-type PersonalAccessToken struct {
-	ID        int        `json:"id"`
-	Name      string     `json:"name"`
-	Revoked   bool       `json:"revoked"`
-	CreatedAt *time.Time `json:"created_at"`
-	Scopes    []string   `json:"scopes"`
-	UserID    int        `json:"user_id"`
-	Active    bool       `json:"active"`
-	ExpiresAt *ISOTime   `json:"expires_at"`
-	Token     string     `json:"token"`
 }
 
 // CreatePersonalAccessTokenOptions represents the available

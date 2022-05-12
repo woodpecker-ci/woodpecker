@@ -316,6 +316,7 @@ func (parser *Parser) Parse(v reflect.Value) (*schemas.Table, error) {
 	table := schemas.NewEmptyTable()
 	table.Type = t
 	table.Name = names.GetTableName(parser.tableMapper, v)
+	table.Comment = names.GetTableComment(v)
 
 	for i := 0; i < t.NumField(); i++ {
 		col, err := parser.parseField(table, i, t.Field(i), v.Field(i))

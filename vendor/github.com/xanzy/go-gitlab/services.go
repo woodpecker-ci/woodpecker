@@ -1421,6 +1421,97 @@ func (s *ServicesService) DeleteSlackSlashCommandsService(pid interface{}, optio
 	return s.client.Do(req, nil)
 }
 
+// MattermostSlashCommandsService represents Mattermost slash commands settings.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#mattermost-slash-commands
+type MattermostSlashCommandsService struct {
+	Service
+	Properties *MattermostSlashCommandsProperties `json:"properties"`
+}
+
+// MattermostSlashCommandsProperties represents Mattermost slash commands specific properties.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#mattermost-slash-commands
+type MattermostSlashCommandsProperties struct {
+	Token    string `json:"token"`
+	Username string `json:"username,omitempty"`
+}
+
+// GetMattermostSlashCommandsService gets Slack Mattermost commands service settings for a project.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#get-mattermost-slash-command-integration-settings
+func (s *ServicesService) GetMattermostSlashCommandsService(pid interface{}, options ...RequestOptionFunc) (*MattermostSlashCommandsService, *Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("projects/%s/services/mattermost-slash-commands", PathEscape(project))
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	svc := new(MattermostSlashCommandsService)
+	resp, err := s.client.Do(req, svc)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return svc, resp, err
+}
+
+// SetMattermostSlashCommandsServiceOptions represents the available SetSlackSlashCommandsService()
+// options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#get-mattermost-slash-command-integration-settings
+type SetMattermostSlashCommandsServiceOptions struct {
+	Token    *string `url:"token,omitempty" json:"token,omitempty"`
+	Username *string `url:"username,omitempty" json:"username,omitempty"`
+}
+
+// SetMattermostSlashCommandsService sets Mattermost slash commands service for a project
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#createedit-mattermost-slash-command-integration
+func (s *ServicesService) SetMattermostSlashCommandsService(pid interface{}, opt *SetMattermostSlashCommandsServiceOptions, options ...RequestOptionFunc) (*Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, err
+	}
+	u := fmt.Sprintf("projects/%s/services/mattermost-slash-commands", PathEscape(project))
+
+	req, err := s.client.NewRequest(http.MethodPut, u, opt, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Do(req, nil)
+}
+
+// DeleteMattermostSlashCommandsService deletes Mattermost slash commands service for project.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/integrations.html#disable-mattermost-slash-command-integration
+func (s *ServicesService) DeleteMattermostSlashCommandsService(pid interface{}, options ...RequestOptionFunc) (*Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, err
+	}
+	u := fmt.Sprintf("projects/%s/services/mattermost-slash-commands", PathEscape(project))
+
+	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Do(req, nil)
+}
+
 // YouTrackService represents YouTrack service settings.
 //
 // GitLab API docs:
