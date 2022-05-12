@@ -51,15 +51,16 @@ var Config = struct {
 		// Secrets model.SecretStore
 	}
 	Server struct {
-		Key            string
-		Cert           string
-		OAuthHost      string
-		Host           string
-		Port           string
-		Pass           string
-		Docs           string
-		StatusContext  string
-		SessionExpires time.Duration
+		Key                 string
+		Cert                string
+		OAuthHost           string
+		Host                string
+		Port                string
+		Pass                string
+		Docs                string
+		StatusContext       string
+		StatusContextFormat string
+		SessionExpires      time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
