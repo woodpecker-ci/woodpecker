@@ -210,7 +210,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "%context/%event/%pipeline",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
 	//
 	// resource limit parameters
