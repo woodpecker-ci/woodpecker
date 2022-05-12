@@ -308,7 +308,7 @@ Context prefix Woodpecker will use to publish status messages to SCM. You probab
 ### `WOODPECKER_STATUS_CONTEXT_FORMAT`
 > Default: `%context/%event/%pipeline`
 
-Template for the status messages published to SCM.
+Template for the status messages published to forges.
 Supported values:
 - `%context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
 - `%event`: the event which started the pipeline
