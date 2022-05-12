@@ -216,45 +216,60 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	procs, err := _store.ProcList(build)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
-		return
-	}
-
 	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
 		c.String(http.StatusBadRequest, "Cannot cancel a non-running or non-pending build")
 		return
 	}
 
+	code, err := cancelBuild(c, _store, repo, build)
+	if err != nil {
+		_ = c.AbortWithError(code, err)
+		return
+	}
+
+	c.String(code, "")
+}
+
+// Cancel the build and returns the status.
+func cancelBuild(
+	ctx context.Context,
+	_store store.Store,
+	repo *model.Repo,
+	build *model.Build,
+) (int, error) {
+	procs, err := _store.ProcList(build)
+	if err != nil {
+		return http.StatusNotFound, err
+	}
+
 	// First cancel/evict procs in the queue in one go
 	var (
-		procToCancel []string
-		procToEvict  []string
+		procsToCancel []string
+		procsToEvict  []string
 	)
 	for _, proc := range procs {
 		if proc.PPID != 0 {
 			continue
 		}
 		if proc.State == model.StatusRunning {
-			procToCancel = append(procToCancel, fmt.Sprint(proc.ID))
+			procsToCancel = append(procsToCancel, fmt.Sprint(proc.ID))
 		}
 		if proc.State == model.StatusPending {
-			procToEvict = append(procToEvict, fmt.Sprint(proc.ID))
+			procsToEvict = append(procsToEvict, fmt.Sprint(proc.ID))
 		}
 	}
 
-	if len(procToEvict) != 0 {
-		if err := server.Config.Services.Queue.EvictAtOnce(c, procToEvict); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+	if len(procsToEvict) != 0 {
+		if err := server.Config.Services.Queue.EvictAtOnce(ctx, procsToEvict); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
 		}
-		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToEvict, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToEvict)
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToEvict, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
 		}
 	}
-	if len(procToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(c, procToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procToCancel)
+	if len(procsToCancel) != 0 {
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToCancel, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToCancel)
 		}
 	}
 
@@ -277,28 +292,21 @@ func DeleteBuild(c *gin.Context) {
 	killedBuild, err := shared.UpdateToStatusKilled(_store, *build)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", build)
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
+		return http.StatusInternalServerError, err
 	}
 
-	// For pending builds, we stream the UI the latest state.
-	// For running builds, the UI will be updated when the agents acknowledge the cancel
-	if build.Status == model.StatusPending {
-		procs, err = _store.ProcList(killedBuild)
-		if err != nil {
-			_ = c.AbortWithError(404, err)
-			return
-		}
-		if killedBuild.Procs, err = model.Tree(procs); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-		if err := publishToTopic(c, killedBuild, repo); err != nil {
-			log.Error().Err(err).Msg("publishToTopic")
-		}
+	procs, err = _store.ProcList(killedBuild)
+	if err != nil {
+		return http.StatusNotFound, err
+	}
+	if killedBuild.Procs, err = model.Tree(procs); err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	c.String(204, "")
+	return http.StatusNoContent, nil
 }
 
 func PostApproval(c *gin.Context) {
@@ -651,26 +659,109 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	return build, buildItems, nil
 }
 
-func startBuild(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, buildItems []*shared.BuildItem) (*model.Build, error) {
-	if err := store.ProcCreate(build.Procs); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, build.Number)
+func cancelPreviousPipelines(
+	ctx context.Context,
+	_store store.Store,
+	build *model.Build,
+	user *model.User,
+	repo *model.Repo,
+) error {
+	// check this event should cancel previous pipelines
+	eventIncluded := false
+	for _, ev := range repo.CancelPreviousPipelineEvents {
+		if ev == build.Event {
+			eventIncluded = true
+			break
+		}
+	}
+	if !eventIncluded {
+		return nil
+	}
+
+	// get all active activeBuilds
+	activeBuilds, err := _store.GetActiveBuildList(repo, -1)
+	if err != nil {
+		return err
+	}
+
+	buildNeedsCancel := func(active *model.Build) (bool, error) {
+		// always filter on same event
+		if active.Event != build.Event {
+			return false, nil
+		}
+
+		// find events for the same context
+		switch build.Event {
+		case model.EventPush:
+			return build.Branch == active.Branch, nil
+		default:
+			return build.Refspec == active.Refspec, nil
+		}
+	}
+
+	for _, active := range activeBuilds {
+		if active.ID == build.ID {
+			// same build. e.g. self
+			continue
+		}
+
+		cancel, err := buildNeedsCancel(active)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("Ref", active.Ref).
+				Msg("Error while trying to cancel build, skipping")
+			continue
+		}
+		if !cancel {
+			continue
+		}
+		_, err = cancelBuild(ctx, _store, repo, active)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("Ref", active.Ref).
+				Int64("ID", active.ID).
+				Msg("Failed to cancel build")
+		}
+	}
+
+	return nil
+}
+
+func startBuild(
+	ctx context.Context,
+	store store.Store,
+	activeBuild *model.Build,
+	user *model.User,
+	repo *model.Repo,
+	buildItems []*shared.BuildItem,
+) (*model.Build, error) {
+	// call to cancel previous builds if needed
+	if err := cancelPreviousPipelines(ctx, store, activeBuild, user, repo); err != nil {
+		// should be not breaking
+		log.Error().Err(err).Msg("Failed to cancel previous builds")
+	}
+
+	if err := store.ProcCreate(activeBuild.Procs); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, activeBuild.Number)
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, build, repo); err != nil {
+	if err := publishToTopic(ctx, activeBuild, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	if err := queueBuild(build, repo, buildItems); err != nil {
+	if err := queueBuild(activeBuild, repo, buildItems); err != nil {
 		log.Error().Err(err).Msg("queueBuild")
 		return nil, err
 	}
 
-	if err := updateBuildStatus(ctx, build, repo, user); err != nil {
+	if err := updateBuildStatus(ctx, activeBuild, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 
-	return build, nil
+	return activeBuild, nil
 }
 
 func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {

@@ -149,7 +149,7 @@ if {{var "l"}} == 0 {
 		{{var "v"}} = {{var "v"}}[:{{var "j"}}]
 		{{var "c"}} = true
 	} else if {{var "j"}} == 0 && {{var "v"}} == nil {
-		{{var "v"}} = make([]{{ .Typ }}, 0)
+		{{var "v"}} = []{{ .Typ }}{}
 		{{var "c"}} = true
 	}
     {{end -}}

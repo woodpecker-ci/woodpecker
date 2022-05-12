@@ -70,6 +70,8 @@ type Store interface {
 	// GetBuildList gets a list of builds for the repository
 	// TODO: paginate
 	GetBuildList(*model.Repo, int) ([]*model.Build, error)
+	// GetBuildList gets a list of the active builds for the repository
+	GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error)
 	// GetBuildQueue gets a list of build in queue.
 	GetBuildQueue() ([]*model.Feed, error)
 	// GetBuildCount gets a count of all builds in the system.

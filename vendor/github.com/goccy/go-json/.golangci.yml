@@ -48,6 +48,14 @@ linters:
     - nlreturn
     - testpackage
     - wsl
+    - varnamelen
+    - nilnil
+    - ireturn
+    - govet
+    - forcetypeassert
+    - cyclop
+    - containedctx
+    - revive
 
 issues:
   exclude-rules:
