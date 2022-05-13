@@ -18,8 +18,6 @@
 package api
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -50,14 +48,12 @@ func GetBadge(c *gin.Context) {
 	}
 
 	build, err := _store.GetBuildLast(repo, branch)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Msg("")
-		c.String(http.StatusInternalServerError, "StatusInternalServerError")
-		return
+	if err != nil {
+		log.Warn().Err(err).Msg("")
+		build = nil
 	}
 
-	// an SVG response is always served, even when error, so
-	// we can go ahead and set the content type appropriately.
+	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
 	c.String(http.StatusOK, badges.Generate(build))
 }
