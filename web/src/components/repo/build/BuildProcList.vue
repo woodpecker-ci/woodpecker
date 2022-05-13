@@ -75,12 +75,8 @@
               </div>
             </div>
           </div>
-          <div v-if="proc.children === undefined || proc.children.length === 0" class="text-center m-auto">
-            <span>No pipeline steps available!</span>
-          </div>
           <div
             v-for="job in proc.children"
-            v-else
             :key="job.pid"
             class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-900"
             :class="{ 'bg-gray-700 !dark:bg-dark-gray-600': selectedProcId && selectedProcId === job.pid }"
