@@ -29,7 +29,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/badges"
-	ccmenue "github.com/woodpecker-ci/woodpecker/server/ccmenu"
+	"github.com/woodpecker-ci/woodpecker/server/ccmenu"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -77,6 +77,6 @@ func GetCC(c *gin.Context) {
 	}
 
 	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, builds[0].Number)
-	cc := ccmenue.New(repo, builds[0], url)
+	cc := ccmenu.New(repo, builds[0], url)
 	c.XML(200, cc)
 }
