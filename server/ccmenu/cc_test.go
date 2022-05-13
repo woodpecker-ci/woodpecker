@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package ccmenue
 
 import (
 	"testing"
 	"time"
 
 	"github.com/franela/goblin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestCC(t *testing.T) {
@@ -27,15 +29,15 @@ func TestCC(t *testing.T) {
 		g.It("Should create a project", func() {
 			now := time.Now().Unix()
 			nowFmt := time.Unix(now, 0).Format(time.RFC3339)
-			r := &Repo{
+			r := &model.Repo{
 				FullName: "foo/bar",
 			}
-			b := &Build{
-				Status:  StatusSuccess,
+			b := &model.Build{
+				Status:  model.StatusSuccess,
 				Number:  1,
 				Started: now,
 			}
-			cc := NewCC(r, b, "http://localhost/foo/bar/1")
+			cc := New(r, b, "http://localhost/foo/bar/1")
 
 			g.Assert(cc.Project.Name).Equal("foo/bar")
 			g.Assert(cc.Project.Activity).Equal("Sleeping")
@@ -46,49 +48,49 @@ func TestCC(t *testing.T) {
 		})
 
 		g.It("Should properly label exceptions", func() {
-			r := &Repo{FullName: "foo/bar"}
-			b := &Build{
-				Status:  StatusError,
+			r := &model.Repo{FullName: "foo/bar"}
+			b := &model.Build{
+				Status:  model.StatusError,
 				Number:  1,
 				Started: 1257894000,
 			}
-			cc := NewCC(r, b, "http://localhost/foo/bar/1")
+			cc := New(r, b, "http://localhost/foo/bar/1")
 			g.Assert(cc.Project.LastBuildStatus).Equal("Exception")
 			g.Assert(cc.Project.Activity).Equal("Sleeping")
 		})
 
 		g.It("Should properly label success", func() {
-			r := &Repo{FullName: "foo/bar"}
-			b := &Build{
-				Status:  StatusSuccess,
+			r := &model.Repo{FullName: "foo/bar"}
+			b := &model.Build{
+				Status:  model.StatusSuccess,
 				Number:  1,
 				Started: 1257894000,
 			}
-			cc := NewCC(r, b, "http://localhost/foo/bar/1")
+			cc := New(r, b, "http://localhost/foo/bar/1")
 			g.Assert(cc.Project.LastBuildStatus).Equal("Success")
 			g.Assert(cc.Project.Activity).Equal("Sleeping")
 		})
 
 		g.It("Should properly label failure", func() {
-			r := &Repo{FullName: "foo/bar"}
-			b := &Build{
-				Status:  StatusFailure,
+			r := &model.Repo{FullName: "foo/bar"}
+			b := &model.Build{
+				Status:  model.StatusFailure,
 				Number:  1,
 				Started: 1257894000,
 			}
-			cc := NewCC(r, b, "http://localhost/foo/bar/1")
+			cc := New(r, b, "http://localhost/foo/bar/1")
 			g.Assert(cc.Project.LastBuildStatus).Equal("Failure")
 			g.Assert(cc.Project.Activity).Equal("Sleeping")
 		})
 
 		g.It("Should properly label running", func() {
-			r := &Repo{FullName: "foo/bar"}
-			b := &Build{
-				Status:  StatusRunning,
+			r := &model.Repo{FullName: "foo/bar"}
+			b := &model.Build{
+				Status:  model.StatusRunning,
 				Number:  1,
 				Started: 1257894000,
 			}
-			cc := NewCC(r, b, "http://localhost/foo/bar/1")
+			cc := New(r, b, "http://localhost/foo/bar/1")
 			g.Assert(cc.Project.Activity).Equal("Building")
 			g.Assert(cc.Project.LastBuildStatus).Equal("Unknown")
 			g.Assert(cc.Project.LastBuildLabel).Equal("Unknown")
