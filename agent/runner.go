@@ -75,16 +75,6 @@ func (r *Runner) Run(ctx context.Context) error {
 		return nil
 	}
 
-	if len(work.Config.Stages) < 1 {
-		state := rpc.State{}
-		state.Started = time.Now().Unix()
-		_ = r.client.Init(ctxmeta, work.ID, state)
-		state.Finished = time.Now().Unix()
-		state.Exited = true
-		_ = r.client.Done(ctxmeta, work.ID, state)
-		return nil
-	}
-
 	timeout := time.Hour
 	if minutes := work.Timeout; minutes != 0 {
 		timeout = time.Duration(minutes) * time.Minute
