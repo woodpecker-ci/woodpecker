@@ -2,6 +2,7 @@ package sender
 
 import (
 	"context"
+	"crypto"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -9,13 +10,13 @@ import (
 )
 
 type http struct {
-	endpoint string
-	secret   string
+	endpoint   string
+	privateKey crypto.PrivateKey
 }
 
 // NewRemote returns a new remote gating service.
-func NewHTTP(endpoint, secret string) model.SenderService {
-	return &http{endpoint, secret}
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) model.SenderService {
+	return &http{endpoint, privateKey}
 }
 
 func (p *http) SenderAllowed(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, conf *model.Config) (bool, error) {
@@ -24,7 +25,7 @@ func (p *http) SenderAllowed(ctx context.Context, user *model.User, repo *model.
 		"build":  build,
 		"config": conf,
 	}
-	_, err := utils.Send(ctx, "POST", path, p.secret, &data, nil)
+	_, err := utils.Send(ctx, "POST", path, p.privateKey, &data, nil)
 	if err != nil {
 		return false, err
 	}
@@ -33,24 +34,24 @@ func (p *http) SenderAllowed(ctx context.Context, user *model.User, repo *model.
 
 func (p *http) SenderCreate(ctx context.Context, repo *model.Repo, sender *model.Sender) error {
 	path := fmt.Sprintf("%s/senders/%s/%s", p.endpoint, repo.Owner, repo.Name)
-	_, err := utils.Send(ctx, "POST", path, p.secret, sender, nil)
+	_, err := utils.Send(ctx, "POST", path, p.privateKey, sender, nil)
 	return err
 }
 
 func (p *http) SenderUpdate(ctx context.Context, repo *model.Repo, sender *model.Sender) error {
 	path := fmt.Sprintf("%s/senders/%s/%s", p.endpoint, repo.Owner, repo.Name)
-	_, err := utils.Send(ctx, "PUT", path, p.secret, sender, nil)
+	_, err := utils.Send(ctx, "PUT", path, p.privateKey, sender, nil)
 	return err
 }
 
 func (p *http) SenderDelete(ctx context.Context, repo *model.Repo, login string) error {
 	path := fmt.Sprintf("%s/senders/%s/%s/%s", p.endpoint, repo.Owner, repo.Name, login)
-	_, err := utils.Send(ctx, "DELETE", path, p.secret, nil, nil)
+	_, err := utils.Send(ctx, "DELETE", path, p.privateKey, nil, nil)
 	return err
 }
 
 func (p *http) SenderList(ctx context.Context, repo *model.Repo) (out []*model.Sender, err error) {
 	path := fmt.Sprintf("%s/senders/%s/%s", p.endpoint, repo.Owner, repo.Name)
-	_, err = utils.Send(ctx, "GET", path, p.secret, nil, out)
+	_, err = utils.Send(ctx, "GET", path, p.privateKey, nil, out)
 	return out, err
 }

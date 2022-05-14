@@ -2,6 +2,9 @@ package configuration
 
 import (
 	"context"
+	"crypto"
+	"crypto/ed25519"
+	"crypto/rand"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -10,8 +13,8 @@ import (
 )
 
 type ConfigService struct {
-	endpoint string
-	secret   string
+	endpoint   string
+	privateKey crypto.PrivateKey
 }
 
 // Same as remote.FileMeta but with json tags and string data
@@ -30,16 +33,22 @@ type responseStructure struct {
 	Configs []config `json:"configs"`
 }
 
-func NewHTTP(endpoint, secret string) *ConfigService {
-	return &ConfigService{endpoint: endpoint, secret: secret}
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) *ConfigService {
+	return &ConfigService{endpoint, privateKey}
 }
 
 func FromRepo(repo *model.Repo) *ConfigService {
-	if repo.SecretEndpoint == "" {
+	if repo.ConfigEndpoint == "" {
 		return nil
 	}
 
-	return NewHTTP(repo.SecretEndpoint, repo.ExtensionSecret)
+	// TODO: create & use global server key
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+
+	return NewHTTP(repo.ConfigEndpoint, privEd25519Key)
 }
 
 func (cp *ConfigService) IsConfigured() bool {
@@ -53,7 +62,8 @@ func (cp *ConfigService) FetchExternalConfig(ctx context.Context, repo *model.Re
 	}
 
 	response := new(responseStructure)
-	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.secret, requestStructure{Repo: repo, Build: build, Configuration: currentConfigs}, response)
+	body := requestStructure{Repo: repo, Build: build, Configuration: currentConfigs}
+	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
 	}

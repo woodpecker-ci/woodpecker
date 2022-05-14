@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"crypto/ed25519"
+	"crypto"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -9,7 +9,7 @@ import (
 	"github.com/go-fed/httpsig"
 )
 
-func SignHTTPRequest(privateKey ed25519.PrivateKey, publicKeyId string, req *http.Request) error {
+func SignHTTPRequest(privateKey crypto.PrivateKey, publicKeyId string, req *http.Request) error {
 	prefs := []httpsig.Algorithm{httpsig.ED25519}
 	headers := []string{httpsig.RequestTarget, "date"}
 	signer, _, err := httpsig.NewSigner(prefs, httpsig.DigestSha256, headers, httpsig.Signature, 0)
@@ -19,6 +19,7 @@ func SignHTTPRequest(privateKey ed25519.PrivateKey, publicKeyId string, req *htt
 
 	req.Header.Add("date", time.Now().UTC().Format(http.TimeFormat))
 
+	// TODO: check if we can read the body like this
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return err

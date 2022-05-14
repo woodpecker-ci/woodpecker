@@ -3,8 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
-	"crypto/ed25519"
-	"crypto/rand"
+	"crypto"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,8 +13,8 @@ import (
 )
 
 // Send makes an http request to the given endpoint, writing the input
-// to the request body and unmarshaling the output from the response body.
-func Send(ctx context.Context, method, path, signkey string, in, out interface{}) (statuscode int, err error) {
+// to the request body and un-marshaling the output from the response body.
+func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (statuscode int, err error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -41,14 +40,7 @@ func Send(ctx context.Context, method, path, signkey string, in, out interface{}
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	// TODO: create global server key
-	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		panic(err)
-	}
-
-	// Sign using the 'Signature' header
-	err = SignHTTPRequest(privEd25519Key, "woodpecker-ci-plugins", req)
+	err = SignHTTPRequest(privateKey, "woodpecker-ci-plugins", req)
 	if err != nil {
 		return 0, err
 	}
