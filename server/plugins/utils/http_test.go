@@ -12,7 +12,7 @@ import (
 )
 
 func TestSign(t *testing.T) {
-	pubKeyId := "woodpecker-ci-plugins"
+	pubKeyID := "woodpecker-ci-plugins"
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -36,8 +36,8 @@ func TestSign(t *testing.T) {
 		t.Error(err)
 	}
 
-	if verifier.KeyId() != pubKeyId {
-		t.Errorf("expected pubKeyId to be %s, got %s", pubKeyId, verifier.KeyId())
+	if verifier.KeyId() != pubKeyID {
+		t.Errorf("expected pubKeyId to be %s, got %s", pubKeyID, verifier.KeyId())
 	}
 
 	err = verifier.Verify(pubEd25519Key, httpsig.ED25519)

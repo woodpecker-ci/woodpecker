@@ -357,8 +357,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			return
 		}
 
-		pubKeyId := verifier.KeyId()
-		if pubKeyId != "woodpecker-ci-plugins" {
+		pubKeyID := verifier.KeyId()
+		if pubKeyID != "woodpecker-ci-plugins" {
 			http.Error(w, "Invalid signature key id", http.StatusBadRequest)
 			return
 		}

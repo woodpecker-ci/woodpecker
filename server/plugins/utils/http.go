@@ -70,7 +70,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 }
 
 func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request, body []byte) error {
-	pubKeyId := "woodpecker-ci-plugins"
+	pubKeyID := "woodpecker-ci-plugins"
 
 	prefs := []httpsig.Algorithm{httpsig.ED25519}
 	headers := []string{httpsig.RequestTarget, "date"}
@@ -81,6 +81,6 @@ func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request, body []byt
 
 	req.Header.Add("date", time.Now().UTC().Format(http.TimeFormat))
 
-	err = signer.SignRequest(privateKey, pubKeyId, req, body)
+	err = signer.SignRequest(privateKey, pubKeyID, req, body)
 	return err
 }
