@@ -98,12 +98,14 @@ func Send(ctx context.Context, method, path, signkey string, in, out interface{}
 	}
 
 	// Sign using the 'Signature' header
-	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		panic(err)
 	}
 
-	err = sign(privEd25519Key, pubEd25519Key, req)
+	signer := NewSigner(privEd25519Key, "woodpecker-ci-plugins")
+
+	err = signer.Sign(req)
 	// err = httpsignatures.DefaultSha256Signer.SignRequest("hmac-key", signkey, req)
 	if err != nil {
 		return 0, err
