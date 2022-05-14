@@ -7,6 +7,7 @@ import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import vueI18n from '@intlify/vite-plugin-vue-i18n';
 
 function woodpeckerInfoPlugin() {
   return {
@@ -25,6 +26,9 @@ function woodpeckerInfoPlugin() {
 export default defineConfig({
   plugins: [
     vue(),
+    vueI18n({
+      include: path.resolve(__dirname, 'src/assets/locales/**'),
+    }),
     WindiCSS(),
     Icons(),
     svgLoader(),

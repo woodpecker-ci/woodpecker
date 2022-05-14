@@ -1,5 +1,6 @@
 import { computed, Ref } from 'vue';
 
+import { useI18n } from 'vue-i18n';
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Build } from '~/lib/api/types';
@@ -25,9 +26,10 @@ export default (build: Ref<Build | undefined>) => {
   );
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
+  const i18n = useI18n();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
-      return 'not started yet';
+      return i18n.t('time.not_started');
     }
 
     if (sinceElapsed.value === undefined) {
@@ -66,7 +68,7 @@ export default (build: Ref<Build | undefined>) => {
     }
 
     if (durationRaw.value === 0) {
-      return 'not started yet';
+      return i18n.t('time.not_started');
     }
 
     return prettyDuration(durationElapsed.value);

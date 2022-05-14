@@ -9,11 +9,13 @@ import App from '~/App.vue';
 import useEvents from '~/compositions/useEvents';
 import { notifications } from '~/compositions/useNotifications';
 import router from '~/router';
+import { i18n } from '~/compositions/useI18n';
 
 const app = createApp(App);
 
 app.use(router);
 app.use(notifications);
+app.use(i18n);
 
 app.use(createPinia());
 app.mount('#app');

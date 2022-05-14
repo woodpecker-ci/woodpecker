@@ -9,7 +9,9 @@
           <Icon name="since" />
           <Tooltip>
             <span>{{ since }}</span>
-            <template #popper><span class="font-bold">Created</span> {{ created }}</template>
+            <template #popper
+              ><span class="font-bold">{{ $t('created') }}</span> {{ created }}</template
+            >
           </Tooltip>
         </div>
         <div class="flex space-x-2 items-center">

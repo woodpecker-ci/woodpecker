@@ -20,8 +20,8 @@
     </div>
 
     <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab title="Activity" />
-      <Tab title="Branches" />
+      <Tab :title="$t('repo.activity')" />
+      <Tab :title="$t('repo.branches')" />
     </Tabs>
 
     <router-view />
@@ -33,6 +33,7 @@
 import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { useI18n } from 'vue-i18n';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
@@ -74,6 +75,7 @@ export default defineComponent({
     const notifications = useNotifications();
     const route = useRoute();
     const router = useRouter();
+    const i18n = useI18n();
 
     const repo = repoStore.getRepo(repoOwner, repoName);
     const repoPermissions = ref<RepoPermissions>();
@@ -85,7 +87,7 @@ export default defineComponent({
     async function loadRepo() {
       repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
       if (!repoPermissions.value.pull) {
-        notifications.notify({ type: 'error', title: 'Not allowed to access this repository' });
+        notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
         await router.replace({ name: 'home' });
         return;
       }

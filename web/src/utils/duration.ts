@@ -1,19 +1,21 @@
 import humanizeDuration from 'humanize-duration';
-
-const enShort = {
-  w: () => 'w',
-  d: () => 'd',
-  h: () => 'h',
-  m: () => 'min',
-  s: () => 'sec',
-};
-const durationOptions: humanizeDuration.HumanizerOptions = {
-  round: true,
-  languages: { en_short: enShort },
-  language: 'en_short',
-};
+import { useI18n } from 'vue-i18n';
 
 export function prettyDuration(durationMs: number): string {
+  const i18n = useI18n();
+  const short = {
+    w: () => i18n.t('time.weeks_short'),
+    d: () => i18n.t('time.days_short'),
+    h: () => i18n.t('time.hours_short'),
+    m: () => i18n.t('time.min_short'),
+    s: () => i18n.t('time.sec_short'),
+  };
+  const durationOptions: humanizeDuration.HumanizerOptions = {
+    round: true,
+    languages: { short },
+    language: 'short',
+  };
+
   if (durationMs < 1000 * 60 * 60) {
     return humanizeDuration(durationMs, durationOptions);
   }
