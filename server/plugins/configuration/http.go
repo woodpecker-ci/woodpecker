@@ -48,7 +48,7 @@ func (cp *ConfigService) FetchExternalConfig(ctx context.Context, repo *model.Re
 	response := new(responseStructure)
 	body := requestStructure{Repo: repo, Build: build, Configuration: currentConfigs}
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
-	if err != nil {
+	if err != nil && status != 204 {
 		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
 	}
 

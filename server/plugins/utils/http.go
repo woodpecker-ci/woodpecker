@@ -17,7 +17,7 @@ import (
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (statuscode int, err error) {
+func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -55,7 +55,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 204 {
+	if resp.StatusCode != 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err

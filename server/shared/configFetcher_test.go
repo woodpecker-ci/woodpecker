@@ -423,7 +423,8 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := configuration.NewHTTP(ts.URL, privEd25519Key)
+	urlWithTrailingSlash := ts.URL + "/" // TODO: use until go-fed/httpsig supports empty paths
+	configAPI := configuration.NewHTTP(urlWithTrailingSlash, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
