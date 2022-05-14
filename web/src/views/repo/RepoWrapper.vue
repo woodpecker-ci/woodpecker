@@ -31,9 +31,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import { useI18n } from 'vue-i18n';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';

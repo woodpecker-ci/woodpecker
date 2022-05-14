@@ -82,8 +82,8 @@
 <script lang="ts">
 import { cloneDeep } from 'lodash';
 import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
-
 import { useI18n } from 'vue-i18n';
+
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import IconButton from '~/components/atomic/IconButton.vue';

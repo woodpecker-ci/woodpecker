@@ -84,6 +84,7 @@ import {
   toRef,
   watch,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -100,8 +101,6 @@ import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
-import { i18n } from '~/compositions/useI18n';
-import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'BuildWrapper',

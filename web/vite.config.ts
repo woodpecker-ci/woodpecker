@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import vueI18n from '@intlify/vite-plugin-vue-i18n';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
@@ -7,7 +8,6 @@ import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
-import vueI18n from '@intlify/vite-plugin-vue-i18n';
 
 function woodpeckerInfoPlugin() {
   return {

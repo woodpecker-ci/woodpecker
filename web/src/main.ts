@@ -7,9 +7,9 @@ import { createApp } from 'vue';
 
 import App from '~/App.vue';
 import useEvents from '~/compositions/useEvents';
+import { i18n } from '~/compositions/useI18n';
 import { notifications } from '~/compositions/useNotifications';
 import router from '~/router';
-import { i18n } from '~/compositions/useI18n';
 
 const app = createApp(App);
 

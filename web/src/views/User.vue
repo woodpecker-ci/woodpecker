@@ -29,11 +29,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'User',

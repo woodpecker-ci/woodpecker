@@ -4,3 +4,4 @@ coverage/
 package.json
 tsconfig.eslint.json
 tsconfig.json
+src/assets/locales/

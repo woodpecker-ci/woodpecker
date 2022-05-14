@@ -28,11 +28,11 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import useAuthentication from '~/compositions/useAuthentication';
-import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   name: 'Login',

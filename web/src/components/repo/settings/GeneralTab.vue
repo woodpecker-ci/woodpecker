@@ -15,6 +15,7 @@
           :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
+          <!-- eslint-disable-next-line vue/no-v-html -->
           <p class="text-sm text-gray-400 dark:text-gray-600" v-html="$t('repo.settings.general.pipeline_path.desc')" />
         </template>
       </InputField>
