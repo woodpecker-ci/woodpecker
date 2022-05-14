@@ -2,16 +2,19 @@ package shared_test
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/httpsignatures-go"
+	"github.com/rs/zerolog/log"
+
+	"github.com/go-fed/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -244,7 +247,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
-				configuration.NewAPI("", ""),
+				configuration.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -341,17 +344,28 @@ func TestFetchFromConfigService(t *testing.T) {
 		},
 	}
 
-	httpSigSecret := "wykf9frJbGXwSHcJ7AQF4tlfXUo0Tkixh57WPEXMyWVgkxIsAarYa2Hb8UTwPpbqO0N3NueKwjv4DVhPgvQjGur3LuCbiGHbBoaL1X5gZ9oyxD2lBHndoNxifDyNH7tNPw3Lh5lX2MSrWP1yuqHp8Sgm7fX8pLTjaKKFgFIKlODd"
+	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
+	}
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
-		signature, err := httpsignatures.FromRequest(r)
+		verifier, err := httpsig.NewVerifier(r)
 		if err != nil {
-			http.Error(w, "Invalid or Missing Signature", http.StatusBadRequest)
+			http.Error(w, "Invalid or missing Signature", http.StatusBadRequest)
 			return
 		}
-		if !signature.IsValid(httpSigSecret, r) {
-			http.Error(w, "Invalid Signature", http.StatusBadRequest)
+
+		pubKeyId := verifier.KeyId()
+		if pubKeyId != "woodpecker-ci-plugins" {
+			http.Error(w, "Invalid signature key id", http.StatusBadRequest)
+			return
+		}
+
+		err = verifier.Verify(pubEd25519Key, httpsig.ED25519)
+		if err != nil {
+			http.Error(w, "Invalid signature", http.StatusBadRequest)
 			return
 		}
 
@@ -409,7 +423,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := configuration.NewAPI(ts.URL, httpSigSecret)
+	configAPI := configuration.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

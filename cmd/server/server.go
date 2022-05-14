@@ -16,6 +16,8 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/tls"
 	"errors"
 	"net"
@@ -269,17 +271,18 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Services.Senders = sender.New(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 
+	// TODO: only create key-pair once and save to database
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewRemote(endpoint)
+		server.Config.Services.Senders = sender.NewHTTP(endpoint, privEd25519Key)
 	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		secret := c.String("config-service-secret")
-		if secret == "" {
-			log.Error().Msg("could not configure configuration service, missing secret")
-		} else {
-			server.Config.Services.ConfigService = configuration.NewAPI(endpoint, secret)
-		}
+		server.Config.Services.ConfigService = configuration.NewHTTP(endpoint, privEd25519Key)
 	}
 
 	// authentication
