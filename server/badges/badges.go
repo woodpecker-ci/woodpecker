@@ -26,6 +26,9 @@ var (
 
 // Generate an SVG badge based on a build
 func Generate(build *model.Build) string {
+	if build == nil {
+		return badgeNone
+	}
 	switch build.Status {
 	case model.StatusSuccess:
 		return badgeSuccess
