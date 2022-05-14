@@ -9,19 +9,7 @@ import (
 	"github.com/go-fed/httpsig"
 )
 
-type signer struct {
-	privateKey  ed25519.PrivateKey
-	publicKeyId string
-}
-
-func NewSigner(privateKey ed25519.PrivateKey, publicKeyId string) *signer {
-	return &signer{
-		privateKey:  privateKey,
-		publicKeyId: publicKeyId,
-	}
-}
-
-func (s *signer) Sign(req *http.Request) error {
+func SignHTTPRequest(privateKey ed25519.PrivateKey, publicKeyId string, req *http.Request) error {
 	prefs := []httpsig.Algorithm{httpsig.ED25519}
 	headers := []string{httpsig.RequestTarget, "date"}
 	signer, _, err := httpsig.NewSigner(prefs, httpsig.DigestSha256, headers, httpsig.Signature, 0)
@@ -36,7 +24,7 @@ func (s *signer) Sign(req *http.Request) error {
 		return err
 	}
 
-	if err = signer.SignRequest(s.privateKey, s.publicKeyId, req, body); err != nil {
+	if err = signer.SignRequest(privateKey, publicKeyId, req, body); err != nil {
 		return err
 	}
 

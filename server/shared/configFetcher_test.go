@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/httpsignatures-go"
+	"github.com/go-fed/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -345,13 +345,22 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
-		signature, err := httpsignatures.FromRequest(r)
+		verifier, err := httpsig.NewVerifier(r)
 		if err != nil {
-			http.Error(w, "Invalid or Missing Signature", http.StatusBadRequest)
+			http.Error(w, "Invalid or missing Signature", http.StatusBadRequest)
 			return
 		}
-		if !signature.IsValid(httpSigSecret, r) {
-			http.Error(w, "Invalid Signature", http.StatusBadRequest)
+
+		pubKeyId := verifier.KeyId()
+		if pubKeyId != "woodpecker-ci-plugins" {
+			http.Error(w, "Invalid signature key id", http.StatusBadRequest)
+			return
+		}
+
+		// TODO: use public key instead of nil
+		err = verifier.Verify(nil, httpsig.ED25519)
+		if err != nil {
+			http.Error(w, "Invalid signature", http.StatusBadRequest)
 			return
 		}
 

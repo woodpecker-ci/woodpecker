@@ -23,10 +23,10 @@ type configFetcher struct {
 	user          *model.User
 	repo          *model.Repo
 	build         *model.Build
-	configService configuration.ConfigService
+	configService *configuration.ConfigService
 }
 
-func NewConfigFetcher(remote remote.Remote, configurationService configuration.ConfigService, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+func NewConfigFetcher(remote remote.Remote, configurationService *configuration.ConfigService, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
 		remote:        remote,
 		user:          user,

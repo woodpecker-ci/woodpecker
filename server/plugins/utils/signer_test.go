@@ -19,14 +19,12 @@ func TestSign(t *testing.T) {
 		panic(err)
 	}
 
-	s := utils.NewSigner(privEd25519Key, pubKeyId)
-
 	req, err := http.NewRequest("GET", "http://example.com", bytes.NewBuffer([]byte("{\"foo\":\"bar\"}")))
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = s.Sign(req)
+	err = utils.SignHTTPRequest(privEd25519Key, pubKeyId, req)
 	if err != nil {
 		t.Error(err)
 	}
