@@ -55,7 +55,10 @@
         </div>
       </InputField>
 
-      <InputField docs-url="docs/usage/project-settings#cancel-previous-pipelines" :label="$t('repo.settings.general.cancel_prev.cancel')">
+      <InputField
+        docs-url="docs/usage/project-settings#cancel-previous-pipelines"
+        :label="$t('repo.settings.general.cancel_prev.cancel')"
+      >
         <CheckboxesField
           v-model="repoSettings.cancel_previous_pipeline_events"
           :options="cancelPreviousBuildEventsOptions"
@@ -67,7 +70,13 @@
         </template>
       </InputField>
 
-      <Button class="mr-auto" color="green" :is-loading="isSaving" :text="$t('repo.settings.general.save')" @click="saveRepoSettings" />
+      <Button
+        class="mr-auto"
+        color="green"
+        :is-loading="isSaving"
+        :text="$t('repo.settings.general.save')"
+        @click="saveRepoSettings"
+      />
     </div>
   </Panel>
 </template>

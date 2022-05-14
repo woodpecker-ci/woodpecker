@@ -15,7 +15,13 @@
         :text="$t('repo.settings.registries.show')"
         @click="selectedRegistry = undefined"
       />
-      <Button v-else class="ml-auto" start-icon="plus" :text="$t('repo.settings.registries.add')" @click="selectedRegistry = {}" />
+      <Button
+        v-else
+        class="ml-auto"
+        start-icon="plus"
+        :text="$t('repo.settings.registries.add')"
+        @click="selectedRegistry = {}"
+      />
     </div>
 
     <div v-if="!selectedRegistry" class="space-y-4 text-gray-500">

@@ -44,11 +44,21 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
         <InputField :label="$t('repo.settings.secrets.name')">
-          <TextField v-model="selectedSecret.name" :placeholder="$t('repo.settings.secrets.name')" required :disabled="isEditingSecret" />
+          <TextField
+            v-model="selectedSecret.name"
+            :placeholder="$t('repo.settings.secrets.name')"
+            required
+            :disabled="isEditingSecret"
+          />
         </InputField>
 
         <InputField :label="$t('repo.settings.secrets.value')">
-          <TextField v-model="selectedSecret.value" :placeholder="$t('repo.settings.secrets.value')" :lines="5" required />
+          <TextField
+            v-model="selectedSecret.value"
+            :placeholder="$t('repo.settings.secrets.value')"
+            :lines="5"
+            required
+          />
         </InputField>
 
         <InputField :label="$t('repo.settings.secrets.images.images')">
@@ -59,7 +69,11 @@
           <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
 
-        <Button :is-loading="isSaving" type="submit" :text="isEditingSecret ? $t('repo.settings.secrets.save') : $t('repo.settings.secrets.add')" />
+        <Button
+          :is-loading="isSaving"
+          type="submit"
+          :text="isEditingSecret ? $t('repo.settings.secrets.save') : $t('repo.settings.secrets.add')"
+        />
       </form>
     </div>
   </Panel>

@@ -13,8 +13,18 @@
           <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
           <p class="text-xl text-gray-500">{{ $t('repo.build.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
-            <Button color="green" :text="$t('repo.build.protected.approve')" :is-loading="isApprovingBuild" @click="approveBuild" />
-            <Button color="red" :text="$t('repo.build.protected.decline')" :is-loading="isDecliningBuild" @click="declineBuild" />
+            <Button
+              color="green"
+              :text="$t('repo.build.protected.approve')"
+              :is-loading="isApprovingBuild"
+              @click="approveBuild"
+            />
+            <Button
+              color="red"
+              :text="$t('repo.build.protected.decline')"
+              :is-loading="isDecliningBuild"
+              @click="declineBuild"
+            />
           </div>
         </div>
 
