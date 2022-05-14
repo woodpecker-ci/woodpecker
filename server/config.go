@@ -51,15 +51,16 @@ var Config = struct {
 		// Secrets model.SecretStore
 	}
 	Server struct {
-		Key            string
-		Cert           string
-		OAuthHost      string
-		Host           string
-		Port           string
-		Pass           string
-		Docs           string
-		StatusContext  string
-		SessionExpires time.Duration
+		Key                 string
+		Cert                string
+		OAuthHost           string
+		Host                string
+		Port                string
+		Pass                string
+		Docs                string
+		StatusContext       string
+		StatusContextFormat string
+		SessionExpires      time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -68,12 +69,13 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		AuthenticatePublicRepos bool
-		DefaultCloneImage       string
-		Limits                  model.ResourceLimit
-		Volumes                 []string
-		Networks                []string
-		Privileged              []string
+		AuthenticatePublicRepos             bool
+		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
+		DefaultCloneImage                   string
+		Limits                              model.ResourceLimit
+		Volumes                             []string
+		Networks                            []string
+		Privileged                          []string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

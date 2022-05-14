@@ -103,7 +103,7 @@ func (s *Stream) statForRetry() ([]byte, int64, unsafe.Pointer) {
 
 func (s *Stream) Reset() {
 	s.reset()
-	s.bufSize = initBufSize
+	s.bufSize = int64(len(s.buf))
 }
 
 func (s *Stream) More() bool {
@@ -423,7 +423,6 @@ func (s *Stream) skipValue(depth int64) error {
 					continue
 				} else if c == nul {
 					if s.read() {
-						s.cursor-- // for retry current character
 						_, cursor, p = s.stat()
 						continue
 					}

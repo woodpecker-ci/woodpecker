@@ -53,7 +53,7 @@ export default defineComponent({
     const errorMessage = ref<string>();
 
     function doLogin() {
-      const url = typeof route.query.origin === 'string' ? route.query.origin : '';
+      const url = typeof route.query.url === 'string' ? route.query.url : '';
       authentication.authenticate(url);
     }
 

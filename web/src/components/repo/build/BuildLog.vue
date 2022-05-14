@@ -8,15 +8,17 @@
       <Icon name="close" class="ml-auto" />
     </div>
 
-    <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
-      <div class="text-gray-500 text-sm w-4">{{ (logLine.pos || 0) + 1 }}</div>
-      <!-- eslint-disable-next-line vue/no-v-html -->
-      <div class="mx-4 text-gray-200 dark:text-gray-400" v-html="logLine.out" />
-      <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
-    </div>
-    <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
-      exit code {{ proc.exit_code }}
-    </div>
+    <template v-if="!proc?.error">
+      <div v-for="logLine in logLines" :key="logLine.pos" class="flex items-center">
+        <div class="text-gray-500 text-sm w-4">{{ (logLine.pos || 0) + 1 }}</div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div class="mx-4 text-gray-200 dark:text-gray-400" v-html="logLine.out" />
+        <div class="ml-auto text-gray-500 text-sm">{{ logLine.time || 0 }}s</div>
+      </div>
+      <div v-if="proc?.end_time !== undefined" class="text-gray-500 text-sm mt-4 ml-8">
+        exit code {{ proc.exit_code }}
+      </div>
+    </template>
 
     <div class="text-gray-300 mx-auto">
       <span v-if="proc?.error" class="text-red-500">{{ proc.error }}</span>
@@ -67,7 +69,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const buildProc = useBuildProc();
 
-    const ansiConvert = new AnsiConvert();
+    const ansiConvert = new AnsiConvert({ escapeXML: true });
     const logLines = computed(() => buildProc.logs.value?.map((l) => ({ ...l, out: ansiConvert.toHtml(l.out) })));
     const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
 

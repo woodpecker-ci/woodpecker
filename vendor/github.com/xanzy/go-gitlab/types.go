@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -119,7 +120,7 @@ func (a *ApproverIDsValue) EncodeValues(key string, v *url.Values) error {
 }
 
 // MarshalJSON implements the json.Marshaler interface
-func (a *ApproverIDsValue) MarshalJSON() ([]byte, error) {
+func (a ApproverIDsValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a.value)
 }
 
@@ -155,7 +156,7 @@ func (a *AssigneeIDValue) EncodeValues(key string, v *url.Values) error {
 }
 
 // MarshalJSON implements the json.Marshaler interface
-func (a *AssigneeIDValue) MarshalJSON() ([]byte, error) {
+func (a AssigneeIDValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a.value)
 }
 
@@ -191,7 +192,7 @@ func (a *ReviewerIDValue) EncodeValues(key string, v *url.Values) error {
 }
 
 // MarshalJSON implements the json.Marshaler interface
-func (a *ReviewerIDValue) MarshalJSON() ([]byte, error) {
+func (a ReviewerIDValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a.value)
 }
 
@@ -362,6 +363,10 @@ const iso8601 = "2006-01-02"
 
 // MarshalJSON implements the json.Marshaler interface
 func (t ISOTime) MarshalJSON() ([]byte, error) {
+	if reflect.ValueOf(t).IsZero() {
+		return []byte(`null`), nil
+	}
+
 	if y := time.Time(t).Year(); y < 0 || y >= 10000 {
 		// ISO 8901 uses 4 digits for the years
 		return nil, errors.New("json: ISOTime year outside of range [0,9999]")

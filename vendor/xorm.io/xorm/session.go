@@ -79,7 +79,8 @@ type Session struct {
 	afterClosures   []func(interface{})
 	afterProcessors []executedProcessor
 
-	stmtCache map[uint32]*core.Stmt //key: hash.Hash32 of (queryStr, len(queryStr))
+	stmtCache   map[uint32]*core.Stmt //key: hash.Hash32 of (queryStr, len(queryStr))
+	txStmtCache map[uint32]*core.Stmt // for tx statement
 
 	lastSQL     string
 	lastSQLArgs []interface{}
@@ -123,13 +124,14 @@ func newSession(engine *Engine) *Session {
 		autoResetStatement:     true,
 		prepareStmt:            false,
 
-		afterInsertBeans: make(map[interface{}]*[]func(interface{}), 0),
-		afterUpdateBeans: make(map[interface{}]*[]func(interface{}), 0),
-		afterDeleteBeans: make(map[interface{}]*[]func(interface{}), 0),
+		afterInsertBeans: make(map[interface{}]*[]func(interface{})),
+		afterUpdateBeans: make(map[interface{}]*[]func(interface{})),
+		afterDeleteBeans: make(map[interface{}]*[]func(interface{})),
 		beforeClosures:   make([]func(interface{}), 0),
 		afterClosures:    make([]func(interface{}), 0),
 		afterProcessors:  make([]executedProcessor, 0),
 		stmtCache:        make(map[uint32]*core.Stmt),
+		txStmtCache:      make(map[uint32]*core.Stmt),
 
 		lastSQL:     "",
 		lastSQLArgs: make([]interface{}, 0),
@@ -150,6 +152,12 @@ func (session *Session) Close() error {
 		}
 	}
 
+	for _, v := range session.txStmtCache {
+		if err := v.Close(); err != nil {
+			return err
+		}
+	}
+
 	if !session.isClosed {
 		// When Close be called, if session is a transaction and do not call
 		// Commit or Rollback, then call Rollback.
@@ -160,6 +168,7 @@ func (session *Session) Close() error {
 		}
 		session.tx = nil
 		session.stmtCache = nil
+		session.txStmtCache = nil
 		session.isClosed = true
 	}
 	return nil
@@ -200,6 +209,7 @@ func (session *Session) IsClosed() bool {
 func (session *Session) resetStatement() {
 	if session.autoResetStatement {
 		session.statement.Reset()
+		session.prepareStmt = false
 	}
 }
 
@@ -370,7 +380,22 @@ func (session *Session) doPrepare(db *core.DB, sqlStr string) (stmt *core.Stmt, 
 	return
 }
 
-func (session *Session) getField(dataStruct *reflect.Value, table *schemas.Table, colName string, idx int) (*schemas.Column, *reflect.Value, error) {
+func (session *Session) doPrepareTx(sqlStr string) (stmt *core.Stmt, err error) {
+	crc := crc32.ChecksumIEEE([]byte(sqlStr))
+	// TODO try hash(sqlStr+len(sqlStr))
+	var has bool
+	stmt, has = session.txStmtCache[crc]
+	if !has {
+		stmt, err = session.tx.PrepareContext(session.ctx, sqlStr)
+		if err != nil {
+			return nil, err
+		}
+		session.txStmtCache[crc] = stmt
+	}
+	return
+}
+
+func getField(dataStruct *reflect.Value, table *schemas.Table, colName string, idx int) (*schemas.Column, *reflect.Value, error) {
 	var col = table.GetColumnIdx(colName, idx)
 	if col == nil {
 		return nil, nil, ErrFieldIsNotExist{colName, table.Name}
@@ -440,7 +465,7 @@ func (session *Session) row2Slice(rows *core.Rows, fields []string, types []*sql
 	return scanResults, nil
 }
 
-func (session *Session) setJSON(fieldValue *reflect.Value, fieldType reflect.Type, scanResult interface{}) error {
+func setJSON(fieldValue *reflect.Value, fieldType reflect.Type, scanResult interface{}) error {
 	bs, ok := convert.AsBytes(scanResult)
 	if !ok {
 		return fmt.Errorf("unsupported database data type: %#v", scanResult)
@@ -524,6 +549,9 @@ func (session *Session) convertBeanField(col *schemas.Column, fieldValue *reflec
 			if !ok {
 				return fmt.Errorf("cannot convert %#v as bytes", scanResult)
 			}
+			if data == nil {
+				return nil
+			}
 			return structConvert.FromDB(data)
 		}
 	}
@@ -548,7 +576,7 @@ func (session *Session) convertBeanField(col *schemas.Column, fieldValue *reflec
 	fieldType := fieldValue.Type()
 
 	if col.IsJSON {
-		return session.setJSON(fieldValue, fieldType, scanResult)
+		return setJSON(fieldValue, fieldType, scanResult)
 	}
 
 	switch fieldType.Kind() {
@@ -567,7 +595,7 @@ func (session *Session) convertBeanField(col *schemas.Column, fieldValue *reflec
 		}
 		return nil
 	case reflect.Complex64, reflect.Complex128:
-		return session.setJSON(fieldValue, fieldType, scanResult)
+		return setJSON(fieldValue, fieldType, scanResult)
 	case reflect.Slice, reflect.Array:
 		bs, ok := convert.AsBytes(scanResult)
 		if ok && fieldType.Elem().Kind() == reflect.Uint8 {
@@ -676,18 +704,17 @@ func (session *Session) slice2Bean(scanResults []interface{}, fields []string, b
 		if idx, ok = tempMap[lKey]; !ok {
 			idx = 0
 		} else {
-			idx = idx + 1
+			idx++
 		}
 		tempMap[lKey] = idx
 
-		col, fieldValue, err := session.getField(dataStruct, table, colName, idx)
-		if err != nil {
-			if _, ok := err.(ErrFieldIsNotExist); ok {
-				continue
-			} else {
-				return nil, err
-			}
+		col, fieldValue, err := getField(dataStruct, table, colName, idx)
+		if _, ok := err.(ErrFieldIsNotExist); ok {
+			continue
+		} else if err != nil {
+			return nil, err
 		}
+
 		if fieldValue == nil {
 			continue
 		}
@@ -730,6 +757,12 @@ func (session *Session) incrVersionFieldValue(fieldValue *reflect.Value) {
 
 // Context sets the context on this session
 func (session *Session) Context(ctx context.Context) *Session {
+	if session.engine.logSessionID && session.ctx != nil {
+		ctx = context.WithValue(ctx, log.SessionIDKey, session.ctx.Value(log.SessionIDKey))
+		ctx = context.WithValue(ctx, log.SessionKey, session.ctx.Value(log.SessionKey))
+		ctx = context.WithValue(ctx, log.SessionShowSQLKey, session.ctx.Value(log.SessionShowSQLKey))
+	}
+
 	session.ctx = ctx
 	return session
 }

@@ -1,6 +1,7 @@
 package decoder
 
 import (
+	"bytes"
 	"reflect"
 	"unicode"
 	"unicode/utf16"
@@ -170,6 +171,7 @@ RETRY:
 	s.buf = append(s.buf[:s.cursor-1], s.buf[s.cursor:]...)
 	s.length--
 	s.cursor--
+	p = s.bufptr()
 	return p, nil
 }
 
@@ -238,14 +240,23 @@ func stringBytes(s *Stream) ([]byte, error) {
 			fallthrough
 		default:
 			// multi bytes character
-			r, _ := utf8.DecodeRune(s.buf[cursor:])
-			b := []byte(string(r))
-			if r == utf8.RuneError {
-				s.buf = append(append(append([]byte{}, s.buf[:cursor]...), b...), s.buf[cursor+1:]...)
-				_, _, p = s.stat()
+			if !utf8.FullRune(s.buf[cursor : len(s.buf)-1]) {
+				s.cursor = cursor
+				if s.read() {
+					_, cursor, p = s.stat()
+					continue
+				}
+				goto ERROR
 			}
-			cursor += int64(len(b))
-			s.length += int64(len(b))
+			r, size := utf8.DecodeRune(s.buf[cursor:])
+			if r == utf8.RuneError {
+				s.buf = append(append(append([]byte{}, s.buf[:cursor]...), runeErrBytes...), s.buf[cursor+1:]...)
+				cursor += runeErrBytesLen
+				s.length += runeErrBytesLen
+				_, _, p = s.stat()
+			} else {
+				cursor += int64(size)
+			}
 			continue
 		}
 		cursor++
@@ -280,7 +291,7 @@ func (d *stringDecoder) decodeStreamByte(s *Stream) ([]byte, error) {
 		}
 		break
 	}
-	return nil, errors.ErrNotAtBeginningOfValue(s.totalOffset())
+	return nil, errors.ErrInvalidBeginningOfValue(s.char(), s.totalOffset())
 }
 
 func (d *stringDecoder) decodeByte(buf []byte, cursor int64) ([]byte, int64, error) {
@@ -298,49 +309,30 @@ func (d *stringDecoder) decodeByte(buf []byte, cursor int64) ([]byte, int64, err
 			cursor++
 			start := cursor
 			b := (*sliceHeader)(unsafe.Pointer(&buf)).data
+			escaped := 0
 			for {
 				switch char(b, cursor) {
 				case '\\':
+					escaped++
 					cursor++
 					switch char(b, cursor) {
-					case '"':
-						buf[cursor] = '"'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case '\\':
-						buf[cursor] = '\\'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case '/':
-						buf[cursor] = '/'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case 'b':
-						buf[cursor] = '\b'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case 'f':
-						buf[cursor] = '\f'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case 'n':
-						buf[cursor] = '\n'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case 'r':
-						buf[cursor] = '\r'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
-					case 't':
-						buf[cursor] = '\t'
-						buf = append(buf[:cursor-1], buf[cursor:]...)
+					case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
+						cursor++
 					case 'u':
 						buflen := int64(len(buf))
 						if cursor+5 >= buflen {
 							return nil, 0, errors.ErrUnexpectedEndOfJSON("escaped string", cursor)
 						}
-						code := unicodeToRune(buf[cursor+1 : cursor+5])
-						unicode := []byte(string(code))
-						buf = append(append(buf[:cursor-1], unicode...), buf[cursor+5:]...)
+						cursor += 5
 					default:
 						return nil, 0, errors.ErrUnexpectedEndOfJSON("escaped string", cursor)
 					}
 					continue
 				case '"':
 					literal := buf[start:cursor]
+					if escaped > 0 {
+						literal = literal[:unescapeString(literal)]
+					}
 					cursor++
 					return literal, cursor, nil
 				case nul:
@@ -355,7 +347,68 @@ func (d *stringDecoder) decodeByte(buf []byte, cursor int64) ([]byte, int64, err
 			cursor += 4
 			return nil, cursor, nil
 		default:
-			return nil, 0, errors.ErrNotAtBeginningOfValue(cursor)
+			return nil, 0, errors.ErrInvalidBeginningOfValue(buf[cursor], cursor)
 		}
 	}
+}
+
+var unescapeMap = [256]byte{
+	'"':  '"',
+	'\\': '\\',
+	'/':  '/',
+	'b':  '\b',
+	'f':  '\f',
+	'n':  '\n',
+	'r':  '\r',
+	't':  '\t',
+}
+
+func unsafeAdd(ptr unsafe.Pointer, offset int) unsafe.Pointer {
+	return unsafe.Pointer(uintptr(ptr) + uintptr(offset))
+}
+
+func unescapeString(buf []byte) int {
+	p := (*sliceHeader)(unsafe.Pointer(&buf)).data
+	end := unsafeAdd(p, len(buf))
+	src := unsafeAdd(p, bytes.IndexByte(buf, '\\'))
+	dst := src
+	for src != end {
+		c := char(src, 0)
+		if c == '\\' {
+			escapeChar := char(src, 1)
+			if escapeChar != 'u' {
+				*(*byte)(dst) = unescapeMap[escapeChar]
+				src = unsafeAdd(src, 2)
+				dst = unsafeAdd(dst, 1)
+			} else {
+				v1 := hexToInt[char(src, 2)]
+				v2 := hexToInt[char(src, 3)]
+				v3 := hexToInt[char(src, 4)]
+				v4 := hexToInt[char(src, 5)]
+				code := rune((v1 << 12) | (v2 << 8) | (v3 << 4) | v4)
+				var b [utf8.UTFMax]byte
+				n := utf8.EncodeRune(b[:], code)
+				switch n {
+				case 4:
+					*(*byte)(unsafeAdd(dst, 3)) = b[3]
+					fallthrough
+				case 3:
+					*(*byte)(unsafeAdd(dst, 2)) = b[2]
+					fallthrough
+				case 2:
+					*(*byte)(unsafeAdd(dst, 1)) = b[1]
+					fallthrough
+				case 1:
+					*(*byte)(unsafeAdd(dst, 0)) = b[0]
+				}
+				src = unsafeAdd(src, 6)
+				dst = unsafeAdd(dst, n)
+			}
+		} else {
+			*(*byte)(dst) = c
+			src = unsafeAdd(src, 1)
+			dst = unsafeAdd(dst, 1)
+		}
+	}
+	return int(uintptr(dst) - uintptr(p))
 }

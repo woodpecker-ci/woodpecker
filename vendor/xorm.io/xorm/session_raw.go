@@ -33,7 +33,7 @@ func (session *Session) queryRows(sqlStr string, args ...interface{}) (*core.Row
 
 	if session.isAutoCommit {
 		var db *core.DB
-		if session.sessionType == groupSession && strings.EqualFold(sqlStr[:6], "select") {
+		if session.sessionType == groupSession && strings.EqualFold(strings.TrimSpace(sqlStr)[:6], "select") && !session.statement.IsForUpdate {
 			db = session.engine.engineGroup.Slave().DB()
 		} else {
 			db = session.DB()
@@ -46,39 +46,106 @@ func (session *Session) queryRows(sqlStr string, args ...interface{}) (*core.Row
 				return nil, err
 			}
 
-			rows, err := stmt.QueryContext(session.ctx, args...)
-			if err != nil {
-				return nil, err
-			}
-			return rows, nil
+			return stmt.QueryContext(session.ctx, args...)
 		}
 
-		rows, err := db.QueryContext(session.ctx, sqlStr, args...)
+		return db.QueryContext(session.ctx, sqlStr, args...)
+	}
+
+	if session.prepareStmt {
+		stmt, err := session.doPrepareTx(sqlStr)
 		if err != nil {
 			return nil, err
 		}
-		return rows, nil
+
+		return stmt.QueryContext(session.ctx, args...)
 	}
 
-	rows, err := session.tx.QueryContext(session.ctx, sqlStr, args...)
-	if err != nil {
-		return nil, err
-	}
-	return rows, nil
+	return session.tx.QueryContext(session.ctx, sqlStr, args...)
 }
 
 func (session *Session) queryRow(sqlStr string, args ...interface{}) *core.Row {
 	return core.NewRow(session.queryRows(sqlStr, args...))
 }
 
-func (session *Session) queryBytes(sqlStr string, args ...interface{}) ([]map[string][]byte, error) {
+// Query runs a raw sql and return records as []map[string][]byte
+func (session *Session) Query(sqlOrArgs ...interface{}) ([]map[string][]byte, error) {
+	if session.isAutoClose {
+		defer session.Close()
+	}
+
+	sqlStr, args, err := session.statement.GenQuerySQL(sqlOrArgs...)
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := session.queryRows(sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	return rows2maps(rows)
+	return session.engine.scanByteMaps(rows)
+}
+
+// QueryString runs a raw sql and return records as []map[string]string
+func (session *Session) QueryString(sqlOrArgs ...interface{}) ([]map[string]string, error) {
+	if session.isAutoClose {
+		defer session.Close()
+	}
+
+	sqlStr, args, err := session.statement.GenQuerySQL(sqlOrArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := session.queryRows(sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return session.engine.ScanStringMaps(rows)
+}
+
+// QuerySliceString runs a raw sql and return records as [][]string
+func (session *Session) QuerySliceString(sqlOrArgs ...interface{}) ([][]string, error) {
+	if session.isAutoClose {
+		defer session.Close()
+	}
+
+	sqlStr, args, err := session.statement.GenQuerySQL(sqlOrArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := session.queryRows(sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return session.engine.ScanStringSlices(rows)
+}
+
+// QueryInterface runs a raw sql and return records as []map[string]interface{}
+func (session *Session) QueryInterface(sqlOrArgs ...interface{}) ([]map[string]interface{}, error) {
+	if session.isAutoClose {
+		defer session.Close()
+	}
+
+	sqlStr, args, err := session.statement.GenQuerySQL(sqlOrArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := session.queryRows(sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return session.engine.ScanInterfaceMaps(rows)
 }
 
 func (session *Session) exec(sqlStr string, args ...interface{}) (sql.Result, error) {
@@ -90,6 +157,13 @@ func (session *Session) exec(sqlStr string, args ...interface{}) (sql.Result, er
 	session.lastSQLArgs = args
 
 	if !session.isAutoCommit {
+		if session.prepareStmt {
+			stmt, err := session.doPrepareTx(sqlStr)
+			if err != nil {
+				return nil, err
+			}
+			return stmt.ExecContext(session.ctx, args...)
+		}
 		return session.tx.ExecContext(session.ctx, sqlStr, args...)
 	}
 
@@ -98,12 +172,7 @@ func (session *Session) exec(sqlStr string, args ...interface{}) (sql.Result, er
 		if err != nil {
 			return nil, err
 		}
-
-		res, err := stmt.ExecContext(session.ctx, args...)
-		if err != nil {
-			return nil, err
-		}
-		return res, nil
+		return stmt.ExecContext(session.ctx, args...)
 	}
 
 	return session.DB().ExecContext(session.ctx, sqlStr, args...)

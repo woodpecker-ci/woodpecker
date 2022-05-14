@@ -34,9 +34,14 @@ type SystemHooksService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/system_hooks.html
 type Hook struct {
-	ID        int        `json:"id"`
-	URL       string     `json:"url"`
-	CreatedAt *time.Time `json:"created_at"`
+	ID                     int        `json:"id"`
+	URL                    string     `json:"url"`
+	CreatedAt              *time.Time `json:"created_at"`
+	PushEvents             bool       `json:"push_events"`
+	TagPushEvents          bool       `json:"tag_push_events"`
+	MergeRequestsEvents    bool       `json:"merge_requests_events"`
+	RepositoryUpdateEvents bool       `json:"repository_update_events"`
+	EnableSSLVerification  bool       `json:"enable_ssl_verification"`
 }
 
 func (h Hook) String() string {
@@ -54,6 +59,27 @@ func (s *SystemHooksService) ListHooks(options ...RequestOptionFunc) ([]*Hook, *
 	}
 
 	var h []*Hook
+	resp, err := s.client.Do(req, &h)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return h, resp, err
+}
+
+// GetHook get a single system hook.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/system_hooks.html#get-system-hook
+func (s *SystemHooksService) GetHook(hook int, options ...RequestOptionFunc) (*Hook, *Response, error) {
+	u := fmt.Sprintf("hooks/%d", hook)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var h *Hook
 	resp, err := s.client.Do(req, &h)
 	if err != nil {
 		return nil, resp, err

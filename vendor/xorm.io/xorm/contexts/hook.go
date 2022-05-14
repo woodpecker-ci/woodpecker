@@ -36,7 +36,7 @@ func (c *ContextHook) End(ctx context.Context, result sql.Result, err error) {
 	c.Ctx = ctx
 	c.Result = result
 	c.Err = err
-	c.ExecuteTime = time.Now().Sub(c.start)
+	c.ExecuteTime = time.Since(c.start)
 }
 
 // Hook represents a hook behaviour
