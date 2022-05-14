@@ -56,7 +56,7 @@ func (s storage) GetBuildLast(repo *model.Repo, branch string) (*model.Build, er
 	build := &model.Build{
 		RepoID: repo.ID,
 		Branch: branch,
-		Event:  "push",
+		Event:  model.EventPush,
 	}
 	return build, wrapGet(s.engine.Desc("build_number").Get(build))
 }
