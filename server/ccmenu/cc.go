@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package ccmenu
 
 import (
 	"encoding/xml"
 	"strconv"
 	"time"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
+
+// CCMenu displays the build status of projects on a ci server as an item in the Mac's menu bar.
+// It started as part of the CruiseControl project that built the first continuous integration server.
+//
+// http://ccmenu.org/
 
 type CCProjects struct {
 	XMLName xml.Name   `xml:"Projects"`
@@ -35,7 +43,7 @@ type CCProject struct {
 	WebURL          string   `xml:"webUrl,attr"`
 }
 
-func NewCC(r *Repo, b *Build, link string) *CCProjects {
+func New(r *model.Repo, b *model.Build, link string) *CCProjects {
 	proj := &CCProject{
 		Name:            r.FullName,
 		WebURL:          link,
@@ -46,8 +54,8 @@ func NewCC(r *Repo, b *Build, link string) *CCProjects {
 
 	// if the build is not currently running then
 	// we can return the latest build status.
-	if b.Status != StatusPending &&
-		b.Status != StatusRunning {
+	if b.Status != model.StatusPending &&
+		b.Status != model.StatusRunning {
 		proj.Activity = "Sleeping"
 		proj.LastBuildTime = time.Unix(b.Started, 0).Format(time.RFC3339)
 		proj.LastBuildLabel = strconv.FormatInt(b.Number, 10)
@@ -56,11 +64,11 @@ func NewCC(r *Repo, b *Build, link string) *CCProjects {
 	// ensure the last build Status accepts a valid
 	// ccmenu enumeration
 	switch b.Status {
-	case StatusError, StatusKilled:
+	case model.StatusError, model.StatusKilled:
 		proj.LastBuildStatus = "Exception"
-	case StatusSuccess:
+	case model.StatusSuccess:
 		proj.LastBuildStatus = "Success"
-	case StatusFailure:
+	case model.StatusFailure:
 		proj.LastBuildStatus = "Failure"
 	}
 
