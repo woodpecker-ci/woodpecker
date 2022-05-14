@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/go-fed/httpsig"
@@ -18,6 +19,10 @@ import (
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
 func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
+	if !strings.HasSuffix(path, "/") {
+		path += "/" // TODO: remove after https://github.com/go-fed/httpsig/pull/27 got merged
+	}
+
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -74,6 +79,9 @@ func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request, body []byt
 
 	prefs := []httpsig.Algorithm{httpsig.ED25519}
 	headers := []string{httpsig.RequestTarget, "date"}
+	if body != nil {
+		headers = append(headers, "digest", "content-type")
+	}
 	signer, _, err := httpsig.NewSigner(prefs, httpsig.DigestSha256, headers, httpsig.Signature, 0)
 	if err != nil {
 		return err

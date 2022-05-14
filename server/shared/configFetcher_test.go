@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/go-fed/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -346,7 +344,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
-		panic(err)
+		t.Fatal("can't generate ed25519 key pair")
 	}
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -383,7 +381,6 @@ func TestFetchFromConfigService(t *testing.T) {
 		var req incoming
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error reading body: %v", err)
 			http.Error(w, "can't read body", http.StatusBadRequest)
 			return
 		}
@@ -423,8 +420,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	urlWithTrailingSlash := ts.URL + "/" // TODO: use until go-fed/httpsig supports empty paths
-	configAPI := configuration.NewHTTP(urlWithTrailingSlash, privEd25519Key)
+	configAPI := configuration.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
