@@ -1,6 +1,6 @@
 # Translations
 
-You can easily translate Woodpecker into your language. Therefore, copy the file `web/src/assets/locales/en.json` to the same path with your language's code and `.json` as name.
+Woodpecker uses [Vue I18n](https://vue-i18n.intlify.dev/) as translation library, thus you can easily translate the web UI into your language. Therefore, copy the file `web/src/assets/locales/en.json` to the same path with your language's code and `.json` as name.
 Then, translate content of this file, but only the values:
 
 ```json
