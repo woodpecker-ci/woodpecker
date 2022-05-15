@@ -18,11 +18,13 @@
 package server
 
 import (
+	"crypto"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -30,15 +32,16 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub        pubsub.Publisher
-		Queue         queue.Queue
-		Logs          logging.Log
-		Senders       model.SenderService
-		Secrets       model.SecretService
-		Registries    model.RegistryService
-		Environ       model.EnvironService
-		Remote        remote.Remote
-		ConfigService configuration.ConfigService
+		Pubsub     pubsub.Publisher
+		Queue      queue.Queue
+		Logs       logging.Log
+		Senders    sender.SenderService
+		Secrets    model.SecretService
+		Registries model.RegistryService
+		Environ    model.EnvironService
+		Remote     remote.Remote
+		Config     config.ConfigService
+		PrivateKey crypto.PrivateKey
 	}
 	Storage struct {
 		// Users  model.UserStore

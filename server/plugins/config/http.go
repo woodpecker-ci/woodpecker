@@ -1,4 +1,4 @@
-package configuration
+package config
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type ConfigService struct {
+type http struct {
 	endpoint   string
 	privateKey crypto.PrivateKey
 }
@@ -32,14 +32,14 @@ type responseStructure struct {
 }
 
 func NewHTTP(endpoint string, privateKey crypto.PrivateKey) ConfigService {
-	return ConfigService{endpoint, privateKey}
+	return &http{endpoint, privateKey}
 }
 
-func (cp *ConfigService) IsConfigured() bool {
+func (cp *http) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *ConfigService) FetchExternalConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
+func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {
 		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}

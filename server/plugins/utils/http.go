@@ -20,7 +20,7 @@ import (
 // to the request body and un-marshaling the output from the response body.
 func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
 	if !strings.HasSuffix(path, "/") {
-		path += "/" // TODO: remove after https://github.com/go-fed/httpsig/pull/27 got merged
+		path += "/" // TODO(anbraten): remove after https://github.com/go-fed/httpsig/pull/27 got merged
 	}
 
 	uri, err := url.Parse(path)

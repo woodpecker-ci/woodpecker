@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -245,7 +245,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
-				configuration.NewHTTP("", ""),
+				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -420,7 +420,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := configuration.NewHTTP(ts.URL, privEd25519Key)
+	configAPI := config.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

@@ -10,7 +10,7 @@ type db struct {
 }
 
 // New returns a new local gating service.
-func New(store model.SenderStore, conf model.ConfigStore) model.SenderService {
+func NewDatabase(store model.SenderStore, conf model.ConfigStore) SenderService {
 	return &db{store, conf}
 }
 

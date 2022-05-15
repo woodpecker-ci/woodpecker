@@ -15,7 +15,7 @@ type http struct {
 }
 
 // NewRemote returns a new remote gating service.
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) model.SenderService {
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) SenderService {
 	return &http{endpoint, privateKey}
 }
 

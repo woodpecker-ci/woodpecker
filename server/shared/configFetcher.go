@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -23,10 +23,10 @@ type configFetcher struct {
 	user          *model.User
 	repo          *model.Repo
 	build         *model.Build
-	configService configuration.ConfigService
+	configService config.ConfigService
 }
 
-func NewConfigFetcher(remote remote.Remote, configurationService configuration.ConfigService, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+func NewConfigFetcher(remote remote.Remote, configurationService config.ConfigService, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
 		remote:        remote,
 		user:          user,
@@ -58,7 +58,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
-			newConfigs, useOld, err := cf.configService.FetchExternalConfig(fetchCtx, cf.repo, cf.build, files)
+			newConfigs, useOld, err := cf.configService.FetchConfig(fetchCtx, cf.repo, cf.build, files)
 			if err != nil {
 				log.Error().Msg("Got error " + err.Error())
 				return nil, fmt.Errorf("On Fetching config via http : %s", err)

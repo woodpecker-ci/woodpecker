@@ -177,7 +177,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, build)
+	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.Config, repoUser, repo, build)
 	remoteYamlConfigs, err := configFetcher.Fetch(c)
 	if err != nil {
 		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
