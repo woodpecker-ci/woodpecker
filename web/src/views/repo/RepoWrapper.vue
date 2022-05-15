@@ -40,6 +40,7 @@ import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
@@ -73,6 +74,7 @@ export default defineComponent({
     const buildStore = BuildStore();
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const { isAuthenticated } = useAuthentication();
     const route = useRoute();
     const router = useRouter();
     const i18n = useI18n();
@@ -88,6 +90,11 @@ export default defineComponent({
       repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
       if (!repoPermissions.value.pull) {
         notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
+        // no access and not authenticated, redirect to login
+        if (!isAuthenticated) {
+          await router.replace({ name: 'login', query: { url: route.fullPath } });
+          return;
+        }
         await router.replace({ name: 'home' });
         return;
       }

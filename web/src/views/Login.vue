@@ -49,7 +49,7 @@ export default defineComponent({
     const i18n = useI18n();
 
     function doLogin() {
-      const url = typeof route.query.origin === 'string' ? route.query.origin : '';
+      const url = typeof route.query.url === 'string' ? route.query.url : '';
       authentication.authenticate(url);
     }
 
