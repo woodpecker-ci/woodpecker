@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-gray-500">Actions</h1>
+      <h1 class="text-xl ml-2 text-gray-500">{{ $t('repo.settings.actions.actions') }}</h1>
     </div>
 
     <div class="flex flex-col">
@@ -9,8 +9,8 @@
         class="mr-auto mt-4"
         color="blue"
         start-icon="heal"
-        text="Repair repository"
         :is-loading="isRepairingRepo"
+        :text="$t('repo.settings.actions.repair.repair')"
         @click="repairRepo"
       />
 
@@ -18,8 +18,8 @@
         class="mr-auto mt-4"
         color="blue"
         start-icon="turn-off"
-        text="Disable repository"
         :is-loading="isDeactivatingRepo"
+        :text="$t('repo.settings.actions.disable.disable')"
         @click="deactivateRepo"
       />
 
@@ -27,8 +27,8 @@
         class="mr-auto mt-4"
         color="red"
         start-icon="trash"
-        text="Delete repository"
         :is-loading="isDeletingRepo"
+        :text="$t('repo.settings.actions.delete.delete')"
         @click="deleteRepo"
       />
     </div>
@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import { defineComponent, inject, Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -55,6 +56,7 @@ export default defineComponent({
     const apiClient = useApiClient();
     const router = useRouter();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
 
@@ -64,7 +66,7 @@ export default defineComponent({
       }
 
       await apiClient.repairRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: 'Repository repaired', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.actions.repair.success'), type: 'success' });
     });
 
     const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async () => {
@@ -74,12 +76,12 @@ export default defineComponent({
 
       // TODO use proper dialog
       // eslint-disable-next-line no-alert, no-restricted-globals
-      if (!confirm('All data will be lost after this action!!!\n\nDo you really want to proceed?')) {
+      if (!confirm(i18n.t('repo.settings.actions.delete.confirm'))) {
         return;
       }
 
       await apiClient.deleteRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: 'Repository deleted', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.actions.delete.success'), type: 'success' });
       await router.replace({ name: 'repos' });
     });
 
@@ -89,7 +91,7 @@ export default defineComponent({
       }
 
       await apiClient.deleteRepo(repo.value.owner, repo.value.name, false);
-      notifications.notify({ title: 'Repository disabled', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.actions.disable.success'), type: 'success' });
       await router.replace({ name: 'repos' });
     });
 
