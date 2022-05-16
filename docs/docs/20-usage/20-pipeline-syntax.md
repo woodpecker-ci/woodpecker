@@ -302,7 +302,7 @@ Example conditional execution by repository:
 
 #### `branch`
 
-:::info
+:::note
 Branch conditions are not applied to tags.
 :::
 
