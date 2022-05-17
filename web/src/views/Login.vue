@@ -19,8 +19,8 @@
         <img class="w-48 h-48" src="../assets/logo.svg?url" />
       </div>
       <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
-        <h1 class="text-xl text-gray-600 dark:text-gray-500">Welcome to Woodpecker</h1>
-        <Button class="mt-4" @click="doLogin">Login</Button>
+        <h1 class="text-xl text-gray-600 dark:text-gray-500">{{ $t('welcome') }}</h1>
+        <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>
   </div>
@@ -28,16 +28,11 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import useAuthentication from '~/compositions/useAuthentication';
-
-const authErrorMessages = {
-  oauth_error: 'Error while authenticating against OAuth provider',
-  internal_error: 'Some internal error occured',
-  access_denied: 'You are not allowed to login',
-};
 
 export default defineComponent({
   name: 'Login',
@@ -51,11 +46,18 @@ export default defineComponent({
     const router = useRouter();
     const authentication = useAuthentication();
     const errorMessage = ref<string>();
+    const i18n = useI18n();
 
     function doLogin() {
       const url = typeof route.query.url === 'string' ? route.query.url : '';
       authentication.authenticate(url);
     }
+
+    const authErrorMessages = {
+      oauth_error: i18n.t('user.oauth_error'),
+      internal_error: i18n.t('user.internal_error'),
+      access_denied: i18n.t('user.access_denied'),
+    };
 
     onMounted(async () => {
       if (authentication.isAuthenticated) {
