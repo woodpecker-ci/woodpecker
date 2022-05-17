@@ -62,7 +62,6 @@ when:
 settings:
   foo: bar
   baz: false
-deprecated_setting: fallback
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -118,9 +117,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		Settings: map[string]interface{}{
 			"foo": "bar",
 			"baz": false,
-		},
-		Vargs: map[string]interface{}{
-			"deprecated_setting": "fallback",
 		},
 	}
 	got := Container{}
