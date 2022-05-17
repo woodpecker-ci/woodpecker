@@ -15,7 +15,7 @@ func (s storage) ServerConfigGet(key string) (string, error) {
 	return config.Value, nil
 }
 
-func (s storage) ServerConfigSet(key string, value string) error {
+func (s storage) ServerConfigSet(key, value string) error {
 	config := &model.ServerConfig{
 		Key:   key,
 		Value: value,
