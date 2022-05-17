@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
@@ -18,7 +20,9 @@ import (
 )
 
 type docker struct {
-	client client.APIClient
+	client     client.APIClient
+	enableIPv6 bool
+	network    string
 }
 
 // make sure docker implements Engine
@@ -51,6 +55,10 @@ func (e *docker) Load() error {
 	}
 	e.client = cli
 
+	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+
+	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+
 	return nil
 }
 
@@ -68,8 +76,9 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:  n.Driver,
-			Options: n.DriverOpts,
+			Driver:     n.Driver,
+			Options:    n.DriverOpts,
+			EnableIPv6: e.enableIPv6,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -136,16 +145,15 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 				return err
 			}
 		}
-	}
 
-	// if proc.Network != "host" { // or bridge, overlay, none, internal, container:<name> ....
-	// 	err = e.client.NetworkConnect(ctx, proc.Network, proc.Name, &network.EndpointSettings{
-	// 		Aliases: proc.NetworkAliases,
-	// 	})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+		// join the container to an existing network
+		if e.network != "" {
+			err = e.client.NetworkConnect(ctx, e.network, proc.Name, &network.EndpointSettings{})
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
@@ -192,10 +200,10 @@ func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
+			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
+			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
@@ -232,3 +240,10 @@ var (
 		Timestamps: false,
 	}
 )
+
+func isErrContainerNotFoundOrNotRunning(err error) bool {
+	// Error response from daemon: Cannot kill container: ...: No such container: ...
+	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
+	// Error: No such container: ...
+	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
+}

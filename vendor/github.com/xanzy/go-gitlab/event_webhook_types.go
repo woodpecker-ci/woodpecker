@@ -61,7 +61,7 @@ type BuildEvent struct {
 // CommitCommentEvent represents a comment on a commit event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#comment-on-commit
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#comment-on-a-commit
 type CommitCommentEvent struct {
 	ObjectKind string `json:"object_kind"`
 	User       *User  `json:"user"`
@@ -125,7 +125,7 @@ type CommitCommentEvent struct {
 // DeploymentEvent represents a deployment event
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#deployment-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#deployment-events
 type DeploymentEvent struct {
 	ObjectKind    string `json:"object_kind"`
 	Status        string `json:"status"`
@@ -160,7 +160,7 @@ type DeploymentEvent struct {
 // IssueCommentEvent represents a comment on an issue event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#comment-on-issue
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#comment-on-an-issue
 type IssueCommentEvent struct {
 	ObjectKind string `json:"object_kind"`
 	User       *User  `json:"user"`
@@ -230,7 +230,7 @@ type IssueCommentEvent struct {
 // IssueEvent represents a issue event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#issues-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#issue-events
 type IssueEvent struct {
 	ObjectKind string     `json:"object_kind"`
 	User       *EventUser `json:"user"`
@@ -344,7 +344,7 @@ type JobEvent struct {
 // MergeCommentEvent represents a comment on a merge event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#comment-on-merge-request
+// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#comment-on-a-merge-request
 type MergeCommentEvent struct {
 	ObjectKind string     `json:"object_kind"`
 	User       *EventUser `json:"user"`
@@ -430,6 +430,7 @@ type MergeCommentEvent struct {
 		Target                    *Repository  `json:"target"`
 		LastCommit                struct {
 			ID        string     `json:"id"`
+			Title     string     `json:"title"`
 			Message   string     `json:"message"`
 			Timestamp *time.Time `json:"timestamp"`
 			URL       string     `json:"url"`
@@ -447,7 +448,7 @@ type MergeCommentEvent struct {
 // MergeEvent represents a merge event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#merge-request-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#merge-request-events
 type MergeEvent struct {
 	ObjectKind string     `json:"object_kind"`
 	User       *EventUser `json:"user"`
@@ -623,7 +624,7 @@ func (p *MergeParams) UnmarshalJSON(b []byte) error {
 // PipelineEvent represents a pipeline event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#pipeline-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#pipeline-events
 type PipelineEvent struct {
 	ObjectKind       string `json:"object_kind"`
 	ObjectAttributes struct {
@@ -720,7 +721,7 @@ type PipelineEvent struct {
 // PushEvent represents a push event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#push-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#push-events
 type PushEvent struct {
 	ObjectKind   string `json:"object_kind"`
 	Before       string `json:"before"`
@@ -770,7 +771,7 @@ type PushEvent struct {
 // ReleaseEvent represents a release event
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#release-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#release-events
 type ReleaseEvent struct {
 	ID          int    `json:"id"`
 	CreatedAt   string `json:"created_at"` // Should be *time.Time (see Gitlab issue #21468)
@@ -829,7 +830,7 @@ type ReleaseEvent struct {
 // SnippetCommentEvent represents a comment on a snippet event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#comment-on-code-snippet
+// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#comment-on-a-code-snippet
 type SnippetCommentEvent struct {
 	ObjectKind string     `json:"object_kind"`
 	User       *EventUser `json:"user"`
@@ -868,13 +869,46 @@ type SnippetCommentEvent struct {
 		Description  string `json:"description"`
 		URL          string `json:"url"`
 	} `json:"object_attributes"`
-	Snippet *Snippet `json:"snippet"`
+	Snippet *struct {
+		ID                 int    `json:"id"`
+		Title              string `json:"title"`
+		Content            string `json:"content"`
+		AuthorID           int    `json:"author_id"`
+		ProjectID          int    `json:"project_id"`
+		CreatedAt          string `json:"created_at"`
+		UpdatedAt          string `json:"updated_at"`
+		Filename           string `json:"file_name"`
+		ExpiresAt          string `json:"expires_at"`
+		Type               string `json:"type"`
+		VisibilityLevel    int    `json:"visibility_level"`
+		Description        string `json:"description"`
+		Secret             bool   `json:"secret"`
+		RepositoryReadOnly bool   `json:"repository_read_only"`
+	} `json:"snippet"`
+}
+
+// SubGroupEvent represents a subgroup event.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#subgroup-events
+type SubGroupEvent struct {
+	CreatedAt      *time.Time `json:"created_at"`
+	UpdatedAt      *time.Time `json:"updated_at"`
+	EventName      string     `json:"event_name"`
+	Name           string     `json:"name"`
+	Path           string     `json:"path"`
+	FullPath       string     `json:"full_path"`
+	GroupID        int        `json:"group_id"`
+	ParentGroupID  int        `json:"parent_group_id"`
+	ParentName     string     `json:"parent_name"`
+	ParentPath     string     `json:"parent_path"`
+	ParentFullPath string     `json:"parent_full_path"`
 }
 
 // TagEvent represents a tag event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#tag-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#tag-events
 type TagEvent struct {
 	ObjectKind   string `json:"object_kind"`
 	Before       string `json:"before"`
@@ -925,7 +959,7 @@ type TagEvent struct {
 // WikiPageEvent represents a wiki page event.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#wiki-page-events
+// https://docs.gitlab.com/ce/user/project/integrations/webhook_events.html#wiki-page-events
 type WikiPageEvent struct {
 	ObjectKind string     `json:"object_kind"`
 	User       *EventUser `json:"user"`

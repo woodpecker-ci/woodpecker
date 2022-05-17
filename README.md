@@ -93,7 +93,7 @@ Here are some places where people mention Woodpecker:
 
 - [GitHub](https://github.com/topics/WoodpeckerCI)
 - [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
-- [Twitter](https://twitter.com/hashtag/WoodpeckerCI)
+- [Twitter](https://twitter.com/hashtag/WoodpeckerCI?f=live)
 - [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
 ## Stars over time

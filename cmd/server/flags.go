@@ -97,11 +97,17 @@ var flags = []cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"},
+		Name:    "default-cancel-previous-pipeline-events",
+		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
+		Value:   cli.NewStringSlice("push", "pull_request"),
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   "woodpeckerci/plugin-git:latest",
+		Value:   constant.DefaultCloneImage,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
@@ -200,6 +206,12 @@ var flags = []cli.Flag{
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
+		Name:    "status-context-format",
+		Usage:   "status context format",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+	},
 	//
 	// resource limit parameters
 	//
@@ -288,7 +300,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GOGS_URL"},
 		Name:    "gogs-server",
 		Usage:   "gogs server address",
-		Value:   "https://github.com",
+		Value:   "https://try.gogs.io",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},

@@ -2,20 +2,20 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-gray-500">Secrets</h1>
+        <h1 class="text-xl text-gray-500">{{ $t('repo.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-gray-400 dark:text-gray-600">
-          Secrets can be passed to individual pipeline steps at runtime as environmental variables.
+          {{ $t('repo.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
       </div>
       <Button
         v-if="selectedSecret"
         class="ml-auto"
-        text="Show secrets"
+        :text="$t('repo.settings.secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret" />
+      <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
     </div>
 
     <div v-if="!selectedSecret" class="space-y-4 text-gray-500">
@@ -38,31 +38,42 @@
         />
       </ListItem>
 
-      <div v-if="secrets?.length === 0" class="ml-2">There are no secrets yet.</div>
+      <div v-if="secrets?.length === 0" class="ml-2">{{ $t('repo.settings.secrets.none') }}</div>
     </div>
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createSecret">
-        <InputField label="Name">
-          <TextField v-model="selectedSecret.name" placeholder="Name" required :disabled="isEditingSecret" />
-        </InputField>
-
-        <InputField label="Value">
-          <TextField v-model="selectedSecret.value" placeholder="Value" :lines="5" required />
-        </InputField>
-
-        <InputField label="Available for following images">
+        <InputField :label="$t('repo.settings.secrets.name')">
           <TextField
-            v-model="images"
-            placeholder="Comma separated list of images where this secret is available, leave empty to allow all images"
+            v-model="selectedSecret.name"
+            :placeholder="$t('repo.settings.secrets.name')"
+            required
+            :disabled="isEditingSecret"
           />
         </InputField>
 
-        <InputField label="Available at following events">
+        <InputField :label="$t('repo.settings.secrets.value')">
+          <TextField
+            v-model="selectedSecret.value"
+            :placeholder="$t('repo.settings.secrets.value')"
+            :lines="5"
+            required
+          />
+        </InputField>
+
+        <InputField :label="$t('repo.settings.secrets.images.images')">
+          <TextField v-model="images" :placeholder="$t('repo.settings.secrets.images.desc')" />
+        </InputField>
+
+        <InputField :label="$t('repo.settings.secrets.events.events')">
           <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
         </InputField>
 
-        <Button :is-loading="isSaving" type="submit" :text="isEditingSecret ? 'Save secret' : 'Add secret'" />
+        <Button
+          :is-loading="isSaving"
+          type="submit"
+          :text="isEditingSecret ? $t('repo.settings.secrets.save') : $t('repo.settings.secrets.add')"
+        />
       </form>
     </div>
   </Panel>
@@ -71,6 +82,7 @@
 <script lang="ts">
 import { cloneDeep } from 'lodash';
 import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
@@ -93,22 +105,6 @@ const emptySecret = {
   event: [WebhookEvents.Push],
 };
 
-const secretEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: 'Push' },
-  { value: WebhookEvents.Tag, text: 'Tag' },
-  {
-    value: WebhookEvents.PullRequest,
-    text: 'Pull Request',
-    description:
-      'Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets.',
-  },
-  {
-    value: WebhookEvents.Release,
-    text: 'Release',
-  },
-  { value: WebhookEvents.Deploy, text: 'Deploy' },
-];
-
 export default defineComponent({
   name: 'SecretsTab',
 
@@ -126,6 +122,7 @@ export default defineComponent({
   setup() {
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>();
@@ -167,7 +164,10 @@ export default defineComponent({
       } else {
         await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
       }
-      notifications.notify({ title: 'Secret created', type: 'success' });
+      notifications.notify({
+        title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
+        type: 'success',
+      });
       selectedSecret.value = undefined;
       await loadSecrets();
     });
@@ -178,7 +178,7 @@ export default defineComponent({
       }
 
       await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
-      notifications.notify({ title: 'Secret deleted', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
       await loadSecrets();
     });
 
@@ -189,6 +189,18 @@ export default defineComponent({
     onMounted(async () => {
       await loadSecrets();
     });
+
+    const secretEventsOptions: CheckboxOption[] = [
+      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
+      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+      {
+        value: WebhookEvents.PullRequest,
+        text: i18n.t('repo.build.event.pr'),
+        description: i18n.t('repo.settings.secrets.events.pr_warning'),
+      },
+      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+      { value: WebhookEvents.Release, text: i18n.t('repo.build.event.release') },
+    ];
 
     return {
       secretEventsOptions,

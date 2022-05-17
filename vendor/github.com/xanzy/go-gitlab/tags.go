@@ -34,10 +34,12 @@ type TagsService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/tags.html
 type Tag struct {
-	Commit  *Commit      `json:"commit"`
-	Release *ReleaseNote `json:"release"`
-	Name    string       `json:"name"`
-	Message string       `json:"message"`
+	Commit    *Commit      `json:"commit"`
+	Release   *ReleaseNote `json:"release"`
+	Name      string       `json:"name"`
+	Message   string       `json:"message"`
+	Protected bool         `json:"protected"`
+	Target    string       `json:"target"`
 }
 
 // ReleaseNote represents a GitLab version release.
@@ -123,7 +125,8 @@ type CreateTagOptions struct {
 	TagName *string `url:"tag_name,omitempty" json:"tag_name,omitempty"`
 	Ref     *string `url:"ref,omitempty" json:"ref,omitempty"`
 	Message *string `url:"message,omitempty" json:"message,omitempty"`
-	// ReleaseDescription parameter was deprecated in GitLab 11.7
+
+	// Deprecated members
 	ReleaseDescription *string `url:"release_description:omitempty" json:"release_description,omitempty"`
 }
 

@@ -41,6 +41,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
@@ -287,6 +288,14 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
 
+	// Execution
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
 	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
@@ -308,6 +317,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
+	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")

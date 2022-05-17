@@ -10,8 +10,8 @@
         :to="{ name: 'repos' }"
         class="mx-4 hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md"
       >
-        <span class="flex md:hidden">Repos</span>
-        <span class="hidden md:flex">Repositories</span>
+        <span class="flex md:hidden">{{ $t('repos') }}</span>
+        <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
     </div>
     <div class="flex ml-auto items-center space-x-4 text-white dark:text-gray-500">
@@ -29,7 +29,7 @@
       <router-link v-if="user" :to="{ name: 'user' }">
         <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
       </router-link>
-      <Button v-else text="Login" @click="doLogin" />
+      <Button v-else :text="$t('login')" @click="doLogin" />
       <ActiveBuilds v-if="user" />
     </div>
   </div>

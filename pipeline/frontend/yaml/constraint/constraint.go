@@ -53,7 +53,6 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 	match := c.Platform.Match(metadata.Sys.Arch) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
-		c.Branch.Match(metadata.Curr.Commit.Branch) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
 		c.Instance.Match(metadata.Sys.Host) &&
@@ -62,6 +61,9 @@ func (c *Constraints) Match(metadata frontend.Metadata) bool {
 	// changed files filter do only apply for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
+	}
+	if metadata.Curr.Event != frontend.EventTag {
+		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
 	}
 
 	return match

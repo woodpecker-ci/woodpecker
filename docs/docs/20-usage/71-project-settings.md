@@ -24,7 +24,7 @@ If you set your project to trusted, a pipeline step and by this the underlying c
 
 :::note
 
-Only server admins can set this option. If you are not a server admin this option wont be shown in your project settings.
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
 
@@ -40,3 +40,6 @@ You can change the visibility of your project by this setting. If a user has acc
 
 After this timeout a pipeline has to finish or will be treated as timed out.
 
+## Cancel previous pipelines
+
+By enabling this option for a pipeline event previous pipelines of the same event and context will be canceled before starting the newly triggered one.

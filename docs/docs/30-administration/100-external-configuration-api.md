@@ -51,7 +51,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
   },
   "build": {
     "author": "myUser",
-    "author_avatar": "https://myscm.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
+    "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
     "author_email": "my@email.com",
     "branch": "master",
     "changed_files": [
@@ -65,7 +65,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "event": "push",
     "finished_at": 0,
     "id": 0,
-    "link_url": "https://myscm.com/myUser/woodpecker-testpipe/commit/2fff90f8d288a4640e90f05049fe30e61a14fd50",
+    "link_url": "https://myforge.com/myUser/woodpecker-testpipe/commit/2fff90f8d288a4640e90f05049fe30e61a14fd50",
     "message": "test old config\n",
     "number": 0,
     "parent": 0,

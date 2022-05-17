@@ -19,7 +19,6 @@ package gitlab
 import (
 	"fmt"
 	"net/http"
-	"time"
 )
 
 // NamespacesService handles communication with the namespace related methods
@@ -34,21 +33,21 @@ type NamespacesService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/namespaces.html
 type Namespace struct {
-	ID                          int        `json:"id"`
-	Name                        string     `json:"name"`
-	Path                        string     `json:"path"`
-	Kind                        string     `json:"kind"`
-	FullPath                    string     `json:"full_path"`
-	ParentID                    int        `json:"parent_id"`
-	AvatarURL                   *string    `json:"avatar_url"`
-	WebURL                      string     `json:"web_url"`
-	MembersCountWithDescendants int        `json:"members_count_with_descendants"`
-	BillableMembersCount        int        `json:"billable_members_count"`
-	Plan                        string     `json:"plan"`
-	TrialEndsOn                 *time.Time `json:"trial_ends_on"`
-	Trial                       bool       `json:"trial"`
-	MaxSeatsUsed                *int       `json:"max_seats_used"`
-	SeatsInUse                  *int       `json:"seats_in_use"`
+	ID                          int      `json:"id"`
+	Name                        string   `json:"name"`
+	Path                        string   `json:"path"`
+	Kind                        string   `json:"kind"`
+	FullPath                    string   `json:"full_path"`
+	ParentID                    int      `json:"parent_id"`
+	AvatarURL                   *string  `json:"avatar_url"`
+	WebURL                      string   `json:"web_url"`
+	MembersCountWithDescendants int      `json:"members_count_with_descendants"`
+	BillableMembersCount        int      `json:"billable_members_count"`
+	Plan                        string   `json:"plan"`
+	TrialEndsOn                 *ISOTime `json:"trial_ends_on"`
+	Trial                       bool     `json:"trial"`
+	MaxSeatsUsed                *int     `json:"max_seats_used"`
+	SeatsInUse                  *int     `json:"seats_in_use"`
 }
 
 func (n Namespace) String() string {

@@ -44,7 +44,13 @@ func lintDir(c *cli.Context, dir string) error {
 }
 
 func lintFile(_ *cli.Context, file string) error {
-	configErrors, err := schema.Lint(file)
+	fi, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer fi.Close()
+
+	configErrors, err := schema.Lint(fi)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {
