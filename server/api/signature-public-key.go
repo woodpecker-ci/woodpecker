@@ -15,10 +15,24 @@
 package api
 
 import (
+	"crypto/x509"
+	"encoding/pem"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 func GetSignaturePublicKey(c *gin.Context) {
-	c.String(200, "%s", server.Config.Services.SignaturePublicKey)
+	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.SignaturePublicKey)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	block := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: b,
+	}
+
+	c.String(200, "%s", pem.EncodeToMemory(block))
 }
