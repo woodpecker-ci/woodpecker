@@ -32,6 +32,7 @@ var migrationTasks = []*task{
 	&alterTableReposDropAllowDeploysAllowTags,
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
+	&dropSenders,
 }
 
 var allBeans = []interface{}{
@@ -46,7 +47,6 @@ var allBeans = []interface{}{
 	new(model.Registry),
 	new(model.Repo),
 	new(model.Secret),
-	new(model.Sender),
 	new(model.Task),
 	new(model.User),
 }
