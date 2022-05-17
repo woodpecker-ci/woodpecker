@@ -61,9 +61,6 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	if _, err := sess.Where("sender_repo_id = ?", repo.ID).Delete(new(model.Sender)); err != nil {
-		return err
-	}
 	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
