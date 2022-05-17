@@ -15,6 +15,14 @@
 
 package model
 
+type SenderService interface {
+	SenderAllowed(*User, *Repo, *Build, *Config) (bool, error)
+	SenderCreate(*Repo, *Sender) error
+	SenderUpdate(*Repo, *Sender) error
+	SenderDelete(*Repo, string) error
+	SenderList(*Repo) ([]*Sender, error)
+}
+
 type SenderStore interface {
 	SenderFind(*Repo, string) (*Sender, error)
 	SenderList(*Repo) ([]*Sender, error)

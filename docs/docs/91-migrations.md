@@ -2,6 +2,10 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
+## 1.0.0
+
+- The signature used to verify extentions webhook calls done by the Woodpecker server switched from using a shared-secret HMac singer to an async signer using an ed25519 key-pair. Read more about it at the [extensions docs]().
+
 ## 0.15.0
 
 - Default value for custom pipeline path is now empty / un-set which results in following resolution:
