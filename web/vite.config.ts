@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import vueI18n from '@intlify/vite-plugin-vue-i18n';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
@@ -25,6 +26,9 @@ function woodpeckerInfoPlugin() {
 export default defineConfig({
   plugins: [
     vue(),
+    vueI18n({
+      include: path.resolve(__dirname, 'src/assets/locales/**'),
+    }),
     WindiCSS(),
     Icons(),
     svgLoader(),
