@@ -376,6 +376,7 @@ when:
 
 #### `tag`
 
+This filter only applies to tag events.
 Use glob expression to execute a step if the tag name starts with `v`:
 
 ```diff
