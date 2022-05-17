@@ -282,6 +282,10 @@ Example conditional execution by repository:
 
 #### `branch`
 
+:::note
+Branch conditions are not applied to tags.
+:::
+
 Example conditional execution by branch:
 
 ```diff

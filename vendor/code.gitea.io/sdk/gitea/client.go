@@ -6,9 +6,9 @@
 package gitea
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -24,23 +24,25 @@ var jsonHeader = http.Header{"content-type": []string{"application/json"}}
 
 // Version return the library version
 func Version() string {
-	return "0.14.0"
+	return "0.16.0"
 }
 
 // Client represents a thread-safe Gitea API client.
 type Client struct {
-	url            string
-	accessToken    string
-	username       string
-	password       string
-	otp            string
-	sudo           string
-	debug          bool
-	client         *http.Client
-	ctx            context.Context
-	mutex          sync.RWMutex
+	url         string
+	accessToken string
+	username    string
+	password    string
+	otp         string
+	sudo        string
+	debug       bool
+	client      *http.Client
+	ctx         context.Context
+	mutex       sync.RWMutex
+
 	serverVersion  *version.Version
 	getVersionOnce sync.Once
+	ignoreVersion  bool // only set by SetGiteaVersion so don't need a mutex lock
 }
 
 // Response represents the gitea response
@@ -48,16 +50,21 @@ type Response struct {
 	*http.Response
 }
 
+// ClientOption are functions used to init a new client
+type ClientOption func(*Client) error
+
 // NewClient initializes and returns a API client.
 // Usage of all gitea.Client methods is concurrency-safe.
-func NewClient(url string, options ...func(*Client)) (*Client, error) {
+func NewClient(url string, options ...ClientOption) (*Client, error) {
 	client := &Client{
 		url:    strings.TrimSuffix(url, "/"),
 		client: &http.Client{},
 		ctx:    context.Background(),
 	}
 	for _, opt := range options {
-		opt(client)
+		if err := opt(client); err != nil {
+			return nil, err
+		}
 	}
 	if err := client.checkServerVersionGreaterThanOrEqual(version1_11_0); err != nil {
 		return nil, err
@@ -73,9 +80,10 @@ func NewClientWithHTTP(url string, httpClient *http.Client) *Client {
 }
 
 // SetHTTPClient is an option for NewClient to set custom http client
-func SetHTTPClient(httpClient *http.Client) func(client *Client) {
-	return func(client *Client) {
+func SetHTTPClient(httpClient *http.Client) ClientOption {
+	return func(client *Client) error {
 		client.SetHTTPClient(httpClient)
+		return nil
 	}
 }
 
@@ -87,18 +95,20 @@ func (c *Client) SetHTTPClient(client *http.Client) {
 }
 
 // SetToken is an option for NewClient to set token
-func SetToken(token string) func(client *Client) {
-	return func(client *Client) {
+func SetToken(token string) ClientOption {
+	return func(client *Client) error {
 		client.mutex.Lock()
 		client.accessToken = token
 		client.mutex.Unlock()
+		return nil
 	}
 }
 
 // SetBasicAuth is an option for NewClient to set username and password
-func SetBasicAuth(username, password string) func(client *Client) {
-	return func(client *Client) {
+func SetBasicAuth(username, password string) ClientOption {
+	return func(client *Client) error {
 		client.SetBasicAuth(username, password)
+		return nil
 	}
 }
 
@@ -110,9 +120,10 @@ func (c *Client) SetBasicAuth(username, password string) {
 }
 
 // SetOTP is an option for NewClient to set OTP for 2FA
-func SetOTP(otp string) func(client *Client) {
-	return func(client *Client) {
+func SetOTP(otp string) ClientOption {
+	return func(client *Client) error {
 		client.SetOTP(otp)
+		return nil
 	}
 }
 
@@ -123,14 +134,15 @@ func (c *Client) SetOTP(otp string) {
 	c.mutex.Unlock()
 }
 
-// SetContext is an option for NewClient to set context
-func SetContext(ctx context.Context) func(client *Client) {
-	return func(client *Client) {
+// SetContext is an option for NewClient to set the default context
+func SetContext(ctx context.Context) ClientOption {
+	return func(client *Client) error {
 		client.SetContext(ctx)
+		return nil
 	}
 }
 
-// SetContext set context witch is used for http requests
+// SetContext set default context witch is used for http requests
 func (c *Client) SetContext(ctx context.Context) {
 	c.mutex.Lock()
 	c.ctx = ctx
@@ -138,9 +150,10 @@ func (c *Client) SetContext(ctx context.Context) {
 }
 
 // SetSudo is an option for NewClient to set sudo header
-func SetSudo(sudo string) func(client *Client) {
-	return func(client *Client) {
+func SetSudo(sudo string) ClientOption {
+	return func(client *Client) error {
 		client.SetSudo(sudo)
+		return nil
 	}
 }
 
@@ -152,11 +165,12 @@ func (c *Client) SetSudo(sudo string) {
 }
 
 // SetDebugMode is an option for NewClient to enable debug mode
-func SetDebugMode() func(client *Client) {
-	return func(client *Client) {
+func SetDebugMode() ClientOption {
+	return func(client *Client) error {
 		client.mutex.Lock()
 		client.debug = true
 		client.mutex.Unlock()
+		return nil
 	}
 }
 
@@ -185,14 +199,20 @@ func (c *Client) getWebResponse(method, path string, body io.Reader) ([]byte, *R
 	if debug {
 		fmt.Printf("Response: %v\n\n", resp)
 	}
-	return data, &Response{resp}, nil
+	return data, &Response{resp}, err
 }
 
 func (c *Client) doRequest(method, path string, header http.Header, body io.Reader) (*Response, error) {
 	c.mutex.RLock()
 	debug := c.debug
 	if debug {
-		fmt.Printf("%s: %s\nHeader: %v\nBody: %s\n", method, c.url+"/api/v1"+path, header, body)
+		var bodyStr string
+		if body != nil {
+			bs, _ := ioutil.ReadAll(body)
+			body = bytes.NewReader(bs)
+			bodyStr = string(bs)
+		}
+		fmt.Printf("%s: %s\nHeader: %v\nBody: %s\n", method, c.url+"/api/v1"+path, header, bodyStr)
 	}
 	req, err := http.NewRequestWithContext(c.ctx, method, c.url+"/api/v1"+path, body)
 	if err != nil {
@@ -248,27 +268,23 @@ func statusCodeToErr(resp *Response) (body []byte, err error) {
 		return nil, fmt.Errorf("body read on HTTP error %d: %v", resp.StatusCode, err)
 	}
 
-	switch resp.StatusCode {
-	case 403:
-		return data, errors.New("403 Forbidden")
-	case 404:
-		return data, errors.New("404 Not Found")
-	case 409:
-		return data, errors.New("409 Conflict")
-	case 422:
-		return data, fmt.Errorf("422 Unprocessable Entity: %s", string(data))
-	}
-
-	path := resp.Request.URL.Path
-	method := resp.Request.Method
-	header := resp.Request.Header
+	// Try to unmarshal and get an error message
 	errMap := make(map[string]interface{})
 	if err = json.Unmarshal(data, &errMap); err != nil {
 		// when the JSON can't be parsed, data was probably empty or a
 		// plain string, so we try to return a helpful error anyway
+		path := resp.Request.URL.Path
+		method := resp.Request.Method
+		header := resp.Request.Header
 		return data, fmt.Errorf("Unknown API Error: %d\nRequest: '%s' with '%s' method '%s' header and '%s' body", resp.StatusCode, path, method, header, string(data))
 	}
-	return data, errors.New(errMap["message"].(string))
+
+	if msg, ok := errMap["message"]; ok {
+		return data, fmt.Errorf("%v", msg)
+	}
+
+	// If no error message, at least give status and data
+	return data, fmt.Errorf("%s: %s", resp.Status, string(data))
 }
 
 func (c *Client) getResponse(method, path string, header http.Header, body io.Reader) ([]byte, *Response, error) {

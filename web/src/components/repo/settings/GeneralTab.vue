@@ -1,74 +1,90 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-gray-500">General</h1>
+      <h1 class="text-xl ml-2 text-gray-500">{{ $t('general') }}</h1>
     </div>
 
     <div v-if="repoSettings" class="flex flex-col">
-      <InputField label="Pipeline path" docs-url="docs/usage/project-settings#pipeline-path">
+      <InputField
+        docs-url="docs/usage/project-settings#pipeline-path"
+        :label="$t('repo.settings.general.pipeline_path.path')"
+      >
         <TextField
           v-model="repoSettings.config_file"
           class="max-w-124"
-          placeholder="By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+          :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
-          <p class="text-sm text-gray-400 dark:text-gray-600">
-            Path to your pipeline config (for example
-            <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">my/path/</span>). Folders should end with a
-            <span class="bg-gray-300 dark:bg-dark-100 rounded-md px-1">/</span>.
-          </p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p class="text-sm text-gray-400 dark:text-gray-600" v-html="$t('repo.settings.general.pipeline_path.desc')" />
         </template>
       </InputField>
 
-      <InputField label="Project settings" docs-url="docs/usage/project-settings#project-settings-1">
+      <InputField
+        docs-url="docs/usage/project-settings#project-settings-1"
+        :label="$t('repo.settings.general.project')"
+      >
         <Checkbox
           v-model="repoSettings.allow_pr"
-          label="Allow Pull Request"
-          description="Pipelines can run on pull requests."
+          :label="$t('repo.settings.general.allow_pr.allow')"
+          @description="$t('repo.settings.general.allow_pr.desc')"
         />
         <Checkbox
           v-model="repoSettings.gated"
-          label="Protected"
-          description="Every pipeline needs to be approved before being executed."
+          :label="$t('repo.settings.general.protected.protected')"
+          @description="$t('repo.settings.general.protected.desc')"
         />
         <Checkbox
           v-if="user?.admin"
           v-model="repoSettings.trusted"
-          label="Trusted"
-          description="Underlying pipeline containers get access to escalated capabilities like mounting volumes."
+          :label="$t('repo.settings.general.trusted.trusted')"
+          :description="$t('repo.settings.general.trusted.desc')"
         />
       </InputField>
 
-      <InputField label="Project visibility" docs-url="docs/usage/project-settings#project-visibility">
+      <InputField
+        docs-url="docs/usage/project-settings#project-visibility"
+        :label="$t('repo.settings.general.visibility.visibility')"
+      >
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
-      <InputField label="Timeout" docs-url="docs/usage/project-settings#timeout">
+      <InputField docs-url="docs/usage/project-settings#timeout" :label="$t('repo.settings.general.timeout.timeout')">
         <div class="flex items-center">
           <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-gray-600">minutes</span>
+          <span class="ml-4 text-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
-      <InputField label="Cancel previous pipelines" docs-url="docs/usage/project-settings#cancel-previous-pipelines">
+      <InputField
+        docs-url="docs/usage/project-settings#cancel-previous-pipelines"
+        :label="$t('repo.settings.general.cancel_prev.cancel')"
+      >
         <CheckboxesField
           v-model="repoSettings.cancel_previous_pipeline_events"
           :options="cancelPreviousBuildEventsOptions"
         />
         <template #description>
           <p class="text-sm text-gray-400 dark:text-gray-600">
-            Enable to cancel running pipelines of the same event and context before starting the newly triggered one.
+            {{ $t('repo.settings.general.cancel_prev.desc') }}
           </p>
         </template>
       </InputField>
 
-      <Button class="mr-auto" color="green" text="Save settings" :is-loading="isSaving" @click="saveRepoSettings" />
+      <Button
+        class="mr-auto"
+        color="green"
+        :is-loading="isSaving"
+        :text="$t('repo.settings.general.save')"
+        @click="saveRepoSettings"
+      />
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -86,34 +102,6 @@ import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import RepoStore from '~/store/repos';
 
-const projectVisibilityOptions: RadioOption[] = [
-  {
-    value: RepoVisibility.Public,
-    text: 'Public',
-    description: 'Every user can see your project without being logged in.',
-  },
-  {
-    value: RepoVisibility.Private,
-    text: 'Private',
-    description: 'Only authenticated users of the Woodpecker instance can see this project.',
-  },
-  {
-    value: RepoVisibility.Internal,
-    text: 'Internal',
-    description: 'Only you and other owners of the repository can see this project.',
-  },
-];
-
-const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: 'Push' },
-  { value: WebhookEvents.Tag, text: 'Tag' },
-  {
-    value: WebhookEvents.PullRequest,
-    text: 'Pull Request',
-  },
-  { value: WebhookEvents.Deploy, text: 'Deploy' },
-];
-
 export default defineComponent({
   name: 'GeneralTab',
 
@@ -124,6 +112,7 @@ export default defineComponent({
     const notifications = useNotifications();
     const { user } = useAuthentication();
     const repoStore = RepoStore();
+    const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
     const repoSettings = ref<RepoSettings>();
@@ -164,12 +153,40 @@ export default defineComponent({
 
       await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
       await loadRepo();
-      notifications.notify({ title: 'Repository settings updated', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
     });
 
     onMounted(() => {
       loadRepoSettings();
     });
+
+    const projectVisibilityOptions: RadioOption[] = [
+      {
+        value: RepoVisibility.Public,
+        text: i18n.t('repo.settings.general.visibility.public.public'),
+        description: i18n.t('repo.settings.general.visibility.public.desc'),
+      },
+      {
+        value: RepoVisibility.Private,
+        text: i18n.t('repo.settings.general.visibility.private.private'),
+        description: i18n.t('repo.settings.general.visibility.private.desc'),
+      },
+      {
+        value: RepoVisibility.Internal,
+        text: i18n.t('repo.settings.general.visibility.internal.internal'),
+        description: i18n.t('repo.settings.general.visibility.internal.desc'),
+      },
+    ];
+
+    const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
+      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
+      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+      {
+        value: WebhookEvents.PullRequest,
+        text: i18n.t('repo.build.event.pr'),
+      },
+      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+    ];
 
     return {
       user,

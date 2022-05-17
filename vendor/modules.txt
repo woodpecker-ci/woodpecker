@@ -1,6 +1,6 @@
 # 4d63.com/gochecknoglobals v0.1.0
 4d63.com/gochecknoglobals/checknoglobals
-# code.gitea.io/sdk/gitea v0.15.0
+# code.gitea.io/sdk/gitea v0.15.1-0.20220501190934-319a978c6c71
 ## explicit
 code.gitea.io/sdk/gitea
 # github.com/99designs/httpsignatures-go v0.0.0-20170731043157-88528bf4ca7e
