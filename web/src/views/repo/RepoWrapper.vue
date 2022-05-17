@@ -20,8 +20,8 @@
     </div>
 
     <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab title="Activity" />
-      <Tab title="Branches" />
+      <Tab :title="$t('repo.activity')" />
+      <Tab :title="$t('repo.branches')" />
     </Tabs>
 
     <router-view />
@@ -31,6 +31,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -76,6 +77,7 @@ export default defineComponent({
     const { isAuthenticated } = useAuthentication();
     const route = useRoute();
     const router = useRouter();
+    const i18n = useI18n();
 
     const repo = repoStore.getRepo(repoOwner, repoName);
     const repoPermissions = ref<RepoPermissions>();
@@ -87,7 +89,7 @@ export default defineComponent({
     async function loadRepo() {
       repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
       if (!repoPermissions.value.pull) {
-        notifications.notify({ type: 'error', title: 'Not allowed to access this repository' });
+        notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
         // no access and not authenticated, redirect to login
         if (!isAuthenticated) {
           await router.replace({ name: 'login', query: { url: route.fullPath } });
