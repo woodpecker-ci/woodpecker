@@ -1,4 +1,12 @@
 pipeline:
+  lint-pipeline:
+    image: woodpeckerci/woodpecker-cli:next-alpine
+    commands:
+      - woodpecker-cli lint
+    when:
+      path:
+        - ".woodpecker/**"
+
   dummy-web:
     image: golang:1.17
     commands:
