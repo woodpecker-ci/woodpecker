@@ -357,33 +357,34 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	})
 }
 
-// generate or load key pair to sign webhooks requests
-func setupServiceKeys(_store store.Store) crypto.PrivateKey {
-	privKeyID := "services-private-key"
+// generate or load key pair to sign webhooks requests (i.e. used for extensions)
+func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
+	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
 	if err != nil && err == datastore.RecordNotExist {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil
+			return nil, nil
 		}
 		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil
+			return nil, nil
 		}
 		log.Info().Msg("Created private key")
-		return privKey
+		return privKey, privKey.Public()
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load private key")
-		return nil
+		return nil, nil
 	} else {
-		privKey, err := hex.DecodeString(privKey)
+		privKeyStr, err := hex.DecodeString(privKey)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to decode private key")
-			return nil
+			return nil, nil
 		}
-		return ed25519.PrivateKey(privKey)
+		privKey := ed25519.PrivateKey(privKeyStr)
+		return privKey, privKey.Public()
 	}
 }

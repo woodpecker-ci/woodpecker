@@ -31,17 +31,17 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub            pubsub.Publisher
-		Queue             queue.Queue
-		Logs              logging.Log
-		Senders           model.SenderService
-		Secrets           model.SecretService
-		Registries        model.RegistryService
-		Environ           model.EnvironService
-		Remote            remote.Remote
-		ConfigService     config.ConfigService
-		WebhookPrivateKey crypto.PrivateKey
-		WebhookPublicKey  crypto.PublicKey
+		Pubsub              pubsub.Publisher
+		Queue               queue.Queue
+		Logs                logging.Log
+		Senders             model.SenderService
+		Secrets             model.SecretService
+		Registries          model.RegistryService
+		Environ             model.EnvironService
+		Remote              remote.Remote
+		ConfigService       config.ConfigService
+		SignaturePrivateKey crypto.PrivateKey
+		SignaturePublicKey  crypto.PublicKey
 	}
 	Storage struct {
 		// Users  model.UserStore
