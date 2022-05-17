@@ -104,14 +104,6 @@ type Store interface {
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
 
-	// Sender
-	SenderFind(*model.Repo, string) (*model.Sender, error)
-	// SenderList TODO: paginate
-	SenderList(*model.Repo) ([]*model.Sender, error)
-	SenderCreate(*model.Sender) error
-	SenderUpdate(*model.Sender) error
-	SenderDelete(*model.Sender) error
-
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo) ([]*model.Secret, error)

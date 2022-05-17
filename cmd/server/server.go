@@ -43,7 +43,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
@@ -266,14 +265,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Senders = sender.New(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
-
-	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewRemote(endpoint, server.Config.Services.SignaturePrivateKey)
-	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
