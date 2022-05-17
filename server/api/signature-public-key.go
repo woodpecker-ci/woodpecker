@@ -20,13 +20,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
 func GetSignaturePublicKey(c *gin.Context) {
 	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.SignaturePublicKey)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msg("can't marshal public key")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	block := &pem.Block{
