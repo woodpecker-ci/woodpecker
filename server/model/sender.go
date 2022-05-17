@@ -17,20 +17,12 @@ package model
 
 import "context"
 
-type SenderService interface {
-	SenderAllowed(context.Context, *User, *Repo, *Build, *Config) (bool, error)
-	SenderCreate(context.Context, *Repo, *Sender) error
-	SenderUpdate(context.Context, *Repo, *Sender) error
-	SenderDelete(context.Context, *Repo, string) error
-	SenderList(context.Context, *Repo) ([]*Sender, error)
-}
-
 type SenderStore interface {
-	SenderFind(*Repo, string) (*Sender, error)
-	SenderList(*Repo) ([]*Sender, error)
-	SenderCreate(*Sender) error
-	SenderUpdate(*Sender) error
-	SenderDelete(*Sender) error
+	SenderFind(context.Context, *Repo, string) (*Sender, error)
+	SenderList(context.Context, *Repo) ([]*Sender, error)
+	SenderCreate(context.Context, *Sender) error
+	SenderUpdate(context.Context, *Sender) error
+	SenderDelete(context.Context, *Sender) error
 }
 
 type Sender struct {

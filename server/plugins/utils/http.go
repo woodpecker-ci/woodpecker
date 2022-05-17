@@ -10,29 +10,38 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
+
+	"github.com/go-fed/httpsig"
 )
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (statuscode int, err error) {
+func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
+	if !strings.HasSuffix(path, "/") {
+		path += "/" // TODO(anbraten): remove after https://github.com/go-fed/httpsig/pull/27 got merged
+	}
+
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
 	}
 
-	// if we are posting or putting data, we need to
-	// write it to the body of the request.
-	var buf io.ReadWriter
+	// if we are posting or putting data, we need to write it to the body of the request.
+	var payload io.Reader
+	var body []byte
 	if in != nil {
-		buf = new(bytes.Buffer)
-		jsonerr := json.NewEncoder(buf).Encode(in)
-		if jsonerr != nil {
-			return 0, jsonerr
+		var err error
+		body, err = json.Marshal(in)
+		if err != nil {
+			return 0, err
 		}
+		payload = bytes.NewReader(body)
 	}
 
 	// creates a new http request to the endpoint.
-	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
+	req, err := http.NewRequestWithContext(ctx, method, uri.String(), payload)
 	if err != nil {
 		return 0, err
 	}
@@ -40,7 +49,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	err = SignHTTPRequest(privateKey, "woodpecker-ci-plugins", req)
+	err = SignHTTPRequest(privateKey, req, body)
 	if err != nil {
 		return 0, err
 	}
@@ -65,18 +74,21 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	return resp.StatusCode, err
 }
 
-// Error represents a http error.
-type Error struct {
-	code int
-	text string
-}
+func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request, body []byte) error {
+	pubKeyID := "woodpecker-ci-plugins"
 
-// Code returns the http error code.
-func (e *Error) Code() int {
-	return e.code
-}
+	prefs := []httpsig.Algorithm{httpsig.ED25519}
+	headers := []string{httpsig.RequestTarget, "date"}
+	if body != nil {
+		headers = append(headers, "digest", "content-type")
+	}
+	signer, _, err := httpsig.NewSigner(prefs, httpsig.DigestSha256, headers, httpsig.Signature, 0)
+	if err != nil {
+		return err
+	}
 
-// Error returns the error message in string format.
-func (e *Error) Error() string {
-	return e.text
+	req.Header.Add("date", time.Now().UTC().Format(http.TimeFormat))
+
+	err = signer.SignRequest(privateKey, pubKeyID, req, body)
+	return err
 }

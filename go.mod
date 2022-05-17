@@ -19,7 +19,7 @@ require (
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-fed/httpsig v1.1.0
-	github.com/go-playground/validator/v10 v10.10.0 // indirect
+	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85

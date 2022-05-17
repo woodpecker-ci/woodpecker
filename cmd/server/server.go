@@ -42,7 +42,7 @@ import (
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -266,20 +266,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Senders = sender.New(v, v)
+	server.Config.Services.Senders = sender.NewDatabase(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 
+	server.Config.Services.PrivateKey = setupServicesKeys(v)
+
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewHTTP(endpoint, "")
+		server.Config.Services.Senders = sender.NewHTTP(endpoint, server.Config.Services.PrivateKey)
 	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		secret := c.String("config-service-secret")
-		if secret == "" {
-			log.Error().Msg("could not configure configuration service, missing secret")
-		} else {
-			server.Config.Services.ConfigService = configuration.NewHTTP(endpoint, secret)
-		}
+		server.Config.Services.Config = config.NewHTTP(endpoint, server.Config.Services.PrivateKey)
 	}
 
 	// authentication
