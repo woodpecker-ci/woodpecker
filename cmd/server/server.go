@@ -266,17 +266,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Senders = sender.NewDatabase(v, v)
+	server.Config.Services.Senders = sender.New(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 
-	server.Config.Services.PrivateKey = setupServicesKeys(v)
+	server.Config.Services.WebhookPrivateKey = setupServiceKeys(v)
 
 	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewHTTP(endpoint, server.Config.Services.PrivateKey)
+		server.Config.Services.Senders = sender.NewRemote(endpoint, server.Config.Services.WebhookPrivateKey)
 	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Services.Config = config.NewHTTP(endpoint, server.Config.Services.PrivateKey)
+		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.WebhookPrivateKey)
 	}
 
 	// authentication

@@ -476,13 +476,13 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.Config.IsConfigured() {
+	if server.Config.Services.ConfigService.IsConfigured() {
 		currentFileMeta := make([]*remote.FileMeta, len(configs))
 		for i, cfg := range configs {
 			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.Config.FetchConfig(c, repo, build, currentFileMeta)
+		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(c, repo, build, currentFileMeta)
 		if err != nil {
 			msg := fmt.Sprintf("On fetching external build config: %s", err)
 			c.String(http.StatusBadRequest, msg)
