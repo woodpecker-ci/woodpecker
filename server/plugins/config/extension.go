@@ -7,7 +7,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type ConfigService interface {
+type Extension interface {
 	IsConfigured() bool
 	FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error)
 }

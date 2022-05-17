@@ -23,25 +23,27 @@ func TestSign(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "http://example.com", bytes.NewBuffer(body))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
+	req.Header.Set("Content-Type", "application/json")
 
 	err = utils.SignHTTPRequest(privEd25519Key, req, body)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	verifier, err := httpsig.NewVerifier(req)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if verifier.KeyId() != pubKeyID {
-		t.Errorf("expected pubKeyId to be %s, got %s", pubKeyID, verifier.KeyId())
+		t.Fatalf("expected pubKeyId to be %s, got %s", pubKeyID, verifier.KeyId())
 	}
 
 	err = verifier.Verify(pubEd25519Key, httpsig.ED25519)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }

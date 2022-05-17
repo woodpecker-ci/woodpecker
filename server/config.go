@@ -38,7 +38,7 @@ var Config = struct {
 		Registries          model.RegistryService
 		Environ             model.EnvironService
 		Remote              remote.Remote
-		ConfigService       config.ConfigService
+		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
 		SignaturePublicKey  crypto.PublicKey
 	}
