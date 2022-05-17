@@ -380,6 +380,7 @@ Execute a step if the tag name starts with `release`:
 
 ```diff
 when:
+  event: tag
   tag: release*
 ```
 
