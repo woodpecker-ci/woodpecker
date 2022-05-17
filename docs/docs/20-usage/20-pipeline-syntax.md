@@ -376,12 +376,12 @@ when:
 
 #### `tag`
 
-Execute a step if the tag name starts with `release`:
+Use glob expression to execute a step if the tag name starts with `v`:
 
 ```diff
 when:
   event: tag
-  tag: release*
+  tag: v*
 ```
 
 #### `status`
