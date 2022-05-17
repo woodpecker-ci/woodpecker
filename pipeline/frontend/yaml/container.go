@@ -83,10 +83,6 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 				container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
 			}
 
-			if container.Settings == nil {
-				container.Settings = make(map[string]interface{})
-			}
-
 			c.Containers = append(c.Containers, &container)
 		}
 	}
