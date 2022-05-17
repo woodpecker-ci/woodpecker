@@ -4,7 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## 1.0.0
 
-- The signature used to verify extentions webhook calls done by the Woodpecker server switched from using a shared-secret HMac singer to an async signer using an ed25519 key-pair. Read more about it at the [extensions docs]().
+- The signature used to verify extensions calls (like those used for the [config-extension](/docs/administration/external-configuration-api)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](/docs/administration/external-configuration-api) documentation.
 
 ## 0.15.0
 
