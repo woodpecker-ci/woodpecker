@@ -1,10 +1,10 @@
 # Services
 
-Woodpecker provides a services section in the Yaml file used for defining service containers.
+Woodpecker provides a services section in the YAML file used for defining service containers.
 The below configuration composes database and cache containers.
 
 Services are accessed using custom hostnames.
-In the example below, the mysql service is assigned the hostname `database` and is available at `database:3306`.
+In the example below, the MySQL service is assigned the hostname `database` and is available at `database:3306`.
 
 ```diff
 pipeline:
