@@ -210,6 +210,7 @@ func PostHook(c *gin.Context) {
 			step.Proc.State = model.StatusSuccess
 			build.Procs = append(build.Procs, step.Proc)
 		}
+		// TODO: this wont create any builds the status can link to ...
 		if err := updateBuildStatus(c, build, repo, repoUser); err != nil {
 			log.Error().Err(err).Msg("updateBuildStatus")
 		}
