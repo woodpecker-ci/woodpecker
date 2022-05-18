@@ -37,15 +37,16 @@ import (
 
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
-	Repo  *model.Repo
-	Curr  *model.Build
-	Last  *model.Build
-	Netrc *model.Netrc
-	Secs  []*model.Secret
-	Regs  []*model.Registry
-	Link  string
-	Yamls []*remote.FileMeta
-	Envs  map[string]string
+	Repo         *model.Repo
+	Curr         *model.Build
+	Last         *model.Build
+	Netrc        *model.Netrc
+	Secs         []*model.Secret
+	Regs         []*model.Registry
+	Link         string
+	Yamls        []*remote.FileMeta
+	Envs         map[string]string
+	IncludeEmpty bool
 }
 
 type BuildItem struct {
@@ -114,7 +115,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
-			if len(ir.Stages) == 0 {
+			if len(ir.Stages) == 0 && !b.IncludeEmpty {
 				continue
 			}
 
@@ -138,7 +139,6 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one proc can start, if list is not empty
-	procListContainsItemsToRun(items)
 	if len(items) > 0 && !procListContainsItemsToRun(items) {
 		return nil, fmt.Errorf("build has no startpoint")
 	}
