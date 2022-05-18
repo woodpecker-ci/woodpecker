@@ -200,6 +200,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
+	// TODO: move global pipeline filters into own check functions ...
 	if z, steps := zeroSteps(build, remoteYamlConfigs); z {
 		msg := "ignoring hook: step conditions yield zero runnable steps"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
