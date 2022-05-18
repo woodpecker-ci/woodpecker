@@ -55,7 +55,7 @@ matrix:
     - mariadb:10.1
 ```
 
-Example Yaml file after injecting the matrix parameters:
+Example YAML file after injecting the matrix parameters:
 
 ```diff
 pipeline:
