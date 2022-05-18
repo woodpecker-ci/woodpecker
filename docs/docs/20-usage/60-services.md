@@ -95,5 +95,5 @@ pipeline:
     commands:
       - ( apt update && apt dist-upgrade -y && apt install -y mysql-client 2>&1 )> /dev/null
       - sleep 30s # need to wait for mysql-server init
-      - echo 'SHOW VARIABLES LIKE "version"' | mysql -u root -h database test -pexample
+      - echo 'SHOW VARIABLES LIKE "version"' | mysql -uroot -hdatabase test -pexample
 ```
