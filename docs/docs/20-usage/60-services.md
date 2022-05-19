@@ -80,7 +80,7 @@ services:
     image: mysql
 ```
 
-## Example
+## Complete Pipeline Example
 
 ```yml
 services:
