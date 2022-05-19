@@ -201,18 +201,20 @@ func PostHook(c *gin.Context) {
 	}
 
 	// TODO: move global pipeline filters into own check functions ...
-	if z, steps := zeroSteps(build, remoteYamlConfigs); z {
+	z, emptySteps := zeroSteps(build, remoteYamlConfigs)
+	buildEmpty := *build
+	buildEmpty.Status = model.StatusSuccess
+	for _, step := range emptySteps {
+		step.Proc.State = model.StatusSuccess
+		buildEmpty.Procs = append(buildEmpty.Procs, step.Proc)
+	}
+	if err := updateBuildStatus(c, &buildEmpty, repo, repoUser); err != nil {
+		log.Error().Err(err).Msg("updateBuildStatus")
+	}
+	if z {
 		msg := "ignoring hook: step conditions yield zero runnable steps"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusOK, msg)
-		build.Status = model.StatusSuccess
-		for _, step := range steps {
-			step.Proc.State = model.StatusSuccess
-			build.Procs = append(build.Procs, step.Proc)
-		}
-		if err := updateBuildStatus(c, build, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updateBuildStatus")
-		}
 		return
 	}
 
@@ -317,12 +319,12 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, 
 	if err != nil {
 		return false, []*shared.BuildItem{}
 	}
-	b.IncludeEmpty = true
-	buildItems, err := b.Build()
+	b.EmptyOnly = true
+	buildItemsEmpty, err := b.Build()
 	if err != nil {
 		return false, []*shared.BuildItem{}
 	}
-	return len(buildItemsNoEmpty) == 0, buildItems
+	return len(buildItemsNoEmpty) == 0, buildItemsEmpty
 }
 
 func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {

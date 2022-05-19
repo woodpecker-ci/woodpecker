@@ -37,16 +37,16 @@ import (
 
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
-	Repo         *model.Repo
-	Curr         *model.Build
-	Last         *model.Build
-	Netrc        *model.Netrc
-	Secs         []*model.Secret
-	Regs         []*model.Registry
-	Link         string
-	Yamls        []*remote.FileMeta
-	Envs         map[string]string
-	IncludeEmpty bool
+	Repo      *model.Repo
+	Curr      *model.Build
+	Last      *model.Build
+	Netrc     *model.Netrc
+	Secs      []*model.Secret
+	Regs      []*model.Registry
+	Link      string
+	Yamls     []*remote.FileMeta
+	Envs      map[string]string
+	EmptyOnly bool
 }
 
 type BuildItem struct {
@@ -115,7 +115,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
-			if len(ir.Stages) == 0 && !b.IncludeEmpty {
+			if (len(ir.Stages) == 0 && !b.EmptyOnly) || (len(ir.Stages) > 0 && b.EmptyOnly) {
 				continue
 			}
 
