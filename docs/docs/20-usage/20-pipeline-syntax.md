@@ -200,7 +200,7 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 
 ##### Images from private registries
 
-You must provide registry credentials on the UI in order to pull private pipeline images defined in your Yaml configuration file.
+You must provide registry credentials on the UI in order to pull private pipeline images defined in your YAML configuration file.
 
 These credentials are never exposed to your pipeline, which means they cannot be used to push, and are safe to use with pull requests, for example. Pushing to a registry still require setting credentials for the appropriate plugin.
 
@@ -278,7 +278,7 @@ For more details check the [environment docs](/docs/usage/environment/).
 
 ### `secrets`
 
-Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
 For more details check the [secrets docs](/docs/usage/secrets/).
 
@@ -502,7 +502,7 @@ In the above example, the `frontend` and `backend` steps are executed in paralle
 
 ### `volumes`
 
-Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
+Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
 
 For more details check the [volumes docs](/docs/usage/volumes/).
 
@@ -526,7 +526,7 @@ The workspace defines the shared volume and working directory shared by all pipe
 /drone/src/github.com/octocat/hello-world
 ```
 
-The workspace can be customized using the workspace block in the Yaml file:
+The workspace can be customized using the workspace block in the YAML file:
 
 ```diff
 +workspace:
@@ -663,7 +663,7 @@ pipeline:
 
 ## Privileged mode
 
-Woodpecker gives the ability to configure privileged mode in the Yaml. You can use this parameter to launch containers with escalated capabilities.
+Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 > Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
 
