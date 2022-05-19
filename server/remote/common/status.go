@@ -59,6 +59,10 @@ func GetBuildStatusDescription(status model.StatusValue) string {
 }
 
 func GetBuildStatusLink(repo *model.Repo, build *model.Build, proc *model.Proc) string {
+	if !build.Verified {
+		return ""
+	}
+
 	if proc == nil {
 		return fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
 	}
