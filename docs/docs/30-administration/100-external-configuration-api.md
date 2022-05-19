@@ -32,7 +32,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "git_http_url": "",
     "git_ssh_url": "",
     "link": "",
-    "default_branhc": "",
+    "default_branch": "",
     "private": true,
     "visibility": "private",
     "active": true,
