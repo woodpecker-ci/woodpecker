@@ -1,6 +1,6 @@
 # Services
 
-Woodpecker provides a services section in the Yaml file used for defining service containers. The below configuration composes database and cache containers.
+Woodpecker provides a services section in the YAML file used for defining service containers. The below configuration composes database and cache containers.
 
 ```diff
 pipeline:
