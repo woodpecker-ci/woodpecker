@@ -24,10 +24,9 @@ Webhooks are used to trigger pipeline executions. When you push code to your rep
 
 To configure your pipeline you should place a `.woodpecker.yml` file in the root of your repository. The .woodpecker.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
 
-:::info
-
-Currently, only YAML 1.1 syntax is supported for pipeline configuration files. YAML 1.2 support is [planned for the future](https://github.com/woodpecker-ci/woodpecker/issues/517)!
-
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
 :::
 
 Example pipeline configuration:
