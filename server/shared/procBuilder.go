@@ -115,6 +115,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
+			// skip the proc if it is empty, but only non-empty builds are expected or if it is not empty but only empty builds are expected
 			if (len(ir.Stages) == 0 && !b.EmptyOnly) || (len(ir.Stages) > 0 && b.EmptyOnly) {
 				continue
 			}
