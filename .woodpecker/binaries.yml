@@ -9,95 +9,95 @@ pipeline:
       - cd web/
       - yarn install --frozen-lockfile
       - yarn build
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   build-server:
     group: build
     image: golang:1.17
     commands:
       - make release-server
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   build-agent:
     group: build
     image: golang:1.17
     commands:
       - make release-agent
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   build-cli:
     group: build
     image: golang:1.17
     commands:
       - make release-cli
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   build-deb-rpm:
     group: bundle
     image: golang:1.17
     commands:
       - make bundle
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   checksums:
     image: golang:1.17
     commands:
       - make release-checksums
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
@@ -106,16 +106,16 @@ pipeline:
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt
-    when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+#    when:
+#      path:
+#        # related config files
+#        - ".woodpecker/binaries.yml"
+#        - "nfpm/*.yml"
+#        # go source code
+#        - "**/*.go"
+#        - "go.*"
+#        # web source code
+#        - "web/**"
 
   release:
     image: plugins/github-release
