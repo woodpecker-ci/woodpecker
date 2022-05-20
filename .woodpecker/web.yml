@@ -4,8 +4,8 @@ pipeline:
     commands:
       - cd web/
       - yarn install --frozen-lockfile
-#    when:
-#      path: "web/**"
+    when:
+      path: "web/**"
 
   lint:
     group: test
@@ -13,8 +13,8 @@ pipeline:
     commands:
       - cd web/
       - yarn lint
-#    when:
-#      path: "web/**"
+    when:
+      path: "web/**"
 
   formatcheck:
     group: test
@@ -22,8 +22,8 @@ pipeline:
     commands:
       - cd web/
       - yarn formatcheck
-#    when:
-#      path: "web/**"
+    when:
+      path: "web/**"
 
   typecheck:
     group: test
@@ -31,8 +31,8 @@ pipeline:
     commands:
       - cd web/
       - yarn typecheck
-#    when:
-#      path: "web/**"
+    when:
+      path: "web/**"
 
   test:
     group: test
@@ -40,6 +40,6 @@ pipeline:
     commands:
       - cd web/
       - yarn test
-#    when:
-#      path: "web/**"
+    when:
+      path: "web/**"
 

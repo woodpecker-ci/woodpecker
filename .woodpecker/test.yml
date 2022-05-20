@@ -3,38 +3,38 @@ pipeline:
     image: woodpeckerci/woodpecker-cli:next-alpine
     commands:
       - woodpecker-cli lint
-#    when:
-#      path:
-#        - ".woodpecker/**"
+    when:
+      path:
+        - ".woodpecker/**"
 
   dummy-web:
     image: golang:1.17
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
-#        # schema changes
-#        - "pipeline/schema/**"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   lint:
     image: golang:1.17
     group: test
     commands:
       - make lint
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        - ".golangci.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   test:
     image: golang:1.17
@@ -44,15 +44,15 @@ pipeline:
       - make test-server
       - make test-cli
       - make test-lib
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
-#        # schema changes
-#        - "pipeline/schema/**"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
   sqlite:
     image: golang:1.17
@@ -61,13 +61,13 @@ pipeline:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore-coverage
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   postgres:
     image: golang:1.17
@@ -77,13 +77,13 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   mysql:
     image: golang:1.17
@@ -93,13 +93,13 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   codecov:
     pull: true
@@ -112,15 +112,15 @@ pipeline:
         - datastore-coverage.out
       token:
         from_secret: codecov_token
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
-#        # schema changes
-#        - "pipeline/schema/**"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
 
 services:
   service-postgres:
@@ -129,13 +129,13 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
 
   service-mysql:
     image: mysql:5.6.27
@@ -143,10 +143,10 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-#    when:
-#      path:
-#        # related config files
-#        - ".woodpecker/test.yml"
-#        # go source code
-#        - "**/*.go"
-#        - "go.*"
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
