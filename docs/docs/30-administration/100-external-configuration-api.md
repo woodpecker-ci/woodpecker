@@ -85,7 +85,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
   },
   "configs": [
     {
-      "name": ".woodpecekr.yml",
+      "name": ".woodpecker.yml",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecekr.yml)\"\n"
     }
   ]
