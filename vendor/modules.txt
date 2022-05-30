@@ -606,10 +606,6 @@ github.com/ultraware/whitespace
 github.com/urfave/cli/v2
 # github.com/uudashr/gocognit v1.0.5
 github.com/uudashr/gocognit
-# github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
-## explicit
-github.com/woodpecker-ci/expr
-github.com/woodpecker-ci/expr/parse
 # github.com/xanzy/go-gitlab v0.64.0
 ## explicit
 github.com/xanzy/go-gitlab

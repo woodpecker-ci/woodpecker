@@ -92,7 +92,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	})
 
 	// create a default network
-	if strings.HasPrefix(c.metadata.Sys.Arch, windowsPrefix) {
+	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
 			Driver: networkDriverNAT,
