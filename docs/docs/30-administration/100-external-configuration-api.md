@@ -81,9 +81,9 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "updated_at": 0,
     "verified": false
   },
-  "config": [
+  "configs": [
     {
-      "name": ".woodpecekr.yml",
+      "name": ".woodpecker.yml",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecekr.yml)\"\n"
     }
   ]
