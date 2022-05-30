@@ -40,7 +40,6 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 	var err error
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)
-	req.Filter.Expr = f.Expr
 	req.Filter.Labels = f.Labels
 	for {
 		res, err = c.client.Next(ctx, req)

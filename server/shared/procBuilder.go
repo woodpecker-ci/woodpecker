@@ -111,8 +111,6 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				proc.State = model.StatusSkipped
 			}
 
-			metadata.SetPlatform(parsed.Platform)
-
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
 			// skip the proc if it is empty, but only non-empty builds are expected or if it is not empty but only empty builds are expected
@@ -126,7 +124,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
 				RunsOn:    parsed.RunsOn,
-				Platform:  metadata.Sys.Arch,
+				Platform:  parsed.Platform,
 			}
 			if item.Labels == nil {
 				item.Labels = map[string]string{}
@@ -366,10 +364,10 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Matrix: proc.Environ,
 		},
 		Sys: frontend.System{
-			Name: "woodpecker",
-			Link: link,
-			Host: host,
-			Arch: "linux/amd64",
+			Name:     "woodpecker",
+			Link:     link,
+			Host:     host,
+			Platform: "", // will be set by pipeline platform option or by agent
 		},
 	}
 }

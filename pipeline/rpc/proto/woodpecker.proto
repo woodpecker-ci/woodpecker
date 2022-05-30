@@ -31,7 +31,6 @@ message Line {
 
 message Filter {
   map<string, string> labels = 1;
-  string expr = 2;
 }
 
 message Pipeline {

@@ -1,6 +1,6 @@
-# Matrix builds
+# Matrix pipelines
 
-Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
+Woodpecker has integrated support for matrix pipeline. Woodpecker executes a separate pipeline for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
 Example matrix definition:
 
@@ -33,6 +33,15 @@ matrix:
 Matrix variables are interpolated in the yaml using the `${VARIABLE}` syntax, before the yaml is parsed. This is an example yaml file before interpolating matrix parameters:
 
 ```yaml
+matrix:
+  GO_VERSION:
+    - 1.4
+    - 1.3
+  DATABASE:
+    - mysql:5.5
+    - mysql:6.5
+    - mariadb:10.1
+
 pipeline:
   build:
     image: golang:${GO_VERSION}
@@ -44,15 +53,6 @@ pipeline:
 services:
   database:
     image: ${DATABASE}
-
-matrix:
-  GO_VERSION:
-    - 1.4
-    - 1.3
-  DATABASE:
-    - mysql:5.5
-    - mysql:6.5
-    - mariadb:10.1
 ```
 
 Example YAML file after injecting the matrix parameters:
@@ -78,36 +78,61 @@ services:
 
 ## Examples
 
-Example matrix build based on Docker image tag:
+### Example matrix pipeline based on Docker image tag
 
 ```yaml
+matrix:
+  TAG:
+    - 1.7
+    - 1.8
+    - latest
+
 pipeline:
   build:
     image: golang:${TAG}
     commands:
       - go build
       - go test
-
-matrix:
-  TAG:
-    - 1.7
-    - 1.8
-    - latest
 ```
 
-Example matrix build based on Docker image:
+### Example matrix pipeline based on container image
 
 ```yaml
+matrix:
+  IMAGE:
+    - golang:1.7
+    - golang:1.8
+    - golang:latest
+
 pipeline:
   build:
     image: ${IMAGE}
     commands:
       - go build
       - go test
+```
 
+### Example matrix pipeline using multiple platforms
+
+```yaml
 matrix:
-  IMAGE:
-    - golang:1.7
-    - golang:1.8
-    - golang:latest
+  platform:
+    - linux/amd64
+    - linux/arm64
+
+platform: ${platform}
+
+pipeline:
+  test:
+    image: alpine
+    commands:
+      - echo "I am running on ${platform}"
+
+  test-arm-only:
+    image: alpine
+    commands:
+      - echo "I am running on ${platform}"
+      - echo "Arm is cool!"
+    when:
+      platform: linux/arm*
 ```
