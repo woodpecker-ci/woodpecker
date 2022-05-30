@@ -1,7 +1,8 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import useAuthentication from './compositions/useAuthentication';
+import useAuthentication from '~/compositions/useAuthentication';
+import useUserConfig from '~/compositions/useUserConfig';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -26,7 +27,6 @@ const routes: RouteRecordRaw[] = [
     name: 'repos-owner',
     component: (): Component => import('~/views/ReposOwner.vue'),
     props: true,
-    meta: { authentication: 'required' },
   },
   {
     path: '/:repoOwner/:repoName',
@@ -133,6 +133,13 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
+  const config = useUserConfig();
+  const { redirectUrl } = config.userConfig.value;
+  if (redirectUrl !== '') {
+    config.setUserConfig('redirectUrl', '');
+    next(redirectUrl);
+  }
+
   const authentication = useAuthentication();
   if (to.meta.authentication === 'required' && !authentication.isAuthenticated) {
     next({ name: 'login', query: { url: to.fullPath } });

@@ -35,11 +35,11 @@ export default () => {
       return;
     }
 
-    if (isProcFinished(_proc)) {
+    if (_proc.error) {
+      logs.value = undefined;
+    } else if (isProcFinished(_proc)) {
       logs.value = await apiClient.getLogs(owner, repo, build, _proc.pid);
-    }
-
-    if (isProcRunning(_proc)) {
+    } else if (isProcRunning(_proc)) {
       // load stream of parent process (which receives all child processes logs)
       stream = apiClient.streamLogs(owner, repo, build, _proc.ppid, onLogsUpdate);
     }

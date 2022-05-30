@@ -32,6 +32,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // TODO: Implement log streaming.
@@ -98,6 +99,13 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
+
+	// Add sigterm support for internal context.
+	// Required when the pipeline is terminated by external signals
+	// like kubernetes.
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
 
 	canceled := abool.New()
 	go func() {
@@ -242,6 +250,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		proclogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
+			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
@@ -253,6 +262,10 @@ func (r *Runner) Run(ctx context.Context) error {
 			Started:  time.Now().Unix(), // TODO do not do this
 			Finished: time.Now().Unix(),
 		}
+		if state.Process.Error != nil {
+			procState.Error = state.Process.Error.Error()
+		}
+
 		defer func() {
 			proclogger.Debug().Msg("update step status")
 

@@ -185,31 +185,13 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
 		"CI_SYSTEM_VERSION":  version.Version,
 
-		// TODO drop for v0.16.0 development
-		// DEPRECATED
-		"CI_ARCH":                    m.Sys.Platform,                       // use CI_SYSTEM_ARCH
-		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
-		"CI_REMOTE_URL":              m.Repo.Remote,                        // use CI_REPO_REMOTE
-		"CI_REPO_BRANCH":             m.Repo.Branch,                        // use CI_REPO_DEFAULT_BRANCH
-		"CI_PARENT_BUILD_NUMBER":     strconv.FormatInt(m.Curr.Parent, 10), // use CI_BUILD_PARENT
-		"CI_BUILD_TARGET":            m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
-		"CI_DEPLOY_TO":               m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
-		"CI_COMMIT_AUTHOR_NAME":      m.Curr.Commit.Author.Name,            // use CI_COMMIT_AUTHOR
-		"CI_PREV_COMMIT_AUTHOR_NAME": m.Prev.Commit.Author.Name,            // use CI_PREV_COMMIT_AUTHOR
-		"CI_SYSTEM":                  m.Sys.Name,                           // use CI_SYSTEM_NAME
-		"CI_BRANCH":                  m.Curr.Commit.Branch,                 // use CI_COMMIT_BRANCH
-		"CI_SOURCE_BRANCH":           sourceBranch,                         // use CI_COMMIT_SOURCE_BRANCH
-		"CI_TARGET_BRANCH":           targetBranch,                         // use CI_COMMIT_TARGET_BRANCH
-		"CI_TAG":                     "",                                   // use CI_COMMIT_TAG
-		"CI_PULL_REQUEST":            "",                                   // use CI_COMMIT_PULL_REQUEST
+		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after next version
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
-		params["CI_TAG"] = params["CI_COMMIT_TAG"]
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
-		params["CI_PULL_REQUEST"] = params["CI_COMMIT_PULL_REQUEST"]
 	}
 
 	return params

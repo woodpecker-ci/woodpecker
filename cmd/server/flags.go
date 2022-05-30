@@ -165,11 +165,6 @@ var flags = []cli.Flag{
 		Usage:   "registry plugin endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GATEKEEPER_ENDPOINT"},
-		Name:    "gating-service",
-		Usage:   "gated build endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
@@ -205,6 +200,12 @@ var flags = []cli.Flag{
 		Name:    "status-context",
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
+		Name:    "status-context-format",
+		Usage:   "status context format",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
 	//
 	// resource limit parameters
