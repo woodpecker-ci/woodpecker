@@ -32,7 +32,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "git_http_url": "",
     "git_ssh_url": "",
     "link": "",
-    "default_branhc": "",
+    "default_branch": "",
     "private": true,
     "visibility": "private",
     "active": true,
@@ -83,9 +83,9 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "updated_at": 0,
     "verified": false
   },
-  "config": [
+  "configs": [
     {
-      "name": ".woodpecekr.yml",
+      "name": ".woodpecker.yml",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecekr.yml)\"\n"
     }
   ]

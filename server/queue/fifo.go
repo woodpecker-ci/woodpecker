@@ -26,7 +26,7 @@ type entry struct {
 }
 
 type worker struct {
-	filter  Filter
+	filter  FilterFn
 	channel chan *Task
 }
 
@@ -74,7 +74,7 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
+func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 	q.Lock()
 	w := &worker{
 		channel: make(chan *Task, 1),

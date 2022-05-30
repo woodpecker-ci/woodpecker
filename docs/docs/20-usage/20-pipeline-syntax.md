@@ -96,26 +96,6 @@ pipeline:
 +  exclude: [ develop, feature/* ]
 ```
 
-### `platform`
-
-To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
-
-Example:
-
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
-
-```diff
-+platform: linux/arm64
-
- pipeline:
-   build:
-     image: golang
-     commands:
-       - go build
-       - go test
-```
-
 ### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
@@ -200,7 +180,7 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 
 ##### Images from private registries
 
-You must provide registry credentials on the UI in order to pull private pipeline images defined in your Yaml configuration file.
+You must provide registry credentials on the UI in order to pull private pipeline images defined in your YAML configuration file.
 
 These credentials are never exposed to your pipeline, which means they cannot be used to push, and are safe to use with pull requests, for example. Pushing to a registry still require setting credentials for the appropriate plugin.
 
@@ -278,7 +258,7 @@ For more details check the [environment docs](/docs/usage/environment/).
 
 ### `secrets`
 
-Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
 For more details check the [secrets docs](/docs/usage/secrets/).
 
@@ -376,11 +356,13 @@ when:
 
 #### `tag`
 
-Execute a step if the tag name starts with `release`:
+This filter only applies to tag events.
+Use glob expression to execute a step if the tag name starts with `v`:
 
 ```diff
 when:
-  tag: release*
+  event: tag
+  tag: v*
 ```
 
 #### `status`
@@ -398,6 +380,10 @@ pipeline:
 ```
 
 #### `platform`
+
+:::note
+This condition should be used in conjunction with a [matrix](/docs/usage/matrix-pipelines#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
+:::
 
 Execute a step for a specific platform:
 
@@ -446,8 +432,8 @@ when:
 #### `path`
 
 :::info
-Path conditions are applied only to **push** and **pull_request** events.  
-It is currently **only available** for GitHub, GitLab.  
+Path conditions are applied only to **push** and **pull_request** events.
+It is currently **only available** for GitHub, GitLab.
 Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
 :::
 
@@ -500,7 +486,7 @@ In the above example, the `frontend` and `backend` steps are executed in paralle
 
 ### `volumes`
 
-Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
+Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
 
 For more details check the [volumes docs](/docs/usage/volumes/).
 
@@ -524,7 +510,7 @@ The workspace defines the shared volume and working directory shared by all pipe
 /drone/src/github.com/octocat/hello-world
 ```
 
-The workspace can be customized using the workspace block in the Yaml file:
+The workspace can be customized using the workspace block in the YAML file:
 
 ```diff
 +workspace:
@@ -584,7 +570,52 @@ git clone https://github.com/octocat/hello-world \
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
-For more details check the [matrix build docs](/docs/usage/matrix-builds/).
+For more details check the [matrix build docs](/docs/usage/matrix-pipelines/).
+
+## `platform`
+
+To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
+```diff
++platform: linux/arm64
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
+
+## `labels`
+
+You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
+
+To set additional agent labels check the [agent configuration options](/docs/administration/agent-config#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+
+Pipeline labels with an empty value will be ignored.
+By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
+
+You can add additional labels as a key value map:
+
+```diff
++labels:
++  location: europe # only agents with `location=europe` or `location=*` will be used
++  weather: sun
++  hostname: "" # this label will be ignored as it is empty
+
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
 
 ## `clone`
 
@@ -661,7 +692,7 @@ pipeline:
 
 ## Privileged mode
 
-Woodpecker gives the ability to configure privileged mode in the Yaml. You can use this parameter to launch containers with escalated capabilities.
+Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 > Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
 
