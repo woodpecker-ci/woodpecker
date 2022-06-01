@@ -1,19 +1,6 @@
 <template>
   <div class="flex flex-col w-full md:w-3/12 text-gray-200 dark:text-gray-400 bg-gray-600 dark:bg-dark-gray-800">
-    <div
-      class="
-        flex
-        py-4
-        px-2
-        mx-2
-        space-x-1
-        justify-between
-        flex-shrink-0
-        text-gray-500
-        border-b-1
-        dark:border-dark-gray-600
-      "
-    >
+    <div class="flex py-4 px-2 mx-2 space-x-1 justify-between flex-shrink-0 border-b-1 dark:border-dark-gray-600">
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
         <span>{{ build.author }}</span>
