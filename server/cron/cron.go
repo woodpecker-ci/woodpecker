@@ -91,15 +91,15 @@ func createBuild(job *model.CronJob, store store.Store) (*model.Repo, *model.Bui
 	}
 
 	return repo, &model.Build{
-		Event:     model.EventCron,
-		Commit:    commit,
-		Ref:       "refs/heads/" + branch,
-		Branch:    job.Branch,
-		Message:   job.Title,
-		Avatar:    avatarFromUser(cj.AuthorID),
-		Author:    getUser(cj.AuthorID),
-		Email:     getMail(cj.AuthorID),
-		Timestamp: time.Now().UTC().Unix(),
+		Event:   model.EventCron,
+		Commit:  commit,
+		Ref:     "refs/heads/" + job.Branch,
+		Branch:  job.Branch,
+		Message: job.Title,
+		// Avatar:    avatarFromUser(cj.AuthorID),
+		// Author:    getUser(cj.AuthorID),
+		// Email:     getMail(cj.AuthorID),
+		Timestamp: job.NextExec,
 		Sender:    "TODO: Cron?",
 	}, nil
 }

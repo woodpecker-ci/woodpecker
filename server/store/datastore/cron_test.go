@@ -78,11 +78,14 @@ func TestCronGetLock(t *testing.T) {
 	job1 := &model.CronJob{RepoID: 1, Title: "some-title", NextExec: 10000}
 	assert.NoError(t, store.CronCreate(job1))
 
+	oldJob := *job1
 	gotLock, err = store.CronGetLock(job1, job1.NextExec+1000)
 	assert.NoError(t, err)
 	assert.True(t, gotLock)
+	assert.NotEqualValues(t, oldJob.NextExec, job1.NextExec)
 
-	gotLock, err = store.CronGetLock(job1, job1.NextExec+1000)
+	gotLock, err = store.CronGetLock(&oldJob, oldJob.NextExec+1000)
 	assert.NoError(t, err)
 	assert.False(t, gotLock)
+	assert.EqualValues(t, oldJob.NextExec, oldJob.NextExec)
 }

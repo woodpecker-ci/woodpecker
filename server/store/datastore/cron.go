@@ -46,5 +46,11 @@ func (s storage) CronDelete(id int64) error {
 func (s storage) CronGetLock(job *model.CronJob, newNextExec int64) (bool, error) {
 	cols, err := s.engine.ID(job.ID).Where(builder.Eq{"next_exec": job.NextExec}).
 		Cols("next_exec").Update(&model.CronJob{NextExec: newNextExec})
-	return cols != 0, err
+	gotLock := cols != 0
+
+	if err == nil && gotLock {
+		job.NextExec = newNextExec
+	}
+
+	return gotLock, err
 }
