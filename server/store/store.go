@@ -151,8 +151,7 @@ type Store interface {
 
 	// Cron
 	CronCreate(*model.CronJob) error
-	// TODO
-	CronList(execUnixAfterOrBefore int64) ([]*model.CronJob, error)
+	CronList(int64, int64) ([]*model.CronJob, error)
 	CronDelete(int64) error
 	CronGetLock(*model.CronJob, int64) (bool, error)
 
