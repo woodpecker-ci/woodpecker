@@ -26,8 +26,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// checkTime specify the interfall woodpecker look for new cron jobs to exec
-const checkTime = time.Minute
+const (
+	// checkTime specify the interfall woodpecker look for new cron jobs to exec
+	checkTime = time.Minute
+
+	// checkItems specify the jobs to retrieve per check interfall from database
+	checkItems = 10
+)
 
 // Start starts the cron functionality
 func Start(ctx context.Context, store store.Store) {
@@ -37,7 +42,7 @@ func Start(ctx context.Context, store store.Store) {
 	case <-time.After(checkTime):
 		go func() {
 			now := time.Now().Unix()
-			jobs, err := store.CronList(now, 10)
+			jobs, err := store.CronList(now, checkItems)
 			if err != nil {
 				log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
 				return
