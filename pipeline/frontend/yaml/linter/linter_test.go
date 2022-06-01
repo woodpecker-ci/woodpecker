@@ -7,7 +7,7 @@ import (
 )
 
 func TestLint(t *testing.T) {
-	testdatas := []string{`
+	testdatas := []struct{ Title, Data string }{{Title: "map", Data: `
 pipeline:
   build:
     image: docker
@@ -28,7 +28,7 @@ services:
     image: redis
     entrypoint: [ /bin/redis-server ]
     command: [ -v ]
-`, `
+`}, {Title: "list", Data: `
 pipeline:
   - build:
       image: docker
@@ -44,16 +44,18 @@ pipeline:
       repo: foo/bar
       settings:
         foo: bar
-`}
+`}}
 
 	for _, testd := range testdatas {
-		conf, err := yaml.ParseString(testd)
-		if err != nil {
-			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd, err)
-		}
-		if err := New(WithTrusted(true)).Lint(conf); err != nil {
-			t.Errorf("Expected lint returns no errors, got %q", err)
-		}
+		t.Run(testd.Title, func(t *testing.T) {
+			conf, err := yaml.ParseString(testd.Data)
+			if err != nil {
+				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd, err)
+			}
+			if err := New(WithTrusted(true)).Lint(conf); err != nil {
+				t.Errorf("Expected lint returns no errors, got %q", err)
+			}
+		})
 	}
 }
 
