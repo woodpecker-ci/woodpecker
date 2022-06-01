@@ -30,20 +30,20 @@ services:
     command: [ -v ]
 `}, {Title: "list", Data: `
 pipeline:
-  - build:
-      image: docker
-      privileged: true
-      network_mode: host
-      volumes:
-        - /tmp:/tmp
-      commands:
-        - go build
-        - go test
-  - publish:
-      image: plugins/docker
-      repo: foo/bar
-      settings:
-        foo: bar
+  - name: build
+    image: docker
+    privileged: true
+    network_mode: host
+    volumes:
+      - /tmp:/tmp
+    commands:
+      - go build
+      - go test
+  - name: publish
+    image: plugins/docker
+    repo: foo/bar
+    settings:
+      foo: bar
 `}}
 
 	for _, testd := range testdatas {

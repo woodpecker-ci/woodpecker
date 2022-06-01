@@ -5,7 +5,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
@@ -64,61 +63,53 @@ type (
 	}
 )
 
-func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
-	return c.Constraints.Match(meta)
-}
-
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
-	// TODO: Deprecate pipeline as map to achieve proper yaml
-	decodeFromMap := func() ([]*Container, error) {
-		containers := []*Container{}
+	switch value.Kind {
+
+	// We support mapps ...
+	case yaml.MappingNode:
+		c.Containers = make([]*Container, 0, len(value.Content)/2+1)
 		// We cannot use decode on specific values
 		// since if we try to load from a map, the order
 		// will not be kept. Therefore use value.Content
 		// and take the map values i%2=1
 		for i, n := range value.Content {
 			if i%2 == 1 {
-				container := Container{}
-				err := n.Decode(&container)
+				container := &Container{}
+				err := n.Decode(container)
 				if err != nil {
-					return containers, err
+					return err
 				}
 
 				if container.Name == "" {
 					container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
 				}
 
-				containers = append(containers, &container)
+				c.Containers = append(c.Containers, container)
 			}
 		}
-		return containers, nil
-	}
 
-	decodeFromList := func() ([]*Container, error) {
-		containers := []*Container{}
-		err := value.Decode(&containers)
-		if err != nil {
-			return containers, err
-		}
-		for i, container := range containers {
+	// ... and lists
+	case yaml.SequenceNode:
+		c.Containers = make([]*Container, 0, len(value.Content))
+		for i, n := range value.Content {
+			container := &Container{}
+			err := n.Decode(container)
+			if err != nil {
+				return err
+			}
+
 			if container.Name == "" {
 				container.Name = fmt.Sprintf("step-%d", i)
 			}
+
+			c.Containers = append(c.Containers, container)
 		}
-		return containers, nil
-	}
 
-	containers, err := decodeFromList()
-	if err != nil {
-		containers, err = decodeFromMap()
+	default:
+		return fmt.Errorf("yaml node type[%d]: '%s' not supported", value.Kind, value.Tag)
 	}
-	if err != nil {
-		return err
-	}
-
-	// Load and validate the container values.
-	c.Containers = containers
 
 	return nil
 }
