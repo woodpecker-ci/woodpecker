@@ -235,6 +235,7 @@ func TestUnmarshalContainers(t *testing.T) {
 func TestUnmarshalContainersErr(t *testing.T) {
 	testdata := []string{
 		"foo: { name: [ foo, bar] }",
+		"- foo",
 	}
 	for _, test := range testdata {
 		in := []byte(test)
