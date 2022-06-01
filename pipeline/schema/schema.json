@@ -17,6 +17,8 @@
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
+    "platform": { "$ref": "#/definitions/platform" },
+    "labels": { "$ref": "#/definitions/labels" },
     "skip_clone": { "type": "boolean" },
     "depends_on": {
       "type": "array",
@@ -269,7 +271,7 @@
           "oneOf": [
             { "type": "string" },
             {
-              "type" :"array",
+              "type": "array",
               "items": {
                 "type": "string"
               }
@@ -310,7 +312,7 @@
       "additionalProperties": true
     },
     "matrix": {
-      "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/matrix-builds",
+      "description": "Execute pipeline for each matrix combination. Read more: https://woodpecker-ci.org/docs/usage/matrix-pipelines",
       "type": "object",
       "properties": {
         "include": {
@@ -327,6 +329,18 @@
           "type": ["boolean", "string", "number"]
         },
         "minLength": 1
+      }
+    },
+    "platform": {
+      "description": "Configures the platform the pipeline will be executed on. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#platform",
+      "type": "string",
+      "additionalProperties": false
+    },
+    "labels": {
+      "description": "Configures the labels used for the agent selection. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#clone",
+      "type": "object",
+      "additionalProperties": {
+        "type": ["boolean", "string", "number"]
       }
     }
   }

@@ -93,7 +93,7 @@ func (s *Stmt) ExecContext(ctx context.Context, args ...interface{}) (sql.Result
 	if err != nil {
 		return nil, err
 	}
-	res, err := s.Stmt.ExecContext(ctx, args)
+	res, err := s.Stmt.ExecContext(ctx, args...)
 	hookCtx.End(ctx, res, err)
 	if err := s.db.afterProcess(hookCtx); err != nil {
 		return nil, err

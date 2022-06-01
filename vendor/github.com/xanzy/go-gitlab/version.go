@@ -42,8 +42,8 @@ func (s Version) String() string {
 // authenticated users.
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/version.md
-func (s *VersionService) GetVersion() (*Version, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, "version", nil, nil)
+func (s *VersionService) GetVersion(options ...RequestOptionFunc) (*Version, *Response, error) {
+	req, err := s.client.NewRequest(http.MethodGet, "version", nil, options)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -278,8 +278,16 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Branches returns the names of all branches for the named repository.
 func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range bitbucketBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
@@ -290,6 +298,9 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 // helper function to return the bitbucket oauth2 client
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
+	if u == nil {
+		return c.newClientToken(ctx, "", "")
+	}
 	return c.newClientToken(ctx, u.Token, u.Secret)
 }
 

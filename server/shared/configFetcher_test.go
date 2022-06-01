@@ -2,21 +2,22 @@ package shared_test
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/httpsignatures-go"
+	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/configuration"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -244,7 +245,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := shared.NewConfigFetcher(
 				r,
-				configuration.NewAPI("", ""),
+				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -341,17 +342,29 @@ func TestFetchFromConfigService(t *testing.T) {
 		},
 	}
 
-	httpSigSecret := "wykf9frJbGXwSHcJ7AQF4tlfXUo0Tkixh57WPEXMyWVgkxIsAarYa2Hb8UTwPpbqO0N3NueKwjv4DVhPgvQjGur3LuCbiGHbBoaL1X5gZ9oyxD2lBHndoNxifDyNH7tNPw3Lh5lX2MSrWP1yuqHp8Sgm7fX8pLTjaKKFgFIKlODd"
+	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal("can't generate ed25519 key pair")
+	}
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
-		signature, err := httpsignatures.FromRequest(r)
+		pubKeyID := "woodpecker-ci-plugins"
+
+		keystore := httpsig.NewMemoryKeyStore()
+		keystore.SetKey(pubKeyID, pubEd25519Key)
+
+		verifier := httpsig.NewVerifier(keystore)
+		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
+
+		keyID, err := verifier.Verify(r)
 		if err != nil {
-			http.Error(w, "Invalid or Missing Signature", http.StatusBadRequest)
+			http.Error(w, "Invalid signature", http.StatusBadRequest)
 			return
 		}
-		if !signature.IsValid(httpSigSecret, r) {
-			http.Error(w, "Invalid Signature", http.StatusBadRequest)
+
+		if keyID != pubKeyID {
+			http.Error(w, "Used wrong key", http.StatusBadRequest)
 			return
 		}
 
@@ -369,7 +382,6 @@ func TestFetchFromConfigService(t *testing.T) {
 		var req incoming
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error reading body: %v", err)
 			http.Error(w, "can't read body", http.StatusBadRequest)
 			return
 		}
@@ -409,7 +421,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := configuration.NewAPI(ts.URL, httpSigSecret)
+	configAPI := config.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

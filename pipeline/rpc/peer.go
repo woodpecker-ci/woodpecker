@@ -10,7 +10,6 @@ type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
 		Labels map[string]string `json:"labels"`
-		Expr   string            `json:"expr"`
 	}
 
 	// State defines the pipeline state.

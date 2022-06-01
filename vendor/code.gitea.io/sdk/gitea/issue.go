@@ -71,6 +71,10 @@ type ListIssueOption struct {
 	AssignedBy string
 	// filter by username mentioned
 	MentionedBy string
+	// filter by owner (only works on ListIssues on User)
+	Owner string
+	// filter by team (requires organization owner parameter to be provided and only works on ListIssues on User)
+	Team string
 }
 
 // StateType issue state type
@@ -134,6 +138,12 @@ func (opt *ListIssueOption) QueryEncode() string {
 	}
 	if len(opt.MentionedBy) > 0 {
 		query.Add("mentioned_by", opt.MentionedBy)
+	}
+	if len(opt.Owner) > 0 {
+		query.Add("owner", opt.Owner)
+	}
+	if len(opt.Team) > 0 {
+		query.Add("team", opt.MentionedBy)
 	}
 
 	return query.Encode()

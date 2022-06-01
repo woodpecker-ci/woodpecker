@@ -68,7 +68,8 @@ type Note struct {
 		AvatarURL string `json:"avatar_url"`
 		WebURL    string `json:"web_url"`
 	} `json:"resolved_by"`
-	NoteableIID int `json:"noteable_iid"`
+	ResolvedAt  *time.Time `json:"resolved_at"`
+	NoteableIID int        `json:"noteable_iid"`
 }
 
 // NotePosition represents the position attributes of a note.

@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-gray-500">Badge</h1>
+      <h1 class="text-xl ml-2 text-gray-500">{{ $t('repo.settings.badge.badge') }}</h1>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
       </a>
@@ -9,17 +9,17 @@
 
     <div class="flex flex-col space-y-4">
       <div>
-        <h2 class="text-lg text-gray-500 ml-2">Url</h2>
+        <h2 class="text-lg text-gray-500 ml-2">{{ $t('url') }}</h2>
         <pre class="box">{{ baseUrl }}{{ badgeUrl }}</pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-gray-500 ml-2">Url for specific branch</h2>
+        <h2 class="text-lg text-gray-500 ml-2">{{ $t('repo.settings.badge.url_branch') }}</h2>
         <pre class="box">{{ baseUrl }}{{ badgeUrl }}?branch=<span class="font-bold">&lt;branch&gt;</span></pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-gray-500 ml-2">Markdown</h2>
+        <h2 class="text-lg text-gray-500 ml-2">{{ $t('repo.settings.badge.markdown') }}</h2>
         <pre class="box">[![status-badge]({{ baseUrl }}{{ badgeUrl }})]({{ baseUrl }}{{ repoUrl }})</pre>
       </div>
     </div>
