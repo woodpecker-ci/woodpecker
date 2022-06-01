@@ -32,8 +32,8 @@ var migrationTasks = []*task{
 	&alterTableReposDropAllowDeploysAllowTags,
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
-	&addServerConfigTable,
 	&dropSenders,
+	&addServerConfigTable,
 }
 
 var allBeans = []interface{}{
