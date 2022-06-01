@@ -34,8 +34,7 @@ func (s storage) CronCreate(job *model.CronJob) error {
 // is less or equal than unitx timestamp
 func (s storage) CronList(nextExec, limit int64) ([]*model.CronJob, error) {
 	jobs := make([]*model.CronJob, 0, 10)
-	s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(jobs)
-	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(jobs)
+	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
 }
 
 func (s storage) CronDelete(id int64) error {

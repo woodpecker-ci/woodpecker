@@ -42,7 +42,28 @@ func TestCronCreate(t *testing.T) {
 }
 
 func TestCronList(t *testing.T) {
-	// TODO CronList
+	store, closer := newTestStore(t, new(model.CronJob))
+	defer closer()
+
+	jobs, err := store.CronList(0, 10)
+	assert.NoError(t, err)
+	assert.Len(t, jobs, 0)
+
+	now := time.Now().Unix()
+
+	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "some", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "aaaa", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "bbbb", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "none", RepoID: 1, NextExec: now + 1000}))
+	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "test", RepoID: 1, NextExec: now + 2000}))
+
+	jobs, err = store.CronList(now, 10)
+	assert.NoError(t, err)
+	assert.Len(t, jobs, 3)
+
+	jobs, err = store.CronList(now+1500, 10)
+	assert.NoError(t, err)
+	assert.Len(t, jobs, 4)
 }
 
 func TestCronGetLock(t *testing.T) {
