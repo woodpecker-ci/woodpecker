@@ -77,8 +77,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		for i, n := range value.Content {
 			if i%2 == 1 {
 				container := &Container{}
-				err := n.Decode(container)
-				if err != nil {
+				if err := n.Decode(container); err != nil {
 					return err
 				}
 
@@ -95,8 +94,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 		c.Containers = make([]*Container, 0, len(value.Content))
 		for i, n := range value.Content {
 			container := &Container{}
-			err := n.Decode(container)
-			if err != nil {
+			if err := n.Decode(container); err != nil {
 				return err
 			}
 
