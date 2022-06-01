@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-fed/httpsig"
+	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -349,21 +349,22 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
-		verifier, err := httpsig.NewVerifier(r)
-		if err != nil {
-			http.Error(w, "Invalid or missing Signature", http.StatusBadRequest)
-			return
-		}
+		pubKeyID := "woodpecker-ci-plugins"
 
-		pubKeyID := verifier.KeyId()
-		if pubKeyID != "woodpecker-ci-plugins" {
-			http.Error(w, "Invalid signature key id", http.StatusBadRequest)
-			return
-		}
+		keystore := httpsig.NewMemoryKeyStore()
+		keystore.SetKey(pubKeyID, pubEd25519Key)
 
-		err = verifier.Verify(pubEd25519Key, httpsig.ED25519)
+		verifier := httpsig.NewVerifier(keystore)
+		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
+
+		keyId, err := verifier.Verify(r)
 		if err != nil {
 			http.Error(w, "Invalid signature", http.StatusBadRequest)
+			return
+		}
+
+		if keyId != pubKeyID {
+			http.Error(w, "Used wrong key", http.StatusBadRequest)
 			return
 		}
 
