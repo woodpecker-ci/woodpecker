@@ -66,7 +66,6 @@ type (
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Kind {
-
 	// We support mapps ...
 	case yaml.MappingNode:
 		c.Containers = make([]*Container, 0, len(value.Content)/2+1)
