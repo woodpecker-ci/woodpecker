@@ -16,55 +16,90 @@ package cron
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/robfig/cron"
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func StartLoop(ctx context.Context, store store.Store) {
-	// TODO
-}
+// checkTime specify the interfall woodpecker look for new cron jobs to exec
+const checkTime = time.Minute
 
-/*
-
-// ExclusiveUpdateNext only update if next_exec has not changed
-// It then calculates next exec time and save it
-func ExclusiveUpdateNext(cj *CronJob) {
-		oldExec := cj.NextExec
-		cj.NextExec = calc(cj.NextExec+cj.Schedule.Unix()))
-		updated, err :=engine.Where("id=? AND next_exec=?", cj.IDm oldExec).Cols("next_exec").Update(cj)
-		err != nil -> well error handling
-		if updated == 0 {
-			-> no excluseive lock -> somebody else did the job
-		}
-}
-
-next_exec -> sql(select * where next_exec <= now())
-
-
-for each min {
-	for each db.getNextExecs(repo.IsActive, time.Now())... {
-		branch := cj.Branch
-		repo := getRepo(cj.RepoID)
-		if branch == "" {
-			branch = repo.DefaultBranch
-		}
-
-		commit, err := remote.GetLatestCommit(repo, branch)
-
-		return repo, &model.Build{
-			Event:        model.EventCron,
-			Commit:       commit,
-			Ref:          "refs/heads/"+branch,
-			Branch:       branch,
-			Message:      cj.Title,
-			Avatar:       avatarFromUser(cj.AuthorID),
-			Author:       getUser(cj.AuthorID),
-			Email:        getMail(cj.AuthorID),
-			Timestamp:    time.Now().UTC().Unix(),
-			Sender:       "TODO: Cron?",
-		}
-		) -> (*model.Repo, *model.Build, error)
+// Start starts the cron functionality
+func Start(ctx context.Context, store store.Store) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(checkTime):
+		go func() {
+			now := time.Now().Unix()
+			jobs, err := store.CronList(now, 10)
+			if err != nil {
+				log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
+				return
+			}
+			for _, job := range jobs {
+				if err := runJob(job, store); err != nil {
+					log.Error().Err(err).Int64("jobID", job.ID).Msg("run cron job failed")
+				}
+			}
+		}()
 	}
 }
 
-*/
+func runJob(job *model.CronJob, store store.Store) error {
+	schedule, err := cron.Parse(job.Schedule)
+	if err != nil {
+		return fmt.Errorf("cron parse schedule: %v", err)
+	}
+	newNext := schedule.Next(time.Unix(job.NextExec, 0))
+
+	// try to get lock on cron job
+	gotLock, err := store.CronGetLock(job, newNext.Unix())
+	if err != nil {
+		return err
+	}
+	if !gotLock {
+		// a other go routine catched it
+		return nil
+	}
+
+	repo, build, err := createBuild(job, store)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\n%#v\n%#v\n", repo, build)
+	// TODO -> build start
+
+	return nil
+}
+
+func createBuild(job *model.CronJob, store store.Store) (*model.Repo, *model.Build, error) {
+	repo, err := store.GetRepo(job.RepoID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	commit, err := "", nil // remote.GetLatestCommit(repo, branch)
+
+	if job.Branch == "" {
+		job.Branch = repo.Branch
+	}
+
+	return repo, &model.Build{
+		Event:     model.EventCron,
+		Commit:    commit,
+		Ref:       "refs/heads/" + branch,
+		Branch:    job.Branch,
+		Message:   job.Title,
+		Avatar:    avatarFromUser(cj.AuthorID),
+		Author:    getUser(cj.AuthorID),
+		Email:     getMail(cj.AuthorID),
+		Timestamp: time.Now().UTC().Unix(),
+		Sender:    "TODO: Cron?",
+	}, nil
+}

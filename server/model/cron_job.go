@@ -19,9 +19,9 @@ type CronJob struct {
 	ID        int64  `json:"id"                  xorm:"pk autoincr"`
 	Title     string `json:"title"               xorm:"UNIQUE(s) INDEX"`
 	RepoID    int64  `json:"repo_id"             xorm:"repo_id UNIQUE(s) INDEX"`
-	CreatorID int64  `json:"creator_id"           xorm:"creator_id INDEX"`
+	CreatorID int64  `json:"creator_id"          xorm:"creator_id INDEX"`
 	NextExec  int64
-	Schedule  string // @weekly, 3min, ...
+	Schedule  string `                           xorm:"NOT NULL"` // @weekly, 3min, ...
 	Created   int64  `json:"created_at"          xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string `json:"branch"`
 }
