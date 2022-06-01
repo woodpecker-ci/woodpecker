@@ -145,6 +145,10 @@ type Store interface {
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
 
+	// ServerConfig
+	ServerConfigGet(string) (string, error)
+	ServerConfigSet(string, string) error
+
 	// Store operations
 	Ping() error
 	Close() error

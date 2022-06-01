@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20220501190934-319a978c6c71
-	github.com/99designs/httpsignatures-go v0.0.0-20170731043157-88528bf4ca7e
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/containerd/containerd v1.5.9 // indirect
@@ -19,6 +18,7 @@ require (
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-ap/httpsig v0.0.0-20210714162115-62a09257db51
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.7 // indirect
