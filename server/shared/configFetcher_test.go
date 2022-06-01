@@ -357,13 +357,13 @@ func TestFetchFromConfigService(t *testing.T) {
 		verifier := httpsig.NewVerifier(keystore)
 		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
 
-		keyId, err := verifier.Verify(r)
+		keyID, err := verifier.Verify(r)
 		if err != nil {
 			http.Error(w, "Invalid signature", http.StatusBadRequest)
 			return
 		}
 
-		if keyId != pubKeyID {
+		if keyID != pubKeyID {
 			http.Error(w, "Used wrong key", http.StatusBadRequest)
 			return
 		}
