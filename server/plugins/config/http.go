@@ -31,7 +31,7 @@ type responseStructure struct {
 	Configs []config `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) ConfigService {
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Extension {
 	return &http{endpoint, privateKey}
 }
 

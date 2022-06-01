@@ -18,7 +18,7 @@ require (
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gin-gonic/gin v1.7.7
-	github.com/go-fed/httpsig v1.1.0
+	github.com/go-ap/httpsig v0.0.0-20210714162115-62a09257db51
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.7 // indirect
@@ -44,7 +44,6 @@ require (
 	github.com/tevino/abool v1.2.0
 	github.com/ugorji/go v1.2.7 // indirect
 	github.com/urfave/cli/v2 v2.5.1
-	github.com/woodpecker-ci/expr v0.0.0-20210628233344-164b8b3d0915
 	github.com/xanzy/go-gitlab v0.64.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0

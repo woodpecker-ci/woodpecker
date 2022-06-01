@@ -3,7 +3,7 @@
 To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP api which can be enabled to call an external config extension.
 Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP api sending the current repository, build information and all current config files retrieved from the repository. The external webservice can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
 
-Every request sent by Woodpecker is signed using a http-signature . Learn more about here.
+Every request sent by Woodpecker is signed using a [http-signature](https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures) by a private key (ed25519) generated on the first start of the Woodpecker server. You can get the public key for the verification of the http-signature from `http(s)://your-woodpecker-server/api/signature/public-key`.
 
 A simplistic example configuration extension can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
 
@@ -30,7 +30,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "git_http_url": "",
     "git_ssh_url": "",
     "link": "",
-    "default_branhc": "",
+    "default_branch": "",
     "private": true,
     "visibility": "private",
     "active": true,
@@ -81,9 +81,9 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "updated_at": 0,
     "verified": false
   },
-  "config": [
+  "configs": [
     {
-      "name": ".woodpecekr.yml",
+      "name": ".woodpecker.yml",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecekr.yml)\"\n"
     }
   ]

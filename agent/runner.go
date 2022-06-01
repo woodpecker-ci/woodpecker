@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -283,7 +284,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		// TODO: find better way to update this state
+		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
@@ -292,6 +293,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"

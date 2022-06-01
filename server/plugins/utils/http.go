@@ -10,38 +10,30 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
-	"time"
 
-	"github.com/go-fed/httpsig"
+	"github.com/go-ap/httpsig"
 )
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
 func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
-	if !strings.HasSuffix(path, "/") {
-		path += "/" // TODO(anbraten): remove after https://github.com/go-fed/httpsig/pull/27 got merged
-	}
-
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
 	}
 
 	// if we are posting or putting data, we need to write it to the body of the request.
-	var payload io.Reader
-	var body []byte
+	var buf io.ReadWriter
 	if in != nil {
-		var err error
-		body, err = json.Marshal(in)
-		if err != nil {
-			return 0, err
+		buf = new(bytes.Buffer)
+		jsonerr := json.NewEncoder(buf).Encode(in)
+		if jsonerr != nil {
+			return 0, jsonerr
 		}
-		payload = bytes.NewReader(body)
 	}
 
 	// creates a new http request to the endpoint.
-	req, err := http.NewRequestWithContext(ctx, method, uri.String(), payload)
+	req, err := http.NewRequestWithContext(ctx, method, uri.String(), buf)
 	if err != nil {
 		return 0, err
 	}
@@ -49,7 +41,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	err = SignHTTPRequest(privateKey, req, body)
+	err = SignHTTPRequest(privateKey, req)
 	if err != nil {
 		return 0, err
 	}
@@ -74,21 +66,10 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	return resp.StatusCode, err
 }
 
-func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request, body []byte) error {
+func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request) error {
 	pubKeyID := "woodpecker-ci-plugins"
 
-	prefs := []httpsig.Algorithm{httpsig.ED25519}
-	headers := []string{httpsig.RequestTarget, "date"}
-	if body != nil {
-		headers = append(headers, "digest", "content-type")
-	}
-	signer, _, err := httpsig.NewSigner(prefs, httpsig.DigestSha256, headers, httpsig.Signature, 0)
-	if err != nil {
-		return err
-	}
+	signer := httpsig.NewEd25519Signer(pubKeyID, privateKey, nil)
 
-	req.Header.Add("date", time.Now().UTC().Format(http.TimeFormat))
-
-	err = signer.SignRequest(privateKey, pubKeyID, req, body)
-	return err
+	return signer.Sign(req)
 }

@@ -24,7 +24,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -32,16 +31,16 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub     pubsub.Publisher
-		Queue      queue.Queue
-		Logs       logging.Log
-		Senders    sender.SenderService
-		Secrets    model.SecretService
-		Registries model.RegistryService
-		Environ    model.EnvironService
-		Remote     remote.Remote
-		Config     config.ConfigService
-		PrivateKey crypto.PrivateKey
+		Pubsub              pubsub.Publisher
+		Queue               queue.Queue
+		Logs                logging.Log
+		Secrets             model.SecretService
+		Registries          model.RegistryService
+		Environ             model.EnvironService
+		Remote              remote.Remote
+		ConfigService       config.Extension
+		SignaturePrivateKey crypto.PrivateKey
+		SignaturePublicKey  crypto.PublicKey
 	}
 	Storage struct {
 		// Users  model.UserStore
