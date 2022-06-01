@@ -165,7 +165,7 @@ github.com/go-playground/locales
 github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.18.0
 github.com/go-playground/universal-translator
-# github.com/go-playground/validator/v10 v10.10.0
+# github.com/go-playground/validator/v10 v10.10.1
 ## explicit
 github.com/go-playground/validator/v10
 # github.com/go-sql-driver/mysql v1.6.0

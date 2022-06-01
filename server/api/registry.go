@@ -31,7 +31,7 @@ func GetRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	registry, err := server.Config.Services.Registries.RegistryFind(c, repo, name)
+	registry, err := server.Config.Extensions.Registries.RegistryFind(c, repo, name)
 	if err != nil {
 		c.String(404, "Error getting registry %q. %s", name, err)
 		return
@@ -60,7 +60,7 @@ func PostRegistry(c *gin.Context) {
 		c.String(400, "Error inserting registry. %s", err)
 		return
 	}
-	if err := server.Config.Services.Registries.RegistryCreate(c, repo, registry); err != nil {
+	if err := server.Config.Extensions.Registries.RegistryCreate(c, repo, registry); err != nil {
 		c.String(500, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
@@ -81,7 +81,7 @@ func PatchRegistry(c *gin.Context) {
 		return
 	}
 
-	registry, err := server.Config.Services.Registries.RegistryFind(c, repo, name)
+	registry, err := server.Config.Extensions.Registries.RegistryFind(c, repo, name)
 	if err != nil {
 		c.String(404, "Error getting registry %q. %s", name, err)
 		return
@@ -103,7 +103,7 @@ func PatchRegistry(c *gin.Context) {
 		c.String(400, "Error updating registry. %s", err)
 		return
 	}
-	if err := server.Config.Services.Registries.RegistryUpdate(c, repo, registry); err != nil {
+	if err := server.Config.Extensions.Registries.RegistryUpdate(c, repo, registry); err != nil {
 		c.String(500, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
@@ -114,7 +114,7 @@ func PatchRegistry(c *gin.Context) {
 // to the response in json format.
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Registries.RegistryList(c, repo)
+	list, err := server.Config.Extensions.Registries.RegistryList(c, repo)
 	if err != nil {
 		c.String(500, "Error getting registry list. %s", err)
 		return
@@ -133,7 +133,7 @@ func DeleteRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	if err := server.Config.Services.Registries.RegistryDelete(c, repo, name); err != nil {
+	if err := server.Config.Extensions.Registries.RegistryDelete(c, repo, name); err != nil {
 		c.String(500, "Error deleting registry %q. %s", name, err)
 		return
 	}

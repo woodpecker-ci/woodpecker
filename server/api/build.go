@@ -476,13 +476,13 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.Config.IsConfigured() {
+	if server.Config.Extensions.Config.IsConfigured() {
 		currentFileMeta := make([]*remote.FileMeta, len(configs))
 		for i, cfg := range configs {
 			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(c, repo, build, currentFileMeta)
+		newConfig, useOld, err := server.Config.Extensions.Config.FetchConfig(c, repo, build, currentFileMeta)
 		if err != nil {
 			msg := fmt.Sprintf("On fetching external build config: %s", err)
 			c.String(http.StatusBadRequest, msg)
@@ -615,12 +615,12 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretList(ctx, repo)
+	secs, err := server.Config.Extensions.Secrets.SecretList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(ctx, repo)
+	regs, err := server.Config.Extensions.Registries.RegistryList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
 	}
@@ -628,8 +628,8 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	if envs == nil {
 		envs = map[string]string{}
 	}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
+	if server.Config.Extensions.Environ != nil {
+		globals, _ := server.Config.Extensions.Environ.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}

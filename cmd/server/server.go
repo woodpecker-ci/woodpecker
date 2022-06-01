@@ -263,14 +263,14 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
-	server.Config.Services.Registries = setupRegistryService(c, v)
-	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Extensions.Registries = setupRegistryService(c, v)
+	server.Config.Extensions.Secrets = setupSecretService(c, v)
+	server.Config.Extensions.Environ = setupEnvironService(c, v)
 
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
+	server.Config.Extensions.SignaturePrivateKey, server.Config.Extensions.SignaturePublicKey = setupSignatureKeys(v)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
+		server.Config.Extensions.Config = config.NewHTTP(endpoint, server.Config.Extensions.SignaturePrivateKey)
 	}
 
 	// authentication
