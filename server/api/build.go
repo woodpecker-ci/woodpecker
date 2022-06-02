@@ -482,7 +482,7 @@ func PostBuild(c *gin.Context) {
 			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchExternalConfig(c, repo, build, currentFileMeta)
+		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(c, repo, build, currentFileMeta)
 		if err != nil {
 			msg := fmt.Sprintf("On fetching external build config: %s", err)
 			c.String(http.StatusBadRequest, msg)

@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## 1.0.0
 
+- The signature used to verify extensions calls (like those used for the [config-extension](/docs/administration/external-configuration-api)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](/docs/administration/external-configuration-api) documentation.
 - Refactored support of old agent filter labels and expression. Learn how to use the new [filter](/docs/usage/pipeline-syntax#labels).
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 
