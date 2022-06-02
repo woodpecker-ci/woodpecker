@@ -23,6 +23,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -73,14 +74,13 @@ func runJob(job *model.CronJob, store store.Store) error {
 		return nil
 	}
 
-	repo, build, err := createBuild(job, store)
+	repo, newBuild, err := createBuild(job, store)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("\n%#v\n%#v\n", repo, build)
-	// TODO -> build start
 
-	return nil
+	_, err = pipeline.Create(context.Background(), store, repo, newBuild)
+	return err
 }
 
 func createBuild(job *model.CronJob, store store.Store) (*model.Repo, *model.Build, error) {
