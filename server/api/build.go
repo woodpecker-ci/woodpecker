@@ -19,9 +19,6 @@ package api
 
 import (
 	"bytes"
-	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -32,8 +29,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	server_build "github.com/woodpecker-ci/woodpecker/server/build"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -221,92 +218,13 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	code, err := cancelBuild(c, _store, repo, build)
+	code, err := server_build.Cancel(c, _store, repo, build)
 	if err != nil {
 		_ = c.AbortWithError(code, err)
 		return
 	}
 
 	c.String(code, "")
-}
-
-// Cancel the build and returns the status.
-func cancelBuild(
-	ctx context.Context,
-	_store store.Store,
-	repo *model.Repo,
-	build *model.Build,
-) (int, error) {
-	procs, err := _store.ProcList(build)
-	if err != nil {
-		return http.StatusNotFound, err
-	}
-
-	// First cancel/evict procs in the queue in one go
-	var (
-		procsToCancel []string
-		procsToEvict  []string
-	)
-	for _, proc := range procs {
-		if proc.PPID != 0 {
-			continue
-		}
-		if proc.State == model.StatusRunning {
-			procsToCancel = append(procsToCancel, fmt.Sprint(proc.ID))
-		}
-		if proc.State == model.StatusPending {
-			procsToEvict = append(procsToEvict, fmt.Sprint(proc.ID))
-		}
-	}
-
-	if len(procsToEvict) != 0 {
-		if err := server.Config.Services.Queue.EvictAtOnce(ctx, procsToEvict); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
-		}
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToEvict, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
-		}
-	}
-	if len(procsToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToCancel)
-		}
-	}
-
-	// Then update the DB status for pending builds
-	// Running ones will be set when the agents stop on the cancel signal
-	for _, proc := range procs {
-		if proc.State == model.StatusPending {
-			if proc.PPID != 0 {
-				if _, err = shared.UpdateProcToStatusSkipped(_store, *proc, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
-				}
-			} else {
-				if _, err = shared.UpdateProcToStatusKilled(_store, *proc); err != nil {
-					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
-				}
-			}
-		}
-	}
-
-	killedBuild, err := shared.UpdateToStatusKilled(_store, *build)
-	if err != nil {
-		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", build)
-		return http.StatusInternalServerError, err
-	}
-
-	procs, err = _store.ProcList(killedBuild)
-	if err != nil {
-		return http.StatusNotFound, err
-	}
-	if killedBuild.Procs, err = model.Tree(procs); err != nil {
-		return http.StatusInternalServerError, err
-	}
-	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-
-	return http.StatusNoContent, nil
 }
 
 func PostApproval(c *gin.Context) {
@@ -345,15 +263,15 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, user, repo, yamls, nil)
+	build, buildItems, err := server_build.CreateBuildItems(c, _store, build, user, repo, yamls, nil)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
-	build, err = startBuild(c, _store, build, user, repo, buildItems)
+	build, err = server_build.Start(c, _store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -394,12 +312,12 @@ func PostDecline(c *gin.Context) {
 		log.Error().Err(err).Msg("can not build tree from proc list")
 	}
 
-	if err := updateBuildStatus(c, build, repo, user); err != nil {
-		log.Error().Err(err).Msg("updateBuildStatus")
+	if err := server_build.UpdateBuildStatus(c, build, repo, user); err != nil {
+		log.Error().Err(err).Msg("UpdateBuildStatus")
 	}
 
-	if err := publishToTopic(c, build, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
+	if err := server_build.PublishToTopic(c, build, repo); err != nil {
+		log.Error().Err(err).Msg("PublishToTopic")
 	}
 
 	c.JSON(200, build)
@@ -543,15 +461,15 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := createBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
+	build, buildItems, err := server_build.CreateBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
-	build, err = startBuild(c, _store, build, user, repo, buildItems)
+	build, err = server_build.Start(c, _store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -601,184 +519,6 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
-}
-
-func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Build, []*shared.BuildItem, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to generate netrc file")
-	}
-
-	// get the previous build so that we can send status change notifications
-	last, err := store.GetBuildLastBefore(repo, build.Branch, build.ID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
-	}
-
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
-	}
-
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
-	}
-
-	if envs == nil {
-		envs = map[string]string{}
-	}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
-		for _, global := range globals {
-			envs[global.Name] = global.Value
-		}
-	}
-
-	b := shared.ProcBuilder{
-		Repo:  repo,
-		Curr:  build,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Link:  server.Config.Server.Host,
-		Yamls: yamls,
-	}
-	buildItems, err := b.Build()
-	if err != nil {
-		if _, err := shared.UpdateToStatusError(store, *build, err); err != nil {
-			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
-		}
-		return nil, nil, err
-	}
-
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
-
-	return build, buildItems, nil
-}
-
-func cancelPreviousPipelines(
-	ctx context.Context,
-	_store store.Store,
-	build *model.Build,
-	user *model.User,
-	repo *model.Repo,
-) error {
-	// check this event should cancel previous pipelines
-	eventIncluded := false
-	for _, ev := range repo.CancelPreviousPipelineEvents {
-		if ev == build.Event {
-			eventIncluded = true
-			break
-		}
-	}
-	if !eventIncluded {
-		return nil
-	}
-
-	// get all active activeBuilds
-	activeBuilds, err := _store.GetActiveBuildList(repo, -1)
-	if err != nil {
-		return err
-	}
-
-	buildNeedsCancel := func(active *model.Build) (bool, error) {
-		// always filter on same event
-		if active.Event != build.Event {
-			return false, nil
-		}
-
-		// find events for the same context
-		switch build.Event {
-		case model.EventPush:
-			return build.Branch == active.Branch, nil
-		default:
-			return build.Refspec == active.Refspec, nil
-		}
-	}
-
-	for _, active := range activeBuilds {
-		if active.ID == build.ID {
-			// same build. e.g. self
-			continue
-		}
-
-		cancel, err := buildNeedsCancel(active)
-		if err != nil {
-			log.Error().
-				Err(err).
-				Str("Ref", active.Ref).
-				Msg("Error while trying to cancel build, skipping")
-			continue
-		}
-		if !cancel {
-			continue
-		}
-		_, err = cancelBuild(ctx, _store, repo, active)
-		if err != nil {
-			log.Error().
-				Err(err).
-				Str("Ref", active.Ref).
-				Int64("ID", active.ID).
-				Msg("Failed to cancel build")
-		}
-	}
-
-	return nil
-}
-
-func startBuild(
-	ctx context.Context,
-	store store.Store,
-	activeBuild *model.Build,
-	user *model.User,
-	repo *model.Repo,
-	buildItems []*shared.BuildItem,
-) (*model.Build, error) {
-	// call to cancel previous builds if needed
-	if err := cancelPreviousPipelines(ctx, store, activeBuild, user, repo); err != nil {
-		// should be not breaking
-		log.Error().Err(err).Msg("Failed to cancel previous builds")
-	}
-
-	if err := store.ProcCreate(activeBuild.Procs); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, activeBuild.Number)
-		return nil, err
-	}
-
-	if err := publishToTopic(ctx, activeBuild, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-
-	if err := queueBuild(activeBuild, repo, buildItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
-		return nil, err
-	}
-
-	if err := updateBuildStatus(ctx, activeBuild, repo, user); err != nil {
-		log.Error().Err(err).Msg("updateBuildStatus")
-	}
-
-	return activeBuild, nil
-}
-
-func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
-	for _, proc := range build.Procs {
-		// skip child procs
-		if !proc.IsParent() {
-			continue
-		}
-
-		err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			return err
-		}
-	}
-
-	return nil
 }
 
 func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
