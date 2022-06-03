@@ -101,9 +101,8 @@ var flags = []cli.Flag{
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_ARCH"},
-		Name:    "system-arch",
-		Value:   "linux/amd64",
+		EnvVars: []string{"CI_SYSTEM_PLATFORM"},
+		Name:    "system-platform",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_NAME"},

@@ -16,19 +16,19 @@ import (
 // Md5 return md5 hash string
 func Md5(str string) string {
 	m := md5.New()
-	io.WriteString(m, str)
+	_, _ = io.WriteString(m, str)
 	return fmt.Sprintf("%x", m.Sum(nil))
 }
 
 // Encode Encode data
 func Encode(data interface{}) ([]byte, error) {
-	//return JsonEncode(data)
+	// return JsonEncode(data)
 	return GobEncode(data)
 }
 
 // Decode decode data
 func Decode(data []byte, to interface{}) error {
-	//return JsonDecode(data, to)
+	// return JsonDecode(data, to)
 	return GobDecode(data, to)
 }
 

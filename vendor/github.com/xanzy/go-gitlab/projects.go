@@ -64,6 +64,7 @@ type Project struct {
 	ContainerExpirationPolicy                 *ContainerExpirationPolicy `json:"container_expiration_policy,omitempty"`
 	ContainerRegistryEnabled                  bool                       `json:"container_registry_enabled"`
 	ContainerRegistryAccessLevel              AccessControlValue         `json:"container_registry_access_level"`
+	ContainerRegistryImagePrefix              string                     `json:"container_registry_image_prefix,omitempty"`
 	CreatedAt                                 *time.Time                 `json:"created_at,omitempty"`
 	LastActivityAt                            *time.Time                 `json:"last_activity_at,omitempty"`
 	CreatorID                                 int                        `json:"creator_id"`
@@ -120,22 +121,29 @@ type Project struct {
 		GroupName        string `json:"group_name"`
 		GroupAccessLevel int    `json:"group_access_level"`
 	} `json:"shared_with_groups"`
-	Statistics                   *ProjectStatistics `json:"statistics"`
-	Links                        *Links             `json:"_links,omitempty"`
-	CIConfigPath                 string             `json:"ci_config_path"`
-	CIDefaultGitDepth            int                `json:"ci_default_git_depth"`
-	CustomAttributes             []*CustomAttribute `json:"custom_attributes"`
-	ComplianceFrameworks         []string           `json:"compliance_frameworks"`
-	BuildCoverageRegex           string             `json:"build_coverage_regex"`
-	BuildTimeout                 int                `json:"build_timeout"`
-	IssuesTemplate               string             `json:"issues_template"`
-	MergeRequestsTemplate        string             `json:"merge_requests_template"`
-	KeepLatestArtifact           bool               `json:"keep_latest_artifact"`
-	MergePipelinesEnabled        bool               `json:"merge_pipelines_enabled"`
-	MergeTrainsEnabled           bool               `json:"merge_trains_enabled"`
-	RestrictUserDefinedVariables bool               `json:"restrict_user_defined_variables"`
-	MergeCommitTemplate          string             `json:"merge_commit_template"`
-	SquashCommitTemplate         string             `json:"squash_commit_template"`
+	Statistics                               *ProjectStatistics `json:"statistics"`
+	Links                                    *Links             `json:"_links,omitempty"`
+	CIConfigPath                             string             `json:"ci_config_path"`
+	CIDefaultGitDepth                        int                `json:"ci_default_git_depth"`
+	CustomAttributes                         []*CustomAttribute `json:"custom_attributes"`
+	ComplianceFrameworks                     []string           `json:"compliance_frameworks"`
+	BuildCoverageRegex                       string             `json:"build_coverage_regex"`
+	BuildTimeout                             int                `json:"build_timeout"`
+	IssuesTemplate                           string             `json:"issues_template"`
+	MergeRequestsTemplate                    string             `json:"merge_requests_template"`
+	KeepLatestArtifact                       bool               `json:"keep_latest_artifact"`
+	MergePipelinesEnabled                    bool               `json:"merge_pipelines_enabled"`
+	MergeTrainsEnabled                       bool               `json:"merge_trains_enabled"`
+	RestrictUserDefinedVariables             bool               `json:"restrict_user_defined_variables"`
+	MergeCommitTemplate                      string             `json:"merge_commit_template"`
+	SquashCommitTemplate                     string             `json:"squash_commit_template"`
+	AutoDevopsDeployStrategy                 string             `json:"auto_devops_deploy_strategy"`
+	AutoDevopsEnabled                        bool               `json:"auto_devops_enabled"`
+	BuildGitStrategy                         string             `json:"build_git_strategy"`
+	EmailsDisabled                           bool               `json:"emails_disabled"`
+	ExternalAuthorizationClassificationLabel string             `json:"external_authorization_classification_label"`
+	RequirementsAccessLevel                  AccessControlValue `json:"requirements_access_level"`
+	SecurityAndComplianceAccessLevel         AccessControlValue `json:"security_and_compliance_access_level"`
 }
 
 // BasicProject included in other service responses (such as todos).
@@ -643,6 +651,7 @@ type CreateProjectOptions struct {
 	RequestAccessEnabled                      *bool                                `url:"request_access_enabled,omitempty" json:"request_access_enabled,omitempty"`
 	RequirementsAccessLevel                   *AccessControlValue                  `url:"requirements_access_level,omitempty" json:"requirements_access_level,omitempty"`
 	ResolveOutdatedDiffDiscussions            *bool                                `url:"resolve_outdated_diff_discussions,omitempty" json:"resolve_outdated_diff_discussions,omitempty"`
+	SecurityAndComplianceAccessLevel          *AccessControlValue                  `url:"security_and_compliance_access_level,omitempty" json:"security_and_compliance_access_level,omitempty"`
 	SharedRunnersEnabled                      *bool                                `url:"shared_runners_enabled,omitempty" json:"shared_runners_enabled,omitempty"`
 	ShowDefaultAwardEmojis                    *bool                                `url:"show_default_award_emojis,omitempty" json:"show_default_award_emojis,omitempty"`
 	SnippetsAccessLevel                       *AccessControlValue                  `url:"snippets_access_level,omitempty" json:"snippets_access_level,omitempty"`
@@ -836,6 +845,7 @@ type EditProjectOptions struct {
 	RequirementsAccessLevel                   *AccessControlValue                  `url:"requirements_access_level,omitempty" json:"requirements_access_level,omitempty"`
 	ResolveOutdatedDiffDiscussions            *bool                                `url:"resolve_outdated_diff_discussions,omitempty" json:"resolve_outdated_diff_discussions,omitempty"`
 	RestrictUserDefinedVariables              *bool                                `url:"restrict_user_defined_variables,omitempty" json:"restrict_user_defined_variables,omitempty"`
+	SecurityAndComplianceAccessLevel          *AccessControlValue                  `url:"security_and_compliance_access_level,omitempty" json:"security_and_compliance_access_level,omitempty"`
 	SharedRunnersEnabled                      *bool                                `url:"shared_runners_enabled,omitempty" json:"shared_runners_enabled,omitempty"`
 	ShowDefaultAwardEmojis                    *bool                                `url:"show_default_award_emojis,omitempty" json:"show_default_award_emojis,omitempty"`
 	SnippetsAccessLevel                       *AccessControlValue                  `url:"snippets_access_level,omitempty" json:"snippets_access_level,omitempty"`
@@ -909,9 +919,16 @@ func (s *ProjectsService) EditProject(pid interface{}, opt *EditProjectOptions, 
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/projects.html#fork-project
 type ForkProjectOptions struct {
-	Name      *string `url:"name,omitempty" json:"name,omitempty" `
+	Description                   *string          `url:"description,omitempty" json:"description,omitempty"`
+	MergeRequestDefaultTargetSelf *bool            `url:"mr_default_target_self,omitempty" json:"mr_default_target_self,omitempty"`
+	Name                          *string          `url:"name,omitempty" json:"name,omitempty"`
+	NamespaceID                   *int             `url:"namespace_id,omitempty" json:"namespace_id,omitempty"`
+	NamespacePath                 *string          `url:"namespace_path,omitempty" json:"namespace_path,omitempty"`
+	Path                          *string          `url:"path,omitempty" json:"path,omitempty"`
+	Visibility                    *VisibilityValue `url:"visibility,omitempty" json:"visibility,omitempty"`
+
+	// Deprecated members
 	Namespace *string `url:"namespace,omitempty" json:"namespace,omitempty"`
-	Path      *string `url:"path,omitempty" json:"path,omitempty"`
 }
 
 // ForkProject forks a project into the user namespace of the authenticated
@@ -1733,17 +1750,43 @@ func (s *ProjectsService) GetProjectApprovalRules(pid interface{}, options ...Re
 	return par, resp, err
 }
 
+// GetProjectApprovalRule gets the project level approvers.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ee/api/merge_request_approvals.html#get-a-single-project-level-rule
+func (s *ProjectsService) GetProjectApprovalRule(pid interface{}, ruleID int, options ...RequestOptionFunc) (*ProjectApprovalRule, *Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("projects/%s/approval_rules/%d", PathEscape(project), ruleID)
+
+	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	par := new(ProjectApprovalRule)
+	resp, err := s.client.Do(req, &par)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return par, resp, err
+}
+
 // CreateProjectLevelRuleOptions represents the available CreateProjectApprovalRule()
 // options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/merge_request_approvals.html#create-project-level-rules
 type CreateProjectLevelRuleOptions struct {
-	ApprovalsRequired  *int    `url:"approvals_required,omitempty" json:"approvals_required,omitempty"`
-	GroupIDs           *[]int  `url:"group_ids,omitempty" json:"group_ids,omitempty"`
 	Name               *string `url:"name,omitempty" json:"name,omitempty"`
-	ProtectedBranchIDs *[]int  `url:"protected_branch_ids,omitempty" json:"protected_branch_ids,omitempty"`
+	ApprovalsRequired  *int    `url:"approvals_required,omitempty" json:"approvals_required,omitempty"`
+	RuleType           *string `url:"rule_type,omitempty" json:"rule_type,omitempty"`
 	UserIDs            *[]int  `url:"user_ids,omitempty" json:"user_ids,omitempty"`
+	GroupIDs           *[]int  `url:"group_ids,omitempty" json:"group_ids,omitempty"`
+	ProtectedBranchIDs *[]int  `url:"protected_branch_ids,omitempty" json:"protected_branch_ids,omitempty"`
 }
 
 // CreateProjectApprovalRule creates a new project-level approval rule.
@@ -1777,11 +1820,11 @@ func (s *ProjectsService) CreateProjectApprovalRule(pid interface{}, opt *Create
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/merge_request_approvals.html#update-project-level-rules
 type UpdateProjectLevelRuleOptions struct {
-	ApprovalsRequired  *int    `url:"approvals_required,omitempty" json:"approvals_required,omitempty"`
-	GroupIDs           *[]int  `url:"group_ids,omitempty" json:"group_ids,omitempty"`
 	Name               *string `url:"name,omitempty" json:"name,omitempty"`
-	ProtectedBranchIDs *[]int  `url:"protected_branch_ids,omitempty" json:"protected_branch_ids,omitempty"`
+	ApprovalsRequired  *int    `url:"approvals_required,omitempty" json:"approvals_required,omitempty"`
 	UserIDs            *[]int  `url:"user_ids,omitempty" json:"user_ids,omitempty"`
+	GroupIDs           *[]int  `url:"group_ids,omitempty" json:"group_ids,omitempty"`
+	ProtectedBranchIDs *[]int  `url:"protected_branch_ids,omitempty" json:"protected_branch_ids,omitempty"`
 }
 
 // UpdateProjectApprovalRule updates an existing approval rule with new options.

@@ -72,10 +72,10 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_FILTER"},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
-		Usage:   "filter expression to restrict builds by label",
+		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_PROCS"},

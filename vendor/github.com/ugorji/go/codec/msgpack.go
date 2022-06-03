@@ -851,6 +851,9 @@ func (d *msgpackDecDriver) DecodeBytes(bs []byte) (bsOut []byte) {
 		for i := 0; i < len(bs); i++ {
 			bs[i] = uint8(chkOvf.UintV(d.DecodeUint64(), 8))
 		}
+		for i := len(bs); i < slen; i++ {
+			bs = append(bs, uint8(chkOvf.UintV(d.DecodeUint64(), 8)))
+		}
 		return bs
 	} else {
 		d.d.errorf("invalid byte descriptor for decoding bytes, got: 0x%x", d.bd)

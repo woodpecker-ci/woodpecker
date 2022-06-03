@@ -97,6 +97,12 @@ var flags = []cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"},
+		Name:    "default-cancel-previous-pipeline-events",
+		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
+		Value:   cli.NewStringSlice("push", "pull_request"),
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",
@@ -159,20 +165,9 @@ var flags = []cli.Flag{
 		Usage:   "registry plugin endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GATEKEEPER_ENDPOINT"},
-		Name:    "gating-service",
-		Usage:   "gated build endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CONFIG_SERVICE_SECRET"},
-		Name:     "config-service-secret",
-		Usage:    "secret to sign requests send to configuration service",
-		FilePath: os.Getenv("WOODPECKER_CONFIG_SERVICE_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
@@ -199,6 +194,12 @@ var flags = []cli.Flag{
 		Name:    "status-context",
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
+		Name:    "status-context-format",
+		Usage:   "status context format",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
 	//
 	// resource limit parameters

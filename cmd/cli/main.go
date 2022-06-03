@@ -18,54 +18,12 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-
-	"github.com/woodpecker-ci/woodpecker/cli/build"
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/deploy"
-	"github.com/woodpecker-ci/woodpecker/cli/exec"
-	"github.com/woodpecker-ci/woodpecker/cli/info"
-	"github.com/woodpecker-ci/woodpecker/cli/lint"
-	"github.com/woodpecker-ci/woodpecker/cli/log"
-	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
-	"github.com/woodpecker-ci/woodpecker/cli/registry"
-	"github.com/woodpecker-ci/woodpecker/cli/repo"
-	"github.com/woodpecker-ci/woodpecker/cli/secret"
-	"github.com/woodpecker-ci/woodpecker/cli/user"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "woodpecker-cli"
-	app.Version = version.String()
-	app.Usage = "command line utility"
-	app.EnableBashCompletion = true
-	app.Flags = common.GlobalFlags
-	app.Commands = []*cli.Command{
-		build.Command,
-		log.Command,
-		deploy.Command,
-		exec.Command,
-		info.Command,
-		registry.Command,
-		secret.Command,
-		repo.Command,
-		user.Command,
-		lint.Command,
-		loglevel.Command,
-	}
-
-	zlog.Logger = zlog.Output(
-		zerolog.ConsoleWriter{
-			Out: os.Stderr,
-		},
-	)
-	app.Before = common.SetupConsoleLogger
-
+	app := newApp()
 	if err := app.Run(os.Args); err != nil {
-		zlog.Fatal().Err(err).Msg("error running cli")
+		log.Fatal().Err(err).Msg("error running cli")
 	}
 }

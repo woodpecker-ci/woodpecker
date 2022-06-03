@@ -40,3 +40,6 @@ You can change the visibility of your project by this setting. If a user has acc
 
 After this timeout a pipeline has to finish or will be treated as timed out.
 
+## Cancel previous pipelines
+
+By enabling this option for a pipeline event previous pipelines of the same event and context will be canceled before starting the newly triggered one.

@@ -136,7 +136,7 @@ func (s *PackagesService) ListProjectPackages(pid interface{}, opt *ListProjectP
 // https://docs.gitlab.com/ee/api/packages.html#within-a-group
 type ListGroupPackagesOptions struct {
 	ListOptions
-	ExcludeSubgroups   *bool   `url:"exclude_subgroups,omitempty" json:"exclude_subgroups,omitempty"`
+	ExcludeSubGroups   *bool   `url:"exclude_subgroups,omitempty" json:"exclude_subgroups,omitempty"`
 	OrderBy            *string `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort               *string `url:"sort,omitempty" json:"sort,omitempty"`
 	PackageType        *string `url:"package_type,omitempty" json:"package_type,omitempty"`

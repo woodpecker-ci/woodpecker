@@ -45,6 +45,7 @@ const (
 	pathHooks       = "%s/2.0/repositories/%s/%s/hooks?%s"
 	pathSource      = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus      = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches    = "%s/2.0/repositories/%s/%s/refs/branches"
 )
 
 type Client struct {
@@ -172,6 +173,13 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 		return nil, fmt.Errorf("no permissions in repository %s", fullName)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+	out := new(BranchResp)
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	_, err := c.do(uri, get, nil, out)
+	return out.Values, err
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {

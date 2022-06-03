@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -39,16 +40,24 @@ import (
 )
 
 func loop(c *cli.Context) error {
-	filter := rpc.Filter{
-		Labels: map[string]string{
-			"platform": runtime.GOOS + "/" + runtime.GOARCH,
-		},
-		Expr: c.String("filter"),
-	}
-
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
+	}
+
+	labels := map[string]string{
+		"hostname": hostname,
+		"platform": runtime.GOOS + "/" + runtime.GOARCH,
+		"repo":     "*", // allow all repos by default
+	}
+
+	for _, v := range c.StringSlice("filter-labels") {
+		parts := strings.SplitN(v, "=", 2)
+		labels[parts[0]] = parts[1]
+	}
+
+	filter := rpc.Filter{
+		Labels: labels,
 	}
 
 	if c.Bool("pretty") {

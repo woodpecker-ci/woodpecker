@@ -524,14 +524,14 @@ func (s *MergeRequestsService) CreateMergeRequestPipeline(pid interface{}, merge
 // options.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/merge_requests.html#list-issues-that-will-close-on-merge
+// https://docs.gitlab.com/ee/api/merge_requests.html#list-issues-that-close-on-merge
 type GetIssuesClosedOnMergeOptions ListOptions
 
 // GetIssuesClosedOnMerge gets all the issues that would be closed by merging the
 // provided merge request.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/merge_requests.html#list-issues-that-will-close-on-merge
+// https://docs.gitlab.com/ee/api/merge_requests.html#list-issues-that-close-on-merge
 func (s *MergeRequestsService) GetIssuesClosedOnMerge(pid interface{}, mergeRequest int, opt *GetIssuesClosedOnMergeOptions, options ...RequestOptionFunc) ([]*Issue, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
@@ -670,7 +670,7 @@ func (s *MergeRequestsService) DeleteMergeRequest(pid interface{}, mergeRequest 
 // options.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/merge_requests.html#accept-mr
+// https://docs.gitlab.com/ee/api/merge_requests.html#merge-a-merge-request
 type AcceptMergeRequestOptions struct {
 	MergeCommitMessage        *string `url:"merge_commit_message,omitempty" json:"merge_commit_message,omitempty"`
 	SquashCommitMessage       *string `url:"squash_commit_message,omitempty" json:"squash_commit_message,omitempty"`
@@ -686,7 +686,7 @@ type AcceptMergeRequestOptions struct {
 // already merged or closed - you get 405 and error message 'Method Not Allowed'
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/merge_requests.html#accept-mr
+// https://docs.gitlab.com/ee/api/merge_requests.html#merge-a-merge-request
 func (s *MergeRequestsService) AcceptMergeRequest(pid interface{}, mergeRequest int, opt *AcceptMergeRequestOptions, options ...RequestOptionFunc) (*MergeRequest, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
@@ -875,7 +875,7 @@ func (s *MergeRequestsService) UnsubscribeFromMergeRequest(pid interface{}, merg
 // status code 304 is returned.
 //
 // GitLab API docs:
-// https://docs.gitlab.com/ce/api/merge_requests.html#create-a-todo
+// https://docs.gitlab.com/ee/api/merge_requests.html#create-a-to-do-item
 func (s *MergeRequestsService) CreateTodo(pid interface{}, mergeRequest int, options ...RequestOptionFunc) (*Todo, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {

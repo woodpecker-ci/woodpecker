@@ -15,8 +15,8 @@
 
       <div class="m-auto text-xl text-gray-500 dark:text-gray-500">
         <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
-        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">This step has been skipped.</span>
-        <span v-else-if="!proc?.start_time">This step hasn't started yet.</span>
+        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">{{ $t('repo.build.actions.canceled') }}</span>
+        <span v-else-if="!proc?.start_time">{{ $t('repo.build.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">Loading ...</div>
       </div>
 
