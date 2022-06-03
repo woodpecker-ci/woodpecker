@@ -171,6 +171,8 @@
       "no_pipelines": "No pipelines have been started yet.",
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{0}\"",
+      "exit_code": "exit code {exitCode}",
+      "loading": "Loading ...",
 
       "actions": {
         "cancel": "Cancel",
