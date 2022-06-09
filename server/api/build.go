@@ -394,7 +394,7 @@ func PostBuild(c *gin.Context) {
 	}
 
 	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService.IsConfigured() {
+	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
 		currentFileMeta := make([]*remote.FileMeta, len(configs))
 		for i, cfg := range configs {
 			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
