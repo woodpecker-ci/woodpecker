@@ -23,7 +23,7 @@
       "minLength": 1,
       "items": { "type": "string" }
     },
-    "run_on": {
+    "runs_on": {
       "type": "array",
       "minLength": 1,
       "items": { "type": "string" }
