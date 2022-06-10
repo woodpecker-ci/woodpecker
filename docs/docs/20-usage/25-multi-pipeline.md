@@ -104,7 +104,7 @@ pipeline:
 +  - test
 ```
 
-Pipelines that need to run even on failures should set the `run_on` tag.
+Pipelines that need to run even on failures should set the `runs_on` tag.
 
 ```diff
 pipeline:
@@ -116,7 +116,7 @@ pipeline:
 depends_on:
   - deploy
 
-+run_on: [ success, failure ]
++runs_on: [ success, failure ]
 ```
 
 Some pipelines don't need the source code, set the `skip_clone` tag to skip cloning:
@@ -132,6 +132,6 @@ pipeline:
 depends_on:
   - deploy
 
-run_on: [ success, failure ]
+runs_on: [ success, failure ]
 +skip_clone: true
 ```
