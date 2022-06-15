@@ -27,9 +27,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func ReStart(ctx context.Context, store store.Store,
-	lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string,
-) (*model.Build, error) {
+// Restart a build by creating a new one out of the old and start it
+func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string) (*model.Build, error) {
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
@@ -96,7 +95,7 @@ func ReStart(ctx context.Context, store store.Store,
 		return nil, fmt.Errorf(msg)
 	}
 
-	build, err = Start(ctx, store, build, user, repo, buildItems)
+	build, err = start(ctx, store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -106,6 +105,7 @@ func ReStart(ctx context.Context, store store.Store,
 	return build, nil
 }
 
+// TODO: reuse at create.go too
 func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
 	for _, conf := range configs {
 		buildConfig := &model.BuildConfig{

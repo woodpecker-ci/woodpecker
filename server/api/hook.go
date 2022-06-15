@@ -66,7 +66,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// Start a pipeline triggered by a forges post webhook
+// PostHook start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 

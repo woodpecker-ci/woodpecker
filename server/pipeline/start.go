@@ -24,14 +24,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func Start(
-	ctx context.Context,
-	store store.Store,
-	activeBuild *model.Build,
-	user *model.User,
-	repo *model.Repo,
-	buildItems []*shared.BuildItem,
-) (*model.Build, error) {
+// start a build, make sure it was stored persistent in the store before
+func start(ctx context.Context, store store.Store, activeBuild *model.Build, user *model.User, repo *model.Repo, buildItems []*shared.BuildItem) (*model.Build, error) {
 	// call to cancel previous builds if needed
 	if err := cancelPreviousPipelines(ctx, store, activeBuild, repo); err != nil {
 		// should be not breaking

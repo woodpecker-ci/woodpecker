@@ -14,49 +14,16 @@
 
 package pipeline
 
-import (
-	"crypto/sha256"
-	"fmt"
+// TODO(770): pipeline filter should not belong here
 
+import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
-	"github.com/woodpecker-ci/woodpecker/server/store"
 )
-
-func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
-	sha := fmt.Sprintf("%x", sha256.Sum256(remoteYamlConfig.Data))
-	conf, err := store.ConfigFindIdentical(build.RepoID, sha)
-	if err != nil {
-		conf = &model.Config{
-			RepoID: build.RepoID,
-			Data:   remoteYamlConfig.Data,
-			Hash:   sha,
-			Name:   shared.SanitizePath(remoteYamlConfig.Name),
-		}
-		err = store.ConfigCreate(conf)
-		if err != nil {
-			// retry in case we receive two hooks at the same time
-			conf, err = store.ConfigFindIdentical(build.RepoID, sha)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	buildConfig := &model.BuildConfig{
-		ConfigID: conf.ID,
-		BuildID:  build.ID,
-	}
-	if err := store.BuildConfigCreate(buildConfig); err != nil {
-		return nil, err
-	}
-
-	return conf, nil
-}
 
 func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 	b := shared.ProcBuilder{

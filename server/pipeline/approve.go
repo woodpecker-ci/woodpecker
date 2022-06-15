@@ -19,15 +19,20 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func Approve(ctx context.Context, store store.Store,
-	build *model.Build, user *model.User, repo *model.Repo,
-) (*model.Build, error) {
+// Approve update the status to pending for blocked build because of a gated repo
+// and start them afterwards
+func Approve(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
+	if build.Status != model.StatusBlocked {
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a build with status %s", build.Status)}
+	}
+
 	// fetch the build file from the database
 	configs, err := store.ConfigsForBuild(build.ID)
 	if err != nil {
@@ -52,7 +57,7 @@ func Approve(ctx context.Context, store store.Store,
 		return nil, err
 	}
 
-	build, err = Start(ctx, store, build, user, repo, buildItems)
+	build, err = start(ctx, store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)

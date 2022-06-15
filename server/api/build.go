@@ -217,6 +217,7 @@ func DeleteBuild(c *gin.Context) {
 	}
 }
 
+// PostApproval start pipelines in gated repos
 func PostApproval(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -230,10 +231,6 @@ func PostApproval(c *gin.Context) {
 		_ = c.AbortWithError(404, err)
 		return
 	}
-	if build.Status != model.StatusBlocked {
-		c.String(http.StatusBadRequest, "cannot decline a build with status %s", build.Status)
-		return
-	}
 
 	newBuild, err := pipeline.Approve(c, _store, build, user, repo)
 	if err != nil {
@@ -243,6 +240,7 @@ func PostApproval(c *gin.Context) {
 	}
 }
 
+// PostDecline decline pipelines in gated repos
 func PostDecline(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -274,7 +272,7 @@ func GetBuildQueue(c *gin.Context) {
 	c.JSON(200, out)
 }
 
-// PostBuild restarts a build
+// PostBuild restarts a build optional with altered event, deploy or environment
 func PostBuild(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -331,7 +329,7 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	newBuild, err := pipeline.ReStart(c, _store, build, user, repo, envs)
+	newBuild, err := pipeline.Restart(c, _store, build, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

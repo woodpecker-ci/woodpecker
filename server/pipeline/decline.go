@@ -24,6 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
+// Decline update the status to declined for blocked build because of a gated repo
 func Decline(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
 	if build.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a build with status %s", build.Status)

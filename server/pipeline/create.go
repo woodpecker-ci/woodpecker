@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
+// Create a new build and start it
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Build) (*model.Build, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
@@ -123,7 +124,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		return build, nil
 	}
 
-	build, err = Start(ctx, _store, build, repoUser, repo, buildItems)
+	build, err = start(ctx, _store, build, repoUser, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
