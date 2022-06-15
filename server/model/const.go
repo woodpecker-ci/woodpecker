@@ -21,6 +21,7 @@ const (
 	EventPull   WebhookEvent = "pull_request"
 	EventTag    WebhookEvent = "tag"
 	EventDeploy WebhookEvent = "deployment"
+	EventCron   WebhookEvent = "cron"
 )
 
 func ValidateWebhookEvent(s WebhookEvent) bool {
