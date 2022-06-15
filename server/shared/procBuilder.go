@@ -89,12 +89,12 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			// add GLOBAL_ environment variables for substituting
 			for k, v := range b.Envs {
-				new_k := "GLOBAL_" + k
-				if _, exists := environ[new_k]; exists {
+				newK := "GLOBAL_" + k
+				if _, exists := environ[newK]; exists {
 					// don't override existing values
 					continue
 				}
-				environ[new_k] = v
+				environ[newK] = v
 			}
 
 			// substitute vars
