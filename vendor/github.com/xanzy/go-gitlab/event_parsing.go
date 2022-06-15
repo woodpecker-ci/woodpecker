@@ -39,6 +39,7 @@ const (
 	EventTypePush          EventType = "Push Hook"
 	EventTypeRelease       EventType = "Release Hook"
 	EventTypeServiceHook   EventType = "Service Hook"
+	EventTypeSubGroup      EventType = "Subgroup Hook"
 	EventTypeSystemHook    EventType = "System Hook"
 	EventTypeTagPush       EventType = "Tag Push Hook"
 	EventTypeWikiPage      EventType = "Wiki Page Hook"
@@ -265,6 +266,8 @@ func ParseWebhook(eventType EventType, payload []byte) (event interface{}, err e
 		default:
 			return nil, fmt.Errorf("unexpected service type %s", service.ObjectKind)
 		}
+	case EventTypeSubGroup:
+		event = &SubGroupEvent{}
 	case EventTypeTagPush:
 		event = &TagEvent{}
 	case EventTypeWikiPage:

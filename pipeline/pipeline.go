@@ -117,6 +117,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	if processState == nil {
 		processState = new(backend.State)
 		if err != nil {
+			processState.Error = err
 			processState.Exited = true
 			processState.OOMKilled = false
 			processState.ExitCode = 126 // command invoked cannot be executed.
@@ -203,7 +204,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	return done
 }
 
-// Executes the step and returns the statem and error.
+// Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
 

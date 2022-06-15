@@ -209,15 +209,18 @@ func (c *Client) EditPullRequest(owner, repo string, index int64, opt EditPullRe
 
 // MergePullRequestOption options when merging a pull request
 type MergePullRequestOption struct {
-	Style   MergeStyle `json:"Do"`
-	Title   string     `json:"MergeTitleField"`
-	Message string     `json:"MergeMessageField"`
+	Style                  MergeStyle `json:"Do"`
+	MergeCommitID          string     `json:"MergeCommitID"`
+	Title                  string     `json:"MergeTitleField"`
+	Message                string     `json:"MergeMessageField"`
+	DeleteBranchAfterMerge bool       `json:"delete_branch_after_merge"`
+	ForceMerge             bool       `json:"force_merge"`
 }
 
 // Validate the MergePullRequestOption struct
 func (opt MergePullRequestOption) Validate(c *Client) error {
 	if opt.Style == MergeStyleSquash {
-		if err := c.CheckServerVersionConstraint(">=1.11.5"); err != nil {
+		if err := c.checkServerVersionGreaterThanOrEqual(version1_11_5); err != nil {
 			return err
 		}
 	}
@@ -249,7 +252,6 @@ func (c *Client) IsPullRequestMerged(owner, repo string, index int64) (bool, *Re
 		return false, nil, err
 	}
 	status, resp, err := c.getStatusCode("GET", fmt.Sprintf("/repos/%s/%s/pulls/%d/merge", owner, repo, index), nil, nil)
-
 	if err != nil {
 		return false, resp, err
 	}
@@ -257,9 +259,29 @@ func (c *Client) IsPullRequestMerged(owner, repo string, index int64) (bool, *Re
 	return status == 204, resp, nil
 }
 
+// PullRequestDiffOptions options for GET /repos/<owner>/<repo>/pulls/<idx>.[diff|patch]
+type PullRequestDiffOptions struct {
+	// Include binary file changes when requesting a .diff
+	Binary bool
+}
+
+// QueryEncode converts the options to a query string
+func (o PullRequestDiffOptions) QueryEncode() string {
+	query := make(url.Values)
+	query.Add("binary", fmt.Sprintf("%v", o.Binary))
+	return query.Encode()
+}
+
+type pullRequestDiffType string
+
+const (
+	pullRequestDiffTypeDiff  pullRequestDiffType = "diff"
+	pullRequestDiffTypePatch pullRequestDiffType = "patch"
+)
+
 // getPullRequestDiffOrPatch gets the patch or diff file as bytes for a PR
-func (c *Client) getPullRequestDiffOrPatch(owner, repo, kind string, index int64) ([]byte, *Response, error) {
-	if err := escapeValidatePathSegments(&owner, &repo, &kind); err != nil {
+func (c *Client) getPullRequestDiffOrPatch(owner, repo string, kind pullRequestDiffType, index int64, opts PullRequestDiffOptions) ([]byte, *Response, error) {
+	if err := escapeValidatePathSegments(&owner, &repo); err != nil {
 		return nil, nil, err
 	}
 	if err := c.checkServerVersionGreaterThanOrEqual(version1_13_0); err != nil {
@@ -270,19 +292,20 @@ func (c *Client) getPullRequestDiffOrPatch(owner, repo, kind string, index int64
 		if r.Private {
 			return nil, nil, err
 		}
-		return c.getWebResponse("GET", fmt.Sprintf("/%s/%s/pulls/%d.%s", owner, repo, index, kind), nil)
+		url := fmt.Sprintf("/%s/%s/pulls/%d.%s?%s", owner, repo, index, kind, opts.QueryEncode())
+		return c.getWebResponse("GET", url, nil)
 	}
 	return c.getResponse("GET", fmt.Sprintf("/repos/%s/%s/pulls/%d.%s", owner, repo, index, kind), nil, nil)
 }
 
-// GetPullRequestPatch gets the .patch file as bytes for a PR
+// GetPullRequestPatch gets the git patchset of a PR
 func (c *Client) GetPullRequestPatch(owner, repo string, index int64) ([]byte, *Response, error) {
-	return c.getPullRequestDiffOrPatch(owner, repo, "patch", index)
+	return c.getPullRequestDiffOrPatch(owner, repo, pullRequestDiffTypePatch, index, PullRequestDiffOptions{})
 }
 
-// GetPullRequestDiff gets the .diff file as bytes for a PR
-func (c *Client) GetPullRequestDiff(owner, repo string, index int64) ([]byte, *Response, error) {
-	return c.getPullRequestDiffOrPatch(owner, repo, "diff", index)
+// GetPullRequestDiff gets the diff of a PR. For Gitea >= 1.16, you must set includeBinary to get an applicable diff
+func (c *Client) GetPullRequestDiff(owner, repo string, index int64, opts PullRequestDiffOptions) ([]byte, *Response, error) {
+	return c.getPullRequestDiffOrPatch(owner, repo, pullRequestDiffTypeDiff, index, opts)
 }
 
 // ListPullRequestCommitsOptions options for listing pull requests

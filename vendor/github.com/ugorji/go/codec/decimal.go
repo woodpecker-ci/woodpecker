@@ -132,12 +132,20 @@ var fi64 = floatinfo{52, 22, 15, false, 1<<52 - 1}
 var fi64u = floatinfo{0, 19, 0, true, fUint64Cutoff}
 
 func noFrac64(fbits uint64) bool {
+	if fbits == 0 {
+		return true
+	}
+
 	exp := uint64(fbits>>52)&0x7FF - 1023 // uint(x>>shift)&mask - bias
 	// clear top 12+e bits, the integer part; if the rest is 0, then no fraction.
 	return exp < 52 && fbits<<(12+exp) == 0 // means there's no fractional part
 }
 
 func noFrac32(fbits uint32) bool {
+	if fbits == 0 {
+		return true
+	}
+
 	exp := uint32(fbits>>23)&0xFF - 127 // uint(x>>shift)&mask - bias
 	// clear top 9+e bits, the integer part; if the rest is 0, then no fraction.
 	return exp < 23 && fbits<<(9+exp) == 0 // means there's no fractional part

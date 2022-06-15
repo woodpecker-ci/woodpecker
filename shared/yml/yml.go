@@ -3,7 +3,7 @@ package yml
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
@@ -59,6 +59,7 @@ func toJSON(node *yaml.Node) (interface{}, error) {
 	return nil, fmt.Errorf("do not support yaml node kind '%v'", node.Kind)
 }
 
+// ToJSON converts YAML bytes to JSON
 func ToJSON(data []byte) ([]byte, error) {
 	m := &yaml.Node{}
 	if err := yaml.Unmarshal(data, m); err != nil {
@@ -72,8 +73,9 @@ func ToJSON(data []byte) ([]byte, error) {
 	return json.Marshal(d)
 }
 
-func LoadYmlFileAsJSON(path string) (j []byte, err error) {
-	data, err := os.ReadFile(path)
+// LoadYmlReaderAsJSON reads from an io.Reader containing YAML and converts it to JSON
+func LoadYmlReaderAsJSON(r io.Reader) (j []byte, err error) {
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

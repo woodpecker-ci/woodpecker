@@ -72,8 +72,8 @@ func (c *Client) GetMilestone(owner, repo string, id int64) (*Milestone, *Respon
 }
 
 // GetMilestoneByName get one milestone by repo and milestone name
-func (c *Client) GetMilestoneByName(owner, repo string, name string) (*Milestone, *Response, error) {
-	if c.CheckServerVersionConstraint(">=1.13") != nil {
+func (c *Client) GetMilestoneByName(owner, repo, name string) (*Milestone, *Response, error) {
+	if c.checkServerVersionGreaterThanOrEqual(version1_13_0) != nil {
 		// backwards compatibility mode
 		m, resp, err := c.resolveMilestoneByName(owner, repo, name)
 		return m, resp, err
@@ -163,8 +163,8 @@ func (c *Client) EditMilestone(owner, repo string, id int64, opt EditMilestoneOp
 }
 
 // EditMilestoneByName modify milestone with options
-func (c *Client) EditMilestoneByName(owner, repo string, name string, opt EditMilestoneOption) (*Milestone, *Response, error) {
-	if c.CheckServerVersionConstraint(">=1.13") != nil {
+func (c *Client) EditMilestoneByName(owner, repo, name string, opt EditMilestoneOption) (*Milestone, *Response, error) {
+	if c.checkServerVersionGreaterThanOrEqual(version1_13_0) != nil {
 		// backwards compatibility mode
 		m, _, err := c.resolveMilestoneByName(owner, repo, name)
 		if err != nil {
@@ -197,8 +197,8 @@ func (c *Client) DeleteMilestone(owner, repo string, id int64) (*Response, error
 }
 
 // DeleteMilestoneByName delete one milestone by name
-func (c *Client) DeleteMilestoneByName(owner, repo string, name string) (*Response, error) {
-	if c.CheckServerVersionConstraint(">=1.13") != nil {
+func (c *Client) DeleteMilestoneByName(owner, repo, name string) (*Response, error) {
+	if c.checkServerVersionGreaterThanOrEqual(version1_13_0) != nil {
 		// backwards compatibility mode
 		m, _, err := c.resolveMilestoneByName(owner, repo, name)
 		if err != nil {
@@ -229,7 +229,7 @@ func (c *Client) resolveMilestoneByName(owner, repo, name string) (*Milestone, *
 			return nil, nil, fmt.Errorf("milestone '%s' do not exist", name)
 		}
 		for _, m := range miles {
-			if strings.ToLower(strings.TrimSpace(m.Title)) == strings.ToLower(strings.TrimSpace(name)) {
+			if strings.EqualFold(strings.TrimSpace(m.Title), strings.TrimSpace(name)) {
 				return m, resp, nil
 			}
 		}

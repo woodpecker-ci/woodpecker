@@ -130,12 +130,11 @@ func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // Match returns true if all constraints match the given input. If a single
-// constraint failsa false value is returned.
+// constraint fails a false value is returned.
 func (c *Constraint) Match(metadata frontend.Metadata) bool {
-	match := c.Platform.Match(metadata.Sys.Arch) &&
+	match := c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
-		c.Branch.Match(metadata.Curr.Commit.Branch) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
 		c.Instance.Match(metadata.Sys.Host) &&
@@ -144,6 +143,9 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	// changed files filter apply only for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
+	}
+	if metadata.Curr.Event != frontend.EventTag {
+		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
 	}
 
 	return match

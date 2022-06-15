@@ -38,11 +38,23 @@ func (uri *URI) SetSchema(schema string) {
 	}
 }
 
+// enumerates all autoincr mode
+const (
+	IncrAutoincrMode = iota
+	SequenceAutoincrMode
+)
+
+// DialectFeatures represents a dialect parameters
+type DialectFeatures struct {
+	AutoincrMode int // 0 autoincrement column, 1 sequence
+}
+
 // Dialect represents a kind of database
 type Dialect interface {
 	Init(*URI) error
 	URI() *URI
 	Version(ctx context.Context, queryer core.Queryer) (*schemas.Version, error)
+	Features() *DialectFeatures
 
 	SQLType(*schemas.Column) string
 	Alias(string) string       // return what a sql type's alias of
@@ -61,8 +73,12 @@ type Dialect interface {
 
 	GetTables(queryer core.Queryer, ctx context.Context) ([]*schemas.Table, error)
 	IsTableExist(queryer core.Queryer, ctx context.Context, tableName string) (bool, error)
-	CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool)
+	CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error)
 	DropTableSQL(tableName string) (string, bool)
+
+	CreateSequenceSQL(ctx context.Context, queryer core.Queryer, seqName string) (string, error)
+	IsSequenceExist(ctx context.Context, queryer core.Queryer, seqName string) (bool, error)
+	DropSequenceSQL(seqName string) (string, error)
 
 	GetColumns(queryer core.Queryer, ctx context.Context, tableName string) ([]string, map[string]*schemas.Column, error)
 	IsColumnExist(queryer core.Queryer, ctx context.Context, tableName string, colName string) (bool, error)
@@ -104,7 +120,7 @@ func (db *Base) URI() *URI {
 }
 
 // CreateTableSQL implements Dialect
-func (db *Base) CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool) {
+func (db *Base) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error) {
 	if tableName == "" {
 		tableName = table.Name
 	}
@@ -112,7 +128,9 @@ func (db *Base) CreateTableSQL(table *schemas.Table, tableName string) ([]string
 	quoter := db.dialect.Quoter()
 	var b strings.Builder
 	b.WriteString("CREATE TABLE IF NOT EXISTS ")
-	quoter.QuoteTo(&b, tableName)
+	if err := quoter.QuoteTo(&b, tableName); err != nil {
+		return "", false, err
+	}
 	b.WriteString(" (")
 
 	for i, colName := range table.ColumnsSeq() {
@@ -133,7 +151,25 @@ func (db *Base) CreateTableSQL(table *schemas.Table, tableName string) ([]string
 
 	b.WriteString(")")
 
-	return []string{b.String()}, false
+	return b.String(), false, nil
+}
+
+func (db *Base) CreateSequenceSQL(ctx context.Context, queryer core.Queryer, seqName string) (string, error) {
+	return fmt.Sprintf(`CREATE SEQUENCE %s 
+	minvalue 1
+	   nomaxvalue
+	   start with 1
+	   increment by 1
+	   nocycle
+	nocache`, seqName), nil
+}
+
+func (db *Base) IsSequenceExist(ctx context.Context, queryer core.Queryer, seqName string) (bool, error) {
+	return false, fmt.Errorf("unsupported sequence feature")
+}
+
+func (db *Base) DropSequenceSQL(seqName string) (string, error) {
+	return fmt.Sprintf("DROP SEQUENCE %s", seqName), nil
 }
 
 // DropTableSQL returns drop table SQL
@@ -174,7 +210,7 @@ func (db *Base) IsColumnExist(queryer core.Queryer, ctx context.Context, tableNa
 // AddColumnSQL returns a SQL to add a column
 func (db *Base) AddColumnSQL(tableName string, col *schemas.Column) string {
 	s, _ := ColumnString(db.dialect, col, true)
-	return fmt.Sprintf("ALTER TABLE %v ADD %v", db.dialect.Quoter().Quote(tableName), s)
+	return fmt.Sprintf("ALTER TABLE %s ADD %s", db.dialect.Quoter().Quote(tableName), s)
 }
 
 // CreateIndexSQL returns a SQL to create index
@@ -285,43 +321,41 @@ func ColumnString(dialect Dialect, col *schemas.Column, includePrimaryKey bool) 
 		return "", err
 	}
 
-	if err := bd.WriteByte(' '); err != nil {
-		return "", err
-	}
-
 	if includePrimaryKey && col.IsPrimaryKey {
-		if _, err := bd.WriteString("PRIMARY KEY "); err != nil {
+		if _, err := bd.WriteString(" PRIMARY KEY"); err != nil {
 			return "", err
 		}
-
 		if col.IsAutoIncrement {
-			if _, err := bd.WriteString(dialect.AutoIncrStr()); err != nil {
-				return "", err
-			}
 			if err := bd.WriteByte(' '); err != nil {
 				return "", err
 			}
+			if _, err := bd.WriteString(dialect.AutoIncrStr()); err != nil {
+				return "", err
+			}
 		}
 	}
 
-	if col.Default != "" {
-		if _, err := bd.WriteString("DEFAULT "); err != nil {
+	if !col.DefaultIsEmpty {
+		if _, err := bd.WriteString(" DEFAULT "); err != nil {
 			return "", err
 		}
-		if _, err := bd.WriteString(col.Default); err != nil {
-			return "", err
-		}
-		if err := bd.WriteByte(' '); err != nil {
-			return "", err
+		if col.Default == "" {
+			if _, err := bd.WriteString("''"); err != nil {
+				return "", err
+			}
+		} else {
+			if _, err := bd.WriteString(col.Default); err != nil {
+				return "", err
+			}
 		}
 	}
 
 	if col.Nullable {
-		if _, err := bd.WriteString("NULL "); err != nil {
+		if _, err := bd.WriteString(" NULL"); err != nil {
 			return "", err
 		}
 	} else {
-		if _, err := bd.WriteString("NOT NULL "); err != nil {
+		if _, err := bd.WriteString(" NOT NULL"); err != nil {
 			return "", err
 		}
 	}

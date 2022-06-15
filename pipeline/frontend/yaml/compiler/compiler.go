@@ -7,6 +7,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
@@ -15,11 +16,13 @@ import (
 const (
 	windowsPrefix = "windows/"
 
-	defaultCloneImage = "woodpeckerci/plugin-git:latest"
-	defaultCloneName  = "clone"
+	defaultCloneName = "clone"
 
 	networkDriverNAT    = "nat"
 	networkDriverBridge = "bridge"
+
+	nameServices = "services"
+	namePipeline = "pipeline"
 )
 
 type Registry struct {
@@ -95,7 +98,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	})
 
 	// create a default network
-	if strings.HasPrefix(c.metadata.Sys.Arch, windowsPrefix) {
+	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
 			Driver: networkDriverNAT,
@@ -129,7 +132,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	if !c.local && !conf.SkipClone {
 		if len(conf.Clone.Containers) == 0 {
 			// Load from default clone
-			cloneImage := defaultCloneImage
+			cloneImage := constant.DefaultCloneImage
 			if len(c.defaultCloneImage) > 0 {
 				cloneImage = c.defaultCloneImage
 			}
@@ -173,16 +176,16 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add services steps
 	if len(conf.Services.Containers) != 0 {
 		stage := new(backend.Stage)
-		stage.Name = fmt.Sprintf("%s_services", c.prefix)
-		stage.Alias = "services"
+		stage.Name = fmt.Sprintf("%s_%s", c.prefix, nameServices)
+		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
 			if !container.MatchConstraints(c.metadata) {
 				continue
 			}
 
-			name := fmt.Sprintf("%s_services_%d", c.prefix, i)
-			step := c.createProcess(name, container, "services")
+			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
+			step := c.createProcess(name, container, nameServices)
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -211,7 +214,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
-		step := c.createProcess(name, container, "pipeline")
+		step := c.createProcess(name, container, namePipeline)
 		stage.Steps = append(stage.Steps, step)
 	}
 
@@ -238,7 +241,7 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 }
 
 func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
-	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != "push" || c.cacher == nil {
+	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != frontend.EventPush || c.cacher == nil {
 		return
 	}
 	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)

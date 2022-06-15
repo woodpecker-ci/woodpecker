@@ -6,7 +6,7 @@ This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [
 
 By default, Woodpecker looks for the pipeline definition in `.woodpecker.yml` in the project root.
 
-The Multi-Pipeline feature allows the pipeline to be split into several files and placed in the `.woodpecker/` folder. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](/docs/usage/project-settings). 
+The Multi-Pipeline feature allows the pipeline to be split into several files and placed in the `.woodpecker/` folder. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](/docs/usage/project-settings).
 
 ## Rational
 
@@ -17,7 +17,7 @@ The Multi-Pipeline feature allows the pipeline to be split into several files an
 ## Example multi-pipeline definition
 :::warning
 Please note that files are only shared between steps of the same pipeline (see [File changes are incremental](/docs/usage/pipeline-syntax#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` pipeline below in the `deploy` pipeline.
-If you still need to pass artifacts between the pipelines you need use storage [plugins](docs/usage/plugins/plugins) (e.g. one which stores files in an Amazon S3 bucket).
+If you still need to pass artifacts between the pipelines you need use storage [plugins](/docs/usage/plugins/plugins) (e.g. one which stores files in an Amazon S3 bucket).
 :::
 
 ```bash
@@ -81,13 +81,13 @@ pipeline:
 
 ## Status lines
 
-Each pipeline has its own status line on GitHub.
+Each pipeline will report its own status back to your forge.
 
 ## Flow control
 
 The pipelines run in parallel on separate agents and share nothing.
 
-Dependencies between pipelines can be set with the `depends_on` element. A pipeline doesn't execute until its dependencies did not complete successfully.
+Dependencies between pipelines can be set with the `depends_on` element. A pipeline doesn't execute until all of its dependencies finished successfully.
 
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml`. If the project config for example uses `.woodpecker/` as path for ci files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
@@ -104,7 +104,7 @@ pipeline:
 +  - test
 ```
 
-Pipelines that need to run even on failures should set the `run_on` tag.
+Pipelines that need to run even on failures should set the `runs_on` tag.
 
 ```diff
 pipeline:
@@ -116,7 +116,7 @@ pipeline:
 depends_on:
   - deploy
 
-+run_on: [ success, failure ]
++runs_on: [ success, failure ]
 ```
 
 Some pipelines don't need the source code, set the `skip_clone` tag to skip cloning:
@@ -132,6 +132,6 @@ pipeline:
 depends_on:
   - deploy
 
-run_on: [ success, failure ]
+runs_on: [ success, failure ]
 +skip_clone: true
 ```

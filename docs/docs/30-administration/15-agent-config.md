@@ -1,6 +1,6 @@
 # Agent configuration
 
-Agents are configured by the command line or environement variables. At the minimum you need the following information:
+Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
 ```yaml
 # docker-compose.yml
@@ -12,7 +12,6 @@ services:
   environment:
 +   - WOODPECKER_SERVER=localhost:9000
 +   - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-
 ```
 
 The following are automatically set and can be overridden:
@@ -36,45 +35,6 @@ services:
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
 +    - WOODPECKER_MAX_PROCS=4
 ```
-
-## Filtering agents
-
-When building your pipelines as long as you have set the platform or filter, builds can be made to only run code on certain agents.
-
-```
-- WOODPECKER_HOSTNAME=mycompany-ci-01.example.com
-- WOODPECKER_FILTER=
-```
-
-### Filter on Platform
-
-Only want certain pipelines or steps to run on certain agents with specific platforms? Such as arm vs amd64?
-
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-   image: golang
-   commands:
-     - go build
-     - go test
-  when:
-    platform: linux/amd64
-
-
-  testing:
-   image: golang
-   commands:
-     - go build
-     - go test
-  when:
-    platform: linux/arm*
-
-
-```
-
-See [Conditionals Pipeline](/docs/usage/pipeline-syntax#step-when---conditional-execution) syntax for more
-
 
 ## All agent configuration options
 
@@ -125,6 +85,11 @@ Configures the agent hostname.
 
 Configures the number of parallel builds.
 
+### `WOODPECKER_FILTER_LABELS`
+> Default: empty
+
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](/docs/usage/pipeline-syntax#labels).
+
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`
 
@@ -153,4 +118,12 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 ### `WOODPECKER_BACKEND`
 > Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect` or `docker`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `ssh`.
+
+### `WOODPECKER_BACKEND_DOCKER_*`
+
+See [Docker backend configuration](backends/docker/#configuration)
+
+### `WOODPECKER_BACKEND_SSH_*`
+
+See [SSH backend configuration](backends/ssh/#configuration)
