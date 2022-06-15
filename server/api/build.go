@@ -213,13 +213,7 @@ func DeleteBuild(c *gin.Context) {
 	}
 
 	if err := pipeline.Cancel(c, _store, repo, build); err != nil {
-		if pipeline.IsErrNotFound(err) {
-			c.String(http.StatusNotFound, "%v", err)
-		} else if pipeline.IsErrBadRequest(err) {
-			c.String(http.StatusBadRequest, "%v", err)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
+		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)
 	}
@@ -245,11 +239,7 @@ func PostApproval(c *gin.Context) {
 
 	newBuild, err := pipeline.Approve(c, _store, build, user, repo)
 	if err != nil {
-		if pipeline.IsErrNotFound(err) {
-			c.String(http.StatusNotFound, "%v", err)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
+		handlePipelineErr(c, err)
 	} else {
 		c.JSON(200, newBuild)
 	}
@@ -271,13 +261,7 @@ func PostDecline(c *gin.Context) {
 
 	build, err = pipeline.Decline(c, _store, build, user, repo)
 	if err != nil {
-		if pipeline.IsErrNotFound(err) {
-			c.String(http.StatusNotFound, "%v", err)
-		} else if pipeline.IsErrBadRequest(err) {
-			c.String(http.StatusBadRequest, "%v", err)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
+		handlePipelineErr(c, err)
 	} else {
 		c.JSON(200, build)
 	}
@@ -364,15 +348,7 @@ func PostBuild(c *gin.Context) {
 
 	newBuild, err := pipeline.ReStart(c, _store, build, user, repo, envs)
 	if err != nil {
-		if pipeline.IsErrNotFound(err) {
-			c.String(http.StatusNotFound, "%v", err)
-		} else if pipeline.IsErrBadRequest(err) {
-			c.String(http.StatusBadRequest, "%v", err)
-		} else if pipeline.IsErrFiltered(err) {
-			c.String(http.StatusOK, "%v", err)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
+		handlePipelineErr(c, err)
 	} else {
 		c.JSON(200, newBuild)
 	}

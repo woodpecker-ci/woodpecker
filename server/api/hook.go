@@ -66,6 +66,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// Start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -146,13 +147,7 @@ func PostHook(c *gin.Context) {
 
 	build, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
-		if pipeline.IsErrNotFound(err) {
-			c.String(http.StatusNotFound, "%v", err)
-		} else if pipeline.IsErrBadRequest(err) {
-			c.String(http.StatusBadRequest, "%v", err)
-		} else {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		}
+		handlePipelineErr(c, err)
 	} else {
 		c.JSON(200, build)
 	}
