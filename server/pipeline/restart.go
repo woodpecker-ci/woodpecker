@@ -27,21 +27,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func ReStart(
-	ctx context.Context,
-	store store.Store,
-	lastBuild *model.Build,
-	user *model.User,
-	repo *model.Repo,
-	envs map[string]string,
+func ReStart(ctx context.Context, store store.Store,
+	lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string,
 ) (*model.Build, error) {
-
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
-		return nil, ErrBadRequest{
-			Msg: fmt.Sprintf("cannot restart a build with status %s", lastBuild.Status),
-		}
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a build with status %s", lastBuild.Status)}
 	}
 
 	var pipelineFiles []*remote.FileMeta

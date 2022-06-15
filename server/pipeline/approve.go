@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -24,14 +25,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func Approve(
-	ctx context.Context,
-	store store.Store,
-	build *model.Build,
-	user *model.User,
-	repo *model.Repo,
+func Approve(ctx context.Context, store store.Store,
+	build *model.Build, user *model.User, repo *model.Repo,
 ) (*model.Build, error) {
-
 	// fetch the build file from the database
 	configs, err := store.ConfigsForBuild(build.ID)
 	if err != nil {
