@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func UpdateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
+func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
 	for _, proc := range build.Procs {
 		// skip child procs
 		if !proc.IsParent() {

@@ -111,12 +111,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	}
 
 	if build.Status == model.StatusBlocked {
-		if err := PublishToTopic(ctx, build, repo); err != nil {
-			log.Error().Err(err).Msg("PublishToTopic")
+		if err := publishToTopic(ctx, build, repo); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := UpdateBuildStatus(ctx, build, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("UpdateBuildStatus")
+		if err := updateBuildStatus(ctx, build, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updateBuildStatus")
 		}
 
 		return build, nil

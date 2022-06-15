@@ -43,8 +43,8 @@ func Start(
 		return nil, err
 	}
 
-	if err := PublishToTopic(ctx, activeBuild, repo); err != nil {
-		log.Error().Err(err).Msg("PublishToTopic")
+	if err := publishToTopic(ctx, activeBuild, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
 	if err := queueBuild(activeBuild, repo, buildItems); err != nil {
@@ -52,8 +52,8 @@ func Start(
 		return nil, err
 	}
 
-	if err := UpdateBuildStatus(ctx, activeBuild, repo, user); err != nil {
-		log.Error().Err(err).Msg("UpdateBuildStatus")
+	if err := updateBuildStatus(ctx, activeBuild, repo, user); err != nil {
+		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 
 	return activeBuild, nil

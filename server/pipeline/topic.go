@@ -24,8 +24,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 )
 
-// PublishToTopic publishes message to UI clients
-func PublishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
+// publishToTopic publishes message to UI clients
+func publishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,

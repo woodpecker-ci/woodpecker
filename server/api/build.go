@@ -33,7 +33,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -267,35 +266,22 @@ func PostDecline(c *gin.Context) {
 
 	build, err := _store.GetBuildNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
-		return
-	}
-	if build.Status != model.StatusBlocked {
-		c.String(500, "cannot decline a build with status %s", build.Status)
+		c.String(http.StatusNotFound, "%v", err)
 		return
 	}
 
-	if _, err = shared.UpdateToStatusDeclined(_store, *build, user.Login); err != nil {
-		c.String(500, "error updating build. %s", err)
-		return
+	build, err = pipeline.Decline(c, _store, build, user, repo)
+	if err != nil {
+		if pipeline.IsErrNotFound(err) {
+			c.String(http.StatusNotFound, "%v", err)
+		} else if pipeline.IsErrBadRequest(err) {
+			c.String(http.StatusBadRequest, "%v", err)
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
+	} else {
+		c.JSON(200, build)
 	}
-
-	if build.Procs, err = _store.ProcList(build); err != nil {
-		log.Error().Err(err).Msg("can not get proc list from store")
-	}
-	if build.Procs, err = model.Tree(build.Procs); err != nil {
-		log.Error().Err(err).Msg("can not build tree from proc list")
-	}
-
-	if err := pipeline.UpdateBuildStatus(c, build, repo, user); err != nil {
-		log.Error().Err(err).Msg("UpdateBuildStatus")
-	}
-
-	if err := pipeline.PublishToTopic(c, build, repo); err != nil {
-		log.Error().Err(err).Msg("PublishToTopic")
-	}
-
-	c.JSON(200, build)
 }
 
 func GetBuildQueue(c *gin.Context) {

@@ -100,8 +100,8 @@ func Cancel(
 	if killedBuild.Procs, err = model.Tree(procs); err != nil {
 		return http.StatusInternalServerError, err
 	}
-	if err := PublishToTopic(ctx, killedBuild, repo); err != nil {
-		log.Error().Err(err).Msg("PublishToTopic")
+	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
 	}
 
 	return http.StatusNoContent, nil
