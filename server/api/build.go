@@ -212,18 +212,17 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
-		c.String(http.StatusBadRequest, "Cannot cancel a non-running or non-pending build")
-		return
+	if err := pipeline.Cancel(c, _store, repo, build); err != nil {
+		if pipeline.IsErrNotFound(err) {
+			c.String(http.StatusNotFound, "%v", err)
+		} else if pipeline.IsErrBadRequest(err) {
+			c.String(http.StatusBadRequest, "%v", err)
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
+	} else {
+		c.Status(http.StatusNoContent)
 	}
-
-	code, err := pipeline.Cancel(c, _store, repo, build)
-	if err != nil {
-		_ = c.AbortWithError(code, err)
-		return
-	}
-
-	c.String(code, "")
 }
 
 func PostApproval(c *gin.Context) {

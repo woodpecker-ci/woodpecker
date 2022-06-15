@@ -17,8 +17,6 @@ package pipeline
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -29,15 +27,14 @@ import (
 )
 
 // Cancel the build and returns the status.
-func Cancel(
-	ctx context.Context,
-	_store store.Store,
-	repo *model.Repo,
-	build *model.Build,
-) (int, error) {
-	procs, err := _store.ProcList(build)
+func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *model.Build) error {
+	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
+		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending build"}
+	}
+
+	procs, err := store.ProcList(build)
 	if err != nil {
-		return http.StatusNotFound, err
+		return ErrNotFound{Msg: err.Error()}
 	}
 
 	// First cancel/evict procs in the queue in one go
@@ -76,35 +73,35 @@ func Cancel(
 	for _, proc := range procs {
 		if proc.State == model.StatusPending {
 			if proc.PPID != 0 {
-				if _, err = shared.UpdateProcToStatusSkipped(_store, *proc, 0); err != nil {
+				if _, err = shared.UpdateProcToStatusSkipped(store, *proc, 0); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			} else {
-				if _, err = shared.UpdateProcToStatusKilled(_store, *proc); err != nil {
+				if _, err = shared.UpdateProcToStatusKilled(store, *proc); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(_store, *build)
+	killedBuild, err := shared.UpdateToStatusKilled(store, *build)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", build)
-		return http.StatusInternalServerError, err
+		return err
 	}
 
-	procs, err = _store.ProcList(killedBuild)
+	procs, err = store.ProcList(killedBuild)
 	if err != nil {
-		return http.StatusNotFound, err
+		return ErrNotFound{Msg: err.Error()}
 	}
 	if killedBuild.Procs, err = model.Tree(procs); err != nil {
-		return http.StatusInternalServerError, err
+		return err
 	}
 	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	return http.StatusNoContent, nil
+	return nil
 }
 
 func cancelPreviousPipelines(
@@ -160,11 +157,12 @@ func cancelPreviousPipelines(
 				Msg("Error while trying to cancel build, skipping")
 			continue
 		}
+
 		if !cancel {
 			continue
 		}
-		_, err = Cancel(ctx, _store, repo, active)
-		if err != nil {
+
+		if err = Cancel(ctx, _store, repo, active); err != nil {
 			log.Error().
 				Err(err).
 				Str("Ref", active.Ref).
