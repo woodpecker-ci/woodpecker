@@ -89,9 +89,9 @@ func ReStart(ctx context.Context, store store.Store,
 		return nil, fmt.Errorf(msg)
 	}
 
-	build, buildItems, err := CreateBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	build, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
-		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}

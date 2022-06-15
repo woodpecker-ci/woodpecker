@@ -45,9 +45,9 @@ func Approve(ctx context.Context, store store.Store,
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := CreateBuildItems(ctx, store, build, user, repo, yamls, nil)
+	build, buildItems, err := createBuildItems(ctx, store, build, user, repo, yamls, nil)
 	if err != nil {
-		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
 	}
