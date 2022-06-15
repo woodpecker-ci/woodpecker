@@ -28,10 +28,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -278,7 +276,6 @@ func GetBuildQueue(c *gin.Context) {
 
 // PostBuild restarts a build
 func PostBuild(c *gin.Context) {
-	_remote := server.Config.Services.Remote
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
@@ -302,20 +299,8 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	// if the remote has a refresh token, the current access token
-	// may be stale. Therefore, we should refresh prior to dispatching
-	// the job.
-	// TODO: own helper func for api package
-	if refresher, ok := _remote.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(c, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := _store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
-		}
-	}
+	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if nessessary again
+	refreshUserToken(c, user)
 
 	// make Deploy overridable
 	build.Deploy = c.DefaultQuery("deploy_to", build.Deploy)
