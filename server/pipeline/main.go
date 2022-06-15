@@ -12,34 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package build
+package pipeline
 
 import (
 	"context"
-	"encoding/json"
-	"strconv"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 )
 
-// PublishToTopic publishes message to UI clients
-func PublishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
-	buildCopy := *build
-	if buildCopy.Procs, err = model.Tree(buildCopy.Procs); err != nil {
-		return err
+func UpdateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
+	for _, proc := range build.Procs {
+		// skip child procs
+		if !proc.IsParent() {
+			continue
+		}
+
+		err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
+		if err != nil {
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			return err
+		}
 	}
 
-	message.Data, _ = json.Marshal(model.Event{
-		Repo:  *repo,
-		Build: buildCopy,
-	})
-	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
+	return nil
 }

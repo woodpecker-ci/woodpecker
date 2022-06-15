@@ -29,8 +29,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	server_build "github.com/woodpecker-ci/woodpecker/server/build"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
@@ -218,7 +218,7 @@ func DeleteBuild(c *gin.Context) {
 		return
 	}
 
-	code, err := server_build.Cancel(c, _store, repo, build)
+	code, err := pipeline.Cancel(c, _store, repo, build)
 	if err != nil {
 		_ = c.AbortWithError(code, err)
 		return
@@ -263,7 +263,7 @@ func PostApproval(c *gin.Context) {
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := server_build.CreateBuildItems(c, _store, build, user, repo, yamls, nil)
+	build, buildItems, err := pipeline.CreateBuildItems(c, _store, build, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -271,7 +271,7 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	build, err = server_build.Start(c, _store, build, user, repo, buildItems)
+	build, err = pipeline.Start(c, _store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -312,11 +312,11 @@ func PostDecline(c *gin.Context) {
 		log.Error().Err(err).Msg("can not build tree from proc list")
 	}
 
-	if err := server_build.UpdateBuildStatus(c, build, repo, user); err != nil {
+	if err := pipeline.UpdateBuildStatus(c, build, repo, user); err != nil {
 		log.Error().Err(err).Msg("UpdateBuildStatus")
 	}
 
-	if err := server_build.PublishToTopic(c, build, repo); err != nil {
+	if err := pipeline.PublishToTopic(c, build, repo); err != nil {
 		log.Error().Err(err).Msg("PublishToTopic")
 	}
 
@@ -461,7 +461,7 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := server_build.CreateBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
+	build, buildItems, err := pipeline.CreateBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
 	if err != nil {
 		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -469,7 +469,7 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	build, err = server_build.Start(c, _store, build, user, repo, buildItems)
+	build, err = pipeline.Start(c, _store, build, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

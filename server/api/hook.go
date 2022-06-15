@@ -28,8 +28,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/build"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -144,7 +144,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	string, json, status := build.Create(c, _store, repo, tmpBuild)
+	string, json, status := pipeline.Create(c, _store, repo, tmpBuild)
 	if json != nil {
 		c.JSON(status, json)
 	} else {
