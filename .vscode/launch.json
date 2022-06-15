@@ -21,6 +21,16 @@
       "cwd": "${workspaceFolder}"
     },
     {
+      "name": "Go: current file",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env",
+      "cwd": "${workspaceFolder}",
+      "program": "${file}"
+    },
+    {
       "name": "Woodpecker UI",
       "type": "node",
       "request": "launch",
