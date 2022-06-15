@@ -248,7 +248,7 @@ func PostApproval(c *gin.Context) {
 	newBuild, err := pipeline.Approve(c, _store, build, user, repo)
 	if err != nil {
 		if pipeline.IsErrNotFound(err) {
-			_ = c.AbortWithError(http.StatusNotFound, err)
+			c.String(http.StatusNotFound, "%v", err)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -348,55 +348,10 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	switch build.Status {
-	case model.StatusDeclined,
-		model.StatusBlocked:
-		c.String(500, "cannot restart a build with status %s", build.Status)
-		return
-	}
-
-	var pipelineFiles []*remote.FileMeta
-
-	// fetch the old pipeline config from database
-	configs, err := _store.ConfigsForBuild(build.ID)
-	if err != nil {
-		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(404, err)
-		return
-	}
-
-	for _, y := range configs {
-		pipelineFiles = append(pipelineFiles, &remote.FileMeta{Data: y.Data, Name: y.Name})
-	}
-
-	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
-		currentFileMeta := make([]*remote.FileMeta, len(configs))
-		for i, cfg := range configs {
-			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
-		}
-
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(c, repo, build, currentFileMeta)
-		if err != nil {
-			msg := fmt.Sprintf("On fetching external build config: %s", err)
-			c.String(http.StatusBadRequest, msg)
-			return
-		}
-		if !useOld {
-			pipelineFiles = newConfig
-		}
-	}
-
-	build.ID = 0
-	build.Number = 0
-	build.Parent = num
-	build.Status = model.StatusPending
-	build.Started = 0
-	build.Finished = 0
-	build.Enqueued = time.Now().UTC().Unix()
-	build.Error = ""
+	// make Deploy overridable
 	build.Deploy = c.DefaultQuery("deploy_to", build.Deploy)
 
+	// make Event overridable
 	if event, ok := c.GetQuery("event"); ok {
 		build.Event = model.WebhookEvent(event)
 
@@ -405,21 +360,6 @@ func PostBuild(c *gin.Context) {
 			c.String(http.StatusBadRequest, msg)
 			return
 		}
-	}
-
-	err = _store.CreateBuild(build)
-	if err != nil {
-		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
-	if err := persistBuildConfigs(_store, configs, build.ID); err != nil {
-		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
 	}
 
 	// Read query string parameters into buildParams, exclude reserved params
@@ -437,23 +377,18 @@ func PostBuild(c *gin.Context) {
 		}
 	}
 
-	build, buildItems, err := pipeline.CreateBuildItems(c, _store, build, user, repo, pipelineFiles, envs)
+	newBuild, err := pipeline.ReStart(c, _store, build, user, repo, envs)
 	if err != nil {
-		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
+		if pipeline.IsErrNotFound(err) {
+			c.String(http.StatusNotFound, "%v", err)
+		} else if pipeline.IsErrBadRequest(err) {
+			c.String(http.StatusBadRequest, "%v", err)
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
+	} else {
+		c.JSON(200, newBuild)
 	}
-
-	build, err = pipeline.Start(c, _store, build, user, repo, buildItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
-	c.JSON(200, build)
 }
 
 func DeleteBuildLogs(c *gin.Context) {
@@ -495,20 +430,6 @@ func DeleteBuildLogs(c *gin.Context) {
 	}
 
 	c.String(204, "")
-}
-
-func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
-	for _, conf := range configs {
-		buildConfig := &model.BuildConfig{
-			ConfigID: conf.ID,
-			BuildID:  buildID,
-		}
-		err := store.BuildConfigCreate(buildConfig)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 var deleteStr = `[
