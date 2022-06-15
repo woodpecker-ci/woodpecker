@@ -311,6 +311,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
+		pipeline.WithDescription(map[string]string{
+			"ID":    work.ID,
+			"Repo":  repoName,
+			"Build": buildNumber,
+		}),
 	).Run()
 
 	state.Finished = time.Now().Unix()

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
@@ -40,12 +41,15 @@ type Runtime struct {
 	ctx    context.Context
 	tracer Tracer
 	logger Logger
+
+	Description map[string]string // The runtime descriptors.
 }
 
 // New returns a new runtime using the specified runtime
 // configuration and runtime engine.
 func New(spec *backend.Config, opts ...Option) *Runtime {
 	r := new(Runtime)
+	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
 	for _, opts := range opts {
@@ -54,11 +58,33 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	return r
 }
 
+func (r *Runtime) MakeLogger() zerolog.Logger {
+	logCtx := log.With()
+	for key, val := range r.Description {
+		logCtx = logCtx.Str(key, val)
+	}
+	return logCtx.Logger()
+}
+
 // Starts the execution of the pipeline and waits for it to complete
 func (r *Runtime) Run() error {
+	logger := r.MakeLogger()
+	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
+	for _, stage := range r.spec.Stages {
+		steps := []string{}
+		for _, step := range stage.Steps {
+			steps = append(steps, step.Name)
+		}
+
+		logger.Debug().
+			Str("Stage", stage.Name).
+			Str("Steps", strings.Join(steps, ",")).
+			Msg("stage")
+	}
+
 	defer func() {
 		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
-			log.Error().Err(err).Msg("could not destroy pipeline")
+			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
@@ -111,6 +137,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
+	logger := r.MakeLogger()
 
 	for _, step := range steps {
 		// required since otherwise the loop variable
@@ -119,10 +146,21 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Prepare")
+
 			switch {
 			case r.err != nil && !step.OnFailure:
+				logger.Debug().
+					Str("Step", step.Name).
+					Err(r.err).
+					Msgf("Skipped due to OnFailure=%t", step.OnFailure)
 				return nil
 			case r.err == nil && !step.OnSuccess:
+				logger.Debug().
+					Str("Step", step.Name).
+					Msgf("Skipped due to OnSuccess=%t", step.OnSuccess)
 				return nil
 			}
 
@@ -131,6 +169,10 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 			if err != nil {
 				return err
 			}
+
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Executing")
 
 			processState, err := r.exec(step)
 
@@ -171,8 +213,10 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		}
 
 		go func() {
+			logger := r.MakeLogger()
+
 			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
-				log.Error().Err(err).Msg("process logging failed")
+				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
 		}()
