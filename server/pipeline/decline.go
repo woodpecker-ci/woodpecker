@@ -17,20 +17,20 @@ package pipeline
 import (
 	"context"
 	"fmt"
+
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func Decline(ctx context.Context, store store.Store,
-	build *model.Build, user *model.User, repo *model.Repo) (_ *model.Build, err error) {
-
+func Decline(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
 	if build.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a build with status %s", build.Status)
 	}
 
-	if _, err := shared.UpdateToStatusDeclined(store, *build, user.Login); err != nil {
+	_, err := shared.UpdateToStatusDeclined(store, *build, user.Login)
+	if err != nil {
 		return nil, fmt.Errorf("error updating build. %s", err)
 	}
 

@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
