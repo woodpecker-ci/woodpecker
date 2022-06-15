@@ -149,6 +149,13 @@ type Store interface {
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
 
+	// Cron
+	CronCreate(*model.CronJob) error
+	// TODO
+	CronList(execUnixAfterOrBefore int64) ([]*model.CronJob, error)
+	CronDelete(int64) error
+	CronGetLock(*model.CronJob, int64) (bool, error)
+
 	// Store operations
 	Ping() error
 	Close() error
