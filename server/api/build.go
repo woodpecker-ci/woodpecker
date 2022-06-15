@@ -245,41 +245,16 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	// fetch the build file from the database
-	configs, err := _store.ConfigsForBuild(build.ID)
+	newBuild, err := pipeline.Approve(c, _store, build, user, repo)
 	if err != nil {
-		log.Error().Msgf("failure to get build config for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(404, err)
-		return
+		if pipeline.IsErrNotFound(err) {
+			_ = c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
+	} else {
+		c.JSON(200, newBuild)
 	}
-
-	if build, err = shared.UpdateToStatusPending(_store, *build, user.Login); err != nil {
-		c.String(http.StatusInternalServerError, "error updating build. %s", err)
-		return
-	}
-
-	var yamls []*remote.FileMeta
-	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
-	}
-
-	build, buildItems, err := pipeline.CreateBuildItems(c, _store, build, user, repo, yamls, nil)
-	if err != nil {
-		msg := fmt.Sprintf("failure to CreateBuildItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
-	build, err = pipeline.Start(c, _store, build, user, repo, buildItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
-	c.JSON(200, build)
 }
 
 func PostDecline(c *gin.Context) {
@@ -358,16 +333,10 @@ func PostBuild(c *gin.Context) {
 		return
 	}
 
-	switch build.Status {
-	case model.StatusDeclined,
-		model.StatusBlocked:
-		c.String(500, "cannot restart a build with status %s", build.Status)
-		return
-	}
-
 	// if the remote has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the job.
+	// TODO: own helper func for api package
 	if refresher, ok := _remote.(remote.Refresher); ok {
 		ok, err := refresher.Refresh(c, user)
 		if err != nil {
@@ -377,6 +346,13 @@ func PostBuild(c *gin.Context) {
 				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 			}
 		}
+	}
+
+	switch build.Status {
+	case model.StatusDeclined,
+		model.StatusBlocked:
+		c.String(500, "cannot restart a build with status %s", build.Status)
+		return
 	}
 
 	var pipelineFiles []*remote.FileMeta
