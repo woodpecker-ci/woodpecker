@@ -130,7 +130,10 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err
 
-	return r.tracer.Trace(state)
+	if traceErr := r.tracer.Trace(state); traceErr != nil {
+		return traceErr
+	}
+	return err
 }
 
 // Executes a set of parallel steps
