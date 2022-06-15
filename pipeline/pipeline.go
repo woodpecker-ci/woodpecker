@@ -179,13 +179,20 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			processState, err := r.exec(step)
 
-			// Return the error after tracing it.
-			traceErr := r.traceStep(processState, err, step)
-			if traceErr != nil {
-				return traceErr
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Complete")
+
+			// if we got a nil process but an error state
+			// then we need to log the internal error to the step.
+			if r.logger != nil && err != nil && processState == nil {
+				_ = r.logger.Log(step, multipart.New(strings.NewReader(
+					"Backend engine error while running step: "+err.Error(),
+				)))
 			}
 
-			return err
+			// Return the error after tracing it.
+			return r.traceStep(processState, err, step)
 		})
 	}
 
