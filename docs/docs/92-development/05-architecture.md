@@ -25,11 +25,11 @@
 | `server/badges/**` | generate svg badges for pipelines               | `server/model`
 | `server/ccmenu/**` | generate xml ccmenu for pipelines               | `server/model`
 | `server/grpc/**`   | gRPC server agents can connect to               | `pipeline/rpc/**`, `server/(logging\|model\|pubsub\|queue\|remote\|shared\|store)`
-| `server/logging/**`| logging lib for server... noop (TODO: rm)       |
+| `server/logging/**`| logging lib for gPRC server to stream logs while running | std
 | `server/model/**`  | structs for store (db) and api (json)           | std
 | `server/plugins/**`| plugins for server                              | `server/model`, `server/remote`
-| `server/pubsub/**` | pubsub lib for server (TODO: write down what exatly is handled there) | std
-| `server/queue/**`  | queue lib for server (TODO: write down what exatly is handled there) | `server/model`
+| `server/pubsub/**` | pubsub lib for server to push changes to the WebUI | std
+| `server/queue/**`  | queue lib for server where agents pull new pipelines from via gRPC | `server/model`
 | `server/remote/**` | remote lib for server to connect and handle forge specific stuff | `shared`, `server/model`
 | `server/router/**` | handle REST API (and all middleware) and serve route `web` | `shared`, `server/(api\|model\|remote\|store\|web)`
 | `server/store/**`  | handle database                                 | `server/model`
