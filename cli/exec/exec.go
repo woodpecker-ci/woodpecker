@@ -201,6 +201,9 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
+		pipeline.WithDescription(map[string]string{
+			"CLI": "exec",
+		}),
 	).Run()
 }
 
