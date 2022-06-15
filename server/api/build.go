@@ -383,6 +383,8 @@ func PostBuild(c *gin.Context) {
 			c.String(http.StatusNotFound, "%v", err)
 		} else if pipeline.IsErrBadRequest(err) {
 			c.String(http.StatusBadRequest, "%v", err)
+		} else if pipeline.IsErrFiltered(err) {
+			c.String(http.StatusOK, "%v", err)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}

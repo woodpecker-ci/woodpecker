@@ -144,10 +144,16 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	string, json, status := pipeline.Create(c, _store, repo, tmpBuild)
-	if json != nil {
-		c.JSON(status, json)
+	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	if err != nil {
+		if pipeline.IsErrNotFound(err) {
+			c.String(http.StatusNotFound, "%v", err)
+		} else if pipeline.IsErrBadRequest(err) {
+			c.String(http.StatusBadRequest, "%v", err)
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
 	} else {
-		c.String(status, string)
+		c.JSON(200, build)
 	}
 }

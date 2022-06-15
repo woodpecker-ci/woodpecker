@@ -17,8 +17,6 @@ package pipeline
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -28,13 +26,12 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// TODO: create error types instead of return string or interface
-func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Build) (string, interface{}, int) {
+func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Build) (*model.Build, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return msg, nil, http.StatusInternalServerError
+		return nil, fmt.Errorf(msg)
 	}
 
 	// if the remote has a refresh token, the current access token
@@ -58,25 +55,25 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	if err != nil {
 		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return msg, nil, http.StatusNotFound
+		return nil, ErrNotFound{Msg: msg}
 	}
 
 	filtered, err := branchFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		msg := "failure to parse yaml from hook"
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return msg, nil, http.StatusBadRequest
+		return nil, ErrBadRequest{Msg: msg}
 	}
 	if filtered {
-		msg := "ignoring hook: branch does not match restrictions defined in yaml"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
-		return msg, nil, http.StatusOK
+		err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+		log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+		return nil, err
 	}
 
 	if zeroSteps(build, remoteYamlConfigs) {
-		msg := "ignoring hook: step conditions yield zero runnable steps"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
-		return msg, nil, http.StatusOK
+		err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
+		log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+		return nil, err
 	}
 
 	// update some build fields
@@ -93,7 +90,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	if err != nil {
 		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return msg, nil, http.StatusInternalServerError
+		return nil, fmt.Errorf(msg)
 	}
 
 	// persist the build config for historical correctness, restarts, etc
@@ -102,7 +99,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
-			return msg, nil, http.StatusInternalServerError
+			return nil, fmt.Errorf(msg)
 		}
 	}
 
@@ -110,7 +107,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return msg, nil, http.StatusInternalServerError
+		return nil, fmt.Errorf(msg)
 	}
 
 	if build.Status == model.StatusBlocked {
@@ -122,15 +119,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 			log.Error().Err(err).Msg("UpdateBuildStatus")
 		}
 
-		return "", build, http.StatusOK
+		return build, nil
 	}
 
 	build, err = Start(ctx, _store, build, repoUser, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return msg, nil, http.StatusInternalServerError
+		return nil, fmt.Errorf(msg)
 	}
 
-	return "", build, http.StatusOK
+	return build, nil
 }
