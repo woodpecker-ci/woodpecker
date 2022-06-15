@@ -88,21 +88,21 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		return nil, fmt.Errorf(msg)
 	}
 
-	build, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	build, err = start(ctx, store, build, user, repo, buildItems)
+	newBuild, err = start(ctx, store, newBuild, user, repo, buildItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return build, nil
+	return newBuild, nil
 }
 
 // TODO: reuse at create.go too
