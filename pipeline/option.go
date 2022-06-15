@@ -36,9 +36,3 @@ func WithContext(ctx context.Context) Option {
 		r.ctx = ctx
 	}
 }
-
-func WithDescription(desc map[string]string) Option {
-	return func(r *Runtime) {
-		r.Description = desc
-	}
-}

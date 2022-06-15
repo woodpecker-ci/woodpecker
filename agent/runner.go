@@ -81,20 +81,17 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config)
-	buildNumber := extractBuildNumber(work.Config)
-
 	r.counter.Add(
 		work.ID,
 		timeout,
-		repoName,    // hack
-		buildNumber, // hack
+		extractRepositoryName(work.Config), // hack
+		extractBuildNumber(work.Config),    // hack
 	)
 	defer r.counter.Done(work.ID)
 
 	logger := log.With().
-		Str("repo", repoName).     // hack
-		Str("build", buildNumber). // hack
+		Str("repo", extractRepositoryName(work.Config)). // hack
+		Str("build", extractBuildNumber(work.Config)).   // hack
 		Str("id", work.ID).
 		Logger()
 
@@ -311,11 +308,6 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
-		pipeline.WithDescription(map[string]string{
-			"ID":    work.ID,
-			"Repo":  repoName,
-			"Build": buildNumber,
-		}),
 	).Run()
 
 	state.Finished = time.Now().Unix()
