@@ -67,13 +67,8 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		}
 	}
 
-	newBuild := &model.Build{
-		Parent:   lastBuild.ID,
-		Deploy:   lastBuild.Deploy,
-		Event:    lastBuild.Event,
-		Status:   model.StatusPending,
-		Enqueued: time.Now().UTC().Unix(),
-	}
+	newBuild := createNewBuildOutOfOld(lastBuild)
+	newBuild.Parent = lastBuild.ID
 
 	err = store.CreateBuild(newBuild)
 	if err != nil {
@@ -118,4 +113,16 @@ func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int
 		}
 	}
 	return nil
+}
+
+func createNewBuildOutOfOld(old *model.Build) *model.Build {
+	new := *old
+	new.ID = 0
+	new.Number = 0
+	new.Status = model.StatusPending
+	new.Started = 0
+	new.Finished = 0
+	new.Enqueued = time.Now().UTC().Unix()
+	new.Error = ""
+	return &new
 }
