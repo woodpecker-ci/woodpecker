@@ -1,3 +1,13 @@
 {
-  "Exclude": [".git", "vendor", "testdata", "fixtures", "LICENSE", "node_modules"]
+  "Exclude": [
+    ".git",
+    "go.mod", "go.sum",
+    "vendor",
+    "fixtures",
+    "LICENSE",
+    "node_modules",
+    "server/store/datastore/migration/testfiles/sqlite.db",
+    "server/store/datastore/feed.go",
+    "_test.go"
+  ]
 }
