@@ -48,6 +48,10 @@ type Proc struct {
 	Children []*Proc           `json:"children,omitempty"   xorm:"-"`
 }
 
+type UpdateProcStore interface {
+	ProcUpdate(*Proc) error
+}
+
 // TableName return database table name for xorm
 func (Proc) TableName() string {
 	return "procs"
