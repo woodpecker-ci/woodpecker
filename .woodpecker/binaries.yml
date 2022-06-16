@@ -105,7 +105,7 @@ pipeline:
     group: bundle
     image: golang:1.18
     commands:
-      - release-tarball
+      - make release-tarball
     when:
       path:
         # related config files
