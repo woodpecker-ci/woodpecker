@@ -19,22 +19,25 @@
 
 ### Server
 
-| package            | meaning                                         | import
-|--------------------|-------------------------------------------------|----------
-| `server/api/**`    | handle web requests from `server/router`        | `pipeline`, `server/(badges\|ccmenue\|logging\|model\|pubsub\|queue\|remote\|shared\|store)`, `shared`, (TODO: mv `server/router/middleware/session`)
-| `server/badges/**` | generate svg badges for pipelines               | `server/model`
-| `server/ccmenu/**` | generate xml ccmenu for pipelines               | `server/model`
-| `server/grpc/**`   | gRPC server agents can connect to               | `pipeline/rpc/**`, `server/(logging\|model\|pubsub\|queue\|remote\|shared\|store)`
-| `server/logging/**`| logging lib for gPRC server to stream logs while running | std
-| `server/model/**`  | structs for store (db) and api (json)           | std
-| `server/plugins/**`| plugins for server                              | `server/model`, `server/remote`
-| `server/pubsub/**` | pubsub lib for server to push changes to the WebUI | std
-| `server/queue/**`  | queue lib for server where agents pull new pipelines from via gRPC | `server/model`
-| `server/remote/**` | remote lib for server to connect and handle forge specific stuff | `shared`, `server/model`
-| `server/router/**` | handle REST API (and all middleware) and serve route `web` | `shared`, `server/(api\|model\|remote\|store\|web)`
-| `server/store/**`  | handle database                                 | `server/model`
-| `server/shared/**` | shared utils only server need (TODO: import indecate unrelated func) | `server/(model\|remote\|store\|plugins)`, (TODO: mv `pipeline`)
-| `server/web/**`    | server SPA                                      | `shared`, (TODO: mv `server/router/middleware/session`)
+| package             | meaning                                         | import
+|---------------------|-------------------------------------------------|----------
+| `server/api/**`     | handle web requests from `server/router`        | `pipeline`, `../badges`, `../ccmenue`, `../logging`, `../model`, `../pubsub`, `../queue`, `../remote`, `../shared`, `../store`, `shared`, (TODO: mv `server/router/middleware/session`)
+| `server/badges/**`  | generate svg badges for pipelines               | `../model`
+| `server/ccmenu/**`  | generate xml ccmenu for pipelines               | `../model`
+| `server/grpc/**`    | gRPC server agents can connect to               | `pipeline/rpc/**`, `../logging`, `../model`, `../pubsub`, `../queue`, `../remote`, `../pipeline`, `../store`
+| `server/logging/**` | logging lib for gPRC server to stream logs while running | std
+| `server/model/**`   | structs for store (db) and api (json)           | std
+| `server/plugins/**` | plugins for server                              | `../model`, `../remote`
+| `server/pipeline/**`| orchistrate pipelines                          | `pipeline`, `../model`, `../pubsub`, `../queue`, `../remote`, `../store`, `../plugins`
+| `server/pubsub/**`  | pubsub lib for server to push changes to the WebUI | std
+| `server/queue/**`   | queue lib for server where agents pull new pipelines from via gRPC | `server/model`
+| `server/remote/**`  | remote lib for server to connect and handle forge specific stuff | `shared`, `server/model`
+| `server/router/**`  | handle REST API (and all middleware) and serve route `web` | `shared`, `../api`, `../model`, `../remote`, `../store`, `../web`
+| `server/store/**`   | handle database                                 | `server/model`
+| `server/shared/**`  | TODO: move and split [#974](https://github.com/woodpecker-ci/woodpecker/issues/974) |
+| `server/web/**`     | server SPA                                      |
+
+* `../` = `server/`
 
 
 ### Agent
