@@ -20,9 +20,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type UpdateBuildStore interface {
-	UpdateBuild(*model.Build) error
-}
+// TODO(974) move to server/pipeline/*
 
 func UpdateToStatusRunning(store model.UpdateBuildStore, build model.Build, started int64) (*model.Build, error) {
 	build.Status = model.StatusRunning

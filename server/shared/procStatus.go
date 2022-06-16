@@ -21,9 +21,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type UpdateProcStore interface {
-	ProcUpdate(*model.Proc) error
-}
+// TODO(974) move to server/pipeline/*
 
 func UpdateProcStatus(store model.UpdateProcStore, proc model.Proc, state rpc.State, started int64) (*model.Proc, error) {
 	if state.Exited {
