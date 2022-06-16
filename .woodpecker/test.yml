@@ -1,3 +1,8 @@
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    name: clone-test
+
 pipeline:
   lint-pipeline:
     image: woodpeckerci/woodpecker-cli:next-alpine
