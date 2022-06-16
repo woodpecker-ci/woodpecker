@@ -39,6 +39,8 @@ pipeline:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
+    commands:
+      - editorconfig-checker
     when:
       path:
         # related config files
