@@ -1,14 +1,9 @@
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-    name: clone-binaries
-
 depends_on:
   - test
   - web
 
 pipeline:
-  build-web1:
+  build-web:
     image: node:16-alpine
     commands:
       - cd web/
