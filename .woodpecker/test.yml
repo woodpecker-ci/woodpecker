@@ -41,14 +41,6 @@ pipeline:
     group: test
     commands:
       - editorconfig-checker
-    when:
-      path:
-        # related config files
-        - ".woodpecker/test.yml"
-        - ".golangci.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
 
   test:
     image: golang:1.17
