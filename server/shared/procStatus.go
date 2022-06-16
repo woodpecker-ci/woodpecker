@@ -21,11 +21,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type UpdateProcStore interface {
-	ProcUpdate(*model.Proc) error
-}
+// TODO(974) move to server/pipeline/*
 
-func UpdateProcStatus(store UpdateProcStore, proc model.Proc, state rpc.State, started int64) (*model.Proc, error) {
+func UpdateProcStatus(store model.UpdateProcStore, proc model.Proc, state rpc.State, started int64) (*model.Proc, error) {
 	if state.Exited {
 		proc.Stopped = state.Finished
 		proc.ExitCode = state.ExitCode
@@ -48,13 +46,13 @@ func UpdateProcStatus(store UpdateProcStore, proc model.Proc, state rpc.State, s
 	return &proc, store.ProcUpdate(&proc)
 }
 
-func UpdateProcToStatusStarted(store UpdateProcStore, proc model.Proc, state rpc.State) (*model.Proc, error) {
+func UpdateProcToStatusStarted(store model.UpdateProcStore, proc model.Proc, state rpc.State) (*model.Proc, error) {
 	proc.Started = state.Started
 	proc.State = model.StatusRunning
 	return &proc, store.ProcUpdate(&proc)
 }
 
-func UpdateProcToStatusSkipped(store UpdateProcStore, proc model.Proc, stopped int64) (*model.Proc, error) {
+func UpdateProcToStatusSkipped(store model.UpdateProcStore, proc model.Proc, stopped int64) (*model.Proc, error) {
 	proc.State = model.StatusSkipped
 	if proc.Started != 0 {
 		proc.State = model.StatusSuccess // for daemons that are killed
@@ -63,7 +61,7 @@ func UpdateProcToStatusSkipped(store UpdateProcStore, proc model.Proc, stopped i
 	return &proc, store.ProcUpdate(&proc)
 }
 
-func UpdateProcStatusToDone(store UpdateProcStore, proc model.Proc, state rpc.State) (*model.Proc, error) {
+func UpdateProcStatusToDone(store model.UpdateProcStore, proc model.Proc, state rpc.State) (*model.Proc, error) {
 	proc.Stopped = state.Finished
 	proc.Error = state.Error
 	proc.ExitCode = state.ExitCode
@@ -78,7 +76,7 @@ func UpdateProcStatusToDone(store UpdateProcStore, proc model.Proc, state rpc.St
 	return &proc, store.ProcUpdate(&proc)
 }
 
-func UpdateProcToStatusKilled(store UpdateProcStore, proc model.Proc) (*model.Proc, error) {
+func UpdateProcToStatusKilled(store model.UpdateProcStore, proc model.Proc) (*model.Proc, error) {
 	proc.State = model.StatusKilled
 	proc.Stopped = time.Now().Unix()
 	if proc.Started == 0 {
