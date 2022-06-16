@@ -4,11 +4,28 @@ depends_on:
 
 pipeline:
   build-web:
+    group: prepare
     image: node:16-alpine
     commands:
       - cd web/
       - yarn install --frozen-lockfile
       - yarn build
+    when:
+      path:
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
+
+  vendor:
+    group: prepare
+    image: golang:1.18
+    commands:
+      - go mod vendor
     when:
       path:
         # related config files
