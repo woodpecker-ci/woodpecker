@@ -191,6 +191,31 @@ release-cli:
 	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
 
+release-tarball:
+	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
+		agent \
+		cli \
+		cmd \
+		go.??? \
+		LICENSE \
+		Makefile \
+		pipeline \
+		server \
+		shared \
+		vendor \
+		version \
+		woodpecker-go \
+		web/index.html \
+		web/node_modules \
+		web/package.json \
+		web/public \
+		web/src \
+		web/package.json \
+		web/tsconfig.* \
+		web/*.ts \
+		web/yarn.lock \
+		web/web.go
+
 release-checksums:
 	# generate shas for tar files
 	(cd dist/; sha256sum *.* > checksums.txt)

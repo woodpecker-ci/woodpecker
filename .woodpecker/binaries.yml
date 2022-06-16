@@ -101,6 +101,22 @@ pipeline:
         # web source code
         - "web/**"
 
+  build-tarball:
+    group: bundle
+    image: golang:1.18
+    commands:
+      - release-tarball
+    when:
+      path:
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
+
   checksums:
     image: golang:1.18
     commands:
