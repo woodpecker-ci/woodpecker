@@ -45,7 +45,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 			{Data: []byte(`
 pipeline:
   build:
-    image: ${GLOBAL_IMAGE}
+    image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
@@ -79,7 +79,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			{Data: []byte(`
 pipeline:
   build:
-    image: ${GLOBAL_IMAGE}
+    image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},

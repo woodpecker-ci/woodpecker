@@ -110,12 +110,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
 		droneEnv[envs[0]] = envs[1]
-		newK := "GLOBAL_" + envs[0]
-		if _, exists := environ[newK]; exists {
+		if _, exists := environ[envs[0]]; exists {
 			// don't override existing values
 			continue
 		}
-		environ[newK] = envs[1]
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)

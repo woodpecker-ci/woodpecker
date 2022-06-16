@@ -89,14 +89,13 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
-			// add GLOBAL_ environment variables for substituting
+			// add global environment variables for substituting
 			for k, v := range b.Envs {
-				newK := "GLOBAL_" + k
-				if _, exists := environ[newK]; exists {
+				if _, exists := environ[k]; exists {
 					// don't override existing values
 					continue
 				}
-				environ[newK] = v
+				environ[k] = v
 			}
 
 			// substitute vars
