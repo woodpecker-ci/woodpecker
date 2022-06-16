@@ -1,6 +1,6 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
+    <FluidContainer class="flex flex-col min-w-0 dark:border-gray-600">
       <div class="flex mb-2 items-center <md:flex-wrap">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 
@@ -45,7 +45,7 @@
         <Tabs v-model="activeTab" disable-hash-mode class="order-2 md:order-none">
           <Tab id="tasks" :title="$t('repo.build.tasks')" />
           <Tab id="config" :title="$t('repo.build.config')" />
-          <Tab id="changed-files" :title="$t('repo.build.files', [build.changed_files?.length || 0])" />
+          <Tab id="changed-files" :title="$t('repo.build.files', { files: build.changed_files?.length || 0 })" />
         </Tabs>
 
         <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
