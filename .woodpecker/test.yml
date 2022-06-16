@@ -39,8 +39,6 @@ pipeline:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
-    commands:
-      - editorconfig-checker
 
   test:
     image: golang:1.17
