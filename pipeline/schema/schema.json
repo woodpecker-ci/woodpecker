@@ -25,7 +25,7 @@
       "minLength": 1,
       "items": { "type": "string" }
     },
-    "run_on": {
+    "runs_on": {
       "type": "array",
       "minLength": 1,
       "items": { "type": "string" }
@@ -90,11 +90,10 @@
     },
     "pipeline": {
       "description": "The pipeline section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/step"
-      },
-      "minProperties": 1
+      "oneOf": [
+        { "type": "object", "additionalProperties": { "$ref": "#/definitions/step" }, "minProperties": 1 },
+        { "type": "array", "items": { "$ref": "#/definitions/step" }, "minLength": 1 }
+      ]
     },
     "step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",

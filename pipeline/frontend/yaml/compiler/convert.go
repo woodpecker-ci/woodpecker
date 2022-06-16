@@ -145,8 +145,15 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	stepName := container.Name
+	if len(stepName) == 0 {
+		stepName = name
+	} else {
+		stepName = section + "." + stepName
+	}
+
 	return &backend.Step{
-		Name:         name,
+		Name:         stepName,
 		Alias:        container.Name,
 		Image:        image,
 		Pull:         container.Pull,

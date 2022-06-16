@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
+
+* BUGFIXES
+  * Fix uppercase from_secrets (#842) (#925)
+  * Fix key/val format for dind env vars (#889) (#890)
+  * Update helm chart releasing (#882) (#888)
+* DOCUMENTATION
+  * Fix run_on references with runs_on in docs (#965)
+
 ## [0.15.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.1) - 2022-04-13
 
 * SECURITY
