@@ -8,6 +8,11 @@ RUN apk add make gcc musl-dev
 COPY --from=golang_image /usr/local/go /usr/local/go
 ENV PATH=$PATH:/usr/local/go/bin
 
+# Cache tools
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && \
+  go install github.com/rs/zerolog/cmd/lint@latest && \
+  go install mvdan.cc/gofumpt@latest
+
 WORKDIR /build
 
 CMD [ "sh" ]
