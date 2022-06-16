@@ -22,7 +22,8 @@
 
       <div
         v-if="proc?.end_time !== undefined"
-        class="w-full bg-gray-400 dark:bg-dark-gray-800 text-gray-200 text-md p-4"
+        :class="proc.exit_code == 0 ? 'dark:text-lime-400 text-lime-600' : 'dark:text-red-400 text-red-600'"
+        class="w-full bg-gray-400 dark:bg-dark-gray-800 text-md p-4"
       >
         {{ $t('repo.build.exit_code', { exitCode: proc.exit_code }) }}
       </div>
