@@ -7,8 +7,24 @@ pipeline:
       path:
         - ".woodpecker/**"
 
+  vendor:
+    image: golang:1.18
+    group: prepare
+    commands:
+      - go mod vendor
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
+
   dummy-web:
     image: golang:1.18
+    group: prepare
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
