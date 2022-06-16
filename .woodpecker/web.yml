@@ -1,8 +1,3 @@
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-    name: clone-web
-
 pipeline:
   deps:
     image: node:16-alpine
