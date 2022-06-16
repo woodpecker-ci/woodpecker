@@ -36,6 +36,18 @@ pipeline:
         - "**/*.go"
         - "go.*"
 
+  lint-editorconfig:
+    image: mstruebing/editorconfig-checker
+    group: test
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+
   test:
     image: golang:1.17
     group: test
