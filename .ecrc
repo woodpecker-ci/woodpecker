@@ -1,0 +1,3 @@
+{
+  "Exclude": [".git", "vendor", "testdata", "fixtures", "LICENSE", "node_modules"]
+}
