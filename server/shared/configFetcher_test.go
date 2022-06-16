@@ -23,6 +23,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
+// TODO(974) move to new package
+
 func TestFetch(t *testing.T) {
 	t.Parallel()
 
