@@ -32,7 +32,7 @@
 | `server/pubsub/**`  | pubsub lib for server to push changes to the WebUI | std
 | `server/queue/**`   | queue lib for server where agents pull new pipelines from via gRPC | `server/model`
 | `server/remote/**`  | remote lib for server to connect and handle forge specific stuff | `shared`, `server/model`
-| `server/router/**`  | handle REST API (and all middleware) and serve route `web` | `shared`, `../api`, `../model`, `../remote`, `../store`, `../web`
+| `server/router/**`  | handle REST API (and all middleware) and serve UI and WebUI config | `shared`, `../api`, `../model`, `../remote`, `../store`, `../web`
 | `server/store/**`   | handle database                                 | `server/model`
 | `server/shared/**`  | TODO: move and split [#974](https://github.com/woodpecker-ci/woodpecker/issues/974) |
 | `server/web/**`     | server SPA                                      |
