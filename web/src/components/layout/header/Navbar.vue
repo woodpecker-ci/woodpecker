@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
@@ -53,12 +54,13 @@ export default defineComponent({
 
   setup() {
     const config = useConfig();
+    const route = useRoute();
     const authentication = useAuthentication();
     const { darkMode } = useDarkMode();
     const docsUrl = window.WOODPECKER_DOCS;
 
     function doLogin() {
-      authentication.authenticate();
+      authentication.authenticate(route.fullPath);
     }
 
     const version = config.version?.startsWith('next') ? 'next' : config.version;
