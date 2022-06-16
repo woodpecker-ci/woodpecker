@@ -8,7 +8,7 @@ depends_on:
   - web
 
 pipeline:
-  build-web:
+  build-web1:
     image: node:16-alpine
     commands:
       - cd web/

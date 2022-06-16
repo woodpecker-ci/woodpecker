@@ -11,7 +11,7 @@ pipeline:
   ###############
   # S e r v e r #
   ###############
-  build-web:
+  build-web2:
     image: node:16-alpine
     commands:
       - cd web/
