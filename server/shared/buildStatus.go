@@ -24,33 +24,33 @@ type UpdateBuildStore interface {
 	UpdateBuild(*model.Build) error
 }
 
-func UpdateToStatusRunning(store UpdateBuildStore, build model.Build, started int64) (*model.Build, error) {
+func UpdateToStatusRunning(store model.UpdateBuildStore, build model.Build, started int64) (*model.Build, error) {
 	build.Status = model.StatusRunning
 	build.Started = started
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateToStatusPending(store UpdateBuildStore, build model.Build, reviewer string) (*model.Build, error) {
+func UpdateToStatusPending(store model.UpdateBuildStore, build model.Build, reviewer string) (*model.Build, error) {
 	build.Reviewer = reviewer
 	build.Status = model.StatusPending
 	build.Reviewed = time.Now().Unix()
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateToStatusDeclined(store UpdateBuildStore, build model.Build, reviewer string) (*model.Build, error) {
+func UpdateToStatusDeclined(store model.UpdateBuildStore, build model.Build, reviewer string) (*model.Build, error) {
 	build.Reviewer = reviewer
 	build.Status = model.StatusDeclined
 	build.Reviewed = time.Now().Unix()
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateStatusToDone(store UpdateBuildStore, build model.Build, status model.StatusValue, stopped int64) (*model.Build, error) {
+func UpdateStatusToDone(store model.UpdateBuildStore, build model.Build, status model.StatusValue, stopped int64) (*model.Build, error) {
 	build.Status = status
 	build.Finished = stopped
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateToStatusError(store UpdateBuildStore, build model.Build, err error) (*model.Build, error) {
+func UpdateToStatusError(store model.UpdateBuildStore, build model.Build, err error) (*model.Build, error) {
 	build.Error = err.Error()
 	build.Status = model.StatusError
 	build.Started = time.Now().Unix()
@@ -58,7 +58,7 @@ func UpdateToStatusError(store UpdateBuildStore, build model.Build, err error) (
 	return &build, store.UpdateBuild(&build)
 }
 
-func UpdateToStatusKilled(store UpdateBuildStore, build model.Build) (*model.Build, error) {
+func UpdateToStatusKilled(store model.UpdateBuildStore, build model.Build) (*model.Build, error) {
 	build.Status = model.StatusKilled
 	build.Finished = time.Now().Unix()
 	return &build, store.UpdateBuild(&build)
