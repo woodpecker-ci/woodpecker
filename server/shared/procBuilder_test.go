@@ -22,6 +22,74 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+func TestGlobalEnvsubst(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Envs: map[string]string{
+			"KEY_K": "VALUE_V",
+			"IMAGE": "scratch",
+		},
+		Repo: &model.Repo{},
+		Curr: &model.Build{
+			Message: "aaa",
+		},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+pipeline:
+  build:
+    image: ${GLOBAL_IMAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	if buildItems, err := b.Build(); err != nil {
+		t.Fatal(err)
+	} else {
+		fmt.Println(buildItems)
+	}
+}
+
+func TestMissingGlobalEnvsubst(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Envs: map[string]string{
+			"KEY_K":    "VALUE_V",
+			"NO_IMAGE": "scratch",
+		},
+		Repo: &model.Repo{},
+		Curr: &model.Build{
+			Message: "aaa",
+		},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+pipeline:
+  build:
+    image: ${GLOBAL_IMAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	if _, err := b.Build(); err != nil {
+		fmt.Println("test rightfully failed")
+	} else {
+		t.Fatal("test erroneously succeeded")
+	}
+}
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
