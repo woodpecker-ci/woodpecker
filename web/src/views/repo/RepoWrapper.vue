@@ -15,6 +15,8 @@
       >
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
+        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
+        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />

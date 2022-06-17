@@ -21,8 +21,9 @@
   <i-ph-prohibit v-else-if="name === 'status-skipped'" class="h-8 w-8" />
   <i-entypo-dots-two-vertical v-else-if="name === 'status-started'" class="h-8 w-8" />
   <i-ph-check-circle v-else-if="name === 'status-success'" class="h-8 w-8" />
-  <i-cib-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
-  <i-cib-gitlab v-else-if="name === 'gitlab'" class="h-8 w-8" />
+  <i-simple-icons-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
+  <i-ph-gitlab-logo-simple-fill v-else-if="name === 'gitlab'" class="h-8 w-8" />
+  <i-mdi-bitbucket v-else-if="name === 'bitbucket'" class="h-8 w-8" />
   <i-vaadin-question-circle-o v-else-if="name === 'question'" class="h-6 w-6" />
   <i-ic-twotone-add v-else-if="name === 'plus'" class="h-6 w-6" />
   <i-mdi-format-list-bulleted v-else-if="name === 'list'" class="h-6 w-6" />
@@ -65,6 +66,8 @@ export type IconNames =
   | 'status-started'
   | 'status-success'
   | 'gitea'
+  | 'gitlab'
+  | 'bitbucket'
   | 'question'
   | 'list'
   | 'loading'
