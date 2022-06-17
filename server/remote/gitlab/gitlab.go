@@ -70,7 +70,7 @@ func New(opts Opts) (remote.Remote, error) {
 }
 
 // Name returns the string name of this driver
-func (c *Gitlab) Name() string {
+func (g *Gitlab) Name() string {
 	return "gitlab"
 }
 
