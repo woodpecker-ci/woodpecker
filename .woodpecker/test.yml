@@ -52,6 +52,10 @@ pipeline:
         - "**/*.go"
         - "go.*"
 
+  lint-editorconfig:
+    image: mstruebing/editorconfig-checker
+    group: test
+
   test:
     image: golang:1.18
     group: test
