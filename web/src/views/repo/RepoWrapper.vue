@@ -81,7 +81,7 @@ export default defineComponent({
     const router = useRouter();
     const i18n = useI18n();
 
-    const {forge} = useConfig();
+    const { forge } = useConfig();
     const repo = repoStore.getRepo(repoOwner, repoName);
     const repoPermissions = ref<RepoPermissions>();
     const builds = buildStore.getSortedBuilds(repoOwner, repoName);
