@@ -25,7 +25,7 @@ func CreateRandomID(
 }
 
 // Converts a string into a kubernetes valid FQDN name.
-func ToKuberenetesValidName(name string, maxChars int) string {
+func ToKubernetesValidName(name string, maxChars int) string {
 	name = strings.ToLower(name)
 
 	// cleanup chars

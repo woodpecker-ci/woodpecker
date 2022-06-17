@@ -11,7 +11,6 @@ import (
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
-// TODO(bradrydzewski) compiler should handle user-defined networks from YAML
 
 const (
 	windowsPrefix = "windows/"

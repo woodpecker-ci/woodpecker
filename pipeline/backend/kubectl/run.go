@@ -126,7 +126,7 @@ func (run *KubePiplineRun) Exec(ctx context.Context, step *types.Step) error {
 
 	if step.Detached {
 		step.Alias = Triary(
-			len(step.Alias) > 0, step.Alias, ToKuberenetesValidName(step.Name, 50),
+			len(step.Alias) > 0, step.Alias, ToKubernetesValidName(step.Name, 50),
 		).(string)
 		logger.Debug().Msg("Starting detached job")
 	} else {

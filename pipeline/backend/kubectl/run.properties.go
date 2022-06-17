@@ -2,7 +2,7 @@ package kubectl
 
 // The run kubernetes id
 func (run *KubePiplineRun) ID() string {
-	return ToKuberenetesValidName("wp-"+run.RunID, 30)
+	return ToKubernetesValidName("wp-"+run.RunID, 30)
 }
 
 // The kubernetes namespace

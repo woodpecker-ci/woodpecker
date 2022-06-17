@@ -18,7 +18,8 @@ func (template *KubeJobTemplate) Render() (string, error) {
 
 // The job kubernetes name.
 func (template *KubeJobTemplate) JobName() string {
-	return ToKuberenetesValidName(template.Run.ID()+"-"+template.Step.Name, 60)
+	// This name should be unique (Run ID is random and unique)
+	return ToKubernetesValidName(template.Run.ID()+"-"+template.Step.Name, 60)
 }
 
 // The job id
@@ -49,7 +50,7 @@ func (template *KubeJobTemplate) DetachedHostAlias() string {
 	return Triary(
 		len(template.Step.Alias) > 0,
 		template.Step.Alias,
-		ToKuberenetesValidName(template.Step.Name, 50),
+		ToKubernetesValidName(template.Step.Name, 50),
 	).(string)
 }
 

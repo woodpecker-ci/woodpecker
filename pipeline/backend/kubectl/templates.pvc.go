@@ -7,12 +7,12 @@ type KubePVCTemplate struct {
 
 // The pvc volume name.
 func (template *KubePVCTemplate) VolumeName() string {
-	return ToKuberenetesValidName(template.Run.ID()+"-"+template.Name, 60)
+	return ToKubernetesValidName(template.Run.ID()+"-"+template.Name, 60)
 }
 
 // The pvc mount name.
 func (template *KubePVCTemplate) MountName() string {
-	return ToKuberenetesValidName(template.Name, 60)
+	return ToKubernetesValidName(template.Name, 60)
 }
 
 func (template *KubePVCTemplate) Render() (string, error) {
