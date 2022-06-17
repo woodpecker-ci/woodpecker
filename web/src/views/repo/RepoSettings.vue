@@ -2,23 +2,23 @@
   <FluidContainer>
     <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
       <IconButton icon="back" @click="goBack" />
-      <h1 class="text-xl ml-2 text-gray-500">Settings</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.settings') }}</h1>
     </div>
 
     <Tabs>
-      <Tab title="General">
+      <Tab :title="$t('repo.settings.general.general')">
         <GeneralTab />
       </Tab>
-      <Tab title="Secrets">
+      <Tab :title="$t('repo.settings.secrets.secrets')">
         <SecretsTab />
       </Tab>
-      <Tab title="Registries">
+      <Tab :title="$t('repo.settings.registries.registries')">
         <RegistriesTab />
       </Tab>
-      <Tab title="Badge">
+      <Tab :title="$t('repo.settings.badge.badge')">
         <BadgeTab />
       </Tab>
-      <Tab title="Actions">
+      <Tab :title="$t('repo.settings.actions.actions')">
         <ActionsTab />
       </Tab>
     </Tabs>

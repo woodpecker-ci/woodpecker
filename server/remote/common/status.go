@@ -1,32 +1,41 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
+	"text/template"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	name := server.Config.Server.StatusContext
-
+	event := string(build.Event)
 	switch build.Event {
 	case model.EventPull:
-		name += "/pr"
-	default:
-		if len(build.Event) > 0 {
-			name += "/" + string(build.Event)
-		}
+		event = "pr"
 	}
 
-	if proc != nil {
-		name += "/" + proc.Name
+	tmpl, err := template.New("context").Parse(server.Config.Server.StatusContextFormat)
+	if err != nil {
+		return ""
+	}
+	var ctx bytes.Buffer
+	err = tmpl.Execute(&ctx, map[string]interface{}{
+		"context":  server.Config.Server.StatusContext,
+		"event":    event,
+		"pipeline": proc.Name,
+		"owner":    repo.Owner,
+		"repo":     repo.Name,
+	})
+	if err != nil {
+		return ""
 	}
 
-	return name
+	return ctx.String()
 }
 
-// getBuildStatusDescription is a helper function that generates a description
+// GetBuildStatusDescription is a helper function that generates a description
 // message for the current build status.
 func GetBuildStatusDescription(status model.StatusValue) string {
 	switch status {

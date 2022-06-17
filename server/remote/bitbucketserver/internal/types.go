@@ -219,3 +219,11 @@ type HookSettings struct {
 	HookURL18 string `json:"hook-url-18,omitempty"`
 	HookURL19 string `json:"hook-url-19,omitempty"`
 }
+
+type BranchResp struct {
+	Values []*Branch `json:"values"`
+}
+
+type Branch struct {
+	Name string `json:"name"`
+}

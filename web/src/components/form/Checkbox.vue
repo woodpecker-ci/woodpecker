@@ -22,10 +22,8 @@
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`checkbox-${id}`">{{
-        label
-      }}</label>
-      <span v-if="description" class="text-sm text-gray-400 dark:text-gray-600">{{ description }}</span>
+      <label v-if="label" class="cursor-pointer text-color" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-sm text-color-alt">{{ description }}</span>
     </div>
   </div>
 </template>

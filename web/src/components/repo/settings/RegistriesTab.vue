@@ -2,9 +2,9 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-gray-500">Registry credentials</h1>
-        <p class="text-sm text-gray-400 dark:text-gray-600">
-          Registries credentials can be added to use private images for your pipeline.
+        <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
+        <p class="text-sm text-color-alt">
+          {{ $t('repo.settings.registries.desc') }}
           <DocsLink url="docs/usage/registries" />
         </p>
       </div>
@@ -12,48 +12,58 @@
         v-if="selectedRegistry"
         class="ml-auto"
         start-icon="back"
-        text="Show registries"
+        :text="$t('repo.settings.registries.show')"
         @click="selectedRegistry = undefined"
       />
-      <Button v-else class="ml-auto" start-icon="plus" text="Add registry" @click="selectedRegistry = {}" />
+      <Button
+        v-else
+        class="ml-auto"
+        start-icon="plus"
+        :text="$t('repo.settings.registries.add')"
+        @click="selectedRegistry = {}"
+      />
     </div>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-gray-500">
+    <div v-if="!selectedRegistry" class="space-y-4 text-color">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
         <IconButton icon="edit" class="ml-auto w-8 h-8" @click="selectedRegistry = registry" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-red-400"
+          class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteRegistry(registry)"
         />
       </ListItem>
 
-      <div v-if="registries?.length === 0" class="ml-2">There are no registry credentials yet.</div>
+      <div v-if="registries?.length === 0" class="ml-2">{{ $t('repo.settings.registries.none') }}</div>
     </div>
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <InputField label="Address">
+        <InputField :label="$t('repo.settings.registries.address.address')">
           <!-- TODO: check input field Address is a valid address -->
           <TextField
             v-model="selectedRegistry.address"
-            placeholder="Registry Address (e.g. docker.io)"
+            :placeholder="$t('repo.settings.registries.address.placeholder')"
             required
             :disabled="isEditingRegistry"
           />
         </InputField>
 
-        <InputField label="Username">
-          <TextField v-model="selectedRegistry.username" placeholder="Username" required />
+        <InputField :label="$t('username')">
+          <TextField v-model="selectedRegistry.username" :placeholder="$t('username')" required />
         </InputField>
 
-        <InputField label="Password">
-          <TextField v-model="selectedRegistry.password" placeholder="Password" required />
+        <InputField :label="$t('password')">
+          <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
-        <Button type="submit" :is-loading="isSaving" :text="isEditingRegistry ? 'Save registy' : 'Add registry'" />
+        <Button
+          type="submit"
+          :is-loading="isSaving"
+          :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
+        />
       </form>
     </div>
   </Panel>
@@ -61,6 +71,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
@@ -91,6 +102,7 @@ export default defineComponent({
   setup() {
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
     const registries = ref<Registry[]>();
@@ -119,7 +131,12 @@ export default defineComponent({
       } else {
         await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
       }
-      notifications.notify({ title: 'Registry credentials created', type: 'success' });
+      notifications.notify({
+        title: i18n.t(
+          isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
+        ),
+        type: 'success',
+      });
       selectedRegistry.value = undefined;
       await loadRegistries();
     });
@@ -131,7 +148,7 @@ export default defineComponent({
 
       const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
-      notifications.notify({ title: 'Registry credentials deleted', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
       await loadRegistries();
     });
 

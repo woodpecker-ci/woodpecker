@@ -204,11 +204,19 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
+		pipeline.WithDescription(map[string]string{
+			"CLI": "exec",
+		}),
 	).Run()
 }
 
 // return the metadata from the cli context.
 func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
+	platform := c.String("system-platform")
+	if platform == "" {
+		platform = runtime.GOOS + "/" + runtime.GOARCH
+	}
+
 	return frontend.Metadata{
 		Repo: frontend.Repo{
 			Name:    c.String("repo-name"),
@@ -265,9 +273,9 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Matrix: axis,
 		},
 		Sys: frontend.System{
-			Name: c.String("system-name"),
-			Link: c.String("system-link"),
-			Arch: c.String("system-arch"),
+			Name:     c.String("system-name"),
+			Link:     c.String("system-link"),
+			Platform: platform,
 		},
 	}
 }

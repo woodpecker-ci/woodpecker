@@ -440,12 +440,12 @@ func TestConstraints(t *testing.T) {
 		// platform constraint
 		{
 			conf: "{ platform: linux/amd64 }",
-			with: frontend.Metadata{Sys: frontend.System{Arch: "linux/amd64"}},
+			with: frontend.Metadata{Sys: frontend.System{Platform: "linux/amd64"}},
 			want: true,
 		},
 		{
 			conf: "{ repo: linux/amd64 }",
-			with: frontend.Metadata{Sys: frontend.System{Arch: "windows/amd64"}},
+			with: frontend.Metadata{Sys: frontend.System{Platform: "windows/amd64"}},
 			want: false,
 		},
 		// instance constraint

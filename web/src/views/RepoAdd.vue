@@ -2,12 +2,12 @@
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
       <IconButton :to="{ name: 'repos' }" icon="back" />
-      <h1 class="text-xl ml-2 text-gray-500">Add repository</h1>
-      <TextField v-model="search" class="w-auto ml-auto" placeholder="Search ..." />
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.add') }}</h1>
+      <TextField v-model="search" class="w-auto ml-auto" :placeholder="$t('search')" />
       <Button
         class="ml-auto"
         start-icon="sync"
-        text="Reload repositories"
+        :text="$t('repo.enable.reload')"
         :is-loading="isReloadingRepos"
         @click="reloadRepos"
       />
@@ -21,12 +21,12 @@
         :clickable="repo.active"
         @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
       >
-        <span class="text-gray-500">{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto text-gray-500">Already enabled</span>
+        <span class="text-color">{{ repo.full_name }}</span>
+        <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>
         <Button
           v-if="!repo.active"
           class="ml-auto"
-          text="Enable"
+          :text="$t('repo.enable.enable')"
           :is-loading="isActivatingRepo && repoToActivate?.id === repo.id"
           @click="activateRepo(repo)"
         />
@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -68,6 +69,7 @@ export default defineComponent({
     const repos = ref<Repo[]>();
     const repoToActivate = ref<Repo>();
     const search = ref('');
+    const i18n = useI18n();
 
     const { searchedRepos } = useRepoSearch(repos, search);
 
@@ -78,13 +80,13 @@ export default defineComponent({
     const { doSubmit: reloadRepos, isLoading: isReloadingRepos } = useAsyncAction(async () => {
       repos.value = undefined;
       repos.value = await apiClient.getRepoList({ all: true, flush: true });
-      notifications.notify({ title: 'Repository list reloaded', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.enable.list_reloaded'), type: 'success' });
     });
 
     const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
       repoToActivate.value = repo;
       await apiClient.activateRepo(repo.owner, repo.name);
-      notifications.notify({ title: 'Repository enabled', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.enabled.success'), type: 'success' });
       repoToActivate.value = undefined;
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     });
