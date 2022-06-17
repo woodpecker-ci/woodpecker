@@ -13,7 +13,7 @@
         <div id="terminal" class="w-full h-full" />
       </div>
 
-      <div class="m-auto text-xl text-gray-500 dark:text-gray-500">
+      <div class="m-auto text-xl text-color">
         <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
         <span v-else-if="proc?.state === 'skipped'" class="text-red-400">{{ $t('repo.build.actions.canceled') }}</span>
         <span v-else-if="!proc?.start_time">{{ $t('repo.build.step_not_started') }}</span>

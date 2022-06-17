@@ -11,7 +11,7 @@
             <md:flex-wrap
             md:order-none md:w-auto md:ml-2
             flex
-            text-center text-xl text-gray-500
+            text-center text-xl text-color
             whitespace-nowrap
             overflow-hidden overflow-ellipsis
           "
@@ -48,7 +48,7 @@
           <Tab id="changed-files" :title="$t('repo.build.files', { files: build.changed_files?.length || 0 })" />
         </Tabs>
 
-        <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <Tooltip>

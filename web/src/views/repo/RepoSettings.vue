@@ -2,7 +2,7 @@
   <FluidContainer>
     <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
       <IconButton icon="back" @click="goBack" />
-      <h1 class="text-xl ml-2 text-gray-500">{{ $t('repo.settings.settings') }}</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.settings') }}</h1>
     </div>
 
     <Tabs>

@@ -51,7 +51,7 @@
         "pipeline_path": {
           "path": "Pipeline path",
           "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Path to your pipeline config (for example<span class=\"bg-gray-300 dark:bg-dark-100 rounded-md px-1\">my/path/</span>). Folders should end with a<span class=\"bg-gray-300 dark:bg-dark-100 rounded-md px-1\">/</span>."
+          "desc": "Path to your pipeline config (for example <span class=\"bg-gray-300 dark:bg-dark-300 rounded-md px-1\">my/path/</span>). Folders should end with a <span class=\"bg-gray-300 dark:bg-dark-300 rounded-md px-1\">/</span>."
         },
 
         "allow_pr": {

@@ -1,8 +1,8 @@
 <template>
-  <FluidContainer v-if="build" class="flex flex-col gap-y-6 text-gray-500 justify-between py-0">
+  <FluidContainer v-if="build" class="flex flex-col gap-y-6 text-color justify-between py-0">
     <Panel>
       <div v-if="build.changed_files === undefined || build.changed_files.length < 1" class="w-full">
-        <span class="text-gray-500">{{ $t('repo.build.no_files') }}</span>
+        <span class="text-color">{{ $t('repo.build.no_files') }}</span>
       </div>
       <div v-for="file in build.changed_files" v-else :key="file" class="w-full">
         <div>- {{ file }}</div>
