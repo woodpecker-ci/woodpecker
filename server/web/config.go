@@ -51,6 +51,7 @@ func Config(c *gin.Context) {
 		"syncing": syncing,
 		"docs":    server.Config.Server.Docs,
 		"version": version.String(),
+		"forge": server.Config.Services.Remote.Name(),
 	}
 
 	// default func map with json parser.
@@ -76,4 +77,5 @@ window.WOODPECKER_SYNC = {{ .syncing }};
 window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";
+window.WOODPECKER_FORGE = "{{ .forge }}";
 `
