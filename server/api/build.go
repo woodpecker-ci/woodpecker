@@ -380,8 +380,8 @@ func DeleteBuildLogs(c *gin.Context) {
 
 var deleteStr = `[
 	{
-	  "proc": %q,
-	  "pos": 0,
-	  "out": "logs purged by %s on %s\n"
+		"proc": %q,
+		"pos": 0,
+		"out": "logs purged by %s on %s\n"
 	}
 ]`
