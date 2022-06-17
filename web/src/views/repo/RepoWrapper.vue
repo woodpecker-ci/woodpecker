@@ -13,7 +13,10 @@
         target="_blank"
         class="flex ml-4 p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
-        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
+        <Icon v-if="forge === 'github'" name="github" />
+        <Icon v-else-if="forge === 'gitea'" name="gitea" />
+        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
+        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
@@ -41,6 +44,7 @@ import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
@@ -79,6 +83,7 @@ export default defineComponent({
     const router = useRouter();
     const i18n = useI18n();
 
+    const { forge } = useConfig();
     const repo = repoStore.getRepo(repoOwner, repoName);
     const repoPermissions = ref<RepoPermissions>();
     const builds = buildStore.getSortedBuilds(repoOwner, repoName);
@@ -129,7 +134,7 @@ export default defineComponent({
       },
     });
 
-    return { repo, repoPermissions, badgeUrl, activeTab };
+    return { repo, repoPermissions, badgeUrl, activeTab, forge };
   },
 });
 </script>

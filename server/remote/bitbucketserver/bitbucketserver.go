@@ -104,6 +104,11 @@ func New(opts Opts) (remote.Remote, error) {
 	return config, nil
 }
 
+// Name returns the string name of this driver
+func (c *Config) Name() string {
+	return "stash"
+}
+
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
