@@ -27,6 +27,7 @@
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
@@ -60,6 +61,7 @@ export default defineComponent({
   setup() {
     const notifications = useNotifications();
     const router = useRouter();
+    const i18n = useI18n();
 
     const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
     if (!repoPermissions) {
@@ -68,7 +70,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (!repoPermissions.value.admin) {
-        notifications.notify({ type: 'error', title: 'Not allowed to access these repository settings' });
+        notifications.notify({ type: 'error', title: i18n.t('repo.settings.not_allowed') });
         await router.replace({ name: 'home' });
       }
     });
