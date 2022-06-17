@@ -127,7 +127,7 @@ This is the reference list of all environment variables available to your pipeli
 
 If you want specific environment variables to be available in all of your builds use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
 
-```.diff
+```diff
 services:
   woodpecker-server:
     [...]
@@ -148,7 +148,7 @@ pipeline:
       - go test
 ```
 
-```.diff
+```diff
 services:
   woodpecker-server:
     [...]
