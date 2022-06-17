@@ -1,6 +1,6 @@
 <template>
-  <div class="flex shadow-lg bg-lime-600 text-neutral-content px-2 md:px-8 py-2 dark:bg-dark-gray-900">
-    <div class="flex text-white dark:text-gray-500 items-center">
+  <div class="flex shadow-lg dark:shadow-sm bg-lime-600 text-neutral-content px-2 md:px-8 py-2 dark:bg-dark-gray-900">
+    <div class="flex text-white dark:text-gray-400 items-center">
       <router-link :to="{ name: 'home' }" class="relative">
         <img class="-mt-3 w-8" src="../../../assets/logo.svg?url" />
         <span class="absolute -bottom-4 text-xs">{{ version }}</span>
@@ -14,7 +14,7 @@
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
     </div>
-    <div class="flex ml-auto items-center space-x-4 text-white dark:text-gray-500">
+    <div class="flex ml-auto items-center space-x-4 text-white dark:text-gray-400">
       <a
         :href="docsUrl"
         target="_blank"

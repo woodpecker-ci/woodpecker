@@ -1,7 +1,7 @@
 <template>
   <FluidContainer v-if="repo && repoPermissions && $route.meta.repoHeader">
     <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
-      <h1 class="text-xl text-gray-500 w-full md:w-auto text-center mb-4 md:mb-0">
+      <h1 class="text-xl text-color w-full md:w-auto text-center mb-4 md:mb-0">
         <router-link :to="{ name: 'repos-owner', params: { repoOwner } }">{{ repoOwner }}</router-link>
         {{ ` / ${repo.name}` }}
       </h1>
@@ -11,7 +11,7 @@
       <a
         :href="repo.link_url"
         target="_blank"
-        class="flex ml-4 p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
+        class="flex ml-4 p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
         <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
         <Icon v-else name="repo" />
