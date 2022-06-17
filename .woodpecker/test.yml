@@ -7,8 +7,24 @@ pipeline:
       path:
         - ".woodpecker/**"
 
+  vendor:
+    image: golang:1.18
+    group: prepare
+    commands:
+      - go mod vendor
+    when:
+      path:
+        # related config files
+        - ".woodpecker/test.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
+
   dummy-web:
-    image: golang:1.17
+    image: golang:1.18
+    group: prepare
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
@@ -23,7 +39,7 @@ pipeline:
         - "pipeline/schema/**"
 
   lint:
-    image: golang:1.17
+    image: golang:1.18
     group: test
     commands:
       - make lint
@@ -37,7 +53,7 @@ pipeline:
         - "go.*"
 
   test:
-    image: golang:1.17
+    image: golang:1.18
     group: test
     commands:
       - make test-agent
@@ -55,7 +71,7 @@ pipeline:
         - "pipeline/schema/**"
 
   sqlite:
-    image: golang:1.17
+    image: golang:1.18
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
@@ -70,7 +86,7 @@ pipeline:
         - "go.*"
 
   postgres:
-    image: golang:1.17
+    image: golang:1.18
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
@@ -86,7 +102,7 @@ pipeline:
         - "go.*"
 
   mysql:
-    image: golang:1.17
+    image: golang:1.18
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
