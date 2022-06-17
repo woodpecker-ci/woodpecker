@@ -6,6 +6,7 @@ dind_image: &dind_image docker:latest
 
 pipeline:
   first:
+    name: "First test @" # Use complicated name to test naming parser.
     image: *runner_image
     commands:
       - echo "first to run" >| loaded_message

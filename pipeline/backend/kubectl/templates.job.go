@@ -22,9 +22,17 @@ func (template *KubeJobTemplate) JobName() string {
 	return ToKubernetesValidName(template.Run.ID()+"-"+template.Step.Name, 60)
 }
 
+func (template *KubeJobTemplate) KubeLabels() map[string]string {
+	kubeLabels := map[string]string{}
+	for k, v := range template.Step.Labels {
+		kubeLabels[ToKubernetesValidName(k, 30)] = ToKubernetesValidName(v, -1)
+	}
+	return kubeLabels
+}
+
 // The job id
 func (template *KubeJobTemplate) JobID() string {
-	return template.Run.RunID + "-" + template.Step.Name
+	return ToKubernetesValidName(template.Run.RunID+"-"+template.Step.Name, -1)
 }
 
 // If true a shell command exists.

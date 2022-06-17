@@ -32,7 +32,7 @@ func ToKubernetesValidName(name string, maxChars int) string {
 	re, _ := regexp.Compile("[^a-z0-9]+")
 	name = string(re.ReplaceAll([]byte(name), []byte("-")))
 
-	if len(name) > maxChars {
+	if maxChars > -1 && len(name) > maxChars {
 		name = name[len(name)-maxChars:]
 	}
 

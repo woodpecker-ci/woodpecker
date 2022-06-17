@@ -20,7 +20,7 @@ spec:
         woodpecker: "true"
         woodpecker-run: "{{.Run.ID}}"
         woodpecker-job-id: "{{.JobID}}"
-        # {{- range $k, $v := .Step.Labels }}
+        # {{- range $k, $v := .KubeLabels }}
         "{{- $k -}}": "{{- $v -}}"
         # {{- end }}
     spec:
