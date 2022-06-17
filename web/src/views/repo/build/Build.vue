@@ -10,8 +10,8 @@
         </div>
 
         <div v-else-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-          <p class="text-xl text-gray-500">{{ $t('repo.build.protected.awaits') }}</p>
+          <Icon name="status-blocked" class="w-32 h-32 text-color" />
+          <p class="text-xl text-color">{{ $t('repo.build.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
             <Button
               color="green"
@@ -29,8 +29,8 @@
         </div>
 
         <div v-else-if="build.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-          <p class="text-xl text-gray-500">{{ $t('repo.build.protected.declined') }}</p>
+          <Icon name="status-blocked" class="w-32 h-32 text-color" />
+          <p class="text-xl text-color">{{ $t('repo.build.protected.declined') }}</p>
         </div>
 
         <BuildLog

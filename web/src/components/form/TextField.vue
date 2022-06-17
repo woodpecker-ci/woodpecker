@@ -14,14 +14,7 @@
     <input
       v-if="lines === 1"
       v-model="innerValue"
-      class="
-        w-full
-        bg-transparent
-        text-gray-600
-        placeholder-gray-400
-        focus:outline-none focus:border-blue-400
-        dark:placeholder-gray-600 dark:text-gray-500
-      "
+      class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
       :disabled="disabled"
       :type="type"
       :placeholder="placeholder"
@@ -29,14 +22,7 @@
     <textarea
       v-else
       v-model="innerValue"
-      class="
-        w-full
-        bg-transparent
-        text-gray-600
-        placeholder-gray-400
-        focus:outline-none focus:border-blue-400
-        dark:placeholder-gray-600 dark:text-gray-500
-      "
+      class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
       :disabled="disabled"
       :placeholder="placeholder"
       :rows="lines"
