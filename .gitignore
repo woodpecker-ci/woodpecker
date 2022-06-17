@@ -13,6 +13,7 @@
 *.so
 *.dylib
 vendor/
+__debug_bin
 
 # Test binary, built with `go test -c`
 *.test
