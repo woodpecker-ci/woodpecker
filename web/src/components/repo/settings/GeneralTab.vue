@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('general') }}</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
     <div v-if="repoSettings" class="flex flex-col">
