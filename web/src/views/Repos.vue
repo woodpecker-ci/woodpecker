@@ -1,7 +1,7 @@
 <template>
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row flex-wrap md:grid md:grid-cols-3 border-b pb-4 mb-4 dark:border-dark-200">
-      <h1 class="text-xl text-color">Repositories</h1>
+      <h1 class="text-xl text-color">{{ $t('repositories') }}</h1>
       <TextField v-model="search" class="w-auto md:ml-auto md:mr-auto" :placeholder="$t('search')" />
       <Button class="md:ml-auto" :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </div>
