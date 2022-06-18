@@ -17,6 +17,7 @@
     "test": "echo 'No tests configured' && exit 0"
   },
   "dependencies": {
+    "@intlify/vite-plugin-vue-i18n": "^3.4.0",
     "@kyvg/vue3-notification": "2.3.4",
     "@meforma/vue-toaster": "1.2.2",
     "ansi-to-html": "0.7.2",
@@ -29,7 +30,11 @@
     "node-emoji": "1.11.0",
     "pinia": "2.0.0",
     "vue": "v3.2.20",
-    "vue-router": "4.0.10"
+    "vue-i18n": "9",
+    "vue-router": "4.0.10",
+    "xterm": "4.17.0",
+    "xterm-addon-fit": "0.5.0",
+    "xterm-addon-web-links": "0.5.1"
   },
   "devDependencies": {
     "@iconify/json": "1.1.421",

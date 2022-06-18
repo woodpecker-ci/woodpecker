@@ -1,26 +1,36 @@
 <template>
-  <div class="p-0 flex flex-col flex-grow">
+  <div class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <BuildProcList v-model:selected-proc-id="selectedProcId" :build="build" />
 
       <div class="flex flex-grow relative">
-        <div v-if="build.error" class="flex flex-col p-4">
-          <span class="text-red-400 font-bold text-xl mb-2">Execution error</span>
-          <span class="text-red-400">{{ build.error }}</span>
+        <div v-if="error" class="flex flex-col p-4">
+          <span class="text-red-400 font-bold text-xl mb-2">{{ $t('repo.build.execution_error') }}</span>
+          <span class="text-red-400">{{ error }}</span>
         </div>
 
         <div v-else-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-          <p class="text-xl text-gray-500">This pipeline is awaiting approval by some maintainer!</p>
+          <Icon name="status-blocked" class="w-32 h-32 text-color" />
+          <p class="text-xl text-color">{{ $t('repo.build.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
-            <Button color="green" text="Approve" :is-loading="isApprovingBuild" @click="approveBuild" />
-            <Button color="red" text="Decline" :is-loading="isDecliningBuild" @click="declineBuild" />
+            <Button
+              color="green"
+              :text="$t('repo.build.protected.approve')"
+              :is-loading="isApprovingBuild"
+              @click="approveBuild"
+            />
+            <Button
+              color="red"
+              :text="$t('repo.build.protected.decline')"
+              :is-loading="isDecliningBuild"
+              @click="declineBuild"
+            />
           </div>
         </div>
 
         <div v-else-if="build.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-32 h-32 text-gray-500" />
-          <p class="text-xl text-gray-500">This pipeline has been declined!</p>
+          <Icon name="status-blocked" class="w-32 h-32 text-color" />
+          <p class="text-xl text-color">{{ $t('repo.build.protected.declined') }}</p>
         </div>
 
         <BuildLog
@@ -36,6 +46,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, Ref, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -46,6 +57,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Build, BuildProc, Repo, RepoPermissions } from '~/lib/api/types';
+import { findProc } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'Build',
@@ -71,6 +83,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const build = inject<Ref<Build>>('build');
     const repo = inject<Ref<Repo>>('repo');
@@ -122,13 +135,16 @@ export default defineComponent({
       },
     });
 
+    const selectedProc = computed(() => findProc(build.value.procs || [], selectedProcId.value || -1));
+    const error = computed(() => build.value?.error || selectedProc.value?.error);
+
     const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
 
       await apiClient.approveBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
-      notifications.notify({ title: 'Pipeline approved', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.protected.approve_success'), type: 'success' });
     });
 
     const { doSubmit: declineBuild, isLoading: isDecliningBuild } = useAsyncAction(async () => {
@@ -137,13 +153,14 @@ export default defineComponent({
       }
 
       await apiClient.declineBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
-      notifications.notify({ title: 'Pipeline declined', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.protected.decline_success'), type: 'success' });
     });
 
     return {
       repoPermissions,
       selectedProcId,
       build,
+      error,
       isApprovingBuild,
       isDecliningBuild,
       approveBuild,

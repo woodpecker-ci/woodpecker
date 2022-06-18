@@ -1,0 +1,7 @@
+platform: linux/amd64
+
+pipeline:
+  build:
+    image: golang:latest
+    commands:
+      - go test

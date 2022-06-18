@@ -15,36 +15,30 @@
 package grpc
 
 import (
-	"github.com/woodpecker-ci/expr"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
-func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
-	var st *expr.Selector
-	var err error
-
-	if filter.Expr != "" {
-		st, err = expr.ParseString(filter.Expr)
-		if err != nil {
-			return nil, err
-		}
-	}
-
+func createFilterFunc(agentFilter rpc.Filter) (queue.FilterFn, error) {
 	return func(task *queue.Task) bool {
-		if st != nil {
-			match, _ := st.Eval(expr.NewRow(task.Labels))
-			return match
-		}
-
-		for k, v := range filter.Labels {
-			// if platform is not set ignore that filter
-			if k == "platform" && task.Labels[k] == "" {
+		for taskLabel, taskLabelValue := range task.Labels {
+			// if a task label is empty it will be ignored
+			if taskLabelValue == "" {
 				continue
 			}
 
-			if task.Labels[k] != v {
+			agentLabelValue, ok := agentFilter.Labels[taskLabel]
+
+			if !ok {
+				return false
+			}
+
+			// if agent label has a wildcard
+			if agentLabelValue == "*" {
+				continue
+			}
+
+			if taskLabelValue != agentLabelValue {
 				return false
 			}
 		}

@@ -3,7 +3,7 @@
 To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP api which can be enabled to call an external config service.
 Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP api sending the current repository, build information and all current config files retrieved from the repository. The external api can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
 
-Every request sent by Woodpecker is signed using a http-signature using the provided secret from `WOODPECKER_CONFIG_SERVICE_SECRET`. This way the external api can verify the authenticity request from the Woodpecker instance.
+Every request sent by Woodpecker is signed using a [http-signature](https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures) by a private key (ed25519) generated on the first start of the Woodpecker server. You can get the public key for the verification of the http-signature from `http(s)://your-woodpecker-server/api/signature/public-key`.
 
 A simplistic example configuration service can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
 
@@ -13,8 +13,6 @@ A simplistic example configuration service can be found here: [https://github.co
 # Server
 # ...
 WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
-WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
-
 ```
 
 ### Example request made by Woodpecker
@@ -32,7 +30,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "git_http_url": "",
     "git_ssh_url": "",
     "link": "",
-    "default_branhc": "",
+    "default_branch": "",
     "private": true,
     "visibility": "private",
     "active": true,
@@ -83,9 +81,9 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
     "updated_at": 0,
     "verified": false
   },
-  "config": [
+  "configs": [
     {
-      "name": ".woodpecekr.yml",
+      "name": ".woodpecker.yml",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecekr.yml)\"\n"
     }
   ]
@@ -96,7 +94,7 @@ WOODPECKER_CONFIG_SERVICE_SECRET=mysecretsigningkey
 
 ```json
 {
-  "pipelines": [
+  "configs": [
     {
       "name": "central-override",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"

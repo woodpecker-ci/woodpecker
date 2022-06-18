@@ -3,6 +3,11 @@ depends_on:
   - web
 
 pipeline:
+  vendor:
+    image: golang:1.18
+    commands:
+      - go mod vendor
+
   ###############
   # S e r v e r #
   ###############

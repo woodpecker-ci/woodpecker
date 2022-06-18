@@ -197,6 +197,11 @@ Link to documentation in the UI.
 
 Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
 
+### `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
+> Default: `pull_request, push`
+
+List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
+
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
 > Default: `woodpeckerci/plugin-git:latest`
 
@@ -300,6 +305,17 @@ Read the value for `WOODPECKER_PROMETHEUS_AUTH_TOKEN` from the specified filepat
 
 Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
 
+### `WOODPECKER_STATUS_CONTEXT_FORMAT`
+> Default: `{{ .context }}/{{ .event }}/{{ .pipeline }}`
+
+Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
+Supported variables:
+- `context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
+- `event`: the event which started the pipeline
+- `pipeline`: the pipeline's name
+- `owner`: the repo's owner
+- `repo`: the repo's name
+
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`
@@ -339,16 +355,6 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 > Default: ``
 
 Specify a configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
-
-### `WOODPECKER_CONFIG_SERVICE_SECRET`
-> Default: ``
-
-Specify a signing secret for the configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
-
-### `WOODPECKER_CONFIG_SERVICE_SECRET_FILE`
-> Default: ``
-
-Read the value for `WOODPECKER_CONFIG_SERVICE_SECRET` from the specified filepath
 
 ---
 
