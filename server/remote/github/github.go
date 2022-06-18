@@ -78,6 +78,11 @@ type client struct {
 	MergeRef   bool
 }
 
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "github"
+}
+
 // Login authenticates the session and returns the remote user details.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)

@@ -74,6 +74,11 @@ type Coding struct {
 	SkipVerify bool
 }
 
+// Name returns the string name of this driver
+func (c *Coding) Name() string {
+	return "coding"
+}
+
 // Login authenticates the session and returns the
 // remote user details.
 func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {

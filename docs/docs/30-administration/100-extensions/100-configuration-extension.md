@@ -94,7 +94,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 
 ```json
 {
-  "pipelines": [
+  "configs": [
     {
       "name": "central-override",
       "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"

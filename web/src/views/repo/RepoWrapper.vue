@@ -1,7 +1,7 @@
 <template>
   <FluidContainer v-if="repo && repoPermissions && $route.meta.repoHeader">
     <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
-      <h1 class="text-xl text-gray-500 w-full md:w-auto text-center mb-4 md:mb-0">
+      <h1 class="text-xl text-color w-full md:w-auto text-center mb-4 md:mb-0">
         <router-link :to="{ name: 'repos-owner', params: { repoOwner } }">{{ repoOwner }}</router-link>
         {{ ` / ${repo.name}` }}
       </h1>
@@ -11,9 +11,12 @@
       <a
         :href="repo.link_url"
         target="_blank"
-        class="flex ml-4 p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
+        class="flex ml-4 p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
-        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
+        <Icon v-if="forge === 'github'" name="github" />
+        <Icon v-else-if="forge === 'gitea'" name="gitea" />
+        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
+        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
@@ -41,6 +44,7 @@ import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
@@ -79,6 +83,7 @@ export default defineComponent({
     const router = useRouter();
     const i18n = useI18n();
 
+    const { forge } = useConfig();
     const repo = repoStore.getRepo(repoOwner, repoName);
     const repoPermissions = ref<RepoPermissions>();
     const builds = buildStore.getSortedBuilds(repoOwner, repoName);
@@ -129,7 +134,7 @@ export default defineComponent({
       },
     });
 
-    return { repo, repoPermissions, badgeUrl, activeTab };
+    return { repo, repoPermissions, badgeUrl, activeTab, forge };
   },
 });
 </script>

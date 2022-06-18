@@ -18,6 +18,8 @@ type ConfigFetcher interface {
 	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
 }
 
+// TODO(974) move to new package
+
 type configFetcher struct {
 	remote          remote.Remote
 	user            *model.User
@@ -53,7 +55,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			continue
 		}
 
-		if cf.configExtension.IsConfigured() {
+		if cf.configExtension != nil && cf.configExtension.IsConfigured() {
 			fetchCtx, cancel := context.WithTimeout(ctx, configFetchTimeout)
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 

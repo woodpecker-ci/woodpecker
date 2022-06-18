@@ -79,6 +79,11 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (c *Gitea) Name() string {
+	return "gitea"
+}
+
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
