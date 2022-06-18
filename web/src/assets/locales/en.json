@@ -43,7 +43,7 @@
 
     "settings": {
       "settings": "Settings",
-      "not_allowed": "Not allowed to access this repository settings",
+      "not_allowed": "Not allowed to access this repository's settings",
 
       "general": {
         "general": "General",
