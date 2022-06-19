@@ -1,0 +1,8 @@
+type User {
+  id: ID!
+  login: String!
+  email: String!
+  avatar_url: String!
+  admin: Boolean!
+  active: Boolean!
+}

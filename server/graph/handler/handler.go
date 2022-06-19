@@ -10,15 +10,15 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/woodpecker-ci/woodpecker/server/graph"
 	"github.com/woodpecker-ci/woodpecker/server/graph/generated"
+	"github.com/woodpecker-ci/woodpecker/server/graph/resolvers"
 )
 
 // Defining the Graphql handler
 func GraphqlHandler() gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
 	h.AddTransport(transport.POST{})
 	h.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,

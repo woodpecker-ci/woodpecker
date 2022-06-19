@@ -1,18 +1,3 @@
-type Registry {
-  id: ID!
-  address: String!
-  username: String!
-  password: String!
-}
-
-type Secret {
-  id: String!
-  name: String!
-  value: String!
-  event: [String!]!
-  image: [String!]!
-}
-
 # A version control repository.
 type Repo {
   # Is the repo currently active or not
@@ -72,22 +57,12 @@ type Repo {
 
   # Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: [String!]!
-}
 
-type User {
-  id: ID!
-  name: String!
-}
+  # TODO: add builds
 
-type Query {
-  repository: [Repo!]!
-}
+  # TODO: add permissions
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
+  # TODO: add branches
 
-type Mutation {
-  createTodo(input: NewTodo!): Repo!
+  # TODO:
 }

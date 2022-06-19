@@ -1,0 +1,15 @@
+type Proc {
+  id: Int!
+  build_id: Int!
+  pid: Int!
+  ppid: Int!
+  name: String!
+  state: String!
+  exit_code: Int!
+  environ: [String!]!
+  start_time: Int!
+  end_time: Int!
+  machine: String!
+  error: String!
+  children: [Proc!]
+}

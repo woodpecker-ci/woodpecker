@@ -1,0 +1,6 @@
+type Registry {
+  id: ID!
+  address: String!
+  username: String!
+  password: String!
+}

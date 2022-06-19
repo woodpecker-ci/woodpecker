@@ -2,7 +2,32 @@
 
 package model
 
-type NewTodo struct {
+type NewRegistry struct {
+	Address  string `json:"address"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type NewSecret struct {
+	Name  string   `json:"name"`
+	Value string   `json:"value"`
+	Event []string `json:"event"`
+	Image []string `json:"image"`
+}
+
+type UpdateRegistry struct {
+	Address  string `json:"address"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type UpdateRepo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
+}
+
+type UpdateSecret struct {
+	Value string   `json:"value"`
+	Event []string `json:"event"`
+	Image []string `json:"image"`
 }

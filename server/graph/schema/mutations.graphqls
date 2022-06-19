@@ -1,0 +1,57 @@
+input UpdateRepo {
+  text: String!
+  userId: String!
+}
+
+input NewSecret {
+  name: String!
+  value: String!
+  event: [String!]!
+  image: [String!]!
+}
+
+input UpdateSecret {
+  value: String!
+  event: [String!]!
+  image: [String!]!
+}
+
+input NewRegistry {
+  address: String!
+  username: String!
+  password: String!
+}
+
+input UpdateRegistry {
+  address: String!
+  username: String!
+  password: String!
+}
+
+type Mutation {
+  activateRepo(owner: String!, name: String!): Boolean!
+  updateRepo(input: UpdateRepo!): Repo!
+  deleteRepo(owner: String!, name: String!): Boolean!
+  repairRepo(owner: String!, name: String!): Boolean!
+
+  cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+  approveBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+  declineBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+  restartBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+
+  createSecret(owner: String!, name: String!, secret: NewSecret!): Secret!
+  updateSecret(owner: String!, name: String!, secret: UpdateSecret!): Secret!
+  deleteSecret(owner: String!, name: String!, secretName: String!): Boolean!
+
+  createRegistry(
+    owner: String!
+    name: String!
+    registry: NewRegistry!
+  ): Registry!
+  updateRegistry(
+    owner: String!
+    name: String!
+    registry: UpdateRegistry!
+  ): Registry!
+  deleteRegistry(owner: String!, name: String!, registryName: String!): Boolean!
+}
