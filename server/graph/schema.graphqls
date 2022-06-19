@@ -1,0 +1,93 @@
+type Registry {
+  id: ID!
+  address: String!
+  username: String!
+  password: String!
+}
+
+type Secret {
+  id: String!
+  name: String!
+  value: String!
+  event: [String!]!
+  image: [String!]!
+}
+
+# A version control repository.
+type Repo {
+  # Is the repo currently active or not
+  active: Boolean!
+
+  # The unique identifier for the repository.
+  id: Int!
+
+  # The source control management being used.
+  # Currently this is either 'git' or 'hg' (Mercurial).
+  scm: String!
+
+  # The owner of the repository.
+  owner: String!
+
+  # The name of the repository.
+  name: String!
+
+  # The full name of the repository.
+  # This is created from the owner and name of the repository.
+  full_name: String!
+
+  # The url for the avatar image.
+  avatar_url: String!
+
+  # The link to view the repository.
+  link_url: String!
+
+  # The url used to clone the repository.
+  clone_url: String!
+
+  # The default branch of the repository.
+  default_branch: String!
+
+  # Whether the repository is publicly visible.
+  private: Boolean!
+
+  # Whether the repository has trusted access for builds.
+  # If the repository is trusted then the host network can be used and
+  # volumes can be created.
+  trusted: Boolean!
+
+  # x-dart-type: Duration
+  # The amount of time in minutes before the build is killed.
+  timeout: Int!
+
+  # Whether pull requests should trigger a build.
+  allow_pr: Boolean!
+
+  config_file: String!
+
+  visibility: String!
+
+  last_build: Int!
+
+  gated: Boolean!
+
+  # Events that will cancel running pipelines before starting a new one
+  cancel_previous_pipeline_events: [String!]!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  repository: [Repo!]!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Repo!
+}
