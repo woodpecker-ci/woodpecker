@@ -23,8 +23,8 @@
     </div>
 
     <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab :title="$t('repo.activity')" />
-      <Tab :title="$t('repo.branches')" />
+      <Tab id="activity" :title="$t('repo.activity')" />
+      <Tab id="branches" :title="$t('repo.branches')" />
     </Tabs>
 
     <router-view />
