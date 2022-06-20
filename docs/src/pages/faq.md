@@ -11,7 +11,7 @@ Apart from Woodpecker staying free and OpenSource forever, the growing community
 
 The Drone CI license was changed after the 0.8 release from Apache 2 to a proprietary license. Woodpecker is based on this latest freely available version.
 
-## How to debugg clone issues:
+## How to debug clone issues:
 
 (And what to do with an error message like `fatal: could not read Username for 'https://<url>': No such device or address`)
 
