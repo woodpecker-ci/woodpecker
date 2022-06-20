@@ -122,16 +122,16 @@
       },
 
       "registries": {
-        "registries": "Registratur",
-        "creds": "Zugangsdaten für die Registratur",
-        "desc": "Zugangsdaten für die Registratur können hinzugefügt werden, um private Images für Ihre Pipeline zu verwenden.",
-        "show": "Registraturen anzeigen",
-        "add": "Registratur hinzufügen",
-        "none": "Es gibt noch keine Zugangsdaten für die Registratur.",
-        "save": "Registratur speichern",
-        "created": "Registratur Zugangsdaten erstellt",
-        "saved": "Registratur Zugangsdaten gespeichert",
-        "deleted": "Registratur Zugangsdaten gelöscht",
+        "registries": "Registries",
+        "creds": "Zugangsdaten für die Registry",
+        "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für Ihre Pipeline zu verwenden.",
+        "show": "Registries anzeigen",
+        "add": "Registry hinzufügen",
+        "none": "Es gibt noch keine Zugangsdaten für die Registry.",
+        "save": "Registry speichern",
+        "created": "Registry Zugangsdaten erstellt",
+        "saved": "Registry Zugangsdaten gespeichert",
+        "deleted": "Registry Zugangsdaten gelöscht",
 
         "address": {
           "address": "Adresse",
