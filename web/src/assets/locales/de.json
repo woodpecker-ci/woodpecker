@@ -129,9 +129,9 @@
         "add": "Registry hinzufügen",
         "none": "Es gibt noch keine Zugangsdaten für die Registry.",
         "save": "Registry speichern",
-        "created": "Registry Zugangsdaten erstellt",
-        "saved": "Registry Zugangsdaten gespeichert",
-        "deleted": "Registry Zugangsdaten gelöscht",
+        "created": "Registry-Zugangsdaten erstellt",
+        "saved": "Registry-Zugangsdaten gespeichert",
+        "deleted": "Registry-Zugangsdaten gelöscht",
 
         "address": {
           "address": "Adresse",
