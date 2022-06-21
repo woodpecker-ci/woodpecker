@@ -1,5 +1,6 @@
 import 'dayjs/locale/en';
 import 'dayjs/locale/lv';
+import 'dayjs/locale/de';
 
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';

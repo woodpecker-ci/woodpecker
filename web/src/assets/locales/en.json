@@ -79,11 +79,11 @@
           },
           "private": {
             "private": "Private",
-            "desc": "Only authenticated users of the Woodpecker instance can see this project."
+            "desc": "Only you and other owners of the repository can see this project."
           },
           "internal": {
             "internal": "Internal",
-            "desc": "Only you and other owners of the repository can see this project."
+            "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
 
@@ -94,7 +94,7 @@
 
         "cancel_prev": {
           "cancel": "Cancel previous pipelines",
-          "desc": "Enable to cancel running pipelines of the same event and context before starting the newly triggered one."
+          "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
       },
 
