@@ -19,7 +19,7 @@
         :href="docsUrl"
         target="_blank"
         class="hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md hidden md:flex"
-        >Docs</a
+        >{{ $t('docs') }}</a
       >
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"

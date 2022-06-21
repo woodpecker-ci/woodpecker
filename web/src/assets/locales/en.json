@@ -3,11 +3,13 @@
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
   "repositories": "Repositories",
+  "docs": "Docs",
   "logout": "Logout",
   "search": "Search...",
   "username": "Username",
   "password": "Password",
   "url": "URL",
+  "unknown_error": "An unknown error occurred",
 
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
@@ -41,6 +43,7 @@
 
     "settings": {
       "settings": "Settings",
+      "not_allowed": "Not allowed to access this repository's settings",
 
       "general": {
         "general": "General",
@@ -51,7 +54,7 @@
         "pipeline_path": {
           "path": "Pipeline path",
           "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Path to your pipeline config (for example <span class=\"bg-gray-300 dark:bg-dark-300 rounded-md px-1\">my/path/</span>). Folders should end with a <span class=\"bg-gray-300 dark:bg-dark-300 rounded-md px-1\">/</span>."
+          "desc": "Path to your pipeline config (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Folders should end with a <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>."
         },
 
         "allow_pr": {
@@ -76,11 +79,11 @@
           },
           "private": {
             "private": "Private",
-            "desc": "Only authenticated users of the Woodpecker instance can see this project."
+            "desc": "Only you and other owners of the repository can see this project."
           },
           "internal": {
             "internal": "Internal",
-            "desc": "Only you and other owners of the repository can see this project."
+            "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
 
@@ -91,7 +94,7 @@
 
         "cancel_prev": {
           "cancel": "Cancel previous pipelines",
-          "desc": "Enable to cancel running pipelines of the same event and context before starting the newly triggered one."
+          "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
       },
 
@@ -169,10 +172,12 @@
       "no_files": "No files have been changed.",
       "execution_error": "Execution error",
       "no_pipelines": "No pipelines have been started yet.",
+      "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{branch}\"",
       "exit_code": "exit code {exitCode}",
       "loading": "Loading ...",
+      "pipeline": "Pipeline #{buildId}",
 
       "actions": {
         "cancel": "Cancel",
@@ -185,7 +190,9 @@
         "awaits": "This pipeline is awaiting approval by some maintainer!",
         "approve": "Approve",
         "decline": "Decline",
-        "declined": "This pipeline has been declined!"
+        "declined": "This pipeline has been declined!",
+        "approve_success": "Pipeline approved",
+        "decline_success": "Pipeline declined"
       },
       "event": {
         "push": "Push",

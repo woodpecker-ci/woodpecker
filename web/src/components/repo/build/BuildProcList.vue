@@ -46,7 +46,7 @@
     </div>
 
     <div v-if="build.procs === undefined || build.procs.length === 0" class="m-auto mt-4">
-      <span>No pipeline steps available!</span>
+      <span>{{ $t('repo.build.no_pipeline_steps') }}</span>
     </div>
 
     <div class="flex flex-grow relative min-h-0 overflow-y-auto">

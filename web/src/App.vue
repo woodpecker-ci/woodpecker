@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
@@ -37,9 +38,11 @@ export default defineComponent({
     const route = useRoute();
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const i18n = useI18n();
+
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     apiClient.setErrorHandler((err) => {
-      notifications.notify({ title: err.message || 'An unknown error occurred', type: 'error' });
+      notifications.notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
     });
 
     const blank = computed(() => route.meta.blank);

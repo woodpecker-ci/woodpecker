@@ -27,6 +27,9 @@ import (
 // TODO: add Driver() who return source forge back
 
 type Remote interface {
+	// Name returns the string name of this driver
+	Name() string
+
 	// Login authenticates the session and returns the
 	// remote user details.
 	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)

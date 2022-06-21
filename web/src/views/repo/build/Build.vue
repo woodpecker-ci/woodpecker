@@ -46,6 +46,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, Ref, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -82,6 +83,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const build = inject<Ref<Build>>('build');
     const repo = inject<Ref<Repo>>('repo');
@@ -142,7 +144,7 @@ export default defineComponent({
       }
 
       await apiClient.approveBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
-      notifications.notify({ title: 'Pipeline approved', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.protected.approve_success'), type: 'success' });
     });
 
     const { doSubmit: declineBuild, isLoading: isDecliningBuild } = useAsyncAction(async () => {
@@ -151,7 +153,7 @@ export default defineComponent({
       }
 
       await apiClient.declineBuild(repo.value.owner, repo.value.name, `${build.value.number}`);
-      notifications.notify({ title: 'Pipeline declined', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.protected.decline_success'), type: 'success' });
     });
 
     return {

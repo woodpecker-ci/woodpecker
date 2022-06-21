@@ -16,7 +16,7 @@
             overflow-hidden overflow-ellipsis
           "
         >
-          <span class="w-full md:w-auto text-center">Pipeline #{{ buildId }}</span>
+          <span class="w-full md:w-auto text-center">{{ $t('repo.build.pipeline', { buildId }) }}</span>
           <span class="<md:hidden mx-2">-</span>
           <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
         </h1>
