@@ -79,7 +79,7 @@
           },
           "private": {
             "private": "Privat",
-            "desc": "Nur Sie und andere Besitzer des Repositorys können dieses Projekt sehen."
+            "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
           },
           "internal": {
             "internal": "Intern",
@@ -158,7 +158,7 @@
         },
         "delete": {
           "delete": "Repository löschen",
-          "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchten Sie wirklich fortfahren?",
+          "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
           "success": "Repository gelöscht"
         }
       }
@@ -208,10 +208,10 @@
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
     "token": "Dein persönlicher Token",
-    "shell_setup": "Kommando-Zeilen-Einrichtung",
+    "shell_setup": "Kommandozeilen-Einrichtung",
     "api_usage": "Beispiel für die API-Nutzung",
-    "cli_usage": "Beispiel für die Kommando-Zeilen-Nutzung",
+    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
     "dl_cli": "Download Kommando-Zeilen-Tool",
-    "shell_setup_before": "Führen Sie die Schritte zur Einrichtung der Kommando-Zeile vorher aus"
+    "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus"
   }
 }
