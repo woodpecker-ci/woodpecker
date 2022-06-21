@@ -135,7 +135,7 @@
 
         "address": {
           "address": "Adresse",
-          "placeholder": "Registratur Adresse (z. B. docker.io)"
+          "placeholder": "Registry-Adresse (z. B. docker.io)"
         }
       },
 
