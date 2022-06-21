@@ -99,25 +99,25 @@
       },
 
       "secrets": {
-        "secrets": "Geheimnisse",
-        "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
-        "none": "Es gibt noch keine Geheimnisse.",
-        "add": "Geheimnis hinzufügen",
-        "save": "Geheimnis speichern",
-        "show": "Geheimnisse anzeigen",
+        "secrets": "Secrets",
+        "desc": "Secrets können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "none": "Es gibt noch keine Secrets.",
+        "add": "Secret hinzufügen",
+        "save": "Secret speichern",
+        "show": "Secret anzeigen",
         "name": "Name",
         "value": "Wert",
-        "deleted": "Geheimnis gelöscht",
-        "created": "Geheimnis erstellt",
-        "saved": "Geheimnis gespeichert",
+        "deleted": "Secret gelöscht",
+        "created": "Secret erstellt",
+        "saved": "Secret gespeichert",
 
         "images": {
           "images": "Verfügbar für folgende Images",
-          "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen"
+          "desc": "Durch Kommata getrennte Liste der Images, für die dieses Secret verfügbar ist; leer lassen, um alle Images zuzulassen"
         },
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
-          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull Request erstellen kann, der deine Geheimnisse preisgibt."
+          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull Request erstellen kann, der deine Secrets preisgibt."
         }
       },
 
