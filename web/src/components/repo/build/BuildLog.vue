@@ -167,11 +167,16 @@ export default defineComponent({
       fitAddon.value.fit();
     }
 
+    let unmounted = false;
     onMounted(async () => {
       term.value.loadAddon(fitAddon.value);
       term.value.loadAddon(new WebLinksAddon());
 
       await nextTick(() => {
+        if (unmounted) {
+          // need to check if unmounted already because we are async here
+          return;
+        }
         const element = document.getElementById('terminal');
         if (element === null) {
           throw new Error('Unexpected: "terminal" should be provided at this place');
@@ -214,8 +219,14 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
+      unmounted = true;
       if (stream.value) {
         stream.value.close();
+      }
+      const element = document.getElementById('terminal');
+      if (element !== null) {
+        // Clean up any custom DOM added in onMounted above
+        element.innerHTML = '';
       }
       window.removeEventListener('resize', resize);
     });
