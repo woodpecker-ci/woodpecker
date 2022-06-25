@@ -167,13 +167,13 @@ export default defineComponent({
       fitAddon.value.fit();
     }
 
-    let unmounted = false;
+    const unmounted = ref(false);
     onMounted(async () => {
       term.value.loadAddon(fitAddon.value);
       term.value.loadAddon(new WebLinksAddon());
 
       await nextTick(() => {
-        if (unmounted) {
+        if (unmounted.value) {
           // need to check if unmounted already because we are async here
           return;
         }
@@ -219,7 +219,7 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
-      unmounted = true;
+      unmounted.value = true;
       if (stream.value) {
         stream.value.close();
       }
