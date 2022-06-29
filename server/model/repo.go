@@ -46,7 +46,7 @@ type Repo struct {
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	SecretEndpoint               string         `json:"secrect_endpoint"                xorm:"varchar(500) 'secrect_endpoint'"`
+	SecretEndpoint               string         `json:"secret_endpoint"                xorm:"varchar(500) 'secret_endpoint'"`
 	RegistryEndpoint             string         `json:"registry_endpoint"               xorm:"varchar(500) 'registry_endpoint'"`
 	ConfigEndpoint               string         `json:"config_endpoint"                 xorm:"varchar(500) 'config_endpoint'"`
 }
