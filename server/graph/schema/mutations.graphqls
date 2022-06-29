@@ -29,29 +29,35 @@ input UpdateRegistry {
 }
 
 type Mutation {
-  activateRepo(owner: String!, name: String!): Boolean!
-  updateRepo(input: UpdateRepo!): Repo!
-  deleteRepo(owner: String!, name: String!): Boolean!
-  repairRepo(owner: String!, name: String!): Boolean!
+  activateRepo(owner: String!, name: String!): Boolean! @todo
+  updateRepo(input: UpdateRepo!): Repo! @todo
+  deleteRepo(owner: String!, name: String!): Boolean! @todo
+  repairRepo(owner: String!, name: String!): Boolean! @todo
 
-  cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  approveBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  declineBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  restartBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+  cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  approveBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  declineBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  restartBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
 
-  createSecret(owner: String!, name: String!, secret: NewSecret!): Secret!
+  createSecret(owner: String!, name: String!, secret: NewSecret!): Secret! @todo
   updateSecret(owner: String!, name: String!, secret: UpdateSecret!): Secret!
+    @todo
   deleteSecret(owner: String!, name: String!, secretName: String!): Boolean!
+    @todo
 
   createRegistry(
     owner: String!
     name: String!
     registry: NewRegistry!
-  ): Registry!
+  ): Registry! @todo
   updateRegistry(
     owner: String!
     name: String!
     registry: UpdateRegistry!
-  ): Registry!
-  deleteRegistry(owner: String!, name: String!, registryName: String!): Boolean!
+  ): Registry! @todo
+  deleteRegistry(
+    owner: String!
+    name: String!
+    registryName: String!
+  ): Boolean! @todo
 }

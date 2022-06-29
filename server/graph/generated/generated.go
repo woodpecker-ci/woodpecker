@@ -43,28 +43,30 @@ type ResolverRoot interface {
 	Query() QueryResolver
 	Repo() RepoResolver
 	Secret() SecretResolver
-	User() UserResolver
 }
 
 type DirectiveRoot struct {
+	HasRole         func(ctx context.Context, obj interface{}, next graphql.Resolver, role string) (res interface{}, err error)
+	IsAuthenticated func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Todo            func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
 	Build struct {
 		Author       func(childComplexity int) int
-		AuthorAvatar func(childComplexity int) int
-		AuthorEmail  func(childComplexity int) int
+		Avatar       func(childComplexity int) int
 		Branch       func(childComplexity int) int
 		ChangedFiles func(childComplexity int) int
 		Commit       func(childComplexity int) int
-		CreatedAt    func(childComplexity int) int
-		DeployTo     func(childComplexity int) int
-		EnqueuedAt   func(childComplexity int) int
+		Created      func(childComplexity int) int
+		Deploy       func(childComplexity int) int
+		Email        func(childComplexity int) int
+		Enqueued     func(childComplexity int) int
 		Error        func(childComplexity int) int
 		Event        func(childComplexity int) int
-		FinishedAt   func(childComplexity int) int
+		Finished     func(childComplexity int) int
 		ID           func(childComplexity int) int
-		LinkURL      func(childComplexity int) int
+		Link         func(childComplexity int) int
 		Message      func(childComplexity int) int
 		Number       func(childComplexity int) int
 		Parent       func(childComplexity int) int
@@ -72,15 +74,15 @@ type ComplexityRoot struct {
 		Ref          func(childComplexity int) int
 		Refspec      func(childComplexity int) int
 		Remote       func(childComplexity int) int
-		ReviewedAt   func(childComplexity int) int
-		ReviewedBy   func(childComplexity int) int
+		Reviewed     func(childComplexity int) int
+		Reviewer     func(childComplexity int) int
 		Sender       func(childComplexity int) int
 		Signed       func(childComplexity int) int
-		StartedAt    func(childComplexity int) int
+		Started      func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Timestamp    func(childComplexity int) int
 		Title        func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
+		Updated      func(childComplexity int) int
 		Verified     func(childComplexity int) int
 	}
 
@@ -102,19 +104,18 @@ type ComplexityRoot struct {
 	}
 
 	Proc struct {
-		BuildID   func(childComplexity int) int
-		Children  func(childComplexity int) int
-		EndTime   func(childComplexity int) int
-		Environ   func(childComplexity int) int
-		Error     func(childComplexity int) int
-		ExitCode  func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Machine   func(childComplexity int) int
-		Name      func(childComplexity int) int
-		PID       func(childComplexity int) int
-		PPID      func(childComplexity int) int
-		StartTime func(childComplexity int) int
-		State     func(childComplexity int) int
+		BuildID  func(childComplexity int) int
+		Children func(childComplexity int) int
+		Environ  func(childComplexity int) int
+		Error    func(childComplexity int) int
+		ExitCode func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Machine  func(childComplexity int) int
+		Name     func(childComplexity int) int
+		PID      func(childComplexity int) int
+		PPID     func(childComplexity int) int
+		Started  func(childComplexity int) int
+		State    func(childComplexity int) int
 	}
 
 	Query struct {
@@ -129,62 +130,48 @@ type ComplexityRoot struct {
 	}
 
 	Repo struct {
-		Active                       func(childComplexity int) int
-		AllowPr                      func(childComplexity int) int
-		AvatarURL                    func(childComplexity int) int
+		AllowPull                    func(childComplexity int) int
+		Avatar                       func(childComplexity int) int
+		Branch                       func(childComplexity int) int
 		CancelPreviousPipelineEvents func(childComplexity int) int
-		CloneURL                     func(childComplexity int) int
-		ConfigFile                   func(childComplexity int) int
-		DefaultBranch                func(childComplexity int) int
+		Clone                        func(childComplexity int) int
+		Config                       func(childComplexity int) int
 		FullName                     func(childComplexity int) int
-		Gated                        func(childComplexity int) int
 		ID                           func(childComplexity int) int
+		IsActive                     func(childComplexity int) int
+		IsGated                      func(childComplexity int) int
+		IsSCMPrivate                 func(childComplexity int) int
+		IsTrusted                    func(childComplexity int) int
 		LastBuild                    func(childComplexity int) int
-		LinkURL                      func(childComplexity int) int
+		Link                         func(childComplexity int) int
 		Name                         func(childComplexity int) int
 		Owner                        func(childComplexity int) int
-		Private                      func(childComplexity int) int
-		Scm                          func(childComplexity int) int
+		SCMKind                      func(childComplexity int) int
 		Timeout                      func(childComplexity int) int
-		Trusted                      func(childComplexity int) int
 		Visibility                   func(childComplexity int) int
 	}
 
 	Secret struct {
-		Event func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Image func(childComplexity int) int
-		Name  func(childComplexity int) int
-		Value func(childComplexity int) int
+		Events func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Images func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Value  func(childComplexity int) int
 	}
 
 	User struct {
-		Active    func(childComplexity int) int
-		Admin     func(childComplexity int) int
-		AvatarURL func(childComplexity int) int
-		Email     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Login     func(childComplexity int) int
+		Active func(childComplexity int) int
+		Admin  func(childComplexity int) int
+		Avatar func(childComplexity int) int
+		Email  func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Login  func(childComplexity int) int
 	}
 }
 
 type BuildResolver interface {
 	Event(ctx context.Context, obj *model1.Build) (string, error)
 	Status(ctx context.Context, obj *model1.Build) (string, error)
-
-	CreatedAt(ctx context.Context, obj *model1.Build) (int, error)
-	UpdatedAt(ctx context.Context, obj *model1.Build) (int, error)
-	EnqueuedAt(ctx context.Context, obj *model1.Build) (int, error)
-	StartedAt(ctx context.Context, obj *model1.Build) (int, error)
-	FinishedAt(ctx context.Context, obj *model1.Build) (int, error)
-	DeployTo(ctx context.Context, obj *model1.Build) (string, error)
-
-	AuthorAvatar(ctx context.Context, obj *model1.Build) (string, error)
-	AuthorEmail(ctx context.Context, obj *model1.Build) (string, error)
-	LinkURL(ctx context.Context, obj *model1.Build) (string, error)
-
-	ReviewedBy(ctx context.Context, obj *model1.Build) (string, error)
-	ReviewedAt(ctx context.Context, obj *model1.Build) (int, error)
 }
 type MutationResolver interface {
 	ActivateRepo(ctx context.Context, owner string, name string) (bool, error)
@@ -206,39 +193,20 @@ type ProcResolver interface {
 	State(ctx context.Context, obj *model1.Proc) (string, error)
 
 	Environ(ctx context.Context, obj *model1.Proc) ([]string, error)
-	StartTime(ctx context.Context, obj *model1.Proc) (int, error)
-	EndTime(ctx context.Context, obj *model1.Proc) (int, error)
 }
 type QueryResolver interface {
 	Repository(ctx context.Context) ([]*model1.Repo, error)
 }
 type RepoResolver interface {
-	Active(ctx context.Context, obj *model1.Repo) (bool, error)
+	SCMKind(ctx context.Context, obj *model1.Repo) (string, error)
 
-	Scm(ctx context.Context, obj *model1.Repo) (string, error)
-
-	AvatarURL(ctx context.Context, obj *model1.Repo) (string, error)
-	LinkURL(ctx context.Context, obj *model1.Repo) (string, error)
-	CloneURL(ctx context.Context, obj *model1.Repo) (string, error)
-	DefaultBranch(ctx context.Context, obj *model1.Repo) (string, error)
-	Private(ctx context.Context, obj *model1.Repo) (bool, error)
-	Trusted(ctx context.Context, obj *model1.Repo) (bool, error)
-
-	AllowPr(ctx context.Context, obj *model1.Repo) (bool, error)
-	ConfigFile(ctx context.Context, obj *model1.Repo) (string, error)
 	Visibility(ctx context.Context, obj *model1.Repo) (string, error)
-	LastBuild(ctx context.Context, obj *model1.Repo) (int, error)
-	Gated(ctx context.Context, obj *model1.Repo) (bool, error)
+
 	CancelPreviousPipelineEvents(ctx context.Context, obj *model1.Repo) ([]string, error)
+	LastBuild(ctx context.Context, obj *model1.Repo) (int, error)
 }
 type SecretResolver interface {
-	ID(ctx context.Context, obj *model1.Secret) (string, error)
-
-	Event(ctx context.Context, obj *model1.Secret) ([]string, error)
-	Image(ctx context.Context, obj *model1.Secret) ([]string, error)
-}
-type UserResolver interface {
-	AvatarURL(ctx context.Context, obj *model1.User) (string, error)
+	Events(ctx context.Context, obj *model1.Secret) ([]string, error)
 }
 
 type executableSchema struct {
@@ -264,18 +232,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Author(childComplexity), true
 
 	case "Build.author_avatar":
-		if e.complexity.Build.AuthorAvatar == nil {
+		if e.complexity.Build.Avatar == nil {
 			break
 		}
 
-		return e.complexity.Build.AuthorAvatar(childComplexity), true
-
-	case "Build.author_email":
-		if e.complexity.Build.AuthorEmail == nil {
-			break
-		}
-
-		return e.complexity.Build.AuthorEmail(childComplexity), true
+		return e.complexity.Build.Avatar(childComplexity), true
 
 	case "Build.branch":
 		if e.complexity.Build.Branch == nil {
@@ -299,25 +260,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Commit(childComplexity), true
 
 	case "Build.created_at":
-		if e.complexity.Build.CreatedAt == nil {
+		if e.complexity.Build.Created == nil {
 			break
 		}
 
-		return e.complexity.Build.CreatedAt(childComplexity), true
+		return e.complexity.Build.Created(childComplexity), true
 
 	case "Build.deploy_to":
-		if e.complexity.Build.DeployTo == nil {
+		if e.complexity.Build.Deploy == nil {
 			break
 		}
 
-		return e.complexity.Build.DeployTo(childComplexity), true
+		return e.complexity.Build.Deploy(childComplexity), true
+
+	case "Build.author_email":
+		if e.complexity.Build.Email == nil {
+			break
+		}
+
+		return e.complexity.Build.Email(childComplexity), true
 
 	case "Build.enqueued_at":
-		if e.complexity.Build.EnqueuedAt == nil {
+		if e.complexity.Build.Enqueued == nil {
 			break
 		}
 
-		return e.complexity.Build.EnqueuedAt(childComplexity), true
+		return e.complexity.Build.Enqueued(childComplexity), true
 
 	case "Build.error":
 		if e.complexity.Build.Error == nil {
@@ -334,11 +302,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Event(childComplexity), true
 
 	case "Build.finished_at":
-		if e.complexity.Build.FinishedAt == nil {
+		if e.complexity.Build.Finished == nil {
 			break
 		}
 
-		return e.complexity.Build.FinishedAt(childComplexity), true
+		return e.complexity.Build.Finished(childComplexity), true
 
 	case "Build.id":
 		if e.complexity.Build.ID == nil {
@@ -348,11 +316,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.ID(childComplexity), true
 
 	case "Build.link_url":
-		if e.complexity.Build.LinkURL == nil {
+		if e.complexity.Build.Link == nil {
 			break
 		}
 
-		return e.complexity.Build.LinkURL(childComplexity), true
+		return e.complexity.Build.Link(childComplexity), true
 
 	case "Build.message":
 		if e.complexity.Build.Message == nil {
@@ -404,18 +372,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Remote(childComplexity), true
 
 	case "Build.reviewed_at":
-		if e.complexity.Build.ReviewedAt == nil {
+		if e.complexity.Build.Reviewed == nil {
 			break
 		}
 
-		return e.complexity.Build.ReviewedAt(childComplexity), true
+		return e.complexity.Build.Reviewed(childComplexity), true
 
 	case "Build.reviewed_by":
-		if e.complexity.Build.ReviewedBy == nil {
+		if e.complexity.Build.Reviewer == nil {
 			break
 		}
 
-		return e.complexity.Build.ReviewedBy(childComplexity), true
+		return e.complexity.Build.Reviewer(childComplexity), true
 
 	case "Build.sender":
 		if e.complexity.Build.Sender == nil {
@@ -432,11 +400,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Signed(childComplexity), true
 
 	case "Build.started_at":
-		if e.complexity.Build.StartedAt == nil {
+		if e.complexity.Build.Started == nil {
 			break
 		}
 
-		return e.complexity.Build.StartedAt(childComplexity), true
+		return e.complexity.Build.Started(childComplexity), true
 
 	case "Build.status":
 		if e.complexity.Build.Status == nil {
@@ -460,11 +428,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Build.Title(childComplexity), true
 
 	case "Build.updated_at":
-		if e.complexity.Build.UpdatedAt == nil {
+		if e.complexity.Build.Updated == nil {
 			break
 		}
 
-		return e.complexity.Build.UpdatedAt(childComplexity), true
+		return e.complexity.Build.Updated(childComplexity), true
 
 	case "Build.verified":
 		if e.complexity.Build.Verified == nil {
@@ -655,13 +623,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Proc.Children(childComplexity), true
 
-	case "Proc.end_time":
-		if e.complexity.Proc.EndTime == nil {
-			break
-		}
-
-		return e.complexity.Proc.EndTime(childComplexity), true
-
 	case "Proc.environ":
 		if e.complexity.Proc.Environ == nil {
 			break
@@ -718,12 +679,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Proc.PPID(childComplexity), true
 
-	case "Proc.start_time":
-		if e.complexity.Proc.StartTime == nil {
+	case "Proc.start_time", "Proc.end_time":
+		if e.complexity.Proc.Started == nil {
 			break
 		}
 
-		return e.complexity.Proc.StartTime(childComplexity), true
+		return e.complexity.Proc.Started(childComplexity), true
 
 	case "Proc.state":
 		if e.complexity.Proc.State == nil {
@@ -767,26 +728,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Registry.Username(childComplexity), true
 
-	case "Repo.active":
-		if e.complexity.Repo.Active == nil {
-			break
-		}
-
-		return e.complexity.Repo.Active(childComplexity), true
-
 	case "Repo.allow_pr":
-		if e.complexity.Repo.AllowPr == nil {
+		if e.complexity.Repo.AllowPull == nil {
 			break
 		}
 
-		return e.complexity.Repo.AllowPr(childComplexity), true
+		return e.complexity.Repo.AllowPull(childComplexity), true
 
-	case "Repo.avatar_url":
-		if e.complexity.Repo.AvatarURL == nil {
+	case "Repo.avatar":
+		if e.complexity.Repo.Avatar == nil {
 			break
 		}
 
-		return e.complexity.Repo.AvatarURL(childComplexity), true
+		return e.complexity.Repo.Avatar(childComplexity), true
+
+	case "Repo.default_branch":
+		if e.complexity.Repo.Branch == nil {
+			break
+		}
+
+		return e.complexity.Repo.Branch(childComplexity), true
 
 	case "Repo.cancel_previous_pipeline_events":
 		if e.complexity.Repo.CancelPreviousPipelineEvents == nil {
@@ -796,25 +757,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Repo.CancelPreviousPipelineEvents(childComplexity), true
 
 	case "Repo.clone_url":
-		if e.complexity.Repo.CloneURL == nil {
+		if e.complexity.Repo.Clone == nil {
 			break
 		}
 
-		return e.complexity.Repo.CloneURL(childComplexity), true
+		return e.complexity.Repo.Clone(childComplexity), true
 
 	case "Repo.config_file":
-		if e.complexity.Repo.ConfigFile == nil {
+		if e.complexity.Repo.Config == nil {
 			break
 		}
 
-		return e.complexity.Repo.ConfigFile(childComplexity), true
-
-	case "Repo.default_branch":
-		if e.complexity.Repo.DefaultBranch == nil {
-			break
-		}
-
-		return e.complexity.Repo.DefaultBranch(childComplexity), true
+		return e.complexity.Repo.Config(childComplexity), true
 
 	case "Repo.full_name":
 		if e.complexity.Repo.FullName == nil {
@@ -823,19 +777,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.FullName(childComplexity), true
 
-	case "Repo.gated":
-		if e.complexity.Repo.Gated == nil {
-			break
-		}
-
-		return e.complexity.Repo.Gated(childComplexity), true
-
 	case "Repo.id":
 		if e.complexity.Repo.ID == nil {
 			break
 		}
 
 		return e.complexity.Repo.ID(childComplexity), true
+
+	case "Repo.active":
+		if e.complexity.Repo.IsActive == nil {
+			break
+		}
+
+		return e.complexity.Repo.IsActive(childComplexity), true
+
+	case "Repo.gated":
+		if e.complexity.Repo.IsGated == nil {
+			break
+		}
+
+		return e.complexity.Repo.IsGated(childComplexity), true
+
+	case "Repo.is_scm_private":
+		if e.complexity.Repo.IsSCMPrivate == nil {
+			break
+		}
+
+		return e.complexity.Repo.IsSCMPrivate(childComplexity), true
+
+	case "Repo.trusted":
+		if e.complexity.Repo.IsTrusted == nil {
+			break
+		}
+
+		return e.complexity.Repo.IsTrusted(childComplexity), true
 
 	case "Repo.last_build":
 		if e.complexity.Repo.LastBuild == nil {
@@ -844,12 +819,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.LastBuild(childComplexity), true
 
-	case "Repo.link_url":
-		if e.complexity.Repo.LinkURL == nil {
+	case "Repo.link":
+		if e.complexity.Repo.Link == nil {
 			break
 		}
 
-		return e.complexity.Repo.LinkURL(childComplexity), true
+		return e.complexity.Repo.Link(childComplexity), true
 
 	case "Repo.name":
 		if e.complexity.Repo.Name == nil {
@@ -865,19 +840,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.Owner(childComplexity), true
 
-	case "Repo.private":
-		if e.complexity.Repo.Private == nil {
-			break
-		}
-
-		return e.complexity.Repo.Private(childComplexity), true
-
 	case "Repo.scm":
-		if e.complexity.Repo.Scm == nil {
+		if e.complexity.Repo.SCMKind == nil {
 			break
 		}
 
-		return e.complexity.Repo.Scm(childComplexity), true
+		return e.complexity.Repo.SCMKind(childComplexity), true
 
 	case "Repo.timeout":
 		if e.complexity.Repo.Timeout == nil {
@@ -886,13 +854,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.Timeout(childComplexity), true
 
-	case "Repo.trusted":
-		if e.complexity.Repo.Trusted == nil {
-			break
-		}
-
-		return e.complexity.Repo.Trusted(childComplexity), true
-
 	case "Repo.visibility":
 		if e.complexity.Repo.Visibility == nil {
 			break
@@ -900,12 +861,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Repo.Visibility(childComplexity), true
 
-	case "Secret.event":
-		if e.complexity.Secret.Event == nil {
+	case "Secret.events":
+		if e.complexity.Secret.Events == nil {
 			break
 		}
 
-		return e.complexity.Secret.Event(childComplexity), true
+		return e.complexity.Secret.Events(childComplexity), true
 
 	case "Secret.id":
 		if e.complexity.Secret.ID == nil {
@@ -914,12 +875,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.ID(childComplexity), true
 
-	case "Secret.image":
-		if e.complexity.Secret.Image == nil {
+	case "Secret.images":
+		if e.complexity.Secret.Images == nil {
 			break
 		}
 
-		return e.complexity.Secret.Image(childComplexity), true
+		return e.complexity.Secret.Images(childComplexity), true
 
 	case "Secret.name":
 		if e.complexity.Secret.Name == nil {
@@ -950,11 +911,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.User.Admin(childComplexity), true
 
 	case "User.avatar_url":
-		if e.complexity.User.AvatarURL == nil {
+		if e.complexity.User.Avatar == nil {
 			break
 		}
 
-		return e.complexity.User.AvatarURL(childComplexity), true
+		return e.complexity.User.Avatar(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -1001,7 +962,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			data := ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
+				return ec._Query(ctx, rc.Operation.SelectionSet), nil
+			})
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -1016,7 +979,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
+				return ec._Mutation(ctx, rc.Operation.SelectionSet), nil
+			})
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -1050,6 +1015,28 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/directives.graphqls", Input: `directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @goField(
+  forceResolver: Boolean
+  name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE
+
+directive @todo on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+directive @hasRole(
+  role: String!
+) on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+directive @isAuthenticated on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+`, BuiltIn: false},
 	{Name: "../schema/mutations.graphqls", Input: `input UpdateRepo {
   text: String!
   userId: String!
@@ -1081,31 +1068,37 @@ input UpdateRegistry {
 }
 
 type Mutation {
-  activateRepo(owner: String!, name: String!): Boolean!
-  updateRepo(input: UpdateRepo!): Repo!
-  deleteRepo(owner: String!, name: String!): Boolean!
-  repairRepo(owner: String!, name: String!): Boolean!
+  activateRepo(owner: String!, name: String!): Boolean! @todo
+  updateRepo(input: UpdateRepo!): Repo! @todo
+  deleteRepo(owner: String!, name: String!): Boolean! @todo
+  repairRepo(owner: String!, name: String!): Boolean! @todo
 
-  cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  approveBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  declineBuild(owner: String!, name: String!, buildId: Int!): Boolean!
-  restartBuild(owner: String!, name: String!, buildId: Int!): Boolean!
+  cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  approveBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  declineBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
+  restartBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
 
-  createSecret(owner: String!, name: String!, secret: NewSecret!): Secret!
+  createSecret(owner: String!, name: String!, secret: NewSecret!): Secret! @todo
   updateSecret(owner: String!, name: String!, secret: UpdateSecret!): Secret!
+    @todo
   deleteSecret(owner: String!, name: String!, secretName: String!): Boolean!
+    @todo
 
   createRegistry(
     owner: String!
     name: String!
     registry: NewRegistry!
-  ): Registry!
+  ): Registry! @todo
   updateRegistry(
     owner: String!
     name: String!
     registry: UpdateRegistry!
-  ): Registry!
-  deleteRegistry(owner: String!, name: String!, registryName: String!): Boolean!
+  ): Registry! @todo
+  deleteRegistry(
+    owner: String!
+    name: String!
+    registryName: String!
+  ): Boolean! @todo
 }
 `, BuiltIn: false},
 	{Name: "../schema/queries.graphqls", Input: `type Query {
@@ -1119,12 +1112,12 @@ type Mutation {
   event: String!
   status: String!
   error: String!
-  created_at: Int!
-  updated_at: Int!
-  enqueued_at: Int!
-  started_at: Int!
-  finished_at: Int!
-  deploy_to: String!
+  created_at: Int! @goField(name: "created")
+  updated_at: Int! @goField(name: "updated")
+  enqueued_at: Int! @goField(name: "enqueued")
+  started_at: Int! @goField(name: "started")
+  finished_at: Int! @goField(name: "finished")
+  deploy_to: String! @goField(name: "deploy")
   commit: String!
   branch: String!
   message: String!
@@ -1135,13 +1128,13 @@ type Mutation {
   title: String!
   sender: String!
   author: String!
-  author_avatar: String!
-  author_email: String!
-  link_url: String!
+  author_avatar: String! @goField(name: "avatar")
+  author_email: String! @goField(name: "email")
+  link_url: String! @goField(name: "link")
   signed: Boolean!
   verified: Boolean!
-  reviewed_by: String!
-  reviewed_at: Int!
+  reviewed_by: String! @goField(name: "reviewer")
+  reviewed_at: Int! @goField(name: "reviewed")
   procs: [Proc!]!
   changed_files: [String!]!
 }
@@ -1155,8 +1148,8 @@ type Mutation {
   state: String!
   exit_code: Int!
   environ: [String!]!
-  start_time: Int!
-  end_time: Int!
+  start_time: Int! @goField(name: "started")
+  end_time: Int! @goField(name: "started")
   machine: String!
   error: String!
   children: [Proc!]
@@ -1172,14 +1165,14 @@ type Mutation {
 	{Name: "../schema/types/repository.graphqls", Input: `# A version control repository.
 type Repo {
   # Is the repo currently active or not
-  active: Boolean!
+  active: Boolean! @goField(name: "is_active")
 
   # The unique identifier for the repository.
   id: Int!
 
   # The source control management being used.
   # Currently this is either 'git' or 'hg' (Mercurial).
-  scm: String!
+  scm: String! @goField(name: "SCMKind")
 
   # The owner of the repository.
   owner: String!
@@ -1192,42 +1185,42 @@ type Repo {
   full_name: String!
 
   # The url for the avatar image.
-  avatar_url: String!
+  avatar: String!
 
   # The link to view the repository.
-  link_url: String!
+  link: String!
 
   # The url used to clone the repository.
-  clone_url: String!
+  clone_url: String! @goField(name: "clone")
 
   # The default branch of the repository.
-  default_branch: String!
+  default_branch: String! @goField(name: "branch")
 
   # Whether the repository is publicly visible.
-  private: Boolean!
+  is_scm_private: Boolean!
 
   # Whether the repository has trusted access for builds.
   # If the repository is trusted then the host network can be used and
   # volumes can be created.
-  trusted: Boolean!
+  trusted: Boolean! @goField(name: "is_trusted")
 
   # x-dart-type: Duration
   # The amount of time in minutes before the build is killed.
   timeout: Int!
 
   # Whether pull requests should trigger a build.
-  allow_pr: Boolean!
+  allow_pr: Boolean! @goField(name: "allow_pull")
 
-  config_file: String!
+  config_file: String! @goField(name: "config")
 
   visibility: String!
 
-  last_build: Int!
-
-  gated: Boolean!
+  gated: Boolean! @goField(name: "is_gated")
 
   # Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: [String!]!
+
+  last_build: Int!
 
   # TODO: add builds
 
@@ -1239,18 +1232,18 @@ type Repo {
 }
 `, BuiltIn: false},
 	{Name: "../schema/types/secret.graphqls", Input: `type Secret {
-  id: String!
+  id: Int!
   name: String!
   value: String!
-  event: [String!]!
-  image: [String!]!
+  events: [String!]!
+  images: [String!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/types/user.graphqls", Input: `type User {
   id: ID!
   login: String!
   email: String!
-  avatar_url: String!
+  avatar_url: String! @goField(name: "avatar")
   admin: Boolean!
   active: Boolean!
 }
@@ -1261,6 +1254,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["role"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_activateRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1728,6 +1736,157 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    ************************** directives.gotpl **************************
 
+func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "hasRole":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_hasRole_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.HasRole == nil {
+					return nil, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, obj, n, args["role"].(string))
+			}
+		case "isAuthenticated":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.IsAuthenticated == nil {
+					return nil, errors.New("directive isAuthenticated is not implemented")
+				}
+				return ec.directives.IsAuthenticated(ctx, obj, n)
+			}
+		case "todo":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Todo == nil {
+					return nil, errors.New("directive todo is not implemented")
+				}
+				return ec.directives.Todo(ctx, obj, n)
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "hasRole":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_hasRole_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.HasRole == nil {
+					return nil, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, obj, n, args["role"].(string))
+			}
+		case "isAuthenticated":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.IsAuthenticated == nil {
+					return nil, errors.New("directive isAuthenticated is not implemented")
+				}
+				return ec.directives.IsAuthenticated(ctx, obj, n)
+			}
+		case "todo":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Todo == nil {
+					return nil, errors.New("directive todo is not implemented")
+				}
+				return ec.directives.Todo(ctx, obj, n)
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (interface{}, error)) func(ctx context.Context) graphql.Marshaler {
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "hasRole":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_hasRole_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return func(ctx context.Context) graphql.Marshaler {
+					return graphql.Null
+				}
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.HasRole == nil {
+					return nil, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, obj, n, args["role"].(string))
+			}
+		case "isAuthenticated":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.IsAuthenticated == nil {
+					return nil, errors.New("directive isAuthenticated is not implemented")
+				}
+				return ec.directives.IsAuthenticated(ctx, obj, n)
+			}
+		case "todo":
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.Todo == nil {
+					return nil, errors.New("directive todo is not implemented")
+				}
+				return ec.directives.Todo(ctx, obj, n)
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return func(ctx context.Context) graphql.Marshaler {
+			return graphql.Null
+		}
+	}
+	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
+		return data
+	}
+	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return func(ctx context.Context) graphql.Marshaler {
+		return graphql.Null
+	}
+}
+
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
@@ -2010,7 +2169,7 @@ func (ec *executionContext) _Build_created_at(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().CreatedAt(rctx, obj)
+		return obj.Created, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2022,17 +2181,17 @@ func (ec *executionContext) _Build_created_at(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_created_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -2054,7 +2213,7 @@ func (ec *executionContext) _Build_updated_at(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().UpdatedAt(rctx, obj)
+		return obj.Updated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2066,17 +2225,17 @@ func (ec *executionContext) _Build_updated_at(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_updated_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -2098,7 +2257,7 @@ func (ec *executionContext) _Build_enqueued_at(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().EnqueuedAt(rctx, obj)
+		return obj.Enqueued, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2110,17 +2269,17 @@ func (ec *executionContext) _Build_enqueued_at(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_enqueued_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -2142,7 +2301,7 @@ func (ec *executionContext) _Build_started_at(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().StartedAt(rctx, obj)
+		return obj.Started, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2154,17 +2313,17 @@ func (ec *executionContext) _Build_started_at(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_started_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -2186,7 +2345,7 @@ func (ec *executionContext) _Build_finished_at(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().FinishedAt(rctx, obj)
+		return obj.Finished, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2198,17 +2357,17 @@ func (ec *executionContext) _Build_finished_at(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_finished_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -2230,7 +2389,7 @@ func (ec *executionContext) _Build_deploy_to(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().DeployTo(rctx, obj)
+		return obj.Deploy, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2251,8 +2410,8 @@ func (ec *executionContext) fieldContext_Build_deploy_to(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -2714,7 +2873,7 @@ func (ec *executionContext) _Build_author_avatar(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().AuthorAvatar(rctx, obj)
+		return obj.Avatar, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2735,8 +2894,8 @@ func (ec *executionContext) fieldContext_Build_author_avatar(ctx context.Context
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -2758,7 +2917,7 @@ func (ec *executionContext) _Build_author_email(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().AuthorEmail(rctx, obj)
+		return obj.Email, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2779,8 +2938,8 @@ func (ec *executionContext) fieldContext_Build_author_email(ctx context.Context,
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -2802,7 +2961,7 @@ func (ec *executionContext) _Build_link_url(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().LinkURL(rctx, obj)
+		return obj.Link, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2823,8 +2982,8 @@ func (ec *executionContext) fieldContext_Build_link_url(ctx context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -2934,7 +3093,7 @@ func (ec *executionContext) _Build_reviewed_by(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().ReviewedBy(rctx, obj)
+		return obj.Reviewer, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2955,8 +3114,8 @@ func (ec *executionContext) fieldContext_Build_reviewed_by(ctx context.Context, 
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -2978,7 +3137,7 @@ func (ec *executionContext) _Build_reviewed_at(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Build().ReviewedAt(rctx, obj)
+		return obj.Reviewed, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2990,17 +3149,17 @@ func (ec *executionContext) _Build_reviewed_at(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Build_reviewed_at(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Build",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -3137,8 +3296,28 @@ func (ec *executionContext) _Mutation_activateRepo(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ActivateRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().ActivateRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3192,8 +3371,28 @@ func (ec *executionContext) _Mutation_updateRepo(ctx context.Context, field grap
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateRepo(rctx, fc.Args["input"].(model.UpdateRepo))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateRepo(rctx, fc.Args["input"].(model.UpdateRepo))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model1.Repo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/woodpecker-ci/woodpecker/server/model.Repo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3230,16 +3429,16 @@ func (ec *executionContext) fieldContext_Mutation_updateRepo(ctx context.Context
 				return ec.fieldContext_Repo_name(ctx, field)
 			case "full_name":
 				return ec.fieldContext_Repo_full_name(ctx, field)
-			case "avatar_url":
-				return ec.fieldContext_Repo_avatar_url(ctx, field)
-			case "link_url":
-				return ec.fieldContext_Repo_link_url(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Repo_avatar(ctx, field)
+			case "link":
+				return ec.fieldContext_Repo_link(ctx, field)
 			case "clone_url":
 				return ec.fieldContext_Repo_clone_url(ctx, field)
 			case "default_branch":
 				return ec.fieldContext_Repo_default_branch(ctx, field)
-			case "private":
-				return ec.fieldContext_Repo_private(ctx, field)
+			case "is_scm_private":
+				return ec.fieldContext_Repo_is_scm_private(ctx, field)
 			case "trusted":
 				return ec.fieldContext_Repo_trusted(ctx, field)
 			case "timeout":
@@ -3250,12 +3449,12 @@ func (ec *executionContext) fieldContext_Mutation_updateRepo(ctx context.Context
 				return ec.fieldContext_Repo_config_file(ctx, field)
 			case "visibility":
 				return ec.fieldContext_Repo_visibility(ctx, field)
-			case "last_build":
-				return ec.fieldContext_Repo_last_build(ctx, field)
 			case "gated":
 				return ec.fieldContext_Repo_gated(ctx, field)
 			case "cancel_previous_pipeline_events":
 				return ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+			case "last_build":
+				return ec.fieldContext_Repo_last_build(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Repo", field.Name)
 		},
@@ -3287,8 +3486,28 @@ func (ec *executionContext) _Mutation_deleteRepo(ctx context.Context, field grap
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3342,8 +3561,28 @@ func (ec *executionContext) _Mutation_repairRepo(ctx context.Context, field grap
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RepairRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().RepairRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3397,8 +3636,28 @@ func (ec *executionContext) _Mutation_cancelBuild(ctx context.Context, field gra
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CancelBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CancelBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3452,8 +3711,28 @@ func (ec *executionContext) _Mutation_approveBuild(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ApproveBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().ApproveBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3507,8 +3786,28 @@ func (ec *executionContext) _Mutation_declineBuild(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeclineBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeclineBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3562,8 +3861,28 @@ func (ec *executionContext) _Mutation_restartBuild(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RestartBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().RestartBuild(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["buildId"].(int))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3617,8 +3936,28 @@ func (ec *executionContext) _Mutation_createSecret(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secret"].(model.NewSecret))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secret"].(model.NewSecret))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model1.Secret); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/woodpecker-ci/woodpecker/server/model.Secret`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3649,10 +3988,10 @@ func (ec *executionContext) fieldContext_Mutation_createSecret(ctx context.Conte
 				return ec.fieldContext_Secret_name(ctx, field)
 			case "value":
 				return ec.fieldContext_Secret_value(ctx, field)
-			case "event":
-				return ec.fieldContext_Secret_event(ctx, field)
-			case "image":
-				return ec.fieldContext_Secret_image(ctx, field)
+			case "events":
+				return ec.fieldContext_Secret_events(ctx, field)
+			case "images":
+				return ec.fieldContext_Secret_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Secret", field.Name)
 		},
@@ -3684,8 +4023,28 @@ func (ec *executionContext) _Mutation_updateSecret(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secret"].(model.UpdateSecret))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secret"].(model.UpdateSecret))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model1.Secret); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/woodpecker-ci/woodpecker/server/model.Secret`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3716,10 +4075,10 @@ func (ec *executionContext) fieldContext_Mutation_updateSecret(ctx context.Conte
 				return ec.fieldContext_Secret_name(ctx, field)
 			case "value":
 				return ec.fieldContext_Secret_value(ctx, field)
-			case "event":
-				return ec.fieldContext_Secret_event(ctx, field)
-			case "image":
-				return ec.fieldContext_Secret_image(ctx, field)
+			case "events":
+				return ec.fieldContext_Secret_events(ctx, field)
+			case "images":
+				return ec.fieldContext_Secret_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Secret", field.Name)
 		},
@@ -3751,8 +4110,28 @@ func (ec *executionContext) _Mutation_deleteSecret(ctx context.Context, field gr
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secretName"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteSecret(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["secretName"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3806,8 +4185,28 @@ func (ec *executionContext) _Mutation_createRegistry(ctx context.Context, field 
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registry"].(model.NewRegistry))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registry"].(model.NewRegistry))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model1.Registry); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/woodpecker-ci/woodpecker/server/model.Registry`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3871,8 +4270,28 @@ func (ec *executionContext) _Mutation_updateRegistry(ctx context.Context, field 
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registry"].(model.UpdateRegistry))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registry"].(model.UpdateRegistry))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model1.Registry); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/woodpecker-ci/woodpecker/server/model.Registry`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3936,8 +4355,28 @@ func (ec *executionContext) _Mutation_deleteRegistry(ctx context.Context, field 
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registryName"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteRegistry(rctx, fc.Args["owner"].(string), fc.Args["name"].(string), fc.Args["registryName"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Todo == nil {
+				return nil, errors.New("directive todo is not implemented")
+			}
+			return ec.directives.Todo(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(bool); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4344,7 +4783,7 @@ func (ec *executionContext) _Proc_start_time(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Proc().StartTime(rctx, obj)
+		return obj.Started, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4356,17 +4795,17 @@ func (ec *executionContext) _Proc_start_time(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Proc_start_time(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Proc",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -4388,7 +4827,7 @@ func (ec *executionContext) _Proc_end_time(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Proc().EndTime(rctx, obj)
+		return obj.Started, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4400,17 +4839,17 @@ func (ec *executionContext) _Proc_end_time(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Proc_end_time(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Proc",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -4626,16 +5065,16 @@ func (ec *executionContext) fieldContext_Query_repository(ctx context.Context, f
 				return ec.fieldContext_Repo_name(ctx, field)
 			case "full_name":
 				return ec.fieldContext_Repo_full_name(ctx, field)
-			case "avatar_url":
-				return ec.fieldContext_Repo_avatar_url(ctx, field)
-			case "link_url":
-				return ec.fieldContext_Repo_link_url(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Repo_avatar(ctx, field)
+			case "link":
+				return ec.fieldContext_Repo_link(ctx, field)
 			case "clone_url":
 				return ec.fieldContext_Repo_clone_url(ctx, field)
 			case "default_branch":
 				return ec.fieldContext_Repo_default_branch(ctx, field)
-			case "private":
-				return ec.fieldContext_Repo_private(ctx, field)
+			case "is_scm_private":
+				return ec.fieldContext_Repo_is_scm_private(ctx, field)
 			case "trusted":
 				return ec.fieldContext_Repo_trusted(ctx, field)
 			case "timeout":
@@ -4646,12 +5085,12 @@ func (ec *executionContext) fieldContext_Query_repository(ctx context.Context, f
 				return ec.fieldContext_Repo_config_file(ctx, field)
 			case "visibility":
 				return ec.fieldContext_Repo_visibility(ctx, field)
-			case "last_build":
-				return ec.fieldContext_Repo_last_build(ctx, field)
 			case "gated":
 				return ec.fieldContext_Repo_gated(ctx, field)
 			case "cancel_previous_pipeline_events":
 				return ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+			case "last_build":
+				return ec.fieldContext_Repo_last_build(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Repo", field.Name)
 		},
@@ -4978,7 +5417,7 @@ func (ec *executionContext) _Repo_active(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Active(rctx, obj)
+		return obj.IsActive, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4999,8 +5438,8 @@ func (ec *executionContext) fieldContext_Repo_active(ctx context.Context, field 
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -5066,7 +5505,7 @@ func (ec *executionContext) _Repo_scm(ctx context.Context, field graphql.Collect
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Scm(rctx, obj)
+		return ec.resolvers.Repo().SCMKind(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5228,8 +5667,8 @@ func (ec *executionContext) fieldContext_Repo_full_name(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_avatar_url(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_avatar_url(ctx, field)
+func (ec *executionContext) _Repo_avatar(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repo_avatar(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5242,7 +5681,7 @@ func (ec *executionContext) _Repo_avatar_url(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().AvatarURL(rctx, obj)
+		return obj.Avatar, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5259,12 +5698,12 @@ func (ec *executionContext) _Repo_avatar_url(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_avatar_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repo_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5272,8 +5711,8 @@ func (ec *executionContext) fieldContext_Repo_avatar_url(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_link_url(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_link_url(ctx, field)
+func (ec *executionContext) _Repo_link(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repo_link(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5286,7 +5725,7 @@ func (ec *executionContext) _Repo_link_url(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().LinkURL(rctx, obj)
+		return obj.Link, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5303,12 +5742,12 @@ func (ec *executionContext) _Repo_link_url(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_link_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repo_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5330,7 +5769,7 @@ func (ec *executionContext) _Repo_clone_url(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().CloneURL(rctx, obj)
+		return obj.Clone, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5351,8 +5790,8 @@ func (ec *executionContext) fieldContext_Repo_clone_url(ctx context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5374,7 +5813,7 @@ func (ec *executionContext) _Repo_default_branch(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().DefaultBranch(rctx, obj)
+		return obj.Branch, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5395,8 +5834,8 @@ func (ec *executionContext) fieldContext_Repo_default_branch(ctx context.Context
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5404,8 +5843,8 @@ func (ec *executionContext) fieldContext_Repo_default_branch(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_private(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_private(ctx, field)
+func (ec *executionContext) _Repo_is_scm_private(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repo_is_scm_private(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5418,7 +5857,7 @@ func (ec *executionContext) _Repo_private(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Private(rctx, obj)
+		return obj.IsSCMPrivate, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5435,12 +5874,12 @@ func (ec *executionContext) _Repo_private(ctx context.Context, field graphql.Col
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_private(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repo_is_scm_private(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -5462,7 +5901,7 @@ func (ec *executionContext) _Repo_trusted(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Trusted(rctx, obj)
+		return obj.IsTrusted, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5483,8 +5922,8 @@ func (ec *executionContext) fieldContext_Repo_trusted(ctx context.Context, field
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -5550,7 +5989,7 @@ func (ec *executionContext) _Repo_allow_pr(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().AllowPr(rctx, obj)
+		return obj.AllowPull, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5571,8 +6010,8 @@ func (ec *executionContext) fieldContext_Repo_allow_pr(ctx context.Context, fiel
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -5594,7 +6033,7 @@ func (ec *executionContext) _Repo_config_file(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().ConfigFile(rctx, obj)
+		return obj.Config, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5615,8 +6054,8 @@ func (ec *executionContext) fieldContext_Repo_config_file(ctx context.Context, f
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -5656,6 +6095,94 @@ func (ec *executionContext) _Repo_visibility(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Repo_visibility(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Repo",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Repo_gated(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repo_gated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsGated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Repo_gated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Repo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Repo().CancelPreviousPipelineEvents(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Repo",
 		Field:      field,
@@ -5712,94 +6239,6 @@ func (ec *executionContext) fieldContext_Repo_last_build(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_gated(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_gated(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Gated(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Repo_gated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Repo",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().CancelPreviousPipelineEvents(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Repo",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Secret_id(ctx context.Context, field graphql.CollectedField, obj *model1.Secret) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Secret_id(ctx, field)
 	if err != nil {
@@ -5814,7 +6253,7 @@ func (ec *executionContext) _Secret_id(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Secret().ID(rctx, obj)
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5826,19 +6265,19 @@ func (ec *executionContext) _Secret_id(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Secret_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Secret",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5932,8 +6371,8 @@ func (ec *executionContext) fieldContext_Secret_value(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Secret_event(ctx context.Context, field graphql.CollectedField, obj *model1.Secret) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Secret_event(ctx, field)
+func (ec *executionContext) _Secret_events(ctx context.Context, field graphql.CollectedField, obj *model1.Secret) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Secret_events(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5946,7 +6385,7 @@ func (ec *executionContext) _Secret_event(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Secret().Event(rctx, obj)
+		return ec.resolvers.Secret().Events(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5963,7 +6402,7 @@ func (ec *executionContext) _Secret_event(ctx context.Context, field graphql.Col
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Secret_event(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Secret_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Secret",
 		Field:      field,
@@ -5976,8 +6415,8 @@ func (ec *executionContext) fieldContext_Secret_event(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Secret_image(ctx context.Context, field graphql.CollectedField, obj *model1.Secret) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Secret_image(ctx, field)
+func (ec *executionContext) _Secret_images(ctx context.Context, field graphql.CollectedField, obj *model1.Secret) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Secret_images(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5990,7 +6429,7 @@ func (ec *executionContext) _Secret_image(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Secret().Image(rctx, obj)
+		return obj.Images, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6007,12 +6446,12 @@ func (ec *executionContext) _Secret_image(ctx context.Context, field graphql.Col
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Secret_image(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Secret_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Secret",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -6166,7 +6605,7 @@ func (ec *executionContext) _User_avatar_url(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().AvatarURL(rctx, obj)
+		return obj.Avatar, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6187,8 +6626,8 @@ func (ec *executionContext) fieldContext_User_avatar_url(ctx context.Context, fi
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -8339,125 +8778,47 @@ func (ec *executionContext) _Build(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "created_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_created_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_created_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "updated_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_updated_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_updated_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "enqueued_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_enqueued_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_enqueued_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "started_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_started_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_started_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "finished_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_finished_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_finished_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "deploy_to":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_deploy_to(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_deploy_to(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "commit":
 
 			out.Values[i] = ec._Build_commit(ctx, field, obj)
@@ -8529,65 +8890,26 @@ func (ec *executionContext) _Build(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "author_avatar":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_author_avatar(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_author_avatar(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "author_email":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_author_email(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_author_email(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "link_url":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_link_url(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_link_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "signed":
 
 			out.Values[i] = ec._Build_signed(ctx, field, obj)
@@ -8603,45 +8925,19 @@ func (ec *executionContext) _Build(ctx context.Context, sel ast.SelectionSet, ob
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "reviewed_by":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_reviewed_by(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_reviewed_by(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "reviewed_at":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Build_reviewed_at(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Build_reviewed_at(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "procs":
 
 			out.Values[i] = ec._Build_procs(ctx, field, obj)
@@ -8916,45 +9212,19 @@ func (ec *executionContext) _Proc(ctx context.Context, sel ast.SelectionSet, obj
 
 			})
 		case "start_time":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Proc_start_time(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Proc_start_time(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "end_time":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Proc_end_time(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Proc_end_time(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "machine":
 
 			out.Values[i] = ec._Proc_machine(ctx, field, obj)
@@ -9109,25 +9379,12 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Repo")
 		case "active":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_active(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_active(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "id":
 
 			out.Values[i] = ec._Repo_id(ctx, field, obj)
@@ -9176,126 +9433,48 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "avatar_url":
-			field := field
+		case "avatar":
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_avatar_url(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_avatar(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "link":
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
+			out.Values[i] = ec._Repo_link(ctx, field, obj)
 
-			})
-		case "link_url":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_link_url(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "clone_url":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_clone_url(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_clone_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "default_branch":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_default_branch(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_default_branch(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "is_scm_private":
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
+			out.Values[i] = ec._Repo_is_scm_private(ctx, field, obj)
 
-			})
-		case "private":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_private(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "trusted":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_trusted(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_trusted(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "timeout":
 
 			out.Values[i] = ec._Repo_timeout(ctx, field, obj)
@@ -9304,45 +9483,19 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "allow_pr":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_allow_pr(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_allow_pr(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "config_file":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_config_file(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_config_file(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "visibility":
 			field := field
 
@@ -9363,46 +9516,13 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
-		case "last_build":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_last_build(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "gated":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repo_gated(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Repo_gated(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "cancel_previous_pipeline_events":
 			field := field
 
@@ -9413,6 +9533,26 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._Repo_cancel_previous_pipeline_events(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "last_build":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Repo_last_build(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9445,25 +9585,12 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Secret")
 		case "id":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Secret_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Secret_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "name":
 
 			out.Values[i] = ec._Secret_name(ctx, field, obj)
@@ -9478,7 +9605,7 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "event":
+		case "events":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -9487,7 +9614,7 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Secret_event(ctx, field, obj)
+				res = ec._Secret_events(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9498,26 +9625,13 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 				return innerFunc(ctx)
 
 			})
-		case "image":
-			field := field
+		case "images":
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Secret_image(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._Secret_images(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9544,55 +9658,42 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "login":
 
 			out.Values[i] = ec._User_login(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "email":
 
 			out.Values[i] = ec._User_email(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "avatar_url":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_avatar_url(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._User_avatar_url(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
 			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "admin":
 
 			out.Values[i] = ec._User_admin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "active":
 
 			out.Values[i] = ec._User_active(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -10511,6 +10612,44 @@ func (ec *executionContext) marshalOProc2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
 
 	for _, e := range ret {
 		if e == graphql.Null {

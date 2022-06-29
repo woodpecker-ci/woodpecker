@@ -19,14 +19,6 @@ func (r *procResolver) Environ(ctx context.Context, obj *model.Proc) ([]string, 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *procResolver) StartTime(ctx context.Context, obj *model.Proc) (int, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *procResolver) EndTime(ctx context.Context, obj *model.Proc) (int, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 // Proc returns generated.ProcResolver implementation.
 func (r *Resolver) Proc() generated.ProcResolver { return &procResolver{r} }
 

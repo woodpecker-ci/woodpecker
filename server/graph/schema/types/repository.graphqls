@@ -1,14 +1,14 @@
 # A version control repository.
 type Repo {
   # Is the repo currently active or not
-  active: Boolean!
+  active: Boolean! @goField(name: "is_active")
 
   # The unique identifier for the repository.
   id: Int!
 
   # The source control management being used.
   # Currently this is either 'git' or 'hg' (Mercurial).
-  scm: String!
+  scm: String! @goField(name: "SCMKind")
 
   # The owner of the repository.
   owner: String!
@@ -21,42 +21,42 @@ type Repo {
   full_name: String!
 
   # The url for the avatar image.
-  avatar_url: String!
+  avatar: String!
 
   # The link to view the repository.
-  link_url: String!
+  link: String!
 
   # The url used to clone the repository.
-  clone_url: String!
+  clone_url: String! @goField(name: "clone")
 
   # The default branch of the repository.
-  default_branch: String!
+  default_branch: String! @goField(name: "branch")
 
   # Whether the repository is publicly visible.
-  private: Boolean!
+  is_scm_private: Boolean!
 
   # Whether the repository has trusted access for builds.
   # If the repository is trusted then the host network can be used and
   # volumes can be created.
-  trusted: Boolean!
+  trusted: Boolean! @goField(name: "is_trusted")
 
   # x-dart-type: Duration
   # The amount of time in minutes before the build is killed.
   timeout: Int!
 
   # Whether pull requests should trigger a build.
-  allow_pr: Boolean!
+  allow_pr: Boolean! @goField(name: "allow_pull")
 
-  config_file: String!
+  config_file: String! @goField(name: "config")
 
   visibility: String!
 
-  last_build: Int!
-
-  gated: Boolean!
+  gated: Boolean! @goField(name: "is_gated")
 
   # Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: [String!]!
+
+  last_build: Int!
 
   # TODO: add builds
 

@@ -2,7 +2,7 @@ type User {
   id: ID!
   login: String!
   email: String!
-  avatar_url: String!
+  avatar_url: String! @goField(name: "avatar")
   admin: Boolean!
   active: Boolean!
 }

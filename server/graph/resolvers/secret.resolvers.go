@@ -11,15 +11,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (r *secretResolver) ID(ctx context.Context, obj *model.Secret) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *secretResolver) Event(ctx context.Context, obj *model.Secret) ([]string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *secretResolver) Image(ctx context.Context, obj *model.Secret) ([]string, error) {
+func (r *secretResolver) Events(ctx context.Context, obj *model.Secret) ([]string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

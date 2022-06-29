@@ -1,0 +1,23 @@
+directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @goField(
+  forceResolver: Boolean
+  name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+directive @deprecated(
+  reason: String = "No longer supported"
+) on FIELD_DEFINITION | ENUM_VALUE
+
+directive @todo on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+directive @hasRole(
+  role: String!
+) on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+directive @isAuthenticated on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+# instance admin, repo admin, repo user, authenticated, unauthenticated

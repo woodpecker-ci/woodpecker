@@ -5,12 +5,12 @@ type Build {
   event: String!
   status: String!
   error: String!
-  created_at: Int!
-  updated_at: Int!
-  enqueued_at: Int!
-  started_at: Int!
-  finished_at: Int!
-  deploy_to: String!
+  created_at: Int! @goField(name: "created")
+  updated_at: Int! @goField(name: "updated")
+  enqueued_at: Int! @goField(name: "enqueued")
+  started_at: Int! @goField(name: "started")
+  finished_at: Int! @goField(name: "finished")
+  deploy_to: String! @goField(name: "deploy")
   commit: String!
   branch: String!
   message: String!
@@ -21,13 +21,13 @@ type Build {
   title: String!
   sender: String!
   author: String!
-  author_avatar: String!
-  author_email: String!
-  link_url: String!
+  author_avatar: String! @goField(name: "avatar")
+  author_email: String! @goField(name: "email")
+  link_url: String! @goField(name: "link")
   signed: Boolean!
   verified: Boolean!
-  reviewed_by: String!
-  reviewed_at: Int!
+  reviewed_by: String! @goField(name: "reviewer")
+  reviewed_at: Int! @goField(name: "reviewed")
   procs: [Proc!]!
   changed_files: [String!]!
 }

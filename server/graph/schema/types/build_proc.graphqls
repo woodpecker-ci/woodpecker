@@ -7,8 +7,8 @@ type Proc {
   state: String!
   exit_code: Int!
   environ: [String!]!
-  start_time: Int!
-  end_time: Int!
+  start_time: Int! @goField(name: "started")
+  end_time: Int! @goField(name: "started")
   machine: String!
   error: String!
   children: [Proc!]
