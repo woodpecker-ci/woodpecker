@@ -18,7 +18,7 @@ type filesystem struct {
 	path string
 }
 
-func NewFilesystem(path string) model.ReadOnlyRegistryService {
+func NewFilesystem(path string) ReadOnlyRegistryExtension {
 	return &filesystem{path}
 }
 

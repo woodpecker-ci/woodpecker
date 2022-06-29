@@ -21,9 +21,11 @@ import (
 	"crypto"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/extensions/config"
+	registryExtension "github.com/woodpecker-ci/woodpecker/server/extensions/registry"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/secrets"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -37,8 +39,8 @@ var Config = struct {
 		Remote remote.Remote
 	}
 	Extensions struct {
-		Secrets             model.SecretService
-		Registries          model.RegistryService
+		Secrets             secrets.SecretExtension
+		Registries          registryExtension.RegistryExtension
 		Environ             model.EnvironService
 		Config              config.Extension
 		SignaturePrivateKey crypto.PrivateKey

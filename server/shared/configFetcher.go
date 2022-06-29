@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/config"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"

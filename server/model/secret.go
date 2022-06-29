@@ -16,7 +16,6 @@
 package model
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -28,15 +27,6 @@ var (
 	errSecretValueInvalid = errors.New("Invalid Secret Value")
 	errSecretEventInvalid = errors.New("Invalid Secret Event")
 )
-
-// SecretService defines a service for managing secrets.
-type SecretService interface {
-	SecretFind(context.Context, *Repo, string) (*Secret, error)
-	SecretList(context.Context, *Repo) ([]*Secret, error)
-	SecretCreate(context.Context, *Repo, *Secret) error
-	SecretUpdate(context.Context, *Repo, *Secret) error
-	SecretDelete(context.Context, *Repo, string) error
-}
 
 // SecretStore persists secret information to storage.
 type SecretStore interface {

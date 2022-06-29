@@ -7,8 +7,8 @@ import (
 	"crypto/rand"
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/server/extensions/utils"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
 )
 
 type http struct {
@@ -17,11 +17,15 @@ type http struct {
 }
 
 // New returns a new local secret service.
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) model.SecretService {
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) SecretExtension {
 	return &http{endpoint, privateKey}
 }
 
-func FromRepo(repo *model.Repo) model.SecretService {
+func FromRepo(repo *model.Repo) SecretExtension {
+	if repo.SecretEndpoint == "" {
+		return nil
+	}
+
 	// TODO: create & use global server key
 	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {

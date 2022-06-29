@@ -33,10 +33,10 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/environments"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/registry"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/secrets"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket"
@@ -162,11 +162,11 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
+func setupSecretService(c *cli.Context, s store.Store) secrets.SecretExtension {
 	return secrets.NewBuiltin(s)
 }
 
-func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
+func setupRegistryService(c *cli.Context, s store.Store) registry.RegistryExtension {
 	if c.String("docker-config") != "" {
 		return registry.NewCombined(
 			registry.NewBuiltin(s),

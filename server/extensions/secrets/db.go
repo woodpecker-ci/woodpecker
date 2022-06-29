@@ -11,7 +11,7 @@ type db struct {
 }
 
 // New returns a new local secret service.
-func NewBuiltin(store model.SecretStore) model.SecretService {
+func NewBuiltin(store model.SecretStore) SecretExtension {
 	return &db{store}
 }
 

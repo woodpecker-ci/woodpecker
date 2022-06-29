@@ -50,13 +50,13 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 	}
 
 	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
+	if server.Config.Extensions.Config != nil && server.Config.Extensions.Config.IsConfigured() {
 		currentFileMeta := make([]*remote.FileMeta, len(configs))
 		for i, cfg := range configs {
 			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastBuild, currentFileMeta)
+		newConfig, useOld, err := server.Config.Extensions.Config.FetchConfig(ctx, repo, lastBuild, currentFileMeta)
 		if err != nil {
 			return nil, ErrBadRequest{
 				Msg: fmt.Sprintf("On fetching external build config: %s", err),

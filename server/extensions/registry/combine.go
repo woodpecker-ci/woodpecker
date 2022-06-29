@@ -7,11 +7,11 @@ import (
 )
 
 type combined struct {
-	registries   []model.ReadOnlyRegistryService
-	mainRegistry model.RegistryService
+	registries   []ReadOnlyRegistryExtension
+	mainRegistry RegistryExtension
 }
 
-func NewCombined(mainRegistry model.RegistryService, registries ...model.ReadOnlyRegistryService) model.RegistryService {
+func NewCombined(mainRegistry RegistryExtension, registries ...ReadOnlyRegistryExtension) RegistryExtension {
 	registries = append(registries, mainRegistry)
 	return &combined{
 		registries:   registries,

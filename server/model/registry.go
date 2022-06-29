@@ -16,7 +16,6 @@
 package model
 
 import (
-	"context"
 	"errors"
 	"net/url"
 )
@@ -26,21 +25,6 @@ var (
 	errRegistryUsernameInvalid = errors.New("Invalid Registry Username")
 	errRegistryPasswordInvalid = errors.New("Invalid Registry Password")
 )
-
-// RegistryService defines a service for managing registries.
-type RegistryService interface {
-	RegistryFind(context.Context, *Repo, string) (*Registry, error)
-	RegistryList(context.Context, *Repo) ([]*Registry, error)
-	RegistryCreate(context.Context, *Repo, *Registry) error
-	RegistryUpdate(context.Context, *Repo, *Registry) error
-	RegistryDelete(context.Context, *Repo, string) error
-}
-
-// ReadOnlyRegistryService defines a service for managing registries.
-type ReadOnlyRegistryService interface {
-	RegistryFind(context.Context, *Repo, string) (*Registry, error)
-	RegistryList(context.Context, *Repo) ([]*Registry, error)
-}
 
 // RegistryStore persists registry information to storage.
 type RegistryStore interface {
