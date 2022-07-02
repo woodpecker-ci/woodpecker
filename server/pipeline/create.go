@@ -23,7 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -52,8 +51,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	}
 
 	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Extensions.Config, repoUser, repo, build)
-	remoteYamlConfigs, err := configFetcher.Fetch(ctx)
+	remoteYamlConfigs, err := server.Config.Extensions.Config().FetchConfig(ctx, repoUser, repo, build)
 	if err != nil {
 		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
 		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)

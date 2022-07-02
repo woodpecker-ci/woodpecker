@@ -25,7 +25,7 @@ import (
 )
 
 func GetSignaturePublicKey(c *gin.Context) {
-	b, err := x509.MarshalPKIXPublicKey(server.Config.Extensions.SignaturePublicKey)
+	b, err := x509.MarshalPKIXPublicKey(server.Config.Extensions.SignaturePublicKey())
 	if err != nil {
 		log.Error().Err(err).Msg("can't marshal public key")
 		c.AbortWithStatus(http.StatusInternalServerError)

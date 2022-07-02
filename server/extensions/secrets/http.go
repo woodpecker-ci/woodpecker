@@ -3,8 +3,6 @@ package secrets
 import (
 	"context"
 	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/extensions/utils"
@@ -19,20 +17,6 @@ type http struct {
 // New returns a new local secret service.
 func NewHTTP(endpoint string, privateKey crypto.PrivateKey) SecretExtension {
 	return &http{endpoint, privateKey}
-}
-
-func FromRepo(repo *model.Repo) SecretExtension {
-	if repo.SecretEndpoint == "" {
-		return nil
-	}
-
-	// TODO: create & use global server key
-	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		panic(err)
-	}
-
-	return NewHTTP(repo.SecretEndpoint, privEd25519Key)
 }
 
 func (b *http) SecretFind(ctx context.Context, repo *model.Repo, name string) (secret *model.Secret, err error) {

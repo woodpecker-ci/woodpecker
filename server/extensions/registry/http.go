@@ -3,8 +3,6 @@ package registry
 import (
 	"context"
 	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/extensions/utils"
@@ -19,20 +17,6 @@ type http struct {
 // New returns a new local secret service.
 func NewHTTP(endpoint string, privateKey crypto.PrivateKey) RegistryExtension {
 	return &http{endpoint, privateKey}
-}
-
-func FromRepo(repo *model.Repo) RegistryExtension {
-	if repo.RegistryEndpoint == "" {
-		return nil
-	}
-
-	// TODO: create & use global server key
-	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		panic(err)
-	}
-
-	return NewHTTP(repo.RegistryEndpoint, privEd25519Key)
 }
 
 func (b *http) RegistryFind(ctx context.Context, repo *model.Repo, name string) (registry *model.Registry, err error) {

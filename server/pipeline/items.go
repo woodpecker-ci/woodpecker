@@ -41,12 +41,12 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	}
 
 	// TODO: only get secrets for build
-	secs, err := server.Config.Extensions.Secrets.SecretList(ctx, repo)
+	secs, err := server.Config.Extensions.SecretsFromRepo(repo).SecretList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
 	}
 
-	regs, err := server.Config.Extensions.Registries.RegistryList(ctx, repo)
+	regs, err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryList(ctx, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
 	}
@@ -54,8 +54,8 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	if envs == nil {
 		envs = map[string]string{}
 	}
-	if server.Config.Extensions.Environ != nil {
-		globals, _ := server.Config.Extensions.Environ.EnvironList(repo)
+	if server.Config.Extensions.Environ() != nil {
+		globals, _ := server.Config.Extensions.Environ().EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}

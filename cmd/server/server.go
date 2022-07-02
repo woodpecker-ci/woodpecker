@@ -39,7 +39,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/extensions/config"
+	"github.com/woodpecker-ci/woodpecker/server/extensions"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -263,15 +263,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
-	server.Config.Extensions.Registries = setupRegistryService(c, v)
-	server.Config.Extensions.Secrets = setupSecretService(c, v)
-	server.Config.Extensions.Environ = setupEnvironService(c, v)
 
-	server.Config.Extensions.SignaturePrivateKey, server.Config.Extensions.SignaturePublicKey = setupSignatureKeys(v)
-
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Extensions.Config = config.NewHTTP(endpoint, server.Config.Extensions.SignaturePrivateKey)
-	}
+	// extensions
+	server.Config.Extensions = extensions.NewManager(v, r, c)
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

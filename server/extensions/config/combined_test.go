@@ -1,4 +1,4 @@
-package shared_test
+package config_test
 
 import (
 	"context"
@@ -16,14 +16,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/woodpecker-ci/woodpecker/server/extensions/config"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
-
-// TODO(974) move to new package
 
 func TestFetch(t *testing.T) {
 	t.Parallel()
@@ -245,14 +242,8 @@ func TestFetch(t *testing.T) {
 			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
-				r,
-				config.NewHTTP("", ""),
-				&model.User{Token: "xxx"},
-				repo,
-				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-			)
-			files, err := configFetcher.Fetch(context.Background())
+			configFetcher := config.NewCombined(r, "", nil)
+			files, err := configFetcher.FetchConfig(context.Background(), &model.User{Token: "xxx"}, repo, &model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"})
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {
@@ -423,7 +414,6 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := config.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
@@ -450,14 +440,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
-				r,
-				configAPI,
-				&model.User{Token: "xxx"},
-				repo,
-				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-			)
-			files, err := configFetcher.Fetch(context.Background())
+			configFetcher := config.NewCombined(r, ts.URL, privEd25519Key)
+			files, err := configFetcher.FetchConfig(context.Background(), &model.User{Token: "xxx"}, repo, &model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"})
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {

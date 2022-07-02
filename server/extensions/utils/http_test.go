@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-ap/httpsig"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/utils"
 )
 
 func TestSign(t *testing.T) {

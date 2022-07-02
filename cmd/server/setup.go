@@ -16,10 +16,6 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"net/url"
 	"os"
@@ -33,10 +29,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/extensions/environments"
-	"github.com/woodpecker-ci/woodpecker/server/extensions/registry"
-	"github.com/woodpecker-ci/woodpecker/server/extensions/secrets"
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket"
@@ -160,24 +152,6 @@ func fallbackSqlite3File(path string) (string, error) {
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
-}
-
-func setupSecretService(c *cli.Context, s store.Store) secrets.SecretExtension {
-	return secrets.NewBuiltin(s)
-}
-
-func setupRegistryService(c *cli.Context, s store.Store) registry.RegistryExtension {
-	if c.String("docker-config") != "" {
-		return registry.NewCombined(
-			registry.NewBuiltin(s),
-			registry.NewFilesystem(c.String("docker-config")),
-		)
-	}
-	return registry.NewBuiltin(s)
-}
-
-func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return environments.Parse(c.StringSlice("environment"))
 }
 
 // setupRemote helper function to setup the remote from the CLI arguments.
@@ -355,36 +329,4 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
-}
-
-// generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
-	if err != nil && err == datastore.RecordNotExist {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
-		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
-		}
-		log.Info().Msg("Created private key")
-		return privKey, privKey.Public()
-	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load private key")
-		return nil, nil
-	} else {
-		privKeyStr, err := hex.DecodeString(privKey)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to decode private key")
-			return nil, nil
-		}
-		privKey := ed25519.PrivateKey(privKeyStr)
-		return privKey, privKey.Public()
-	}
 }
