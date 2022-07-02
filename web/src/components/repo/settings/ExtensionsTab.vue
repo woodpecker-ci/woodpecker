@@ -1,11 +1,11 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-gray-500">{{ $t('repo.settings.extensions.extensions') }}</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.extensions.extensions') }}</h1>
     </div>
 
     <div>
-      <span class="text-gray-400 font-bold">{{ $t('repo.settings.extensions.signatures_public_key') }}</span>
+      <span class="text-color font-bold">{{ $t('repo.settings.extensions.signatures_public_key') }}</span>
       <div class="token-box mt-2">{{ signaturePublicKey }}</div>
     </div>
 
