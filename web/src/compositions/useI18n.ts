@@ -3,8 +3,10 @@
 import messages from '@intlify/vite-plugin-vue-i18n/messages';
 import { createI18n } from 'vue-i18n';
 
+import { getUserLanguage } from '~/utils/locale';
+
 export const i18n = createI18n({
-  locale: navigator.language.split('-')[0],
+  locale: getUserLanguage(),
   legacy: false,
   globalInjection: true,
   fallbackLocale: 'en',
