@@ -57,6 +57,15 @@ export type Repo = {
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
+
+  // Endpoint for secrets extensions
+  secret_endpoint: string;
+
+  // Endpoint for registries extensions
+  registry_endpoint: string;
+
+  // Endpoint for config extensions
+  config_endpoint: string;
 };
 
 export enum RepoVisibility {
@@ -65,9 +74,20 @@ export enum RepoVisibility {
   Internal = 'internal',
 }
 
-export type RepoSettings = Pick<
-  Repo,
-  'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr' | 'cancel_previous_pipeline_events'
+export type RepoSettings = Partial<
+  Pick<
+    Repo,
+    | 'config_file'
+    | 'timeout'
+    | 'visibility'
+    | 'trusted'
+    | 'gated'
+    | 'allow_pr'
+    | 'cancel_previous_pipeline_events'
+    | 'config_endpoint'
+    | 'secret_endpoint'
+    | 'registry_endpoint'
+  >
 >;
 
 export type RepoPermissions = {

@@ -101,4 +101,7 @@ type RepoPatch struct {
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
+	ConfigEndpoint               *string         `json:"config_endpoint,omitempty"`
+	SecretEndpoint               *string         `json:"secret_endpoint,omitempty"`
+	RegistryEndpoint             *string         `json:"registry_endpoint,omitempty"`
 }

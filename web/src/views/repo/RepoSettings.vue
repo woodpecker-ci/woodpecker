@@ -28,8 +28,8 @@
   </FluidContainer>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, onMounted, Ref } from 'vue';
+<script lang="ts" setup>
+import { inject, onMounted, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -47,42 +47,21 @@ import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { RepoPermissions } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'RepoSettings',
+const notifications = useNotifications();
+const router = useRouter();
+const i18n = useI18n();
 
-  components: {
-    FluidContainer,
-    IconButton,
-    Tabs,
-    Tab,
-    GeneralTab,
-    SecretsTab,
-    RegistriesTab,
-    ActionsTab,
-    BadgeTab,
-    ExtensionsTab,
-  },
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+if (!repoPermissions) {
+  throw new Error('Unexpected: "repoPermissions" should be provided at this place');
+}
 
-  setup() {
-    const notifications = useNotifications();
-    const router = useRouter();
-    const i18n = useI18n();
-
-    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-    if (!repoPermissions) {
-      throw new Error('Unexpected: "repoPermissions" should be provided at this place');
-    }
-
-    onMounted(async () => {
-      if (!repoPermissions.value.admin) {
-        notifications.notify({ type: 'error', title: i18n.t('repo.settings.not_allowed') });
-        await router.replace({ name: 'home' });
-      }
-    });
-
-    return {
-      goBack: useRouteBackOrDefault({ name: 'repo' }),
-    };
-  },
+onMounted(async () => {
+  if (!repoPermissions.value.admin) {
+    notifications.notify({ type: 'error', title: i18n.t('repo.settings.not_allowed') });
+    await router.replace({ name: 'home' });
+  }
 });
+
+const goBack = useRouteBackOrDefault({ name: 'repo' });
 </script>

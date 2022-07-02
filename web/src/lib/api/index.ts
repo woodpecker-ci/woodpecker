@@ -143,6 +143,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
+  getSignaturePublicKey(): Promise<string> {
+    return this._get('/api/signature/public-key') as Promise<string>;
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { build?: Build; repo?: Repo; proc?: BuildProc }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {

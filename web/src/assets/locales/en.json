@@ -164,7 +164,19 @@
       },
 
       "extensions": {
-        "extensions": "Extensions"
+        "extensions": "Extensions",
+        "extensions_desc": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+        "secrets_endpoint": "Secrets extension endpoint",
+        "secrets_endpoint_placeholder": "e.g. https://my.secret.service/api/v1/secrets",
+        "registries_endpoint": "Registries extension endpoint",
+        "registries_endpoint_placeholder": "e.g. https://my.registry.service/api/v1/registries",
+        "config_endpoint": "Config extension endpoint",
+        "config_endpoint_placeholder": "e.g. https://my.config.service/api/v1/config",
+        "config_endpoint_desc": "This endpoint is used to post-process pipeline configs retrieved from the repository.",
+        "save_extensions": "Save extensions configuration",
+        "signatures_public_key": "Public key for signatures",
+        "signatures_public_key_desc": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+        "success": "Extensions configuration saved"
       }
     },
 
