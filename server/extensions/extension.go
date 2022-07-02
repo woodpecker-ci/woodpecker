@@ -11,7 +11,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/extensions/config"
 	"github.com/woodpecker-ci/woodpecker/server/extensions/environments"
 	"github.com/woodpecker-ci/woodpecker/server/extensions/registry"
-	"github.com/woodpecker-ci/woodpecker/server/extensions/secrets"
+	"github.com/woodpecker-ci/woodpecker/server/extensions/secret"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -19,10 +19,10 @@ import (
 )
 
 type Manager struct {
-	secrets             secrets.SecretExtension
+	secrets             secret.SecretExtension
 	registries          registry.RegistryExtension
 	config              config.Extension
-	environ             model.EnvironService
+	environ             environments.EnvironExtension
 	signaturePrivateKey crypto.PrivateKey
 	signaturePublicKey  crypto.PublicKey
 }
@@ -33,7 +33,7 @@ func NewManager(store store.Store, remote remote.Remote, c *cli.Context) *Manage
 	return &Manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
-		secrets:             secrets.NewBuiltin(store),
+		secrets:             secret.NewBuiltin(store),
 		registries:          setupRegistryExtension(store, c.String("docker-config")),
 		config:              config.NewCombined(remote, c.String("config-service-endpoint"), signaturePrivateKey),
 		environ:             environments.Parse(c.StringSlice("environment")),
@@ -86,9 +86,9 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 	return e.signaturePublicKey
 }
 
-func (e *Manager) SecretsFromRepo(repo *model.Repo) secrets.SecretExtension {
+func (e *Manager) SecretsFromRepo(repo *model.Repo) secret.SecretExtension {
 	if repo.SecretEndpoint != "" {
-		return secrets.NewHTTP(repo.SecretEndpoint, e.signaturePrivateKey)
+		return secret.NewHTTP(repo.SecretEndpoint, e.signaturePrivateKey)
 	}
 
 	return e.secrets
@@ -114,6 +114,6 @@ func (e *Manager) ConfigExtensionsFromRepo(repo *model.Repo) *config.HttpFetcher
 	return nil
 }
 
-func (e *Manager) Environ() model.EnvironService {
+func (e *Manager) Environ() environments.EnvironExtension {
 	return e.environ
 }
