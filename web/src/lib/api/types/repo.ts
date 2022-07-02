@@ -74,21 +74,12 @@ export enum RepoVisibility {
   Internal = 'internal',
 }
 
-export type RepoSettings = Partial<
-  Pick<
-    Repo,
-    | 'config_file'
-    | 'timeout'
-    | 'visibility'
-    | 'trusted'
-    | 'gated'
-    | 'allow_pr'
-    | 'cancel_previous_pipeline_events'
-    | 'config_endpoint'
-    | 'secret_endpoint'
-    | 'registry_endpoint'
-  >
+export type RepoSettings = Pick<
+  Repo,
+  'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr' | 'cancel_previous_pipeline_events'
 >;
+
+export type ExtensionSettings = Pick<Repo, 'config_endpoint' | 'secret_endpoint' | 'registry_endpoint'>;
 
 export type RepoPermissions = {
   pull: boolean;

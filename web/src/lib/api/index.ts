@@ -5,6 +5,7 @@ import {
   BuildFeed,
   BuildLog,
   BuildProc,
+  ExtensionSettings,
   Registry,
   Repo,
   RepoPermissions,
@@ -38,7 +39,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}`);
   }
 
-  updateRepo(owner: string, repo: string, repoSettings: RepoSettings): Promise<unknown> {
+  updateRepo(owner: string, repo: string, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${owner}/${repo}`, repoSettings);
   }
 

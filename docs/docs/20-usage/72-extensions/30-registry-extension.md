@@ -1,0 +1,3 @@
+# Registry extensions
+
+TODO

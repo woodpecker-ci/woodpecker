@@ -172,7 +172,6 @@
         "registries_endpoint_placeholder": "e.g. https://my.registry.service/api/v1/registries",
         "config_endpoint": "Config extension endpoint",
         "config_endpoint_placeholder": "e.g. https://my.config.service/api/v1/config",
-        "config_endpoint_desc": "This endpoint is used to post-process pipeline configs retrieved from the repository.",
         "save_extensions": "Save extensions configuration",
         "signatures_public_key": "Public key for signatures",
         "signatures_public_key_desc": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
