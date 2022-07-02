@@ -4,12 +4,12 @@
       <h1 class="text-xl ml-2 text-gray-500">{{ $t('repo.settings.extensions.extensions') }}</h1>
     </div>
 
-    <div class="mb-8">
+    <div>
       <span class="text-gray-400 font-bold">{{ $t('repo.settings.extensions.signatures_public_key') }}</span>
-      <div class="token-box">{{ signaturePublicKey }}</div>
+      <div class="token-box mt-2">{{ signaturePublicKey }}</div>
     </div>
 
-    <div class="flex flex-col border-t-1 dark:border-gray-600">
+    <div class="flex flex-col mt-4 border-t-1 dark:border-gray-600">
       <form @submit.prevent="saveExtensions">
         <InputField :label="$t('repo.settings.extensions.secrets_endpoint')">
           <TextField
