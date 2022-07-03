@@ -157,25 +157,14 @@ func procListContainsItemsToRun(items []*BuildItem) bool {
 }
 
 func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
-	itemsToRemove := make([]*BuildItem, 0)
-
 	for _, item := range items {
+		deps := make([]string, 0)
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
+			if containsItemWithName(dep, items) {
+				deps = append(deps, dep)
 			}
 		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*BuildItem, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
+		item.DependsOn = deps
 	}
 
 	return items
