@@ -57,3 +57,7 @@ type Build struct {
 func (Build) TableName() string {
 	return "builds"
 }
+
+type UpdateBuildStore interface {
+	UpdateBuild(*Build) error
+}

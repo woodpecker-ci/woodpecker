@@ -35,6 +35,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+// TODO(974) move to pipeline/*
+
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo      *model.Repo

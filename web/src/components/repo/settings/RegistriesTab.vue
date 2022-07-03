@@ -2,8 +2,8 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-gray-500">{{ $t('repo.settings.registries.creds') }}</h1>
-        <p class="text-sm text-gray-400 dark:text-gray-600">
+        <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
+        <p class="text-sm text-color-alt">
           {{ $t('repo.settings.registries.desc') }}
           <DocsLink url="docs/usage/registries" />
         </p>
@@ -24,13 +24,13 @@
       />
     </div>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-gray-500">
+    <div v-if="!selectedRegistry" class="space-y-4 text-color">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
         <IconButton icon="edit" class="ml-auto w-8 h-8" @click="selectedRegistry = registry" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-red-400"
+          class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteRegistry(registry)"
         />

@@ -2,8 +2,8 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-gray-500">{{ $t('repo.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-gray-400 dark:text-gray-600">
+        <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
+        <p class="text-sm text-color-alt">
           {{ $t('repo.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
@@ -18,21 +18,21 @@
       <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
     </div>
 
-    <div v-if="!selectedSecret" class="space-y-4 text-gray-500">
+    <div v-if="!selectedSecret" class="space-y-4 text-color">
       <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
         <span>{{ secret.name }}</span>
         <div class="ml-auto">
           <span
             v-for="event in secret.event"
             :key="event"
-            class="bg-gray-400 dark:bg-dark-200 dark:text-gray-500 text-white rounded-md mx-1 py-1 px-2 text-sm"
+            class="bg-gray-500 dark:bg-dark-700 dark:text-gray-400 text-white rounded-md mx-1 py-1 px-2 text-sm"
             >{{ event }}</span
           >
         </div>
         <IconButton icon="edit" class="ml-2 w-8 h-8" @click="selectedSecret = secret" />
         <IconButton
           icon="trash"
-          class="ml-2 w-8 h-8 hover:text-red-400"
+          class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteSecret(secret)"
         />

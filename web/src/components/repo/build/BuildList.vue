@@ -9,7 +9,7 @@
       <BuildItem :build="build" />
     </router-link>
     <Panel v-if="builds.length === 0">
-      <span class="text-gray-500">{{ $t('repo.build.no_pipelines') }}</span>
+      <span class="text-color">{{ $t('repo.build.no_pipelines') }}</span>
     </Panel>
   </div>
 </template>
