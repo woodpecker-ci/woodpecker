@@ -332,8 +332,8 @@ depends_on: [ zerostep ]
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
+	if len(buildItems) != 2 {
+		t.Fatal("Zerostep not generate a build item")
 	}
 	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
