@@ -29,7 +29,7 @@ func userInfo(c *cli.Context) error {
 
 	login := c.Args().First()
 	if len(login) == 0 {
-		return fmt.Errorf("Missing or invalid user login")
+		return fmt.Errorf("missing or invalid user login")
 	}
 
 	user, err := client.User(login)

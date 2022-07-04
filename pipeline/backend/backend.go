@@ -33,12 +33,12 @@ func FindEngine(engineName string) (types.Engine, error) {
 			}
 		}
 
-		return nil, fmt.Errorf("Can't detect an available backend engine")
+		return nil, fmt.Errorf("can't detect an available backend engine")
 	}
 
 	engine, ok := engines[engineName]
 	if !ok {
-		return nil, fmt.Errorf("Backend engine '%s' not found", engineName)
+		return nil, fmt.Errorf("backend engine '%s' not found", engineName)
 	}
 
 	return engine, nil

@@ -144,5 +144,5 @@ func findNode(nodes []*Proc, pid int) (*Proc, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Corrupt proc structure")
+	return nil, fmt.Errorf("corrupt proc structure")
 }

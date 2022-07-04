@@ -26,7 +26,7 @@ linters:
     - revive
     - staticcheck
     - structcheck
-    - typecheck
+#    - typecheck
     - unused
     - varcheck
     - whitespace
@@ -48,30 +48,17 @@ linters:
     - gocritic
     - goheader
     - goimports
-    - gomnd
+#    - gomnd
     - gomoddirectives
     - gomodguard
     - goprintffuncname
-#    - gosec
-#    - ifshort
     - importas
-#    - ireturn
-#    - lll
     - makezero
-#    - nakedret
-#    - nestif
-#    - nilerr
-#    - nilnil
-#    - nlreturn
-#    - noctx
     - nolintlint
-#    - paralleltest
-#    - prealloc
-#    - predeclared
-#    - promlinter
+    - promlinter
     - rowserrcheck
     - sqlclosecheck
-#    - stylecheck
+    - stylecheck
 #    - tagliatelle
 #    - tenv
 #    - testpackage

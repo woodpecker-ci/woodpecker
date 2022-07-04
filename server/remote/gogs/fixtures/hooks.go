@@ -14,7 +14,7 @@
 
 package fixtures
 
-// Sample Gogs push hook
+// HookPush is a sample Gogs push hook
 var HookPush = `
 {
   "ref": "refs/heads/master",
@@ -64,7 +64,7 @@ var HookPush = `
 }
 `
 
-// Sample Gogs tag hook
+// HookPushTag is a sample Gogs tag hook
 var HookPushTag = `{
   "secret": "l26Un7G7HXogLAvsyf2hOA4EMARSTsR3",
   "ref": "v1.0.0",

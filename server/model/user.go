@@ -23,7 +23,7 @@ import (
 // validate a username (e.g. from github)
 var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 
-var errUserLoginInvalid = errors.New("Invalid User Login")
+var errUserLoginInvalid = errors.New("invalid user login")
 
 const maxLoginLen = 250
 

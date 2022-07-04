@@ -39,5 +39,5 @@ func (s *Command) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		fmt.Println(interfaceType)
 	}
 
-	return errors.New("Failed to unmarshal Command")
+	return errors.New("failed to unmarshal Command")
 }

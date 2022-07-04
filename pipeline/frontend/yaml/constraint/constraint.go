@@ -124,7 +124,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil
@@ -204,7 +204,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil

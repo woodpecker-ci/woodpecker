@@ -30,7 +30,7 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		for mapKey, mapValue := range mapType {
 			name, ok := mapKey.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			var soft, hard int64
 			switch mv := mapValue.(type) {
@@ -39,7 +39,7 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 				hard = int64(mv)
 			case map[string]interface{}:
 				if len(mv) != 2 {
-					return fmt.Errorf("Failed to unmarshal Ulimit: %#v", mapValue)
+					return fmt.Errorf("failed to unmarshal Ulimit: %#v", mapValue)
 				}
 				for mkey, mvalue := range mv {
 					value, _ := mvalue.(int)
@@ -54,7 +54,7 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 					}
 				}
 			default:
-				return fmt.Errorf("Failed to unmarshal Ulimit: %v, %T", mapValue, mapValue)
+				return fmt.Errorf("failed to unmarshal Ulimit: %v, %T", mapValue, mapValue)
 			}
 			ulimits[name] = Ulimit{
 				Name: name,
@@ -75,7 +75,7 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Ulimit")
+	return errors.New("failed to unmarshal Ulimit")
 }
 
 // Ulimit represents ulimit information.

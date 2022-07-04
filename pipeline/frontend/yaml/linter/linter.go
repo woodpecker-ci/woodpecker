@@ -29,7 +29,7 @@ func New(opts ...Option) *Linter {
 // Lint lints the configuration.
 func (l *Linter) Lint(c *yaml.Config) error {
 	if len(c.Pipeline.Containers) == 0 {
-		return fmt.Errorf("Invalid or missing pipeline section")
+		return fmt.Errorf("invalid or missing pipeline section")
 	}
 	if err := l.lint(c.Clone.Containers, blockClone); err != nil {
 		return err
@@ -67,7 +67,7 @@ func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
 
 func (l *Linter) lintImage(c *yaml.Container) error {
 	if len(c.Image) == 0 {
-		return fmt.Errorf("Invalid or missing image")
+		return fmt.Errorf("invalid or missing image")
 	}
 	return nil
 }
@@ -81,63 +81,63 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 		for key := range c.Settings {
 			keys = append(keys, key)
 		}
-		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)
+		return fmt.Errorf("cannot configure both commands and custom attributes %v", keys)
 	}
 	if len(c.Entrypoint) != 0 {
-		return fmt.Errorf("Cannot configure both commands and entrypoint attributes")
+		return fmt.Errorf("cannot configure both commands and entrypoint attributes")
 	}
 	if len(c.Command) != 0 {
-		return fmt.Errorf("Cannot configure both commands and command attributes")
+		return fmt.Errorf("cannot configure both commands and command attributes")
 	}
 	return nil
 }
 
 func (l *Linter) lintEntrypoint(c *yaml.Container) error {
 	if len(c.Entrypoint) != 0 {
-		return fmt.Errorf("Cannot override container entrypoint")
+		return fmt.Errorf("cannot override container entrypoint")
 	}
 	if len(c.Command) != 0 {
-		return fmt.Errorf("Cannot override container command")
+		return fmt.Errorf("cannot override container command")
 	}
 	return nil
 }
 
 func (l *Linter) lintTrusted(c *yaml.Container) error {
 	if c.Privileged {
-		return fmt.Errorf("Insufficient privileges to use privileged mode")
+		return fmt.Errorf("insufficient privileges to use privileged mode")
 	}
 	if c.ShmSize != 0 {
-		return fmt.Errorf("Insufficient privileges to override shm_size")
+		return fmt.Errorf("insufficient privileges to override shm_size")
 	}
 	if len(c.DNS) != 0 {
-		return fmt.Errorf("Insufficient privileges to use custom dns")
+		return fmt.Errorf("insufficient privileges to use custom dns")
 	}
 	if len(c.DNSSearch) != 0 {
-		return fmt.Errorf("Insufficient privileges to use dns_search")
+		return fmt.Errorf("insufficient privileges to use dns_search")
 	}
 	if len(c.Devices) != 0 {
-		return fmt.Errorf("Insufficient privileges to use devices")
+		return fmt.Errorf("insufficient privileges to use devices")
 	}
 	if len(c.ExtraHosts) != 0 {
-		return fmt.Errorf("Insufficient privileges to use extra_hosts")
+		return fmt.Errorf("insufficient privileges to use extra_hosts")
 	}
 	if len(c.NetworkMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use network_mode")
+		return fmt.Errorf("insufficient privileges to use network_mode")
 	}
 	if len(c.IpcMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use ipc_mode")
+		return fmt.Errorf("insufficient privileges to use ipc_mode")
 	}
 	if len(c.Sysctls) != 0 {
-		return fmt.Errorf("Insufficient privileges to use sysctls")
+		return fmt.Errorf("insufficient privileges to use sysctls")
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		return fmt.Errorf("Insufficient privileges to use networks")
+		return fmt.Errorf("insufficient privileges to use networks")
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		return fmt.Errorf("Insufficient privileges to use volumes")
+		return fmt.Errorf("insufficient privileges to use volumes")
 	}
 	if len(c.Tmpfs) != 0 {
-		return fmt.Errorf("Insufficient privileges to use tmpfs")
+		return fmt.Errorf("insufficient privileges to use tmpfs")
 	}
 	return nil
 }

@@ -18,5 +18,5 @@ var buildLogsCmd = &cli.Command{
 
 func buildLogs(c *cli.Context) error {
 	// TODO: add logs command
-	return fmt.Errorf("Command temporarily disabled. See https://github.com/woodpecker-ci/woodpecker/issues/383")
+	return fmt.Errorf("command temporarily disabled. See https://github.com/woodpecker-ci/woodpecker/issues/383")
 }

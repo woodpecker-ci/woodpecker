@@ -259,7 +259,7 @@ func (c *client) BuildKill(owner, name string, num int) error {
 
 // BuildLogs returns the build logs for the specified job.
 func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
-	return nil, errors.New("Method not implemented")
+	return nil, errors.New("method not implemented")
 }
 
 // Deploy triggers a deployment for an existing build using the

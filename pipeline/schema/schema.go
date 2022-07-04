@@ -18,17 +18,17 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
 	j, err := yml.LoadYmlReaderAsJSON(r)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load yml file %w", err)
+		return nil, fmt.Errorf("failed to load yml file %w", err)
 	}
 
 	documentLoader := gojsonschema.NewBytesLoader(j)
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return nil, fmt.Errorf("Validation failed %w", err)
+		return nil, fmt.Errorf("validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return result.Errors(), fmt.Errorf("Config not valid")
+		return result.Errors(), fmt.Errorf("config not valid")
 	}
 
 	return nil, nil

@@ -95,7 +95,7 @@ func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 		return nil, fmt.Errorf("fail to parse response from %s %s: %w", req.Method, req.URL.String(), err)
 	}
 	if apiResp.Code != 0 {
-		return nil, fmt.Errorf("Coding OAuth API respond error: %s", string(body))
+		return nil, fmt.Errorf("coding OAuth API respond error: %s", string(body))
 	}
 	return apiResp.Data, nil
 }

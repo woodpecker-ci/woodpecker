@@ -58,7 +58,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 			return resp.StatusCode, err
 		}
 
-		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
+		return resp.StatusCode, fmt.Errorf("response: %s", string(body))
 	}
 
 	// if no other errors parse and return the json response.

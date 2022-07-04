@@ -31,7 +31,7 @@ func (s *StringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal StringorInt")
+	return errors.New("failed to unmarshal StringorInt")
 }
 
 // MemStringorInt represents a string or an integer
@@ -56,7 +56,7 @@ func (s *MemStringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal MemStringorInt")
+	return errors.New("failed to unmarshal MemStringorInt")
 }
 
 // Stringorslice represents
@@ -81,7 +81,7 @@ func (s *Stringorslice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Stringorslice")
+	return errors.New("failed to unmarshal Stringorslice")
 }
 
 // SliceorMap represents a slice or a map of strings.
@@ -104,7 +104,7 @@ func (s *SliceorMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 				}
 				parts[key] = val
 			} else {
-				return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", s, s)
+				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", s, s)
 			}
 		}
 		*s = parts
@@ -119,17 +119,17 @@ func (s *SliceorMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 				if sv, ok := v.(string); ok {
 					parts[sk] = sv
 				} else {
-					return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", v, v)
+					return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", v, v)
 				}
 			} else {
-				return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", k, k)
+				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", k, k)
 			}
 		}
 		*s = parts
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal SliceorMap")
+	return errors.New("failed to unmarshal SliceorMap")
 }
 
 func toStrings(s []interface{}) ([]string, error) {
@@ -141,7 +141,7 @@ func toStrings(s []interface{}) ([]string, error) {
 		if sv, ok := v.(string); ok {
 			r[k] = sv
 		} else {
-			return nil, fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", v, v)
+			return nil, fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", v, v)
 		}
 	}
 	return r, nil

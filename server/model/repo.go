@@ -64,7 +64,7 @@ func (r *Repo) ResetVisibility() {
 func ParseRepo(str string) (user, repo string, err error) {
 	parts := strings.Split(str, "/")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
+		err = fmt.Errorf("invalid or missing repository. eg octocat/hello-world")
 		return
 	}
 	user = parts[0]
