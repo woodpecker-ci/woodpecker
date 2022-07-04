@@ -49,16 +49,17 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	// Get environment variables
-	Command := []string{}
+	Env := os.Environ()
 	for a, b := range proc.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Command = append(Command, a+"="+b)
+			Env = append(Env, a+"="+b)
 		}
 	}
 
+	Command := []string{}
 	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
+		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -72,7 +73,8 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
+	e.cmd = exec.CommandContext(ctx, Command[0], Command[1:]...)
+	e.cmd.Env = Env
 
 	// Prepare working directory
 	if proc.Image == constant.DefaultCloneImage {
