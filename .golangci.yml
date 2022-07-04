@@ -43,7 +43,6 @@ linters:
     - errorlint
     - forcetypeassert
     - gci
-#    - gochecknoglobals
 #    - gochecknoinits
 #    - gocognit
 #    - goconst

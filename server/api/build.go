@@ -378,7 +378,7 @@ func DeleteBuildLogs(c *gin.Context) {
 	c.String(204, "")
 }
 
-var deleteStr = `[
+const deleteStr = `[
 	{
 		"proc": %q,
 		"pos": 0,
