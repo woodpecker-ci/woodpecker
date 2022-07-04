@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-gray-500">{{ $t('general') }}</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
     <div v-if="repoSettings" class="flex flex-col">
@@ -16,7 +16,7 @@
         />
         <template #description>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="text-sm text-gray-400 dark:text-gray-600" v-html="$t('repo.settings.general.pipeline_path.desc')" />
+          <p class="text-sm text-color-alt" v-html="$t('repo.settings.general.pipeline_path.desc')" />
         </template>
       </InputField>
 
@@ -27,12 +27,12 @@
         <Checkbox
           v-model="repoSettings.allow_pr"
           :label="$t('repo.settings.general.allow_pr.allow')"
-          @description="$t('repo.settings.general.allow_pr.desc')"
+          :description="$t('repo.settings.general.allow_pr.desc')"
         />
         <Checkbox
           v-model="repoSettings.gated"
           :label="$t('repo.settings.general.protected.protected')"
-          @description="$t('repo.settings.general.protected.desc')"
+          :description="$t('repo.settings.general.protected.desc')"
         />
         <Checkbox
           v-if="user?.admin"
@@ -65,7 +65,7 @@
           :options="cancelPreviousBuildEventsOptions"
         />
         <template #description>
-          <p class="text-sm text-gray-400 dark:text-gray-600">
+          <p class="text-sm">
             {{ $t('repo.settings.general.cancel_prev.desc') }}
           </p>
         </template>

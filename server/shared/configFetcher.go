@@ -18,6 +18,8 @@ type ConfigFetcher interface {
 	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
 }
 
+// TODO(974) move to new package
+
 type configFetcher struct {
 	remote          remote.Remote
 	user            *model.User

@@ -7,6 +7,7 @@ declare global {
     WOODPECKER_DOCS: string | undefined;
     WOODPECKER_VERSION: string | undefined;
     WOODPECKER_CSRF: string | undefined;
+    WOODPECKER_FORGE: string | undefined;
   }
 }
 
@@ -16,4 +17,5 @@ export default () => ({
   docs: window.WOODPECKER_DOCS || null,
   version: window.WOODPECKER_VERSION,
   csrf: window.WOODPECKER_CSRF || null,
+  forge: window.WOODPECKER_FORGE || null,
 });
