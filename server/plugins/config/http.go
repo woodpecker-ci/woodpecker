@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	stdHttp "http"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
@@ -53,7 +54,7 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.
 	}
 
 	var newFileMeta []*remote.FileMeta
-	if status != 200 {
+	if status != stdHttp.StatusOK {
 		newFileMeta = make([]*remote.FileMeta, 0)
 	} else {
 		newFileMeta = make([]*remote.FileMeta, len(response.Configs))
@@ -62,5 +63,5 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.
 		}
 	}
 
-	return newFileMeta, status == 204, nil
+	return newFileMeta, status == stdHttp.StatusNoContent, nil
 }

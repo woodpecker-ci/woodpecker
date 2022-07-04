@@ -46,10 +46,9 @@ linters:
     - gochecknoinits
     - goconst
     - gocritic
-#    - gocyclo
     - goheader
     - goimports
-#    - gomnd
+    - gomnd
     - gomoddirectives
     - gomodguard
     - goprintffuncname
@@ -113,3 +112,6 @@ issues:
     - path: server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go
       linters:
         - gocritic
+    - path: shared/yml/yml.go|shared/oauth2/oauth2.go|server/remote/bitbucketserver/internal/client.go|cmd/agent/flags.go
+      linters:
+        - gomnd

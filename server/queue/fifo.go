@@ -43,12 +43,13 @@ type fifo struct {
 
 // New returns a new fifo queue.
 func New(ctx context.Context) Queue {
+	extension := time.Minute * 10
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     time.Minute * 10,
+		extension:     extension,
 		paused:        false,
 	}
 }

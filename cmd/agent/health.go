@@ -39,14 +39,14 @@ func initHealth() {
 
 func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func handleVersion(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/json")
 	if err := json.NewEncoder(w).Encode(versionResp{
 		Source:  constant.WoodpeckerSourceCode,
@@ -58,9 +58,9 @@ func handleVersion(w http.ResponseWriter, r *http.Request) {
 
 func handleStats(w http.ResponseWriter, r *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	w.Header().Add("Content-Type", "text/json")
 	if _, err := counter.WriteTo(w); err != nil {
@@ -86,7 +86,7 @@ func pinger(c *cli.Context) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("agent returned non-200 status code")
 	}
 	return nil

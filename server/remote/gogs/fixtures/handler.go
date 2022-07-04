@@ -65,11 +65,11 @@ func createRepoHook(c *gin.Context) {
 	if in.Type != "gogs" ||
 		in.Conf.Type != "json" ||
 		in.Conf.URL != "http://localhost" {
-		c.String(500, "")
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 
-	c.String(200, "{}")
+	c.String(http.StatusOK, "{}")
 }
 
 func getUserRepos(c *gin.Context) {

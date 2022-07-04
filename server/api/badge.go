@@ -34,7 +34,7 @@ func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
@@ -61,17 +61,17 @@ func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	builds, err := _store.GetBuildList(repo, 1)
 	if err != nil || len(builds) == 0 {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, builds[0].Number)
 	cc := ccmenu.New(repo, builds[0], url)
-	c.XML(200, cc)
+	c.XML(http.StatusOK, cc)
 }

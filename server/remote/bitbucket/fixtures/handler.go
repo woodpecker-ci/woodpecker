@@ -44,107 +44,107 @@ func Handler() http.Handler {
 
 func getOauth(c *gin.Context) {
 	if c.PostForm("error") == "invalid_scope" {
-		c.String(500, "")
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 
 	switch c.PostForm("code") {
 	case "code_bad_request":
-		c.String(500, "")
+		c.String(http.StatusInternalServerError, "")
 		return
 	case "code_user_not_found":
-		c.String(200, tokenNotFoundPayload)
+		c.String(http.StatusOK, tokenNotFoundPayload)
 		return
 	}
 	switch c.PostForm("refresh_token") {
 	case "refresh_token_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	case "refresh_token_is_empty":
 		c.Header("Content-Type", "application/json")
-		c.String(200, "{}")
+		c.String(http.StatusOK, "{}")
 	default:
 		c.Header("Content-Type", "application/json")
-		c.String(200, tokenPayload)
+		c.String(http.StatusOK, tokenPayload)
 	}
 }
 
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
 	case "not_found", "repo_unknown", "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	case "permission_read", "permission_write", "permission_admin":
-		c.String(200, fmt.Sprintf(permissionRepoPayload, c.Param("name")))
+		c.String(http.StatusOK, fmt.Sprintf(permissionRepoPayload, c.Param("name")))
 	default:
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
 }
 
 func getRepoHooks(c *gin.Context) {
 	switch c.Param("name") {
 	case "hooks_not_found", "repo_no_hooks":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	case "hook_empty":
-		c.String(200, "{}")
+		c.String(http.StatusOK, "{}")
 	default:
-		c.String(200, repoHookPayload)
+		c.String(http.StatusOK, repoHookPayload)
 	}
 }
 
 func getRepoFile(c *gin.Context) {
 	switch c.Param("file") {
 	case "file_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, repoFilePayload)
+		c.String(http.StatusOK, repoFilePayload)
 	}
 }
 
 func createRepoStatus(c *gin.Context) {
 	switch c.Param("name") {
 	case "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, "")
+		c.String(http.StatusOK, "")
 	}
 }
 
 func createRepoHook(c *gin.Context) {
-	c.String(200, "")
+	c.String(http.StatusOK, "")
 }
 
 func deleteRepoHook(c *gin.Context) {
 	switch c.Param("name") {
 	case "hook_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, "")
+		c.String(http.StatusOK, "")
 	}
 }
 
 func getUser(c *gin.Context) {
 	switch c.Request.Header.Get("Authorization") {
 	case "Bearer user_not_found", "Bearer a87ff679":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, userPayload)
+		c.String(http.StatusOK, userPayload)
 	}
 }
 
 func getUserTeams(c *gin.Context) {
 	switch c.Request.Header.Get("Authorization") {
 	case "Bearer teams_not_found", "Bearer c81e728d":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, userTeamPayload)
+		c.String(http.StatusOK, userTeamPayload)
 	}
 }
 
 func getUserRepos(c *gin.Context) {
 	switch c.Request.Header.Get("Authorization") {
 	case "Bearer repos_not_found", "Bearer 70efdf2e":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, userRepoPayload)
+		c.String(http.StatusOK, userRepoPayload)
 	}
 }
 
@@ -156,13 +156,13 @@ func getPermissions(c *gin.Context) {
 	query := c.Request.URL.Query()["q"][0]
 	switch query {
 	case `repository.full_name="test_name/permission_read"`:
-		c.String(200, permission("read"))
+		c.String(http.StatusOK, permission("read"))
 	case `repository.full_name="test_name/permission_write"`:
-		c.String(200, permission("write"))
+		c.String(http.StatusOK, permission("write"))
 	case `repository.full_name="test_name/permission_admin"`:
-		c.String(200, permission("admin"))
+		c.String(http.StatusOK, permission("admin"))
 	default:
-		c.String(200, permission("read"))
+		c.String(http.StatusOK, permission("read"))
 	}
 }
 

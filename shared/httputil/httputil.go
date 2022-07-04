@@ -40,6 +40,9 @@ func IsHTTPS(r *http.Request) bool {
 
 // SetCookie writes the cookie value.
 func SetCookie(w http.ResponseWriter, r *http.Request, name, value string) {
+	// the cooke value (token) is responsible for expiration
+	maxAge := 2147483647
+
 	cookie := http.Cookie{
 		Name:     name,
 		Value:    value,
@@ -47,7 +50,7 @@ func SetCookie(w http.ResponseWriter, r *http.Request, name, value string) {
 		Domain:   r.URL.Host,
 		HttpOnly: true,
 		Secure:   IsHTTPS(r),
-		MaxAge:   2147483647, // the cooke value (token) is responsible for expiration
+		MaxAge:   maxAge,
 	}
 
 	http.SetCookie(w, &cookie)

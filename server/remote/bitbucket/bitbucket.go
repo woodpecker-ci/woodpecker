@@ -33,6 +33,7 @@ import (
 const (
 	DefaultAPI = "https://api.bitbucket.org"
 	DefaultURL = "https://bitbucket.org"
+	perPage    = 100
 )
 
 // Opts are remote options for bitbucket
@@ -131,7 +132,7 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	opts := &internal.ListTeamOpts{
-		PageLen: 100,
+		PageLen: perPage,
 		Role:    "member",
 	}
 	resp, err := c.newClient(ctx, u).ListTeams(opts)

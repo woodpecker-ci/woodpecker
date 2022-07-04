@@ -396,7 +396,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		return err
 	}
 	defer r.Body.Close()
-	if r.StatusCode != 200 {
+	if r.StatusCode != http.StatusOK {
 		return OAuthError{"updateToken", "Unexpected HTTP status " + r.Status}
 	}
 	var b struct {

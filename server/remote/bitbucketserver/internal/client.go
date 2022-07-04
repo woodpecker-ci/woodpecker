@@ -159,7 +159,7 @@ func (c *Client) FindFileForRepo(owner, repo, fileName, ref string) ([]byte, err
 	if err != nil {
 		log.Err(err).Msg("")
 	}
-	if response.StatusCode == 404 {
+	if response.StatusCode == http.StatusNotFound {
 		return nil, nil
 	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
