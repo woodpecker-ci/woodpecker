@@ -50,11 +50,12 @@ func Test_github(t *testing.T) {
 					Secret:     "I1NiIsInR5",
 					SkipVerify: true,
 				})
-				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*client).API).Equal("http://localhost:8080/api/v3/")
-				g.Assert(remote.(*client).Client).Equal("0ZXh0IjoiI")
-				g.Assert(remote.(*client).Secret).Equal("I1NiIsInR5")
-				g.Assert(remote.(*client).SkipVerify).Equal(true)
+				c, _ := remote.(*client)
+				g.Assert(c.URL).Equal("http://localhost:8080")
+				g.Assert(c.API).Equal("http://localhost:8080/api/v3/")
+				g.Assert(c.Client).Equal("0ZXh0IjoiI")
+				g.Assert(c.Secret).Equal("I1NiIsInR5")
+				g.Assert(c.SkipVerify).Equal(true)
 			})
 		})
 

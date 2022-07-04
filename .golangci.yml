@@ -103,6 +103,6 @@ issues:
     - path: pipeline/backend/local/local.go
       linters:
         - errorlint
-    - path: server/remote/gitea/gitea_test.go|server/remote/gogs/gogs_test.go
+    - path: server/remote/gitea/gitea_test.go|server/remote/gogs/gogs_test.go|server/remote/github/github.go
       linters:
         - forcetypeassert

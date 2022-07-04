@@ -374,7 +374,7 @@ func (q *fifo) removeFromPending(taskID string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			q.pending.Remove(e)

@@ -189,6 +189,6 @@ type tokenPayload struct {
 
 // ToConfig returns the config from the Context
 func ToConfig(c *gin.Context) *model.Settings {
-	v := c.MustGet("config")
-	return v.(*model.Settings)
+	conf, _ := c.MustGet("config").(*model.Settings)
+	return conf
 }

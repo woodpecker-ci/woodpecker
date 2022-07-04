@@ -42,11 +42,12 @@ func (u *Ulimits) UnmarshalYAML(unmarshal func(interface{}) error) error {
 					return fmt.Errorf("Failed to unmarshal Ulimit: %#v", mapValue)
 				}
 				for mkey, mvalue := range mv {
+					value, _ := mvalue.(int)
 					switch mkey {
 					case "soft":
-						soft = int64(mvalue.(int))
+						soft = int64(value)
 					case "hard":
-						hard = int64(mvalue.(int))
+						hard = int64(value)
 					default:
 						// FIXME(vdemeester) Should we ignore or fail ?
 						continue

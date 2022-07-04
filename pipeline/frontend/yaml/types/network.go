@@ -85,12 +85,13 @@ func handleNetwork(name string, value interface{}) (*Network, error) {
 				}
 				network.Aliases = []string{}
 				for _, alias := range aliases {
-					network.Aliases = append(network.Aliases, alias.(string))
+					a, _ := alias.(string)
+					network.Aliases = append(network.Aliases, a)
 				}
 			case "ipv4_address":
-				network.IPv4Address = mapValue.(string)
+				network.IPv4Address, _ = mapValue.(string)
 			case "ipv6_address":
-				network.IPv6Address = mapValue.(string)
+				network.IPv6Address, _ = mapValue.(string)
 			default:
 				// Ignorer unknown keys ?
 				continue

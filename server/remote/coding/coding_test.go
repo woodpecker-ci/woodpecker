@@ -52,13 +52,14 @@ func Test_coding(t *testing.T) {
 					Password:   "password",
 					SkipVerify: true,
 				})
-				g.Assert(remote.(*Coding).URL).Equal("https://coding.net")
-				g.Assert(remote.(*Coding).Client).Equal("KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP")
-				g.Assert(remote.(*Coding).Secret).Equal("zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp")
-				g.Assert(remote.(*Coding).Scopes).Equal([]string{"user", "project", "project:depot"})
-				g.Assert(remote.(*Coding).Username).Equal("someuser")
-				g.Assert(remote.(*Coding).Password).Equal("password")
-				g.Assert(remote.(*Coding).SkipVerify).Equal(true)
+				c, _ := remote.(*Coding)
+				g.Assert(c.URL).Equal("https://coding.net")
+				g.Assert(c.Client).Equal("KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP")
+				g.Assert(c.Secret).Equal("zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp")
+				g.Assert(c.Scopes).Equal([]string{"user", "project", "project:depot"})
+				g.Assert(c.Username).Equal("someuser")
+				g.Assert(c.Password).Equal("password")
+				g.Assert(c.SkipVerify).Equal(true)
 			})
 		})
 
