@@ -25,6 +25,8 @@ import (
 )
 
 func main() {
+	initHealth()
+
 	app := cli.NewApp()
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()

@@ -31,7 +31,7 @@ import (
 // following specification:
 //   https://github.com/mozilla-services/Dockerflow
 
-func init() {
+func initHealth() {
 	http.HandleFunc("/varz", handleStats)
 	http.HandleFunc("/healthz", handleHeartbeat)
 	http.HandleFunc("/version", handleVersion)
