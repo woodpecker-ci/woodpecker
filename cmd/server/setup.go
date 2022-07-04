@@ -20,6 +20,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -362,7 +363,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
-	if err != nil && err == datastore.RecordNotExist {
+	if err != nil && errors.Is(err, datastore.RecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to generate private key")

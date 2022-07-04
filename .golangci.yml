@@ -40,8 +40,7 @@ linters:
 #    - dupl
     - durationcheck
     - errchkjson
-#    - errname
-#    - errorlint
+    - errorlint
 #    - exhaustivestruct
 #    - exhaustive
 #    - exportloopref
@@ -104,3 +103,7 @@ issues:
     - path: agent/runner.go
       linters:
         - contextcheck
+        - errorlint
+    - path: pipeline/backend/local/local.go
+      linters:
+        - errorlint

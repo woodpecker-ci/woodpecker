@@ -216,7 +216,7 @@ func (t *Transport) transport() http.RoundTripper {
 func (c *Config) AuthCodeURL(state string) (string, error) {
 	_url, err := url.Parse(c.AuthURL)
 	if err != nil {
-		return "", fmt.Errorf("AuthURL malformed: %v", err)
+		return "", fmt.Errorf("AuthURL malformed: %w", err)
 	}
 	if err := _url.Query().Get("error"); err != "" {
 		return "", fmt.Errorf("AuthURL contains error: %v", err)

@@ -33,7 +33,7 @@ func Decline(ctx context.Context, store store.Store, build *model.Build, user *m
 
 	_, err := shared.UpdateToStatusDeclined(store, *build, user.Login)
 	if err != nil {
-		return nil, fmt.Errorf("error updating build. %s", err)
+		return nil, fmt.Errorf("error updating build. %w", err)
 	}
 
 	if build.Procs, err = store.ProcList(build); err != nil {

@@ -42,7 +42,7 @@ func Approve(ctx context.Context, store store.Store, build *model.Build, user *m
 	}
 
 	if build, err = shared.UpdateToStatusPending(store, *build, user.Login); err != nil {
-		return nil, fmt.Errorf("error updating build. %s", err)
+		return nil, fmt.Errorf("error updating build. %w", err)
 	}
 
 	var yamls []*remote.FileMeta

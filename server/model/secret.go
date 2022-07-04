@@ -89,11 +89,11 @@ var validDockerImageString = regexp.MustCompile(
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
 		if !ValidateWebhookEvent(event) {
-			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
+			return fmt.Errorf("%w: '%s'", errSecretEventInvalid, event)
 		}
 	}
 	if len(s.Events) == 0 {
-		return fmt.Errorf("%s: no event specified", errSecretEventInvalid)
+		return fmt.Errorf("%w: no event specified", errSecretEventInvalid)
 	}
 
 	for _, image := range s.Images {

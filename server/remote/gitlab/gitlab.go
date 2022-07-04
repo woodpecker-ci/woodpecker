@@ -100,7 +100,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	if len(code) == 0 {
 		authCodeURL, err := config.AuthCodeURL("drone")
 		if err != nil {
-			return nil, fmt.Errorf("authCodeURL error: %v", err)
+			return nil, fmt.Errorf("authCodeURL error: %w", err)
 		}
 		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
 		return nil, nil
@@ -112,7 +112,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}}
 	token, err := trans.Exchange(code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %s", err)
+		return nil, fmt.Errorf("Error exchanging token: %w", err)
 	}
 
 	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
