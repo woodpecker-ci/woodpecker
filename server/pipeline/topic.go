@@ -37,9 +37,12 @@ func publishToTopic(c context.Context, build *model.Build, repo *model.Repo) (er
 		return err
 	}
 
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:  *repo,
 		Build: buildCopy,
-	})
+	}); err != nil {
+		return err
+	}
+
 	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }

@@ -77,7 +77,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 	res.Pipeline = new(proto.Pipeline)
 	res.Pipeline.Id = pipeline.ID
 	res.Pipeline.Timeout = pipeline.Timeout
-	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
+	res.Pipeline.Payload, err = json.Marshal(pipeline.Config)
 
 	return res, err
 }

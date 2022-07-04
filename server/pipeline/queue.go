@@ -44,11 +44,15 @@ func queueBuild(ctx context.Context, build *model.Build, repo *model.Repo, build
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]string)
 
-		task.Data, _ = json.Marshal(rpc.Pipeline{
+		var err error
+		task.Data, err = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Proc.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
+		if err != nil {
+			return err
+		}
 
 		if err := server.Config.Services.Logs.Open(ctx, task.ID); err != nil {
 			return err

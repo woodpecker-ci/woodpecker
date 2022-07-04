@@ -39,7 +39,7 @@ linters:
     - dogsled
 #    - dupl
     - durationcheck
-#    - errchkjson
+    - errchkjson
 #    - errname
 #    - errorlint
 #    - exhaustivestruct

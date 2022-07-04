@@ -149,11 +149,12 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:  *repo,
 		Build: *build,
-	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+	}); err != nil {
+		log.Error().Err(err).Msg("can not marshal json to publish to proc list")
+	} else if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msg("can not publish proc list to")
 	}
 
@@ -279,17 +280,18 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		message.Data, _ = json.Marshal(model.Event{
+		if message.Data, err = json.Marshal(model.Event{
 			Repo:  *repo,
 			Build: *build,
-		})
-		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+		}); err != nil {
+			log.Error().Err(err).Msg("can not marshal event to publish")
+		} else if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 			log.Error().Err(err).Msg("can not publish proc list to")
 		}
 	}()
 
-	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
-	return err
+	_, err2 := shared.UpdateProcToStatusStarted(s.store, *proc, state)
+	return err2
 }
 
 // Done implements the rpc.Done function
@@ -371,9 +373,11 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 }
 
 // Log implements the rpc.Log function
-func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
+func (s *RPC) Log(c context.Context, id string, line *rpc.Line) (err error) {
 	entry := new(logging.Entry)
-	entry.Data, _ = json.Marshal(line)
+	if entry.Data, err = json.Marshal(line); err != nil {
+		log.Error().Err(err).Msgf("rpc server could not marshal rpc line")
+	}
 	if err := s.logger.Write(c, id, entry); err != nil {
 		log.Error().Err(err).Msgf("rpc server could not write to logger")
 	}
@@ -427,11 +431,12 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:  *repo,
 		Build: *build,
-	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
+	}); err != nil {
+		log.Error().Err(err).Msg("grpc could not marshal event")
+	} else if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
 	return nil

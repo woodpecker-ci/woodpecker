@@ -23,6 +23,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
@@ -47,10 +48,12 @@ func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 func handleVersion(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "text/json")
-	_ = json.NewEncoder(w).Encode(versionResp{
-		Source:  "https://github.com/woodpecker-ci/woodpecker",
+	if err := json.NewEncoder(w).Encode(versionResp{
+		Source:  constant.WoodpeckerSourceCode,
 		Version: version.String(),
-	})
+	}); err != nil {
+		log.Err(err).Msg("handleVersion could not encode")
+	}
 }
 
 func handleStats(w http.ResponseWriter, r *http.Request) {
