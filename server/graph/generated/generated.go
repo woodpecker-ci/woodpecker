@@ -1036,6 +1036,8 @@ directive @hasRole(
 ) on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
 
 directive @isAuthenticated on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_DEFINITION | ENUM_VALUE
+
+# instance admin, repo admin, repo user, authenticated, unauthenticated
 `, BuiltIn: false},
 	{Name: "../schema/mutations.graphqls", Input: `input UpdateRepo {
   text: String!
@@ -1102,7 +1104,7 @@ type Mutation {
 }
 `, BuiltIn: false},
 	{Name: "../schema/queries.graphqls", Input: `type Query {
-  repository: [Repo!]!
+  repository: [Repo!]! @isAuthenticated
 }
 `, BuiltIn: false},
 	{Name: "../schema/types/build.graphqls", Input: `type Build {
@@ -5027,8 +5029,28 @@ func (ec *executionContext) _Query_repository(ctx context.Context, field graphql
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Repository(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Repository(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.IsAuthenticated == nil {
+				return nil, errors.New("directive isAuthenticated is not implemented")
+			}
+			return ec.directives.IsAuthenticated(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*model1.Repo); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/woodpecker-ci/woodpecker/server/model.Repo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -22,11 +22,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
-	"github.com/woodpecker-ci/woodpecker/server/graph/handler"
-	graphMiddleware "github.com/woodpecker-ci/woodpecker/server/graph/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
@@ -45,8 +41,8 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.Use(header.Options)
 	e.Use(header.Secure)
 	e.Use(middleware...)
-	e.Use(session.SetUser())
-	e.Use(token.Refresh)
+	// e.Use(session.SetUser())
+	// e.Use(token.Refresh)
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
 
@@ -66,13 +62,6 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.GET("/healthz", api.Health)
 
 	apiRoutes(e)
-
-	graph := e.Group("/")
-	{
-		graph.Use(graphMiddleware.GinContextToContextMiddleware())
-		graph.POST("/query", handler.GraphqlHandler())
-		graph.GET("/graphql", handler.PlaygroundHandler())
-	}
 
 	return e
 }

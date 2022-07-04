@@ -19,6 +19,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
+	"github.com/woodpecker-ci/woodpecker/server/graph/handler"
+	graphMiddleware "github.com/woodpecker-ci/woodpecker/server/graph/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
@@ -161,5 +163,11 @@ func apiRoutes(e *gin.Engine) {
 			session.MustPull,
 			api.LogStreamSSE,
 		)
+	}
+
+	graph := e.Group("/")
+	{
+		graph.GET("/graphql", handler.PlaygroundHandler())
+		graph.POST("/api/query", graphMiddleware.SetConfig(), graphMiddleware.SetStore(), graphMiddleware.SetUser(), handler.GraphqlHandler())
 	}
 }

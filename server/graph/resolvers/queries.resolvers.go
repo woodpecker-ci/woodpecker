@@ -5,21 +5,19 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/graph/generated"
 	"github.com/woodpecker-ci/woodpecker/server/graph/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func (r *queryResolver) Repository(ctx context.Context) ([]*model.Repo, error) {
-	gc, err := middleware.GinContextFromContext(ctx)
-	if err != nil {
-		return nil, err
+	user := middleware.User(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("user is nil")
 	}
-
-	user := session.User(gc)
 
 	return store.FromContext(ctx).RepoList(user, true)
 }
