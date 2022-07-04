@@ -39,33 +39,35 @@ func Handler() http.Handler {
 }
 
 func listRepoHooks(c *gin.Context) {
-	c.String(200, listRepoHookPayloads)
+	c.String(http.StatusOK, listRepoHookPayloads)
 }
 
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
 	case "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
 }
 
 func createRepoCommitStatus(c *gin.Context) {
 	if c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50" {
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
+	} else {
+		c.String(http.StatusNotFound, "")
 	}
-	c.String(404, "")
 }
 
 func getRepoFile(c *gin.Context) {
-	if c.Param("file") == "file_not_found" {
-		c.String(404, "")
+	switch {
+	case c.Param("file") == "file_not_found":
+		c.String(http.StatusNotFound, "")
+	case c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50":
+		c.String(http.StatusOK, repoFilePayload)
+	default:
+		c.String(http.StatusNotFound, "")
 	}
-	if c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50" {
-		c.String(200, repoFilePayload)
-	}
-	c.String(404, "")
 }
 
 func createRepoHook(c *gin.Context) {
@@ -80,33 +82,33 @@ func createRepoHook(c *gin.Context) {
 	if in.Type != "gitea" ||
 		in.Conf.Type != "json" ||
 		in.Conf.URL != "http://localhost" {
-		c.String(500, "")
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 
-	c.String(200, "{}")
+	c.String(http.StatusOK, "{}")
 }
 
 func deleteRepoHook(c *gin.Context) {
-	c.String(200, "{}")
+	c.String(http.StatusOK, "{}")
 }
 
 func getUserRepos(c *gin.Context) {
 	switch c.Request.Header.Get("Authorization") {
 	case "token repos_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
 		page := c.Query("page")
 		if page != "" && page != "1" {
-			c.String(200, "[]")
+			c.String(http.StatusOK, "[]")
 		} else {
-			c.String(200, userRepoPayload)
+			c.String(http.StatusOK, userRepoPayload)
 		}
 	}
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.12"})
+	c.JSON(http.StatusOK, map[string]interface{}{"version": "1.12"})
 }
 
 const listRepoHookPayloads = `

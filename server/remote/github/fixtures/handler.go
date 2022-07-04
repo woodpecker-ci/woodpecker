@@ -36,20 +36,20 @@ func Handler() http.Handler {
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
 	case "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
 }
 
 func getMembership(c *gin.Context) {
 	switch c.Param("org") {
 	case "org_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	case "github":
-		c.String(200, membershipIsMemberPayload)
+		c.String(http.StatusOK, membershipIsMemberPayload)
 	default:
-		c.String(200, membershipIsOwnerPayload)
+		c.String(http.StatusOK, membershipIsOwnerPayload)
 	}
 }
 

@@ -46,18 +46,18 @@ func getToken(c *gin.Context) {
 	case "refresh_token":
 		switch c.PostForm("refresh_token") {
 		case "i9i0HQqNR8bTY4rALYEF2itayFJNbnzC1eMFppwT":
-			c.String(200, refreshedTokenPayload)
+			c.String(http.StatusOK, refreshedTokenPayload)
 		default:
-			c.String(200, invalidRefreshTokenPayload)
+			c.String(http.StatusOK, invalidRefreshTokenPayload)
 		}
 	case "authorization_code":
 		fallthrough
 	default:
 		switch c.PostForm("code") {
 		case "code":
-			c.String(200, tokenPayload)
+			c.String(http.StatusOK, tokenPayload)
 		default:
-			c.String(200, invalidCodePayload)
+			c.String(http.StatusOK, invalidCodePayload)
 		}
 	}
 }
@@ -66,9 +66,9 @@ func getUser(c *gin.Context) {
 	c.Header("Content-Type", "application/json;charset=UTF-8")
 	switch c.Query("access_token") {
 	case "KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP":
-		c.String(200, userPayload)
+		c.String(http.StatusOK, userPayload)
 	default:
-		c.String(200, userNotFoundPayload)
+		c.String(http.StatusOK, userNotFoundPayload)
 	}
 }
 
