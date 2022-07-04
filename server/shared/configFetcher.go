@@ -63,7 +63,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.build, files)
 			if err != nil {
 				log.Error().Msg("Got error " + err.Error())
-				return nil, fmt.Errorf("On Fetching config via http : %w", err)
+				return nil, fmt.Errorf("on Fetching config via http : %w", err)
 			}
 
 			if !useOld {

@@ -55,7 +55,6 @@ linters:
     - importas
     - makezero
     - nolintlint
-    - promlinter
     - rowserrcheck
     - sqlclosecheck
     - stylecheck

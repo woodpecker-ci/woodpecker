@@ -224,7 +224,7 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
 // Status creates a build status for the Bitbucket commit.

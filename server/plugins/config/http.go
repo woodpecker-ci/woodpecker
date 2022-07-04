@@ -4,14 +4,14 @@ import (
 	"context"
 	"crypto"
 	"fmt"
-	stdHttp "http"
+	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type http struct {
+type httpExt struct {
 	endpoint   string
 	privateKey crypto.PrivateKey
 }
@@ -33,14 +33,14 @@ type responseStructure struct {
 }
 
 func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Extension {
-	return &http{endpoint, privateKey}
+	return &httpExt{endpoint, privateKey}
 }
 
-func (cp *http) IsConfigured() bool {
+func (cp *httpExt) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
+func (cp *httpExt) FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {
 		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}
@@ -50,11 +50,11 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.
 	body := requestStructure{Repo: repo, Build: build, Configuration: currentConfigs}
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
 	if err != nil && status != 204 {
-		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
+		return nil, false, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
 
 	var newFileMeta []*remote.FileMeta
-	if status != stdHttp.StatusOK {
+	if status != http.StatusOK {
 		newFileMeta = make([]*remote.FileMeta, 0)
 	} else {
 		newFileMeta = make([]*remote.FileMeta, len(response.Configs))
@@ -63,5 +63,5 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.
 		}
 	}
 
-	return newFileMeta, status == stdHttp.StatusNoContent, nil
+	return newFileMeta, status == http.StatusNoContent, nil
 }

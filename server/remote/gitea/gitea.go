@@ -396,10 +396,10 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	if err != nil {
 		if response != nil {
 			if response.StatusCode == 404 {
-				return fmt.Errorf("Could not find repository")
+				return fmt.Errorf("could not find repository")
 			}
 			if response.StatusCode == 200 {
-				return fmt.Errorf("Could not find repository, repository was probably renamed")
+				return fmt.Errorf("could not find repository, repository was probably renamed")
 			}
 		}
 		return err

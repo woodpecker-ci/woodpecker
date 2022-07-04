@@ -129,7 +129,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 // Auth is not supported by the Gogs driver.
 func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
-	return "", fmt.Errorf("Not Implemented")
+	return "", fmt.Errorf("not implemented")
 }
 
 // Teams is not supported by the Gogs driver.
@@ -209,7 +209,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
 // Status is not supported by the Gogs driver.

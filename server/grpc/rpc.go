@@ -331,7 +331,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if proc.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Proc finished with exitcode %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("proc finished with exitcode %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, proc.State)
 	}

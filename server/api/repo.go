@@ -291,7 +291,7 @@ func MoveRepo(c *gin.Context) {
 
 	to, exists := c.GetQuery("to")
 	if !exists {
-		err := fmt.Errorf("Missing required to query value")
+		err := fmt.Errorf("missing required to query value")
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

@@ -112,7 +112,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}}
 	token, err := trans.Exchange(code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token: %w", err)
+		return nil, fmt.Errorf("error exchanging token: %w", err)
 	}
 
 	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)

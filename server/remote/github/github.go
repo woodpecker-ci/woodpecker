@@ -123,7 +123,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 	email := matchingEmail(emails, c.API)
 	if email == nil {
-		return nil, fmt.Errorf("No verified Email address for GitHub account")
+		return nil, fmt.Errorf("no verified Email address for GitHub account")
 	}
 
 	return &model.User{

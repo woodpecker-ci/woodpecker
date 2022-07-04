@@ -150,7 +150,7 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 // Teams fetches a list of team memberships from the remote system.
 func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
-	return nil, fmt.Errorf("Not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
 // TeamPerm fetches the named organization permissions from
@@ -242,7 +242,7 @@ func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+	return nil, fmt.Errorf("not implemented")
 }
 
 // Status sends the commit status to the remote system.

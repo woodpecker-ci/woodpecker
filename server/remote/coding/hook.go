@@ -133,7 +133,7 @@ func convertRepository(repo *Repository) (*model.Repo, error) {
 	re := regexp.MustCompile(`git@.+:([^/]+)/.+\.git`)
 	matches := re.FindStringSubmatch(repo.SSHURL)
 	if len(matches) != 2 {
-		return nil, fmt.Errorf("Unable to resolve owner from ssh url %q", repo.SSHURL)
+		return nil, fmt.Errorf("unable to resolve owner from ssh url %q", repo.SSHURL)
 	}
 
 	return &model.Repo{
