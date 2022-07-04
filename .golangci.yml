@@ -59,17 +59,11 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - stylecheck
-#    - tagliatelle
-#    - tenv
-#    - testpackage
-#    - thelper
-#    - tparallel
+    - tenv
     - unconvert
-#    - unparam
+    - unparam
     - wastedassign
     - whitespace
-#    - wrapcheck
-#    - wsl
 
 run:
   timeout: 5m
@@ -102,3 +96,6 @@ issues:
     - path: shared/yml/yml.go|shared/oauth2/oauth2.go|server/remote/bitbucketserver/internal/client.go|cmd/agent/flags.go
       linters:
         - gomnd
+    - path: pipeline/frontend/yaml/compiler/option_test.go
+      linters:
+        - tenv

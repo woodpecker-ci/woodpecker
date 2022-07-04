@@ -412,7 +412,7 @@ func (c *client) delete(rawurl string) error {
 
 // helper function to make an http request
 func (c *client) do(rawurl, method string, in, out interface{}) error {
-	body, err := c.open(rawurl, method, in, out)
+	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
 	}
@@ -424,7 +424,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in interface{}) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
