@@ -193,10 +193,12 @@ func (q *fifo) Info(c context.Context) InfoT {
 	stats.Stats.Running = len(q.running)
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
-		stats.Pending = append(stats.Pending, e.Value.(*Task))
+		task, _ := e.Value.(*Task)
+		stats.Pending = append(stats.Pending, task)
 	}
 	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
-		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*Task))
+		task, _ := e.Value.(*Task)
+		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
@@ -244,7 +246,7 @@ func (q *fifo) process() {
 	q.resubmitExpiredBuilds()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
-		task := pending.Value.(*Task)
+		task, _ := pending.Value.(*Task)
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
 		q.running[task.ID] = &entry{
@@ -261,7 +263,7 @@ func (q *fifo) filterWaiting() {
 	var nextWaiting *list.Element
 	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
 		nextWaiting = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*Task)
 		q.pending.PushBack(task)
 	}
 
@@ -271,7 +273,7 @@ func (q *fifo) filterWaiting() {
 	var nextPending *list.Element
 	for e := q.pending.Front(); e != nil; e = nextPending {
 		nextPending = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
@@ -289,7 +291,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {

@@ -22,7 +22,7 @@ import (
 
 // AuthorizeAgent authorizes requests from build agents to access the queue.
 func AuthorizeAgent(c *gin.Context) {
-	secret := c.MustGet("agent").(string)
+	secret, _ := c.MustGet("agent").(string)
 	if secret == "" {
 		c.String(401, "invalid or empty token.")
 		return
