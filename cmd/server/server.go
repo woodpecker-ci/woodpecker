@@ -281,7 +281,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
-	events := make([]model.WebhookEvent, len(_events))
+	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
 		events = append(events, model.WebhookEvent(v))
 	}

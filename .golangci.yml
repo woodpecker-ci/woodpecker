@@ -7,7 +7,10 @@ linters-settings:
     lang-version: "1.16"
     extra-rules: true
   gci:
-    local-prefixes: github.com/woodpecker-ci/woodpecker
+    sections:
+      - standard
+      - default
+      - prefix(github.com/woodpecker-ci/woodpecker)
 
 linters:
   enable:

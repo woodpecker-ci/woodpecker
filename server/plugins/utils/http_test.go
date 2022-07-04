@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-ap/httpsig"
+
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
 )
 
