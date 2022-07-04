@@ -79,11 +79,11 @@
           },
           "private": {
             "private": "Privāts",
-            "desc": "Tikai autorizēti lietotāji var piekļūt šim projektam."
+            "desc": "Tikai lietotāji, kam ir tiesības uz repozitoriju, var piekļūt šim projektam."
           },
           "internal": {
             "internal": "Iekšējs",
-            "desc": "Tikai lietotāji, kam ir tiesības uz repozitoriju, var piekļūt šim projektam."
+            "desc": "Tikai autorizēti lietotāji var piekļūt šim projektam."
           }
         },
 
