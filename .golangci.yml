@@ -26,7 +26,7 @@ linters:
     - revive
     - staticcheck
     - structcheck
-#    - typecheck
+    - typecheck
     - unused
     - varcheck
     - whitespace
@@ -99,3 +99,6 @@ issues:
     - path: pipeline/frontend/yaml/compiler/option_test.go
       linters:
         - tenv
+    - path: server/pipeline/create.go|server/api/helper.go|server/router/middleware/token/token.go|server/shared/configFetcher.go
+      linters:
+        - typecheck
