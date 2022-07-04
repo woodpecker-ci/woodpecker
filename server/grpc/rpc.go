@@ -24,9 +24,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
