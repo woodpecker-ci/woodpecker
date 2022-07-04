@@ -41,7 +41,7 @@ func start(ctx context.Context, store store.Store, activeBuild *model.Build, use
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	if err := queueBuild(activeBuild, repo, buildItems); err != nil {
+	if err := queueBuild(ctx, activeBuild, repo, buildItems); err != nil {
 		log.Error().Err(err).Msg("queueBuild")
 		return nil, err
 	}

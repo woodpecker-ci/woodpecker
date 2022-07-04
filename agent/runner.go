@@ -100,13 +100,13 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().Msg("received execution")
 
-	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
+	timeoutCtx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
 	// Add sigterm support for internal context.
 	// Required when the pipeline is terminated by external signals
 	// like kubernetes.
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
+	timeoutCtx = utils.WithContextSigtermCallback(timeoutCtx, func() {
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
@@ -114,7 +114,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(ctx, work.ID); werr != nil {
+		if werr := r.client.Wait(timeoutCtx, work.ID); werr != nil {
 			canceled.SetTo(true)
 			logger.Warn().Err(werr).Msg("cancel signal received")
 
@@ -127,14 +127,14 @@ func (r *Runner) Run(ctx context.Context) error {
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
+			case <-timeoutCtx.Done():
 				logger.Debug().Msg("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
 
-				if err := r.client.Extend(ctx, work.ID); err != nil {
+				if err := r.client.Extend(timeoutCtx, work.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
 			}
@@ -307,7 +307,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	})
 
 	err = pipeline.New(work.Config,
-		pipeline.WithContext(ctx),
+		pipeline.WithContext(timeoutCtx),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),

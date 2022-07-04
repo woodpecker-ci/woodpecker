@@ -62,9 +62,9 @@ func (e *docker) Load() error {
 	return nil
 }
 
-func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) Setup(ctx context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
+		_, err := e.client.VolumeCreate(ctx, volume.VolumeCreateBody{
 			Name:       vol.Name,
 			Driver:     vol.Driver,
 			DriverOpts: vol.DriverOpts,
@@ -75,7 +75,7 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 		}
 	}
 	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
+		_, err := e.client.NetworkCreate(ctx, n.Name, types.NetworkCreate{
 			Driver:     n.Driver,
 			Options:    n.DriverOpts,
 			EnableIPv6: e.enableIPv6,
@@ -197,24 +197,24 @@ func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 	return rc, nil
 }
 
-func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) Destroy(ctx context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerKill(ctx, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerRemove(ctx, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
 	}
 	for _, v := range conf.Volumes {
-		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
+		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
 			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
 		}
 	}
 	for _, n := range conf.Networks {
-		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
+		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {
 			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
 		}
 	}
@@ -222,8 +222,6 @@ func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 }
 
 var (
-	noContext = context.Background()
-
 	startOpts = types.ContainerStartOptions{}
 
 	removeOpts = types.ContainerRemoveOptions{
