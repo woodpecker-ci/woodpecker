@@ -44,8 +44,8 @@ func (cp *HttpFetcher) FetchConfig(ctx context.Context, _ *model.User, repo *mod
 	response := new(httpResponseStructure)
 	body := httpConfigRequestStructure{Repo: repo, Build: build, Configuration: currentConfigs}
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
-	if err != nil {
-		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
+	if err != nil && status != 204 {
+		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %s", status, err.Error())
 	}
 
 	var newFileMeta []*remote.FileMeta

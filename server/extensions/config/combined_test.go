@@ -270,11 +270,12 @@ func TestFetchFromConfigService(t *testing.T) {
 	dummyData := []byte("TEST")
 
 	testTable := []struct {
-		name              string
-		repoConfig        string
-		files             []file
-		expectedFileNames []string
-		expectedError     bool
+		name                  string
+		repoConfig            string
+		useRepoConfigEndpoint bool
+		files                 []file
+		expectedFileNames     []string
+		expectedError         bool
 	}{
 		{
 			name:              "External Fetch empty repo",
@@ -332,6 +333,25 @@ func TestFetchFromConfigService(t *testing.T) {
 				".my-ci-folder/test.yml",
 			},
 			expectedError: false,
+		},
+		{
+			name:                  "Use config endpoint from repo",
+			useRepoConfigEndpoint: true,
+			files: []file{{
+				name: ".woodpecker/test.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker.yml",
+				data: dummyData,
+			}, {
+				name: ".drone.yml",
+				data: dummyData,
+			}, {
+				name: ".my-ci-folder/test.yml",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{"override1", "override2", "override3"},
+			expectedError:     false,
 		},
 	}
 
@@ -409,7 +429,7 @@ func TestFetchFromConfigService(t *testing.T) {
 							"data": "some new pipelineconfig \n pipe, pipe, pipe"
 					}
 			]
-}`)
+	}`)
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
@@ -418,6 +438,10 @@ func TestFetchFromConfigService(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
+			repo.FullName = repo.Owner + "/" + repo.Name
+			if tt.useRepoConfigEndpoint {
+				repo.Config = ts.URL
+			}
 
 			r := new(mocks.Remote)
 			dirs := map[string][]*remote.FileMeta{}
