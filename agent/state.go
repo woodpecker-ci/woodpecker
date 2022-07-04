@@ -75,6 +75,7 @@ func (s *State) WriteTo(w io.Writer) (int64, error) {
 	s.Lock()
 	out, err := json.Marshal(s)
 	if err != nil {
+		s.Unlock()
 		return 0, err
 	}
 	s.Unlock()
