@@ -44,8 +44,7 @@ linters:
     - forcetypeassert
     - gci
     - gochecknoinits
-#    - gocognit
-#    - goconst
+    - goconst
 #    - gocritic
 #    - gocyclo
     - goheader
@@ -108,3 +107,6 @@ issues:
     - path: pipeline/backend/backend.go
       linters:
         - gochecknoinits
+    - path: cli/build/build_info.go|_test.go
+      linters:
+        - goconst
