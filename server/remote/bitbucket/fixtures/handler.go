@@ -43,9 +43,9 @@ func Handler() http.Handler {
 }
 
 func getOauth(c *gin.Context) {
-	switch c.PostForm("error") {
-	case "invalid_scope":
+	if c.PostForm("error") == "invalid_scope" {
 		c.String(500, "")
+		return
 	}
 
 	switch c.PostForm("code") {

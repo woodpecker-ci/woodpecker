@@ -13,7 +13,7 @@ func generateScriptPosix(commands []string) string {
 	var buf bytes.Buffer
 	for _, command := range commands {
 		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.Replace(escaped, "$", `\$`, -1)
+		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		buf.WriteString(fmt.Sprintf(
 			traceScript,
 			escaped,

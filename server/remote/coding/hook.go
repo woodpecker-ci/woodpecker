@@ -168,7 +168,7 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Commit:  hook.After,
 		Ref:     hook.Ref,
 		Link:    fmt.Sprintf("%s/git/commit/%s", hook.Repository.WebURL, hook.After),
-		Branch:  strings.Replace(hook.Ref, "refs/heads/", "", -1),
+		Branch:  strings.ReplaceAll(hook.Ref, "refs/heads/", ""),
 		Message: lastCommit.ShortMessage,
 		Email:   lastCommit.Committer.Email,
 		Avatar:  hook.User.Avatar,

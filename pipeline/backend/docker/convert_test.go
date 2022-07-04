@@ -65,10 +65,8 @@ func TestSplitVolumeParts(t *testing.T) {
 	for _, test := range testdata {
 		results, err := splitVolumeParts(test.from)
 		if test.success == (err != nil) {
-		} else {
-			if reflect.DeepEqual(results, test.to) != test.success {
-				t.Errorf("Expect %q matches %q is %v", test.from, results, test.to)
-			}
+		} else if reflect.DeepEqual(results, test.to) != test.success {
+			t.Errorf("Expect %q matches %q is %v", test.from, results, test.to)
 		}
 	}
 }

@@ -67,11 +67,12 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
-	if target == nil && source == nil {
+	switch {
+	case target == nil && source == nil:
 		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
-	} else if target == nil {
+	case target == nil:
 		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
-	} else if source == nil {
+	case source == nil:
 		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 

@@ -31,7 +31,7 @@ func toJSON(node *yaml.Node) (interface{}, error) {
 			return nil, fmt.Errorf("broken mapping node")
 		}
 		val := make(map[string]interface{}, len(node.Content)%2)
-		for i := len(node.Content); i > 1; i = i - 2 {
+		for i := len(node.Content); i > 1; i -= 2 {
 			k, err := toJSON(node.Content[i-2])
 			if err != nil {
 				return nil, err

@@ -245,14 +245,14 @@ func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return parseHook(r, c.URL)
 }
 
-func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
+func CreateConsumer(url, consumerKey string, privateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
-		ConsumerKey,
-		PrivateKey,
+		consumerKey,
+		privateKey,
 		oauth.ServiceProvider{
-			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, URL),
-			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, URL),
-			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, URL),
+			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, url),
+			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, url),
+			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, url),
 			HttpMethod:        "POST",
 		})
 	consumer.HttpClient = &http.Client{

@@ -49,11 +49,12 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	build, _ := UpdateToStatusPending(&mockUpdateBuildStore{}, model.Build{}, "Reviewer")
 
-	if model.StatusPending != build.Status {
+	switch {
+	case model.StatusPending != build.Status:
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusPending, build.Status)
-	} else if build.Reviewer != "Reviewer" {
+	case build.Reviewer != "Reviewer":
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
-	} else if now > build.Reviewed {
+	case now > build.Reviewed:
 		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
 	}
 }
@@ -65,11 +66,12 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	build, _ := UpdateToStatusDeclined(&mockUpdateBuildStore{}, model.Build{}, "Reviewer")
 
-	if model.StatusDeclined != build.Status {
+	switch {
+	case model.StatusDeclined != build.Status:
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusDeclined, build.Status)
-	} else if build.Reviewer != "Reviewer" {
+	case build.Reviewer != "Reviewer":
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
-	} else if now > build.Reviewed {
+	case now > build.Reviewed:
 		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
 	}
 }
@@ -93,13 +95,14 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	build, _ := UpdateToStatusError(&mockUpdateBuildStore{}, model.Build{}, errors.New("error"))
 
-	if build.Error != "error" {
+	switch {
+	case build.Error != "error":
 		t.Errorf("Build error not equals 'error' != '%s'", build.Error)
-	} else if model.StatusError != build.Status {
+	case model.StatusError != build.Status:
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusError, build.Status)
-	} else if now > build.Started {
+	case now > build.Started:
 		t.Errorf("Started not updated %d !< %d", now, build.Started)
-	} else if build.Started != build.Finished {
+	case build.Started != build.Finished:
 		t.Errorf("Build started and finished not equals %d != %d", build.Started, build.Finished)
 	}
 }

@@ -43,15 +43,16 @@ func TestUpdateProcStatusNotExited(t *testing.T) {
 	}
 	proc, _ := UpdateProcStatus(&mockUpdateProcStore{}, model.Proc{}, state, int64(1))
 
-	if proc.State != model.StatusRunning {
+	switch {
+	case proc.State != model.StatusRunning:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusRunning, proc.State)
-	} else if proc.Started != int64(42) {
+	case proc.Started != int64(42):
 		t.Errorf("Proc started not equals 42 != %d", proc.Started)
-	} else if proc.Stopped != int64(0) {
+	case proc.Stopped != int64(0):
 		t.Errorf("Proc stopped not equals 0 != %d", proc.Stopped)
-	} else if proc.ExitCode != 0 {
+	case proc.ExitCode != 0:
 		t.Errorf("Proc exit code not equals 0 != %d", proc.ExitCode)
-	} else if proc.Error != "" {
+	case proc.Error != "":
 		t.Errorf("Proc error not equals '' != '%s'", proc.Error)
 	}
 }
@@ -70,15 +71,16 @@ func TestUpdateProcStatusNotExitedButStopped(t *testing.T) {
 	}
 	proc, _ = UpdateProcStatus(&mockUpdateProcStore{}, *proc, state, int64(42))
 
-	if proc.State != model.StatusRunning {
+	switch {
+	case proc.State != model.StatusRunning:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusRunning, proc.State)
-	} else if proc.Started != int64(42) {
+	case proc.Started != int64(42):
 		t.Errorf("Proc started not equals 42 != %d", proc.Started)
-	} else if proc.Stopped != int64(64) {
+	case proc.Stopped != int64(64):
 		t.Errorf("Proc stopped not equals 64 != %d", proc.Stopped)
-	} else if proc.ExitCode != 0 {
+	case proc.ExitCode != 0:
 		t.Errorf("Proc exit code not equals 0 != %d", proc.ExitCode)
-	} else if proc.Error != "" {
+	case proc.Error != "":
 		t.Errorf("Proc error not equals '' != '%s'", proc.Error)
 	}
 }
@@ -95,15 +97,16 @@ func TestUpdateProcStatusExited(t *testing.T) {
 	}
 	proc, _ := UpdateProcStatus(&mockUpdateProcStore{}, model.Proc{}, state, int64(42))
 
-	if proc.State != model.StatusKilled {
+	switch {
+	case proc.State != model.StatusKilled:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusKilled, proc.State)
-	} else if proc.Started != int64(42) {
+	case proc.Started != int64(42):
 		t.Errorf("Proc started not equals 42 != %d", proc.Started)
-	} else if proc.Stopped != int64(34) {
+	case proc.Stopped != int64(34):
 		t.Errorf("Proc stopped not equals 34 != %d", proc.Stopped)
-	} else if proc.ExitCode != 137 {
+	case proc.ExitCode != 137:
 		t.Errorf("Proc exit code not equals 137 != %d", proc.ExitCode)
-	} else if proc.Error != "an error" {
+	case proc.Error != "an error":
 		t.Errorf("Proc error not equals 'an error' != '%s'", proc.Error)
 	}
 }
@@ -119,15 +122,16 @@ func TestUpdateProcStatusExitedButNot137(t *testing.T) {
 	}
 	proc, _ := UpdateProcStatus(&mockUpdateProcStore{}, model.Proc{}, state, int64(42))
 
-	if proc.State != model.StatusFailure {
+	switch {
+	case proc.State != model.StatusFailure:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusFailure, proc.State)
-	} else if proc.Started != int64(42) {
+	case proc.Started != int64(42):
 		t.Errorf("Proc started not equals 42 != %d", proc.Started)
-	} else if proc.Stopped != int64(34) {
+	case proc.Stopped != int64(34):
 		t.Errorf("Proc stopped not equals 34 != %d", proc.Stopped)
-	} else if proc.ExitCode != 0 {
+	case proc.ExitCode != 0:
 		t.Errorf("Proc exit code not equals 0 != %d", proc.ExitCode)
-	} else if proc.Error != "an error" {
+	case proc.Error != "an error":
 		t.Errorf("Proc error not equals 'an error' != '%s'", proc.Error)
 	}
 }
@@ -201,13 +205,14 @@ func TestUpdateProcStatusToDoneSkipped(t *testing.T) {
 
 	proc, _ := UpdateProcStatusToDone(&mockUpdateProcStore{}, model.Proc{}, state)
 
-	if proc.State != model.StatusSkipped {
+	switch {
+	case proc.State != model.StatusSkipped:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusSkipped, proc.State)
-	} else if proc.Stopped != int64(34) {
+	case proc.Stopped != int64(34):
 		t.Errorf("Proc stopped not equals 34 != %d", proc.Stopped)
-	} else if proc.Error != "" {
+	case proc.Error != "":
 		t.Errorf("Proc error not equals '' != '%s'", proc.Error)
-	} else if proc.ExitCode != 0 {
+	case proc.ExitCode != 0:
 		t.Errorf("Proc exit code not equals 0 != %d", proc.ExitCode)
 	}
 }
@@ -222,13 +227,14 @@ func TestUpdateProcStatusToDoneSuccess(t *testing.T) {
 
 	proc, _ := UpdateProcStatusToDone(&mockUpdateProcStore{}, model.Proc{}, state)
 
-	if proc.State != model.StatusSuccess {
+	switch {
+	case proc.State != model.StatusSuccess:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusSuccess, proc.State)
-	} else if proc.Stopped != int64(34) {
+	case proc.Stopped != int64(34):
 		t.Errorf("Proc stopped not equals 34 != %d", proc.Stopped)
-	} else if proc.Error != "" {
+	case proc.Error != "":
 		t.Errorf("Proc error not equals '' != '%s'", proc.Error)
-	} else if proc.ExitCode != 0 {
+	case proc.ExitCode != 0:
 		t.Errorf("Proc exit code not equals 0 != %d", proc.ExitCode)
 	}
 }
@@ -264,13 +270,14 @@ func TestUpdateProcToStatusKilledStarted(t *testing.T) {
 
 	proc, _ := UpdateProcToStatusKilled(&mockUpdateProcStore{}, model.Proc{})
 
-	if proc.State != model.StatusKilled {
+	switch {
+	case proc.State != model.StatusKilled:
 		t.Errorf("Proc status not equals '%s' != '%s'", model.StatusKilled, proc.State)
-	} else if proc.Stopped < now {
+	case proc.Stopped < now:
 		t.Errorf("Proc stopped not equals %d < %d", now, proc.Stopped)
-	} else if proc.Started != proc.Stopped {
+	case proc.Started != proc.Stopped:
 		t.Errorf("Proc started not equals %d != %d", proc.Stopped, proc.Started)
-	} else if proc.ExitCode != 137 {
+	case proc.ExitCode != 137:
 		t.Errorf("Proc exit code not equals 137 != %d", proc.ExitCode)
 	}
 }

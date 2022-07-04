@@ -198,7 +198,7 @@ func fixMalformedAvatar(url string) string {
 	}
 	index = strings.Index(url, "//avatars/")
 	if index != -1 {
-		return strings.Replace(url, "//avatars/", "/avatars/", -1)
+		return strings.ReplaceAll(url, "//avatars/", "/avatars/")
 	}
 	return url
 }

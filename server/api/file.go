@@ -106,8 +106,7 @@ func FileGet(c *gin.Context) {
 	}
 	defer rc.Close()
 
-	switch file.Mime {
-	case "application/vnd.test+json":
+	if file.Mime == "application/vnd.test+json" {
 		c.Header("Content-Type", "application/json")
 	}
 

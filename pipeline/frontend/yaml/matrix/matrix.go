@@ -73,7 +73,7 @@ func calc(matrix Matrix) []Axis {
 		decr := perm
 		for i, tag := range tags {
 			elems := matrix[tag]
-			decr = decr / len(elems)
+			decr /= len(elems)
 			elem := p / decr % len(elems)
 			axis[tag] = elems[elem]
 

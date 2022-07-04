@@ -11,8 +11,7 @@ import (
 
 func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
 	event := string(build.Event)
-	switch build.Event {
-	case model.EventPull:
+	if build.Event == model.EventPull {
 		event = "pr"
 	}
 

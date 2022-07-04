@@ -363,7 +363,8 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
-	if err != nil && errors.Is(err, datastore.RecordNotExist) {
+	switch {
+	case err != nil && errors.Is(err, datastore.RecordNotExist):
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
@@ -376,10 +377,10 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 		}
 		log.Info().Msg("Created private key")
 		return privKey, privKey.Public()
-	} else if err != nil {
+	case err != nil:
 		log.Fatal().Err(err).Msgf("Failed to load private key")
 		return nil, nil
-	} else {
+	default:
 		privKeyStr, err := hex.DecodeString(privKey)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to decode private key")

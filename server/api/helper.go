@@ -29,13 +29,14 @@ import (
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if errors.As(err, &pipeline.ErrNotFound{}) {
+	switch {
+	case errors.As(err, &pipeline.ErrNotFound{}):
 		c.String(http.StatusNotFound, "%v", err)
-	} else if errors.As(err, &pipeline.ErrBadRequest{}) {
+	case errors.As(err, &pipeline.ErrBadRequest{}):
 		c.String(http.StatusBadRequest, "%v", err)
-	} else if errors.As(err, &pipeline.ErrFiltered{}) {
+	case errors.As(err, &pipeline.ErrFiltered{}):
 		c.String(http.StatusNoContent, "%v", err)
-	} else {
+	default:
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }

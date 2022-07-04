@@ -45,7 +45,7 @@ linters:
     - gci
     - gochecknoinits
     - goconst
-#    - gocritic
+    - gocritic
 #    - gocyclo
     - goheader
     - goimports
@@ -110,3 +110,6 @@ issues:
     - path: cli/build/build_info.go|_test.go
       linters:
         - goconst
+    - path: server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go
+      linters:
+        - gocritic

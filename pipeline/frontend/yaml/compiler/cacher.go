@@ -27,7 +27,7 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Conta
 			"mount":       mounts,
 			"path":        "/cache",
 			"restore":     true,
-			"file":        strings.Replace(branch, "/", "_", -1) + ".tar",
+			"file":        strings.ReplaceAll(branch, "/", "_") + ".tar",
 			"fallback_to": "master.tar",
 		},
 		Volumes: types.Volumes{
@@ -51,7 +51,7 @@ func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Conta
 			"path":    "/cache",
 			"rebuild": true,
 			"flush":   true,
-			"file":    strings.Replace(branch, "/", "_", -1) + ".tar",
+			"file":    strings.ReplaceAll(branch, "/", "_") + ".tar",
 		},
 		Volumes: types.Volumes{
 			Volumes: []*types.Volume{

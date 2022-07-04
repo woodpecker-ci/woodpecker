@@ -81,7 +81,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Build, error) {
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
 		Link:         hook.GetHeadCommit().GetURL(),
-		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
+		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:       hook.GetSender().GetAvatarURL(),
@@ -105,7 +105,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Build, error) {
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as build's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			build.Branch = strings.Replace(hook.GetBaseRef(), "refs/heads/", "", -1)
+			build.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
 		}
 	}
 
