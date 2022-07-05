@@ -1,3 +1,3 @@
 type Query {
-  repository: [Repo!]! @isAuthenticated
+  repositories: [Repository!]! @isAuthenticated
 }

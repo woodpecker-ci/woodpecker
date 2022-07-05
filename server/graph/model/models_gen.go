@@ -21,7 +21,7 @@ type UpdateRegistry struct {
 	Password string `json:"password"`
 }
 
-type UpdateRepo struct {
+type UpdateRepository struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func (r *queryResolver) Repository(ctx context.Context) ([]*model.Repo, error) {
+func (r *queryResolver) Repositories(ctx context.Context) ([]*model.Repo, error) {
 	user := middleware.User(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("user is nil")

@@ -12,19 +12,19 @@ import (
 	model1 "github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (r *mutationResolver) ActivateRepo(ctx context.Context, owner string, name string) (bool, error) {
+func (r *mutationResolver) ActivateRepository(ctx context.Context, owner string, name string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateRepo(ctx context.Context, input model.UpdateRepo) (*model1.Repo, error) {
+func (r *mutationResolver) UpdateRepository(ctx context.Context, input model.UpdateRepository) (*model1.Repo, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteRepo(ctx context.Context, owner string, name string) (bool, error) {
+func (r *mutationResolver) DeleteRepository(ctx context.Context, owner string, name string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) RepairRepo(ctx context.Context, owner string, name string) (bool, error) {
+func (r *mutationResolver) RepairRepository(ctx context.Context, owner string, name string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

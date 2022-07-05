@@ -41,7 +41,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Proc() ProcResolver
 	Query() QueryResolver
-	Repo() RepoResolver
+	Repository() RepositoryResolver
 	Secret() SecretResolver
 }
 
@@ -87,20 +87,20 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ActivateRepo   func(childComplexity int, owner string, name string) int
-		ApproveBuild   func(childComplexity int, owner string, name string, buildID int) int
-		CancelBuild    func(childComplexity int, owner string, name string, buildID int) int
-		CreateRegistry func(childComplexity int, owner string, name string, registry model.NewRegistry) int
-		CreateSecret   func(childComplexity int, owner string, name string, secret model.NewSecret) int
-		DeclineBuild   func(childComplexity int, owner string, name string, buildID int) int
-		DeleteRegistry func(childComplexity int, owner string, name string, registryName string) int
-		DeleteRepo     func(childComplexity int, owner string, name string) int
-		DeleteSecret   func(childComplexity int, owner string, name string, secretName string) int
-		RepairRepo     func(childComplexity int, owner string, name string) int
-		RestartBuild   func(childComplexity int, owner string, name string, buildID int) int
-		UpdateRegistry func(childComplexity int, owner string, name string, registry model.UpdateRegistry) int
-		UpdateRepo     func(childComplexity int, input model.UpdateRepo) int
-		UpdateSecret   func(childComplexity int, owner string, name string, secret model.UpdateSecret) int
+		ActivateRepository func(childComplexity int, owner string, name string) int
+		ApproveBuild       func(childComplexity int, owner string, name string, buildID int) int
+		CancelBuild        func(childComplexity int, owner string, name string, buildID int) int
+		CreateRegistry     func(childComplexity int, owner string, name string, registry model.NewRegistry) int
+		CreateSecret       func(childComplexity int, owner string, name string, secret model.NewSecret) int
+		DeclineBuild       func(childComplexity int, owner string, name string, buildID int) int
+		DeleteRegistry     func(childComplexity int, owner string, name string, registryName string) int
+		DeleteRepository   func(childComplexity int, owner string, name string) int
+		DeleteSecret       func(childComplexity int, owner string, name string, secretName string) int
+		RepairRepository   func(childComplexity int, owner string, name string) int
+		RestartBuild       func(childComplexity int, owner string, name string, buildID int) int
+		UpdateRegistry     func(childComplexity int, owner string, name string, registry model.UpdateRegistry) int
+		UpdateRepository   func(childComplexity int, input model.UpdateRepository) int
+		UpdateSecret       func(childComplexity int, owner string, name string, secret model.UpdateSecret) int
 	}
 
 	Proc struct {
@@ -116,10 +116,11 @@ type ComplexityRoot struct {
 		PPID     func(childComplexity int) int
 		Started  func(childComplexity int) int
 		State    func(childComplexity int) int
+		Stopped  func(childComplexity int) int
 	}
 
 	Query struct {
-		Repository func(childComplexity int) int
+		Repositories func(childComplexity int) int
 	}
 
 	Registry struct {
@@ -129,7 +130,7 @@ type ComplexityRoot struct {
 		Username func(childComplexity int) int
 	}
 
-	Repo struct {
+	Repository struct {
 		AllowPull                    func(childComplexity int) int
 		Avatar                       func(childComplexity int) int
 		Branch                       func(childComplexity int) int
@@ -174,10 +175,10 @@ type BuildResolver interface {
 	Status(ctx context.Context, obj *model1.Build) (string, error)
 }
 type MutationResolver interface {
-	ActivateRepo(ctx context.Context, owner string, name string) (bool, error)
-	UpdateRepo(ctx context.Context, input model.UpdateRepo) (*model1.Repo, error)
-	DeleteRepo(ctx context.Context, owner string, name string) (bool, error)
-	RepairRepo(ctx context.Context, owner string, name string) (bool, error)
+	ActivateRepository(ctx context.Context, owner string, name string) (bool, error)
+	UpdateRepository(ctx context.Context, input model.UpdateRepository) (*model1.Repo, error)
+	DeleteRepository(ctx context.Context, owner string, name string) (bool, error)
+	RepairRepository(ctx context.Context, owner string, name string) (bool, error)
 	CancelBuild(ctx context.Context, owner string, name string, buildID int) (bool, error)
 	ApproveBuild(ctx context.Context, owner string, name string, buildID int) (bool, error)
 	DeclineBuild(ctx context.Context, owner string, name string, buildID int) (bool, error)
@@ -195,9 +196,9 @@ type ProcResolver interface {
 	Environ(ctx context.Context, obj *model1.Proc) ([]string, error)
 }
 type QueryResolver interface {
-	Repository(ctx context.Context) ([]*model1.Repo, error)
+	Repositories(ctx context.Context) ([]*model1.Repo, error)
 }
-type RepoResolver interface {
+type RepositoryResolver interface {
 	SCMKind(ctx context.Context, obj *model1.Repo) (string, error)
 
 	Visibility(ctx context.Context, obj *model1.Repo) (string, error)
@@ -441,17 +442,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Build.Verified(childComplexity), true
 
-	case "Mutation.activateRepo":
-		if e.complexity.Mutation.ActivateRepo == nil {
+	case "Mutation.activateRepository":
+		if e.complexity.Mutation.ActivateRepository == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_activateRepo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_activateRepository_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ActivateRepo(childComplexity, args["owner"].(string), args["name"].(string)), true
+		return e.complexity.Mutation.ActivateRepository(childComplexity, args["owner"].(string), args["name"].(string)), true
 
 	case "Mutation.approveBuild":
 		if e.complexity.Mutation.ApproveBuild == nil {
@@ -525,17 +526,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteRegistry(childComplexity, args["owner"].(string), args["name"].(string), args["registryName"].(string)), true
 
-	case "Mutation.deleteRepo":
-		if e.complexity.Mutation.DeleteRepo == nil {
+	case "Mutation.deleteRepository":
+		if e.complexity.Mutation.DeleteRepository == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_deleteRepo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_deleteRepository_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteRepo(childComplexity, args["owner"].(string), args["name"].(string)), true
+		return e.complexity.Mutation.DeleteRepository(childComplexity, args["owner"].(string), args["name"].(string)), true
 
 	case "Mutation.deleteSecret":
 		if e.complexity.Mutation.DeleteSecret == nil {
@@ -549,17 +550,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteSecret(childComplexity, args["owner"].(string), args["name"].(string), args["secretName"].(string)), true
 
-	case "Mutation.repairRepo":
-		if e.complexity.Mutation.RepairRepo == nil {
+	case "Mutation.repairRepository":
+		if e.complexity.Mutation.RepairRepository == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_repairRepo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_repairRepository_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RepairRepo(childComplexity, args["owner"].(string), args["name"].(string)), true
+		return e.complexity.Mutation.RepairRepository(childComplexity, args["owner"].(string), args["name"].(string)), true
 
 	case "Mutation.restartBuild":
 		if e.complexity.Mutation.RestartBuild == nil {
@@ -585,17 +586,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateRegistry(childComplexity, args["owner"].(string), args["name"].(string), args["registry"].(model.UpdateRegistry)), true
 
-	case "Mutation.updateRepo":
-		if e.complexity.Mutation.UpdateRepo == nil {
+	case "Mutation.updateRepository":
+		if e.complexity.Mutation.UpdateRepository == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateRepo_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_updateRepository_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateRepo(childComplexity, args["input"].(model.UpdateRepo)), true
+		return e.complexity.Mutation.UpdateRepository(childComplexity, args["input"].(model.UpdateRepository)), true
 
 	case "Mutation.updateSecret":
 		if e.complexity.Mutation.UpdateSecret == nil {
@@ -679,7 +680,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Proc.PPID(childComplexity), true
 
-	case "Proc.start_time", "Proc.end_time":
+	case "Proc.start_time":
 		if e.complexity.Proc.Started == nil {
 			break
 		}
@@ -693,12 +694,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Proc.State(childComplexity), true
 
-	case "Query.repository":
-		if e.complexity.Query.Repository == nil {
+	case "Proc.end_time":
+		if e.complexity.Proc.Stopped == nil {
 			break
 		}
 
-		return e.complexity.Query.Repository(childComplexity), true
+		return e.complexity.Proc.Stopped(childComplexity), true
+
+	case "Query.repositories":
+		if e.complexity.Query.Repositories == nil {
+			break
+		}
+
+		return e.complexity.Query.Repositories(childComplexity), true
 
 	case "Registry.address":
 		if e.complexity.Registry.Address == nil {
@@ -728,138 +736,138 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Registry.Username(childComplexity), true
 
-	case "Repo.allow_pr":
-		if e.complexity.Repo.AllowPull == nil {
+	case "Repository.allow_pr":
+		if e.complexity.Repository.AllowPull == nil {
 			break
 		}
 
-		return e.complexity.Repo.AllowPull(childComplexity), true
+		return e.complexity.Repository.AllowPull(childComplexity), true
 
-	case "Repo.avatar":
-		if e.complexity.Repo.Avatar == nil {
+	case "Repository.avatar":
+		if e.complexity.Repository.Avatar == nil {
 			break
 		}
 
-		return e.complexity.Repo.Avatar(childComplexity), true
+		return e.complexity.Repository.Avatar(childComplexity), true
 
-	case "Repo.default_branch":
-		if e.complexity.Repo.Branch == nil {
+	case "Repository.default_branch":
+		if e.complexity.Repository.Branch == nil {
 			break
 		}
 
-		return e.complexity.Repo.Branch(childComplexity), true
+		return e.complexity.Repository.Branch(childComplexity), true
 
-	case "Repo.cancel_previous_pipeline_events":
-		if e.complexity.Repo.CancelPreviousPipelineEvents == nil {
+	case "Repository.cancel_previous_pipeline_events":
+		if e.complexity.Repository.CancelPreviousPipelineEvents == nil {
 			break
 		}
 
-		return e.complexity.Repo.CancelPreviousPipelineEvents(childComplexity), true
+		return e.complexity.Repository.CancelPreviousPipelineEvents(childComplexity), true
 
-	case "Repo.clone_url":
-		if e.complexity.Repo.Clone == nil {
+	case "Repository.clone_url":
+		if e.complexity.Repository.Clone == nil {
 			break
 		}
 
-		return e.complexity.Repo.Clone(childComplexity), true
+		return e.complexity.Repository.Clone(childComplexity), true
 
-	case "Repo.config_file":
-		if e.complexity.Repo.Config == nil {
+	case "Repository.config_file":
+		if e.complexity.Repository.Config == nil {
 			break
 		}
 
-		return e.complexity.Repo.Config(childComplexity), true
+		return e.complexity.Repository.Config(childComplexity), true
 
-	case "Repo.full_name":
-		if e.complexity.Repo.FullName == nil {
+	case "Repository.full_name":
+		if e.complexity.Repository.FullName == nil {
 			break
 		}
 
-		return e.complexity.Repo.FullName(childComplexity), true
+		return e.complexity.Repository.FullName(childComplexity), true
 
-	case "Repo.id":
-		if e.complexity.Repo.ID == nil {
+	case "Repository.id":
+		if e.complexity.Repository.ID == nil {
 			break
 		}
 
-		return e.complexity.Repo.ID(childComplexity), true
+		return e.complexity.Repository.ID(childComplexity), true
 
-	case "Repo.active":
-		if e.complexity.Repo.IsActive == nil {
+	case "Repository.active":
+		if e.complexity.Repository.IsActive == nil {
 			break
 		}
 
-		return e.complexity.Repo.IsActive(childComplexity), true
+		return e.complexity.Repository.IsActive(childComplexity), true
 
-	case "Repo.gated":
-		if e.complexity.Repo.IsGated == nil {
+	case "Repository.gated":
+		if e.complexity.Repository.IsGated == nil {
 			break
 		}
 
-		return e.complexity.Repo.IsGated(childComplexity), true
+		return e.complexity.Repository.IsGated(childComplexity), true
 
-	case "Repo.is_scm_private":
-		if e.complexity.Repo.IsSCMPrivate == nil {
+	case "Repository.is_scm_private":
+		if e.complexity.Repository.IsSCMPrivate == nil {
 			break
 		}
 
-		return e.complexity.Repo.IsSCMPrivate(childComplexity), true
+		return e.complexity.Repository.IsSCMPrivate(childComplexity), true
 
-	case "Repo.trusted":
-		if e.complexity.Repo.IsTrusted == nil {
+	case "Repository.trusted":
+		if e.complexity.Repository.IsTrusted == nil {
 			break
 		}
 
-		return e.complexity.Repo.IsTrusted(childComplexity), true
+		return e.complexity.Repository.IsTrusted(childComplexity), true
 
-	case "Repo.last_build":
-		if e.complexity.Repo.LastBuild == nil {
+	case "Repository.last_build":
+		if e.complexity.Repository.LastBuild == nil {
 			break
 		}
 
-		return e.complexity.Repo.LastBuild(childComplexity), true
+		return e.complexity.Repository.LastBuild(childComplexity), true
 
-	case "Repo.link":
-		if e.complexity.Repo.Link == nil {
+	case "Repository.link":
+		if e.complexity.Repository.Link == nil {
 			break
 		}
 
-		return e.complexity.Repo.Link(childComplexity), true
+		return e.complexity.Repository.Link(childComplexity), true
 
-	case "Repo.name":
-		if e.complexity.Repo.Name == nil {
+	case "Repository.name":
+		if e.complexity.Repository.Name == nil {
 			break
 		}
 
-		return e.complexity.Repo.Name(childComplexity), true
+		return e.complexity.Repository.Name(childComplexity), true
 
-	case "Repo.owner":
-		if e.complexity.Repo.Owner == nil {
+	case "Repository.owner":
+		if e.complexity.Repository.Owner == nil {
 			break
 		}
 
-		return e.complexity.Repo.Owner(childComplexity), true
+		return e.complexity.Repository.Owner(childComplexity), true
 
-	case "Repo.scm":
-		if e.complexity.Repo.SCMKind == nil {
+	case "Repository.scm":
+		if e.complexity.Repository.SCMKind == nil {
 			break
 		}
 
-		return e.complexity.Repo.SCMKind(childComplexity), true
+		return e.complexity.Repository.SCMKind(childComplexity), true
 
-	case "Repo.timeout":
-		if e.complexity.Repo.Timeout == nil {
+	case "Repository.timeout":
+		if e.complexity.Repository.Timeout == nil {
 			break
 		}
 
-		return e.complexity.Repo.Timeout(childComplexity), true
+		return e.complexity.Repository.Timeout(childComplexity), true
 
-	case "Repo.visibility":
-		if e.complexity.Repo.Visibility == nil {
+	case "Repository.visibility":
+		if e.complexity.Repository.Visibility == nil {
 			break
 		}
 
-		return e.complexity.Repo.Visibility(childComplexity), true
+		return e.complexity.Repository.Visibility(childComplexity), true
 
 	case "Secret.events":
 		if e.complexity.Secret.Events == nil {
@@ -949,7 +957,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputNewRegistry,
 		ec.unmarshalInputNewSecret,
 		ec.unmarshalInputUpdateRegistry,
-		ec.unmarshalInputUpdateRepo,
+		ec.unmarshalInputUpdateRepository,
 		ec.unmarshalInputUpdateSecret,
 	)
 	first := true
@@ -1039,7 +1047,7 @@ directive @isAuthenticated on QUERY | MUTATION | SUBSCRIPTION | OBJECT | FIELD_D
 
 # instance admin, repo admin, repo user, authenticated, unauthenticated
 `, BuiltIn: false},
-	{Name: "../schema/mutations.graphqls", Input: `input UpdateRepo {
+	{Name: "../schema/mutations.graphqls", Input: `input UpdateRepository {
   text: String!
   userId: String!
 }
@@ -1070,10 +1078,10 @@ input UpdateRegistry {
 }
 
 type Mutation {
-  activateRepo(owner: String!, name: String!): Boolean! @todo
-  updateRepo(input: UpdateRepo!): Repo! @todo
-  deleteRepo(owner: String!, name: String!): Boolean! @todo
-  repairRepo(owner: String!, name: String!): Boolean! @todo
+  activateRepository(owner: String!, name: String!): Boolean! @todo
+  updateRepository(input: UpdateRepository!): Repository! @todo
+  deleteRepository(owner: String!, name: String!): Boolean! @todo
+  repairRepository(owner: String!, name: String!): Boolean! @todo
 
   cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
   approveBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
@@ -1104,7 +1112,7 @@ type Mutation {
 }
 `, BuiltIn: false},
 	{Name: "../schema/queries.graphqls", Input: `type Query {
-  repository: [Repo!]! @isAuthenticated
+  repositories: [Repository!]! @isAuthenticated
 }
 `, BuiltIn: false},
 	{Name: "../schema/types/build.graphqls", Input: `type Build {
@@ -1151,7 +1159,7 @@ type Mutation {
   exit_code: Int!
   environ: [String!]!
   start_time: Int! @goField(name: "started")
-  end_time: Int! @goField(name: "started")
+  end_time: Int! @goField(name: "stopped")
   machine: String!
   error: String!
   children: [Proc!]
@@ -1165,7 +1173,8 @@ type Mutation {
 }
 `, BuiltIn: false},
 	{Name: "../schema/types/repository.graphqls", Input: `# A version control repository.
-type Repo {
+type Repository
+  @goModel(model: "github.com/woodpecker-ci/woodpecker/server/model.Repo") {
   # Is the repo currently active or not
   active: Boolean! @goField(name: "is_active")
 
@@ -1272,7 +1281,7 @@ func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[st
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_activateRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_activateRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1494,7 +1503,7 @@ func (ec *executionContext) field_Mutation_deleteRegistry_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_deleteRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_deleteRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1551,7 +1560,7 @@ func (ec *executionContext) field_Mutation_deleteSecret_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_repairRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_repairRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1641,13 +1650,13 @@ func (ec *executionContext) field_Mutation_updateRegistry_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateRepo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.UpdateRepo
+	var arg0 model.UpdateRepository
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUpdateRepo2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋgraphᚋmodelᚐUpdateRepo(ctx, tmp)
+		arg0, err = ec.unmarshalNUpdateRepository2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋgraphᚋmodelᚐUpdateRepository(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3285,8 +3294,8 @@ func (ec *executionContext) fieldContext_Build_changed_files(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_activateRepo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_activateRepo(ctx, field)
+func (ec *executionContext) _Mutation_activateRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_activateRepository(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3300,7 +3309,7 @@ func (ec *executionContext) _Mutation_activateRepo(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().ActivateRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+			return ec.resolvers.Mutation().ActivateRepository(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.Todo == nil {
@@ -3336,7 +3345,7 @@ func (ec *executionContext) _Mutation_activateRepo(ctx context.Context, field gr
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_activateRepo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_activateRepository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3353,15 +3362,15 @@ func (ec *executionContext) fieldContext_Mutation_activateRepo(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_activateRepo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_activateRepository_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updateRepo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateRepo(ctx, field)
+func (ec *executionContext) _Mutation_updateRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateRepository(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3375,7 +3384,7 @@ func (ec *executionContext) _Mutation_updateRepo(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateRepo(rctx, fc.Args["input"].(model.UpdateRepo))
+			return ec.resolvers.Mutation().UpdateRepository(rctx, fc.Args["input"].(model.UpdateRepository))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.Todo == nil {
@@ -3408,10 +3417,10 @@ func (ec *executionContext) _Mutation_updateRepo(ctx context.Context, field grap
 	}
 	res := resTmp.(*model1.Repo)
 	fc.Result = res
-	return ec.marshalNRepo2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx, field.Selections, res)
+	return ec.marshalNRepository2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updateRepo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateRepository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3420,45 +3429,45 @@ func (ec *executionContext) fieldContext_Mutation_updateRepo(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "active":
-				return ec.fieldContext_Repo_active(ctx, field)
+				return ec.fieldContext_Repository_active(ctx, field)
 			case "id":
-				return ec.fieldContext_Repo_id(ctx, field)
+				return ec.fieldContext_Repository_id(ctx, field)
 			case "scm":
-				return ec.fieldContext_Repo_scm(ctx, field)
+				return ec.fieldContext_Repository_scm(ctx, field)
 			case "owner":
-				return ec.fieldContext_Repo_owner(ctx, field)
+				return ec.fieldContext_Repository_owner(ctx, field)
 			case "name":
-				return ec.fieldContext_Repo_name(ctx, field)
+				return ec.fieldContext_Repository_name(ctx, field)
 			case "full_name":
-				return ec.fieldContext_Repo_full_name(ctx, field)
+				return ec.fieldContext_Repository_full_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_Repo_avatar(ctx, field)
+				return ec.fieldContext_Repository_avatar(ctx, field)
 			case "link":
-				return ec.fieldContext_Repo_link(ctx, field)
+				return ec.fieldContext_Repository_link(ctx, field)
 			case "clone_url":
-				return ec.fieldContext_Repo_clone_url(ctx, field)
+				return ec.fieldContext_Repository_clone_url(ctx, field)
 			case "default_branch":
-				return ec.fieldContext_Repo_default_branch(ctx, field)
+				return ec.fieldContext_Repository_default_branch(ctx, field)
 			case "is_scm_private":
-				return ec.fieldContext_Repo_is_scm_private(ctx, field)
+				return ec.fieldContext_Repository_is_scm_private(ctx, field)
 			case "trusted":
-				return ec.fieldContext_Repo_trusted(ctx, field)
+				return ec.fieldContext_Repository_trusted(ctx, field)
 			case "timeout":
-				return ec.fieldContext_Repo_timeout(ctx, field)
+				return ec.fieldContext_Repository_timeout(ctx, field)
 			case "allow_pr":
-				return ec.fieldContext_Repo_allow_pr(ctx, field)
+				return ec.fieldContext_Repository_allow_pr(ctx, field)
 			case "config_file":
-				return ec.fieldContext_Repo_config_file(ctx, field)
+				return ec.fieldContext_Repository_config_file(ctx, field)
 			case "visibility":
-				return ec.fieldContext_Repo_visibility(ctx, field)
+				return ec.fieldContext_Repository_visibility(ctx, field)
 			case "gated":
-				return ec.fieldContext_Repo_gated(ctx, field)
+				return ec.fieldContext_Repository_gated(ctx, field)
 			case "cancel_previous_pipeline_events":
-				return ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+				return ec.fieldContext_Repository_cancel_previous_pipeline_events(ctx, field)
 			case "last_build":
-				return ec.fieldContext_Repo_last_build(ctx, field)
+				return ec.fieldContext_Repository_last_build(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Repo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Repository", field.Name)
 		},
 	}
 	defer func() {
@@ -3468,15 +3477,15 @@ func (ec *executionContext) fieldContext_Mutation_updateRepo(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateRepo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateRepository_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_deleteRepo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteRepo(ctx, field)
+func (ec *executionContext) _Mutation_deleteRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteRepository(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3490,7 +3499,7 @@ func (ec *executionContext) _Mutation_deleteRepo(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().DeleteRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+			return ec.resolvers.Mutation().DeleteRepository(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.Todo == nil {
@@ -3526,7 +3535,7 @@ func (ec *executionContext) _Mutation_deleteRepo(ctx context.Context, field grap
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_deleteRepo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_deleteRepository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3543,15 +3552,15 @@ func (ec *executionContext) fieldContext_Mutation_deleteRepo(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteRepo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_deleteRepository_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_repairRepo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_repairRepo(ctx, field)
+func (ec *executionContext) _Mutation_repairRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_repairRepository(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3565,7 +3574,7 @@ func (ec *executionContext) _Mutation_repairRepo(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().RepairRepo(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
+			return ec.resolvers.Mutation().RepairRepository(rctx, fc.Args["owner"].(string), fc.Args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.Todo == nil {
@@ -3601,7 +3610,7 @@ func (ec *executionContext) _Mutation_repairRepo(ctx context.Context, field grap
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_repairRepo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_repairRepository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3618,7 +3627,7 @@ func (ec *executionContext) fieldContext_Mutation_repairRepo(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_repairRepo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_repairRepository_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4829,7 +4838,7 @@ func (ec *executionContext) _Proc_end_time(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Started, nil
+		return obj.Stopped, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5016,8 +5025,8 @@ func (ec *executionContext) fieldContext_Proc_children(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_repository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_repository(ctx, field)
+func (ec *executionContext) _Query_repositories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_repositories(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5031,7 +5040,7 @@ func (ec *executionContext) _Query_repository(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Repository(rctx)
+			return ec.resolvers.Query().Repositories(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.IsAuthenticated == nil {
@@ -5064,10 +5073,10 @@ func (ec *executionContext) _Query_repository(ctx context.Context, field graphql
 	}
 	res := resTmp.([]*model1.Repo)
 	fc.Result = res
-	return ec.marshalNRepo2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepoᚄ(ctx, field.Selections, res)
+	return ec.marshalNRepository2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepoᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_repository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_repositories(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -5076,45 +5085,45 @@ func (ec *executionContext) fieldContext_Query_repository(ctx context.Context, f
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "active":
-				return ec.fieldContext_Repo_active(ctx, field)
+				return ec.fieldContext_Repository_active(ctx, field)
 			case "id":
-				return ec.fieldContext_Repo_id(ctx, field)
+				return ec.fieldContext_Repository_id(ctx, field)
 			case "scm":
-				return ec.fieldContext_Repo_scm(ctx, field)
+				return ec.fieldContext_Repository_scm(ctx, field)
 			case "owner":
-				return ec.fieldContext_Repo_owner(ctx, field)
+				return ec.fieldContext_Repository_owner(ctx, field)
 			case "name":
-				return ec.fieldContext_Repo_name(ctx, field)
+				return ec.fieldContext_Repository_name(ctx, field)
 			case "full_name":
-				return ec.fieldContext_Repo_full_name(ctx, field)
+				return ec.fieldContext_Repository_full_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_Repo_avatar(ctx, field)
+				return ec.fieldContext_Repository_avatar(ctx, field)
 			case "link":
-				return ec.fieldContext_Repo_link(ctx, field)
+				return ec.fieldContext_Repository_link(ctx, field)
 			case "clone_url":
-				return ec.fieldContext_Repo_clone_url(ctx, field)
+				return ec.fieldContext_Repository_clone_url(ctx, field)
 			case "default_branch":
-				return ec.fieldContext_Repo_default_branch(ctx, field)
+				return ec.fieldContext_Repository_default_branch(ctx, field)
 			case "is_scm_private":
-				return ec.fieldContext_Repo_is_scm_private(ctx, field)
+				return ec.fieldContext_Repository_is_scm_private(ctx, field)
 			case "trusted":
-				return ec.fieldContext_Repo_trusted(ctx, field)
+				return ec.fieldContext_Repository_trusted(ctx, field)
 			case "timeout":
-				return ec.fieldContext_Repo_timeout(ctx, field)
+				return ec.fieldContext_Repository_timeout(ctx, field)
 			case "allow_pr":
-				return ec.fieldContext_Repo_allow_pr(ctx, field)
+				return ec.fieldContext_Repository_allow_pr(ctx, field)
 			case "config_file":
-				return ec.fieldContext_Repo_config_file(ctx, field)
+				return ec.fieldContext_Repository_config_file(ctx, field)
 			case "visibility":
-				return ec.fieldContext_Repo_visibility(ctx, field)
+				return ec.fieldContext_Repository_visibility(ctx, field)
 			case "gated":
-				return ec.fieldContext_Repo_gated(ctx, field)
+				return ec.fieldContext_Repository_gated(ctx, field)
 			case "cancel_previous_pipeline_events":
-				return ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+				return ec.fieldContext_Repository_cancel_previous_pipeline_events(ctx, field)
 			case "last_build":
-				return ec.fieldContext_Repo_last_build(ctx, field)
+				return ec.fieldContext_Repository_last_build(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Repo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Repository", field.Name)
 		},
 	}
 	return fc, nil
@@ -5425,8 +5434,8 @@ func (ec *executionContext) fieldContext_Registry_password(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_active(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_active(ctx, field)
+func (ec *executionContext) _Repository_active(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_active(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5456,9 +5465,9 @@ func (ec *executionContext) _Repo_active(ctx context.Context, field graphql.Coll
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5469,8 +5478,8 @@ func (ec *executionContext) fieldContext_Repo_active(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_id(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_id(ctx, field)
+func (ec *executionContext) _Repository_id(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5500,9 +5509,9 @@ func (ec *executionContext) _Repo_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5513,8 +5522,8 @@ func (ec *executionContext) fieldContext_Repo_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_scm(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_scm(ctx, field)
+func (ec *executionContext) _Repository_scm(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_scm(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5527,7 +5536,7 @@ func (ec *executionContext) _Repo_scm(ctx context.Context, field graphql.Collect
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().SCMKind(rctx, obj)
+		return ec.resolvers.Repository().SCMKind(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5544,9 +5553,9 @@ func (ec *executionContext) _Repo_scm(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_scm(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_scm(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -5557,8 +5566,8 @@ func (ec *executionContext) fieldContext_Repo_scm(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_owner(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_owner(ctx, field)
+func (ec *executionContext) _Repository_owner(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_owner(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5588,9 +5597,9 @@ func (ec *executionContext) _Repo_owner(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5601,8 +5610,8 @@ func (ec *executionContext) fieldContext_Repo_owner(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_name(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_name(ctx, field)
+func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5632,9 +5641,9 @@ func (ec *executionContext) _Repo_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5645,8 +5654,8 @@ func (ec *executionContext) fieldContext_Repo_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_full_name(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_full_name(ctx, field)
+func (ec *executionContext) _Repository_full_name(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_full_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5676,9 +5685,9 @@ func (ec *executionContext) _Repo_full_name(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_full_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_full_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5689,8 +5698,8 @@ func (ec *executionContext) fieldContext_Repo_full_name(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_avatar(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_avatar(ctx, field)
+func (ec *executionContext) _Repository_avatar(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_avatar(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5720,9 +5729,9 @@ func (ec *executionContext) _Repo_avatar(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5733,8 +5742,8 @@ func (ec *executionContext) fieldContext_Repo_avatar(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_link(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_link(ctx, field)
+func (ec *executionContext) _Repository_link(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_link(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5764,9 +5773,9 @@ func (ec *executionContext) _Repo_link(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_link(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5777,8 +5786,8 @@ func (ec *executionContext) fieldContext_Repo_link(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_clone_url(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_clone_url(ctx, field)
+func (ec *executionContext) _Repository_clone_url(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_clone_url(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5808,9 +5817,9 @@ func (ec *executionContext) _Repo_clone_url(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_clone_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_clone_url(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5821,8 +5830,8 @@ func (ec *executionContext) fieldContext_Repo_clone_url(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_default_branch(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_default_branch(ctx, field)
+func (ec *executionContext) _Repository_default_branch(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_default_branch(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5852,9 +5861,9 @@ func (ec *executionContext) _Repo_default_branch(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_default_branch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_default_branch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5865,8 +5874,8 @@ func (ec *executionContext) fieldContext_Repo_default_branch(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_is_scm_private(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_is_scm_private(ctx, field)
+func (ec *executionContext) _Repository_is_scm_private(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_is_scm_private(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5896,9 +5905,9 @@ func (ec *executionContext) _Repo_is_scm_private(ctx context.Context, field grap
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_is_scm_private(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_is_scm_private(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5909,8 +5918,8 @@ func (ec *executionContext) fieldContext_Repo_is_scm_private(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_trusted(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_trusted(ctx, field)
+func (ec *executionContext) _Repository_trusted(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_trusted(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5940,9 +5949,9 @@ func (ec *executionContext) _Repo_trusted(ctx context.Context, field graphql.Col
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_trusted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_trusted(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5953,8 +5962,8 @@ func (ec *executionContext) fieldContext_Repo_trusted(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_timeout(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_timeout(ctx, field)
+func (ec *executionContext) _Repository_timeout(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_timeout(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5984,9 +5993,9 @@ func (ec *executionContext) _Repo_timeout(ctx context.Context, field graphql.Col
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_timeout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_timeout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5997,8 +6006,8 @@ func (ec *executionContext) fieldContext_Repo_timeout(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_allow_pr(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_allow_pr(ctx, field)
+func (ec *executionContext) _Repository_allow_pr(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_allow_pr(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6028,9 +6037,9 @@ func (ec *executionContext) _Repo_allow_pr(ctx context.Context, field graphql.Co
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_allow_pr(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_allow_pr(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6041,8 +6050,8 @@ func (ec *executionContext) fieldContext_Repo_allow_pr(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_config_file(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_config_file(ctx, field)
+func (ec *executionContext) _Repository_config_file(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_config_file(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6072,9 +6081,9 @@ func (ec *executionContext) _Repo_config_file(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_config_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_config_file(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6085,8 +6094,8 @@ func (ec *executionContext) fieldContext_Repo_config_file(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_visibility(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_visibility(ctx, field)
+func (ec *executionContext) _Repository_visibility(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_visibility(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6099,7 +6108,7 @@ func (ec *executionContext) _Repo_visibility(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().Visibility(rctx, obj)
+		return ec.resolvers.Repository().Visibility(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6116,9 +6125,9 @@ func (ec *executionContext) _Repo_visibility(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_visibility(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_visibility(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -6129,8 +6138,8 @@ func (ec *executionContext) fieldContext_Repo_visibility(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_gated(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_gated(ctx, field)
+func (ec *executionContext) _Repository_gated(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_gated(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6160,9 +6169,9 @@ func (ec *executionContext) _Repo_gated(ctx context.Context, field graphql.Colle
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_gated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_gated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6173,8 +6182,8 @@ func (ec *executionContext) fieldContext_Repo_gated(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_cancel_previous_pipeline_events(ctx, field)
+func (ec *executionContext) _Repository_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_cancel_previous_pipeline_events(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6187,7 +6196,7 @@ func (ec *executionContext) _Repo_cancel_previous_pipeline_events(ctx context.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().CancelPreviousPipelineEvents(rctx, obj)
+		return ec.resolvers.Repository().CancelPreviousPipelineEvents(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6204,9 +6213,9 @@ func (ec *executionContext) _Repo_cancel_previous_pipeline_events(ctx context.Co
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_cancel_previous_pipeline_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -6217,8 +6226,8 @@ func (ec *executionContext) fieldContext_Repo_cancel_previous_pipeline_events(ct
 	return fc, nil
 }
 
-func (ec *executionContext) _Repo_last_build(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Repo_last_build(ctx, field)
+func (ec *executionContext) _Repository_last_build(ctx context.Context, field graphql.CollectedField, obj *model1.Repo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Repository_last_build(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6231,7 +6240,7 @@ func (ec *executionContext) _Repo_last_build(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Repo().LastBuild(rctx, obj)
+		return ec.resolvers.Repository().LastBuild(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6248,9 +6257,9 @@ func (ec *executionContext) _Repo_last_build(ctx context.Context, field graphql.
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Repo_last_build(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Repository_last_build(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Repo",
+		Object:     "Repository",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -8643,8 +8652,8 @@ func (ec *executionContext) unmarshalInputUpdateRegistry(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateRepo(ctx context.Context, obj interface{}) (model.UpdateRepo, error) {
-	var it model.UpdateRepo
+func (ec *executionContext) unmarshalInputUpdateRepository(ctx context.Context, obj interface{}) (model.UpdateRepository, error) {
+	var it model.UpdateRepository
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -9004,37 +9013,37 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "activateRepo":
+		case "activateRepository":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_activateRepo(ctx, field)
+				return ec._Mutation_activateRepository(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateRepo":
+		case "updateRepository":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateRepo(ctx, field)
+				return ec._Mutation_updateRepository(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "deleteRepo":
+		case "deleteRepository":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteRepo(ctx, field)
+				return ec._Mutation_deleteRepository(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "repairRepo":
+		case "repairRepository":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_repairRepo(ctx, field)
+				return ec._Mutation_repairRepository(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -9295,7 +9304,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "repository":
+		case "repositories":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -9304,7 +9313,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_repository(ctx, field)
+				res = ec._Query_repositories(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9390,26 +9399,26 @@ func (ec *executionContext) _Registry(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var repoImplementors = []string{"Repo"}
+var repositoryImplementors = []string{"Repository"}
 
-func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj *model1.Repo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repoImplementors)
+func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSet, obj *model1.Repo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Repo")
+			out.Values[i] = graphql.MarshalString("Repository")
 		case "active":
 
-			out.Values[i] = ec._Repo_active(ctx, field, obj)
+			out.Values[i] = ec._Repository_active(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "id":
 
-			out.Values[i] = ec._Repo_id(ctx, field, obj)
+			out.Values[i] = ec._Repository_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -9423,7 +9432,7 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Repo_scm(ctx, field, obj)
+				res = ec._Repository_scm(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9436,84 +9445,84 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 			})
 		case "owner":
 
-			out.Values[i] = ec._Repo_owner(ctx, field, obj)
+			out.Values[i] = ec._Repository_owner(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 
-			out.Values[i] = ec._Repo_name(ctx, field, obj)
+			out.Values[i] = ec._Repository_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "full_name":
 
-			out.Values[i] = ec._Repo_full_name(ctx, field, obj)
+			out.Values[i] = ec._Repository_full_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "avatar":
 
-			out.Values[i] = ec._Repo_avatar(ctx, field, obj)
+			out.Values[i] = ec._Repository_avatar(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "link":
 
-			out.Values[i] = ec._Repo_link(ctx, field, obj)
+			out.Values[i] = ec._Repository_link(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "clone_url":
 
-			out.Values[i] = ec._Repo_clone_url(ctx, field, obj)
+			out.Values[i] = ec._Repository_clone_url(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "default_branch":
 
-			out.Values[i] = ec._Repo_default_branch(ctx, field, obj)
+			out.Values[i] = ec._Repository_default_branch(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "is_scm_private":
 
-			out.Values[i] = ec._Repo_is_scm_private(ctx, field, obj)
+			out.Values[i] = ec._Repository_is_scm_private(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "trusted":
 
-			out.Values[i] = ec._Repo_trusted(ctx, field, obj)
+			out.Values[i] = ec._Repository_trusted(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "timeout":
 
-			out.Values[i] = ec._Repo_timeout(ctx, field, obj)
+			out.Values[i] = ec._Repository_timeout(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "allow_pr":
 
-			out.Values[i] = ec._Repo_allow_pr(ctx, field, obj)
+			out.Values[i] = ec._Repository_allow_pr(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "config_file":
 
-			out.Values[i] = ec._Repo_config_file(ctx, field, obj)
+			out.Values[i] = ec._Repository_config_file(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -9527,7 +9536,7 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Repo_visibility(ctx, field, obj)
+				res = ec._Repository_visibility(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9540,7 +9549,7 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 			})
 		case "gated":
 
-			out.Values[i] = ec._Repo_gated(ctx, field, obj)
+			out.Values[i] = ec._Repository_gated(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -9554,7 +9563,7 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Repo_cancel_previous_pipeline_events(ctx, field, obj)
+				res = ec._Repository_cancel_previous_pipeline_events(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9574,7 +9583,7 @@ func (ec *executionContext) _Repo(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Repo_last_build(ctx, field, obj)
+				res = ec._Repository_last_build(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -10184,11 +10193,11 @@ func (ec *executionContext) marshalNRegistry2ᚖgithubᚗcomᚋwoodpeckerᚑci�
 	return ec._Registry(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRepo2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx context.Context, sel ast.SelectionSet, v model1.Repo) graphql.Marshaler {
-	return ec._Repo(ctx, sel, &v)
+func (ec *executionContext) marshalNRepository2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx context.Context, sel ast.SelectionSet, v model1.Repo) graphql.Marshaler {
+	return ec._Repository(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRepo2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model1.Repo) graphql.Marshaler {
+func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model1.Repo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10212,7 +10221,7 @@ func (ec *executionContext) marshalNRepo2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRepo2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx, sel, v[i])
+			ret[i] = ec.marshalNRepository2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10232,14 +10241,14 @@ func (ec *executionContext) marshalNRepo2ᚕᚖgithubᚗcomᚋwoodpeckerᚑciᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNRepo2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx context.Context, sel ast.SelectionSet, v *model1.Repo) graphql.Marshaler {
+func (ec *executionContext) marshalNRepository2ᚖgithubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐRepo(ctx context.Context, sel ast.SelectionSet, v *model1.Repo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Repo(ctx, sel, v)
+	return ec._Repository(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNSecret2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋmodelᚐSecret(ctx context.Context, sel ast.SelectionSet, v model1.Secret) graphql.Marshaler {
@@ -10308,8 +10317,8 @@ func (ec *executionContext) unmarshalNUpdateRegistry2githubᚗcomᚋwoodpecker�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateRepo2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋgraphᚋmodelᚐUpdateRepo(ctx context.Context, v interface{}) (model.UpdateRepo, error) {
-	res, err := ec.unmarshalInputUpdateRepo(ctx, v)
+func (ec *executionContext) unmarshalNUpdateRepository2githubᚗcomᚋwoodpeckerᚑciᚋwoodpeckerᚋserverᚋgraphᚋmodelᚐUpdateRepository(ctx context.Context, v interface{}) (model.UpdateRepository, error) {
+	res, err := ec.unmarshalInputUpdateRepository(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

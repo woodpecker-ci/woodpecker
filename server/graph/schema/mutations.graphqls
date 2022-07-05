@@ -1,4 +1,4 @@
-input UpdateRepo {
+input UpdateRepository {
   text: String!
   userId: String!
 }
@@ -29,10 +29,10 @@ input UpdateRegistry {
 }
 
 type Mutation {
-  activateRepo(owner: String!, name: String!): Boolean! @todo
-  updateRepo(input: UpdateRepo!): Repo! @todo
-  deleteRepo(owner: String!, name: String!): Boolean! @todo
-  repairRepo(owner: String!, name: String!): Boolean! @todo
+  activateRepository(owner: String!, name: String!): Boolean! @todo
+  updateRepository(input: UpdateRepository!): Repository! @todo
+  deleteRepository(owner: String!, name: String!): Boolean! @todo
+  repairRepository(owner: String!, name: String!): Boolean! @todo
 
   cancelBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
   approveBuild(owner: String!, name: String!, buildId: Int!): Boolean! @todo
