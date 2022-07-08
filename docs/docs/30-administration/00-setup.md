@@ -31,7 +31,7 @@ services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:latest
     ports:
-      - 8000:8000
+      - 9000:9000
     volumes:
       - woodpecker-server-data:/var/lib/woodpecker/
     environment:
