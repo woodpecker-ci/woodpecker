@@ -1,10 +1,27 @@
 tasks:
   - name: Server
+    env:
+      # server
+      WOODPECKER_OPEN: true
+      WOODPECKER_HOST: http://host.docker.internal:8000
+      WOODPECKER_SECRET: "1234"
+      WOODPECKER_GITEA: true
+      WOODPECKER_GITEA_URL: http://localhost:3000
+      WOODPECKER_GITEA_CLIENT: 8bf10b81-5b34-4abc-b443-5d3c9bd03216
+      WOODPECKER_GITEA_SECRET: gto_63sg6wiehnqc6yx3dloynuqv72bytxhx3tignokvabrpfvtt7r2q
+      # dev
+      WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
+      WOODPECKER_DEV_OAUTH_HOST: http://localhost:8000
+      WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: go get
-    command: go run
+    command: go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
+    env:
+      WOODPECKER_SERVER: localhost:9000
+      WOODPECKER_SECRET: "1234"
+      WOODPECKER_MAX_PROCS: 1
     init: go get
-    command: go run
+    command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
     command: docker-compose up
   - name: App
@@ -16,6 +33,7 @@ tasks:
     init: |
       cd docs/
       yarn install
+      yarn build:woodpecker-plugins
     command: yarn start
 
 ports:
