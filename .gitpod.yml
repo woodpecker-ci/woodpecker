@@ -36,17 +36,19 @@ tasks:
       cd docs/
       yarn install
       yarn build:woodpecker-plugins
-    command: yarn start
+    command: yarn start --port 4000
 
 ports:
   - port: 3000
     onOpen: ignore
   - port: 8000
-    onOpen: ignore
+    onOpen: notify
   - port: 9000
     onOpen: ignore
   - port: 8010
     onOpen: ignore
+  - port: 4000
+    onOpen: notify
 
 vscode:
   extensions:
