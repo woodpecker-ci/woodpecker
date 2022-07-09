@@ -13,17 +13,17 @@ tasks:
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_DEV_OAUTH_HOST: http://localhost:8000
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
-    init: go get
+    init: go mod tidy
     command: go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
       WOODPECKER_MAX_PROCS: 1
-    init: go get
+    init: go mod tidy
     command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
-    command: docker-compose up
+    command: docker-compose -f docker-compose.gitpod.yml -p woodpecker up
   - name: App
     init: |
       cd web/
