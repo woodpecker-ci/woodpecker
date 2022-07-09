@@ -1,7 +1,6 @@
 tasks:
   - name: Server
     env:
-      # server
       WOODPECKER_OPEN: true
       WOODPECKER_HOST: http://host.docker.internal:8000
       WOODPECKER_SECRET: "1234"
@@ -22,6 +21,7 @@ tasks:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
       WOODPECKER_MAX_PROCS: 1
+      WOODPECKER_HEALTHCHECK: false
     init: go mod tidy
     command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
