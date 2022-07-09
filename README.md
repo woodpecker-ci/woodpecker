@@ -80,6 +80,8 @@ https://woodpecker-ci.org/
 
 See [Contributing Guide](CONTRIBUTING.md)
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/PSE2-BusyBeavers/BusyBeavers)
+
 ## Who uses Woodpecker?
 
 [Codeberg](https://codeberg.org), the woodpecker project itself, and many others.
