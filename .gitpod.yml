@@ -1,0 +1,40 @@
+tasks:
+  - name: Server
+    init: go get
+    command: go run
+  - name: Agent
+    init: go get
+    command: go run
+  - name: Gitea
+    command: docker-compose up
+  - name: App
+    init: |
+      cd web/
+      yarn install
+    command: yarn start
+  - name: Docs
+    init: |
+      cd docs/
+      yarn install
+    command: yarn start
+
+ports:
+  - port: 3000
+    onOpen: ignore
+  - port: 8000
+    onOpen: ignore
+  - port: 9000
+    onOpen: ignore
+  - port: 8010
+    onOpen: ignore
+
+vscode:
+  extensions:
+    - "golang.go"
+    - "EditorConfig.EditorConfig"
+    - "dbaeumer.vscode-eslint"
+    - "esbenp.prettier-vscode"
+    - "voorjaar.windicss-intellisense"
+    - "johnsoncodehk.volar"
+    - "redhat.vscode-yaml"
+    - "davidanson.vscode-markdownlint"
