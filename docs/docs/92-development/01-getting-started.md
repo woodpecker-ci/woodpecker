@@ -2,6 +2,10 @@
 
 ## Preparation
 
+You can develop on your local computer by following the steps below or you can start with a prepared online setup using Gitpod. Start Woodpecker in Gitpod by clicking this badge:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
+
 ### Install Go
 
 Install Golang (>=1.16) as described by [this guide](https://go.dev/doc/install).

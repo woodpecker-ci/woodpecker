@@ -80,7 +80,7 @@ https://woodpecker-ci.org/
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/PSE2-BusyBeavers/BusyBeavers)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
 
 ## Who uses Woodpecker?
 
