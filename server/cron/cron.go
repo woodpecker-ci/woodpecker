@@ -28,22 +28,22 @@ import (
 )
 
 const (
-	// checkTime specify the interfall woodpecker look for new cron jobs to exec
-	checkTime = time.Minute
+	// checkTime specify the interval woodpecker look for new cron jobs to exec
+	checkTime = time.Second
 
-	// checkItems specify the jobs to retrieve per check interfall from database
+	// checkItems specify the jobs to retrieve per check interval from database
 	checkItems = 10
 )
 
 // Start starts the cron functionality
-func Start(ctx context.Context, store store.Store) {
+func Start(ctx context.Context, store store.Store) error {
 	select {
 	case <-ctx.Done():
-		return
+		return nil
 	case <-time.After(checkTime):
 		go func() {
 			now := time.Now().Unix()
-			jobs, err := store.CronList(now, checkItems)
+			jobs, err := store.CronListNextExecute(now, checkItems)
 			if err != nil {
 				log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
 				return
@@ -55,6 +55,7 @@ func Start(ctx context.Context, store store.Store) {
 			}
 		}()
 	}
+	return nil
 }
 
 func runJob(job *model.CronJob, store store.Store) error {
@@ -62,7 +63,11 @@ func runJob(job *model.CronJob, store store.Store) error {
 	if err != nil {
 		return fmt.Errorf("cron parse schedule: %v", err)
 	}
-	newNext := schedule.Next(time.Unix(job.NextExec, 0))
+	oldNext := time.Unix(job.NextExec, 0)
+	if job.NextExec == 0 {
+		oldNext = time.Now()
+	}
+	newNext := schedule.Next(oldNext) // TODO: can we always use time.Now() here?
 
 	// try to get lock on cron job
 	gotLock, err := store.CronGetLock(job, newNext.Unix())
@@ -70,7 +75,7 @@ func runJob(job *model.CronJob, store store.Store) error {
 		return err
 	}
 	if !gotLock {
-		// a other go routine catched it
+		// an other go routine caught it
 		return nil
 	}
 

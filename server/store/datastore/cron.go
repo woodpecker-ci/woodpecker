@@ -30,16 +30,34 @@ func (s storage) CronCreate(job *model.CronJob) error {
 	return err
 }
 
-// CronList return limited number of jobs based on NextExec
-// is less or equal than unitx timestamp
-func (s storage) CronList(nextExec, limit int64) ([]*model.CronJob, error) {
-	jobs := make([]*model.CronJob, 0, 10)
-	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
+func (s storage) CronFind(repo *model.Repo, id int64) (*model.CronJob, error) {
+	cronJob := &model.CronJob{
+		RepoID: repo.ID,
+		ID:     id,
+	}
+	return cronJob, wrapGet(s.engine.Get(cronJob))
 }
 
-func (s storage) CronDelete(id int64) error {
-	_, err := s.engine.ID(id).Delete(new(model.CronJob))
+func (s storage) CronList(repo *model.Repo) ([]*model.CronJob, error) {
+	cronJobs := make([]*model.CronJob, 0, perPage)
+	return cronJobs, s.engine.Where("repo_id = ?", repo.ID).Find(&cronJobs)
+}
+
+func (s storage) CronUpdate(repo *model.Repo, cronJob *model.CronJob) error {
+	_, err := s.engine.ID(cronJob.ID).AllCols().Update(cronJob)
 	return err
+}
+
+func (s storage) CronDelete(repo *model.Repo, id int64) error {
+	_, err := s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.CronJob))
+	return err
+}
+
+// CronList return limited number of jobs based on NextExec
+// is less or equal than unitx timestamp
+func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.CronJob, error) {
+	jobs := make([]*model.CronJob, 0, limit)
+	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
 }
 
 // CronGetLock try to get a lock by updating NextExec

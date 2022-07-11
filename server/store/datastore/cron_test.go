@@ -27,7 +27,8 @@ func TestCronCreate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.CronJob))
 	defer closer()
 
-	job1 := &model.CronJob{RepoID: 1, CreatorID: 1, Title: "sync", NextExec: 10000}
+	repo := &model.Repo{ID: 1, Name: "repo"}
+	job1 := &model.CronJob{RepoID: repo.ID, CreatorID: 1, Title: "sync", NextExec: 10000}
 	assert.NoError(t, store.CronCreate(job1))
 	assert.NotEqualValues(t, 0, job1.ID)
 
@@ -35,17 +36,17 @@ func TestCronCreate(t *testing.T) {
 	assert.Error(t, store.CronCreate(job1))
 
 	oldID := job1.ID
-	assert.NoError(t, store.CronDelete(oldID))
+	assert.NoError(t, store.CronDelete(repo, oldID))
 	job1.ID = 0
 	assert.NoError(t, store.CronCreate(job1))
 	assert.NotEqual(t, oldID, job1.ID)
 }
 
-func TestCronList(t *testing.T) {
+func TestCronListNextExecute(t *testing.T) {
 	store, closer := newTestStore(t, new(model.CronJob))
 	defer closer()
 
-	jobs, err := store.CronList(0, 10)
+	jobs, err := store.CronListNextExecute(0, 10)
 	assert.NoError(t, err)
 	assert.Len(t, jobs, 0)
 
@@ -57,11 +58,11 @@ func TestCronList(t *testing.T) {
 	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "none", RepoID: 1, NextExec: now + 1000}))
 	assert.NoError(t, store.CronCreate(&model.CronJob{Title: "test", RepoID: 1, NextExec: now + 2000}))
 
-	jobs, err = store.CronList(now, 10)
+	jobs, err = store.CronListNextExecute(now, 10)
 	assert.NoError(t, err)
 	assert.Len(t, jobs, 3)
 
-	jobs, err = store.CronList(now+1500, 10)
+	jobs, err = store.CronListNextExecute(now+1500, 10)
 	assert.NoError(t, err)
 	assert.Len(t, jobs, 4)
 }

@@ -139,6 +139,30 @@
         }
       },
 
+      "crons": {
+        "crons": "Crons",
+        "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
+        "show": "Show crons",
+        "add": "Add cron",
+        "none": "There are no crons yet.",
+        "save": "Save cron",
+        "created": "Cron created",
+        "saved": "Cron saved",
+        "deleted": "Cron deleted",
+        "next_exec": "Next execution",
+        "not_executed_yet": "Not executed yet",
+        "branch": {
+          "branch": "Branch"
+        },
+        "title": {
+          "title": "Title",
+          "placeholder": "Title of the cron job"
+        },
+        "schedule": {
+          "schedule": "Schedule"
+        }
+      },
+
       "badge": {
         "badge": "Badge",
         "url_branch": "URL for specific branch",

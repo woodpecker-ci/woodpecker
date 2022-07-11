@@ -151,8 +151,11 @@ type Store interface {
 
 	// Cron
 	CronCreate(*model.CronJob) error
-	CronList(int64, int64) ([]*model.CronJob, error)
-	CronDelete(int64) error
+	CronFind(*model.Repo, int64) (*model.CronJob, error)
+	CronList(*model.Repo) ([]*model.CronJob, error)
+	CronUpdate(*model.Repo, *model.CronJob) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.CronJob, error)
 	CronGetLock(*model.CronJob, int64) (bool, error)
 
 	// Store operations
