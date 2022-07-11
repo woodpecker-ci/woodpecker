@@ -69,6 +69,11 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (g *Gitlab) Name() string {
+	return "gitlab"
+}
+
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {

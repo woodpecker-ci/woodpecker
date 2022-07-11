@@ -60,6 +60,11 @@ func New(opts *Opts) (remote.Remote, error) {
 	// TODO: add checks
 }
 
+// Name returns the string name of this driver
+func (c *config) Name() string {
+	return "bitbucket"
+}
+
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
