@@ -2,9 +2,9 @@
 
 ## Aliases
 
-with aliases you can have variables in your pipeline config.
+With aliases you can have variables in your pipeline config.
 
-to convert this:
+To convert this:
 ```yml
 pipeline:
   test:
@@ -15,12 +15,11 @@ pipeline:
     command: build
 ```
 
-just use a new section called **variables**:
+Just use a new section called **variables**:
 
 ```diff
 +variables:
 +  - &golang_image 'golang:1.18'
-+
  pipeline:
    test:
 -    image: golang:1.18
@@ -32,7 +31,7 @@ just use a new section called **variables**:
      command: build
 ```
 
-## Overrides and Extensions
+## Example of YAML override and extension
 
 ```yml
 variables: 
@@ -50,13 +49,13 @@ pipelines:
     when:
       branch: develop
 
-  master:
+  main
     name: Build and test
     image: some-plugin
     settings:
       <<: *some-plugin-settings
-      try: false #override
-      ongoing: false #extension
+      try: false # replacing original value from `some-plugin-settings`
+      ongoing: false # adding a new value to `some-plugin-settings`
     when:
-      branch: master
+      branch: main
 ```
