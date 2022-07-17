@@ -1,4 +1,5 @@
-FROM alpine:3.14
+FROM alpine:3.16
+
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
