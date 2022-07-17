@@ -617,6 +617,12 @@ pipeline:
       - go test
 ```
 
+## `variables`
+
+Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+
+For more details and examples check the [Advanced YAML syntax docs](/docs/usage/advanced-yaml-syntax)
+
 ## `clone`
 
 Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
@@ -663,12 +669,6 @@ Example configuration to clone Mercurial repository:
 +    settings:
 +      path: bitbucket.org/foo/bar
 ```
-
-## `variables`
-
-Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
-
-For more details and examples check the [Advanced YAML syntax docs](/docs/usage/advanced-yaml-syntax)
 
 ### Git Submodules
 
