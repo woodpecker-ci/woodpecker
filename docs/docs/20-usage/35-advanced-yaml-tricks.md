@@ -20,6 +20,7 @@ Just use a new section called **variables**:
 ```diff
 +variables:
 +  - &golang_image 'golang:1.18'
+
  pipeline:
    test:
 -    image: golang:1.18
