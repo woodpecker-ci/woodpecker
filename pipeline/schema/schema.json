@@ -11,7 +11,9 @@
       "type": "string",
       "format": "uri"
     },
-    "vars": {},
+    "variables": {
+      "description": "Use yaml aliases to define variables. Read more: "
+    },
     "clone": { "$ref": "#/definitions/clone" },
     "branches": { "$ref": "#/definitions/branches" },
     "pipeline": { "$ref": "#/definitions/pipeline" },

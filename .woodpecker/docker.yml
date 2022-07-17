@@ -2,7 +2,7 @@ depends_on:
   - test
   - web
 
-vars:
+variables:
   - &golang_image 'golang:1.18'
   - &node_image 'node:16-alpine'
   - &xgo_image 'techknowlogick/xgo:go-1.18.x'

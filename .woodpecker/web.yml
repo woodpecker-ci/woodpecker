@@ -1,4 +1,4 @@
-vars:
+variables:
   - &node_image 'node:16-alpine'
   - &when_path
       # web source code
