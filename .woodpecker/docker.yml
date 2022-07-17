@@ -19,7 +19,7 @@ pipeline:
       - yarn build
 
   cross-compile-server:
-    image: techknowlogick/xgo:go-1.17.x
+    image: techknowlogick/xgo:go-1.18.x
     commands:
       - apt update
       - apt install -y tree
