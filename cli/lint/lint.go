@@ -26,7 +26,8 @@ func lint(c *cli.Context) error {
 }
 
 func lintDir(c *cli.Context, dir string) error {
-	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+	var errorStrings []string
+	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -34,13 +35,23 @@ func lintDir(c *cli.Context, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			_ = lintFile(c, path) // TODO: should we drop errors or store them and report back?
+			if err := lintFile(c, path); err != nil {
+				errorStrings = append(errorStrings, err.Error())
+			}
 			fmt.Println("")
 			return nil
 		}
 
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	if len(errorStrings) != 0 {
+		return fmt.Errorf("ERRORS: %v", errorStrings)
+	} else {
+		return nil
+	}
 }
 
 func lintFile(_ *cli.Context, file string) error {
