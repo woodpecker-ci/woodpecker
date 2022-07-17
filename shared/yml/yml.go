@@ -56,7 +56,7 @@ func toJSON(node *yaml.Node) (interface{}, error) {
 		return node.Value, nil
 
 	case yaml.AliasNode:
-		return nil, nil
+		return toJSON(node.Alias)
 	}
 
 	return nil, fmt.Errorf("do not support yaml node kind '%v'", node.Kind)

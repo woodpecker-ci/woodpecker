@@ -35,6 +35,24 @@ job: Butcher
       with new line
 `,
 		json: `[{"job":"Butcher","name":"Jack"},{"job":"Cook","name":"Jill","obj":{"data":"some data 123\nwith new line\n","empty":false}}]`,
+	}, {
+		yaml: `vars:
+  - &node_image 'node:16-alpine'
+  - &when_path
+    # web source code
+    - "web/**"
+    - some
+
+pipeline:
+  deps:
+    image: *node_image
+    commands:
+    - "cd web/"
+    - yarn install
+    when:
+      path: *when_path
+`,
+		json: `{"pipeline":{"deps":{"commands":["cd web/","yarn install"],"image":"node:16-alpine","when":{"path":["web/**","some"]}}},"vars":["node:16-alpine",["web/**","some"]]}`,
 	}}
 
 	for _, tc := range tests {
