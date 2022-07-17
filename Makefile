@@ -23,7 +23,7 @@ CGO_CFLAGS ?=
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO), GO)
-	XGO_VERSION ?= go-1.17.x
+	XGO_VERSION ?= go-1.18.x
 	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
 endif
 
