@@ -1,4 +1,4 @@
-# Advanced YAML tricks
+# Advanced YAML syntax
 
 ## Aliases
 

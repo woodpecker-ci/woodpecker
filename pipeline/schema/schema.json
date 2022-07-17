@@ -12,7 +12,7 @@
       "format": "uri"
     },
     "variables": {
-      "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-yaml-tricks"
+      "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-yaml-syntax"
     },
     "clone": { "$ref": "#/definitions/clone" },
     "branches": { "$ref": "#/definitions/branches" },
