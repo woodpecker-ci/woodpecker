@@ -11,6 +11,9 @@
       "type": "string",
       "format": "uri"
     },
+    "variables": {
+      "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-yaml-syntax"
+    },
     "clone": { "$ref": "#/definitions/clone" },
     "branches": { "$ref": "#/definitions/branches" },
     "pipeline": { "$ref": "#/definitions/pipeline" },
