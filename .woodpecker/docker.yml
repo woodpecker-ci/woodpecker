@@ -22,6 +22,7 @@ pipeline:
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
       TAGS: bindata sqlite sqlite_unlock_notify
+      XGO_VERSION: go-1.18.x
 
   publish-server-dryrun:
     image: woodpeckerci/plugin-docker-buildx
