@@ -664,6 +664,12 @@ Example configuration to clone Mercurial repository:
 +      path: bitbucket.org/foo/bar
 ```
 
+## `variables`
+
+Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+
+For more details and examples check the [Advanced YAML syntax docs](/docs/usage/advanced-yaml-syntax)
+
 ### Git Submodules
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
