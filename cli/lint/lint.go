@@ -48,10 +48,9 @@ func lintDir(c *cli.Context, dir string) error {
 	}
 
 	if len(errorStrings) != 0 {
-		return fmt.Errorf("ERRORS: %v", errorStrings)
-	} else {
-		return nil
+		return fmt.Errorf("ERRORS: %s", strings.Join(errorStrings, "; "))
 	}
+	return nil
 }
 
 func lintFile(_ *cli.Context, file string) error {
