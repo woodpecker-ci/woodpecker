@@ -11,6 +11,7 @@ import {
   RepoSettings,
   Secret,
 } from './types';
+import { Cron } from './types/cron';
 
 type RepoListOptions = {
   all?: boolean;
@@ -133,6 +134,22 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteRegistry(owner: string, repo: string, registryAddress: string): Promise<unknown> {
     return this._delete(`/api/repos/${owner}/${repo}/registry/${registryAddress}`);
+  }
+
+  getCronList(owner: string, repo: string): Promise<Cron[]> {
+    return this._get(`/api/repos/${owner}/${repo}/cron`) as Promise<Cron[]>;
+  }
+
+  createCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/cron`, cron);
+  }
+
+  updateCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
+    return this._patch(`/api/repos/${owner}/${repo}/cron/${cron.id}`, cron);
+  }
+
+  deleteCron(owner: string, repo: string, cronId: number): Promise<unknown> {
+    return this._delete(`/api/repos/${owner}/${repo}/cron/${cronId}`);
   }
 
   getSelf(): Promise<unknown> {

@@ -1,5 +1,5 @@
 <template>
-  <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-gray-500 justify-between !pt-0">
+  <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-color justify-between !pt-0">
     <Panel v-for="buildConfig in buildConfigs" :key="buildConfig.hash" :title="buildConfig.name">
       <span class="font-mono whitespace-pre">{{ buildConfig.data }}</span>
     </Panel>

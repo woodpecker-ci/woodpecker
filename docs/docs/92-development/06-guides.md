@@ -13,14 +13,14 @@ Woodpecker uses migrations to change the database schema if a database model has
 package migration
 
 import (
-	"xorm.io/xorm"
+  "xorm.io/xorm"
 )
 
 var alterTableReposDropCounter = task{
-	name: "alter-table-drop-counter",
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos", "repo_counter")
-	},
+  name: "alter-table-drop-counter",
+  fn: func(sess *xorm.Session) error {
+    return dropTableColumns(sess, "repos", "repo_counter")
+  },
 }
 ```
 
@@ -33,4 +33,3 @@ You should not use `sess.Begin()`, `sess.Commit()` or `sess.Close()` inside a mi
 :::
 
 To automatically execute the migration after the start of the server, the new migration needs to be added to the end of `migrationTasks` in `server/store/datastore/migration/migration.go`. After a successful execution of that transaction the server will automatically add the migration to a list, so it won't be executed again on the next start.
-

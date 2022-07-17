@@ -4,6 +4,7 @@ depends_on:
 
 pipeline:
   build-web:
+    group: prepare
     image: node:16-alpine
     commands:
       - cd web/
@@ -20,9 +21,25 @@ pipeline:
         # web source code
         - "web/**"
 
+  vendor:
+    group: prepare
+    image: golang:1.18
+    commands:
+      - go mod vendor
+    when:
+      path:
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
+
   build-server:
     group: build
-    image: golang:1.17
+    image: golang:1.18
     commands:
       - make release-server
     when:
@@ -38,7 +55,7 @@ pipeline:
 
   build-agent:
     group: build
-    image: golang:1.17
+    image: golang:1.18
     commands:
       - make release-agent
     when:
@@ -54,7 +71,7 @@ pipeline:
 
   build-cli:
     group: build
-    image: golang:1.17
+    image: golang:1.18
     commands:
       - make release-cli
     when:
@@ -70,7 +87,7 @@ pipeline:
 
   build-deb-rpm:
     group: bundle
-    image: golang:1.17
+    image: golang:1.18
     commands:
       - make bundle
     when:
@@ -84,8 +101,24 @@ pipeline:
         # web source code
         - "web/**"
 
+  build-tarball:
+    group: bundle
+    image: golang:1.18
+    commands:
+      - make release-tarball
+    when:
+      path:
+        # related config files
+        - ".woodpecker/binaries.yml"
+        - "nfpm/*.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # web source code
+        - "web/**"
+
   checksums:
-    image: golang:1.17
+    image: golang:1.18
     commands:
       - make release-checksums
     when:
@@ -102,7 +135,7 @@ pipeline:
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
   release-dryrun:
-    image: golang:1.17
+    image: golang:1.18
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt

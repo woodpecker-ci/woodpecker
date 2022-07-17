@@ -22,6 +22,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+// TODO(974) move to pipeline/*
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 

@@ -93,6 +93,13 @@ func apiRoutes(e *gin.Engine) {
 			repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
 			repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
 
+			// requires push permissions
+			repo.GET("/cron", session.MustPush, api.GetCronJobList)
+			repo.POST("/cron", session.MustPush, api.PostCronJob)
+			repo.GET("/cron/:cron", session.MustPush, api.GetCronJob)
+			repo.PATCH("/cron/:cron", session.MustPush, api.PatchCronJob)
+			repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCronJob)
+
 			// requires admin permissions
 			repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
 			repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)

@@ -67,6 +67,11 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "gogs"
+}
+
 // Login authenticates an account with Gogs using basic authentication. The
 // Gogs account details are returned when the user is successfully authenticated.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
