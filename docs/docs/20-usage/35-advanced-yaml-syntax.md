@@ -1,8 +1,8 @@
 # Advanced YAML syntax
 
-## Aliases
+## Anchors & aliases
 
-With aliases you can have variables in your pipeline config.
+You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in your pipeline config.
 
 To convert this:
 ```yml
@@ -15,7 +15,7 @@ pipeline:
     command: build
 ```
 
-Just use a new section called **variables**:
+Just add a new section called **variables** like this:
 
 ```diff
 +variables:
