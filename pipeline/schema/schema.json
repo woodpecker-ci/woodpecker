@@ -363,8 +363,10 @@
           "$ref": "#/definitions/step_volumes"
         },
         "ports": {
-          "description": "export port steps in pipeline can connect to",
-          "type": "array"
+          "description": "expose ports to which other steps can connect to",
+          "type": "array",
+          "items": { "type": "number" },
+          "minLength": 1
         }
       }
     },
