@@ -143,6 +143,27 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	return user, nil
 }
 
+// Refresh refreshes the Gitlab oauth2 access token. If the token is
+// refreshed the user is updated and a true value is returned.
+func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
+	config := g.oauth2Config()
+	config.RedirectURL = ""
+
+	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+		Proxy:           http.ProxyFromEnvironment,
+	}}
+
+	if err := trans.Refresh(); err != nil {
+		return false, err
+	}
+
+	user.Token = trans.Token.AccessToken
+	user.Secret = trans.Token.RefreshToken
+	user.Expiry = trans.Token.Expiry.UTC().Unix()
+	return true, nil
+}
+
 // Auth authenticates the session and returns the remote user login for the given token
 func (g *Gitlab) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := newClient(g.URL, token, g.SkipVerify)
