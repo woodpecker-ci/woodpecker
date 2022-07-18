@@ -332,11 +332,11 @@ when:
   event: tag
 ```
 
-Execute a step if the build event is a `tag` created from the specified branch:
+Execute a step if the build event is a `push` created to an specified branch:
 
 ```diff
 when:
-  event: tag
+  event: push
 + branch: master
 ```
 
