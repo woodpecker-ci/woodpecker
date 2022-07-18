@@ -332,12 +332,12 @@ when:
   event: tag
 ```
 
-Execute a step if the build event is a `push` created to an specified branch:
+Execute a step if the pipeline event is a `push` to a specified branch:
 
 ```diff
 when:
   event: push
-+ branch: master
++ branch: main
 ```
 
 Execute a step for all non-pull request events:
