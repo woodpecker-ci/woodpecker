@@ -26,8 +26,6 @@ pipeline:
 services:
   redis:
     image: redis
-    entrypoint: [ /bin/redis-server ]
-    command: [ -v ]
 `}, {Title: "list", Data: `
 pipeline:
   - name: build
