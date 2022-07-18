@@ -111,6 +111,8 @@ func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
 		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
 		Command = append(Command, "cd "+e.workingdir+"/"+proc.Environment["CI_REPO"]+" && "+string(Script)[strings.Index(string(Script), "\n\n")+2:])
+
+		// TODO: use new proc.Commands - CI_SCRIPT no longer works
 	}
 
 	// Prepare command

@@ -18,8 +18,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
-		entrypoint  = container.Entrypoint
-		command     = container.Command
 		image       = expandImage(container.Image)
 		networkMode = container.NetworkMode
 		ipcMode     = container.IpcMode
@@ -77,26 +75,8 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
-	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Platform == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\\root"
-			environment["SHELL"] = "powershell.exe"
-		} else {
-			entrypoint = []string{"/bin/sh", "-c"}
-			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-			environment["HOME"] = "/root"
-			environment["SHELL"] = "/bin/sh"
-		}
-	}
-
 	if matchImage(container.Image, c.escalated...) {
 		privileged = true
-		entrypoint = []string{}
-		command = []string{}
 	}
 
 	authConfig := backend.Auth{
@@ -155,8 +135,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		WorkingDir:   workingdir,
 		Environment:  environment,
 		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
+		Commands:     container.Commands,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
 		Tmpfs:        container.Tmpfs,

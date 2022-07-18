@@ -17,7 +17,6 @@ auth_config:
   password: password
 cap_add: [ ALL ]
 cap_drop: [ NET_ADMIN, SYS_ADMIN ]
-command: bundle exec thin -p 3000
 commands:
   - go build
   - go test
@@ -29,7 +28,6 @@ devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
 dns: 8.8.8.8
 dns_search: example.com
-entrypoint: /code/entrypoint.sh
 environment:
   - RACK_ENV=development
   - SHOW=true
@@ -72,7 +70,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle exec thin -p 3000"},
 		Commands:      types.Stringorslice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
@@ -81,7 +78,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
 		DNS:           types.Stringorslice{"8.8.8.8"},
 		DNSSearch:     types.Stringorslice{"example.com"},
-		Entrypoint:    types.Command{"/code/entrypoint.sh"},
 		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
