@@ -28,21 +28,18 @@ func toConfig(proc *types.Step) *container.Config {
 			proc.Environment["HOME"] = "c:\\root"
 			proc.Environment["SHELL"] = "powershell.exe"
 			proc.Entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			proc.Commands = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+			config.Cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 		} else {
 			proc.Environment["CI_SCRIPT"] = generateScriptPosix(proc.Commands)
 			proc.Environment["HOME"] = "/root"
 			proc.Environment["SHELL"] = "/bin/sh"
 			proc.Entrypoint = []string{"/bin/sh", "-c"}
-			proc.Commands = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+			config.Cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 		}
 	}
 
 	if len(proc.Environment) != 0 {
 		config.Env = toEnv(proc.Environment)
-	}
-	if len(proc.Commands) != 0 {
-		config.Cmd = proc.Commands
 	}
 	if len(proc.Entrypoint) != 0 {
 		config.Entrypoint = proc.Entrypoint
