@@ -9,10 +9,10 @@ To convert this:
 pipeline:
   test:
     image: golang:1.18
-    command: go test ./...
+    commands: go test ./...
   build:
     image: golang:1.18
-    command: build
+    commands: build
 ```
 
 Just add a new section called **variables** like this:
@@ -25,11 +25,11 @@ Just add a new section called **variables** like this:
    test:
 -    image: golang:1.18
 +    image: *golang_image
-     command: go test ./...
+     commands: go test ./...
    build:
 -    image: golang:1.18
 +    image: *golang_image
-     command: build
+     commands: build
 ```
 
 ## Example of YAML override and extension
