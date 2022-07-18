@@ -178,13 +178,15 @@
       "exit_code": "exit code {exitCode}",
       "loading": "Loading ...",
       "pipeline": "Pipeline #{buildId}",
+      "log_download_error": "There was an error while downloading the log file",
 
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
         "cancel_success": "Pipeline canceled",
-        "restart_success": "Pipeline restarted"
+        "restart_success": "Pipeline restarted",
+        "log_download": "Download"
       },
       "protected": {
         "awaits": "This pipeline is awaiting approval by some maintainer!",
