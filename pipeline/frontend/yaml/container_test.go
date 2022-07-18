@@ -72,7 +72,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Command:       types.Command{"bundle exec thin -p 3000"},
 		Commands:      types.Stringorslice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
