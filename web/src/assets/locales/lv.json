@@ -178,13 +178,15 @@
       "exit_code": "iziešanas kods {exitCode}",
       "loading": "Notiek ielāde...",
       "pipeline": "Konvejerdarbs #{buildId}",
+      "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
 
       "actions": {
         "cancel": "Atcelt",
         "restart": "Pārstartēt",
         "canceled": "Šis solis tika atcelts.",
         "cancel_success": "Konvejerdarbs atcelts",
-        "restart_success": "Konvejerdarbs pārstartēts"
+        "restart_success": "Konvejerdarbs pārstartēts",
+        "log_download": "Lejupielādēt"
       },
       "protected": {
         "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",

@@ -1,45 +1,51 @@
+variables:
+  - &node_image 'node:16-alpine'
+  - &when_path
+      # web source code
+      - "web/**"
+
 pipeline:
   deps:
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn install --frozen-lockfile
     when:
-      path: "web/**"
+      path: *when_path
 
   lint:
     group: test
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn lint
     when:
-      path: "web/**"
+      path: *when_path
 
   formatcheck:
     group: test
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn formatcheck
     when:
-      path: "web/**"
+      path: *when_path
 
   typecheck:
     group: test
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn typecheck
     when:
-      path: "web/**"
+      path: *when_path
 
   test:
     group: test
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn test
     when:
-      path: "web/**"
+      path: *when_path
 

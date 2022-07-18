@@ -28,6 +28,7 @@
         color === 'red',
       ...passedClasses,
     }"
+    :title="title"
     :disabled="disabled"
     @click="doClick"
   >
@@ -65,6 +66,11 @@ export default defineComponent({
 
   props: {
     text: {
+      type: String,
+      default: null,
+    },
+
+    title: {
       type: String,
       default: null,
     },
