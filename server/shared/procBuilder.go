@@ -162,6 +162,9 @@ func procListContainsItemsToRun(items []*BuildItem) bool {
 
 func filterItemsWithMissingDependencies(items []*BuildItem, itemsSkippedClone []*BuildItem) []*BuildItem {
 	itemsToRemove := make([]*BuildItem, 0)
+	if len(itemsSkippedClone) > 0 {
+		itemsSkippedClone = filterItemsWithMissingDependencies(items, []*BuildItem{})
+	}
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
