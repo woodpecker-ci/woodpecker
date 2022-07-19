@@ -20,9 +20,7 @@ package gitea
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -468,7 +466,7 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 		return false, false, err
 	}
 
-	member, resp, err := client.CheckOrgMembership(owner, u.Login)
+	member, _, err := client.CheckOrgMembership(owner, u.Login)
 	if err != nil {
 		return false, false, err
 	}
@@ -477,21 +475,12 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 		return false, false, nil
 	}
 
-	buf, err := io.ReadAll(resp.Body)
+	perm, _, err := client.GetOrgPermissions(owner, u.Login)
 	if err != nil {
 		return member, false, err
 	}
 
-	p := struct {
-		IsAdmin bool `json:"is_admin"`
-		IsOwner bool `json:"is_owner"`
-	}{}
-
-	if err := json.Unmarshal(buf, &p); err != nil {
-		return member, false, err
-	}
-
-	return member, p.IsAdmin || p.IsOwner, nil
+	return member, perm.IsAdmin || perm.IsOwner, nil
 }
 
 // helper function to return the Gitea client with Token

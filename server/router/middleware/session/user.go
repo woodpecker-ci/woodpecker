@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -112,6 +113,66 @@ func MustUser() gin.HandlerFunc {
 			c.String(401, "User not authorized")
 			c.Abort()
 		default:
+			c.Next()
+		}
+	}
+}
+
+func MustOrgMember() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := User(c)
+		owner := c.Param("owner")
+		switch {
+		case user == nil:
+			c.String(401, "User not authorized")
+			c.Abort()
+		case owner == "":
+			c.String(http.StatusForbidden, "User not authorized")
+			c.Abort()
+		default:
+			if user.Login != owner && !user.Admin {
+				member, err := server.Config.Services.Membership.IsMember(c, user, owner)
+				if err != nil {
+					c.String(http.StatusInternalServerError, "Failed to check membership")
+					c.Abort()
+					return
+				}
+				if !member {
+					c.String(http.StatusForbidden, "User not authorized")
+					c.Abort()
+					return
+				}
+			}
+			c.Next()
+		}
+	}
+}
+
+func MustOrgAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := User(c)
+		owner := c.Param("owner")
+		switch {
+		case user == nil:
+			c.String(401, "User not authorized")
+			c.Abort()
+		case owner == "":
+			c.String(http.StatusForbidden, "User not authorized")
+			c.Abort()
+		default:
+			if user.Login != owner && !user.Admin {
+				admin, err := server.Config.Services.Membership.IsAdmin(c, user, owner)
+				if err != nil {
+					c.String(http.StatusInternalServerError, "Failed to check membership")
+					c.Abort()
+					return
+				}
+				if !admin {
+					c.String(http.StatusForbidden, "User not authorized")
+					c.Abort()
+					return
+				}
+			}
 			c.Next()
 		}
 	}

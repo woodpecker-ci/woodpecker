@@ -266,6 +266,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Membership = setupMembershipService(c, r)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 
