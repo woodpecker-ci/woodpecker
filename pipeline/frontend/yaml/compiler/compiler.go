@@ -214,6 +214,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	if len(stages) == 0 {
 		// nothing will run, remove services and clone step
 		config.Stages = []*backend.Stage{}
+		config.SkippedClone = true
 	} else {
 		config.Stages = append(config.Stages, stages...)
 	}

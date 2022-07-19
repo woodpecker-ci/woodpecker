@@ -62,6 +62,7 @@ type BuildItem struct {
 
 func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 	var items []*BuildItem
+	var itemsSkippedClone []*BuildItem
 
 	sort.Sort(remote.ByName(b.Yamls))
 
@@ -115,11 +116,6 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
-			// skip the proc if it is empty, but only non-empty builds are expected or if it is not empty but only empty builds are expected
-			if (len(ir.Stages) == 0 && !b.EmptyOnly) || (len(ir.Stages) > 0 && b.EmptyOnly) {
-				continue
-			}
-
 			item := &BuildItem{
 				Proc:      proc,
 				Config:    ir,
@@ -132,12 +128,20 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				item.Labels = map[string]string{}
 			}
 
+			// skip the proc if it is empty, but only non-empty builds are expected or if it is not empty but only empty builds are expected
+			if (len(ir.Stages) == 0 && !b.EmptyOnly) || (len(ir.Stages) > 0 && b.EmptyOnly) {
+				if !b.EmptyOnly && ir.SkippedClone {
+					itemsSkippedClone = append(itemsSkippedClone, item)
+				}
+				continue
+			}
+
 			items = append(items, item)
 			pidSequence++
 		}
 	}
 
-	items = filterItemsWithMissingDependencies(items)
+	items = filterItemsWithMissingDependencies(items, itemsSkippedClone)
 
 	// check if at least one proc can start, if list is not empty
 	if len(items) > 0 && !procListContainsItemsToRun(items) {
@@ -156,15 +160,26 @@ func procListContainsItemsToRun(items []*BuildItem) bool {
 	return false
 }
 
-func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
+func filterItemsWithMissingDependencies(items []*BuildItem, itemsSkippedClone []*BuildItem) []*BuildItem {
+	itemsToRemove := make([]*BuildItem, 0)
+
 	for _, item := range items {
-		deps := make([]string, 0)
 		for _, dep := range item.DependsOn {
-			if containsItemWithName(dep, items) {
-				deps = append(deps, dep)
+			if !containsItemWithName(dep, append(items, itemsSkippedClone...)) {
+				itemsToRemove = append(itemsToRemove, item)
 			}
 		}
-		item.DependsOn = deps
+	}
+
+	if len(itemsToRemove) > 0 {
+		filtered := make([]*BuildItem, 0)
+		for _, item := range items {
+			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
+				filtered = append(filtered, item)
+			}
+		}
+		// Recursive to handle transitive deps
+		return filterItemsWithMissingDependencies(filtered, itemsSkippedClone)
 	}
 
 	return items
