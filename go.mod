@@ -11,7 +11,6 @@ require (
 	github.com/docker/docker v20.10.14+incompatible
 	github.com/docker/go-units v0.4.0
 	github.com/drone/envsubst v1.0.3
-	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-ap/httpsig v0.0.0-20210714162115-62a09257db51
