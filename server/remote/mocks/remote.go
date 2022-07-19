@@ -228,6 +228,34 @@ func (_m *Remote) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	return r0, r1
 }
 
+// OrgMembership provides a mock function with given fields: ctx, u, owner
+func (_m *Remote) OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
+	ret := _m.Called(ctx, u, owner)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string) bool); ok {
+		r0 = rf(ctx, u, owner)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 bool
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, string) bool); ok {
+		r1 = rf(ctx, u, owner)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(context.Context, *model.User, string) error); ok {
+		r2 = rf(ctx, u, owner)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // Perm provides a mock function with given fields: ctx, u, r
 func (_m *Remote) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	ret := _m.Called(ctx, u, r)

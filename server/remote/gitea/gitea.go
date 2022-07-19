@@ -20,7 +20,9 @@ package gitea
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -456,6 +458,40 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return false, false, err
+	}
+
+	member, resp, err := client.CheckOrgMembership(owner, u.Login)
+	if err != nil {
+		return false, false, err
+	}
+
+	if !member {
+		return false, false, nil
+	}
+
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return member, false, err
+	}
+
+	p := struct {
+		IsAdmin bool `json:"is_admin"`
+		IsOwner bool `json:"is_owner"`
+	}{}
+
+	if err := json.Unmarshal(buf, &p); err != nil {
+		return member, false, err
+	}
+
+	return member, p.IsAdmin || p.IsOwner, nil
 }
 
 // helper function to return the Gitea client with Token
