@@ -332,7 +332,7 @@
       "minProperties": 1
     },
     "service": {
-      "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "type": "object",
       "additionalProperties": false,
       "minProperties": 1,
