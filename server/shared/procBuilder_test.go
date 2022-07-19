@@ -459,3 +459,179 @@ func TestSanitizePath(t *testing.T) {
 		}
 	}
 }
+
+func TestSkippedClone(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &model.Build{},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			{Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Should have generated 1 buildItems")
+	}
+}
+
+func TestEmptyOnly(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Repo:      &model.Repo{},
+		Curr:      &model.Build{},
+		Last:      &model.Build{},
+		Netrc:     &model.Netrc{},
+		Secs:      []*model.Secret{},
+		Regs:      []*model.Registry{},
+		Link:      "",
+		EmptyOnly: true,
+		Yamls: []*remote.FileMeta{
+			{Name: "empty", Data: []byte(`
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			{Name: "not-empty", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Should have generated 1 buildItems")
+	}
+	if buildItems[0].Proc.Name != "empty" {
+		t.Fatal("Should have generated the empty build item")
+	}
+}
+
+func TestSkippedCloneWithDeps(t *testing.T) {
+	t.Parallel()
+
+	build := &model.Build{Branch: "dev"}
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{},
+		Curr:  build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Name: "zerostep", Data: []byte(`
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			{Name: "justastep", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			{Name: "shouldbefiltered", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ zerostep ]
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
+	}
+	if buildItems[0].Proc.Name != "justastep" {
+		t.Fatal("justastep should have been generated")
+	}
+}
+
+func TestSkippedCloneWithTransitiveDeps(t *testing.T) {
+	t.Parallel()
+
+	build := &model.Build{Branch: "dev"}
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{},
+		Curr:  build,
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Name: "zerostep", Data: []byte(`
+pipeline:
+  build:
+    when:
+      branch: notdev
+    image: scratch
+`)},
+			{Name: "justastep", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+			{Name: "shouldbefiltered", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ zerostep ]
+`)},
+			{Name: "shouldbefilteredtoo", Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+depends_on: [ shouldbefiltered ]
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(buildItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
+	}
+	if buildItems[0].Proc.Name != "justastep" {
+		t.Fatal("justastep should have been generated")
+	}
+}
