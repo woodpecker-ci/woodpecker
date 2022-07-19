@@ -105,92 +105,46 @@
       "required": ["image"],
       "properties": {
         "image": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-image",
-          "type": "string"
+          "$ref": "#/definitions/step_image"
         },
         "pull": {
-          "description": "Always pull the latest image on pipeline execution Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-image",
-          "type": "boolean"
+          "$ref": "#/definitions/step_pull"
         },
         "commands": {
-          "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-commands",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": { "type": "string" },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/definitions/step_commands"
         },
         "environment": {
-          "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": { "type": "string" },
-              "minLength": 1
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "type": ["boolean", "string", "number"]
-              }
-            }
-          ]
+          "$ref": "#/definitions/step_environment"
         },
         "secrets": {
-          "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
-          "type": "array",
-          "items": {
-            "oneOf": [
-              { "type": "string" },
-              {
-                "type": "object",
-                "required": ["source", "target"],
-                "properties": {
-                  "source": { "type": "string" },
-                  "target": { "type": "string" }
-                }
-              }
-            ]
-          },
-          "minLength": 1
+          "$ref": "#/definitions/step_secrets"
+        },
+        "settings": {
+          "$ref": "#/definitions/step_settings"
         },
         "when": {
           "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
         },
         "group": {
           "description": "Execute multiple steps with the same group key in parallel. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-group---parallel-execution",
           "type": "string"
         },
-        "volumes": {
-          "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.org/docs/usage/volumes",
-          "oneOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" }, "minLength": 1 }
-          ]
-        },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
           "type": "boolean"
-        },
-        "settings": {
-          "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
-          "type": "object",
-          "additionalProperties": {
-            "type": ["boolean", "string", "number", "array", "object"]
-          }
         }
       }
     },
     "step_when": {
-      "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-when---conditional-execution",
+      "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#when---conditional-execution",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "repo": {
-          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/conditional-execution#repo",
+          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#repo",
           "oneOf": [
             {
               "type": "array",
@@ -203,7 +157,7 @@
           ]
         },
         "branch": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
           "oneOf": [
             {
               "type": "array",
@@ -216,7 +170,7 @@
           ]
         },
         "event": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
           "oneOf": [
             {
               "type": "array",
@@ -231,11 +185,11 @@
           ]
         },
         "tag": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
           "type": "string"
         },
         "status": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#status",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#status",
           "type": "array",
           "items": {
             "enum": ["success", "failure"]
@@ -259,18 +213,18 @@
           "type": "string"
         },
         "matrix": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#matrix",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/matrix-pipelines",
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]
           }
         },
         "instance": {
-          "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#instance",
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#instance",
           "type": "string"
         },
         "path": {
-          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
+          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#path",
           "oneOf": [
             { "type": "string" },
             {
@@ -304,13 +258,124 @@
         }
       }
     },
-    "services": {
-      "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/services",
+    "step_image": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
+      "type": "string"
+    },
+    "step_pull": {
+      "description": "Always pull the latest image on pipeline execution Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
+      "type": "boolean"
+    },
+    "step_commands": {
+      "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#commands",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minLength": 1
+        },
+        { "type": "string" }
+      ]
+    },
+    "step_environment": {
+      "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        }
+      ]
+    },
+    "step_secrets": {
+      "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["source", "target"],
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" }
+            }
+          }
+        ]
+      },
+      "minLength": 1
+    },
+    "step_settings": {
+      "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
+      }
+    },
+    "step_volumes": {
+      "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.org/docs/usage/volumes",
+      "type": "array",
+      "items": { "type": "string" },
+      "minLength": 1
+    },
+    "services": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/service" },
+      "minProperties": 1
+    },
+    "service": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "required": ["image"],
+      "properties": {
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "commands": {
+          "$ref": "#/definitions/step_commands"
+        },
+        "environment": {
+          "$ref": "#/definitions/step_environment"
+        },
+        "secrets": {
+          "$ref": "#/definitions/step_secrets"
+        },
+        "settings": {
+          "$ref": "#/definitions/step_settings"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "ports": {
+          "description": "expose ports to which other steps can connect to",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ]
+          },
+          "minLength": 1
+        }
+      }
     },
     "workspace": {
-      "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#workspace",
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#workspace",
       "type": "object",
       "additionalProperties": true
     },
