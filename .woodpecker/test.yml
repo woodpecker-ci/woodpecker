@@ -19,6 +19,7 @@ pipeline:
     when:
       path:
         - ".woodpecker/**"
+        - "pipeline/schema/**"
 
   vendor:
     image: *golang_image
