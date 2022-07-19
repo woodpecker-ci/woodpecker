@@ -82,7 +82,7 @@ type Remote interface {
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
-	OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error)
+	OrgMembership(ctx context.Context, u *model.User, owner string) (member, admin bool, err error)
 }
 
 // FileMeta represents a file in version control
