@@ -17,12 +17,13 @@ package session
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 func User(c *gin.Context) *model.User {
@@ -118,62 +119,45 @@ func MustUser() gin.HandlerFunc {
 	}
 }
 
-func MustOrgMember() gin.HandlerFunc {
+func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := User(c)
 		owner := c.Param("owner")
-		switch {
-		case user == nil:
-			c.String(401, "User not authorized")
+		if user == nil {
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
-		case owner == "":
+			return
+		}
+		if owner == "" {
 			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
-		default:
-			if user.Login != owner && !user.Admin {
-				member, err := server.Config.Services.Membership.IsMember(c, user, owner)
-				if err != nil {
-					c.String(http.StatusInternalServerError, "Failed to check membership")
-					c.Abort()
-					return
-				}
-				if !member {
-					c.String(http.StatusForbidden, "User not authorized")
-					c.Abort()
-					return
-				}
-			}
-			c.Next()
+			return
 		}
-	}
-}
+		// User can access his own, admin can access all
+		if user.Login == owner || user.Admin {
+			c.Next()
+			return
+		}
 
-func MustOrgAdmin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user := User(c)
-		owner := c.Param("owner")
-		switch {
-		case user == nil:
-			c.String(401, "User not authorized")
+		var perm bool
+		var err error
+
+		if admin {
+			perm, err = server.Config.Services.Membership.IsAdmin(c, user, owner)
+		} else {
+			perm, err = server.Config.Services.Membership.IsMember(c, user, owner)
+		}
+		if err != nil {
+			log.Error().Msgf("Failed to check membership: %v", err)
+			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
-		case owner == "":
+			return
+		}
+		if !perm {
 			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
-		default:
-			if user.Login != owner && !user.Admin {
-				admin, err := server.Config.Services.Membership.IsAdmin(c, user, owner)
-				if err != nil {
-					c.String(http.StatusInternalServerError, "Failed to check membership")
-					c.Abort()
-					return
-				}
-				if !admin {
-					c.String(http.StatusForbidden, "User not authorized")
-					c.Abort()
-					return
-				}
-			}
-			c.Next()
+			return
 		}
+		c.Next()
 	}
 }
