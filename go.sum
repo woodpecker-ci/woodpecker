@@ -30,8 +30,8 @@ cloud.google.com/go/storage v1.5.0/go.mod h1:tpKbwo567HUNpVclU5sGELwQWBDZ8gh0Zeo
 cloud.google.com/go/storage v1.6.0/go.mod h1:N7U0C8pVQ/+NIKOBQyamJIeKQKkZ+mxpohlUTyfDhBk=
 cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RXyy7KQOVs=
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
-code.gitea.io/sdk/gitea v0.15.1-0.20220719204045-db8a2d99e210 h1:kZKzz58nhfeUcEF8uW+WuwTt/TefPN+RcEAHCJGk/WI=
-code.gitea.io/sdk/gitea v0.15.1-0.20220719204045-db8a2d99e210/go.mod h1:aRmrQC3CAHdJAU1LQt0C9zqzqI8tUB/5oQtNE746aYE=
+code.gitea.io/sdk/gitea v0.15.1-0.20220720025709-de34275bb64e h1:xayGBU2DwsrA5ZyqKNpXB91w3BfnkNcLDWZ7Ynn/w+g=
+code.gitea.io/sdk/gitea v0.15.1-0.20220720025709-de34275bb64e/go.mod h1:aRmrQC3CAHdJAU1LQt0C9zqzqI8tUB/5oQtNE746aYE=
 codeberg.org/6543/go-yaml2json v0.1.0 h1:njuf3a8QgsmBXJFiH+7wNR01biBS4MU+XeWE7W3bnus=
 codeberg.org/6543/go-yaml2json v0.1.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
