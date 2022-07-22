@@ -1,5 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
-// Copyright 2022 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
+// Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
