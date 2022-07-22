@@ -131,6 +131,13 @@ Server fully qualified url of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
+### `WOODPECKER_HOST_INTERNAL`
+> Default: empty
+
+Woodpecker CI service internal (behind proxy) fully qualified url (<scheme>://<host>). Used for creating hooks in Gitea when reverse proxy authentication mode using HTTP header is enabled (see `WOODPECKER_GITEA_REV_PROXY_AUTH` option).
+
+Example: `WOODPECKER_HOST_INTERNAL=http://192.168.1.100:8000/`
+
 ### `WOODPECKER_SERVER_ADDR`
 > Default: `:8000`
 

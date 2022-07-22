@@ -98,12 +98,12 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		}
 
 		// Since api does not return token secret, if drone token exists create new one.
-		resp, err := client.DeleteAccessToken("drone")
+		resp, err := client.DeleteAccessToken("woodpecker")
 		if err != nil && !(resp != nil && resp.StatusCode == 404) {
 			return nil, err
 		}
 		token, _, terr := client.CreateAccessToken(
-			gitea.CreateAccessTokenOption{Name: "drone"},
+			gitea.CreateAccessTokenOption{Name: "woodpecker"},
 		)
 		if terr != nil {
 			return nil, terr
