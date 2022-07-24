@@ -303,9 +303,9 @@ func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
+func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
 	// TODO: Not supported in Coding OAuth API
-	return false, false, nil
+	return nil, nil
 }
 
 // helper function to return the Coding oauth2 context using an HTTPClient that

@@ -54,11 +54,10 @@ func (c *membershipCache) Get(ctx context.Context, u *model.User, name string) (
 		return item.Value(), nil
 	}
 
-	member, admin, err := c.Remote.OrgMembership(ctx, u, name)
+	perm, err := c.Remote.OrgMembership(ctx, u, name)
 	if err != nil {
 		return nil, err
 	}
-	perm := &model.OrgPerm{Member: member, Admin: admin}
 	c.Cache.Set(key, perm, c.TTL)
 	return perm, nil
 }

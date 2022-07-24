@@ -247,9 +247,9 @@ func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
 	// TODO: Not implemented currently
-	return false, false, nil
+	return nil, nil
 }
 
 func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {

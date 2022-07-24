@@ -307,14 +307,14 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
 	client := c.newClientToken(ctx, u.Token)
 	org, _, err := client.Organizations.GetOrgMembership(ctx, u.Login, owner)
 	if err != nil {
-		return false, false, err
+		return nil, err
 	}
 
-	return org.GetState() == "active", org.GetRole() == "admin", nil
+	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
 // helper function to return the GitHub oauth2 context using an HTTPClient that
