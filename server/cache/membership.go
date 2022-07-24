@@ -26,21 +26,13 @@ import (
 
 // MembershipService is a service to check for user membership.
 type MembershipService interface {
-	// IsMember returns true if the user is a member of the organization.
-	IsMember(ctx context.Context, u *model.User, owner string) (bool, error)
-
-	// IsAdmin returns true if the user is an admin of the organization.
-	IsAdmin(ctx context.Context, u *model.User, owner string) (bool, error)
-}
-
-type membership struct {
-	Member bool
-	Admin  bool
+	// Get returns if the user is a member of the organization.
+	Get(ctx context.Context, u *model.User, name string) (*model.OrgPerm, error)
 }
 
 type membershipCache struct {
 	Remote remote.Remote
-	Cache  *ttlcache.Cache[string, membership]
+	Cache  *ttlcache.Cache[string, *model.OrgPerm]
 	TTL    time.Duration
 }
 
@@ -49,40 +41,24 @@ func NewMembershipService(r remote.Remote) MembershipService {
 	return &membershipCache{
 		TTL:    10 * time.Minute,
 		Remote: r,
-		Cache:  ttlcache.New(ttlcache.WithDisableTouchOnHit[string, membership]()),
+		Cache:  ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
 	}
 }
 
-func (c *membershipCache) get(ctx context.Context, u *model.User, owner string) (bool, bool, error) {
-	key := u.Login + "/" + owner
+// Get returns if the user is a member of the organization.
+func (c *membershipCache) Get(ctx context.Context, u *model.User, name string) (*model.OrgPerm, error) {
+	key := u.Login + "/" + name
 	// Error can be safely ignored, as cache can only return error from loaders.
 	item, _ := c.Cache.Get(key)
 	if item != nil && !item.IsExpired() {
-		return item.Value().Member, item.Value().Admin, nil
+		return item.Value(), nil
 	}
 
-	member, admin, err := c.Remote.OrgMembership(ctx, u, owner)
+	member, admin, err := c.Remote.OrgMembership(ctx, u, name)
 	if err != nil {
-		return false, false, err
+		return nil, err
 	}
-	c.Cache.Set(key, membership{Member: member, Admin: admin}, c.TTL)
-	return member, admin, nil
-}
-
-// IsMember returns true if the user is a member of the organization.
-func (c *membershipCache) IsMember(ctx context.Context, u *model.User, owner string) (bool, error) {
-	member, _, err := c.get(ctx, u, owner)
-	if err != nil {
-		return false, err
-	}
-	return member, nil
-}
-
-// IsAdmin returns true if the user is an admin of the organization.
-func (c *membershipCache) IsAdmin(ctx context.Context, u *model.User, owner string) (bool, error) {
-	_, admin, err := c.get(ctx, u, owner)
-	if err != nil {
-		return false, err
-	}
-	return admin, nil
+	perm := &model.OrgPerm{Member: member, Admin: admin}
+	c.Cache.Set(key, perm, c.TTL)
+	return perm, nil
 }

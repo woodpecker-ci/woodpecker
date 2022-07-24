@@ -139,21 +139,14 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		var perm bool
-		var err error
-
-		if admin {
-			perm, err = server.Config.Services.Membership.IsAdmin(c, user, owner)
-		} else {
-			perm, err = server.Config.Services.Membership.IsMember(c, user, owner)
-		}
+		perm, err := server.Config.Services.Membership.Get(c, user, owner)
 		if err != nil {
 			log.Error().Msgf("Failed to check membership: %v", err)
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
-		if !perm {
+		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
 			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 			return
