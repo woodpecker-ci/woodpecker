@@ -205,6 +205,66 @@
     }
   },
 
+  "org": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "Not allowed to access this organization's settings",
+
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no organization secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Organization secret deleted",
+        "created": "Organization secret created",
+        "saved": "Organization secret saved",
+
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
+      }
+    }
+  },
+
+  "admin": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "Not allowed to access server settings",
+
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no global secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Global secret deleted",
+        "created": "Global secret created",
+        "saved": "Global secret saved",
+
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
+      }
+    }
+  },
+
   "user": {
     "oauth_error": "Error while authenticating against OAuth provider",
     "internal_error": "Some internal error occurred",

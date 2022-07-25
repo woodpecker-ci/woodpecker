@@ -29,6 +29,26 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    path: '/org/:repoOwner',
+    name: 'org-wrapper',
+    component: (): Component => import('~/views/org/OrgWrapper.vue'),
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'org',
+        redirect: (route) => ({ name: 'repos-owner', params: route.params }),
+      },
+      {
+        path: 'settings',
+        name: 'org-settings',
+        component: (): Component => import('~/views/org/OrgSettings.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+    ],
+  },
+  {
     path: '/:repoOwner/:repoName',
     name: 'repo-wrapper',
     component: (): Component => import('~/views/repo/RepoWrapper.vue'),
@@ -96,6 +116,13 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     name: 'admin',
     component: (): Component => import('~/views/admin/Admin.vue'),
+    meta: { authentication: 'required' },
+    props: true,
+  },
+  {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: (): Component => import('~/views/admin/AdminSettings.vue'),
     meta: { authentication: 'required' },
     props: true,
   },

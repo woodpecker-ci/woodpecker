@@ -11,6 +11,7 @@ import {
   RepoSettings,
   Secret,
 } from './types';
+import { OrgPermissions } from './types/org';
 
 type RepoListOptions = {
   all?: boolean;
@@ -133,6 +134,42 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteRegistry(owner: string, repo: string, registryAddress: string): Promise<unknown> {
     return this._delete(`/api/repos/${owner}/${repo}/registry/${registryAddress}`);
+  }
+
+  getOrgPermissions(owner: string): Promise<OrgPermissions> {
+    return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
+  }
+
+  getOrgSecretList(owner: string): Promise<Secret[]> {
+    return this._get(`/api/orgs/${owner}/secrets`) as Promise<Secret[]>;
+  }
+
+  createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
+    return this._post(`/api/orgs/${owner}/secrets`, secret);
+  }
+
+  updateOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
+    return this._patch(`/api/orgs/${owner}/secrets/${secret.name}`, secret);
+  }
+
+  deleteOrgSecret(owner: string, secretName: string): Promise<unknown> {
+    return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
+  }
+
+  getGlobalSecretList(): Promise<Secret[]> {
+    return this._get(`/api/secrets`) as Promise<Secret[]>;
+  }
+
+  createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
+    return this._post(`/api/secrets`, secret);
+  }
+
+  updateGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
+    return this._patch(`/api/secrets/${secret.name}`, secret);
+  }
+
+  deleteGlobalSecret(secretName: string): Promise<unknown> {
+    return this._delete(`/api/secrets/${secretName}`);
   }
 
   getSelf(): Promise<unknown> {
