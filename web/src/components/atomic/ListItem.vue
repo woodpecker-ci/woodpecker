@@ -1,5 +1,6 @@
 <template>
-  <div
+  <component
+    :is="clickable ? 'button' : 'div'"
     class="
       w-full
       flex
@@ -14,7 +15,7 @@
     :class="{ 'cursor-pointer hover:shadow-md hover:bg-gray-200 dark:hover:bg-dark-gray-800': clickable }"
   >
     <slot />
-  </div>
+  </component>
 </template>
 
 <script lang="ts">
