@@ -2,7 +2,7 @@
 
 ## Preparation
 
-You can develop on your local computer by following the steps below or you can start with a prepared online setup using Gitpod. Start Woodpecker in Gitpod by clicking this badge:
+You can develop on your local computer by following the steps below or you can start with a prepared online setup using Gitpod. Simply start Woodpecker in Gitpod by clicking on the following badge. You can login with `woodpecker` and `password`.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
 
