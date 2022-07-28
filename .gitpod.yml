@@ -2,6 +2,7 @@ tasks:
   - name: Server
     env:
       WOODPECKER_OPEN: true
+      WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
       WOODPECKER_SECRET: "1234"
       WOODPECKER_GITEA: true
@@ -15,6 +16,8 @@ tasks:
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
+      gp sync-await gitea
+      gp sync-done woodpecker-server
     command: go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
     env:
@@ -22,7 +25,8 @@ tasks:
       WOODPECKER_SECRET: "1234"
       WOODPECKER_MAX_PROCS: 1
       WOODPECKER_HEALTHCHECK: false
-    init: go mod tidy
+    init: |
+      gp sync-await woodpecker-server
     command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
     command: |
@@ -31,11 +35,14 @@ tasks:
       $DOCKER_COMPOSE_CMD up -d
       sleep 10s
       $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
-      export GITEA_TOKEN=$($GITEA_CLI_CMD gitea admin user generate-access-token -u woodpecker --raw)
-      curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
-        -H 'accept: application/json' -H 'Content-Type: application/json' -H 'Authorization: token ${GITEA_TOKEN}' \
-        -d '{ "name": "Woodpecker CI", "redirect_uris": [ "https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize" ] }'
-      # $DOCKER_COMPOSE_CMD logs -f
+      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --raw)
+      GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
+        -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
+        -d "{ \"name\": \"Woodpecker CI\", \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
+      echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) > .env
+      echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
+      gp sync-done gitea
+      $DOCKER_COMPOSE_CMD logs -f
   - name: App
     init: |
       cd web/
