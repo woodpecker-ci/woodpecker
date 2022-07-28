@@ -29,6 +29,7 @@ tasks:
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
       export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
       $DOCKER_COMPOSE_CMD up -d
+      sleep 10s
       $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
       export GITEA_TOKEN=$($GITEA_CLI_CMD gitea admin user generate-access-token -u woodpecker --raw)
       curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
