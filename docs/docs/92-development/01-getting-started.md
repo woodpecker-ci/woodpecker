@@ -1,10 +1,22 @@
 # Getting started
 
-## Preparation
+You can develop on your local computer by following the [steps below](#preparation-for-local-development) or you can start with a fully prepared online setup using [Gitpod](https://github.com/gitpod-io/gitpod) and [Gitea](https://github.com/go-gitea/gitea).
 
-You can develop on your local computer by following the steps below or you can start with a prepared online setup using Gitpod. Simply start Woodpecker in Gitpod by clicking on the following badge. You can login with `woodpecker` and `password`.
+## Gitpod
+
+If you want to start development or updating docs as easy as possible you can use our preconfigured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
+
+- An IDE in the browser or bridged to your local VS-Code or Jetbrains
+- A preconfigured [Gitea](https://github.com/go-gitea/gitea) instance as forge
+- A preconfigured Woodpecker server
+- A single preconfigured Woodpecker agent node
+- Our docs preview server
+
+Simply start Woodpecker in Gitpod by clicking on the following badge. You can login with `woodpecker` and `password`.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
+
+## Preparation for local development
 
 ### Install Go
 
