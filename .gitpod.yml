@@ -56,8 +56,10 @@ tasks:
 ports:
   - port: 3000
     onOpen: ignore
+    visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 8000
     onOpen: notify
+    visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 9000
     onOpen: ignore
   - port: 8010
