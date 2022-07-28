@@ -25,7 +25,16 @@ tasks:
     init: go mod tidy
     command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
-    command: docker-compose -f docker-compose.gitpod.yml -p woodpecker up
+    command: |
+      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
+      export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
+      $DOCKER_COMPOSE_CMD up -d
+      $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
+      export GITEA_TOKEN=$($GITEA_CLI_CMD gitea admin user generate-access-token -u woodpecker --raw)
+      curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
+        -H 'accept: application/json' -H 'Content-Type: application/json' -H 'Authorization: token ${GITEA_TOKEN}' \
+        -d '{ "name": "Woodpecker CI", "redirect_uris": [ "https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize" ] }'
+      # $DOCKER_COMPOSE_CMD logs -f
   - name: App
     init: |
       cd web/
