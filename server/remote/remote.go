@@ -79,6 +79,10 @@ type Remote interface {
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
+
+	// OrgMembership returns if user is member of organization and if user
+	// is admin/owner in that organization.
+	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
 }
 
 // FileMeta represents a file in version control

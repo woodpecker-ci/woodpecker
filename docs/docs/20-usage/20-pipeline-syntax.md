@@ -332,12 +332,12 @@ when:
   event: tag
 ```
 
-Execute a step if the build event is a `tag` created from the specified branch:
+Execute a step if the pipeline event is a `push` to a specified branch:
 
 ```diff
 when:
-  event: tag
-+ branch: master
+  event: push
++ branch: main
 ```
 
 Execute a step for all non-pull request events:
@@ -616,6 +616,12 @@ pipeline:
       - go build
       - go test
 ```
+
+## `variables`
+
+Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+
+For more details and examples check the [Advanced YAML syntax docs](/docs/usage/advanced-yaml-syntax)
 
 ## `clone`
 

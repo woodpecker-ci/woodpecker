@@ -8,7 +8,21 @@
       <Icon name="close" class="ml-auto" />
     </div>
 
-    <div class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden">
+    <div
+      class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
+      @mouseover="showActions = true"
+      @mouseleave="showActions = false"
+    >
+      <div v-show="showActions" class="absolute top-0 right-0 z-50 mt-2 mr-4 hidden md:flex">
+        <Button
+          v-if="proc?.end_time !== undefined"
+          :is-loading="downloadInProgress"
+          :title="$t('repo.build.actions.log_download')"
+          start-icon="download"
+          @click="download"
+        />
+      </div>
+
       <div v-show="loadedLogs" class="w-full flex-grow p-2">
         <div id="terminal" class="w-full h-full" />
       </div>
@@ -47,20 +61,23 @@ import {
   toRef,
   watch,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 
+import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useDarkMode } from '~/compositions/useDarkMode';
+import useNotifications from '~/compositions/useNotifications';
 import { Build, Repo } from '~/lib/api/types';
 import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'BuildLog',
 
-  components: { Icon },
+  components: { Icon, Button },
 
   props: {
     build: {
@@ -82,6 +99,8 @@ export default defineComponent({
   },
 
   setup(props) {
+    const notifications = useNotifications();
+    const i18n = useI18n();
     const build = toRef(props, 'build');
     const procId = toRef(props, 'procId');
     const repo = inject<Ref<Repo>>('repo');
@@ -103,6 +122,41 @@ export default defineComponent({
     const fitAddon = ref(new FitAddon());
     const loadedLogs = ref(true);
     const autoScroll = ref(true); // TODO
+    const showActions = ref(false);
+    const downloadInProgress = ref(false);
+
+    async function download() {
+      if (!repo?.value || !build.value || !proc.value) {
+        throw new Error('The reposiotry, build or proc was undefined');
+      }
+      let logs;
+      try {
+        downloadInProgress.value = true;
+        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
+      } catch (e) {
+        notifications.notifyError(e, i18n.t('repo.build.log_download_error'));
+        return;
+      } finally {
+        downloadInProgress.value = false;
+      }
+      const fileURL = window.URL.createObjectURL(
+        new Blob([logs.map((line) => line.out).join('')], {
+          type: 'text/plain',
+        }),
+      );
+      const fileLink = document.createElement('a');
+
+      fileLink.href = fileURL;
+      fileLink.setAttribute(
+        'download',
+        `${repo.value.owner}-${repo.value.name}-${build.value.number}-${proc.value.name}.log`,
+      );
+      document.body.appendChild(fileLink);
+
+      fileLink.click();
+      document.body.removeChild(fileLink);
+      window.URL.revokeObjectURL(fileURL);
+    }
 
     async function loadLogs() {
       if (loadedProcSlug.value === procSlug.value) {
@@ -167,11 +221,16 @@ export default defineComponent({
       fitAddon.value.fit();
     }
 
+    const unmounted = ref(false);
     onMounted(async () => {
       term.value.loadAddon(fitAddon.value);
       term.value.loadAddon(new WebLinksAddon());
 
       await nextTick(() => {
+        if (unmounted.value) {
+          // need to check if unmounted already because we are async here
+          return;
+        }
         const element = document.getElementById('terminal');
         if (element === null) {
           throw new Error('Unexpected: "terminal" should be provided at this place');
@@ -214,13 +273,19 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
+      unmounted.value = true;
       if (stream.value) {
         stream.value.close();
+      }
+      const element = document.getElementById('terminal');
+      if (element !== null) {
+        // Clean up any custom DOM added in onMounted above
+        element.innerHTML = '';
       }
       window.removeEventListener('resize', resize);
     });
 
-    return { proc, loadedLogs };
+    return { proc, loadedLogs, showActions, download, downloadInProgress };
   },
 });
 </script>
