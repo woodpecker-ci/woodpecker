@@ -6,7 +6,7 @@ import (
 )
 
 var alterTableLogUpdateColumnLogDataType = task{
-	name: "alter-table-logs",
+	name: "alter-table-logs-update-type-of-data",
 	fn: func(sess *xorm.Session) error {
 		dialect := sess.Engine().Dialect().URI().DBType
 		var sql string
