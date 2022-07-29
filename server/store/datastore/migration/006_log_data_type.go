@@ -7,28 +7,21 @@ import (
 
 var alterTableLogUpdateColumnLogDataType = task{
 	name: "alter-table-logs-update-type-of-data",
-	fn: func(sess *xorm.Session) error {
+	fn: func(sess *xorm.Session) (err error) {
 		dialect := sess.Engine().Dialect().URI().DBType
-		var sql string
 
 		switch dialect {
 		case schemas.POSTGRES:
-			sql = "ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA"
+			_, err = sess.Exec("ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA")
 		case schemas.MYSQL:
-			sql = "ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB"
+			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB")
 		case schemas.MSSQL:
-			sql = "ALTER TABLE logs MODIFY COLUMN log_data VARBINARY"
+			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data VARBINARY")
+		default:
+			// sqlite does only know BLOB in all cases
+			return nil
 		}
 
-		if sql != "" {
-			res, err := sess.Query(sql)
-			_ = res
-
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return err
 	},
 }
