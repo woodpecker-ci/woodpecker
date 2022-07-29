@@ -21,6 +21,7 @@ import (
 	"crypto"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
@@ -38,6 +39,7 @@ var Config = struct {
 		Registries          model.RegistryService
 		Environ             model.EnvironService
 		Remote              remote.Remote
+		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
 		SignaturePublicKey  crypto.PublicKey
