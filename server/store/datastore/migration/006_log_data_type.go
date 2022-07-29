@@ -13,11 +13,11 @@ var alterTableLogUpdateColumnLogDataType = task{
 
 		switch dialect {
 		case schemas.POSTGRES:
-			sql = "ALTER TABLE logs ALTER COLUMN log_data TYPE LONGBLOB"
+			sql = "ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA"
 		case schemas.MYSQL:
 			sql = "ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB"
 		case schemas.MSSQL:
-			sql = "ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB"
+			sql = "ALTER TABLE logs MODIFY COLUMN log_data VARBINARY"
 		}
 
 		if sql != "" {
