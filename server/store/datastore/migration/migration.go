@@ -32,7 +32,6 @@ var migrationTasks = []*task{
 	&alterTableReposDropAllowDeploysAllowTags,
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
-	&dropSenders,
 	&alterTableLogUpdateColumnLogDataType
 }
 
