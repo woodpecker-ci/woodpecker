@@ -141,22 +141,13 @@ These can be used, for example, to manage the image tag used by multiple project
 ```diff
 pipeline:
   build:
+-   image: golang:1.18
 +   image: golang:${GOLANG_VERSION}
     commands:
-      - export PATH=$${PATH}:/go
-      - go build
-      - go test
-```
-
-```diff
-services:
-  woodpecker-server:
-    [...]
+      - [...]
     environment:
       - [...]
--     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.17
 +     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
-```
 
 ## String Substitution
 
