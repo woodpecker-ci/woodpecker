@@ -20,7 +20,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 ## Tools
 
-- [Convert Drone CI pipelines to Woodpecker CI]([https://github.com/woodpecker-ci?q=plugin&type=all](https://codeberg.org/lafriks/woodpecker-pipeline-transform))
+- [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
 
 ## Templates
 
