@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/docs/static/img/logo.svg" width="220"/>
+    <img alt="Woodpecker" src="docs/static/img/logo-auto-darkmode.svg" width="220"/>
   </a>
 </p>
 <br/>
@@ -44,12 +44,13 @@
 
 ![woodpecker](docs/docs/woodpecker.png)
 
-## Support
+## 🫶 Support
 
 Please consider to donate and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
-## Usage
+## 🚀 Usage
 
 ### .woodpecker.yml
 
@@ -72,22 +73,23 @@ Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you ca
 
 [Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
-## Documentation
+## 📖 Documentation
 
 https://woodpecker-ci.org/
 
-## Contribution
+## ✨ Contribute
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-## Who uses Woodpecker?
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#preparation-for-local-development)
 
-[Codeberg](https://codeberg.org), the woodpecker project itself, and many others.
+## 👋 Who uses Woodpecker?
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
+[Codeberg](https://codeberg.org), the Woodpecker project itself, and many others.
 
-Also consider using the topic `WoodpeckerCI` in your repository, so others can learn
-from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it as well.
+
+Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
 
 Here are some places where people mention Woodpecker:
 
@@ -96,7 +98,8 @@ Here are some places where people mention Woodpecker:
 - [Twitter](https://twitter.com/hashtag/WoodpeckerCI?f=live)
 - [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
-## Stars over time
+## ✨ Stars over time
+
 [![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
 
 ## License
