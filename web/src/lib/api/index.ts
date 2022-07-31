@@ -5,13 +5,13 @@ import {
   BuildFeed,
   BuildLog,
   BuildProc,
+  OrgPermissions,
   Registry,
   Repo,
   RepoPermissions,
   RepoSettings,
   Secret,
 } from './types';
-import { OrgPermissions } from './types/org';
 
 type RepoListOptions = {
   all?: boolean;

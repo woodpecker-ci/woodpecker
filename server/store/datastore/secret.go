@@ -28,10 +28,10 @@ func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error
 	return secret, wrapGet(s.engine.Get(secret))
 }
 
-func (s storage) SecretList(repo *model.Repo, all bool) ([]*model.Secret, error) {
+func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0, perPage)
 	var cond builder.Cond = builder.Eq{"secret_repo_id": repo.ID}
-	if all {
+	if includeGlobalAndOrgSecrets {
 		cond = cond.Or(builder.Eq{"secret_owner": repo.Owner}).
 			Or(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0}))
 	}

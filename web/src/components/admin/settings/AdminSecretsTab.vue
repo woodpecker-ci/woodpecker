@@ -7,6 +7,7 @@
           {{ $t('admin.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
+        <Warning :text="$t('admin.settings.secrets.warning')" />
       </div>
       <Button
         v-if="selectedSecret"
@@ -50,6 +51,7 @@ import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Panel from '~/components/layout/Panel.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
@@ -74,6 +76,7 @@ export default defineComponent({
     DocsLink,
     SecretList,
     SecretEdit,
+    Warning,
   },
 
   setup() {

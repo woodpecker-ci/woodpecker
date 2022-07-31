@@ -30,7 +30,6 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/org/:repoOwner',
-    name: 'org-wrapper',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [

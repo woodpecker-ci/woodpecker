@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,11 @@ func GetOrgPermissions(c *gin.Context) {
 		user  = session.User(c)
 		owner = c.Param("owner")
 	)
+
+	if user == nil {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
 
 	perm, err := server.Config.Services.Membership.Get(c, user, owner)
 	if err != nil {

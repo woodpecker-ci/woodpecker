@@ -243,6 +243,7 @@
       "secrets": {
         "secrets": "Noslēpumi",
         "desc": "Noslēpumus var padot visu repozitoriju individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+        "warning": "Šie noslēpumi būs pieejami visiem servera lietotājiem.",
         "none": "Pagaidām nav neviena globālā noslēpuma.",
         "add": "Pievienot noslēpumu",
         "save": "Saglabāt noslēpumu",
