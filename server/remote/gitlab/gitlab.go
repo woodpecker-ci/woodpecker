@@ -579,6 +579,62 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	}
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (g *Gitlab) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 100,
+		},
+		Search: gitlab.String(owner),
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	var gid int
+	for _, group := range groups {
+		if group.Name == owner {
+			gid = group.ID
+			break
+		}
+	}
+	if gid == 0 {
+		return &model.OrgPerm{}, nil
+	}
+
+	opts := &gitlab.ListGroupMembersOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 100,
+		},
+	}
+
+	for i := 1; true; i++ {
+		opts.Page = i
+		members, _, err := client.Groups.ListAllGroupMembers(gid, opts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, member := range members {
+			if member.Username == u.Login {
+				return &model.OrgPerm{Member: true, Admin: member.AccessLevel >= gitlab.OwnerPermissions}, nil
+			}
+		}
+
+		if len(members) < opts.PerPage {
+			break
+		}
+	}
+
+	return &model.OrgPerm{}, nil
+}
+
 func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
