@@ -60,22 +60,19 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		return nil, ErrNotFound{Msg: msg}
 	}
 
-	filtered, err := branchFiltered(build, remoteYamlConfigs)
-	if err != nil {
-		msg := "failure to parse yaml from hook"
-		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, ErrBadRequest{Msg: msg}
-	}
-	if filtered {
-		err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
-		log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-		return nil, err
-	}
+	filtered, parseErr := branchFiltered(build, remoteYamlConfigs)
+	if parseErr == nil {
+		if filtered {
+			err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+			log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+			return nil, err
+		}
 
-	if zeroSteps(build, remoteYamlConfigs) {
-		err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
-		log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-		return nil, err
+		if zeroSteps(build, remoteYamlConfigs) {
+			err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
+			log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+			return nil, err
+		}
 	}
 
 	// update some build fields
@@ -83,8 +80,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	build.Verified = true
 	build.Status = model.StatusPending
 
-	// TODO(336) extend gated feature with an allow/block List
-	if repo.IsGated {
+	if parseErr != nil {
+		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
+		build.Status = model.StatusError
+		build.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
+	} else if repo.IsGated {
+		// TODO(336) extend gated feature with an allow/block List
 		build.Status = model.StatusBlocked
 	}
 
@@ -103,6 +104,18 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 			log.Error().Err(err).Msg(msg)
 			return nil, fmt.Errorf(msg)
 		}
+	}
+
+	if build.Status == model.StatusError {
+		if err := publishToTopic(ctx, build, repo); err != nil {
+			log.Error().Err(err).Msg("publishToTopic")
+		}
+
+		if err := updateBuildStatus(ctx, build, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updateBuildStatus")
+		}
+
+		return build, nil
 	}
 
 	build, buildItems, err := createBuildItems(ctx, _store, build, repoUser, repo, remoteYamlConfigs, nil)
