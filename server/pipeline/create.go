@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -82,6 +83,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 
 	if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
+		build.Started = time.Now().Unix()
+		build.Finished = build.Started
 		build.Status = model.StatusError
 		build.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
 	} else if repo.IsGated {

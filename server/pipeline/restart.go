@@ -16,11 +16,13 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -85,6 +87,10 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 
 	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
+		var parseErr *yaml.PipelineParseError
+		if errors.As(err, &parseErr) {
+			return newBuild, nil
+		}
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
