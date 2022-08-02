@@ -2,8 +2,10 @@ package build
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
 
 	"github.com/urfave/cli/v2"
 )
@@ -17,6 +19,35 @@ var buildLogsCmd = &cli.Command{
 }
 
 func buildLogs(c *cli.Context) error {
-	// TODO: add logs command
-	return fmt.Errorf("Command temporarily disabled. See https://github.com/woodpecker-ci/woodpecker/issues/383")
+	repo := c.Args().First()
+	owner, name, err := internal.ParseRepo(repo)
+	if err != nil {
+		return err
+	}
+
+	number, err := strconv.Atoi(c.Args().Get(1))
+	if err != nil {
+		return err
+	}
+
+	job, err := strconv.Atoi(c.Args().Get(2))
+	if err != nil {
+		return err
+	}
+
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+
+	logs, err := client.BuildLogs(owner, name, number, job)
+	if err != nil {
+		return err
+	}
+
+	for _, log := range logs {
+		fmt.Print(log.Output)
+	}
+
+	return nil
 }
