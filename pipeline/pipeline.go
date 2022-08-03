@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -216,13 +217,16 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
 	if r.logger != nil {
 		rc, err := r.engine.Tail(r.ctx, step)
 		if err != nil {
 			return nil, err
 		}
 
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			logger := r.MakeLogger()
 
 			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
@@ -237,6 +241,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
+	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
+	// so first make sure all reading has finished.
+	wg.Wait()
 	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
 		return nil, err
