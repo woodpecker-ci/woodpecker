@@ -34,7 +34,7 @@
               {{ l.line }}
             </span>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <span class="table-cell align-top text-color w-[100%]" v-html="l.text" />
+            <span class="table-cell align-top text-color whitespace-pre-wrap break-words w-[100%]" v-html="l.text" />
             <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
               {{ l.time }}
             </span>
@@ -124,19 +124,45 @@ export default defineComponent({
     const showActions = ref(false);
     const downloadInProgress = ref(false);
     const ansiUp = ref(new AnsiUp());
+    const maxLineCount = 500;
     ansiUp.value.use_classes = true;
+
+    let logBatch: LogLine[] = [];
+    let timer: number | undefined;
 
     function write(lines: LogLine[]) {
       let lastLine = 0;
       if (log.value.length > 0) {
         lastLine = log.value[log.value.length - 1].line;
       }
+      if (logBatch.length > 0 && logBatch[logBatch.length - 1].line > lastLine) {
+        lastLine = logBatch[logBatch.length - 1].line;
+      }
       for (let i = 0; i < lines.length; i += 1) {
         const line = lines[i];
         if (line.line > lastLine) {
-          log.value.push({ ...line, text: ansiUp.value.ansi_to_html(line.text) });
+          logBatch.push({ ...line, text: ansiUp.value.ansi_to_html(line.text) });
         }
       }
+      if (logBatch.length > maxLineCount) {
+        logBatch.splice(0, logBatch.length - maxLineCount);
+      }
+    }
+
+    function flush(): boolean {
+      const b = logBatch.splice(0);
+      if (b.length === 0) {
+        return false;
+      }
+      if (b.length >= maxLineCount) {
+        log.value = b.splice(0);
+        return true;
+      }
+      if (log.value.length + b.length > maxLineCount) {
+        log.value.splice(0, log.value.length + b.length - maxLineCount);
+      }
+      log.value.push(...b);
+      return true;
     }
 
     function scrollDown() {
@@ -188,8 +214,12 @@ export default defineComponent({
       loadedProcSlug.value = procSlug.value;
       loadedLogs.value = false;
       log.value = [];
+      logBatch = [];
       ansiUp.value = new AnsiUp();
       ansiUp.value.use_classes = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
 
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
@@ -214,17 +244,24 @@ export default defineComponent({
         const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
         write(
           logs
-            .slice(Math.max(logs.length, 0) - 300, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776))
+            .slice(Math.max(logs.length, 0) - maxLineCount, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776))
             .map((l) => ({
               line: l.pos,
               text: l.out,
               time: l.time ? `${l.time}s` : '',
             })),
         );
+        flush();
         loadedLogs.value = true;
       }
 
       if (isProcRunning(proc.value)) {
+        timer = setInterval(() => {
+          if (flush() && autoScroll.value) {
+            scrollDown();
+          }
+        }, 500);
+
         // load stream of parent process (which receives all child processes logs)
         // TODO: change stream to only send data of single child process
         stream.value = apiClient.streamLogs(
@@ -238,10 +275,6 @@ export default defineComponent({
             }
             loadedLogs.value = true;
             write([{ line: l.pos, text: l.out, time: l.time ? `${l.time}s` : '' }]);
-
-            if (autoScroll.value) {
-              scrollDown();
-            }
           },
         );
       }
