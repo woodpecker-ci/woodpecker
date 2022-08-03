@@ -23,8 +23,23 @@
         />
       </div>
 
-      <div v-show="loadedLogs" class="w-full flex-grow p-2">
-        <div id="terminal" class="w-full h-full" />
+      <div
+        v-show="loadedLogs"
+        ref="consoleElement"
+        class="w-full max-w-full flex-auto flex-grow p-2 overflow-x-hidden overflow-y-auto"
+      >
+        <div class="table">
+          <div v-for="l in log" :key="l.line" class="table-row whitespace-pre-wrap font-mono">
+            <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
+              {{ l.line }}
+            </span>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span class="table-cell align-top text-color w-[100%]" v-html="l.text" />
+            <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
+              {{ l.time }}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div class="m-auto text-xl text-color">
@@ -36,8 +51,8 @@
 
       <div
         v-if="proc?.end_time !== undefined"
-        :class="proc.exit_code == 0 ? 'dark:text-lime-400 text-lime-600' : 'dark:text-red-400 text-red-600'"
-        class="w-full bg-gray-400 dark:bg-dark-gray-800 text-md p-4"
+        :class="proc.exit_code == 0 ? 'dark:text-lime-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
+        class="w-full bg-gray-200 dark:bg-dark-gray-800 text-md p-4"
       >
         {{ $t('repo.build.exit_code', { exitCode: proc.exit_code }) }}
       </div>
@@ -46,33 +61,24 @@
 </template>
 
 <script lang="ts">
-import 'xterm/css/xterm.css';
+import '~/style/console.css';
 
-import {
-  computed,
-  defineComponent,
-  inject,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  PropType,
-  Ref,
-  ref,
-  toRef,
-  watch,
-} from 'vue';
+import AnsiUp from 'ansi_up';
+import { computed, defineComponent, inject, nextTick, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import { WebLinksAddon } from 'xterm-addon-web-links';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { useDarkMode } from '~/compositions/useDarkMode';
 import useNotifications from '~/compositions/useNotifications';
 import { Build, Repo } from '~/lib/api/types';
 import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
+
+type LogLine = {
+  line: number;
+  text: string;
+  time: string;
+};
 
 export default defineComponent({
   name: 'BuildLog',
@@ -110,24 +116,41 @@ export default defineComponent({
     const procSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${build.value.id} - ${procId.value}`);
     const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
     const stream = ref<EventSource>();
-    const term = ref(
-      new Terminal({
-        convertEol: true,
-        disableStdin: true,
-        theme: {
-          cursor: 'transparent',
-        },
-      }),
-    );
-    const fitAddon = ref(new FitAddon());
+    const log = ref<LogLine[]>([]);
+    const consoleElement = ref<Element>();
+
     const loadedLogs = ref(true);
     const autoScroll = ref(true); // TODO
     const showActions = ref(false);
     const downloadInProgress = ref(false);
+    const ansiUp = ref(new AnsiUp());
+    ansiUp.value.use_classes = true;
+
+    function write(lines: LogLine[]) {
+      let lastLine = 0;
+      if (log.value.length > 0) {
+        lastLine = log.value[log.value.length - 1].line;
+      }
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
+        if (line.line > lastLine) {
+          log.value.push({ ...line, text: ansiUp.value.ansi_to_html(line.text) });
+        }
+      }
+    }
+
+    function scrollDown() {
+      nextTick(() => {
+        if (!consoleElement.value) {
+          return;
+        }
+        consoleElement.value.scrollTop = consoleElement.value.scrollHeight;
+      });
+    }
 
     async function download() {
       if (!repo?.value || !build.value || !proc.value) {
-        throw new Error('The reposiotry, build or proc was undefined');
+        throw new Error('The repository, build or proc was undefined');
       }
       let logs;
       try {
@@ -164,8 +187,9 @@ export default defineComponent({
       }
       loadedProcSlug.value = procSlug.value;
       loadedLogs.value = false;
-      term.value.reset();
-      term.value.write('\x1b[?25l');
+      log.value = [];
+      ansiUp.value = new AnsiUp();
+      ansiUp.value.use_classes = true;
 
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
@@ -188,11 +212,14 @@ export default defineComponent({
 
       if (isProcFinished(proc.value)) {
         const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
-        term.value.write(
+        write(
           logs
-            .slice(Math.max(logs.length, 0) - 300, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776)
-            .map((line) => `${(line.pos || 0).toString().padEnd(logs.length.toString().length)}  ${line.out}`)
-            .join(''),
+            .slice(Math.max(logs.length, 0) - 300, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776))
+            .map((l) => ({
+              line: l.pos,
+              text: l.out,
+              time: l.time ? `${l.time}s` : '',
+            })),
         );
         loadedLogs.value = true;
       }
@@ -206,41 +233,21 @@ export default defineComponent({
           build.value.number,
           proc.value.ppid,
           (l) => {
+            if (l?.proc !== proc.value?.name) {
+              return;
+            }
             loadedLogs.value = true;
-            term.value.write(l.out, () => {
-              if (autoScroll.value) {
-                term.value.scrollToBottom();
-              }
-            });
+            write([{ line: l.pos, text: l.out, time: l.time ? `${l.time}s` : '' }]);
+
+            if (autoScroll.value) {
+              scrollDown();
+            }
           },
         );
       }
     }
 
-    function resize() {
-      fitAddon.value.fit();
-    }
-
-    const unmounted = ref(false);
     onMounted(async () => {
-      term.value.loadAddon(fitAddon.value);
-      term.value.loadAddon(new WebLinksAddon());
-
-      await nextTick(() => {
-        if (unmounted.value) {
-          // need to check if unmounted already because we are async here
-          return;
-        }
-        const element = document.getElementById('terminal');
-        if (element === null) {
-          throw new Error('Unexpected: "terminal" should be provided at this place');
-        }
-        term.value.open(element);
-        fitAddon.value.fit();
-
-        window.addEventListener('resize', resize);
-      });
-
       loadLogs();
     });
 
@@ -248,44 +255,15 @@ export default defineComponent({
       loadLogs();
     });
 
-    const { darkMode } = useDarkMode();
-    watch(
-      darkMode,
-      () => {
-        if (darkMode.value) {
-          term.value.options = {
-            theme: {
-              background: '#303440', // dark-gray-700
-              foreground: '#d3d3d3', // gray-...
-            },
-          };
-        } else {
-          term.value.options = {
-            theme: {
-              background: 'rgb(209,213,219)', // gray-300
-              foreground: '#000',
-              selection: '#000',
-            },
-          };
+    watch(proc, (oldProc, newProc) => {
+      if (oldProc && oldProc.name === newProc?.name && oldProc?.end_time !== newProc?.end_time) {
+        if (autoScroll.value) {
+          scrollDown();
         }
-      },
-      { immediate: true },
-    );
-
-    onBeforeUnmount(() => {
-      unmounted.value = true;
-      if (stream.value) {
-        stream.value.close();
       }
-      const element = document.getElementById('terminal');
-      if (element !== null) {
-        // Clean up any custom DOM added in onMounted above
-        element.innerHTML = '';
-      }
-      window.removeEventListener('resize', resize);
     });
 
-    return { proc, loadedLogs, showActions, download, downloadInProgress };
+    return { consoleElement, proc, log, loadedLogs, showActions, download, downloadInProgress };
   },
 });
 </script>
