@@ -36,7 +36,7 @@
             <!-- eslint-disable-next-line vue/no-v-html -->
             <span class="table-cell align-top text-color whitespace-pre-wrap break-words w-[100%]" v-html="l.text" />
             <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
-              {{ l.time }}
+              {{ formatTime(l.time) }}
             </span>
           </div>
         </div>
@@ -77,7 +77,7 @@ import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
 type LogLine = {
   line: number;
   text: string;
-  time: string;
+  time?: number;
 };
 
 export default defineComponent({
@@ -130,6 +130,10 @@ export default defineComponent({
     let logBatch: LogLine[] = [];
     let timer: number | undefined;
 
+    function formatTime(time?: number): string {
+      return time === undefined ? '' : `${time}s`;
+    }
+
     function write(lines: LogLine[]) {
       let lastLine = 0;
       if (log.value.length > 0) {
@@ -151,15 +155,38 @@ export default defineComponent({
 
     function flush(): boolean {
       const b = logBatch.splice(0);
+      let lastTime: number | undefined;
       if (b.length === 0) {
         return false;
       }
       if (b.length >= maxLineCount) {
+        for (let i = 0; i < b.length; i += 1) {
+          if (b[i].time === lastTime) {
+            b[i].time = undefined;
+          } else {
+            lastTime = b[i].time;
+          }
+        }
         log.value = b.splice(0);
         return true;
       }
       if (log.value.length + b.length > maxLineCount) {
         log.value.splice(0, log.value.length + b.length - maxLineCount);
+      }
+
+      // Deduplicate repeating time.
+      for (let i = log.value.length - 1; i >= 0; i -= 1) {
+        if (log.value[i].time !== undefined) {
+          lastTime = log.value[i].time;
+          break;
+        }
+      }
+      for (let i = 0; i < b.length; i += 1) {
+        if (b[i].time === lastTime) {
+          b[i].time = undefined;
+        } else {
+          lastTime = b[i].time;
+        }
       }
       log.value.push(...b);
       return true;
@@ -218,7 +245,8 @@ export default defineComponent({
       ansiUp.value = new AnsiUp();
       ansiUp.value.use_classes = true;
       if (timer) {
-        window.clearTimeout(timer);
+        window.clearInterval(timer);
+        timer = undefined;
       }
 
       if (!repo) {
@@ -248,7 +276,7 @@ export default defineComponent({
             .map((l) => ({
               line: l.pos,
               text: l.out,
-              time: l.time ? `${l.time}s` : '',
+              time: l.time ?? 0,
             })),
         );
         flush();
@@ -274,7 +302,7 @@ export default defineComponent({
               return;
             }
             loadedLogs.value = true;
-            write([{ line: l.pos, text: l.out, time: l.time ? `${l.time}s` : '' }]);
+            write([{ line: l.pos, text: l.out, time: l.time ?? 0 }]);
           },
         );
       }
@@ -296,7 +324,7 @@ export default defineComponent({
       }
     });
 
-    return { consoleElement, proc, log, loadedLogs, showActions, download, downloadInProgress };
+    return { consoleElement, proc, log, loadedLogs, formatTime, showActions, download, downloadInProgress };
   },
 });
 </script>
