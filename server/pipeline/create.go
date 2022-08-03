@@ -52,27 +52,30 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		}
 	}
 
+	var (
+		remoteYamlConfigs []*remote.FileMeta
+		configFetchErr    error
+		filtered          bool
+		parseErr          error
+	)
+
 	// fetch the build file from the remote
 	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, build)
-	remoteYamlConfigs, err := configFetcher.Fetch(ctx)
-	if err != nil {
-		msg := fmt.Sprintf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
-		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, ErrNotFound{Msg: msg}
-	}
+	remoteYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
+	if configFetchErr == nil {
+		filtered, parseErr = branchFiltered(build, remoteYamlConfigs)
+		if parseErr == nil {
+			if filtered {
+				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+				return nil, err
+			}
 
-	filtered, parseErr := branchFiltered(build, remoteYamlConfigs)
-	if parseErr == nil {
-		if filtered {
-			err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
-			log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-			return nil, err
-		}
-
-		if zeroSteps(build, remoteYamlConfigs) {
-			err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
-			log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-			return nil, err
+			if zeroSteps(build, remoteYamlConfigs) {
+				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
+				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
+				return nil, err
+			}
 		}
 	}
 
@@ -81,7 +84,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	build.Verified = true
 	build.Status = model.StatusPending
 
-	if parseErr != nil {
+	if configFetchErr != nil {
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
+		build.Started = time.Now().Unix()
+		build.Finished = build.Started
+		build.Status = model.StatusError
+		build.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
+	} else if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		build.Started = time.Now().Unix()
 		build.Finished = build.Started
