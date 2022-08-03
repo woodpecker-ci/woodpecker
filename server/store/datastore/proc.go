@@ -44,7 +44,10 @@ func (s storage) ProcChild(build *model.Build, ppid int, child string) (*model.P
 
 func (s storage) ProcList(build *model.Build) ([]*model.Proc, error) {
 	procList := make([]*model.Proc, 0, perPage)
-	return procList, s.engine.Where("proc_build_id = ?", build.ID).Find(&procList)
+	return procList, s.engine.
+		Where("proc_build_id = ?", build.ID).
+		OrderBy("proc_pid").
+		Find(&procList)
 }
 
 func (s storage) ProcCreate(procs []*model.Proc) error {
