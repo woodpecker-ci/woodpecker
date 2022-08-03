@@ -218,7 +218,7 @@ export default defineComponent({
       ansiUp.value = new AnsiUp();
       ansiUp.value.use_classes = true;
       if (timer) {
-        clearTimeout(timer);
+        window.clearTimeout(timer);
       }
 
       if (!repo) {
@@ -256,7 +256,7 @@ export default defineComponent({
       }
 
       if (isProcRunning(proc.value)) {
-        timer = setInterval(() => {
+        timer = window.setInterval(() => {
           if (flush() && autoScroll.value) {
             scrollDown();
           }
