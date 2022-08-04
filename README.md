@@ -81,7 +81,7 @@ https://woodpecker-ci.org/
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#preparation-for-local-development)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#gitpod)
 
 ## 👋 Who uses Woodpecker?
 
