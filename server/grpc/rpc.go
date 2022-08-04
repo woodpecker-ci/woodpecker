@@ -52,7 +52,7 @@ type RPC struct {
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) {
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
@@ -61,7 +61,7 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 		}
 	}
 
-	fn, err := createFilterFunc(filter)
+	fn, err := createFilterFunc(agentFilter)
 	if err != nil {
 		return nil, err
 	}

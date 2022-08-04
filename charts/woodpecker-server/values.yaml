@@ -64,6 +64,10 @@ ingress:
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+
+  # -- Defines which ingress controller will implement the resource
+  ingressClassName: ""
+
   hosts:
     - host: chart-example.local
       paths:

@@ -145,6 +145,8 @@ func apiRoutes(e *gin.Engine) {
 		logLevel.POST("", api.SetLogLevel)
 	}
 
+	e.GET("/api/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
+
 	// TODO: remove /hook in favor of /api/hook
 	e.POST("/hook", api.PostHook)
 	e.POST("/api/hook", api.PostHook)

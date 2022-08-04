@@ -21,7 +21,7 @@
       <BuildFeedItem :build="build" />
     </router-link>
 
-    <span v-if="sortedBuildFeed.length === 0" class="text-gray-500 m-4">No pipelines have been started yet.</span>
+    <span v-if="sortedBuildFeed.length === 0" class="text-color m-4">{{ $t('repo.build.no_pipelines') }}</span>
   </div>
 </template>
 

@@ -25,7 +25,7 @@ type Task struct {
 	// Data is the actual data in the entry.
 	Data []byte `json:"data"`
 
-	// Labels represents the key-value pairs the entry is lebeled with.
+	// Labels represents the key-value pairs the entry is labeled with.
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Task IDs this task depend
@@ -128,7 +128,7 @@ func (t *InfoT) String() string {
 
 // Filter filters tasks in the queue. If the Filter returns false,
 // the Task is skipped and not returned to the subscriber.
-type Filter func(*Task) bool
+type FilterFn func(*Task) bool
 
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
@@ -140,7 +140,7 @@ type Queue interface {
 	PushAtOnce(c context.Context, tasks []*Task) error
 
 	// Poll retrieves and removes a task head of this queue.
-	Poll(c context.Context, f Filter) (*Task, error)
+	Poll(c context.Context, f FilterFn) (*Task, error)
 
 	// Extend extends the deadline for a task.
 	Extend(c context.Context, id string) error

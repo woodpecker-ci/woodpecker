@@ -62,7 +62,6 @@ when:
 settings:
   foo: bar
   baz: false
-deprecated_setting: fallback
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -73,7 +72,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Command:       types.Command{"bundle exec thin -p 3000"},
 		Commands:      types.Stringorslice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
@@ -119,9 +118,6 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
-		Vargs: map[string]interface{}{
-			"deprecated_setting": "fallback",
-		},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -147,14 +143,13 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node, deprecated_setting: fallback, settings: { normal_setting: true } }",
+			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
 					Settings: map[string]interface{}{
-						"deprecated_setting": "fallback",
-						"normal_setting":     true,
+						"normal_setting": true,
 					},
 				},
 			},
@@ -163,11 +158,12 @@ func TestUnmarshalContainers(t *testing.T) {
 			from: `publish-agent:
     group: bundle
     image: print/env
-    repo: woodpeckerci/woodpecker-agent
-    dockerfile: docker/Dockerfile.agent
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dry_run: true
+      dockerfile: docker/Dockerfile.agent
+      tag: [next, latest]
     secrets: [docker_username, docker_password]
-    tag: [next, latest]
-    dry_run: true
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,

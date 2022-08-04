@@ -1,17 +1,17 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 text-gray-200 dark:text-gray-400 bg-gray-600 dark:bg-dark-gray-800">
+  <div class="flex flex-col w-full md:w-3/12 text-gray-600 dark:text-gray-400">
     <div
       class="
         flex
-        py-4
-        px-2
-        mx-2
+        md:ml-2
+        p-4
         space-x-1
         justify-between
         flex-shrink-0
-        text-gray-500
         border-b-1
-        dark:border-dark-gray-600
+        md:rounded-md
+        bg-gray-300
+        dark:border-b-dark-gray-600 dark:bg-dark-gray-700
       "
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
@@ -38,7 +38,7 @@
           <Icon name="commit" />
           <span>{{ build.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-link flex items-center" :href="build.link_url" target="_blank">
+        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="build.link_url" target="_blank">
           <Icon name="commit" />
           <span>{{ build.commit.slice(0, 10) }}</span>
         </a>
@@ -46,14 +46,16 @@
     </div>
 
     <div v-if="build.procs === undefined || build.procs.length === 0" class="m-auto mt-4">
-      <span>No pipeline steps available!</span>
+      <span>{{ $t('repo.build.no_pipeline_steps') }}</span>
     </div>
 
     <div class="flex flex-grow relative min-h-0 overflow-y-auto">
       <div class="md:absolute top-0 left-0 w-full">
         <div v-for="proc in build.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <span>{{ proc.name }}</span>
+            <div class="flex items-center">
+              <span class="ml-2">{{ proc.name }}</span>
+            </div>
             <div v-if="proc.environ" class="text-xs">
               <div v-for="(value, key) in proc.environ" :key="key">
                 <span
@@ -62,6 +64,7 @@
                     pr-1
                     py-0.5
                     bg-gray-800
+                    text-gray-200
                     dark:bg-gray-600
                     border-2 border-gray-800
                     dark:border-gray-600
@@ -78,8 +81,18 @@
           <div
             v-for="job in proc.children"
             :key="job.pid"
-            class="flex p-2 pl-6 cursor-pointer items-center hover:bg-gray-700 hover:dark:bg-dark-gray-900"
-            :class="{ 'bg-gray-700 !dark:bg-dark-gray-600': selectedProcId && selectedProcId === job.pid }"
+            class="
+              flex
+              mx-2
+              mb-1
+              p-2
+              pl-6
+              cursor-pointer
+              rounded-md
+              items-center
+              hover:bg-gray-300 hover:dark:bg-dark-gray-700
+            "
+            :class="{ 'bg-gray-300 !dark:bg-dark-gray-700': selectedProcId && selectedProcId === job.pid }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
             <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />

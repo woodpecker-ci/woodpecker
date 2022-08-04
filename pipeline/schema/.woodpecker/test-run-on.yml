@@ -4,4 +4,4 @@ pipeline:
     commands:
       - go test
 
-run_on: [ success, failure ]
+runs_on: [ success, failure ]

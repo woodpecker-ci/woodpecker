@@ -171,6 +171,19 @@ type PullRequestHook struct {
 	} `json:"pullrequest"`
 }
 
+type WorkspaceMembershipResp struct {
+	Page   int    `json:"page"`
+	Pages  int    `json:"pagelen"`
+	Size   int    `json:"size"`
+	Next   string `json:"next"`
+	Values []struct {
+		Permission string `json:"permission"`
+		User       struct {
+			Nickname string `json:"nickname"`
+		}
+	} `json:"values"`
+}
+
 type ListOpts struct {
 	Page    int
 	PageLen int
@@ -226,4 +239,12 @@ type RepoPermResp struct {
 
 type RepoPerm struct {
 	Permission string `json:"permission"`
+}
+
+type BranchResp struct {
+	Values []*Branch `json:"values"`
+}
+
+type Branch struct {
+	Name string `json:"name"`
 }

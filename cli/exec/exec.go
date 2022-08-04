@@ -110,6 +110,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
 		droneEnv[envs[0]] = envs[1]
+		if _, exists := environ[envs[0]]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -201,11 +206,19 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
+		pipeline.WithDescription(map[string]string{
+			"CLI": "exec",
+		}),
 	).Run()
 }
 
 // return the metadata from the cli context.
 func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
+	platform := c.String("system-platform")
+	if platform == "" {
+		platform = runtime.GOOS + "/" + runtime.GOARCH
+	}
+
 	return frontend.Metadata{
 		Repo: frontend.Repo{
 			Name:    c.String("repo-name"),
@@ -262,9 +275,9 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Matrix: axis,
 		},
 		Sys: frontend.System{
-			Name: c.String("system-name"),
-			Link: c.String("system-link"),
-			Arch: c.String("system-arch"),
+			Name:     c.String("system-name"),
+			Link:     c.String("system-link"),
+			Platform: platform,
 		},
 	}
 }

@@ -1,6 +1,6 @@
 <template>
   <template v-if="build && repo">
-    <FluidContainer class="flex flex-col min-w-0 border-b dark:border-gray-600 !pb-0 mb-4">
+    <FluidContainer class="flex flex-col min-w-0 dark:border-gray-600">
       <div class="flex mb-2 items-center <md:flex-wrap">
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 
@@ -11,12 +11,12 @@
             <md:flex-wrap
             md:order-none md:w-auto md:ml-2
             flex
-            text-center text-xl text-gray-500
+            text-center text-xl text-color
             whitespace-nowrap
             overflow-hidden overflow-ellipsis
           "
         >
-          <span class="w-full md:w-auto text-center">Pipeline #{{ buildId }}</span>
+          <span class="w-full md:w-auto text-center">{{ $t('repo.build.pipeline', { buildId }) }}</span>
           <span class="<md:hidden mx-2">-</span>
           <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
         </h1>
@@ -27,14 +27,14 @@
           <Button
             v-if="build.status === 'pending' || build.status === 'running'"
             class="ml-4 flex-shrink-0"
-            text="Cancel"
+            :text="$t('repo.build.actions.cancel')"
             :is-loading="isCancelingBuild"
             @click="cancelBuild"
           />
           <Button
             v-else-if="build.status !== 'blocked' && build.status !== 'declined'"
             class="ml-4 flex-shrink-0"
-            text="Restart"
+            :text="$t('repo.build.actions.restart')"
             :is-loading="isRestartingBuild"
             @click="restartBuild"
           />
@@ -43,17 +43,19 @@
 
       <div class="flex flex-wrap gap-y-2 items-center justify-between">
         <Tabs v-model="activeTab" disable-hash-mode class="order-2 md:order-none">
-          <Tab id="tasks" title="Tasks" />
-          <Tab id="config" title="Config" />
-          <Tab id="changed-files" :title="`Changed files (${build.changed_files?.length || 0})`" />
+          <Tab id="tasks" :title="$t('repo.build.tasks')" />
+          <Tab id="config" :title="$t('repo.build.config')" />
+          <Tab id="changed-files" :title="$t('repo.build.files', { files: build.changed_files?.length || 0 })" />
         </Tabs>
 
-        <div class="flex justify-between gap-x-4 text-gray-500 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <Tooltip>
               <span>{{ since }}</span>
-              <template #popper><span class="font-bold">Created</span> {{ created }}</template>
+              <template #popper
+                ><span class="font-bold">{{ $t('repo.build.created') }}</span> {{ created }}</template
+              >
             </Tooltip>
           </div>
           <div class="flex space-x-1 items-center flex-shrink-0">
@@ -82,6 +84,7 @@ import {
   toRef,
   watch,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -146,6 +149,7 @@ export default defineComponent({
     const router = useRouter();
     const notifications = useNotifications();
     const favicon = useFavicon();
+    const i18n = useI18n();
 
     const buildStore = BuildStore();
     const buildId = toRef(props, 'buildId');
@@ -190,7 +194,7 @@ export default defineComponent({
       // }
 
       await apiClient.cancelBuild(repo.value.owner, repo.value.name, parseInt(buildId.value, 10), 0);
-      notifications.notify({ title: 'Pipeline canceled', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.actions.cancel_success'), type: 'success' });
     });
 
     const { doSubmit: restartBuild, isLoading: isRestartingBuild } = useAsyncAction(async () => {
@@ -199,7 +203,7 @@ export default defineComponent({
       }
 
       await apiClient.restartBuild(repo.value.owner, repo.value.name, buildId.value, { fork: true });
-      notifications.notify({ title: 'Pipeline restarted', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.build.actions.restart_success'), type: 'success' });
       // TODO: directly send to newest build?
       await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
     });

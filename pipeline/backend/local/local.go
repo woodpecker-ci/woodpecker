@@ -4,17 +4,19 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type local struct {
-	cmd    *exec.Cmd
-	output io.ReadCloser
+	cmd        *exec.Cmd
+	output     io.ReadCloser
+	workingdir string
 }
 
 // make sure local implements Engine
@@ -34,7 +36,9 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	return nil
+	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	e.workingdir = dir
+	return err
 }
 
 // Setup the pipeline environment.
@@ -45,22 +49,17 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	// Get environment variables
-	Command := []string{}
+	Env := os.Environ()
 	for a, b := range proc.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Command = append(Command, a+"="+b)
+			Env = append(Env, a+"="+b)
 		}
 	}
 
-	// Get default clone image
-	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
-	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
-		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
-	}
-
-	if proc.Image == defaultCloneImage {
+	Command := []string{}
+	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
+		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -74,16 +73,19 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
+	e.cmd = exec.CommandContext(ctx, Command[0], Command[1:]...)
+	e.cmd.Env = Env
 
 	// Prepare working directory
-	if proc.Image == defaultCloneImage {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
+	if proc.Image == constant.DefaultCloneImage {
+		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO_OWNER"]
 	} else {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
+		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO"]
 	}
-	_ = os.MkdirAll(e.cmd.Dir, 0o700)
-
+	err := os.MkdirAll(e.cmd.Dir, 0o700)
+	if err != nil {
+		return err
+	}
 	// Get output and redirect Stderr to Stdout
 	e.output, _ = e.cmd.StdoutPipe()
 	e.cmd.Stderr = e.cmd.Stdout
@@ -94,9 +96,17 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
+	err := e.cmd.Wait()
+	ExitCode := 0
+	if eerr, ok := err.(*exec.ExitError); ok {
+		ExitCode = eerr.ExitCode()
+		// Non-zero exit code is a build failure, but not an agent error.
+		err = nil
+	}
 	return &types.State{
-		Exited: true,
-	}, e.cmd.Wait()
+		Exited:   true,
+		ExitCode: ExitCode,
+	}, err
 }
 
 // Tail the pipeline step logs.
@@ -106,6 +116,5 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	os.RemoveAll(e.cmd.Dir)
-	return nil
+	return os.RemoveAll(e.cmd.Dir)
 }
