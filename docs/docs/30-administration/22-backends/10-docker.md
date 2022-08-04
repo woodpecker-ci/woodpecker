@@ -14,6 +14,10 @@ Set to the name of an existing network which will be attached to all your pipeli
 
 Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
 
+## Docker credentials
+
+Woodpecker supports Docker credentials to securely store registry credentials. Install the corresponding credential helper and configure it in your Docker config, and Woodpecker should use them.
+
 ## Podman support
 
 While the agent was developped with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_SOCK` to point to the podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
