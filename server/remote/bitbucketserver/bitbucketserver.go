@@ -159,6 +159,10 @@ func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	return convertRepo(repo), nil
 }
 
+func (c *Config) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	return nil, nil
+}
+
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
 	if err != nil {

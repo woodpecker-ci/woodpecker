@@ -39,6 +39,7 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
+		RemoteID:     from.ID,
 		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,

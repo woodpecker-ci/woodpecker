@@ -86,15 +86,31 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
+	if repo.RemoteID > 0 {
+		from, err := remote.RepoByID(c, user, repo.RemoteID)
+		if err == nil {
+			if from == nil {
+				// both are `nil` means this operation is not supported by this forge
+				repo.Update(from)
+				from, err = remote.Repo(c, user, repo.Owner, repo.Name)
+			}
+
+			if err == nil {
+				repo.Update(from)
+			}
+		}
+	} else {
+		// the ID wasn't set yet, we have to fetch it using the name
+		from, err := remote.Repo(c, user, repo.Owner, repo.Name)
+		if err == nil {
+			repo.Update(from)
+		}
+	}
+
 	err = remote.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
-	if err == nil {
-		repo.Update(from)
 	}
 
 	err = _store.UpdateRepo(repo)
@@ -251,20 +267,28 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
-	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
-		return
+	var from *model.Repo
+
+	if repo.RemoteID > 0 {
+		from, err = remote.RepoByID(c, user, repo.RemoteID)
+		if err == nil {
+			if from == nil {
+				// both are `nil` means this operation is not supported by this forge
+				repo.Update(from)
+				from, err = remote.Repo(c, user, repo.Owner, repo.Name)
+			}
+		}
+	} else {
+		// the ID wasn't set yet, we have to fetch it using the name
+		from, err = remote.Repo(c, user, repo.Owner, repo.Name)
 	}
 
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	repo.RemoteID = from.RemoteID
 	repo.Name = from.Name
 	repo.Owner = from.Owner
 	repo.FullName = from.FullName
@@ -277,6 +301,14 @@ func RepairRepo(c *gin.Context) {
 	}
 	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := remote.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
+	}
+	if err := remote.Activate(c, user, repo, link); err != nil {
+		c.String(500, err.Error())
 		return
 	}
 
@@ -312,6 +344,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
+	repo.RemoteID = from.RemoteID
 	repo.Name = from.Name
 	repo.Owner = from.Owner
 	repo.FullName = from.FullName

@@ -157,6 +157,10 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	return toRepo(repo, c.PrivateMode), nil
 }
 
+func (c *client) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	return nil, nil
+}
+
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {

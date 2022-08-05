@@ -27,6 +27,11 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
+func (s storage) GetRepoRemoteId(id int64) (*model.Repo, error) {
+	repo := new(model.Repo)
+	return repo, wrapGet(s.engine.Where("remote_id = ?", id).Get(repo))
+}
+
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()

@@ -44,6 +44,9 @@ type Remote interface {
 	// Repo fetches the named repository from the remote system.
 	Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error)
 
+	// RepoByID fetches the repository from its remote ID
+	RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error)
+
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 

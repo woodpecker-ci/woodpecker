@@ -213,6 +213,20 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string)
 	return g.convertGitlabRepo(_repo)
 }
 
+func (g *Gitlab) RepoByID(ctx context.Context, user *model.User, id int64) (*model.Repo, error) {
+	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, _, err := client.Projects.GetProject(id, nil, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return g.convertGitlabRepo(repo)
+}
+
 // Repos fetches a list of repos from the remote system.
 func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
@@ -617,7 +631,7 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
 	if err != nil {
 		return nil, err
 	}

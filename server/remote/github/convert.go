@@ -82,6 +82,7 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
+		RemoteID:     from.GetID(),
 		Name:         from.GetName(),
 		FullName:     from.GetFullName(),
 		Link:         from.GetHTMLURL(),

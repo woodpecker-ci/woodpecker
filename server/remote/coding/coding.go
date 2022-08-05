@@ -184,6 +184,10 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	}, nil
 }
 
+func (c *Coding) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	return nil, nil
+}
+
 // Repos fetches a list of repos from the remote system.
 func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)

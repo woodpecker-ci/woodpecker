@@ -100,7 +100,10 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	// TODO update the local repo name
+	// TODO use the old way if forge does not support IDs (bitbucket and coding)
+	// TODO use old way if remote ID not set yet
+	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)

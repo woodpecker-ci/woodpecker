@@ -173,6 +173,15 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	return convertRepo(repo), nil
 }
 
+func (c *client) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	client := c.newClientToken(ctx, u.Token)
+	repo, _, err := client.Repositories.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo), nil
+}
+
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
@@ -518,7 +527,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
 	if err != nil {
 		return nil, err
 	}

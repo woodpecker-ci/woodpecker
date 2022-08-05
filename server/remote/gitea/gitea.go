@@ -230,6 +230,19 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*m
 	return toRepo(repo), nil
 }
 
+func (c *Gitea) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	repo, _, err := client.GetRepoByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return toRepo(repo), nil
+}
+
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
 func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {

@@ -37,6 +37,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
+		RemoteID:     int64(_repo.ID),
 		Owner:        owner,
 		Name:         name,
 		FullName:     _repo.PathWithNamespace,

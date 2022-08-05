@@ -150,6 +150,10 @@ func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	return convertRepo(repo), nil
 }
 
+func (c *config) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
+	return nil, nil
+}
+
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
 func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
