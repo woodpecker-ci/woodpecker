@@ -272,7 +272,7 @@ export default defineComponent({
         const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
         write(
           logs
-            .slice(Math.max(logs.length, 0) - maxLineCount, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776))
+            .slice(Math.max(logs.length, 0) - maxLineCount, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776)
             .map((l) => ({
               line: l.pos,
               text: l.out,
