@@ -41,11 +41,8 @@ type Remote interface {
 	// Teams fetches a list of team memberships from the remote system.
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
-	// Repo fetches the named repository from the remote system.
-	Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error)
-
-	// RepoByID fetches the repository from its remote ID
-	RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error)
+	// Repo fetches the repository from the remote system, preferred is using the ID, fallback is owner/name.
+	Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)

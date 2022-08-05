@@ -100,10 +100,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	// TODO update the local repo name
-	// TODO use the old way if forge does not support IDs (bitbucket and coding)
-	// TODO use old way if remote ID not set yet
-	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -114,6 +111,13 @@ func PostHook(c *gin.Context) {
 		msg := fmt.Sprintf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
 		log.Debug().Msg(msg)
 		c.String(http.StatusNoContent, msg)
+		return
+	}
+
+	repo.Update(tmpRepo)
+	err = _store.UpdateRepo(repo)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 

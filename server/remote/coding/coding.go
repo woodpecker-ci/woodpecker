@@ -160,8 +160,8 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (c *Coding) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
@@ -172,6 +172,7 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 		return nil, err
 	}
 	return &model.Repo{
+		// TODO RemoteID:     project.ID,
 		Owner:        project.Owner,
 		Name:         project.Name,
 		FullName:     projectFullName(project.Owner, project.Name),
@@ -182,10 +183,6 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 		Branch:       depot.DefaultBranch,
 		IsSCMPrivate: !project.IsPublic,
 	}, nil
-}
-
-func (c *Coding) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	return nil, nil
 }
 
 // Repos fetches a list of repos from the remote system.
@@ -203,6 +200,7 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		repo := &model.Repo{
+			// TODO RemoteID:     project.ID,
 			Owner:        project.Owner,
 			Name:         project.Name,
 			FullName:     projectFullName(project.Owner, project.Name),

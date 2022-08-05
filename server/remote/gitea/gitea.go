@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"code.gitea.io/sdk/gitea"
@@ -216,31 +217,27 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo returns the named Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the Gitea repository.
+func (c *Gitea) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, _, err := client.GetRepo(owner, name)
-	if err != nil {
-		return nil, err
+	intID, err := strconv.ParseInt(id, 10, 64)
+	if intID > 0 && err == nil {
+		repo, _, err := client.GetRepoByID(intID)
+		if err != nil {
+			return nil, err
+		}
+		return toRepo(repo), nil
+	} else {
+		repo, _, err := client.GetRepo(owner, name)
+		if err != nil {
+			return nil, err
+		}
+		return toRepo(repo), nil
 	}
-	return toRepo(repo), nil
-}
-
-func (c *Gitea) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	repo, _, err := client.GetRepoByID(id)
-	if err != nil {
-		return nil, err
-	}
-	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gitea account, including

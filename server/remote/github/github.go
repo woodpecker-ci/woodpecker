@@ -163,23 +163,23 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	return teams, nil
 }
 
-// Repo returns the named GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the GitHub repository.
+func (c *client) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
-	repo, _, err := client.Repositories.Get(ctx, owner, name)
-	if err != nil {
-		return nil, err
+	intID, err := strconv.ParseInt(id, 10, 64)
+	if intID > 0 && err == nil {
+		repo, _, err := client.Repositories.Get(ctx, owner, name)
+		if err != nil {
+			return nil, err
+		}
+		return convertRepo(repo), nil
+	} else {
+		repo, _, err := client.Repositories.GetByID(ctx, intID)
+		if err != nil {
+			return nil, err
+		}
+		return convertRepo(repo), nil
 	}
-	return convertRepo(repo), nil
-}
-
-func (c *client) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	client := c.newClientToken(ctx, u.Token)
-	repo, _, err := client.Repositories.GetByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return convertRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for GitHub account, including
@@ -527,7 +527,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

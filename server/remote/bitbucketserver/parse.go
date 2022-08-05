@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
@@ -32,6 +33,7 @@ func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Build, erro
 	}
 	build := convertPushHook(hook, baseURL)
 	repo := &model.Repo{
+		RemoteID: strconv.FormatInt(int64(hook.Repository.ID), 10),
 		Name:     hook.Repository.Slug,
 		Owner:    hook.Repository.Project.Key,
 		FullName: fmt.Sprintf("%s/%s", hook.Repository.Project.Key, hook.Repository.Slug),

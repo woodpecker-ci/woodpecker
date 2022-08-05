@@ -49,12 +49,12 @@ func NewClient(ctx context.Context, baseURL, apiPath, token, agent string, clien
 	}
 }
 
-// Generic GET for requesting Coding OAuth API
+// Get Generic GET for requesting Coding OAuth API
 func (c *Client) Get(u string, params url.Values) ([]byte, error) {
 	return c.Do(http.MethodGet, u, params)
 }
 
-// Generic method for requesting Coding OAuth API
+// Do Generic method for requesting Coding OAuth API
 func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 	if params == nil {
 		params = url.Values{}

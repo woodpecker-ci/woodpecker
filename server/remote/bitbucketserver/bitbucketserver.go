@@ -151,16 +151,12 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *Config) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
 	return convertRepo(repo), nil
-}
-
-func (c *Config) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	return nil, nil
 }
 
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {

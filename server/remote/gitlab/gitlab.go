@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -198,33 +199,29 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 	return repo, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id string, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, owner, name)
-	if err != nil {
-		return nil, err
+	intID, err := strconv.ParseInt(id, 10, 64)
+	if intID > 0 && err == nil {
+		_repo, err := g.getProject(ctx, client, owner, name)
+		if err != nil {
+			return nil, err
+		}
+
+		return g.convertGitlabRepo(_repo)
+	} else {
+		repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+
+		return g.convertGitlabRepo(repo)
 	}
-
-	return g.convertGitlabRepo(_repo)
-}
-
-func (g *Gitlab) RepoByID(ctx context.Context, user *model.User, id int64) (*model.Repo, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
-	if err != nil {
-		return nil, err
-	}
-
-	repo, _, err := client.Projects.GetProject(id, nil, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	return g.convertGitlabRepo(repo)
 }
 
 // Repos fetches a list of repos from the remote system.
@@ -631,7 +628,7 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoRemoteId(tmpRepo.RemoteID)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

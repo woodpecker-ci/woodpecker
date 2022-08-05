@@ -148,7 +148,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
@@ -157,14 +157,10 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 	return toRepo(repo, c.PrivateMode), nil
 }
 
-func (c *client) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	return nil, nil
-}
-
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos := []*model.Repo{}
+	var repos []*model.Repo
 
 	client := c.newClientToken(u.Token)
 	all, err := client.ListMyRepos()

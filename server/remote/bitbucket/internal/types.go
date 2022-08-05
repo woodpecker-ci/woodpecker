@@ -89,6 +89,7 @@ type LinkClone struct {
 }
 
 type Repo struct {
+	UUID      string  `json:"uuid"`
 	Owner     Account `json:"owner"`
 	Name      string  `json:"name"`
 	FullName  string  `json:"full_name"`

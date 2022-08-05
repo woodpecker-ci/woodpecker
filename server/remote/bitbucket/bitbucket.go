@@ -142,16 +142,12 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
 	return convertRepo(repo), nil
-}
-
-func (c *config) RepoByID(ctx context.Context, u *model.User, id int64) (*model.Repo, error) {
-	return nil, nil
 }
 
 // Repos returns a list of all repositories for Bitbucket account, including
