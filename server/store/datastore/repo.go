@@ -43,7 +43,16 @@ func (s storage) GetRepoNameFallback(remoteId string, fullName string) (*model.R
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoName(sess, fullName)
+	repo, err := s.getRepoName(sess, fullName)
+	if err == RecordNotExist {
+		// the repository does not exist, so look for a redirection
+		redirect, err := s.GetRedirection(fullName)
+		if err != nil {
+			return nil, err
+		}
+		return s.GetRepo(redirect.RepoID)
+	}
+	return repo, err
 }
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
@@ -141,23 +150,29 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			continue
 		}
 
-		exist, err := sess.
-			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-			Exist(new(model.Repo))
-		if err != nil {
+		repo, err := s.GetRepoNameFallback(repos[i].RemoteID, repos[i].FullName)
+		if err != nil && err != RecordNotExist {
 			return err
 		}
+		exist := err == nil // if there's an error, it must be a RecordNotExist
 
 		if exist {
+			if repos[i].FullName != repo.FullName {
+				// create redirection
+				err := s.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+				if err != nil {
+					return err
+				}
+			}
 			if _, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-				Cols("repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch").
+				Where("remote_id = ?", repos[i].RemoteID).
+				Cols("repo_owner", "repo_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
 				Update(repos[i]); err != nil {
 				return err
 			}
 
 			_, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+				Where("remote_id = ?", repos[i].RemoteID).
 				Get(repos[i])
 			if err != nil {
 				return err

@@ -58,6 +58,14 @@ type Store interface {
 	// DeleteRepo deletes a user repository.
 	DeleteRepo(*model.Repo) error
 
+	// Redirections
+	// GetRedirection returns the redirection for the given full repo name
+	GetRedirection(string) (*model.Redirection, error)
+	// CreateRedirection creates a redirection
+	CreateRedirection(redirection *model.Redirection) error
+	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
+	HasRedirectionForRepo(int64, string) (bool, error)
+
 	// Builds
 	// GetBuild gets a build by unique ID.
 	GetBuild(int64) (*model.Build, error)

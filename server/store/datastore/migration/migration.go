@@ -51,6 +51,7 @@ var allBeans = []interface{}{
 	new(model.Task),
 	new(model.User),
 	new(model.ServerConfig),
+	new(model.Redirection),
 }
 
 type migrations struct {

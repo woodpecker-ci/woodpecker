@@ -88,6 +88,14 @@ func PostRepo(c *gin.Context) {
 
 	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
 	if err == nil {
+		if repo.FullName != from.FullName {
+			// create a redirection
+			err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+		}
 		repo.Update(from)
 	}
 
@@ -252,12 +260,21 @@ func RepairRepo(c *gin.Context) {
 	)
 
 	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
-
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
+	if repo.FullName != from.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
 	repo.Update(from)
 	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -301,6 +318,12 @@ func MoveRepo(c *gin.Context) {
 	}
 	if !from.Perm.Admin {
 		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
