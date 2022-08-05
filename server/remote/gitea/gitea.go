@@ -218,7 +218,7 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo returns the Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
+func (c *Gitea) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err

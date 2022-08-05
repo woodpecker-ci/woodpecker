@@ -200,7 +200,7 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 }
 
 // Repo fetches the repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, id string, owner, name string) (*model.Repo, error) {
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err

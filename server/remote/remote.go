@@ -42,7 +42,7 @@ type Remote interface {
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
 	// Repo fetches the repository from the remote system, preferred is using the ID, fallback is owner/name.
-	Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error)
+	Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)

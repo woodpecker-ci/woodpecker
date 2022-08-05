@@ -161,7 +161,7 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo fetches the repository from the remote system.
-func (c *Coding) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
+func (c *Coding) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {

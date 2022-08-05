@@ -142,7 +142,7 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err

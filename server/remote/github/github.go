@@ -164,7 +164,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, id string, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
 	intID, err := strconv.ParseInt(id, 10, 64)
 	if intID > 0 && err == nil {
