@@ -26,19 +26,22 @@
       <div
         v-show="loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full flex-auto flex-grow p-2 overflow-x-hidden overflow-y-auto"
+        class="
+          w-full
+          max-w-full
+          grid grid-cols-[min-content,1fr,min-content]
+          auto-rows-min
+          flex-grow
+          p-2
+          gap-x-2
+          overflow-x-hidden overflow-y-auto
+        "
       >
-        <div class="table">
-          <div v-for="l in log" :key="l.line" class="table-row whitespace-pre-wrap font-mono">
-            <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
-              {{ l.line }}
-            </span>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <span class="table-cell align-top text-color whitespace-pre-wrap break-words w-[100%]" v-html="l.text" />
-            <span class="text-gray-500 table-cell whitespace-nowrap select-none pl-2 pr-2 align-top text-right">
-              {{ formatTime(l.time) }}
-            </span>
-          </div>
+        <div v-for="line in log" :key="line.index" class="contents font-mono">
+          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</span>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <span class="align-top text-color whitespace-pre-wrap break-words" v-html="line.text" />
+          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ formatTime(line.time) }}</span>
         </div>
       </div>
 
@@ -64,6 +67,7 @@
 import '~/style/console.css';
 
 import AnsiUp from 'ansi_up';
+import { debounce } from 'lodash';
 import { computed, defineComponent, inject, nextTick, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -75,7 +79,7 @@ import { Build, Repo } from '~/lib/api/types';
 import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
 
 type LogLine = {
-  line: number;
+  index: number;
   text: string;
   time?: number;
 };
@@ -116,80 +120,29 @@ export default defineComponent({
     const procSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${build.value.id} - ${procId.value}`);
     const proc = computed(() => build.value && findProc(build.value.procs || [], procId.value));
     const stream = ref<EventSource>();
-    const log = ref<LogLine[]>([]);
+    const log = ref<LogLine[]>();
     const consoleElement = ref<Element>();
 
-    const loadedLogs = ref(true);
-    const autoScroll = ref(true); // TODO
+    const loadedLogs = computed(() => !!log.value);
+    const autoScroll = ref(true); // TODO: allow enable / disable
     const showActions = ref(false);
     const downloadInProgress = ref(false);
     const ansiUp = ref(new AnsiUp());
-    const maxLineCount = 500;
     ansiUp.value.use_classes = true;
+    const logBuffer = ref<LogLine[]>([]);
 
-    let logBatch: LogLine[] = [];
-    let timer: number | undefined;
+    const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
 
     function formatTime(time?: number): string {
       return time === undefined ? '' : `${time}s`;
     }
 
-    function write(lines: LogLine[]) {
-      let lastLine = 0;
-      if (log.value.length > 0) {
-        lastLine = log.value[log.value.length - 1].line;
-      }
-      if (logBatch.length > 0 && logBatch[logBatch.length - 1].line > lastLine) {
-        lastLine = logBatch[logBatch.length - 1].line;
-      }
-      for (let i = 0; i < lines.length; i += 1) {
-        const line = lines[i];
-        if (line.line > lastLine) {
-          logBatch.push({ ...line, text: ansiUp.value.ansi_to_html(line.text) });
-        }
-      }
-      if (logBatch.length > maxLineCount) {
-        logBatch.splice(0, logBatch.length - maxLineCount);
-      }
-    }
-
-    function flush(): boolean {
-      const b = logBatch.splice(0);
-      let lastTime: number | undefined;
-      if (b.length === 0) {
-        return false;
-      }
-      if (b.length >= maxLineCount) {
-        for (let i = 0; i < b.length; i += 1) {
-          if (b[i].time === lastTime) {
-            b[i].time = undefined;
-          } else {
-            lastTime = b[i].time;
-          }
-        }
-        log.value = b.splice(0);
-        return true;
-      }
-      if (log.value.length + b.length > maxLineCount) {
-        log.value.splice(0, log.value.length + b.length - maxLineCount);
-      }
-
-      // Deduplicate repeating time.
-      for (let i = log.value.length - 1; i >= 0; i -= 1) {
-        if (log.value[i].time !== undefined) {
-          lastTime = log.value[i].time;
-          break;
-        }
-      }
-      for (let i = 0; i < b.length; i += 1) {
-        if (b[i].time === lastTime) {
-          b[i].time = undefined;
-        } else {
-          lastTime = b[i].time;
-        }
-      }
-      log.value.push(...b);
-      return true;
+    function writeLog(line: LogLine) {
+      logBuffer.value.push({
+        index: line.index ?? 0,
+        text: ansiUp.value.ansi_to_html(line.text),
+        time: line.time ?? 0,
+      });
     }
 
     function scrollDown() {
@@ -200,6 +153,41 @@ export default defineComponent({
         consoleElement.value.scrollTop = consoleElement.value.scrollHeight;
       });
     }
+
+    const flushLogs = debounce((scroll: boolean) => {
+      let buffer = logBuffer.value.slice(-maxLineCount);
+      logBuffer.value = [];
+
+      if (buffer.length === 0) {
+        return;
+      }
+
+      // append old logs lines
+      if (buffer.length < maxLineCount && log.value) {
+        buffer = [...log.value.slice(-(maxLineCount - buffer.length)), ...buffer];
+      }
+
+      // deduplicate repeating times
+      buffer = buffer.reduce(
+        (acc, line) => ({
+          lastTime: line.time ?? 0,
+          lines: [
+            ...acc.lines,
+            {
+              ...line,
+              time: acc.lastTime === line.time ? undefined : line.time,
+            },
+          ],
+        }),
+        { lastTime: -1, lines: [] as LogLine[] },
+      ).lines;
+
+      log.value = buffer;
+
+      if (scroll && autoScroll.value) {
+        scrollDown();
+      }
+    }, 500);
 
     async function download() {
       if (!repo?.value || !build.value || !proc.value) {
@@ -239,15 +227,9 @@ export default defineComponent({
         return;
       }
       loadedProcSlug.value = procSlug.value;
-      loadedLogs.value = false;
       log.value = [];
-      logBatch = [];
+      logBuffer.value = [];
       ansiUp.value = new AnsiUp();
-      ansiUp.value.use_classes = true;
-      if (timer) {
-        window.clearInterval(timer);
-        timer = undefined;
-      }
 
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
@@ -270,26 +252,11 @@ export default defineComponent({
 
       if (isProcFinished(proc.value)) {
         const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
-        write(
-          logs
-            .slice(Math.max(logs.length, 0) - maxLineCount, logs.length) // TODO: think about way to support lazy-loading more than last 300 logs (#776)
-            .map((l) => ({
-              line: l.pos,
-              text: l.out,
-              time: l.time ?? 0,
-            })),
-        );
-        flush();
-        loadedLogs.value = true;
+        logs.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
+        flushLogs(false);
       }
 
       if (isProcRunning(proc.value)) {
-        timer = window.setInterval(() => {
-          if (flush() && autoScroll.value) {
-            scrollDown();
-          }
-        }, 500);
-
         // load stream of parent process (which receives all child processes logs)
         // TODO: change stream to only send data of single child process
         stream.value = apiClient.streamLogs(
@@ -297,12 +264,12 @@ export default defineComponent({
           repo.value.name,
           build.value.number,
           proc.value.ppid,
-          (l) => {
-            if (l?.proc !== proc.value?.name) {
+          (line) => {
+            if (line?.proc !== proc.value?.name) {
               return;
             }
-            loadedLogs.value = true;
-            write([{ line: l.pos, text: l.out, time: l.time ?? 0 }]);
+            writeLog({ index: line.pos, text: line.out, time: line.time });
+            flushLogs(true);
           },
         );
       }
