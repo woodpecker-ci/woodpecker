@@ -677,12 +677,10 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-ansi-to-html@0.7.2:
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/ansi-to-html/-/ansi-to-html-0.7.2.tgz#a92c149e4184b571eb29a0135ca001a8e2d710cb"
-  integrity sha512-v6MqmEpNlxF+POuyhKkidusCHWWkaLcGRURzivcU3I9tv7k4JVhFcnukrM5Rlk2rUywdZuzYAZ+kbZqWCnfN3g==
-  dependencies:
-    entities "^2.2.0"
+ansi_up@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/ansi_up/-/ansi_up-5.1.0.tgz#9cf10e6d359bb434bdcfab5ae4c3abfe1617b6db"
+  integrity sha512-3wwu+nJCKBVBwOCurm0uv91lMoVkhFB+3qZQz3U11AmAdDJ4tkw1sNPWJQcVxMVYwe0pGEALOjSBOxdxNc+pNQ==
 
 anymatch@~3.1.2:
   version "3.1.2"
@@ -1097,7 +1095,7 @@ enquirer@^2.3.5:
   dependencies:
     ansi-colors "^4.1.1"
 
-entities@^2.0.0, entities@^2.2.0:
+entities@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-2.2.0.tgz#098dc90ebb83d8dffa089d55256b351d34c4da55"
   integrity sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==
@@ -3241,21 +3239,6 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
-
-xterm-addon-fit@0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/xterm-addon-fit/-/xterm-addon-fit-0.5.0.tgz#2d51b983b786a97dcd6cde805e700c7f913bc596"
-  integrity sha512-DsS9fqhXHacEmsPxBJZvfj2la30Iz9xk+UKjhQgnYNkrUIN5CYLbw7WEfz117c7+S86S/tpHPfvNxJsF5/G8wQ==
-
-xterm-addon-web-links@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/xterm-addon-web-links/-/xterm-addon-web-links-0.5.1.tgz#73bfa3ed567af98fba947f638bd12093ee2a0bc6"
-  integrity sha512-dBjbOIrCNmxAcUQkkSrKj9BM6yLpmqUpZ9SOCUuZe/sznPl4d8OBZQClK7VcdZ0vf0+5i5Fce2rUUrew/XTZTg==
-
-xterm@4.17.0:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-4.17.0.tgz#e48ba6eeb83e118ec163f5512c3cfe9dbbf3f838"
-  integrity sha512-WGXlIHvLvZKtwMdFaL6kUwp+c9abd2Pcakp/GmuefBuOtGCu9fP9tBDPKyL/A17N+5tt44EYk3YsBbvkPBubMw==
 
 yallist@^4.0.0:
   version "4.0.0"
