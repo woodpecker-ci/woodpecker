@@ -230,6 +230,7 @@ export default defineComponent({
       log.value = [];
       logBuffer.value = [];
       ansiUp.value = new AnsiUp();
+      ansiUp.value.use_classes = true;
 
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
