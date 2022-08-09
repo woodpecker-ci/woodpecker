@@ -5,21 +5,13 @@
     </div>
 
     <div
-      class="
-        flex flex-col
-        w-full
-        overflow-hidden
-        md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700
-        dark:border-dark-200
-        md:flex-row md:w-3xl md:h-sm
-        justify-center
-      "
+      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700 dark:border-dark-200 md:flex-row md:w-3xl md:h-sm justify-center"
     >
       <div class="flex md:bg-lime-500 md:dark:bg-lime-900 md:w-3/5 justify-center items-center">
         <img class="w-48 h-48" src="../assets/logo.svg?url" />
       </div>
       <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
-        <h1 class="text-xl text-gray-600 dark:text-gray-500">{{ $t('welcome') }}</h1>
+        <h1 class="text-xl text-color">{{ $t('welcome') }}</h1>
         <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>

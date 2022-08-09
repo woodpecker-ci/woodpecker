@@ -104,6 +104,11 @@ func New(opts Opts) (remote.Remote, error) {
 	return config, nil
 }
 
+// Name returns the string name of this driver
+func (c *Config) Name() string {
+	return "stash"
+}
+
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
@@ -238,6 +243,13 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r, c.URL)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not implemented currently
+	return nil, nil
 }
 
 func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {

@@ -36,6 +36,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+// TODO(974) move to pipeline/*
+
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo  *model.Repo
@@ -87,6 +89,15 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
+
+			// add global environment variables for substituting
+			for k, v := range b.Envs {
+				if _, exists := environ[k]; exists {
+					// don't override existing values
+					continue
+				}
+				environ[k] = v
+			}
 
 			// substitute vars
 			substituted, err := b.envsubst(string(y.Data), environ)

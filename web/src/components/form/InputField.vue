@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-col mt-2 mb-4">
-    <div class="flex items-center text-gray-500 font-bold mb-2">
+    <div class="flex items-center text-color font-bold mb-2">
       <label v-if="label" v-bind="$attrs">{{ label }}</label>
       <DocsLink v-if="docsUrl" :url="docsUrl" class="ml-2" />
     </div>
     <slot />
-    <div v-if="$slots['description']" class="ml-1 text-gray-400">
+    <div v-if="$slots['description']" class="ml-1 text-color-alt">
       <slot name="description" />
     </div>
   </div>

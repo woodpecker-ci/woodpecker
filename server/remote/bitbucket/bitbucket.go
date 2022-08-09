@@ -60,6 +60,11 @@ func New(opts *Opts) (remote.Remote, error) {
 	// TODO: add checks
 }
 
+// Name returns the string name of this driver
+func (c *config) Name() string {
+	return "bitbucket"
+}
+
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -294,6 +299,16 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // Build details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(req)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	perm, err := c.newClient(ctx, u).GetUserWorkspaceMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
 }
 
 // helper function to return the bitbucket oauth2 client

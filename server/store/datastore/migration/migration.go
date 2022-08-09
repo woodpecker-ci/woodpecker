@@ -33,6 +33,7 @@ var migrationTasks = []*task{
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
 	&dropSenders,
+	&alterTableLogUpdateColumnLogDataType,
 }
 
 var allBeans = []interface{}{

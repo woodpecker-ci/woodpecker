@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full mb-4 justify-center">
-    <span class="text-gray-600 dark:text-gray-500 text-xl">{{ $t('repo.build.pipelines_for', [branch]) }}</span>
+    <span class="text-color text-xl">{{ $t('repo.build.pipelines_for', { branch }) }}</span>
   </div>
   <BuildList :builds="builds" :repo="repo" />
 </template>

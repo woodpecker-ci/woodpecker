@@ -3,23 +3,23 @@
     <Button class="ml-auto" :text="$t('logout')" :to="`${address}/logout`" />
 
     <div>
-      <h2 class="text-lg text-gray-500">{{ $t('user.token') }}</h2>
+      <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
       <pre class="cli-box">{{ token }}</pre>
     </div>
 
     <div>
-      <h2 class="text-lg text-gray-500">{{ $t('user.shell_setup') }}</h2>
+      <h2 class="text-lg text-color">{{ $t('user.shell_setup') }}</h2>
       <pre class="cli-box">{{ usageWithShell }}</pre>
     </div>
 
     <div>
-      <h2 class="text-lg text-gray-500">{{ $t('user.api_usage') }}</h2>
+      <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
       <pre class="cli-box">{{ usageWithCurl }}</pre>
     </div>
 
     <div>
       <div class="flex items-center">
-        <h2 class="text-lg text-gray-500">{{ $t('user.cli_usage') }}</h2>
+        <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
         <a :href="cliDownload" target="_blank" class="ml-4 text-link">{{ $t('user.dl_cli') }}</a>
       </div>
       <pre class="cli-box">{{ usageWithCli }}</pre>
@@ -77,7 +77,7 @@ export default defineComponent({
 
 <style scoped>
 .cli-box {
-  @apply bg-gray-400 p-2 rounded-md text-white break-words dark:bg-dark-300 dark:text-gray-500;
+  @apply bg-gray-500 p-2 rounded-md text-white break-words dark:bg-dark-400 dark:text-gray-400;
   white-space: pre-wrap;
 }
 </style>

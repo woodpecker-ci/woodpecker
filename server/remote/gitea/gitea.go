@@ -79,6 +79,11 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (c *Gitea) Name() string {
+	return "gitea"
+}
+
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -451,6 +456,31 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	member, _, err := client.CheckOrgMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+
+	if !member {
+		return &model.OrgPerm{}, nil
+	}
+
+	perm, _, err := client.GetOrgPermissions(owner, u.Login)
+	if err != nil {
+		return &model.OrgPerm{Member: member}, err
+	}
+
+	return &model.OrgPerm{Member: member, Admin: perm.IsAdmin || perm.IsOwner}, nil
 }
 
 // helper function to return the Gitea client with Token
