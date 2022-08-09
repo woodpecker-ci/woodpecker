@@ -14,8 +14,6 @@ import (
 type (
 	// Constraints defines a set of runtime constraints.
 	Constraints struct {
-		// If true then read from a list of constraint
-		FromList  bool
 		MatchList []Constraint
 	}
 
@@ -105,7 +103,6 @@ func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
 		if err != nil {
 			return err
 		}
-		constraints.FromList = true
 		constraints.MatchList = lst
 		return nil
 	}
@@ -116,7 +113,6 @@ func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
 		if err != nil {
 			return err
 		}
-		constraints.FromList = false
 		constraints.MatchList = append(constraints.MatchList, c)
 		return nil
 	}
@@ -219,6 +215,7 @@ func (c *Map) Match(params map[string]string) bool {
 	if len(c.Include) == 0 && len(c.Exclude) == 0 {
 		return true
 	}
+
 	// exclusions are processed first. So we can include everything and then
 	// selectively include others.
 	if len(c.Exclude) != 0 {
