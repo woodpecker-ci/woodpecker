@@ -1,33 +1,36 @@
 import '~/style/prism.css';
 
 import Prism from 'prismjs';
-import * as Vue from 'vue';
-import { VNode } from 'vue';
+import { computed, defineComponent, h, toRef, VNode } from 'vue';
 
 declare type Data = Record<string, unknown>;
 
-export default Vue.defineComponent({
+export default defineComponent({
+  name: 'SyntaxHighlight',
+
   props: {
     code: {
       type: String,
       default: '',
     },
+
     language: {
       type: String,
       default: 'yaml',
     },
   },
+
   setup(props, { attrs }: { attrs: Data }) {
-    const { h } = Vue;
-    const { code, language } = props;
-    const prismLanguage = Prism.languages[language];
-    const className = `language-${language}`;
+    const code = toRef(props, 'code');
+    const language = toRef(props, 'language');
+    const prismLanguage = computed(() => Prism.languages[language.value]);
+    const className = computed(() => `language-${language.value}`);
 
     return (): VNode =>
       h('pre', { ...attrs, class: [attrs.class, className] }, [
         h('code', {
           class: className,
-          innerHTML: Prism.highlight(code, prismLanguage, language),
+          innerHTML: Prism.highlight(code.value, prismLanguage.value, language.value),
         }),
       ]);
   },
