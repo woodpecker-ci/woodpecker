@@ -56,8 +56,7 @@ func (constraints *Constraints) IsEmpty() bool {
 	return len(constraints.Constraints) == 0
 }
 
-// Returns true if any of the internal constraint in the match list
-// is true.
+// Returns true if at least one of the internal constraints is true.
 func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
 	for _, c := range constraints.Constraints {
 		if c.Match(metadata) {
