@@ -63,7 +63,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	filtered, err := checkIfFiltered(build, remoteYamlConfigs)
 	if err != nil {
 		msg := "failure to parse yaml from hook"
-		log.Info().Err(err).Str("repo", repo.FullName).Msg(msg)
+		log.Debug().Err(err).Str("repo", repo.FullName).Msg(msg)
 		return nil, ErrBadRequest{Msg: msg}
 	}
 	if filtered {
@@ -74,7 +74,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 
 	if zeroSteps(build, remoteYamlConfigs) {
 		err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
-		log.Info().Str("repo", repo.FullName).Msgf("%v", err)
+		log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 		return nil, err
 	}
 
