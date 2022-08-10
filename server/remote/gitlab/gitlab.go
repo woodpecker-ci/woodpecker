@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
@@ -149,10 +150,18 @@ func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := g.oauth2Config()
 	config.RedirectURL = ""
 
-	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}}
+	trans := &oauth2.Transport{
+		Config: config,
+		Token: &oauth2.Token{
+			AccessToken:  user.Token,
+			RefreshToken: user.Secret,
+			Expiry:       time.Unix(user.Expiry, 0),
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		},
+	}
 
 	if err := trans.Refresh(); err != nil {
 		return false, err
