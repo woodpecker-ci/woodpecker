@@ -24,7 +24,7 @@
       </div>
 
       <div
-        v-show="loadedLogs"
+        v-show="hasLogs && loadedLogs"
         ref="consoleElement"
         class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 gap-x-2 overflow-x-hidden overflow-y-auto"
       >
@@ -115,6 +115,11 @@ export default defineComponent({
     const consoleElement = ref<Element>();
 
     const loadedLogs = computed(() => !!log.value);
+    const hasLogs = computed(
+      () =>
+        // we do not have logs for skipped jobs
+        repo?.value && build.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
+    );
     const autoScroll = ref(true); // TODO: allow enable / disable
     const showActions = ref(false);
     const downloadInProgress = ref(false);
@@ -150,6 +155,9 @@ export default defineComponent({
       logBuffer.value = [];
 
       if (buffer.length === 0) {
+        if (!log.value) {
+          log.value = [];
+        }
         return;
       }
 
@@ -218,7 +226,7 @@ export default defineComponent({
         return;
       }
       loadedProcSlug.value = procSlug.value;
-      log.value = [];
+      log.value = undefined;
       logBuffer.value = [];
       ansiUp.value = new AnsiUp();
       ansiUp.value.use_classes = true;
@@ -231,20 +239,13 @@ export default defineComponent({
         stream.value.close();
       }
 
-      // we do not have logs for skipped jobs
-      if (
-        !repo.value ||
-        !build.value ||
-        !proc.value ||
-        proc.value.state === 'skipped' ||
-        proc.value.state === 'killed'
-      ) {
+      if (!hasLogs.value || !proc.value) {
         return;
       }
 
       if (isProcFinished(proc.value)) {
         const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
-        logs.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
+        logs?.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
         flushLogs(false);
       }
 
@@ -283,7 +284,7 @@ export default defineComponent({
       }
     });
 
-    return { consoleElement, proc, log, loadedLogs, formatTime, showActions, download, downloadInProgress };
+    return { consoleElement, proc, log, loadedLogs, hasLogs, formatTime, showActions, download, downloadInProgress };
   },
 });
 </script>
