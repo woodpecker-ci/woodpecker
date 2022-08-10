@@ -145,7 +145,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
-			if !container.Constraints.Match(c.metadata) {
+			if !container.When.Match(c.metadata) {
 				continue
 			}
 			stage := new(backend.Stage)
@@ -172,7 +172,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
-			if !container.Constraints.Match(c.metadata) {
+			if !container.When.Match(c.metadata) {
 				continue
 			}
 
@@ -188,11 +188,11 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	var group string
 	for i, container := range conf.Pipeline.Containers {
 		// Skip if local and should not run local
-		if c.local && !container.Constraints.IsLocal() {
+		if c.local && !container.When.IsLocal() {
 			continue
 		}
 
-		if !container.Constraints.Match(c.metadata) {
+		if !container.When.Match(c.metadata) {
 			continue
 		}
 

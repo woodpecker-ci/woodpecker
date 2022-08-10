@@ -61,10 +61,10 @@ func TestParse(t *testing.T) {
 				}
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_fail")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
-				g.Assert(len(out.Pipeline.Containers[0].Constraints.Constraints)).Equal(0)
+				g.Assert(len(out.Pipeline.Containers[0].When.Constraints)).Equal(0)
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
-				g.Assert(out.Pipeline.Containers[1].Constraints.Constraints[0].Event.Include).Equal([]string{"success"})
+				g.Assert(out.Pipeline.Containers[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
 			})
 		})
 	})

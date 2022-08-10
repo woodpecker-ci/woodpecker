@@ -146,10 +146,10 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	// all constraints must exclude success.
-	onSuccess := container.Constraints.IsEmpty() ||
-		!container.Constraints.ExcludesStatus("success")
+	onSuccess := container.When.IsEmpty() ||
+		!container.When.ExcludesStatus("success")
 	// at least one constraint must include the status failure.
-	onFailure := container.Constraints.IncludesStatus("failure")
+	onFailure := container.When.IncludesStatus("failure")
 
 	return &backend.Step{
 		Name:         name,
