@@ -250,7 +250,7 @@ func TestUnmarshalContainers(t *testing.T) {
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 							{
-								Event:  constraint.List{Include: []string{"pull_request"}},
+								Event: constraint.List{Include: []string{"pull_request"}},
 							},
 						},
 					},
