@@ -118,13 +118,7 @@ export default defineComponent({
     const hasLogs = computed(
       () =>
         // we do not have logs for skipped jobs
-        !(
-          !repo?.value ||
-          !build.value ||
-          !proc.value ||
-          proc.value.state === 'skipped' ||
-          proc.value.state === 'killed'
-        ),
+        repo?.value && build.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
     );
     const autoScroll = ref(true); // TODO: allow enable / disable
     const showActions = ref(false);
