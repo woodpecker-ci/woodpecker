@@ -89,8 +89,6 @@ woodpecker.example.com {
 woodpeckeragent.example.com {
   reverse_proxy h2c://woodpecker-server:9000
 }
-```
-Above configuration proxies both ports for web and agent comunication. If your agent uses ssl do not forget to enable WOODPECKER_GRPC_SECURE. 
 
 
 ## Ngrok
