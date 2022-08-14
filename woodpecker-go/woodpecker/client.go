@@ -3,7 +3,6 @@ package woodpecker
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,6 +21,7 @@ const (
 	pathRepair         = "%s/api/repos/%s/%s/repair"
 	pathBuilds         = "%s/api/repos/%s/%s/builds"
 	pathBuild          = "%s/api/repos/%s/%s/builds/%v"
+	pathLogs           = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
@@ -30,6 +30,10 @@ const (
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
 	pathRepoRegistry   = "%s/api/repos/%s/%s/registry/%s"
+	pathOrgSecrets     = "%s/api/orgs/%s/secrets"
+	pathOrgSecret      = "%s/api/orgs/%s/secrets/%s"
+	pathGlobalSecrets  = "%s/api/secrets"
+	pathGlobalSecret   = "%s/api/secrets/%s"
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
 	pathBuildQueue     = "%s/api/builds"
@@ -258,8 +262,11 @@ func (c *client) BuildKill(owner, name string, num int) error {
 }
 
 // BuildLogs returns the build logs for the specified job.
-func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
-	return nil, errors.New("Method not implemented")
+func (c *client) BuildLogs(owner, name string, num, job int) ([]*Logs, error) {
+	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, job)
+	var out []*Logs
+	err := c.get(uri, &out)
+	return out, err
 }
 
 // Deploy triggers a deployment for an existing build using the
@@ -354,6 +361,82 @@ func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
 // SecretDelete deletes a secret.
 func (c *client) SecretDelete(owner, name, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+	return c.delete(uri)
+}
+
+// OrgSecret returns an organization secret by name.
+func (c *client) OrgSecret(owner, secret string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, secret)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgSecretList returns a list of all organization secrets.
+func (c *client) OrgSecretList(owner string) ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, owner)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgSecretCreate creates an organization secret.
+func (c *client) OrgSecretCreate(owner string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, owner)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// OrgSecretUpdate updates an organization secret.
+func (c *client) OrgSecretUpdate(owner string, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// OrgSecretDelete deletes an organization secret.
+func (c *client) OrgSecretDelete(owner, secret string) error {
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, secret)
+	return c.delete(uri)
+}
+
+// GlobalOrgSecret returns an global secret by name.
+func (c *client) GlobalSecret(secret string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// GlobalSecretList returns a list of all global secrets.
+func (c *client) GlobalSecretList() ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// GlobalSecretCreate creates a global secret.
+func (c *client) GlobalSecretCreate(in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// GlobalSecretUpdate updates a global secret.
+func (c *client) GlobalSecretUpdate(in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// GlobalSecretDelete deletes a global secret.
+func (c *client) GlobalSecretDelete(secret string) error {
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
 	return c.delete(uri)
 }
 

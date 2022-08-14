@@ -36,6 +36,7 @@
   <i-mdi-chevron-right v-else-if="name === 'chevron-right'" class="h-6 w-6" />
   <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
   <i-ic-baseline-edit v-else-if="name === 'edit'" class="h-6 w-6" />
+  <i-ic-baseline-download v-else-if="name === 'download'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -80,7 +81,8 @@ export type IconNames =
   | 'chevron-right'
   | 'turn-off'
   | 'close'
-  | 'edit';
+  | 'edit'
+  | 'download';
 
 export default defineComponent({
   name: 'Icon',

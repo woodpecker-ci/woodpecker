@@ -40,3 +40,9 @@ type Perm struct {
 func (Perm) TableName() string {
 	return "perms"
 }
+
+// OrgPerm defines a organization permission for an individual user.
+type OrgPerm struct {
+	Member bool `json:"member"`
+	Admin  bool `json:"admin"`
+}

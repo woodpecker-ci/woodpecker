@@ -1,22 +1,7 @@
 <template>
   <button
     type="button"
-    class="
-      relative
-      flex
-      items-center
-      py-1
-      px-2
-      rounded-md
-      border
-      shadow-sm
-      cursor-pointer
-      transition-all
-      duration-150
-      focus:outline-none
-      overflow-hidden
-      disabled:opacity-50 disabled:cursor-not-allowed
-    "
+    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 focus:outline-none overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
       'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:bg-dark-gray-800':
         color === 'gray',
@@ -28,6 +13,7 @@
         color === 'red',
       ...passedClasses,
     }"
+    :title="title"
     :disabled="disabled"
     @click="doClick"
   >
@@ -65,6 +51,11 @@ export default defineComponent({
 
   props: {
     text: {
+      type: String,
+      default: null,
+    },
+
+    title: {
       type: String,
       default: null,
     },

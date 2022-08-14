@@ -2,9 +2,15 @@ depends_on:
   - test
   - web
 
+variables:
+  - &golang_image 'golang:1.18'
+  - &node_image 'node:16-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.18.x'
+  - &xgo_version 'go-1.18.x'
+
 pipeline:
   vendor:
-    image: golang:1.18
+    image: *golang_image
     commands:
       - go mod vendor
 
@@ -12,14 +18,14 @@ pipeline:
   # S e r v e r #
   ###############
   build-web:
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn install --frozen-lockfile
       - yarn build
 
   cross-compile-server:
-    image: techknowlogick/xgo:go-1.17.x
+    image: *xgo_image
     commands:
       - apt update
       - apt install -y tree
@@ -27,28 +33,29 @@ pipeline:
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
       TAGS: bindata sqlite sqlite_unlock_notify
+      XGO_VERSION: *xgo_version
 
-  publish-server-dryrun:
+  publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     group: docker
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      tag: test
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 
-  publish-server-alpine-dryrun:
+  publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     group: docker
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
-      tag: next-alpine
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
 
@@ -134,15 +141,15 @@ pipeline:
   # A g e n t #
   #############
 
-  publish-agent-dryrun:
+  publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
-      tag: test
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 
@@ -228,15 +235,15 @@ pipeline:
   # C L I #
   #########
 
-  publish-cli-dryrun:
+  publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
-      tag: test
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 

@@ -33,6 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
@@ -178,6 +179,10 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
+}
+
+func setupMembershipService(_ *cli.Context, r remote.Remote) cache.MembershipService {
+	return cache.NewMembershipService(r)
 }
 
 // setupRemote helper function to setup the remote from the CLI arguments.

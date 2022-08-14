@@ -6,19 +6,19 @@
     </div>
 
     <Tabs>
-      <Tab :title="$t('repo.settings.general.general')">
+      <Tab id="general" :title="$t('repo.settings.general.general')">
         <GeneralTab />
       </Tab>
-      <Tab :title="$t('repo.settings.secrets.secrets')">
+      <Tab id="secrets" :title="$t('repo.settings.secrets.secrets')">
         <SecretsTab />
       </Tab>
-      <Tab :title="$t('repo.settings.registries.registries')">
+      <Tab id="registries" :title="$t('repo.settings.registries.registries')">
         <RegistriesTab />
       </Tab>
-      <Tab :title="$t('repo.settings.badge.badge')">
+      <Tab id="badge" :title="$t('repo.settings.badge.badge')">
         <BadgeTab />
       </Tab>
-      <Tab :title="$t('repo.settings.actions.actions')">
+      <Tab id="actions" :title="$t('repo.settings.actions.actions')">
         <ActionsTab />
       </Tab>
     </Tabs>

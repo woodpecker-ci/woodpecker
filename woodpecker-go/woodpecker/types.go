@@ -157,4 +157,10 @@ type (
 	LogLevel struct {
 		Level string `json:"log-level"`
 	}
+
+	// Logs is the JSON data for a logs response
+	Logs struct {
+		Proc   string `json:"proc"`
+		Output string `json:"out"`
+	}
 )

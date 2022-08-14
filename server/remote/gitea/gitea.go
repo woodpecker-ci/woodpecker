@@ -458,6 +458,31 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 	return parseHook(r)
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	member, _, err := client.CheckOrgMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+
+	if !member {
+		return &model.OrgPerm{}, nil
+	}
+
+	perm, _, err := client.GetOrgPermissions(owner, u.Login)
+	if err != nil {
+		return &model.OrgPerm{Member: member}, err
+	}
+
+	return &model.OrgPerm{Member: member, Admin: perm.IsAdmin || perm.IsOwner}, nil
+}
+
 // helper function to return the Gitea client with Token
 func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
