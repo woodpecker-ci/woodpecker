@@ -1,15 +1,19 @@
+variables:
+  - &node_image 'node:16-alpine'
+  - &when_path
+    - "docs/**"
+    - ".woodpecker/docs.yml"
+
 pipeline:
   build:
-    image: node:14-alpine
+    image: *node_image
     commands:
       - cd docs/
       - yarn install --frozen-lockfile
       - yarn build
     when:
       event: [push, pull_request]
-      path:
-        - "docs/**"
-        - ".woodpecker/docs.yml"
+      path: *when_path
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
@@ -23,9 +27,8 @@ pipeline:
         from_secret: GITHUB_TOKEN_SURGE
     when:
       event: pull_request
-      path:
-        - "docs/**"
-        - ".woodpecker/docs.yml"
+      path: *when_path
+
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
@@ -52,7 +55,4 @@ pipeline:
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      path:
-        - "docs/**"
-        - ".woodpecker/docs.yml"
-
+      path: *when_path
