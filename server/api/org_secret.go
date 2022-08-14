@@ -38,7 +38,7 @@ func GetOrgSecret(c *gin.Context) {
 	c.JSON(200, secret.Copy())
 }
 
-// GetOrgSecretList get the organization secret list from
+// GetOrgSecretList gest the organization secret list from
 // the database and writes to the response in json format.
 func GetOrgSecretList(c *gin.Context) {
 	owner := c.Param("owner")
@@ -55,7 +55,7 @@ func GetOrgSecretList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// PostOrgSecret persists the organization secret to the database.
+// PostOrgSecret persists an organization secret to the database.
 func PostOrgSecret(c *gin.Context) {
 	owner := c.Param("owner")
 
@@ -82,7 +82,7 @@ func PostOrgSecret(c *gin.Context) {
 	c.JSON(200, secret.Copy())
 }
 
-// PatchOrgSecret updates the organization secret in the database.
+// PatchOrgSecret updates an organization secret in the database.
 func PatchOrgSecret(c *gin.Context) {
 	var (
 		owner = c.Param("owner")

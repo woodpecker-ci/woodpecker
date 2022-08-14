@@ -23,7 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetGlobalSecretList get the global secret list from
+// GetGlobalSecretList gets the global secret list from
 // the database and writes to the response in json format.
 func GetGlobalSecretList(c *gin.Context) {
 	list, err := server.Config.Services.Secrets.GlobalSecretList()
@@ -51,7 +51,7 @@ func GetGlobalSecret(c *gin.Context) {
 	c.JSON(200, secret.Copy())
 }
 
-// PostGlobalSecret persists the global secret to the database.
+// PostGlobalSecret persists a global secret to the database.
 func PostGlobalSecret(c *gin.Context) {
 	in := new(model.Secret)
 	if err := c.Bind(in); err != nil {
@@ -75,7 +75,7 @@ func PostGlobalSecret(c *gin.Context) {
 	c.JSON(200, secret.Copy())
 }
 
-// PatchGlobalSecret updates the global secret in the database.
+// PatchGlobalSecret updates a global secret in the database.
 func PatchGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 
