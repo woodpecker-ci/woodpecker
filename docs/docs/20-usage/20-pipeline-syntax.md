@@ -21,12 +21,12 @@ pipeline:
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
-
 ## Global Pipeline Conditionals
 
 Woodpecker gives the ability to skip whole pipelines (not just steps) based on certain conditions.
 
 ### `branches`
+
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
 
 Example skipping a commit when the target branch is not master:
@@ -244,7 +244,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```
+```bash
 docker run --entrypoint=build.sh golang
 ```
 
@@ -454,7 +454,7 @@ when:
     ignore_message: "[ALL]"
 ```
 
-** Hint: ** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+**Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 ### `group` - Parallel execution
 
@@ -506,7 +506,7 @@ For more details check the [services docs](/docs/usage/services/).
 
 The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
 
-```
+```txt
 /drone/src/github.com/octocat/hello-world
 ```
 
@@ -546,7 +546,7 @@ The base attribute defines a shared base volume available to all pipeline steps.
 
 This would be equivalent to the following docker commands:
 
-```
+```bash
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest
@@ -695,6 +695,10 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 pipeline:
   ...
 ```
+
+## `depends_on`
+
+Woodpecker supports to define multiple pipelines for a repository. Those pipelines will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/multi-pipeline#flow-control) keyword.
 
 ## Privileged mode
 
