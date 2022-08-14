@@ -20,11 +20,13 @@ pipeline:
 ```
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
+
 ## Global Pipeline Conditionals
 
 Woodpecker gives the ability to skip whole pipelines (not just steps) based on certain conditions.
 
 ### `branches`
+
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
 
 Example skipping a commit when the target branch is not master:
@@ -706,6 +708,10 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 pipeline:
   ...
 ```
+
+## `depends_on`
+
+Woodpecker supports to define multiple pipelines for a repository. Those pipelines will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/multi-pipeline#flow-control) keyword.
 
 ## Privileged mode
 
