@@ -70,20 +70,22 @@ func TestSecretList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()
 
-	assert.NoError(t, store.SecretCreate(&model.Secret{
-		RepoID: 1,
-		Name:   "foo",
-		Value:  "bar",
-	}))
-	assert.NoError(t, store.SecretCreate(&model.Secret{
-		RepoID: 1,
-		Name:   "baz",
-		Value:  "qux",
-	}))
+	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1})
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false)
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
+}
+
+func TestSecretBuildList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	createTestSecrets(t, store)
+
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true)
+	assert.NoError(t, err)
+	assert.Len(t, list, 4)
 }
 
 func TestSecretUpdate(t *testing.T) {
@@ -161,4 +163,136 @@ func TestSecretIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate name")
 	}
+}
+
+func createTestSecrets(t *testing.T, store *storage) {
+	assert.NoError(t, store.SecretCreate(&model.Secret{
+		Owner: "org",
+		Name:  "usr",
+		Value: "sec",
+	}))
+	assert.NoError(t, store.SecretCreate(&model.Secret{
+		RepoID: 1,
+		Name:   "foo",
+		Value:  "bar",
+	}))
+	assert.NoError(t, store.SecretCreate(&model.Secret{
+		RepoID: 1,
+		Name:   "baz",
+		Value:  "qux",
+	}))
+	assert.NoError(t, store.SecretCreate(&model.Secret{
+		Name:  "global",
+		Value: "val",
+	}))
+}
+
+func TestOrgSecretFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	err := store.SecretCreate(&model.Secret{
+		Owner:  "org",
+		Name:   "password",
+		Value:  "correct-horse-battery-staple",
+		Images: []string{"golang", "node"},
+		Events: []model.WebhookEvent{"push", "tag"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: insert secret: %s", err)
+		return
+	}
+
+	secret, err := store.OrgSecretFind("org", "password")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if got, want := secret.Owner, "org"; got != want {
+		t.Errorf("Want owner %s, got %s", want, got)
+	}
+	if got, want := secret.Name, "password"; got != want {
+		t.Errorf("Want secret name %s, got %s", want, got)
+	}
+	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
+		t.Errorf("Want secret value %s, got %s", want, got)
+	}
+	if got, want := secret.Events[0], model.EventPush; got != want {
+		t.Errorf("Want secret event %s, got %s", want, got)
+	}
+	if got, want := secret.Events[1], model.EventTag; got != want {
+		t.Errorf("Want secret event %s, got %s", want, got)
+	}
+	if got, want := secret.Images[0], "golang"; got != want {
+		t.Errorf("Want secret image %s, got %s", want, got)
+	}
+	if got, want := secret.Images[1], "node"; got != want {
+		t.Errorf("Want secret image %s, got %s", want, got)
+	}
+}
+
+func TestOrgSecretList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	createTestSecrets(t, store)
+
+	list, err := store.OrgSecretList("org")
+	assert.NoError(t, err)
+	assert.Len(t, list, 1)
+
+	assert.True(t, list[0].Organization())
+}
+
+func TestGlobalSecretFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	err := store.SecretCreate(&model.Secret{
+		Name:   "password",
+		Value:  "correct-horse-battery-staple",
+		Images: []string{"golang", "node"},
+		Events: []model.WebhookEvent{"push", "tag"},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: insert secret: %s", err)
+		return
+	}
+
+	secret, err := store.GlobalSecretFind("password")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if got, want := secret.Name, "password"; got != want {
+		t.Errorf("Want secret name %s, got %s", want, got)
+	}
+	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
+		t.Errorf("Want secret value %s, got %s", want, got)
+	}
+	if got, want := secret.Events[0], model.EventPush; got != want {
+		t.Errorf("Want secret event %s, got %s", want, got)
+	}
+	if got, want := secret.Events[1], model.EventTag; got != want {
+		t.Errorf("Want secret event %s, got %s", want, got)
+	}
+	if got, want := secret.Images[0], "golang"; got != want {
+		t.Errorf("Want secret image %s, got %s", want, got)
+	}
+	if got, want := secret.Images[1], "node"; got != want {
+		t.Errorf("Want secret image %s, got %s", want, got)
+	}
+}
+
+func TestGlobalSecretList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	createTestSecrets(t, store)
+
+	list, err := store.GlobalSecretList()
+	assert.NoError(t, err)
+	assert.Len(t, list, 1)
+
+	assert.True(t, list[0].Global())
 }
