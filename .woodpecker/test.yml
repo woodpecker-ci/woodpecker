@@ -18,16 +18,26 @@ pipeline:
     commands:
       - go mod vendor
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   lint-pipeline:
     image: *golang_image
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      path:
-        - ".woodpecker/**"
-        - "pipeline/schema/**"
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path:
+          - ".woodpecker/**"
+          - "pipeline/schema/**"
+      - event: [tag, pull_request]
+        path:
+          - ".woodpecker/**"
+          - "pipeline/schema/**"
 
   dummy-web:
     image: *golang_image
@@ -36,7 +46,11 @@ pipeline:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   lint:
     image: *golang_image
@@ -44,22 +58,67 @@ pipeline:
     commands:
       - make lint
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: [tag, pull_request]
 
-  test:
+  test-agent:
     image: *golang_image
     group: test
     commands:
       - make test-agent
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
+
+  test-server:
+    image: *golang_image
+    group: test
+    commands:
       - make test-server
-      - make test-cli
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
+
+  test-cli:
+    image: *golang_image
+    group: test
+    commands:
+      - make test-server
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
+
+  test-lib:
+    image: *golang_image
+    group: test
+    commands:
       - make test-lib
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   sqlite:
     image: *golang_image
@@ -69,7 +128,11 @@ pipeline:
     commands:
       - make test-server-datastore-coverage
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   postgres:
     image: *golang_image
@@ -80,7 +143,11 @@ pipeline:
     commands:
       - make test-server-datastore
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   mysql:
     image: *golang_image
@@ -91,7 +158,11 @@ pipeline:
     commands:
       - make test-server-datastore
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   codecov:
     pull: true
@@ -105,7 +176,11 @@ pipeline:
       token:
         from_secret: codecov_token
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
 services:
   service-postgres:
@@ -115,7 +190,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   service-mysql:
     image: mysql:5.6.27
@@ -124,4 +203,8 @@ services:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path

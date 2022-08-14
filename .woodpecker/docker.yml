@@ -23,6 +23,10 @@ pipeline:
       - cd web/
       - yarn install --frozen-lockfile
       - yarn build
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: [tag, pull_request]
 
   cross-compile-server:
     image: *xgo_image
@@ -34,6 +38,10 @@ pipeline:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
       TAGS: bindata sqlite sqlite_unlock_notify
       XGO_VERSION: *xgo_version
+    when:
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: [tag, pull_request]
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx

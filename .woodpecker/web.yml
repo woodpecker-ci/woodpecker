@@ -3,6 +3,13 @@ variables:
   - &when_path
       # web source code
       - "web/**"
+  - &when
+    - event: tag
+    - event: pull_request
+      path: *when_path
+    - event: push
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      path: *when_path
 
 pipeline:
   deps:
@@ -10,8 +17,7 @@ pipeline:
     commands:
       - cd web/
       - yarn install --frozen-lockfile
-    when:
-      path: *when_path
+    when: *when
 
   lint:
     group: test
@@ -19,8 +25,7 @@ pipeline:
     commands:
       - cd web/
       - yarn lint
-    when:
-      path: *when_path
+    when: *when
 
   formatcheck:
     group: test
@@ -28,8 +33,7 @@ pipeline:
     commands:
       - cd web/
       - yarn formatcheck
-    when:
-      path: *when_path
+    when: *when
 
   typecheck:
     group: test
@@ -37,8 +41,7 @@ pipeline:
     commands:
       - cd web/
       - yarn typecheck
-    when:
-      path: *when_path
+    when: *when
 
   test:
     group: test
@@ -46,6 +49,4 @@ pipeline:
     commands:
       - cd web/
       - yarn test
-    when:
-      path: *when_path
-
+    when: *when

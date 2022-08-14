@@ -24,7 +24,11 @@ pipeline:
       - yarn install --frozen-lockfile
       - yarn build
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   vendor:
     group: prepare
@@ -32,7 +36,11 @@ pipeline:
     commands:
       - go mod vendor
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   build-server:
     group: build
@@ -40,7 +48,11 @@ pipeline:
     commands:
       - make release-server
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   build-agent:
     group: build
@@ -48,7 +60,11 @@ pipeline:
     commands:
       - make release-agent
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   build-cli:
     group: build
@@ -56,7 +72,11 @@ pipeline:
     commands:
       - make release-cli
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   build-deb-rpm:
     group: bundle
@@ -64,7 +84,11 @@ pipeline:
     commands:
       - make bundle
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   build-tarball:
     group: bundle
@@ -72,14 +96,22 @@ pipeline:
     commands:
       - make release-tarball
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   checksums:
     image: *golang_image
     commands:
       - make release-checksums
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
@@ -89,7 +121,11 @@ pipeline:
     - ls -la dist/*.*
     - cat dist/checksums.txt
     when:
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - event: [tag, pull_request]
+        path: *when_path
 
   release:
     image: plugins/github-release
