@@ -134,6 +134,8 @@ func loop(c *cli.Context) error {
 		sigterm.Set()
 	})
 
+	backend.Init(c)
+
 	var wg sync.WaitGroup
 	parallel := c.Int("max-procs")
 	wg.Add(parallel)

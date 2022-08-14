@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 
+	"github.com/urfave/cli/v2"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
@@ -12,12 +13,12 @@ import (
 
 var engines map[string]types.Engine
 
-func init() {
+func Init(c *cli.Context) {
 	loadedEngines := []types.Engine{
 		docker.New(),
 		local.New(),
 		ssh.New(),
-		kubernetes.New(),
+		kubernetes.New(c.String("backend-k8s-namespace"), c.String("backend-k8s-storage-class"), c.String("backend-k8s-volume-size")),
 	}
 
 	engines = make(map[string]types.Engine)

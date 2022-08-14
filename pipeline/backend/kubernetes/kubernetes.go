@@ -33,17 +33,7 @@ type kube struct {
 }
 
 // New returns a new Kubernetes Engine.
-func New() types.Engine {
-	namespace := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
-	if namespace == "" {
-		namespace = "woodpecker-ci"
-	}
-	storageClass := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
-	volumeSize := os.Getenv("WOODPECKER_BACKEND_K8S_NAMESPACE")
-	if volumeSize == "" {
-		volumeSize = "10GiB"
-	}
-
+func New(namespace, storageClass, volumeSize string) types.Engine {
 	return &kube{
 		logs:         new(bytes.Buffer),
 		namespace:    namespace,
