@@ -85,7 +85,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	config := new(backend.Config)
 
-	if !conf.MatchConstraints(c.metadata) {
+	if !conf.When.Match(c.metadata) {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped and wont be shown in the UI as well.
 		return config
@@ -153,7 +153,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		} else {
 			// Load from clone containers.
 			for i, container := range conf.Clone.Containers {
-				if !container.MatchConstraints(c.metadata) {
+				if !container.When.Match(c.metadata) {
 					continue
 				}
 				stage := new(backend.Stage)

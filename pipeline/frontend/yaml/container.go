@@ -5,7 +5,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
@@ -63,10 +62,6 @@ type (
 		Settings      map[string]interface{} `yaml:"settings"`
 	}
 )
-
-func (c *Container) MatchConstraints(meta frontend.Metadata) bool {
-	return c.Constraints.Match(meta)
-}
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {

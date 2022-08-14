@@ -20,7 +20,7 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
-				g.Assert(out.Constraints.MatchList[0].Event.Match("tester")).Equal(true)
+				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -79,7 +79,7 @@ func TestParse(t *testing.T) {
 			}
 
 			g.It("Should match event tester", func() {
-				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
 					Curr: frontend.Build{
 						Event: "tester",
 					},
@@ -87,7 +87,7 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match event tester2", func() {
-				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
 					Curr: frontend.Build{
 						Event: "tester2",
 					},
@@ -95,7 +95,7 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match branch master", func() {
-				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
 					Curr: frontend.Build{
 						Commit: frontend.Commit{
 							Branch: "tester",
@@ -105,7 +105,7 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should not match event push", func() {
-				g.Assert(matchConfig.MatchConstraints(frontend.Metadata{
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
 					Curr: frontend.Build{
 						Event: "push",
 					},

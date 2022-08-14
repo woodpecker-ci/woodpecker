@@ -119,7 +119,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// checking if filtered.
-			if !parsed.MatchConstraints(metadata) {
+			if !parsed.When.Match(metadata) {
 				log.Debug().Str("Step", proc.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
