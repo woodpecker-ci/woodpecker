@@ -140,6 +140,18 @@
     },
     "step_when": {
       "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#when---conditional-execution",
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": { "$ref": "#/definitions/step_when_condition" }
+        },
+        {
+          "$ref": "#/definitions/step_when_condition"
+        }
+      ]
+    },
+    "step_when_condition": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
