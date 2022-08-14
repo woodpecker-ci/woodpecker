@@ -583,6 +583,7 @@ Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline
 
 ```diff
 +platform: linux/arm64
+
 pipeline:
   build:
     image: golang
