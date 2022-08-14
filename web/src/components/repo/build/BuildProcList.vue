@@ -1,18 +1,7 @@
 <template>
   <div class="flex flex-col w-full md:w-3/12 text-gray-600 dark:text-gray-400">
     <div
-      class="
-        flex
-        md:ml-2
-        p-4
-        space-x-1
-        justify-between
-        flex-shrink-0
-        border-b-1
-        md:rounded-md
-        bg-gray-300
-        dark:border-b-dark-gray-600 dark:bg-dark-gray-700
-      "
+      class="flex md:ml-2 p-4 space-x-1 justify-between flex-shrink-0 border-b-1 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
@@ -59,17 +48,7 @@
             <div v-if="proc.environ" class="text-xs">
               <div v-for="(value, key) in proc.environ" :key="key">
                 <span
-                  class="
-                    pl-2
-                    pr-1
-                    py-0.5
-                    bg-gray-800
-                    text-gray-200
-                    dark:bg-gray-600
-                    border-2 border-gray-800
-                    dark:border-gray-600
-                    rounded-l-full
-                  "
+                  class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
                   >{{ key }}</span
                 >
                 <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">{{
@@ -81,17 +60,7 @@
           <div
             v-for="job in proc.children"
             :key="job.pid"
-            class="
-              flex
-              mx-2
-              mb-1
-              p-2
-              pl-6
-              cursor-pointer
-              rounded-md
-              items-center
-              hover:bg-gray-300 hover:dark:bg-dark-gray-700
-            "
+            class="flex mx-2 mb-1 p-2 pl-6 cursor-pointer rounded-md items-center hover:bg-gray-300 hover:dark:bg-dark-gray-700"
             :class="{ 'bg-gray-300 !dark:bg-dark-gray-700': selectedProcId && selectedProcId === job.pid }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
