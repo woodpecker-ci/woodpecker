@@ -1,6 +1,6 @@
 <template>
   <ListItem v-if="build" clickable class="p-0 w-full">
-    <div class="flex items-center md:mr-4">
+    <div class="flex h-full w-11 items-center md:mr-4">
       <div
         class="min-h-full w-3"
         :class="{
@@ -23,9 +23,7 @@
       </div>
 
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
-        <span class="text-color-alt <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
-          message
-        }}</span>
+        <span class="text-color <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       </div>
 
       <div

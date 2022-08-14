@@ -88,6 +88,9 @@ type Client interface {
 	// BuildKill force kills the running build.
 	BuildKill(string, string, int) error
 
+	// BuildLogs returns the logs for the given build
+	BuildLogs(string, string, int, int) ([]*Logs, error)
+
 	// Deploy triggers a deployment for an existing build using the specified
 	// target environment.
 	Deploy(string, string, int, string, map[string]string) (*Build, error)

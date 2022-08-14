@@ -3,7 +3,6 @@ package woodpecker
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,6 +21,7 @@ const (
 	pathRepair         = "%s/api/repos/%s/%s/repair"
 	pathBuilds         = "%s/api/repos/%s/%s/builds"
 	pathBuild          = "%s/api/repos/%s/%s/builds/%v"
+	pathLogs           = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
 	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
 	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
@@ -262,8 +262,11 @@ func (c *client) BuildKill(owner, name string, num int) error {
 }
 
 // BuildLogs returns the build logs for the specified job.
-func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
-	return nil, errors.New("Method not implemented")
+func (c *client) BuildLogs(owner, name string, num, job int) ([]*Logs, error) {
+	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, job)
+	var out []*Logs
+	err := c.get(uri, &out)
+	return out, err
 }
 
 // Deploy triggers a deployment for an existing build using the
