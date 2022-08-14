@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func PersistentVolumeClaim(namespace, name string, storageClass string, size string) *v1.PersistentVolumeClaim {
+func PersistentVolumeClaim(namespace, name, storageClass, size string) *v1.PersistentVolumeClaim {
 	_storageClass := &storageClass
 	if storageClass == "" {
 		_storageClass = nil

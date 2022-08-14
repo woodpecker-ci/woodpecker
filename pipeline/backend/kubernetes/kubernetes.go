@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -105,11 +104,12 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 					return err
 				}
 
-				if svc, err := e.client.CoreV1().Services(e.namespace).Create(ctx, svc, metav1.CreateOptions{}); err != nil {
+				svc, err = e.client.CoreV1().Services(e.namespace).Create(ctx, svc, metav1.CreateOptions{})
+				if err != nil {
 					return err
-				} else {
-					extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
 				}
+
+				extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
 			}
 		}
 	}
@@ -140,7 +140,7 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 
 	finished := make(chan bool)
 
-	var podUpdated = func(old interface{}, new interface{}) {
+	podUpdated := func(old, new interface{}) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
@@ -190,7 +190,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 
 	up := make(chan bool)
 
-	var podUpdated = func(old interface{}, new interface{}) {
+	podUpdated := func(old, new interface{}) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			switch pod.Status.Phase {
@@ -228,17 +228,24 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 	rc, wc := io.Pipe()
 
 	go func() {
-		systemLogs := ioutil.NopCloser(bytes.NewReader(e.logs.Bytes()))
-		io.Copy(wc, systemLogs)
-		io.Copy(wc, logs)
-		e.logs.Reset()
-		logs.Close()
-		wc.Close()
-		rc.Close()
+		defer e.logs.Reset()
+		defer logs.Close()
+		defer wc.Close()
+		defer rc.Close()
+
+		systemLogs := io.NopCloser(bytes.NewReader(e.logs.Bytes()))
+		_, err := io.Copy(wc, systemLogs)
+		if err != nil {
+			return
+		}
+		_, err = io.Copy(wc, logs)
+		if err != nil {
+			return
+		}
 	}()
 	return rc, nil
 
-	// rc := ioutil.NopCloser(bytes.NewReader(e.logs.Bytes()))
+	// rc := io.NopCloser(bytes.NewReader(e.logs.Bytes()))
 	// e.logs.Reset()
 	// return rc, nil
 }

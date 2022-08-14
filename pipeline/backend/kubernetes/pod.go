@@ -10,7 +10,6 @@ import (
 )
 
 func Pod(namespace string, step *types.Step) *v1.Pod {
-
 	var vols []v1.Volume
 	var volMounts []v1.VolumeMount
 	if step.WorkingDir != "" {
