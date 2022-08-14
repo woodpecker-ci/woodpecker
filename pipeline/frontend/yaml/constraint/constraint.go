@@ -12,9 +12,10 @@ import (
 )
 
 type (
-	// Constraints defines a set of runtime constraints.
-	Constraints struct {
-		MatchList []Constraint
+	// When defines a set of runtime constraints.
+	When struct {
+		// If true then read from a list of constraint
+		Constraints []Constraint
 	}
 
 	Constraint struct {
@@ -51,23 +52,22 @@ type (
 	}
 )
 
-func (constraints *Constraints) IsEmpty() bool {
-	return len(constraints.MatchList) == 0
+func (when *When) IsEmpty() bool {
+	return len(when.Constraints) == 0
 }
 
-// Returns true if any of the internal constraint in the match list
-// is true.
-func (constraints *Constraints) Match(metadata frontend.Metadata) bool {
-	for _, c := range constraints.MatchList {
+// Returns true if at least one of the internal constraints is true.
+func (when *When) Match(metadata frontend.Metadata) bool {
+	for _, c := range when.Constraints {
 		if c.Match(metadata) {
 			return true
 		}
 	}
-	return constraints.IsEmpty()
+	return when.IsEmpty()
 }
 
-func (constraints *Constraints) IncludesStatus(status string) bool {
-	for _, c := range constraints.MatchList {
+func (when *When) IncludesStatus(status string) bool {
+	for _, c := range when.Constraints {
 		if c.Status.Includes(status) {
 			return true
 		}
@@ -76,19 +76,19 @@ func (constraints *Constraints) IncludesStatus(status string) bool {
 	return false
 }
 
-func (constraints *Constraints) ExcludesStatus(status string) bool {
-	for _, c := range constraints.MatchList {
+func (when *When) ExcludesStatus(status string) bool {
+	for _, c := range when.Constraints {
 		if !c.Status.Excludes(status) {
 			return false
 		}
 	}
 
-	return len(constraints.MatchList) > 0
+	return len(when.Constraints) > 0
 }
 
 // False if (any) non local
-func (constraints *Constraints) IsLocal() bool {
-	for _, c := range constraints.MatchList {
+func (when *When) IsLocal() bool {
+	for _, c := range when.Constraints {
 		if !c.Local.Bool() {
 			return false
 		}
@@ -96,14 +96,14 @@ func (constraints *Constraints) IsLocal() bool {
 	return true
 }
 
-func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
+func (when *When) UnmarshalYAML(value *yaml.Node) error {
 	unmarshelAsList := func() error {
 		lst := []Constraint{}
 		err := value.Decode(&lst)
 		if err != nil {
 			return err
 		}
-		constraints.MatchList = lst
+		when.Constraints = lst
 		return nil
 	}
 
@@ -113,7 +113,7 @@ func (constraints *Constraints) UnmarshalYAML(value *yaml.Node) error {
 		if err != nil {
 			return err
 		}
-		constraints.MatchList = append(constraints.MatchList, c)
+		when.Constraints = append(when.Constraints, c)
 		return nil
 	}
 
@@ -140,6 +140,7 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 	}
+
 	if metadata.Curr.Event != frontend.EventTag {
 		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
 	}
@@ -290,12 +291,13 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // Match returns true if file paths in string slice matches the include and not exclude patterns
-//  or if commit message contains ignore message.
+// or if commit message contains ignore message.
 func (c *Path) Match(v []string, message string) bool {
 	// ignore file pattern matches if the commit message contains a pattern
 	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
 		return true
 	}
+
 	// always match if there are no commit files (empty commit)
 	if len(v) == 0 {
 		return true

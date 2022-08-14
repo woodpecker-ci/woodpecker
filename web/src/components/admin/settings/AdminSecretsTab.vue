@@ -2,26 +2,33 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
+        <h1 class="text-xl text-color">{{ $t('admin.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-color-alt">
-          {{ $t('repo.settings.secrets.desc') }}
+          {{ $t('admin.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
+        <Warning :text="$t('admin.settings.secrets.warning')" />
       </div>
       <Button
         v-if="selectedSecret"
         class="ml-auto"
-        :text="$t('repo.settings.secrets.show')"
+        :text="$t('admin.settings.secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button
+        v-else
+        class="ml-auto"
+        :text="$t('admin.settings.secrets.add')"
+        start-icon="plus"
+        @click="showAddSecret"
+      />
     </div>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="repo.settings.secrets."
+      i18n-prefix="admin.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -30,7 +37,7 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="repo.settings.secrets."
+      i18n-prefix="admin.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
     />
@@ -39,18 +46,19 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Panel from '~/components/layout/Panel.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
+import { Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
   name: '',
@@ -60,7 +68,7 @@ const emptySecret = {
 };
 
 export default defineComponent({
-  name: 'SecretsTab',
+  name: 'AdminSecretsTab',
 
   components: {
     Button,
@@ -68,6 +76,7 @@ export default defineComponent({
     DocsLink,
     SecretList,
     SecretEdit,
+    Warning,
   },
 
   setup() {
@@ -75,35 +84,26 @@ export default defineComponent({
     const notifications = useNotifications();
     const i18n = useI18n();
 
-    const repo = inject<Ref<Repo>>('repo');
     const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
     async function loadSecrets() {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      secrets.value = await apiClient.getSecretList(repo.value.owner, repo.value.name);
+      secrets.value = await apiClient.getGlobalSecretList();
     }
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
       if (!selectedSecret.value) {
         throw new Error("Unexpected: Can't get secret");
       }
 
       if (isEditingSecret.value) {
-        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.updateGlobalSecret(selectedSecret.value);
       } else {
-        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.createGlobalSecret(selectedSecret.value);
       }
       notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
+        title: i18n.t(isEditingSecret.value ? 'admin.settings.secrets.saved' : 'admin.settings.secrets.created'),
         type: 'success',
       });
       selectedSecret.value = undefined;
@@ -111,12 +111,8 @@ export default defineComponent({
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
-      notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
+      await apiClient.deleteGlobalSecret(_secret.name);
+      notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
       await loadSecrets();
     });
 

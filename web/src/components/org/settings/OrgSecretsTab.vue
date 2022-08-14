@@ -2,26 +2,26 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
+        <h1 class="text-xl text-color">{{ $t('org.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-color-alt">
-          {{ $t('repo.settings.secrets.desc') }}
+          {{ $t('org.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
       </div>
       <Button
         v-if="selectedSecret"
         class="ml-auto"
-        :text="$t('repo.settings.secrets.show')"
+        :text="$t('org.settings.secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-else class="ml-auto" :text="$t('org.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
     </div>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="repo.settings.secrets."
+      i18n-prefix="org.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -30,7 +30,7 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="repo.settings.secrets."
+      i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
     />
@@ -50,7 +50,7 @@ import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
+import { Org, Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
   name: '',
@@ -60,7 +60,7 @@ const emptySecret = {
 };
 
 export default defineComponent({
-  name: 'SecretsTab',
+  name: 'OrgSecretsTab',
 
   components: {
     Button,
@@ -75,22 +75,22 @@ export default defineComponent({
     const notifications = useNotifications();
     const i18n = useI18n();
 
-    const repo = inject<Ref<Repo>>('repo');
+    const org = inject<Ref<Org>>('org');
     const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
     async function loadSecrets() {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
+      if (!org?.value) {
+        throw new Error("Unexpected: Can't load org");
       }
 
-      secrets.value = await apiClient.getSecretList(repo.value.owner, repo.value.name);
+      secrets.value = await apiClient.getOrgSecretList(org.value.name);
     }
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
+      if (!org?.value) {
+        throw new Error("Unexpected: Can't load org");
       }
 
       if (!selectedSecret.value) {
@@ -98,12 +98,12 @@ export default defineComponent({
       }
 
       if (isEditingSecret.value) {
-        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.updateOrgSecret(org.value.name, selectedSecret.value);
       } else {
-        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.createOrgSecret(org.value.name, selectedSecret.value);
       }
       notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
+        title: i18n.t(isEditingSecret.value ? 'org.settings.secrets.saved' : 'org.settings.secrets.created'),
         type: 'success',
       });
       selectedSecret.value = undefined;
@@ -111,12 +111,12 @@ export default defineComponent({
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
+      if (!org?.value) {
+        throw new Error("Unexpected: Can't load org");
       }
 
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
-      notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
+      await apiClient.deleteOrgSecret(org.value.name, _secret.name);
+      notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
       await loadSecrets();
     });
 

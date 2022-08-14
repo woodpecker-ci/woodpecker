@@ -2986,7 +2986,7 @@ vue-demi@*:
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.6.tgz#f9433cbd75e68a970dec066647f4ba6c08ced48f"
   integrity sha512-02NYpxgyGE2kKGegRPYlNQSL1UWfA/+JqvzhGCOYjhfbLWXU5QQX0+9pAm/R2sCOPKr5NBxVIab7fvFU0B1RxQ==
 
-vue-eslint-parser@^9.0.1:
+vue-eslint-parser@^9.0.1, vue-eslint-parser@^9.0.3:
   version "9.0.3"
   resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-9.0.3.tgz#0c17a89e0932cc94fa6a79f0726697e13bfe3c96"
   integrity sha512-yL+ZDb+9T0ELG4VIFo/2anAOz8SvBdlqEnQnvJ3M7Scq56DvtjY0VY88bByRZB0D4J0u8olBcfrXTVONXsh4og==

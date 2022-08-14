@@ -109,8 +109,8 @@ func TestUnmarshalContainer(t *testing.T) {
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: constraint.Constraints{
-			MatchList: []constraint.Constraint{
+		When: constraint.When{
+			Constraints: []constraint.Constraint{
 				{
 					Branch: constraint.List{
 						Include: []string{"master"},
@@ -189,11 +189,13 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next", "latest"),
 						"dry_run":    true,
 					},
-					Constraints: constraint.Constraints{
-						MatchList: []constraint.Constraint{{
-							Event:  constraint.List{Include: []string{"push"}},
-							Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
-						}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
 					},
 				},
 			},
@@ -219,11 +221,38 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
 					},
-					Constraints: constraint.Constraints{
-						MatchList: []constraint.Constraint{{
-							Event:  constraint.List{Include: []string{"push"}},
-							Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
-						}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    image: print/env
+    when:
+      - branch: ${CI_REPO_DEFAULT_BRANCH}
+        event: push
+      - event: pull_request`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+							{
+								Event: constraint.List{Include: []string{"pull_request"}},
+							},
+						},
 					},
 				},
 			},
