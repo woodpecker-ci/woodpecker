@@ -12,6 +12,14 @@ variables:
       - "pipeline/schema/**"
 
 pipeline:
+  vendor:
+    image: *golang_image
+    group: prepare
+    commands:
+      - go mod vendor
+    when:
+      path: *when_path
+
   lint-pipeline:
     image: *golang_image
     commands:
@@ -20,14 +28,6 @@ pipeline:
       path:
         - ".woodpecker/**"
         - "pipeline/schema/**"
-
-  vendor:
-    image: *golang_image
-    group: prepare
-    commands:
-      - go mod vendor
-    when:
-      path: *when_path
 
   dummy-web:
     image: *golang_image
