@@ -5,15 +5,7 @@
     </div>
 
     <div
-      class="
-        flex flex-col
-        w-full
-        overflow-hidden
-        md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700
-        dark:border-dark-200
-        md:flex-row md:w-3xl md:h-sm
-        justify-center
-      "
+      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700 dark:border-dark-200 md:flex-row md:w-3xl md:h-sm justify-center"
     >
       <div class="flex md:bg-lime-500 md:dark:bg-lime-900 md:w-3/5 justify-center items-center">
         <img class="w-48 h-48" src="../assets/logo.svg?url" />

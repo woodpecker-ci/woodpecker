@@ -205,6 +205,67 @@
     }
   },
 
+  "org": {
+    "settings": {
+      "settings": "Iestatījumi",
+      "not_allowed": "Nav piekļuves šīs organizācijas iestatījumiem",
+
+      "secrets": {
+        "secrets": "Noslēpumi",
+        "desc": "Noslēpumus var padot visu organizācijas repozitoriju individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+        "none": "Pagaidām nav neviena organizācijas noslēpuma.",
+        "add": "Pievienot noslēpumu",
+        "save": "Saglabāt noslēpumu",
+        "show": "Noslēpumu saraksts",
+        "name": "Nosaukums",
+        "value": "Vērtība",
+        "deleted": "Organizācijas noslēpums dzēsts",
+        "created": "Organizācijas noslēpums izveidots",
+        "saved": "Organizācijas noslēpums saglabāts",
+
+        "images": {
+          "images": "Pieejami šādiem attēliem",
+          "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem."
+        },
+        "events": {
+          "events": "Pieejams šādiem notikumiem",
+          "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu!"
+        }
+      }
+    }
+  },
+
+  "admin": {
+    "settings": {
+      "settings": "Iestatījumi",
+      "not_allowed": "Nav piekļuves servera iestatījumiem",
+
+      "secrets": {
+        "secrets": "Noslēpumi",
+        "desc": "Noslēpumus var padot visu repozitoriju individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+        "warning": "Šie noslēpumi būs pieejami visiem servera lietotājiem.",
+        "none": "Pagaidām nav neviena globālā noslēpuma.",
+        "add": "Pievienot noslēpumu",
+        "save": "Saglabāt noslēpumu",
+        "show": "Noslēpumu saraksts",
+        "name": "Nosaukums",
+        "value": "Vērtība",
+        "deleted": "Globālais noslēpums dzēsts",
+        "created": "Globālais noslēpums izveidots",
+        "saved": "Globālais noslēpums saglabāts",
+
+        "images": {
+          "images": "Pieejami šādiem attēliem",
+          "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem."
+        },
+        "events": {
+          "events": "Pieejams šādiem notikumiem",
+          "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu!"
+        }
+      }
+    }
+  },
+
   "user": {
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
