@@ -51,7 +51,7 @@ func loop(c *cli.Context) error {
 		"repo":     "*", // allow all repos by default
 	}
 
-	for _, v := range c.StringSlice("filter-labels") {
+	for _, v := range c.StringSlice("filter") {
 		parts := strings.SplitN(v, "=", 2)
 		labels[parts[0]] = parts[1]
 	}
