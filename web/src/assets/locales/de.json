@@ -1,217 +1,250 @@
 {
-  "login": "Anmelden",
-  "welcome": "Willkommen bei Woodpecker",
-  "repos": "Repos",
-  "repositories": "Repositories",
-  "docs": "Docs",
-  "logout": "Abmelden",
-  "search": "Suche...",
-  "username": "Benutzername",
-  "password": "Passwort",
-  "url": "URL",
-  "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
-
-  "not_found": {
-    "not_found": "Whoa 404, entweder haben wir etwas kaputt gemacht oder du hattest einen Tippfehler :-/",
-    "back_home": "Zurück zum Start"
-  },
-
-  "time": {
-    "tmpl": "DD.MM.YYYY, HH:mm z",
-    "weeks_short": "w",
-    "days_short": "t",
-    "hours_short": "h",
-    "min_short": "min",
-    "sec_short": "sek",
-    "not_started": "noch nicht gestartet"
-  },
-
-  "repo": {
-    "activity": "Aktivitäten",
-    "branches": "Branches",
-    "add": "Repository hinzufügen",
-    "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositories.",
-    "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
-
-    "enable": {
-      "reload": "Repositories neu laden",
-      "enable": "Aktivieren",
-      "enabled": "Bereits Aktiviert",
-      "success": "Repository aktiviert",
-      "list_reloaded": "Repository-Liste neu geladen"
+    "login": "Anmelden",
+    "welcome": "Willkommen bei Woodpecker",
+    "repos": "Repos",
+    "repositories": "Repositories",
+    "docs": "Docs",
+    "logout": "Abmelden",
+    "search": "Suche...",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "url": "URL",
+    "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
+    "not_found": {
+        "not_found": "Whoa 404, entweder haben wir etwas kaputt gemacht oder du hattest einen Tippfehler :-/",
+        "back_home": "Zurück zum Start"
     },
-
-    "settings": {
-      "settings": "Einstellungen",
-      "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
-
-      "general": {
-        "general": "Allgemein",
-        "project": "Projekt-Einstellungen",
-        "save": "Einstellungen speichern",
-        "success": "Repository-Einstellungen aktualisiert",
-
-        "pipeline_path": {
-          "path": "Pipeline-Pfad",
-          "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Ordner sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden."
-        },
-
-        "allow_pr": {
-          "allow": "Pull Requests zulassen",
-          "desc": "Pipelines können für Pull-Requests genutzt werden."
-        },
-
-        "protected": {
-          "protected": "Geschützt",
-          "desc": "Jede Pipeline muss genehmigt werden, bevor sie ausgeführt wird."
-        },
-        "trusted": {
-          "trusted": "Vertrauenswürdig",
-          "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen wie z. B. das Einhängen von Volumes."
-        },
-        "visibility": {
-          "visibility": "Sichtbarkeit des Projekts",
-
-          "public": {
-            "public": "Öffentlich",
-            "desc": "Jeder Benutzer kann Ihr Projekt sehen, ohne eingeloggt zu sein."
-          },
-          "private": {
-            "private": "Privat",
-            "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
-          },
-          "internal": {
-            "internal": "Intern",
-            "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
-          }
-        },
-
-        "timeout": {
-          "timeout": "Zeitlimit",
-          "minutes": "Minuten"
-        },
-
-        "cancel_prev": {
-          "cancel": "Breche ältere Pipelines ab",
-          "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
-        }
-      },
-
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "Secrets können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
-        "none": "Es gibt noch keine Secrets.",
-        "add": "Secret hinzufügen",
-        "save": "Secret speichern",
-        "show": "Secret anzeigen",
-        "name": "Name",
-        "value": "Wert",
-        "deleted": "Secret gelöscht",
-        "created": "Secret erstellt",
-        "saved": "Secret gespeichert",
-
-        "images": {
-          "images": "Verfügbar für folgende Images",
-          "desc": "Durch Kommata getrennte Liste der Images, für die dieses Secret verfügbar ist; leer lassen, um alle Images zuzulassen"
-        },
-        "events": {
-          "events": "Verfügbar bei folgenden Ereignissen",
-          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull Request erstellen kann, der deine Secrets preisgibt."
-        }
-      },
-
-      "registries": {
-        "registries": "Registries",
-        "creds": "Zugangsdaten für die Registry",
-        "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für Ihre Pipeline zu verwenden.",
-        "show": "Registries anzeigen",
-        "add": "Registry hinzufügen",
-        "none": "Es gibt noch keine Zugangsdaten für die Registry.",
-        "save": "Registry speichern",
-        "created": "Registry-Zugangsdaten erstellt",
-        "saved": "Registry-Zugangsdaten gespeichert",
-        "deleted": "Registry-Zugangsdaten gelöscht",
-
-        "address": {
-          "address": "Adresse",
-          "placeholder": "Registry-Adresse (z. B. docker.io)"
-        }
-      },
-
-      "badge": {
-        "badge": "Abzeichen",
-        "url_branch": "URL für bestimmten Branch",
-        "markdown": "Markdown"
-      },
-
-      "actions": {
-        "actions": "Aktionen",
-
-        "repair": {
-          "repair": "Repository reparieren",
-          "success": "Repository repariert"
-        },
-        "disable": {
-          "disable": "Repository deaktivieren",
-          "success": "Repository deaktiviert"
-        },
-        "delete": {
-          "delete": "Repository löschen",
-          "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
-          "success": "Repository gelöscht"
-        }
-      }
+    "time": {
+        "tmpl": "DD.MM.YYYY, HH:mm z",
+        "weeks_short": "w",
+        "days_short": "t",
+        "hours_short": "h",
+        "min_short": "min",
+        "sec_short": "sek",
+        "not_started": "noch nicht gestartet"
     },
-
-    "build": {
-      "created": "Erstellt",
-      "tasks": "Vorgänge",
-      "config": "Konfiguration",
-      "files": "Geänderte Dateien ({files})",
-      "no_files": "Es wurden keine Dateien geändert.",
-      "execution_error": "Ausführungsfehler",
-      "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
-      "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
-      "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
-      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
-      "exit_code": "Exit-Code {exitCode}",
-      "loading": "Laden ...",
-      "pipeline": "Pipeline #{buildId}",
-
-      "actions": {
-        "cancel": "Abbrechen",
-        "restart": "Neustarten",
-        "canceled": "Dieser Schritt wurde abgebrochen.",
-        "cancel_success": "Pipeline abgebrochen",
-        "restart_success": "Pipeline neu gestartet"
-      },
-      "protected": {
-        "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
-        "approve": "Genehmigen",
-        "decline": "Ablehnen",
-        "declined": "Diese Pipeline ist abgelehnt worden!",
-        "approve_success": "Pipeline genehmigt",
-        "decline_success": "Pipeline abgelehnt"
-      },
-      "event": {
-        "push": "Push",
-        "tag": "Tag",
-        "pr": "Pull Request",
-        "deploy": "Deploy"
-      }
+    "repo": {
+        "activity": "Aktivitäten",
+        "branches": "Branches",
+        "add": "Repository hinzufügen",
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositories.",
+        "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
+        "enable": {
+            "reload": "Repositories neu laden",
+            "enable": "Aktivieren",
+            "enabled": "Bereits Aktiviert",
+            "success": "Repository aktiviert",
+            "list_reloaded": "Repository-Liste neu geladen"
+        },
+        "settings": {
+            "settings": "Einstellungen",
+            "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
+            "general": {
+                "general": "Allgemein",
+                "project": "Projekt-Einstellungen",
+                "save": "Einstellungen speichern",
+                "success": "Repository-Einstellungen aktualisiert",
+                "pipeline_path": {
+                    "path": "Pipeline-Pfad",
+                    "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+                    "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Ordner sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden."
+                },
+                "allow_pr": {
+                    "allow": "Pull Requests zulassen",
+                    "desc": "Pipelines können für Pull-Requests genutzt werden."
+                },
+                "protected": {
+                    "protected": "Geschützt",
+                    "desc": "Jede Pipeline muss genehmigt werden, bevor sie ausgeführt wird."
+                },
+                "trusted": {
+                    "trusted": "Vertrauenswürdig",
+                    "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen wie z. B. das Einhängen von Volumes."
+                },
+                "visibility": {
+                    "visibility": "Sichtbarkeit des Projekts",
+                    "public": {
+                        "public": "Öffentlich",
+                        "desc": "Jeder Benutzer kann Ihr Projekt sehen, ohne eingeloggt zu sein."
+                    },
+                    "private": {
+                        "private": "Privat",
+                        "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
+                    },
+                    "internal": {
+                        "internal": "Intern",
+                        "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
+                    }
+                },
+                "timeout": {
+                    "timeout": "Zeitlimit",
+                    "minutes": "Minuten"
+                },
+                "cancel_prev": {
+                    "cancel": "Breche ältere Pipelines ab",
+                    "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
+                }
+            },
+            "secrets": {
+                "secrets": "Secrets",
+                "desc": "Secrets können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+                "none": "Es gibt noch keine Secrets.",
+                "add": "Secret hinzufügen",
+                "save": "Secret speichern",
+                "show": "Secret anzeigen",
+                "name": "Name",
+                "value": "Wert",
+                "deleted": "Secret gelöscht",
+                "created": "Secret erstellt",
+                "saved": "Secret gespeichert",
+                "images": {
+                    "images": "Verfügbar für folgende Images",
+                    "desc": "Durch Kommata getrennte Liste der Images, für die dieses Secret verfügbar ist; leer lassen, um alle Images zuzulassen"
+                },
+                "events": {
+                    "events": "Verfügbar bei folgenden Ereignissen",
+                    "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull Request erstellen kann, der deine Secrets preisgibt."
+                }
+            },
+            "registries": {
+                "registries": "Registries",
+                "creds": "Zugangsdaten für die Registry",
+                "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für Ihre Pipeline zu verwenden.",
+                "show": "Registries anzeigen",
+                "add": "Registry hinzufügen",
+                "none": "Es gibt noch keine Zugangsdaten für die Registry.",
+                "save": "Registry speichern",
+                "created": "Registry-Zugangsdaten erstellt",
+                "saved": "Registry-Zugangsdaten gespeichert",
+                "deleted": "Registry-Zugangsdaten gelöscht",
+                "address": {
+                    "address": "Adresse",
+                    "placeholder": "Registry-Adresse (z. B. docker.io)"
+                }
+            },
+            "badge": {
+                "badge": "Abzeichen",
+                "url_branch": "URL für bestimmten Branch",
+                "markdown": "Markdown"
+            },
+            "actions": {
+                "actions": "Aktionen",
+                "repair": {
+                    "repair": "Repository reparieren",
+                    "success": "Repository repariert"
+                },
+                "disable": {
+                    "disable": "Repository deaktivieren",
+                    "success": "Repository deaktiviert"
+                },
+                "delete": {
+                    "delete": "Repository löschen",
+                    "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
+                    "success": "Repository gelöscht"
+                }
+            }
+        },
+        "build": {
+            "created": "Erstellt",
+            "tasks": "Vorgänge",
+            "config": "Konfiguration",
+            "files": "Geänderte Dateien ({files})",
+            "no_files": "Es wurden keine Dateien geändert.",
+            "execution_error": "Ausführungsfehler",
+            "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
+            "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
+            "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
+            "pipelines_for": "Pipelines für den Branch \"{branch}\"",
+            "exit_code": "Exit-Code {exitCode}",
+            "loading": "Laden ...",
+            "pipeline": "Pipeline #{buildId}",
+            "actions": {
+                "cancel": "Abbrechen",
+                "restart": "Neustarten",
+                "canceled": "Dieser Schritt wurde abgebrochen.",
+                "cancel_success": "Pipeline abgebrochen",
+                "restart_success": "Pipeline neu gestartet",
+                "log_download": "Herunterladen"
+            },
+            "protected": {
+                "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
+                "approve": "Genehmigen",
+                "decline": "Ablehnen",
+                "declined": "Diese Pipeline ist abgelehnt worden!",
+                "approve_success": "Pipeline genehmigt",
+                "decline_success": "Pipeline abgelehnt"
+            },
+            "event": {
+                "push": "Push",
+                "tag": "Tag",
+                "pr": "Pull Request",
+                "deploy": "Deploy"
+            },
+            "log_download_error": "Beim Herunterladen der Logdatei ist ein Fehler aufgetreten."
+        }
+    },
+    "user": {
+        "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
+        "internal_error": "Ein interner Fehler ist aufgetreten",
+        "access_denied": "Du bist nicht berechtigt, dich anzumelden",
+        "token": "Dein persönlicher Token",
+        "shell_setup": "Kommandozeilen-Einrichtung",
+        "api_usage": "Beispiel für die API-Nutzung",
+        "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
+        "dl_cli": "Download Kommando-Zeilen-Tool",
+        "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus"
+    },
+    "org": {
+        "settings": {
+            "secrets": {
+                "none": "Es existieren noch keine Organisations Secrets.",
+                "deleted": "Organisations Secret gelöscht",
+                "images": {
+                    "desc": "Komma getrennte Liste aller Images, für die dieses Secret verwendet werden kann. Freilassen, um alle Images zu erlauben",
+                    "images": "Verfügbar für die folgenden Images"
+                },
+                "secrets": "Secrets",
+                "add": "Secret hinzufügen",
+                "save": "Secret speichern",
+                "show": "Secrets anzeigen",
+                "name": "Name",
+                "value": "Wert",
+                "created": "Organisations Secret erstellt",
+                "saved": "Organisations Secret gespeichert",
+                "events": {
+                    "events": "Verfügbar für folgende Events",
+                    "pr_warning": "Bitte sei vorsichtig"
+                }
+            },
+            "settings": "Einstellungen",
+            "not_allowed": "Du bist nicht berechtigt auf die Einstellungen dieser Organsitation zuzugreifen."
+        }
+    },
+    "admin": {
+        "settings": {
+            "secrets": {
+                "events": {
+                    "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Secrets zu erhalten",
+                    "events": "Verfügbar für folgende Events"
+                },
+                "name": "Name",
+                "value": "Wert",
+                "images": {
+                    "desc": "Komma getrennte Liste aller Images, für die dieses Secret verwendet werden kann. Freilassen, um alle Images zu erlauben",
+                    "images": "Verfügbar für folgende Images"
+                },
+                "saved": "Globales Secret gespeichert",
+                "created": "Globales Secret erstellt",
+                "deleted": "Globales Secret gelöscht",
+                "show": "Secrets anzeigen",
+                "save": "Secret speichern",
+                "add": "Secret hinzufügen",
+                "none": "Es gibt noch keine globalen Secrets.",
+                "warning": "Diese Secrets können von allen Nutzern des Server eingesehen werden.",
+                "secrets": "Secrets"
+            },
+            "not_allowed": "Du bist nicht berechtigt auf die Server Einstellungen zuzugreifen.",
+            "settings": "Einstellungen"
+        }
     }
-  },
-
-  "user": {
-    "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "internal_error": "Ein interner Fehler ist aufgetreten",
-    "access_denied": "Du bist nicht berechtigt, dich anzumelden",
-    "token": "Dein persönlicher Token",
-    "shell_setup": "Kommandozeilen-Einrichtung",
-    "api_usage": "Beispiel für die API-Nutzung",
-    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
-    "dl_cli": "Download Kommando-Zeilen-Tool",
-    "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus"
-  }
 }
