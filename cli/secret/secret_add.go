@@ -1,7 +1,7 @@
 package secret
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -64,9 +64,9 @@ func secretCreate(c *cli.Context) error {
 	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
-		out, ferr := ioutil.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		secret.Value = string(out)
 	}
