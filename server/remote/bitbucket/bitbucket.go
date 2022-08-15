@@ -301,6 +301,16 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	return parseHook(req)
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	perm, err := c.newClient(ctx, u).GetUserWorkspaceMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
+}
+
 // helper function to return the bitbucket oauth2 client
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
 	if u == nil {

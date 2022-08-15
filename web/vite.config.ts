@@ -6,6 +6,7 @@ import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 
@@ -36,6 +37,9 @@ export default defineConfig({
       resolvers: IconsResolver(),
     }),
     woodpeckerInfoPlugin(),
+    prismjs({
+      languages: ['yaml'],
+    }),
   ],
   resolve: {
     alias: {

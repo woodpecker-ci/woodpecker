@@ -126,12 +126,6 @@ module.exports = {
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
-    algolia: {
-      appId: 'BH4D9OD16A',
-      apiKey: '148f85e216b68d20ffa49d46a2b89d0e',
-      indexName: 'woodpecker-ci',
-      debug: false, // Set debug to true if you want to inspect the modal
-    },
     tableOfContents: {
       minHeadingLevel: 2,
       maxHeadingLevel: 4,
@@ -164,7 +158,15 @@ module.exports = {
       },
     }),
   ],
-  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
+  themes: [
+    path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+      },
+    ],
+  ],
   presets: [
     [
       '@docusaurus/preset-classic',

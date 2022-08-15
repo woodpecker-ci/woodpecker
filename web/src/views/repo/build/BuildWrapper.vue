@@ -5,16 +5,7 @@
         <IconButton icon="back" class="flex-shrink-0" @click="goBack" />
 
         <h1
-          class="
-            order-3
-            w-full
-            <md:flex-wrap
-            md:order-none md:w-auto md:ml-2
-            flex
-            text-center text-xl text-color
-            whitespace-nowrap
-            overflow-hidden overflow-ellipsis
-          "
+          class="order-3 w-full <md:flex-wrap md:order-none md:w-auto md:ml-2 flex text-center text-xl text-color whitespace-nowrap overflow-hidden overflow-ellipsis"
         >
           <span class="w-full md:w-auto text-center">{{ $t('repo.build.pipeline', { buildId }) }}</span>
           <span class="<md:hidden mx-2">-</span>
