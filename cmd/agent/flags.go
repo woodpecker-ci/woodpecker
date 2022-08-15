@@ -119,8 +119,8 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
 		Name:    "backend-k8s-volume-size",
-		Usage:   "backend k8s volume size (default 10GiB)",
-		Value:   "10GiB",
+		Usage:   "backend k8s volume size (default 10G)",
+		Value:   "10G",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
