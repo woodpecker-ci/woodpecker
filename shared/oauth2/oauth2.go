@@ -33,7 +33,6 @@
 //		// ...
 //		// btw, r.FormValue("state") == "foo"
 //	}
-//
 package oauth2
 
 import (

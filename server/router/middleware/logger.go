@@ -13,8 +13,8 @@ import (
 // Requests without errors are logged using log.Info().
 //
 // It receives:
-//   1. A time package format string (e.g. time.RFC3339).
-//   2. A boolean stating whether to use UTC time zone or local.
+//  1. A time package format string (e.g. time.RFC3339).
+//  2. A boolean stating whether to use UTC time zone or local.
 func Logger(timeFormat string, utc bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
