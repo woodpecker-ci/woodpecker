@@ -128,10 +128,14 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		if len(c.defaultCloneImage) > 0 {
 			cloneImage = c.defaultCloneImage
 		}
+		cloneSettings := map[string]interface{}{"depth": "0"}
+		if c.metadata.Curr.Event == frontend.EventTag {
+			cloneSettings["tags"] = "true"
+		}
 		container := &yaml.Container{
 			Name:        defaultCloneName,
 			Image:       cloneImage,
-			Settings:    map[string]interface{}{"depth": "0"},
+			Settings:    cloneSettings,
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
