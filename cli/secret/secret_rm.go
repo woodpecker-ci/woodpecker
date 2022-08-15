@@ -1,8 +1,6 @@
 package secret
 
 import (
-	"strings"
-
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
@@ -35,30 +33,23 @@ var secretDeleteCmd = &cli.Command{
 }
 
 func secretDelete(c *cli.Context) error {
-	var (
-		secretName = c.String("name")
-		orgName    = c.String("organization")
-		repoName   = c.String("repository")
-	)
+	secretName := c.String("name")
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	if c.Bool("global") {
-		return client.GlobalSecretDelete(secretName)
-	}
-	if orgName == "" && repoName == "" {
-		repoName = c.Args().First()
-	}
-	if orgName == "" && !strings.Contains(repoName, "/") {
-		orgName = repoName
-	}
-	if orgName != "" {
-		return client.OrgSecretDelete(orgName, secretName)
-	}
-	owner, name, err := internal.ParseRepo(repoName)
+
+	global, owner, repo, err := parseTargetArgs(c)
 	if err != nil {
 		return err
 	}
-	return client.SecretDelete(owner, name, secretName)
+
+	if global {
+		return client.GlobalSecretDelete(secretName)
+	}
+	if repo == "" {
+		return client.OrgSecretDelete(owner, secretName)
+	}
+	return client.SecretDelete(owner, repo, secretName)
 }

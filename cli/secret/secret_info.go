@@ -3,7 +3,6 @@ package secret
 import (
 	"html/template"
 	"os"
-	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -41,8 +40,6 @@ var secretInfoCmd = &cli.Command{
 func secretInfo(c *cli.Context) error {
 	var (
 		secretName = c.String("name")
-		orgName    = c.String("organization")
-		repoName   = c.String("repository")
 		format     = c.String("format") + "\n"
 	)
 	client, err := internal.NewClient(c)
@@ -50,33 +47,26 @@ func secretInfo(c *cli.Context) error {
 		return err
 	}
 
+	global, owner, repo, err := parseTargetArgs(c)
+	if err != nil {
+		return err
+	}
+
 	var secret *woodpecker.Secret
-	if c.Bool("global") {
+	if global {
 		secret, err = client.GlobalSecret(secretName)
 		if err != nil {
 			return err
 		}
+	} else if repo == "" {
+		secret, err = client.OrgSecret(owner, secretName)
+		if err != nil {
+			return err
+		}
 	} else {
-		if orgName == "" && repoName == "" {
-			repoName = c.Args().First()
-		}
-		if orgName == "" && !strings.Contains(repoName, "/") {
-			orgName = repoName
-		}
-		if orgName != "" {
-			secret, err = client.OrgSecret(orgName, secretName)
-			if err != nil {
-				return err
-			}
-		} else {
-			owner, name, err := internal.ParseRepo(repoName)
-			if err != nil {
-				return err
-			}
-			secret, err = client.Secret(owner, name, secretName)
-			if err != nil {
-				return err
-			}
+		secret, err = client.Secret(owner, repo, secretName)
+		if err != nil {
+			return err
 		}
 	}
 

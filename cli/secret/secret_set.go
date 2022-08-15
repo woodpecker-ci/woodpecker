@@ -67,28 +67,20 @@ func secretUpdate(c *cli.Context) error {
 		}
 		secret.Value = string(out)
 	}
-	if c.Bool("global") {
-		_, err = client.GlobalSecretUpdate(secret)
-		return err
-	}
 
-	orgName := c.String("organization")
-	repoName := c.String("repository")
-	if orgName == "" && repoName == "" {
-		repoName = c.Args().First()
-	}
-	if orgName == "" && !strings.Contains(repoName, "/") {
-		orgName = repoName
-	}
-	if orgName != "" {
-		_, err = client.OrgSecretUpdate(orgName, secret)
-		return err
-	}
-
-	owner, name, err := internal.ParseRepo(repoName)
+	global, owner, repo, err := parseTargetArgs(c)
 	if err != nil {
 		return err
 	}
-	_, err = client.SecretUpdate(owner, name, secret)
+
+	if global {
+		_, err = client.GlobalSecretUpdate(secret)
+		return err
+	}
+	if repo == "" {
+		_, err = client.OrgSecretUpdate(owner, secret)
+		return err
+	}
+	_, err = client.SecretUpdate(owner, repo, secret)
 	return err
 }

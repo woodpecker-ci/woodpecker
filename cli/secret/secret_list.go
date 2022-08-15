@@ -35,42 +35,33 @@ var secretListCmd = &cli.Command{
 }
 
 func secretList(c *cli.Context) error {
-	var (
-		format   = c.String("format") + "\n"
-		orgName  = c.String("organization")
-		repoName = c.String("repository")
-	)
+	format := c.String("format") + "\n"
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+
+	global, owner, repo, err := parseTargetArgs(c)
+	if err != nil {
+		return err
+	}
+
 	var list []*woodpecker.Secret
-	if c.Bool("global") {
+	if global {
 		list, err = client.GlobalSecretList()
 		if err != nil {
 			return err
 		}
+	} else if repo == "" {
+		list, err = client.OrgSecretList(owner)
+		if err != nil {
+			return err
+		}
 	} else {
-		if orgName == "" && repoName == "" {
-			repoName = c.Args().First()
-		}
-		if orgName == "" && !strings.Contains(repoName, "/") {
-			orgName = repoName
-		}
-		if orgName != "" {
-			list, err = client.OrgSecretList(orgName)
-			if err != nil {
-				return err
-			}
-		} else {
-			owner, name, err := internal.ParseRepo(repoName)
-			if err != nil {
-				return err
-			}
-			list, err = client.SecretList(owner, name)
-			if err != nil {
-				return err
-			}
+		list, err = client.SecretList(owner, repo)
+		if err != nil {
+			return err
 		}
 	}
 
