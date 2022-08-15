@@ -34,6 +34,7 @@ var migrationTasks = []*task{
 	&alterTableReposDropCounter,
 	&dropSenders,
 	&alterTableLogUpdateColumnLogDataType,
+	&alterTableSecretsAddUserCol,
 }
 
 var allBeans = []interface{}{

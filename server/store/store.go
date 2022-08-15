@@ -118,10 +118,14 @@ type Store interface {
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool) ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	OrgSecretFind(string, string) (*model.Secret, error)
+	OrgSecretList(string) ([]*model.Secret, error)
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList() ([]*model.Secret, error)
 
 	// Registrys
 	RegistryFind(*model.Repo, string) (*model.Registry, error)

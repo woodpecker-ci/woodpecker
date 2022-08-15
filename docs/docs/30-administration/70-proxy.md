@@ -1,6 +1,7 @@
 # Proxy
 
 ## Apache
+
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 webserver. This is an example configuration:
 
 ```nohighlight
@@ -85,12 +86,21 @@ This guide provides a brief overview for installing Woodpecker server behind the
 woodpecker.example.com {
   reverse_proxy woodpecker-server:8000
 }
+
+woodpeckeragent.example.com {
+  reverse_proxy h2c://woodpecker-server:9000
+}
 ```
+
+:::note
+Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [WOODPECKER_GRPC_SECURE](/docs/administration/agent-config#woodpecker_grpc_secure).
+:::
 
 ## Ngrok
+
 After installing [ngrok](https://ngrok.com/), open a new console and run:
 
-```
+```bash
 ngrok http 8000
 ```
 

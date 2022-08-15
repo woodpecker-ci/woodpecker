@@ -43,6 +43,21 @@ func apiRoutes(e *gin.Engine) {
 		users.DELETE("/:login", api.DeleteUser)
 	}
 
+	orgBase := e.Group("/api/orgs/:owner")
+	{
+		orgBase.GET("/permissions", api.GetOrgPermissions)
+
+		org := orgBase.Group("")
+		{
+			org.Use(session.MustOrgMember(true))
+			org.GET("/secrets", api.GetOrgSecretList)
+			org.POST("/secrets", api.PostOrgSecret)
+			org.GET("/secrets/:secret", api.GetOrgSecret)
+			org.PATCH("/secrets/:secret", api.PatchOrgSecret)
+			org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+		}
+	}
+
 	repoBase := e.Group("/api/repos/:owner/:name")
 	{
 		repoBase.Use(session.SetRepo())
@@ -121,6 +136,16 @@ func apiRoutes(e *gin.Engine) {
 		queue.GET("/pause", api.PauseQueue)
 		queue.GET("/resume", api.ResumeQueue)
 		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
+	}
+
+	secrets := e.Group("/api/secrets")
+	{
+		secrets.Use(session.MustAdmin())
+		secrets.GET("", api.GetGlobalSecretList)
+		secrets.POST("", api.PostGlobalSecret)
+		secrets.GET("/:secret", api.GetGlobalSecret)
+		secrets.PATCH("/:secret", api.PatchGlobalSecret)
+		secrets.DELETE("/:secret", api.DeleteGlobalSecret)
 	}
 
 	debugger := e.Group("/api/debug")

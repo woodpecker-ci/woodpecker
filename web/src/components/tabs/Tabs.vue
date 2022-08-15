@@ -4,18 +4,7 @@
       <div
         v-for="tab in tabs"
         :key="tab.id"
-        class="
-          w-full
-          py-2
-          md:w-auto md:pt-0 md:pb-2 md:px-8
-          flex
-          cursor-pointer
-          md:border-b-2
-          text-color
-          hover:text-gray-700
-          dark:hover:text-gray-400
-          items-center
-        "
+        class="w-full py-2 md:w-auto md:pt-0 md:pb-2 md:px-8 flex cursor-pointer md:border-b-2 text-color hover:text-gray-700 dark:hover:text-gray-400 items-center"
         :class="{
           'border-gray-400 dark:border-gray-600': activeTab === tab.id,
           'border-transparent': activeTab !== tab.id,

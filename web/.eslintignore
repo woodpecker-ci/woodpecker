@@ -5,3 +5,4 @@ package.json
 tsconfig.eslint.json
 tsconfig.json
 src/assets/locales/
+components.d.ts

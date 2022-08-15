@@ -1,18 +1,6 @@
 <template>
   <div
-    class="
-      flex
-      rounded-full
-      w-8
-      h-8
-      bg-opacity-30
-      hover:bg-opacity-50
-      bg-white
-      items-center
-      justify-center
-      cursor-pointer
-      text-white
-    "
+    class="flex rounded-full w-8 h-8 bg-opacity-30 hover:bg-opacity-50 bg-white items-center justify-center cursor-pointer text-white"
     :class="{
       spinner: activeBuilds.length !== 0,
     }"
