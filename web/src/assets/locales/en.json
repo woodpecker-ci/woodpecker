@@ -31,7 +31,7 @@
     "branches": "Branches",
     "add": "Add repository",
     "user_none": "This organization / user does not have any projects yet.",
-    "not_allowed": "Not allowed to access this repository",
+    "not_allowed": "You are not allowed to access this repository",
 
     "enable": {
       "reload": "Reload repositories",
@@ -43,7 +43,7 @@
 
     "settings": {
       "settings": "Settings",
-      "not_allowed": "Not allowed to access this repository's settings",
+      "not_allowed": "You are not allowed to access this repository's settings",
 
       "general": {
         "general": "General",
@@ -178,13 +178,15 @@
       "exit_code": "exit code {exitCode}",
       "loading": "Loading ...",
       "pipeline": "Pipeline #{buildId}",
+      "log_download_error": "There was an error while downloading the log file",
 
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
         "canceled": "This step has been canceled.",
         "cancel_success": "Pipeline canceled",
-        "restart_success": "Pipeline restarted"
+        "restart_success": "Pipeline restarted",
+        "log_download": "Download"
       },
       "protected": {
         "awaits": "This pipeline is awaiting approval by some maintainer!",
@@ -199,6 +201,67 @@
         "tag": "Tag",
         "pr": "Pull Request",
         "deploy": "Deploy"
+      }
+    }
+  },
+
+  "org": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "You are not allowed to access this organization's settings",
+
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no organization secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Organization secret deleted",
+        "created": "Organization secret created",
+        "saved": "Organization secret saved",
+
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
+      }
+    }
+  },
+
+  "admin": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "You are not allowed to access server settings",
+
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
+        "warning": "These secrets will be available for all server users.",
+        "none": "There are no global secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Global secret deleted",
+        "created": "Global secret created",
+        "saved": "Global secret saved",
+
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
       }
     }
   },

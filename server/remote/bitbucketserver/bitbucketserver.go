@@ -72,11 +72,11 @@ func New(opts Opts) (remote.Remote, error) {
 
 	switch {
 	case opts.Username == "":
-		return nil, fmt.Errorf("must have a git machine account username")
+		return nil, fmt.Errorf("Must have a git machine account username")
 	case opts.Password == "":
-		return nil, fmt.Errorf("must have a git machine account password")
+		return nil, fmt.Errorf("Must have a git machine account password")
 	case opts.ConsumerKey == "":
-		return nil, fmt.Errorf("must have a oauth1 consumer key")
+		return nil, fmt.Errorf("Must have a oauth1 consumer key")
 	}
 
 	if opts.ConsumerRSA == "" && opts.ConsumerRSAString == "" {
@@ -137,7 +137,7 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 // Auth is not supported by the Stash driver.
 func (*Config) Auth(ctx context.Context, token, secret string) (string, error) {
-	return "", fmt.Errorf("not implemented")
+	return "", fmt.Errorf("Not Implemented")
 }
 
 // Teams is not supported by the Stash driver.
@@ -185,7 +185,7 @@ func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the bitbucketserver driver.
@@ -245,14 +245,21 @@ func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return parseHook(r, c.URL)
 }
 
-func CreateConsumer(url, consumerKey string, privateKey *rsa.PrivateKey) *oauth.Consumer {
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not implemented currently
+	return nil, nil
+}
+
+func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
-		consumerKey,
-		privateKey,
+		ConsumerKey,
+		PrivateKey,
 		oauth.ServiceProvider{
-			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, url),
-			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, url),
-			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, url),
+			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, URL),
+			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, URL),
+			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, URL),
 			HttpMethod:        "POST",
 		})
 	consumer.HttpClient = &http.Client{

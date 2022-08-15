@@ -2,3 +2,4 @@ yarn-lock.yaml
 dist
 coverage/
 LICENSE
+components.d.ts

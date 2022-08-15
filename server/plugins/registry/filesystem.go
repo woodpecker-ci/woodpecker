@@ -40,6 +40,13 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 		return nil, err
 	}
 
+	for registryHostname := range configFile.CredentialHelpers {
+		newAuth, err := configFile.GetAuthConfig(registryHostname)
+		if err == nil {
+			configFile.AuthConfigs[registryHostname] = newAuth
+		}
+	}
+
 	for addr, ac := range configFile.AuthConfigs {
 		if ac.Auth != "" {
 			ac.Username, ac.Password, err = decodeAuth(ac.Auth)

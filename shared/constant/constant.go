@@ -23,6 +23,5 @@ var PrivilegedPlugins = []string{
 }
 
 const (
-	DefaultCloneImage    = "docker.io/woodpeckerci/plugin-git:latest"
-	WoodpeckerSourceCode = "https://github.com/woodpecker-ci/woodpecker"
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.3.0"
 )

@@ -290,6 +290,25 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return parseHook(r)
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(u.Token)
+
+	orgs, err := client.ListMyOrgs()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, org := range orgs {
+		if org.UserName == owner {
+			// TODO: API does not support checking if user is admin/owner of org
+			return &model.OrgPerm{Member: true}, nil
+		}
+	}
+	return &model.OrgPerm{}, nil
+}
+
 // helper function to return the Gogs client
 func (c *client) newClient() *gogs.Client {
 	return c.newClientToken("")

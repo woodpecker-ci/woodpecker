@@ -111,3 +111,13 @@ pipeline:
       - echo "test"
     when:
       repo: test/test
+
+  when-multi:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      - event: pull_request
+        repo: test/test
+      - event: push
+        branch: main

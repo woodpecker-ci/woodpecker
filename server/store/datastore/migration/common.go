@@ -212,6 +212,42 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 	return nil
 }
 
+func alterColumnDefault(sess *xorm.Session, table, column, defValue string) error {
+	dialect := sess.Engine().Dialect().URI().DBType
+	switch dialect {
+	case schemas.MYSQL:
+		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
+		return err
+	case schemas.POSTGRES:
+		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
+		return err
+	case schemas.SQLITE:
+		return nil
+	default:
+		return fmt.Errorf("dialect '%s' not supported", dialect)
+	}
+}
+
+func alterColumnNull(sess *xorm.Session, table, column string, null bool) error {
+	val := "NULL"
+	if !null {
+		val = "NOT NULL"
+	}
+	dialect := sess.Engine().Dialect().URI().DBType
+	switch dialect {
+	case schemas.MYSQL:
+		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET %s;", table, column, val))
+		return err
+	case schemas.POSTGRES:
+		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET %s;", table, column, val))
+		return err
+	case schemas.SQLITE:
+		return nil
+	default:
+		return fmt.Errorf("dialect '%s' not supported", dialect)
+	}
+}
+
 var (
 	whitespaces     = regexp.MustCompile(`\s+`)
 	columnSeparator = regexp.MustCompile(`\s?,\s?`)

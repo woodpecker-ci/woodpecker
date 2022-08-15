@@ -1,7 +1,7 @@
 <template>
   <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-color justify-between !pt-0">
     <Panel v-for="buildConfig in buildConfigs" :key="buildConfig.hash" :title="buildConfig.name">
-      <span class="font-mono whitespace-pre">{{ buildConfig.data }}</span>
+      <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="buildConfig.data" />
     </Panel>
   </FluidContainer>
 </template>
@@ -9,6 +9,7 @@
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
 
+import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -20,6 +21,7 @@ export default defineComponent({
   components: {
     FluidContainer,
     Panel,
+    SyntaxHighlight,
   },
 
   setup() {

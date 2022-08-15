@@ -3,6 +3,8 @@ package matrix
 import (
 	"strings"
 
+	pipeline "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -99,8 +101,10 @@ func parse(raw []byte) (Matrix, error) {
 	data := struct {
 		Matrix map[string][]string
 	}{}
-	err := yaml.Unmarshal(raw, &data)
-	return data.Matrix, err
+	if err := yaml.Unmarshal(raw, &data); err != nil {
+		return nil, &pipeline.PipelineParseError{Err: err}
+	}
+	return data.Matrix, nil
 }
 
 func parseList(raw []byte) ([]Axis, error) {
@@ -110,6 +114,8 @@ func parseList(raw []byte) ([]Axis, error) {
 		}
 	}{}
 
-	err := yaml.Unmarshal(raw, &data)
-	return data.Matrix.Include, err
+	if err := yaml.Unmarshal(raw, &data); err != nil {
+		return nil, &pipeline.PipelineParseError{Err: err}
+	}
+	return data.Matrix.Include, nil
 }
