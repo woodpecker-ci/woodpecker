@@ -23,7 +23,7 @@ var secretCreateCmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "organization",
-			Usage: "organizations name (e.g. octocat)",
+			Usage: "organization name (e.g. octocat)",
 		},
 		&cli.StringFlag{
 			Name:  "repository",
