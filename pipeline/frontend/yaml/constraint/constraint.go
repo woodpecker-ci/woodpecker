@@ -97,32 +97,24 @@ func (when *When) IsLocal() bool {
 }
 
 func (when *When) UnmarshalYAML(value *yaml.Node) error {
-	unmarshelAsList := func() error {
-		lst := []Constraint{}
-		err := value.Decode(&lst)
-		if err != nil {
+	switch value.Kind {
+	case yaml.SequenceNode:
+		if err := value.Decode(&when.Constraints); err != nil {
 			return err
 		}
-		when.Constraints = lst
-		return nil
-	}
 
-	unmarshelAsDict := func() error {
+	case yaml.MappingNode:
 		c := Constraint{}
-		err := value.Decode(&c)
-		if err != nil {
+		if err := value.Decode(&c); err != nil {
 			return err
 		}
 		when.Constraints = append(when.Constraints, c)
-		return nil
+
+	default:
+		return fmt.Errorf("not supported yaml kind: %v", value.Kind)
 	}
 
-	err := unmarshelAsList()
-	if err != nil {
-		err = unmarshelAsDict()
-	}
-
-	return err
+	return nil
 }
 
 // Match returns true if all constraints match the given input. If a single
