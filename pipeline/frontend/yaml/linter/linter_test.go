@@ -66,74 +66,74 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing pipeline section",
+			want: "invalid or missing pipeline section",
 		},
 		{
 			from: "pipeline: { build: { image: '' }  }",
-			want: "Invalid or missing image",
+			want: "invalid or missing image",
 		},
 		{
 			from: "pipeline: { build: { image: golang, privileged: true }  }",
-			want: "Insufficient privileges to use privileged mode",
+			want: "insufficient privileges to use privileged mode",
 		},
 		{
 			from: "pipeline: { build: { image: golang, shm_size: 10gb }  }",
-			want: "Insufficient privileges to override shm_size",
+			want: "insufficient privileges to override shm_size",
 		},
 		{
 			from: "pipeline: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
-			want: "Insufficient privileges to use custom dns",
+			want: "insufficient privileges to use custom dns",
 		},
 
 		{
 			from: "pipeline: { build: { image: golang, dns_search: [ example.com ] }  }",
-			want: "Insufficient privileges to use dns_search",
+			want: "insufficient privileges to use dns_search",
 		},
 		{
 			from: "pipeline: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
-			want: "Insufficient privileges to use devices",
+			want: "insufficient privileges to use devices",
 		},
 		{
 			from: "pipeline: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
-			want: "Insufficient privileges to use extra_hosts",
+			want: "insufficient privileges to use extra_hosts",
 		},
 		{
 			from: "pipeline: { build: { image: golang, network_mode: host }  }",
-			want: "Insufficient privileges to use network_mode",
+			want: "insufficient privileges to use network_mode",
 		},
 		{
 			from: "pipeline: { build: { image: golang, networks: [ outside, default ] }  }",
-			want: "Insufficient privileges to use networks",
+			want: "insufficient privileges to use networks",
 		},
 		{
 			from: "pipeline: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
-			want: "Insufficient privileges to use volumes",
+			want: "insufficient privileges to use volumes",
 		},
 		{
 			from: "pipeline: { build: { image: golang, network_mode: 'container:name' }  }",
-			want: "Insufficient privileges to use network_mode",
+			want: "insufficient privileges to use network_mode",
 		},
 		{
 			from: "pipeline: { build: { image: golang, sysctls: [ net.core.somaxconn=1024 ] }  }",
-			want: "Insufficient privileges to use sysctls",
+			want: "insufficient privileges to use sysctls",
 		},
 		// cannot override entypoint, command for script steps
 		{
 			from: "pipeline: { build: { image: golang, commands: [ 'go build' ], entrypoint: [ '/bin/bash' ] } }",
-			want: "Cannot override container entrypoint",
+			want: "cannot override container entrypoint",
 		},
 		{
 			from: "pipeline: { build: { image: golang, commands: [ 'go build' ], command: [ '/bin/bash' ] } }",
-			want: "Cannot override container command",
+			want: "cannot override container command",
 		},
 		// cannot override entypoint, command for plugin steps
 		{
 			from: "pipeline: { publish: { image: plugins/docker, repo: foo/bar, entrypoint: [ '/bin/bash' ] } }",
-			want: "Cannot override container entrypoint",
+			want: "cannot override container entrypoint",
 		},
 		{
 			from: "pipeline: { publish: { image: plugins/docker, repo: foo/bar, command: [ '/bin/bash' ] } }",
-			want: "Cannot override container command",
+			want: "cannot override container command",
 		},
 	}
 
