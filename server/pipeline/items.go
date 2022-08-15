@@ -73,10 +73,11 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 	}
 	buildItems, err := b.Build()
 	if err != nil {
-		if _, err := shared.UpdateToStatusError(store, *build, err); err != nil {
+		build, uerr := shared.UpdateToStatusError(store, *build, err)
+		if uerr != nil {
 			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
 		}
-		return nil, nil, err
+		return build, nil, err
 	}
 
 	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)

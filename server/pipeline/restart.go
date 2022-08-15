@@ -16,14 +16,17 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -77,6 +80,13 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		return nil, fmt.Errorf(msg)
 	}
 
+	if len(configs) == 0 {
+		newBuild, uerr := shared.UpdateToStatusError(store, *newBuild, errors.New("pipeline definition not found"))
+		if uerr != nil {
+			log.Debug().Err(uerr).Msg("failure to update pipeline status")
+		}
+		return newBuild, nil
+	}
 	if err := persistBuildConfigs(store, configs, newBuild.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -85,6 +95,9 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 
 	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
+		if errors.Is(err, &yaml.PipelineParseError{}) {
+			return newBuild, nil
+		}
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
