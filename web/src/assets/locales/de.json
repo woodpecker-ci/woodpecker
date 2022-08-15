@@ -5,7 +5,7 @@
     "repositories": "Repositories",
     "docs": "Docs",
     "logout": "Abmelden",
-    "search": "Suche...",
+    "search": "Suche…",
     "username": "Benutzername",
     "password": "Passwort",
     "url": "URL",
@@ -156,7 +156,7 @@
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "pipelines_for": "Pipelines für den Branch \"{branch}\"",
             "exit_code": "Exit-Code {exitCode}",
-            "loading": "Laden ...",
+            "loading": "Laden…",
             "pipeline": "Pipeline #{buildId}",
             "actions": {
                 "cancel": "Abbrechen",
@@ -214,7 +214,8 @@
                 "events": {
                     "events": "Verfügbar für folgende Events",
                     "pr_warning": "Bitte sei vorsichtig"
-                }
+                },
+                "desc": "Organisationsecrets können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden."
             },
             "settings": "Einstellungen",
             "not_allowed": "Du bist nicht berechtigt auf die Einstellungen dieser Organsitation zuzugreifen."
@@ -241,7 +242,8 @@
                 "add": "Secret hinzufügen",
                 "none": "Es gibt noch keine globalen Secrets.",
                 "warning": "Diese Secrets können von allen Nutzern des Server eingesehen werden.",
-                "secrets": "Secrets"
+                "secrets": "Secrets",
+                "desc": "Globale Secrets können an alle Repositories als Umgebungsvariablen übergeben werden."
             },
             "not_allowed": "Du bist nicht berechtigt auf die Server Einstellungen zuzugreifen.",
             "settings": "Einstellungen"
