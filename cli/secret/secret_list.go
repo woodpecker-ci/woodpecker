@@ -9,14 +9,23 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[org/name|org]",
 	Action:    secretList,
 	Flags: append(common.GlobalFlags,
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
+		},
+		&cli.StringFlag{
+			Name:  "organization",
+			Usage: "organizations name (e.g. octocat)",
+		},
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -28,23 +37,43 @@ var secretListCmd = &cli.Command{
 func secretList(c *cli.Context) error {
 	var (
 		format   = c.String("format") + "\n"
-		reponame = c.String("repository")
+		orgName  = c.String("organization")
+		repoName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.SecretList(owner, name)
-	if err != nil {
-		return err
+	var list []*woodpecker.Secret
+	if c.Bool("global") {
+		list, err = client.GlobalSecretList()
+		if err != nil {
+			return err
+		}
+	} else {
+		if orgName == "" && repoName == "" {
+			repoName = c.Args().First()
+		}
+		if orgName == "" && !strings.Contains(repoName, "/") {
+			orgName = repoName
+		}
+		if orgName != "" {
+			list, err = client.OrgSecretList(orgName)
+			if err != nil {
+				return err
+			}
+		} else {
+			owner, name, err := internal.ParseRepo(repoName)
+			if err != nil {
+				return err
+			}
+			list, err = client.SecretList(owner, name)
+			if err != nil {
+				return err
+			}
+		}
 	}
+
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err

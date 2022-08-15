@@ -14,9 +14,17 @@ import (
 var secretUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a secret",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[org/repo|org]",
 	Action:    secretUpdate,
 	Flags: append(common.GlobalFlags,
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
+		},
+		&cli.StringFlag{
+			Name:  "organization",
+			Usage: "organizations name (e.g. octocat)",
+		},
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -41,14 +49,6 @@ var secretUpdateCmd = &cli.Command{
 }
 
 func secretUpdate(c *cli.Context) error {
-	reponame := c.String("repository")
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
@@ -66,6 +66,28 @@ func secretUpdate(c *cli.Context) error {
 			return ferr
 		}
 		secret.Value = string(out)
+	}
+	if c.Bool("global") {
+		_, err = client.GlobalSecretUpdate(secret)
+		return err
+	}
+
+	orgName := c.String("organization")
+	repoName := c.String("repository")
+	if orgName == "" && repoName == "" {
+		repoName = c.Args().First()
+	}
+	if orgName == "" && !strings.Contains(repoName, "/") {
+		orgName = repoName
+	}
+	if orgName != "" {
+		_, err = client.OrgSecretUpdate(orgName, secret)
+		return err
+	}
+
+	owner, name, err := internal.ParseRepo(repoName)
+	if err != nil {
+		return err
 	}
 	_, err = client.SecretUpdate(owner, name, secret)
 	return err
