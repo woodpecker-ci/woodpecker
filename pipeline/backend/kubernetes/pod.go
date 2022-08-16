@@ -135,38 +135,3 @@ func volumeMountPath(i string) string {
 	}
 	return s[0]
 }
-
-// func decodeScript(snapshots []*engine.Snapshot) ([]byte, error) {
-// 	var script bytes.Buffer
-
-// 	for _, snapshot := range snapshots {
-// 		if len(snapshot.Source) == 0 {
-// 			continue
-// 		}
-
-// 		du, err := dataurl.DecodeString(string(snapshot.Source))
-// 		if err != nil {
-// 			return nil, nil
-// 		}
-
-// 		tr := tar.NewReader(bytes.NewReader(du.Data))
-// 		for {
-// 			hdr, err := tr.Next()
-// 			if err == io.EOF {
-// 				break // End of archive
-// 			}
-// 			if err != nil {
-// 				return nil, err
-// 			}
-
-// 			if hdr.Name == "bin/_drone" {
-// 				if _, err := io.Copy(&script, tr); err != nil {
-// 					log.Println(err)
-// 					return nil, nil
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	return script.Bytes(), nil
-// }
