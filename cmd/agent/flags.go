@@ -114,7 +114,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
 		Name:    "backend-k8s-namespace",
 		Usage:   "backend k8s namespace",
-		Value:   "woodpecker-ci",
+		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
