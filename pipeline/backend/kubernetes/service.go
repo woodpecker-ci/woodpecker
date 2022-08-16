@@ -24,7 +24,7 @@ func Service(namespace, name, podName string, ports []string) (*v1.Service, erro
 
 	return &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      dnsName("dr-" + name),
+			Name:      dnsName(name),
 			Namespace: namespace,
 		},
 		Spec: v1.ServiceSpec{

@@ -11,7 +11,7 @@ func TestService(t *testing.T) {
 	expected := `
 	{
 	  "metadata": {
-	    "name": "dr-bar",
+	    "name": "bar",
 	    "namespace": "foo",
 	    "creationTimestamp": null
 	  },
