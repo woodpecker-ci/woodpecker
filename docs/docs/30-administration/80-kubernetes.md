@@ -2,10 +2,10 @@
 
 Woodpecker does support Kubernetes as a backend.
 
-:::warning
-Kubernetes support is still experimental and not all pipeline features are working as fully supported yet.
+:::caution
+Kubernetes support is still experimental and not all pipeline features are fully supported yet.
 
-TODO: link issue
+Check the [current state](https://github.com/woodpecker-ci/woodpecker/issues/9#issuecomment-483979755)
 :::
 
 ## Deploy with HELM
@@ -16,11 +16,12 @@ Have a look at the `values.yaml` config files for all available settings.
 ### Preparation
 
 ```shell
-# create secrets
+# create agent secret
 kubectl create secret generic woodpecker-secret \
   --namespace <namespace> \
   --from-literal=WOODPECKER_AGENT_SECRET=$(openssl rand -hex 32)
 
+# add credentials for your forge
 kubectl create secret generic woodpecker-github-client \
   --namespace <namespace> \
   --from-literal=WOODPECKER_GITHUB_CLIENT=xxxxxxxx
