@@ -7,14 +7,20 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+env:
+  WOODPECKER_SERVER: "woodpecker-server.<namespace>.svc.cluster.local:9000"
+  WOODPCKER_BACKEND: kubernetes
+  WOODPECKER_BACKEND_K8S_NAMESPACE: woodpecker-ci
+  WOODPECKER_BACKEND_K8S_STORAGE_CLASS: ""
+  WOODPECKER_BACKEND_K8S_VOLUME_SIZE: 10G
+
+# Docker-in-Docker is normally not needed as Woodpecker natively supports Kubernetes
 dind:
+  enabled: false
   image: "docker:20.10.12-dind"
   env:
     DOCKER_DRIVER: "overlay2"
   resources: {}
-
-env:
-  WOODPECKER_SERVER: "woodpecker-server.<namespace>.svc.cluster.local:9000"
 
 extraSecretNamesForEnvFrom:
 - woodpecker-secret
