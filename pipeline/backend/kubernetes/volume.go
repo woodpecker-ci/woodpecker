@@ -8,10 +8,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func PersistentVolumeClaim(namespace, name, storageClass, size string) *v1.PersistentVolumeClaim {
+func PersistentVolumeClaim(namespace, name, storageClass, size string, rwo bool) *v1.PersistentVolumeClaim {
 	_storageClass := &storageClass
 	if storageClass == "" {
 		_storageClass = nil
+	}
+
+	var accessMode v1.PersistentVolumeAccessMode
+
+	if rwo {
+		accessMode = v1.ReadWriteOnce
+	} else {
+		accessMode = v1.ReadWriteMany
 	}
 
 	return &v1.PersistentVolumeClaim{
@@ -20,7 +28,7 @@ func PersistentVolumeClaim(namespace, name, storageClass, size string) *v1.Persi
 			Namespace: namespace,
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
-			AccessModes:      []v1.PersistentVolumeAccessMode{v1.ReadWriteMany},
+			AccessModes:      []v1.PersistentVolumeAccessMode{accessMode},
 			StorageClassName: _storageClass,
 			Resources: v1.ResourceRequirements{
 				Requests: v1.ResourceList{
