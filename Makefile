@@ -56,8 +56,8 @@ vendor:
 	go mod tidy
 	go mod vendor
 
-format:
-	@gofmt -s -w ${GOFILES_NOVENDOR}
+format: install-tools
+	@gofumpt -extra -w ${GOFILES_NOVENDOR}
 
 .PHONY: docs
 docs:
@@ -139,6 +139,9 @@ install-tools:
 	fi ; \
 	hash lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/rs/zerolog/cmd/lint@latest; \
+	fi ; \
+	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install mvdan.cc/gofumpt@latest; \
 	fi
 
 cross-compile-server:
