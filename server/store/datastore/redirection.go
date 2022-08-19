@@ -1,6 +1,9 @@
 package datastore
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import (
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/xorm"
+)
 
 func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
 	repo := new(model.Redirection)
@@ -9,7 +12,14 @@ func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
 
 func (s storage) CreateRedirection(redirect *model.Redirection) error {
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(redirect)
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.createRedirection(sess, redirect)
+}
+
+func (s storage) createRedirection(e *xorm.Session, redirect *model.Redirection) error {
+	// only Insert set auto created ID back to object
+	_, err := e.Insert(redirect)
 	return err
 }
 

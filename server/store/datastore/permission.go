@@ -51,7 +51,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 
 	// lookup repo based on name if possible
 	if perm.RepoID == 0 && len(perm.Repo) != 0 {
-		r, err := s.getRepoName(sess, perm.Repo)
+		r, err := s.getRepoNameFallback(sess, perm.RepoRemoteID, perm.Repo)
 		if err != nil {
 			return err
 		}

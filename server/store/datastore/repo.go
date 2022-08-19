@@ -28,14 +28,26 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 }
 
 func (s storage) GetRepoRemoteId(id string) (*model.Repo, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoRemoteId(sess, id)
+}
+
+func (s storage) getRepoRemoteId(e *xorm.Session, id string) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(s.engine.Where("remote_id = ?", id).Get(repo))
+	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
 }
 
 func (s storage) GetRepoNameFallback(remoteId string, fullName string) (*model.Repo, error) {
-	repo, err := s.GetRepoRemoteId(remoteId)
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoNameFallback(sess, remoteId, fullName)
+}
+
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteId string, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoRemoteId(e, remoteId)
 	if err == RecordNotExist {
-		return s.GetRepoName(fullName)
+		return s.getRepoName(e, fullName)
 	}
 	return repo, err
 }
@@ -159,14 +171,14 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		if exist {
 			if repos[i].FullName != repo.FullName {
 				// create redirection
-				err := s.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+				err := s.createRedirection(sess, &model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 				if err != nil {
 					return err
 				}
 			}
 			if _, err := sess.
 				Where("remote_id = ?", repos[i].RemoteID).
-				Cols("repo_owner", "repo_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+				Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
 				Update(repos[i]); err != nil {
 				return err
 			}
@@ -187,6 +199,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		if repos[i].Perm != nil {
 			repos[i].Perm.RepoID = repos[i].ID
 			repos[i].Perm.Repo = repos[i].FullName
+			repos[i].Perm.RepoRemoteID = repos[i].RemoteID
 			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}
