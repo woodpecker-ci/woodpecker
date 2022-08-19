@@ -18,7 +18,7 @@ func Init(c *cli.Context) {
 		docker.New(),
 		local.New(),
 		ssh.New(),
-		kubernetes.New(c.String("backend-k8s-namespace"), c.String("backend-k8s-storage-class"), c.String("backend-k8s-volume-size")),
+		kubernetes.New(c.String("backend-k8s-namespace"), c.String("backend-k8s-storage-class"), c.String("backend-k8s-volume-size"), c.Bool("backend-k8s-storage-rwx")),
 	}
 
 	engines = make(map[string]types.Engine)

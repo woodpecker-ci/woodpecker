@@ -8,7 +8,7 @@ import (
 )
 
 func TestPersistentVolumeClaim(t *testing.T) {
-	expected := `
+	expected_rwx := `
 	{
 	  "metadata": {
 	    "name": "someName",
@@ -29,8 +29,34 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	  "status": {}
 	}`
 
-	pvc := PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi")
+	expected_rwo := `
+	{
+	  "metadata": {
+	    "name": "someName",
+	    "namespace": "someNamespace",
+	    "creationTimestamp": null
+	  },
+	  "spec": {
+	    "accessModes": [
+	      "ReadWriteOnce"
+	    ],
+	    "resources": {
+	      "requests": {
+	        "storage": "1Gi"
+	      }
+	    },
+	    "storageClassName": "local-storage"
+	  },
+	  "status": {}
+	}`
+
+	pvc := PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", true)
 	j, err := json.Marshal(pvc)
 	assert.Nil(t, err)
-	assert.JSONEq(t, expected, string(j))
+	assert.JSONEq(t, expected_rwx, string(j))
+
+	pvc = PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", false)
+	j, err = json.Marshal(pvc)
+	assert.Nil(t, err)
+	assert.JSONEq(t, expected_rwo, string(j))
 }

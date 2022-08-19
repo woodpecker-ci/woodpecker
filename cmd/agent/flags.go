@@ -128,4 +128,10 @@ var flags = []cli.Flag{
 		Usage:   "backend k8s storage class",
 		Value:   "",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Name:    "backend-k8s-storage-rwx",
+		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
+		Value:   true,
+	},
 }
