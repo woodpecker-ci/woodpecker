@@ -33,7 +33,6 @@
 //		// ...
 //		// btw, r.FormValue("state") == "foo"
 //	}
-//
 package oauth2
 
 import (
@@ -179,10 +178,10 @@ func (t *Token) Expired() bool {
 // Transport implements http.RoundTripper. When configured with a valid
 // Config and Token it can be used to make authenticated HTTP requests.
 //
-//	t := &oauth.Transport{config}
-//      t.Exchange(code)
-//      // t now contains a valid Token
-//	r, _, err := t.Client().Get("http://example.org/url/requiring/auth")
+//		t := &oauth.Transport{config}
+//	     t.Exchange(code)
+//	     // t now contains a valid Token
+//		r, _, err := t.Client().Get("http://example.org/url/requiring/auth")
 //
 // It will automatically refresh the Token if it can,
 // updating the supplied Token in place.

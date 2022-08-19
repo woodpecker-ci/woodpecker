@@ -27,25 +27,25 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoRemoteId(id string) (*model.Repo, error) {
+func (s storage) GetRepoRemoteID(id string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoRemoteId(sess, id)
+	return s.getRepoRemoteID(sess, id)
 }
 
-func (s storage) getRepoRemoteId(e *xorm.Session, id string) (*model.Repo, error) {
+func (s storage) getRepoRemoteID(e *xorm.Session, id string) (*model.Repo, error) {
 	repo := new(model.Repo)
 	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(remoteId string, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(remoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoNameFallback(sess, remoteId, fullName)
+	return s.getRepoNameFallback(sess, remoteID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, remoteId string, fullName string) (*model.Repo, error) {
-	repo, err := s.getRepoRemoteId(e, remoteId)
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoRemoteID(e, remoteID)
 	if err == RecordNotExist {
 		return s.getRepoName(e, fullName)
 	}

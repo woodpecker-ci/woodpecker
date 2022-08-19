@@ -231,13 +231,13 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, id, owner, name string)
 			return nil, err
 		}
 		return toRepo(repo), nil
-	} else {
-		repo, _, err := client.GetRepo(owner, name)
-		if err != nil {
-			return nil, err
-		}
-		return toRepo(repo), nil
 	}
+
+	repo, _, err := client.GetRepo(owner, name)
+	if err != nil {
+		return nil, err
+	}
+	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gitea account, including

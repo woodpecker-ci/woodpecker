@@ -88,7 +88,7 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.Link).Equal(fakeRepo.Link)
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, 0, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -132,7 +132,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		RemoteID:     5,
+		RemoteID:     "5",
 		Owner:        "octocat",
 		Name:         "Hello-World",
 		FullName:     "octocat/Hello-World",

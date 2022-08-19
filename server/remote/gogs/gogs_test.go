@@ -95,7 +95,7 @@ func Test_gogs(t *testing.T) {
 				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, 0, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -182,7 +182,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		RemoteID: 5,
+		RemoteID: "5",
 		Clone:    "http://gogs.com/test_name/repo_name.git",
 		Owner:    "test_name",
 		Name:     "repo_name",

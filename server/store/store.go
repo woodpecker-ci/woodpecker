@@ -43,10 +43,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
-	// GetRepoRemoteId gets a repo by its remote ID.
-	GetRepoRemoteId(string) (*model.Repo, error)
+	// GetRepoRemoteID gets a repo by its remote ID.
+	GetRepoRemoteID(string) (*model.Repo, error)
 	// GetRepoNameFallback gets the repo by its remote ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(remoteId string, fullName string) (*model.Repo, error)
+	GetRepoNameFallback(remoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.

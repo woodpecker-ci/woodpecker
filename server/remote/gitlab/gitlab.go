@@ -208,20 +208,19 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, id, owner, name str
 
 	intID, err := strconv.ParseInt(id, 10, 64)
 	if intID > 0 && err == nil {
-		_repo, err := g.getProject(ctx, client, owner, name)
+		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
 
 		return g.convertGitlabRepo(_repo)
-	} else {
-		repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
-		if err != nil {
-			return nil, err
-		}
-
-		return g.convertGitlabRepo(repo)
 	}
+	_repo, err := g.getProject(ctx, client, owner, name)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.convertGitlabRepo(_repo)
 }
 
 // Repos fetches a list of repos from the remote system.

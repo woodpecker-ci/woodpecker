@@ -108,7 +108,7 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
@@ -119,7 +119,7 @@ func Test_coding(t *testing.T) {
 				g.Assert(repo.IsSCMPrivate).Equal(fakeRepo.IsSCMPrivate)
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})

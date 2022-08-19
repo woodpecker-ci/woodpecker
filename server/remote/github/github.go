@@ -168,18 +168,18 @@ func (c *client) Repo(ctx context.Context, u *model.User, id, owner, name string
 	client := c.newClientToken(ctx, u.Token)
 	intID, err := strconv.ParseInt(id, 10, 64)
 	if intID > 0 && err == nil {
-		repo, _, err := client.Repositories.Get(ctx, owner, name)
-		if err != nil {
-			return nil, err
-		}
-		return convertRepo(repo), nil
-	} else {
 		repo, _, err := client.Repositories.GetByID(ctx, intID)
 		if err != nil {
 			return nil, err
 		}
 		return convertRepo(repo), nil
 	}
+
+	repo, _, err := client.Repositories.Get(ctx, owner, name)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for GitHub account, including

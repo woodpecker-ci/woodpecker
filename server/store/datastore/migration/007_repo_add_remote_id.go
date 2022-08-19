@@ -28,7 +28,7 @@ func (RepoV007) TableName() string {
 	return "repos"
 }
 
-var alterTableReposAddRemoteIdCol = task{
+var alterTableReposAddRemoteIDCol = task{
 	name: "alter-table-repos-add-remote-id-col",
 	fn: func(sess *xorm.Session) error {
 		if err := sess.Sync2(new(RepoV007)); err != nil {
