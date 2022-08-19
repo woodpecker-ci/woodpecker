@@ -58,7 +58,7 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoName(sess, fullName)
 	if err == RecordNotExist {
 		// the repository does not exist, so look for a redirection
-		redirect, err := s.GetRedirection(fullName)
+		redirect, err := s.getRedirection(sess, fullName)
 		if err != nil {
 			return nil, err
 		}

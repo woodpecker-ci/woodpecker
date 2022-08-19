@@ -6,12 +6,17 @@ import (
 )
 
 func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRedirection(sess, fullName)
+}
+
+func (s storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
 	repo := new(model.Redirection)
-	return repo, wrapGet(s.engine.Where("repo_full_name = ?", fullName).Get(repo))
+	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).Get(repo))
 }
 
 func (s storage) CreateRedirection(redirect *model.Redirection) error {
-	// only Insert set auto created ID back to object
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.createRedirection(sess, redirect)
