@@ -96,7 +96,7 @@ type Store interface {
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	// Repositorys
+	// Repositories
 	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
