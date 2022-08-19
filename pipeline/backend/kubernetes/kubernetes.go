@@ -29,18 +29,18 @@ type kube struct {
 	namespace    string
 	storageClass string
 	volumeSize   string
-	rwo          bool
+	storageRwm          bool
 	client       kubernetes.Interface
 }
 
 // New returns a new Kubernetes Engine.
-func New(namespace, storageClass, volumeSize string, rwo bool) types.Engine {
+func New(namespace, storageClass, volumeSize string, storageRwm bool) types.Engine {
 	return &kube{
 		logs:         new(bytes.Buffer),
 		namespace:    namespace,
 		storageClass: storageClass,
 		volumeSize:   volumeSize,
-		rwo:          rwo,
+		storageRwm:          storageRwm,
 	}
 }
 
@@ -76,7 +76,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	e.logs.WriteString("Setting up Kubernetes primitives\n")
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.rwo)
+		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.storageRwm)
 		_, err := e.client.CoreV1().PersistentVolumeClaims(e.namespace).Create(ctx, pvc, metav1.CreateOptions{})
 		if err != nil {
 			return err
@@ -279,7 +279,7 @@ func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
 	}
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.rwo)
+		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.storageRwm)
 		err := e.client.CoreV1().PersistentVolumeClaims(e.namespace).Delete(ctx, pvc.Name, deleteOpts)
 		if err != nil {
 			return err
