@@ -8,7 +8,7 @@ import (
 )
 
 func TestPersistentVolumeClaim(t *testing.T) {
-	expected_rwx := `
+	expectedRwx := `
 	{
 	  "metadata": {
 	    "name": "someName",
@@ -29,7 +29,7 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	  "status": {}
 	}`
 
-	expected_rwo := `
+	expectedRwo := `
 	{
 	  "metadata": {
 	    "name": "someName",
@@ -53,10 +53,10 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	pvc := PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", true)
 	j, err := json.Marshal(pvc)
 	assert.Nil(t, err)
-	assert.JSONEq(t, expected_rwx, string(j))
+	assert.JSONEq(t, expectedRwx, string(j))
 
 	pvc = PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", false)
 	j, err = json.Marshal(pvc)
 	assert.Nil(t, err)
-	assert.JSONEq(t, expected_rwo, string(j))
+	assert.JSONEq(t, expectedRwo, string(j))
 }
