@@ -72,11 +72,10 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 	for _, repo := range repos {
 		if s.Match(repo) {
 			repo.Perm = &model.Perm{
-				UserID:       user.ID,
-				RepoID:       repo.ID,
-				Repo:         repo.FullName,
-				RepoRemoteID: repo.RemoteID,
-				Synced:       unix,
+				UserID: user.ID,
+				RepoID: repo.ID,
+				Repo:   repo,
+				Synced: unix,
 			}
 
 			// TODO(485) temporary workaround to not hit api rate limits

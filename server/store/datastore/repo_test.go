@@ -138,24 +138,27 @@ func TestRepoList(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName},
-		{UserID: user.ID, Repo: repo2.FullName},
+		{UserID: user.ID, Repo: repo1},
+		{UserID: user.ID, Repo: repo2},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -191,21 +194,25 @@ func TestOwnedRepoList(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 	}
 	repo4 := &model.Repo{
 		Owner:    "demo",
 		Name:     "demo",
 		FullName: "demo/demo",
+		RemoteID: "4",
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
@@ -213,10 +220,10 @@ func TestOwnedRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo4))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
-		{UserID: user.ID, Repo: repo3.FullName},
-		{UserID: user.ID, Repo: repo4.FullName},
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
+		{UserID: user.ID, Repo: repo3},
+		{UserID: user.ID, Repo: repo4},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
