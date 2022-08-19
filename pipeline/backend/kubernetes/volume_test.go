@@ -50,12 +50,12 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	  "status": {}
 	}`
 
-	pvc := PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", false)
+	pvc := PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", true)
 	j, err := json.Marshal(pvc)
 	assert.Nil(t, err)
 	assert.JSONEq(t, expected_rwx, string(j))
 
-	pvc = PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", true)
+	pvc = PersistentVolumeClaim("someNamespace", "someName", "local-storage", "1Gi", false)
 	j, err = json.Marshal(pvc)
 	assert.Nil(t, err)
 	assert.JSONEq(t, expected_rwo, string(j))
