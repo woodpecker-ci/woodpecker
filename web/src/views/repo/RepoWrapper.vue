@@ -100,12 +100,13 @@ async function loadRepo() {
     return;
   }
 
-  const fullName = await repoStore.loadRepo(repoOwner.value, repoName.value);
-  if (fullName !== `${repoOwner.value}/${repoName.value}`) {
+  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
+  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
     await router.replace({
       name: route.name ? route.name : 'repo',
-      params: { repoOwner: fullName.split('/')[0], repoName: fullName.split('/')[1] },
+      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
     });
+    return;
   }
   await buildStore.loadBuilds(repoOwner.value, repoName.value);
 }
