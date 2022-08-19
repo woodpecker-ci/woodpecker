@@ -91,7 +91,7 @@ async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
-    // no access and not authenticated, redirect to login
+    // no access and not authenticated, redirect to log in
     if (!isAuthenticated) {
       await router.replace({ name: 'login', query: { url: route.fullPath } });
       return;
@@ -100,7 +100,13 @@ async function loadRepo() {
     return;
   }
 
-  await repoStore.loadRepo(repoOwner.value, repoName.value);
+  const fullName = await repoStore.loadRepo(repoOwner.value, repoName.value);
+  if (fullName !== `${repoOwner.value}/${repoName.value}`) {
+    await router.replace({
+      name: route.name ? route.name : 'repo',
+      params: { repoOwner: fullName.split('/')[0], repoName: fullName.split('/')[1] },
+    });
+  }
   await buildStore.loadBuilds(repoOwner.value, repoName.value);
 }
 
