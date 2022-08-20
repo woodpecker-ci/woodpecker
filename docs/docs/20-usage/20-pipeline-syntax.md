@@ -520,7 +520,7 @@ For more details check the [services docs](/docs/usage/services/).
 The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
 
 ```txt
-/drone/src/github.com/octocat/hello-world
+/woodpecker/src/github.com/octocat/hello-world
 ```
 
 The workspace can be customized using the workspace block in the YAML file:
