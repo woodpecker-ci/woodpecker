@@ -9,9 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
@@ -23,6 +25,8 @@ import (
 	// To authenticate to GCP K8s clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
+
+var noContext = context.Background()
 
 type kube struct {
 	logs         *bytes.Buffer // TODO remove
@@ -243,7 +247,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 }
 
 // Destroy the pipeline environment.
-func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
+func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 	var gracePeriodSeconds int64 = 0 // immediately
 	dpb := metav1.DeletePropagationBackground
 
@@ -252,11 +256,19 @@ func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
 		PropagationPolicy:  &dpb,
 	}
 
+	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
+	// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+	// Trace log them in case the info could be useful when troubleshooting.
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			e.logs.WriteString("Deleting pod\n")
-			if err := e.client.CoreV1().Pods(e.namespace).Delete(ctx, podName(step), deleteOpts); err != nil {
-				return err
+			if err := e.client.CoreV1().Pods(e.namespace).Delete(noContext, podName(step), deleteOpts); err != nil {
+				if errors.IsNotFound(err) {
+					log.Trace().Err(err).Msgf("Unable to delete pod %s", podName(step))
+				} else {
+					return err
+				}
 			}
 		}
 	}
@@ -271,8 +283,12 @@ func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
 				if err != nil {
 					return err
 				}
-				if err := e.client.CoreV1().Services(e.namespace).Delete(ctx, svc.Name, deleteOpts); err != nil {
-					return err
+				if err := e.client.CoreV1().Services(e.namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
+					if errors.IsNotFound(err) {
+						log.Trace().Err(err).Msgf("Unable to service pod %s", svc.Name)
+					} else {
+						return err
+					}
 				}
 			}
 		}
@@ -280,9 +296,13 @@ func (e *kube) Destroy(ctx context.Context, conf *types.Config) error {
 
 	for _, vol := range conf.Volumes {
 		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.storageRwx)
-		err := e.client.CoreV1().PersistentVolumeClaims(e.namespace).Delete(ctx, pvc.Name, deleteOpts)
+		err := e.client.CoreV1().PersistentVolumeClaims(e.namespace).Delete(noContext, pvc.Name, deleteOpts)
 		if err != nil {
-			return err
+			if errors.IsNotFound(err) {
+				log.Trace().Err(err).Msgf("Unable to delete pvc %s", pvc.Name)
+			} else {
+				return err
+			}
 		}
 	}
 
