@@ -20,7 +20,7 @@ import (
 )
 
 type RepoV007 struct {
-	RemoteID string `json:"-"                               xorm:"UNIQUE 'remote_id'"`
+	RemoteID string `json:"-" xorm:"'remote_id'"`
 }
 
 // TableName return database table name for xorm
