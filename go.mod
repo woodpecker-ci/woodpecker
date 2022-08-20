@@ -42,8 +42,8 @@ require (
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v3 v3.0.1
-	xorm.io/builder v0.3.10
-	xorm.io/xorm v1.3.0
+	xorm.io/builder v0.3.12
+	xorm.io/xorm v1.3.1
 )
 
 require (

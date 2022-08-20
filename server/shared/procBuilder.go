@@ -89,6 +89,15 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
+			// add global environment variables for substituting
+			for k, v := range b.Envs {
+				if _, exists := environ[k]; exists {
+					// don't override existing values
+					continue
+				}
+				environ[k] = v
+			}
+
 			// substitute vars
 			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
@@ -98,14 +107,14 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			// parse yaml pipeline
 			parsed, err := yaml.ParseString(substituted)
 			if err != nil {
-				return nil, err
+				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
 			// lint pipeline
 			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
 			).Lint(parsed); err != nil {
-				return nil, err
+				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {

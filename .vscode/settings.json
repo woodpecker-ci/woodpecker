@@ -9,5 +9,10 @@
   "go.lintTool":"golangci-lint",
   "go.lintFlags": [
     "--fast"
-  ]
+  ],
+  "eslint.workingDirectories": [
+      "./web"
+  ],
+  "prettier.configPath": "./web/.prettierrc.js",
+  "prettier.ignorePath": "./web/.prettierignore"
 }

@@ -56,7 +56,7 @@ type (
 		Volumes       types.Volumes          `yaml:"volumes,omitempty"`
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
-		Constraints   constraint.Constraints `yaml:"when,omitempty"`
+		When          constraint.When        `yaml:"when,omitempty"`
 		Settings      map[string]interface{} `yaml:"settings"`
 	}
 )
