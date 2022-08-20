@@ -5,15 +5,17 @@
   "repositories": "Repositories",
   "docs": "Docs",
   "logout": "Logout",
-  "search": "Search…",
+  "search": "Search...",
   "username": "Username",
   "password": "Password",
   "url": "URL",
   "unknown_error": "An unknown error occurred",
+
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
     "back_home": "Back to home"
   },
+
   "time": {
     "tmpl": "MMM D, YYYY, HH:mm z",
     "weeks_short": "w",
@@ -23,12 +25,14 @@
     "sec_short": "sec",
     "not_started": "not started yet"
   },
+
   "repo": {
     "activity": "Activity",
     "branches": "Branches",
     "add": "Add repository",
     "user_none": "This organization / user does not have any projects yet.",
-    "not_allowed": "You are not allowed to access this repository",
+    "not_allowed": "Not allowed to access this repository",
+
     "enable": {
       "reload": "Reload repositories",
       "enable": "Enable",
@@ -36,23 +40,28 @@
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },
+
     "settings": {
       "settings": "Settings",
-      "not_allowed": "You are not allowed to access this repository's settings",
+      "not_allowed": "Not allowed to access this repository's settings",
+
       "general": {
         "general": "General",
         "project": "Project settings",
         "save": "Save settings",
         "success": "Repository settings updated",
+
         "pipeline_path": {
           "path": "Pipeline path",
           "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
           "desc": "Path to your pipeline config (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Folders should end with a <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>."
         },
+
         "allow_pr": {
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
         },
+
         "protected": {
           "protected": "Protected",
           "desc": "Every pipeline needs to be approved before being executed."
@@ -63,6 +72,7 @@
         },
         "visibility": {
           "visibility": "Project visibility",
+
           "public": {
             "public": "Public",
             "desc": "Every user can see your project without being logged in."
@@ -76,15 +86,18 @@
             "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
+
         "timeout": {
           "timeout": "Timeout",
           "minutes": "minutes"
         },
+
         "cancel_prev": {
           "cancel": "Cancel previous pipelines",
           "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
       },
+
       "secrets": {
         "secrets": "Secrets",
         "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
@@ -97,6 +110,7 @@
         "deleted": "Secret deleted",
         "created": "Secret created",
         "saved": "Secret saved",
+
         "images": {
           "images": "Available for following images",
           "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
@@ -106,6 +120,7 @@
           "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
         }
       },
+
       "registries": {
         "registries": "Registries",
         "creds": "Registry credentials",
@@ -117,18 +132,22 @@
         "created": "Registry credentials created",
         "saved": "Registry credentials saved",
         "deleted": "Registry credentials deleted",
+
         "address": {
           "address": "Address",
           "placeholder": "Registry Address (e.g. docker.io)"
         }
       },
+
       "badge": {
         "badge": "Badge",
         "url_branch": "URL for specific branch",
         "markdown": "Markdown"
       },
+
       "actions": {
         "actions": "Actions",
+
         "repair": {
           "repair": "Repair repository",
           "success": "Repository repaired"
@@ -144,6 +163,7 @@
         }
       }
     },
+
     "build": {
       "created": "Created",
       "tasks": "Tasks",
@@ -156,9 +176,10 @@
       "step_not_started": "This step hasn't started yet.",
       "pipelines_for": "Pipelines for branch \"{branch}\"",
       "exit_code": "exit code {exitCode}",
-      "loading": "Loading…",
+      "loading": "Loading ...",
       "pipeline": "Pipeline #{buildId}",
       "log_download_error": "There was an error while downloading the log file",
+
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
@@ -183,61 +204,7 @@
       }
     }
   },
-  "org": {
-    "settings": {
-      "settings": "Settings",
-      "not_allowed": "You are not allowed to access this organization's settings",
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no organization secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Organization secret deleted",
-        "created": "Organization secret created",
-        "saved": "Organization secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
-      }
-    }
-  },
-  "admin": {
-    "settings": {
-      "settings": "Settings",
-      "not_allowed": "You are not allowed to access server settings",
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
-        "warning": "These secrets will be available for all server users.",
-        "none": "There are no global secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Global secret deleted",
-        "created": "Global secret created",
-        "saved": "Global secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
-      }
-    }
-  },
+
   "user": {
     "oauth_error": "Error while authenticating against OAuth provider",
     "internal_error": "Some internal error occurred",
