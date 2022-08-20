@@ -157,6 +157,7 @@ const repoFilePayload = `{ platform: linux/amd64 }`
 const userRepoPayload = `
 [
   {
+		"id": 5,
     "owner": {
       "login": "test_name",
       "email": "octocat@github.com",
