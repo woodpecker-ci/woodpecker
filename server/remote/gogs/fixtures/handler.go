@@ -83,6 +83,7 @@ func getUserRepos(c *gin.Context) {
 
 const repoPayload = `
 {
+	"id": 5,
   "owner": {
     "username": "test_name",
     "email": "octocat@github.com",

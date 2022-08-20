@@ -145,7 +145,7 @@ func PostHook(c *gin.Context) {
 	if !verifiedKey {
 		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
 		if err != nil {
-			msg := fmt.Sprintf("failure to verify token from hook. Could not check for redirections of the repo")
+			msg := "failure to verify token from hook. Could not check for redirections of the repo"
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
