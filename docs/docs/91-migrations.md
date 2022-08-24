@@ -55,6 +55,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Base path has moved from `/var/lib/drone` to `/var/lib/woodpecker`
 
+- Default workspace base path has moved from `/drone` to `/woodpecker`
+
 - Default SQLite database location has changed:
   - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
   - `drone.sqlite` -> `woodpecker.sqlite`
