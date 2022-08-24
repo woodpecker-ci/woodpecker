@@ -22,7 +22,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/lafriks/ttlcache/v3 v3.2.0
 	github.com/lib/pq v1.10.5
-	github.com/mattn/go-sqlite3 v1.14.12
+	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/melbahja/goph v1.3.0
 	github.com/moby/moby v20.10.17+incompatible
 	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae
