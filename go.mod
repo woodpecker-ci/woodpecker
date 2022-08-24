@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20220720025709-de34275bb64e
-	codeberg.org/6543/go-yaml2json v0.1.0
+	codeberg.org/6543/go-yaml2json v0.2.1
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/docker/cli v20.10.14+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
