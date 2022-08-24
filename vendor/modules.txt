@@ -617,7 +617,7 @@ github.com/yagipy/maintidx/pkg/halstvol
 github.com/yeya24/promlinter
 # gitlab.com/bosi/decorder v0.2.1
 gitlab.com/bosi/decorder
-# golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+# golang.org/x/crypto v0.0.0-20220824171710-5757bc0c5503
 ## explicit
 golang.org/x/crypto/acme
 golang.org/x/crypto/acme/autocert
