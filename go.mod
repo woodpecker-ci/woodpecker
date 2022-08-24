@@ -20,7 +20,7 @@ require (
 	github.com/google/go-github/v39 v39.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.4.0
-	github.com/lafriks/ttlcache/v3 v3.1.0
+	github.com/lafriks/ttlcache/v3 v3.2.0
 	github.com/lib/pq v1.10.5
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/melbahja/goph v1.3.0
@@ -38,7 +38,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220824171710-5757bc0c5503
 	golang.org/x/net v0.0.0-20220822230855-b0a4917ee28c
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
+	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v3 v3.0.1
