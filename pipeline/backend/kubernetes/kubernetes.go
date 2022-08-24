@@ -248,7 +248,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 
 // Destroy the pipeline environment.
 func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
-	var gracePeriodSeconds int64 = 0 // immediately
+	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 
 	deleteOpts := metav1.DeleteOptions{
