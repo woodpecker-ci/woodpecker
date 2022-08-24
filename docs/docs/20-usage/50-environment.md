@@ -148,6 +148,7 @@ pipeline:
     environment:
       - [...]
 +     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
+```
 
 ## String Substitution
 
