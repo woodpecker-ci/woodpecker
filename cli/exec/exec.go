@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -72,7 +71,7 @@ func execFile(c *cli.Context, file string) error {
 }
 
 func runExec(c *cli.Context, file, repoPath string) error {
-	dat, err := ioutil.ReadFile(file)
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"runtime"
 	"strconv"
 	"sync"
@@ -211,7 +210,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		data, err = ioutil.ReadAll(limitedPart)
+		data, err = io.ReadAll(limitedPart)
 		if err != nil {
 			loglogger.Err(err).Msg("could not read limited part")
 		}
