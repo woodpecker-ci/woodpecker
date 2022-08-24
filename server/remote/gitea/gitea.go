@@ -40,7 +40,6 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	perPage           = 50
-	giteaDevVersion   = "v1.18.0"
 )
 
 type Gitea struct {
