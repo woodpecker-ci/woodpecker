@@ -32,7 +32,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/testify v1.8.0
 	github.com/tevino/abool v1.2.0
-	github.com/urfave/cli/v2 v2.5.1
+	github.com/urfave/cli/v2 v2.11.2
 	github.com/xanzy/go-gitlab v0.64.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20220824171710-5757bc0c5503
@@ -99,6 +99,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/sys v0.0.0-20220823224334-20c2bfdbfe24 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
