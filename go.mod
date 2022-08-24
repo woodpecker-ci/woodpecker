@@ -24,7 +24,7 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/melbahja/goph v1.3.0
-	github.com/moby/moby v20.10.14+incompatible
+	github.com/moby/moby v20.10.17+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/pkg/errors v0.9.1
@@ -51,7 +51,6 @@ require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/containerd/containerd v1.6.6 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
@@ -108,4 +107,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gotest.tools/v3 v3.0.3 // indirect
 )
