@@ -29,7 +29,7 @@ import (
 
 const (
 	// checkTime specify the interval woodpecker look for new cron jobs to exec
-	checkTime = time.Second
+	checkTime = 10 * time.Second
 
 	// checkItems specify the jobs to retrieve per check interval from database
 	checkItems = 10
@@ -43,15 +43,17 @@ func Start(ctx context.Context, store store.Store) error {
 			return nil
 		case <-time.After(checkTime):
 			go func() {
-				now := time.Now().Unix()
+				now := time.Now()
 				log.Trace().Msg("Cron: fetch next jobs")
-				jobs, err := store.CronListNextExecute(now, checkItems)
+
+				jobs, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
-					log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
+					log.Error().Err(err).Int64("now", now.Unix()).Msg("obtain cron job list")
 					return
 				}
+
 				for _, job := range jobs {
-					if err := runJob(job, store); err != nil {
+					if err := runJob(job, store, now); err != nil {
 						log.Error().Err(err).Int64("jobID", job.ID).Msg("run cron job failed")
 					}
 				}
@@ -60,16 +62,14 @@ func Start(ctx context.Context, store store.Store) error {
 	}
 }
 
-func runJob(job *model.CronJob, store store.Store) error {
+func runJob(job *model.CronJob, store store.Store, now time.Time) error {
+	log.Trace().Msgf("Cron: run job [%d]", job.ID)
+
 	schedule, err := cron.Parse(job.Schedule)
 	if err != nil {
 		return fmt.Errorf("cron parse schedule: %v", err)
 	}
-	oldNext := time.Unix(job.NextExec, 0)
-	if job.NextExec == 0 {
-		oldNext = time.Now()
-	}
-	newNext := schedule.Next(oldNext) // TODO: can we always use time.Now() here?
+	newNext := schedule.Next(now)
 
 	// try to get lock on cron job
 	gotLock, err := store.CronGetLock(job, newNext.Unix())
