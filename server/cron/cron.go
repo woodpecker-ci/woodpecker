@@ -37,25 +37,27 @@ const (
 
 // Start starts the cron functionality
 func Start(ctx context.Context, store store.Store) error {
-	select {
-	case <-ctx.Done():
-		return nil
-	case <-time.After(checkTime):
-		go func() {
-			now := time.Now().Unix()
-			jobs, err := store.CronListNextExecute(now, checkItems)
-			if err != nil {
-				log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
-				return
-			}
-			for _, job := range jobs {
-				if err := runJob(job, store); err != nil {
-					log.Error().Err(err).Int64("jobID", job.ID).Msg("run cron job failed")
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-time.After(checkTime):
+			go func() {
+				now := time.Now().Unix()
+				log.Trace().Msg("Cron: fetch next jobs")
+				jobs, err := store.CronListNextExecute(now, checkItems)
+				if err != nil {
+					log.Error().Err(err).Int64("now", now).Msg("obtain cron job list")
+					return
 				}
-			}
-		}()
+				for _, job := range jobs {
+					if err := runJob(job, store); err != nil {
+						log.Error().Err(err).Int64("jobID", job.ID).Msg("run cron job failed")
+					}
+				}
+			}()
+		}
 	}
-	return nil
 }
 
 func runJob(job *model.CronJob, store store.Store) error {
