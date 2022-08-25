@@ -1,3 +1,5 @@
+branches: [ "main", "release/*" ]
+
 pipeline:
   set-version:
     image: alpine/helm:3.5.3

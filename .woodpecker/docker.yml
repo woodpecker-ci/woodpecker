@@ -2,6 +2,8 @@ depends_on:
   - test
   - web
 
+branches: [ "main", "release/*" ]
+
 variables:
   - &golang_image 'golang:1.18'
   - &node_image 'node:16-alpine'
