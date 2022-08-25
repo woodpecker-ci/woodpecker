@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +35,7 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	dir, err := os.MkdirTemp("", "woodpecker-local-*")
 	e.workingdir = dir
 	return err
 }

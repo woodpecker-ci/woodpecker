@@ -32,7 +32,7 @@
         "enable": {
             "reload": "Repositories neu laden",
             "enable": "Aktivieren",
-            "enabled": "Bereits Aktiviert",
+            "enabled": "Bereits aktiviert",
             "success": "Repository aktiviert",
             "list_reloaded": "Repository-Liste neu geladen"
         },
