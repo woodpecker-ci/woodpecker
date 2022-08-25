@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -72,7 +71,7 @@ func execFile(c *cli.Context, file string) error {
 }
 
 func runExec(c *cli.Context, file, repoPath string) error {
-	dat, err := ioutil.ReadFile(file)
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -110,6 +109,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
 		droneEnv[envs[0]] = envs[1]
+		if _, exists := environ[envs[0]]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)

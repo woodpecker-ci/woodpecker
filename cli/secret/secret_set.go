@@ -1,7 +1,7 @@
 package secret
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -14,9 +14,17 @@ import (
 var secretUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a secret",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[org/repo|org]",
 	Action:    secretUpdate,
 	Flags: append(common.GlobalFlags,
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
+		},
+		&cli.StringFlag{
+			Name:  "organization",
+			Usage: "organization name (e.g. octocat)",
+		},
 		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
@@ -41,14 +49,6 @@ var secretUpdateCmd = &cli.Command{
 }
 
 func secretUpdate(c *cli.Context) error {
-	reponame := c.String("repository")
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
@@ -61,12 +61,26 @@ func secretUpdate(c *cli.Context) error {
 	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
-		out, ferr := ioutil.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		secret.Value = string(out)
 	}
-	_, err = client.SecretUpdate(owner, name, secret)
+
+	global, owner, repo, err := parseTargetArgs(c)
+	if err != nil {
+		return err
+	}
+
+	if global {
+		_, err = client.GlobalSecretUpdate(secret)
+		return err
+	}
+	if repo == "" {
+		_, err = client.OrgSecretUpdate(owner, secret)
+		return err
+	}
+	_, err = client.SecretUpdate(owner, repo, secret)
 	return err
 }

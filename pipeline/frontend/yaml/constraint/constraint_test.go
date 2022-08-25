@@ -469,8 +469,8 @@ func TestConstraints(t *testing.T) {
 	}
 }
 
-func parseConstraints(t *testing.T, s string) *Constraints {
-	c := &Constraints{}
+func parseConstraints(t *testing.T, s string) *When {
+	c := &When{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

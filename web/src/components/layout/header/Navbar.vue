@@ -26,6 +26,12 @@
         class="!text-white !dark:text-gray-500"
         @click="darkMode = !darkMode"
       />
+      <IconButton
+        v-if="user?.admin"
+        icon="settings"
+        class="!text-white !dark:text-gray-500"
+        :to="{ name: 'admin-settings' }"
+      />
       <router-link v-if="user" :to="{ name: 'user' }">
         <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
       </router-link>
