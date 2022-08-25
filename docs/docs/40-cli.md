@@ -478,6 +478,10 @@ adds a secret
 
 **--name**="": secret name
 
+**--global**: global secret
+
+**--organization**="": organization name (e.g. octocat)
+
 **--repository**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
@@ -493,6 +497,10 @@ remove a secret
 **--log-level**="": set logging level (default: info)
 
 **--name**="": secret name
+
+**--global**: global secret
+
+**--organization**="": organization name (e.g. octocat)
 
 **--repository**="": repository name (e.g. octocat/hello-world)
 
@@ -512,6 +520,10 @@ update a secret
 
 **--name**="": secret name
 
+**--global**: global secret
+
+**--organization**="": organization name (e.g. octocat)
+
 **--repository**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
@@ -528,6 +540,10 @@ display secret info
 
 **--name**="": secret name
 
+**--global**: global secret
+
+**--organization**="": organization name (e.g. octocat)
+
 **--repository**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
@@ -539,6 +555,10 @@ display secret info
 list secrets
 
 **--log-level**="": set logging level (default: info)
+
+**--global**: global secret
+
+**--organization**="": organization name (e.g. octocat)
 
 **--repository**="": repository name (e.g. octocat/hello-world)
 

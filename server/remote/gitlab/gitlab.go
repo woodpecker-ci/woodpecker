@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
@@ -74,10 +75,8 @@ func (g *Gitlab) Name() string {
 	return "gitlab"
 }
 
-// Login authenticates the session and returns the
-// remote user details.
-func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := &oauth2.Config{
+func (g *Gitlab) oauth2Config() *oauth2.Config {
+	return &oauth2.Config{
 		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
 		Scope:        defaultScope,
@@ -85,6 +84,12 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
 		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
+}
+
+// Login authenticates the session and returns the
+// remote user details.
+func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
+	config := g.oauth2Config()
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -98,7 +103,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		authCodeURL, err := config.AuthCodeURL("drone")
+		authCodeURL, err := config.AuthCodeURL("woodpecker")
 		if err != nil {
 			return nil, fmt.Errorf("authCodeURL error: %v", err)
 		}
@@ -137,6 +142,35 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	return user, nil
+}
+
+// Refresh refreshes the Gitlab oauth2 access token. If the token is
+// refreshed the user is updated and a true value is returned.
+func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
+	config := g.oauth2Config()
+	config.RedirectURL = ""
+
+	trans := &oauth2.Transport{
+		Config: config,
+		Token: &oauth2.Token{
+			AccessToken:  user.Token,
+			RefreshToken: user.Secret,
+			Expiry:       time.Unix(user.Expiry, 0),
+		},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		},
+	}
+
+	if err := trans.Refresh(); err != nil {
+		return false, err
+	}
+
+	user.Token = trans.Token.AccessToken
+	user.Secret = trans.Token.RefreshToken
+	user.Expiry = trans.Token.Expiry.UTC().Unix()
+	return true, nil
 }
 
 // Auth authenticates the session and returns the remote user login for the given token

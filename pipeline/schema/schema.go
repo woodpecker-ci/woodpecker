@@ -17,7 +17,7 @@ var schemaDefinition []byte
 func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
 	buff := new(bytes.Buffer)
-	err := yaml2json.StreamConverter(r, buff)
+	err := yaml2json.StreamConvert(r, buff)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to load yml file %w", err)
 	}
