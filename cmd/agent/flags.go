@@ -19,9 +19,11 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 )
 
-var flags = []cli.Flag{
+var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER"},
 		Name:    "server",
@@ -50,11 +52,6 @@ var flags = []cli.Flag{
 		Name:    "grpc-skip-insecure",
 		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
@@ -106,4 +103,4 @@ var flags = []cli.Flag{
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
 	},
-}
+}, common.Flags...)

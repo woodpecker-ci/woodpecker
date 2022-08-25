@@ -20,15 +20,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-var flags = []cli.Flag{
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
+var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
@@ -520,4 +516,4 @@ var flags = []cli.Flag{
 		Hidden:  true,
 		// TODO(485) temporary workaround to not hit api rate limits
 	},
-}
+}, common.Flags...)
