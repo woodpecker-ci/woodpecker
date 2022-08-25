@@ -284,6 +284,19 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
+// BranchCommit returns sha of commit ontop of specifyied branch
+func (c *client) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	b, err := c.newClientToken(token).GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
+}
+
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {

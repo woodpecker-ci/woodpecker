@@ -236,6 +236,12 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
+// BranchCommit returns sha of commit ontop of specifyied branch
+func (c *Config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO: implement
+	return "", nil
+}
+
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)

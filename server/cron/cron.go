@@ -22,6 +22,7 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -64,6 +65,7 @@ func Start(ctx context.Context, store store.Store) error {
 
 func runJob(job *model.CronJob, store store.Store, now time.Time) error {
 	log.Trace().Msgf("Cron: run job [%d]", job.ID)
+	ctx := context.Background()
 
 	schedule, err := cron.Parse(job.Schedule)
 	if err != nil {
@@ -81,25 +83,35 @@ func runJob(job *model.CronJob, store store.Store, now time.Time) error {
 		return nil
 	}
 
-	repo, newBuild, err := createBuild(job, store)
+	repo, newBuild, err := createBuild(ctx, job, store)
 	if err != nil {
 		return err
 	}
 
-	_, err = pipeline.Create(context.Background(), store, repo, newBuild)
+	_, err = pipeline.Create(ctx, store, repo, newBuild)
 	return err
 }
 
-func createBuild(job *model.CronJob, store store.Store) (*model.Repo, *model.Build, error) {
+func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*model.Repo, *model.Build, error) {
+	remote := server.Config.Services.Remote
+
 	repo, err := store.GetRepo(job.RepoID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	commit, err := "", nil // remote.GetLatestCommit(repo, branch)
-
 	if job.Branch == "" {
 		job.Branch = repo.Branch
+	}
+
+	creator, err := store.GetUser(job.CreatorID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	commit, err := remote.BranchCommit(ctx, creator, repo, job.Branch)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return repo, &model.Build{

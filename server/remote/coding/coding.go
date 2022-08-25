@@ -291,6 +291,12 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return []string{r.Branch}, nil
 }
 
+// BranchCommit returns sha of commit ontop of specifyied branch
+func (c *Coding) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO: implement
+	return "", nil
+}
+
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
 func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {

@@ -295,6 +295,12 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
+// BranchCommit returns sha of commit ontop of specifyied branch
+func (c *config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO: implement
+	return "", nil
+}
+
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Build details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
