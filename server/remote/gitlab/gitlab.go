@@ -16,7 +16,6 @@ package gitlab
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -26,13 +25,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
+	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
@@ -79,10 +78,13 @@ func (g *Gitlab) oauth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     g.ClientID,
 		ClientSecret: g.ClientSecret,
-		Scope:        defaultScope,
-		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
-		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
+			TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+		},
+		Scopes: []string{defaultScope},
+
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 
@@ -103,19 +105,19 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		authCodeURL, err := config.AuthCodeURL("woodpecker")
-		if err != nil {
-			return nil, fmt.Errorf("authCodeURL error: %v", err)
-		}
-		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
+		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
-	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}}
-	token, err := trans.Exchange(code)
+	// TODO: re-add SkipVerify func
+	// trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+	// 	Proxy:           http.ProxyFromEnvironment,
+	// }}
+	//
+	// token, err := trans.Exchange(code)
+
+	token, err := config.Exchange(ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -150,26 +152,34 @@ func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := g.oauth2Config()
 	config.RedirectURL = ""
 
-	trans := &oauth2.Transport{
-		Config: config,
-		Token: &oauth2.Token{
-			AccessToken:  user.Token,
-			RefreshToken: user.Secret,
-			Expiry:       time.Unix(user.Expiry, 0),
-		},
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-			Proxy:           http.ProxyFromEnvironment,
-		},
-	}
+	// TODO: re-add SkipVerify func
+	// trans := &oauth2.Transport{
+	// 	Config: config,
+	// 	Token: &oauth2.Token{
+	// 		AccessToken:  user.Token,
+	// 		RefreshToken: user.Secret,
+	// 		Expiry:       time.Unix(user.Expiry, 0),
+	// 	},
+	// 	Transport: &http.Transport{
+	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+	// 		Proxy:           http.ProxyFromEnvironment,
+	// 	},
+	// }
 
-	if err := trans.Refresh(); err != nil {
+	source := config.TokenSource(ctx, &oauth2.Token{
+		AccessToken:  user.Token,
+		RefreshToken: user.Secret,
+		Expiry:       time.Unix(user.Expiry, 0),
+	})
+
+	token, err := source.Token()
+	if err != nil || len(token.AccessToken) == 0 {
 		return false, err
 	}
 
-	user.Token = trans.Token.AccessToken
-	user.Secret = trans.Token.RefreshToken
-	user.Expiry = trans.Token.Expiry.UTC().Unix()
+	user.Token = token.AccessToken
+	user.Secret = token.RefreshToken
+	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
 
