@@ -76,7 +76,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 			}
 		}
 		ymlOut, _ := yaml.Marshal(vv.Interface())
-		out, _ := yaml2json.Covnert(ymlOut)
+		out, _ := yaml2json.Convert(ymlOut)
 		return string(out), nil
 
 	case reflect.Slice, reflect.Array:
@@ -102,7 +102,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if err != nil {
 			return "", err
 		}
-		out, err = yaml2json.Covnert(out)
+		out, err = yaml2json.Convert(out)
 		if err != nil {
 			return "", err
 		}
