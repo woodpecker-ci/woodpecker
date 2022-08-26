@@ -11,7 +11,6 @@ module.exports = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   onDuplicateRoutes: 'throw',
-  favicon: 'img/favicon.ico',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
@@ -36,7 +35,7 @@ module.exports = {
           label: 'Plugins',
         },
         {
-          to: 'docs/migrations',
+          to: '/docs/migrations',
           activeBaseRegex: 'docs/migrations',
           position: 'left',
           label: 'Migrations',
@@ -47,8 +46,7 @@ module.exports = {
           label: 'FAQ',
         },
         {
-          to: 'docs/awesome',
-          activeBaseRegex: 'docs/awesome',
+          to: '/docs/awesome',
           position: 'left',
           label: 'Awesome',
         },
@@ -128,14 +126,47 @@ module.exports = {
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
-    algolia: {
-      appId: 'BH4D9OD16A',
-      apiKey: '148f85e216b68d20ffa49d46a2b89d0e',
-      indexName: 'woodpecker-ci',
-      debug: false, // Set debug to true if you want to inspect the modal
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 4,
     },
   },
-  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
+  plugins: [
+    () => ({
+      name: 'docusaurus-plugin-favicon',
+      injectHtmlTags() {
+        return {
+          headTags: [
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.ico',
+                sizes: 'any',
+              },
+            },
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.svg',
+                type: 'image/svg+xml',
+              },
+            },
+          ],
+        };
+      },
+    }),
+  ],
+  themes: [
+    path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+      },
+    ],
+  ],
   presets: [
     [
       '@docusaurus/preset-classic',

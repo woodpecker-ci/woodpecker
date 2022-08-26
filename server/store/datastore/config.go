@@ -52,10 +52,10 @@ func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
 SELECT build_id FROM builds
 WHERE build_repo_id = ?
 AND build_id in (
-  SELECT build_id
-  FROM build_config
-  WHERE build_config.config_id = ?
-  )
+SELECT build_id
+FROM build_config
+WHERE build_config.config_id = ?
+)
 AND build_status NOT IN ('blocked', 'pending')
 LIMIT 1
 `, config.RepoID, config.ID).Count()

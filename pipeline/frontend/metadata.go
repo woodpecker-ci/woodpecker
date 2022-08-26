@@ -87,11 +87,11 @@ type (
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name    string `json:"name,omitempty"`
-		Host    string `json:"host,omitempty"`
-		Link    string `json:"link,omitempty"`
-		Arch    string `json:"arch,omitempty"`
-		Version string `json:"version,omitempty"`
+		Name     string `json:"name,omitempty"`
+		Host     string `json:"host,omitempty"`
+		Link     string `json:"link,omitempty"`
+		Platform string `json:"arch,omitempty"`
+		Version  string `json:"version,omitempty"`
 	}
 )
 
@@ -179,11 +179,14 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 
-		"CI_SYSTEM_NAME":    m.Sys.Name,
-		"CI_SYSTEM_LINK":    m.Sys.Link,
-		"CI_SYSTEM_HOST":    m.Sys.Host,
-		"CI_SYSTEM_ARCH":    m.Sys.Arch,
-		"CI_SYSTEM_VERSION": version.Version,
+		"CI_SYSTEM_NAME":     m.Sys.Name,
+		"CI_SYSTEM_LINK":     m.Sys.Link,
+		"CI_SYSTEM_HOST":     m.Sys.Host,
+		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
+		"CI_SYSTEM_VERSION":  version.Version,
+
+		// DEPRECATED
+		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
@@ -198,8 +201,5 @@ func (m *Metadata) Environ() map[string]string {
 var pullRegexp = regexp.MustCompile(`\d+`)
 
 func (m *Metadata) SetPlatform(platform string) {
-	if platform == "" {
-		platform = "linux/amd64"
-	}
-	m.Sys.Arch = platform
+	m.Sys.Platform = platform
 }

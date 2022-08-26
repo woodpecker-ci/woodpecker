@@ -37,6 +37,11 @@ func TestUnmarshalCommand(t *testing.T) {
     - sleep 3s`), s3)
 	assert.Nil(t, err)
 	assert.Equal(t, Command{`echo AAA; echo "wow"`, `sleep 3s`}, s3.Command)
+
+	s4 := &StructCommand{}
+	err = yaml.Unmarshal([]byte(`command: echo AAA; echo "wow"`), s4)
+	assert.Nil(t, err)
+	assert.Equal(t, Command{`echo AAA; echo "wow"`}, s4.Command)
 }
 
 var sampleEmptyCommand = `{}`

@@ -6,9 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"codeberg.org/6543/go-yaml2json"
 	"gopkg.in/yaml.v3"
-
-	"github.com/woodpecker-ci/woodpecker/shared/yml"
 )
 
 // paramsToEnv uses reflection to convert a map[string]interface to a list
@@ -69,7 +68,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if fromSecret, ok := v.(map[string]interface{}); ok {
 			if secretNameI, ok := fromSecret["from_secret"]; ok {
 				if secretName, ok := secretNameI.(string); ok {
-					if secret, ok := secrets[secretName]; ok {
+					if secret, ok := secrets[strings.ToLower(secretName)]; ok {
 						return secret.Value, nil
 					}
 					return "", fmt.Errorf("no secret found for %q", secretName)
@@ -77,7 +76,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 			}
 		}
 		ymlOut, _ := yaml.Marshal(vv.Interface())
-		out, _ := yml.ToJSON(ymlOut)
+		out, _ := yaml2json.Convert(ymlOut)
 		return string(out), nil
 
 	case reflect.Slice, reflect.Array:
@@ -103,7 +102,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if err != nil {
 			return "", err
 		}
-		out, err = yml.ToJSON(out)
+		out, err = yaml2json.Convert(out)
 		if err != nil {
 			return "", err
 		}

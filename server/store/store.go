@@ -70,6 +70,8 @@ type Store interface {
 	// GetBuildList gets a list of builds for the repository
 	// TODO: paginate
 	GetBuildList(*model.Repo, int) ([]*model.Build, error)
+	// GetBuildList gets a list of the active builds for the repository
+	GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error)
 	// GetBuildQueue gets a list of build in queue.
 	GetBuildQueue() ([]*model.Feed, error)
 	// GetBuildCount gets a count of all builds in the system.
@@ -102,20 +104,16 @@ type Store interface {
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
 
-	// Sender
-	SenderFind(*model.Repo, string) (*model.Sender, error)
-	// SenderList TODO: paginate
-	SenderList(*model.Repo) ([]*model.Sender, error)
-	SenderCreate(*model.Sender) error
-	SenderUpdate(*model.Sender) error
-	SenderDelete(*model.Sender) error
-
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool) ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	OrgSecretFind(string, string) (*model.Secret, error)
+	OrgSecretList(string) ([]*model.Secret, error)
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList() ([]*model.Secret, error)
 
 	// Registrys
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
@@ -150,6 +148,10 @@ type Store interface {
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
+
+	// ServerConfig
+	ServerConfigGet(string) (string, error)
+	ServerConfigSet(string, string) error
 
 	// Store operations
 	Ping() error

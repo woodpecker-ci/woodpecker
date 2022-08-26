@@ -1,7 +1,8 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import useAuthentication from './compositions/useAuthentication';
+import useAuthentication from '~/compositions/useAuthentication';
+import useUserConfig from '~/compositions/useUserConfig';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -26,7 +27,25 @@ const routes: RouteRecordRaw[] = [
     name: 'repos-owner',
     component: (): Component => import('~/views/ReposOwner.vue'),
     props: true,
-    meta: { authentication: 'required' },
+  },
+  {
+    path: '/org/:repoOwner',
+    component: (): Component => import('~/views/org/OrgWrapper.vue'),
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'org',
+        redirect: (route) => ({ name: 'repos-owner', params: route.params }),
+      },
+      {
+        path: 'settings',
+        name: 'org-settings',
+        component: (): Component => import('~/views/org/OrgSettings.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+    ],
   },
   {
     path: '/:repoOwner/:repoName',
@@ -100,6 +119,13 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: (): Component => import('~/views/admin/AdminSettings.vue'),
+    meta: { authentication: 'required' },
+    props: true,
+  },
+  {
     path: '/user',
     name: 'user',
     component: (): Component => import('~/views/User.vue'),
@@ -133,6 +159,13 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
+  const config = useUserConfig();
+  const { redirectUrl } = config.userConfig.value;
+  if (redirectUrl !== '') {
+    config.setUserConfig('redirectUrl', '');
+    next(redirectUrl);
+  }
+
   const authentication = useAuthentication();
   if (to.meta.authentication === 'required' && !authentication.isAuthenticated) {
     next({ name: 'login', query: { url: to.fullPath } });

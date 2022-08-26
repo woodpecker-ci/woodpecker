@@ -18,7 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
@@ -31,6 +31,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // TODO: Implement log streaming.
@@ -79,17 +80,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
+	repoName := extractRepositoryName(work.Config) // hack
+	buildNumber := extractBuildNumber(work.Config) // hack
+
 	r.counter.Add(
 		work.ID,
 		timeout,
-		extractRepositoryName(work.Config), // hack
-		extractBuildNumber(work.Config),    // hack
+		repoName,
+		buildNumber,
 	)
 	defer r.counter.Done(work.ID)
 
 	logger := log.With().
-		Str("repo", extractRepositoryName(work.Config)). // hack
-		Str("build", extractBuildNumber(work.Config)).   // hack
+		Str("repo", repoName).
+		Str("build", buildNumber).
 		Str("id", work.ID).
 		Logger()
 
@@ -97,6 +101,13 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
+
+	// Add sigterm support for internal context.
+	// Required when the pipeline is terminated by external signals
+	// like kubernetes.
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
 
 	canceled := abool.New()
 	go func() {
@@ -199,7 +210,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		data, err = ioutil.ReadAll(limitedPart)
+		data, err = io.ReadAll(limitedPart)
 		if err != nil {
 			loglogger.Err(err).Msg("could not read limited part")
 		}
@@ -241,6 +252,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		proclogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
+			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
@@ -252,6 +264,10 @@ func (r *Runner) Run(ctx context.Context) error {
 			Started:  time.Now().Unix(), // TODO do not do this
 			Finished: time.Now().Unix(),
 		}
+		if state.Process.Error != nil {
+			procState.Error = state.Process.Error.Error()
+		}
+
 		defer func() {
 			proclogger.Debug().Msg("update step status")
 
@@ -270,7 +286,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		// TODO: find better way to update this state
+		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
@@ -279,6 +295,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
@@ -292,6 +310,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
+		pipeline.WithDescription(map[string]string{
+			"ID":    work.ID,
+			"Repo":  repoName,
+			"Build": buildNumber,
+		}),
 	).Run()
 
 	state.Finished = time.Now().Unix()

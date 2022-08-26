@@ -2,91 +2,110 @@ depends_on:
   - test
   - web
 
+variables:
+  - &golang_image 'golang:1.18'
+  - &node_image 'node:16-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.18.x'
+  - &xgo_version 'go-1.18.x'
+
 pipeline:
+  vendor:
+    image: *golang_image
+    commands:
+      - go mod vendor
+
+  ###############
+  # S e r v e r #
+  ###############
   build-web:
-    image: node:16-alpine
+    image: *node_image
     commands:
       - cd web/
       - yarn install --frozen-lockfile
       - yarn build
 
-  ###############
-  # S e r v e r #
-  ###############
-
-  # TODO: needed until https://github.com/woodpecker-ci/woodpecker/pull/635
-  build-server:
-    image: golang:1.17
+  cross-compile-server:
+    image: *xgo_image
     commands:
-      - make release-server
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le
+      TAGS: bindata sqlite sqlite_unlock_notify
+      XGO_VERSION: *xgo_version
 
-  publish-server-dryrun:
-    image: plugins/docker
+  publish-server-preview:
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     group: docker
-    secrets: [docker_username, docker_password]
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server
-      tag: next
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 
-  publish-server-alpine-dryrun:
-    image: plugins/docker
-    group: docker
+  publish-server-alpine-preview:
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
+    group: docker
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine
-      tag: next-alpine
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
 
   publish-next-server:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: next
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-next-server-alpine:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: next-alpine
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-release-branch-server:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
       event: push
 
   publish-release-branch-server-alpine:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     group: docker
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -94,11 +113,12 @@ pipeline:
 
   release-server:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
@@ -106,11 +126,12 @@ pipeline:
 
   release-server-alpine:
     group: docker
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
@@ -120,15 +141,15 @@ pipeline:
   # A g e n t #
   #############
 
-  publish-agent-dryrun:
+  publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
-      tag: test
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 
@@ -214,15 +235,15 @@ pipeline:
   # C L I #
   #########
 
-  publish-cli-dryrun:
+  publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
+    secrets: [ docker_username, docker_password ]
     settings:
-      dry_run: true
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,windows/amd64,darwin/amd64,darwin/arm64
-      tag: test
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
 

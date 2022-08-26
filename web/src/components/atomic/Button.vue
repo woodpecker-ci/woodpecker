@@ -1,24 +1,9 @@
 <template>
   <button
     type="button"
-    class="
-      relative
-      flex
-      items-center
-      py-1
-      px-2
-      rounded-md
-      border
-      shadow-sm
-      cursor-pointer
-      transition-all
-      duration-150
-      focus:outline-none
-      overflow-hidden
-      disabled:opacity-50 disabled:cursor-not-allowed
-    "
+    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 focus:outline-none overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-gray-500 dark:text-gray-500 dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:bg-dark-gray-800':
+      'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:bg-dark-gray-800':
         color === 'gray',
       'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-400 dark:bg-lime-900 dark:hover:bg-lime-800':
         color === 'green',
@@ -28,13 +13,14 @@
         color === 'red',
       ...passedClasses,
     }"
+    :title="title"
     :disabled="disabled"
     @click="doClick"
   >
     <slot>
-      <Icon v-if="startIcon" :name="startIcon" class="mr-1" :class="{ invisible: isLoading }" />
+      <Icon v-if="startIcon" :name="startIcon" class="mr-1 !w-6 !h-6" :class="{ invisible: isLoading }" />
       <span :class="{ invisible: isLoading }">{{ text }}</span>
-      <Icon v-if="endIcon" :name="endIcon" class="ml-2" :class="{ invisible: isLoading }" />
+      <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
         :class="{
@@ -65,6 +51,11 @@ export default defineComponent({
 
   props: {
     text: {
+      type: String,
+      default: null,
+    },
+
+    title: {
       type: String,
       default: null,
     },

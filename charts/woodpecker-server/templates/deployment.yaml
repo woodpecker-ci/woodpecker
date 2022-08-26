@@ -6,6 +6,8 @@ metadata:
     {{- include "woodpecker-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{- toYaml .Values.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "woodpecker-server.selectorLabels" . | nindent 6 }}

@@ -6,6 +6,13 @@ pipeline:
     when:
       branch: master
 
+  when-branch-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      branch: [master, deploy]
+
   when-event:
     image: alpine
     commands:
@@ -104,3 +111,13 @@ pipeline:
       - echo "test"
     when:
       repo: test/test
+
+  when-multi:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      - event: pull_request
+        repo: test/test
+      - event: push
+        branch: main

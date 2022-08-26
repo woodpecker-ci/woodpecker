@@ -46,16 +46,22 @@ var flags = []cli.Flag{
 		Usage:   "external networks",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_PREFIX"},
+		EnvVars: []string{"WOODPECKER_PREFIX"},
 		Name:    "prefix",
 		Value:   "woodpecker",
-		Usage:   "prefix containers created by woodpecker",
+		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
 		Hidden:  true,
 	},
 	&cli.StringSliceFlag{
 		Name:  "privileged",
 		Usage: "privileged plugins",
 		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Name:    "backend-engine",
+		Usage:   "backend engine to run pipelines on",
+		Value:   "auto-detect",
 	},
 
 	//
@@ -95,9 +101,8 @@ var flags = []cli.Flag{
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_ARCH"},
-		Name:    "system-arch",
-		Value:   "linux/amd64",
+		EnvVars: []string{"CI_SYSTEM_PLATFORM"},
+		Name:    "system-platform",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_NAME"},

@@ -26,8 +26,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/mrjones/oauth"
 
@@ -104,6 +102,11 @@ func New(opts Opts) (remote.Remote, error) {
 
 	config.Consumer = CreateConsumer(opts.URL, opts.ConsumerKey, PrivateKey)
 	return config, nil
+}
+
+// Name returns the string name of this driver
+func (c *Config) Name() string {
+	return "stash"
 }
 
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -201,21 +204,15 @@ func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
-	u, err := url.Parse(c.URL)
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
-	// remove the port
-	tmp := strings.Split(u.Host, ":")
-	host := tmp[0]
 
-	if err != nil {
-		return nil, err
-	}
 	return &model.Netrc{
-		Machine:  host,
 		Login:    c.Username,
 		Password: c.Password,
+		Machine:  host,
 	}, nil
 }
 
@@ -227,8 +224,16 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range bitbucketBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
@@ -238,6 +243,13 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r, c.URL)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not implemented currently
+	return nil, nil
 }
 
 func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {

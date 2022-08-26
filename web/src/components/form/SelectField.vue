@@ -3,12 +3,12 @@
     v-model="innerValue"
     class="w-full border border-gray-900 py-1 px-2 rounded-md bg-white focus:outline-none border-gray-900"
     :class="{
-      'text-gray-500': innerValue === '',
+      'text-color': innerValue === '',
       'text-gray-900': innerValue !== '',
     }"
   >
     <option v-if="placeholder" value="" class="hidden">{{ placeholder }}</option>
-    <option v-for="option in options" :key="option.value" :value="option.value" class="text-gray-500">
+    <option v-for="option in options" :key="option.value" :value="option.value" class="text-color">
       {{ option.text }}
     </option>
   </select>
