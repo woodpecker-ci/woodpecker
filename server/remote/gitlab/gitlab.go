@@ -18,7 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -549,7 +549,7 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
-	payload, err := ioutil.ReadAll(req.Body)
+	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, nil, err
 	}
