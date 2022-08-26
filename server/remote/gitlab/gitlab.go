@@ -16,6 +16,7 @@ package gitlab
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -109,15 +110,11 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		return nil, nil
 	}
 
-	// TODO: re-add SkipVerify func
-	// trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
-	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-	// 	Proxy:           http.ProxyFromEnvironment,
-	// }}
-	//
-	// token, err := trans.Exchange(code)
+	oauth2Ctx := context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+	}})
 
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -152,21 +149,11 @@ func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := g.oauth2Config()
 	config.RedirectURL = ""
 
-	// TODO: re-add SkipVerify func
-	// trans := &oauth2.Transport{
-	// 	Config: config,
-	// 	Token: &oauth2.Token{
-	// 		AccessToken:  user.Token,
-	// 		RefreshToken: user.Secret,
-	// 		Expiry:       time.Unix(user.Expiry, 0),
-	// 	},
-	// 	Transport: &http.Transport{
-	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-	// 		Proxy:           http.ProxyFromEnvironment,
-	// 	},
-	// }
+	oauth2Ctx := context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+	}})
 
-	source := config.TokenSource(ctx, &oauth2.Token{
+	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
 		AccessToken:  user.Token,
 		RefreshToken: user.Secret,
 		Expiry:       time.Unix(user.Expiry, 0),
