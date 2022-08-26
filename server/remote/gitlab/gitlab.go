@@ -75,24 +75,28 @@ func (g *Gitlab) Name() string {
 	return "gitlab"
 }
 
-func (g *Gitlab) oauth2Config() *oauth2.Config {
+func (g *Gitlab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-		ClientID:     g.ClientID,
-		ClientSecret: g.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
-			TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+			ClientID:     g.ClientID,
+			ClientSecret: g.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
+				TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+			},
+			Scopes:      []string{defaultScope},
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
-		Scopes: []string{defaultScope},
 
-		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
-	}
+		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		}})
 }
 
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := g.oauth2Config()
+	config, oauth2Ctx := g.oauth2Config(ctx)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -109,10 +113,6 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
-
-	oauth2Ctx := context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-	}})
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
@@ -146,12 +146,8 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := g.oauth2Config()
+	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
-
-	oauth2Ctx := context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-	}})
 
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
 		AccessToken:  user.Token,
