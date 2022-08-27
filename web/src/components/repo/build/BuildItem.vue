@@ -19,7 +19,8 @@
 
     <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
       <div class="<md:hidden flex items-center flex-shrink-0">
-        <img class="w-8" :src="build.author_avatar" />
+        <Icon v-if="build.event === 'cron'" name="stopwatch" class="text-color" />
+        <img v-else class="w-8" :src="build.author_avatar" />
       </div>
 
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
