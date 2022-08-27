@@ -135,7 +135,7 @@
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
                 "branch": {
-                    "branch": "Branch"
+                    "branch": "Branch (uses default branch if empty)"
                 },
                 "title": {
                     "title": "Title",

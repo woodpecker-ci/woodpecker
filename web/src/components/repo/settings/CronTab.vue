@@ -55,7 +55,7 @@
         </InputField>
 
         <InputField :label="$t('repo.settings.crons.branch.branch')">
-          <TextField v-model="selectedCron.branch" :placeholder="$t('repo.settings.crons.branch.branch')" required />
+          <TextField v-model="selectedCron.branch" :placeholder="$t('repo.settings.crons.branch.branch')" />
         </InputField>
 
         <InputField
