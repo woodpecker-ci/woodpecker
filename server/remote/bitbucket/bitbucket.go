@@ -295,10 +295,10 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchCommit returns sha of commit ontop of specifyied branch
+// BranchCommit returns sha of commit on top of the specified branch
 func (c *config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO: implement
-	return "", nil
+	return "", fmt.Errorf("missing implementation")
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and

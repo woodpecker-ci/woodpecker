@@ -236,10 +236,10 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchCommit returns sha of commit ontop of specifyied branch
+// BranchCommit returns sha of commit on top of the specified branch
 func (c *Config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO: implement
-	return "", nil
+	return "", fmt.Errorf("missing implementation")
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {

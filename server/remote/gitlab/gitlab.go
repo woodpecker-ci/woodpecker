@@ -545,6 +545,7 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	return branches, nil
 }
 
+// BranchCommit returns sha of commit on top of the specified branch
 func (g *Gitlab) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {
