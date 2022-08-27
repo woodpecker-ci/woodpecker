@@ -130,5 +130,7 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 		Branch:    job.Branch,
 		Message:   job.Title,
 		Timestamp: job.NextExec,
+		Sender:    job.Title,
+		Link:      repo.Link,
 	}, nil
 }

@@ -14,6 +14,7 @@ const (
 	EventPull   = "pull_request"
 	EventTag    = "tag"
 	EventDeploy = "deployment"
+	EventCron   = "cron"
 )
 
 type (

@@ -187,17 +187,23 @@
             {
               "type": "array",
               "items": {
-                "enum": ["push", "pull_request", "tag", "deployment"]
+                "default": ["push", "pull_request", "tag", "deployment"],
+                "enum": ["push", "pull_request", "tag", "deployment", "cron"]
               },
               "minLength": 1
             },
             {
-              "enum": ["push", "pull_request", "tag", "deployment"]
+              "default": ["push", "pull_request", "tag", "deployment"],
+              "enum": ["push", "pull_request", "tag", "deployment", "cron"]
             }
           ]
         },
         "tag": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+          "type": "string"
+        },
+        "cron": {
+          "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#cron",
           "type": "string"
         },
         "status": {

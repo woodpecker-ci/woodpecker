@@ -26,6 +26,7 @@ type (
 		Environment List
 		Event       List
 		Branch      List
+		Cron        List
 		Status      List
 		Matrix      Map
 		Local       types.BoolTrue
@@ -120,6 +121,16 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraint) Match(metadata frontend.Metadata) bool {
+	// if event filter is not set, set default
+	if len(c.Event.Include) == 0 && len(c.Event.Exclude) == 0 {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+		}
+	}
+
 	match := c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
@@ -135,6 +146,11 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 
 	if metadata.Curr.Event != frontend.EventTag {
 		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
+	}
+
+	if metadata.Curr.Event == frontend.EventCron {
+		// cron title is storend in message
+		match = match && c.Cron.Match(metadata.Curr.Commit.Message)
 	}
 
 	return match
