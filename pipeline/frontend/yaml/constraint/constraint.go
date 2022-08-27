@@ -53,6 +53,10 @@ type (
 	}
 )
 
+func (l List) IsEmpty() bool {
+	return len(l.Include) == 0 && len(l.Exclude) == 0
+}
+
 func (when *When) IsEmpty() bool {
 	return len(when.Constraints) == 0
 }
@@ -122,7 +126,7 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 // constraint fails a false value is returned.
 func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	// if event filter is not set, set default
-	if len(c.Event.Include) == 0 && len(c.Event.Exclude) == 0 {
+	if c.Event.IsEmpty() {
 		c.Event.Include = []string{
 			frontend.EventPush,
 			frontend.EventPull,
