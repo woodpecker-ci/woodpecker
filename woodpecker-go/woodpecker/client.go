@@ -474,7 +474,7 @@ func (c *client) CronList(owner, repo string) ([]*CronJob, error) {
 
 func (c *client) CronCreate(owner, repo string, in *CronJob) (*CronJob, error) {
 	out := new(CronJob)
-	uri := fmt.Sprintf(pathRepoCronJob, c.addr, owner, repo, in.ID)
+	uri := fmt.Sprintf(pathRepoCronJobs, c.addr, owner, repo)
 	return out, c.post(uri, in, out)
 }
 

@@ -17,9 +17,11 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cron"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -61,12 +63,18 @@ func PostCronJob(c *gin.Context) {
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
-		NextExec:  0, // immediately run for the first time
 	}
 	if err := cronJob.Validate(); err != nil {
 		c.String(400, "Error inserting cron-job. validate failed: %s", err)
 		return
 	}
+
+	nextExec, err := cron.CalcNewNext(in.Schedule, time.Now())
+	if err != nil {
+		c.String(400, "Error inserting cron-job. schedule could not parsed: %s", err)
+		return
+	}
+	cronJob.NextExec = nextExec.Unix()
 
 	if in.Branch != "" {
 		// check if branch exists on remote
@@ -109,7 +117,6 @@ func PatchCronJob(c *gin.Context) {
 		c.String(404, "Error getting cron-job %d. %s", id, err)
 		return
 	}
-	cronJob.NextExec = 0
 	if in.Branch != "" {
 		// check if branch exists on remote
 		_, err := remote.BranchCommit(c, user, repo, in.Branch)
@@ -121,6 +128,12 @@ func PatchCronJob(c *gin.Context) {
 	}
 	if in.Schedule != "" {
 		cronJob.Schedule = in.Schedule
+		nextExec, err := cron.CalcNewNext(in.Schedule, time.Now())
+		if err != nil {
+			c.String(400, "Error inserting cron-job. schedule could not parsed: %s", err)
+			return
+		}
+		cronJob.NextExec = nextExec.Unix()
 	}
 	if in.Title != "" {
 		cronJob.Title = in.Title

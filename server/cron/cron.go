@@ -63,15 +63,23 @@ func Start(ctx context.Context, store store.Store) error {
 	}
 }
 
+// CalcNewNext pars schedule and calculate next exec time
+func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
+	c, err := cron.Parse(schedule)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("cron parse schedule: %v", err)
+	}
+	return c.Next(now), nil
+}
+
 func runJob(job *model.CronJob, store store.Store, now time.Time) error {
 	log.Trace().Msgf("Cron: run job [%d]", job.ID)
 	ctx := context.Background()
 
-	schedule, err := cron.Parse(job.Schedule)
+	newNext, err := CalcNewNext(job.Schedule, now)
 	if err != nil {
-		return fmt.Errorf("cron parse schedule: %v", err)
+		return err
 	}
-	newNext := schedule.Next(now)
 
 	// try to get lock on cron job
 	gotLock, err := store.CronGetLock(job, newNext.Unix())
