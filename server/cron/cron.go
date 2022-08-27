@@ -116,15 +116,11 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 	}
 
 	return repo, &model.Build{
-		Event:   model.EventCron,
-		Commit:  commit,
-		Ref:     "refs/heads/" + job.Branch,
-		Branch:  job.Branch,
-		Message: job.Title,
-		// Avatar:    avatarFromUser(cj.AuthorID),
-		// Author:    getUser(cj.AuthorID),
-		// Email:     getMail(cj.AuthorID),
+		Event:     model.EventCron,
+		Commit:    commit,
+		Ref:       "refs/heads/" + job.Branch,
+		Branch:    job.Branch,
+		Message:   job.Title,
 		Timestamp: job.NextExec,
-		Sender:    "TODO: Cron?",
 	}, nil
 }
