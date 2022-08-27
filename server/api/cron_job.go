@@ -19,6 +19,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -45,6 +46,9 @@ func GetCronJob(c *gin.Context) {
 // PostCronJob persists the cron-job to the database.
 func PostCronJob(c *gin.Context) {
 	repo := session.Repo(c)
+	user := session.User(c)
+	store := store.FromContext(c)
+	remote := server.Config.Services.Remote
 
 	in := new(model.CronJob)
 	if err := c.Bind(in); err != nil {
@@ -54,19 +58,26 @@ func PostCronJob(c *gin.Context) {
 	cronJob := &model.CronJob{
 		RepoID:    repo.ID,
 		Title:     in.Title,
-		CreatorID: session.User(c).ID,
+		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
 		NextExec:  0, // immediately run for the first time
 	}
 	if err := cronJob.Validate(); err != nil {
-		c.String(400, "Error inserting cron-job. %s", err)
+		c.String(400, "Error inserting cron-job. validate failed: %s", err)
 		return
 	}
 
-	// TODO: check if branch exists on remote
+	if in.Branch != "" {
+		// check if branch exists on remote
+		_, err := remote.BranchCommit(c, user, repo, in.Branch)
+		if err != nil {
+			c.String(400, "Error inserting cron-job. branch not resolved: %s", err)
+			return
+		}
+	}
 
-	if err := store.FromContext(c).CronCreate(cronJob); err != nil {
+	if err := store.CronCreate(cronJob); err != nil {
 		c.String(500, "Error inserting cron-job %q. %s", in.Title, err)
 		return
 	}
@@ -76,7 +87,10 @@ func PostCronJob(c *gin.Context) {
 // PatchCronJob updates the cron-job in the database.
 func PatchCronJob(c *gin.Context) {
 	repo := session.Repo(c)
+	user := session.User(c)
 	store := store.FromContext(c)
+	remote := server.Config.Services.Remote
+
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
 		c.String(400, "Error parsing cron-job id. %s", err)
@@ -97,7 +111,12 @@ func PatchCronJob(c *gin.Context) {
 	}
 	cronJob.NextExec = 0
 	if in.Branch != "" {
-		// TODO: check if branch exists on remote
+		// check if branch exists on remote
+		_, err := remote.BranchCommit(c, user, repo, in.Branch)
+		if err != nil {
+			c.String(400, "Error inserting cron-job. branch not resolved: %s", err)
+			return
+		}
 		cronJob.Branch = in.Branch
 	}
 	if in.Schedule != "" {
@@ -106,9 +125,10 @@ func PatchCronJob(c *gin.Context) {
 	if in.Title != "" {
 		cronJob.Title = in.Title
 	}
+	cronJob.CreatorID = user.ID
 
 	if err := cronJob.Validate(); err != nil {
-		c.String(400, "Error updating cron-job. %s", err)
+		c.String(400, "Error inserting cron-job. validate failed: %s", err)
 		return
 	}
 	if err := store.CronUpdate(repo, cronJob); err != nil {

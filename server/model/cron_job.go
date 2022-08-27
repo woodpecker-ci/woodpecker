@@ -38,10 +38,6 @@ func (CronJob) TableName() string {
 }
 
 func (c *CronJob) Validate() error {
-	if c.Branch == "" {
-		return fmt.Errorf("branch is required")
-	}
-
 	if c.Title == "" {
 		return fmt.Errorf("title is required")
 	}

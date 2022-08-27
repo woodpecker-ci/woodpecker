@@ -101,6 +101,7 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 	}
 
 	if job.Branch == "" {
+		// fallback to repo default branch
 		job.Branch = repo.Branch
 	}
 
