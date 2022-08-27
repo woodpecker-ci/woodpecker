@@ -277,10 +277,11 @@ func TestRepoCount(t *testing.T) {
 }
 
 func TestRepoBatch(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Redirection))
 	defer closer()
 
 	if !assert.NoError(t, store.CreateRepo(&model.Repo{
+		RemoteID: "5",
 		UserID:   1,
 		FullName: "foo/bar",
 		Owner:    "foo",
@@ -292,6 +293,7 @@ func TestRepoBatch(t *testing.T) {
 
 	repos := []*model.Repo{
 		{
+			RemoteID: "5",
 			UserID:   1,
 			FullName: "foo/bar",
 			Owner:    "foo",
@@ -306,6 +308,7 @@ func TestRepoBatch(t *testing.T) {
 			},
 		},
 		{
+			RemoteID: "6",
 			UserID:   1,
 			FullName: "bar/baz",
 			Owner:    "bar",
@@ -313,6 +316,7 @@ func TestRepoBatch(t *testing.T) {
 			IsActive: true,
 		},
 		{
+			RemoteID: "7",
 			UserID:   1,
 			FullName: "baz/qux",
 			Owner:    "baz",
@@ -320,6 +324,7 @@ func TestRepoBatch(t *testing.T) {
 			IsActive: true,
 		},
 		{
+			RemoteID: "8",
 			UserID:   0, // not activated repos do hot have a user id assigned
 			FullName: "baz/notes",
 			Owner:    "baz",
@@ -337,6 +342,7 @@ func TestRepoBatch(t *testing.T) {
 	assert.True(t, perm.Admin)
 
 	repo := &model.Repo{
+		RemoteID: "5",
 		FullName: "foo/bar",
 		Owner:    "foo",
 		Name:     "bar",
@@ -380,7 +386,8 @@ func TestRepoCrud(t *testing.T) {
 		new(model.File),
 		new(model.Secret),
 		new(model.Registry),
-		new(model.Config))
+		new(model.Config),
+		new(model.Redirection))
 	defer closer()
 
 	repo := model.Repo{
