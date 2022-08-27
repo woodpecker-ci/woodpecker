@@ -458,6 +458,12 @@ func TestConstraints(t *testing.T) {
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
+		{
+			desc: "filter cron by default constraint",
+			conf: "{}",
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron}},
+			want: false,
+		},
 	}
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
