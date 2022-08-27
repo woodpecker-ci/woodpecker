@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -59,7 +59,7 @@ func registryCreate(c *cli.Context) error {
 	}
 	if strings.HasPrefix(registry.Password, "@") {
 		path := strings.TrimPrefix(registry.Password, "@")
-		out, ferr := ioutil.ReadFile(path)
+		out, ferr := os.ReadFile(path)
 		if ferr != nil {
 			return ferr
 		}

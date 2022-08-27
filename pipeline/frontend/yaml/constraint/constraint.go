@@ -53,10 +53,6 @@ type (
 	}
 )
 
-func (l List) IsEmpty() bool {
-	return len(l.Include) == 0 && len(l.Exclude) == 0
-}
-
 func (when *When) IsEmpty() bool {
 	return len(when.Constraints) == 0
 }
@@ -164,6 +160,11 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	}
 
 	return match
+}
+
+// IsEmpty return tru if constrain has nothing set
+func (c List) IsEmpty() bool {
+	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
 
 // Match returns true if the string matches the include patterns and does not
