@@ -135,14 +135,16 @@
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
                 "branch": {
-                    "branch": "Branch (uses default branch if empty)"
+                    "title": "Branch",
+                    "placeholder": "Branch (uses default branch if empty)"
                 },
                 "title": {
                     "title": "Title",
                     "placeholder": "Title of the cron job"
                 },
                 "schedule": {
-                    "schedule": "Schedule"
+                    "title": "Schedule (based on UTC)",
+                    "placeholder": "Schedule"
                 }
             },
             "badge": {

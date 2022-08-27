@@ -54,17 +54,17 @@
           />
         </InputField>
 
-        <InputField :label="$t('repo.settings.crons.branch.branch')">
-          <TextField v-model="selectedCron.branch" :placeholder="$t('repo.settings.crons.branch.branch')" />
+        <InputField :label="$t('repo.settings.crons.branch.title')">
+          <TextField v-model="selectedCron.branch" :placeholder="$t('repo.settings.crons.branch.placeholder')" />
         </InputField>
 
         <InputField
-          :label="$t('repo.settings.crons.schedule.schedule')"
+          :label="$t('repo.settings.crons.schedule.title')"
           docs-url="https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format"
         >
           <TextField
             v-model="selectedCron.schedule"
-            :placeholder="$t('repo.settings.crons.schedule.schedule')"
+            :placeholder="$t('repo.settings.crons.schedule.placeholder')"
             required
           />
         </InputField>
