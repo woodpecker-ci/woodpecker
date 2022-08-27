@@ -40,6 +40,7 @@ declare module '@vue/runtime-core' {
     IIcBaselineEdit: typeof import('~icons/ic/baseline-edit')['default']
     IIcBaselineHealing: typeof import('~icons/ic/baseline-healing')['default']
     IIconoirArrowLeft: typeof import('~icons/iconoir/arrow-left')['default']
+    IIconParkOutlineAlarmClock: typeof import('~icons/icon-park-outline/alarm-clock')['default']
     IIcRoundLightMode: typeof import('~icons/ic/round-light-mode')['default']
     IIcSharpTimelapse: typeof import('~icons/ic/sharp-timelapse')['default']
     IIcTwotoneAdd: typeof import('~icons/ic/twotone-add')['default']

@@ -204,7 +204,8 @@
                 "push": "Push",
                 "tag": "Tag",
                 "pr": "Pull Request",
-                "deploy": "Deploy"
+                "deploy": "Deploy",
+                "cron": "Cron"
             }
         }
     },
