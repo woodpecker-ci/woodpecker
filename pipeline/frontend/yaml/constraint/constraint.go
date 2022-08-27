@@ -68,7 +68,13 @@ func (when *When) Match(metadata frontend.Metadata) bool {
 			return true
 		}
 	}
-	return when.IsEmpty()
+
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata)
+	}
+	return false
 }
 
 func (when *When) IncludesStatus(status string) bool {
