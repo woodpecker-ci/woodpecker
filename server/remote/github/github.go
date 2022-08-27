@@ -503,7 +503,7 @@ func (c *client) BranchCommit(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return "", err
 	}
-	return *b.Commit.SHA, nil
+	return b.GetCommit().GetSHA(), nil
 }
 
 // Hook parses the post-commit hook from the Request body
