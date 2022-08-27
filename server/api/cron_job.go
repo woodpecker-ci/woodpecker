@@ -135,7 +135,7 @@ func PatchCronJob(c *gin.Context) {
 		c.String(500, "Error updating cron-job %q. %s", in.Title, err)
 		return
 	}
-	c.JSON(200, in)
+	c.JSON(200, cronJob)
 }
 
 // GetCronJobList gets the cron-job list from the database and writes
