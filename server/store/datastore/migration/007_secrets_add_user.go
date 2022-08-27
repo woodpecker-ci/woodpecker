@@ -18,21 +18,21 @@ import (
 	"xorm.io/xorm"
 )
 
-type SecretV006 struct {
+type SecretV007 struct {
 	Owner  string `json:"-"    xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
 	RepoID int64  `json:"-"    xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
 	Name   string `json:"name" xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 }
 
 // TableName return database table name for xorm
-func (SecretV006) TableName() string {
+func (SecretV007) TableName() string {
 	return "secrets"
 }
 
 var alterTableSecretsAddUserCol = task{
 	name: "alter-table-add-secrets-user-id",
 	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync2(new(SecretV006)); err != nil {
+		if err := sess.Sync2(new(SecretV007)); err != nil {
 			return err
 		}
 		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {
