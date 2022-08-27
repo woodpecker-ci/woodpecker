@@ -472,9 +472,10 @@ func (c *client) CronList(owner, repo string) ([]*CronJob, error) {
 	return out, c.get(uri, &out)
 }
 
-func (c *client) CronCreate(owner, repo string, in *CronJob) error {
+func (c *client) CronCreate(owner, repo string, in *CronJob) (*CronJob, error) {
+	out := new(CronJob)
 	uri := fmt.Sprintf(pathRepoCronJob, c.addr, owner, repo, in.ID)
-	return c.post(uri, in, nil)
+	return out, c.post(uri, in, out)
 }
 
 func (c *client) CronUpdate(owner, repo string, in *CronJob) (*CronJob, error) {

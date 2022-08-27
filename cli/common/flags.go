@@ -65,3 +65,9 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 		Hidden: len(hidden) != 0,
 	}
 }
+
+// specify repository
+var RepoFlag = &cli.StringFlag{
+	Name:  "repository",
+	Usage: "repository name (e.g. octocat/hello-world)",
+}

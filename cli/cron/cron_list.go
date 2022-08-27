@@ -1,4 +1,4 @@
-package registry
+package cron
 
 import (
 	"html/template"
@@ -10,27 +10,21 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display registry info",
+var cronListCmd = &cli.Command{
+	Name:      "ls",
+	Usage:     "list registries",
 	ArgsUsage: "[repo/name]",
-	Action:    registryInfo,
+	Action:    cronList,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
-		&cli.StringFlag{
-			Name:  "hostname",
-			Usage: "registry hostname",
-			Value: "docker.io",
-		},
-		common.FormatFlag(tmplRegistryList, true),
+		common.FormatFlag(tmplCronList, true),
 	),
 }
 
-func registryInfo(c *cli.Context) error {
+func cronList(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
-		reponame = c.String("repository")
 		format   = c.String("format") + "\n"
+		reponame = c.String("repository")
 	)
 	if reponame == "" {
 		reponame = c.Args().First()
@@ -43,7 +37,7 @@ func registryInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry, err := client.Registry(owner, name, hostname)
+	list, err := client.CronList(owner, name)
 	if err != nil {
 		return err
 	}
@@ -51,5 +45,18 @@ func registryInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, registry)
+	for _, cron := range list {
+		if err := tmpl.Execute(os.Stdout, cron); err != nil {
+			return err
+		}
+	}
+	return nil
 }
+
+// template for build list information
+var tmplCronList = "\x1b[33m{{ .Title }} \x1b[0m" + `
+ID: {{ .ID }}
+Branch: {{ .Branch }}
+Schedule: {{ .Schedule }}
+NextExec: {{ .NextExec }}
+`

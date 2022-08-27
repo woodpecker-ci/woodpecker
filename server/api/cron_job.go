@@ -81,7 +81,7 @@ func PostCronJob(c *gin.Context) {
 		c.String(500, "Error inserting cron-job %q. %s", in.Title, err)
 		return
 	}
-	c.JSON(200, in)
+	c.JSON(200, cronJob)
 }
 
 // PatchCronJob updates the cron-job in the database.

@@ -1,4 +1,4 @@
-package registry
+package cron
 
 import (
 	"html/template"
@@ -10,25 +10,25 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryInfoCmd = &cli.Command{
+var cronInfoCmd = &cli.Command{
 	Name:      "info",
-	Usage:     "display registry info",
+	Usage:     "display cron info",
 	ArgsUsage: "[repo/name]",
-	Action:    registryInfo,
+	Action:    cronInfo,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
 		&cli.StringFlag{
-			Name:  "hostname",
-			Usage: "registry hostname",
-			Value: "docker.io",
+			Name:     "id",
+			Usage:    "cron job id",
+			Required: true,
 		},
-		common.FormatFlag(tmplRegistryList, true),
+		common.FormatFlag(tmplCronList, true),
 	),
 }
 
-func registryInfo(c *cli.Context) error {
+func cronInfo(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
+		jobID    = c.Int64("id")
 		reponame = c.String("repository")
 		format   = c.String("format") + "\n"
 	)
@@ -43,7 +43,7 @@ func registryInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry, err := client.Registry(owner, name, hostname)
+	cron, err := client.CronGet(owner, name, jobID)
 	if err != nil {
 		return err
 	}
@@ -51,5 +51,5 @@ func registryInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, registry)
+	return tmpl.Execute(os.Stdout, cron)
 }

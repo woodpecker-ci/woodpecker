@@ -1,30 +1,32 @@
-package registry
+package cron
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var registryDeleteCmd = &cli.Command{
+var cronDeleteCmd = &cli.Command{
 	Name:      "rm",
-	Usage:     "remove a registry",
+	Usage:     "remove a cron",
 	ArgsUsage: "[repo/name]",
-	Action:    registryDelete,
+	Action:    cronDelete,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
 		&cli.StringFlag{
-			Name:  "hostname",
-			Usage: "registry hostname",
-			Value: "docker.io",
+			Name:     "id",
+			Usage:    "cron job id",
+			Required: true,
 		},
 	),
 }
 
-func registryDelete(c *cli.Context) error {
+func cronDelete(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
+		jobID    = c.Int64("id")
 		reponame = c.String("repository")
 	)
 	if reponame == "" {
@@ -38,5 +40,11 @@ func registryDelete(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return client.RegistryDelete(owner, name, hostname)
+	err = client.CronDelete(owner, name, jobID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Success")
+	return nil
 }
