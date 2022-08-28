@@ -32,7 +32,7 @@ type CronJob struct {
 	Branch    string `json:"branch"`
 }
 
-// TableName return database table name for xorm
+// TableName returns the database table name for xorm
 func (CronJob) TableName() string {
 	return "cron_jobs"
 }

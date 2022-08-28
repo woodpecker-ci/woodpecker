@@ -29,14 +29,14 @@ import (
 )
 
 const (
-	// checkTime specify the interval woodpecker look for new cron jobs to exec
+	// checkTime specifies the interval woodpecker checks for new cron jobs to exec
 	checkTime = 10 * time.Second
 
-	// checkItems specify the jobs to retrieve per check interval from database
+	// checkItems specifies the batch size of jobs to retrieve per check from database
 	checkItems = 10
 )
 
-// Start starts the cron functionality
+// Start starts the cron scheduler loop
 func Start(ctx context.Context, store store.Store) error {
 	for {
 		select {
@@ -63,7 +63,7 @@ func Start(ctx context.Context, store store.Store) error {
 	}
 }
 
-// CalcNewNext pars schedule and calculate next exec time
+// CalcNewNext parses a cron string and calculates the next exec time based on it
 func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	c, err := cron.Parse(schedule)
 	if err != nil {
@@ -109,7 +109,7 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 	}
 
 	if job.Branch == "" {
-		// fallback to repo default branch
+		// fallback to the repos default branch
 		job.Branch = repo.Branch
 	}
 

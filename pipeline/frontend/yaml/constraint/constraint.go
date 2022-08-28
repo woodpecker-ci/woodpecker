@@ -162,7 +162,7 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	return match
 }
 
-// IsEmpty return tru if constrain has nothing set
+// IsEmpty return true if a constraint has no conditions
 func (c List) IsEmpty() bool {
 	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
