@@ -58,7 +58,7 @@ At the minimum you need the following information:
 ```ini
 # .env for the agent
 WOODPECKER_AGENT_SECRET=replace_with_your_server_secret
-WOODPECKER_HOST=replace_with_your_server_address:9000
+WOODPECKER_SERVER=replace_with_your_server_address:9000
 ```
 
 ## Running the agent
