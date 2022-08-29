@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Client is used to communicate with a Drone server.
+// Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
 	SetClient(*http.Client)
