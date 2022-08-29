@@ -186,13 +186,11 @@
           "oneOf": [
             {
               "type": "array",
-              "items": {
-                "enum": ["push", "pull_request", "tag", "deployment"]
-              },
-              "minLength": 1
+              "minLength": 1,
+              "items": { "$ref": "#/definitions/event_enum" }
             },
             {
-              "enum": ["push", "pull_request", "tag", "deployment"]
+              "$ref": "#/definitions/event_enum"
             }
           ]
         },
@@ -269,6 +267,10 @@
           ]
         }
       }
+    },
+    "event_enum": {
+      "default": ["push", "pull_request", "tag", "deployment"],
+      "enum": ["push", "pull_request", "tag", "deployment", "cron"]
     },
     "step_image": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
