@@ -297,7 +297,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 
 // BranchCommit returns sha of commit on top of the specified branch
 func (c *config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	// TODO: implement
+	// TODO(1138): implement
 	return "", fmt.Errorf("missing implementation")
 }
 
