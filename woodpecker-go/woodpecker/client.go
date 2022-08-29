@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -522,7 +521,7 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 			return nil, derr
 		}
 		buf := bytes.NewBuffer(decoded)
-		req.Body = ioutil.NopCloser(buf)
+		req.Body = io.NopCloser(buf)
 		req.ContentLength = int64(len(decoded))
 		req.Header.Set("Content-Length", strconv.Itoa(len(decoded)))
 		req.Header.Set("Content-Type", "application/json")
@@ -533,7 +532,7 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 	}
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
-		out, _ := ioutil.ReadAll(resp.Body)
+		out, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
 	}
 	return resp.Body, nil
