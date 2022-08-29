@@ -24,8 +24,8 @@ var cronUpdateCmd = &cli.Command{
 			Required: true,
 		},
 		&cli.StringFlag{
-			Name:  "title",
-			Usage: "cron job title",
+			Name:  "name",
+			Usage: "cron job name",
 		},
 		&cli.StringFlag{
 			Name:  "branch",
@@ -43,7 +43,7 @@ func cronUpdate(c *cli.Context) error {
 	var (
 		reponame = c.String("repository")
 		jobID    = c.Int64("id")
-		title    = c.String("title")
+		jobName  = c.String("name")
 		branch   = c.String("branch")
 		schedule = c.String("schedule")
 		format   = c.String("format") + "\n"
@@ -61,7 +61,7 @@ func cronUpdate(c *cli.Context) error {
 	}
 	cron := &woodpecker.CronJob{
 		ID:       jobID,
-		Title:    title,
+		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,
 	}

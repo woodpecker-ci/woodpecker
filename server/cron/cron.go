@@ -128,9 +128,9 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 		Commit:    commit,
 		Ref:       "refs/heads/" + job.Branch,
 		Branch:    job.Branch,
-		Message:   job.Title,
+		Message:   job.Name,
 		Timestamp: job.NextExec,
-		Sender:    job.Title,
+		Sender:    job.Name,
 		Link:      repo.Link,
 	}, nil
 }

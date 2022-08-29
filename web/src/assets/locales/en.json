@@ -138,9 +138,9 @@
                     "title": "Branch",
                     "placeholder": "Branch (uses default branch if empty)"
                 },
-                "title": {
-                    "title": "Title",
-                    "placeholder": "Title of the cron job"
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the cron job"
                 },
                 "schedule": {
                     "title": "Schedule (based on UTC)",

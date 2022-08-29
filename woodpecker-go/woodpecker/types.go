@@ -167,7 +167,7 @@ type (
 	// CronJob is the JSON data of a cron job
 	CronJob struct {
 		ID        int64  `json:"id"`
-		Title     string `json:"title"`
+		Name      string `json:"name"`
 		RepoID    int64  `json:"repo_id"`
 		CreatorID int64  `json:"creator_id"`
 		NextExec  int64  `json:"next_exec"`

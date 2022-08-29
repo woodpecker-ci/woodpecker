@@ -26,7 +26,7 @@
 
     <div v-if="!selectedCron" class="space-y-4 text-color">
       <ListItem v-for="cron in crons" :key="cron.id" class="items-center">
-        <span>{{ cron.title }}</span>
+        <span>{{ cron.name }}</span>
         <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
           {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span
         >
@@ -45,10 +45,10 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createCron">
-        <InputField :label="$t('repo.settings.crons.title.title')">
+        <InputField :label="$t('repo.settings.crons.name.name')">
           <TextField
-            v-model="selectedCron.title"
-            :placeholder="$t('repo.settings.crons.title.placeholder')"
+            v-model="selectedCron.name"
+            :placeholder="$t('repo.settings.crons.name.placeholder')"
             required
             :disabled="isEditingCron"
           />

@@ -59,7 +59,7 @@ func PostCronJob(c *gin.Context) {
 	}
 	cronJob := &model.CronJob{
 		RepoID:    repo.ID,
-		Title:     in.Title,
+		Name:      in.Name,
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
@@ -86,7 +86,7 @@ func PostCronJob(c *gin.Context) {
 	}
 
 	if err := store.CronCreate(cronJob); err != nil {
-		c.String(500, "Error inserting cron-job %q. %s", in.Title, err)
+		c.String(500, "Error inserting cron-job %q. %s", in.Name, err)
 		return
 	}
 	c.JSON(200, cronJob)
@@ -135,8 +135,8 @@ func PatchCronJob(c *gin.Context) {
 		}
 		cronJob.NextExec = nextExec.Unix()
 	}
-	if in.Title != "" {
-		cronJob.Title = in.Title
+	if in.Name != "" {
+		cronJob.Name = in.Name
 	}
 	cronJob.CreatorID = user.ID
 
@@ -145,7 +145,7 @@ func PatchCronJob(c *gin.Context) {
 		return
 	}
 	if err := store.CronUpdate(repo, cronJob); err != nil {
-		c.String(500, "Error updating cron-job %q. %s", in.Title, err)
+		c.String(500, "Error updating cron-job %q. %s", in.Name, err)
 		return
 	}
 	c.JSON(200, cronJob)

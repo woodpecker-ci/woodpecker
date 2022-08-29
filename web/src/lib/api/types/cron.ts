@@ -1,6 +1,6 @@
 export type Cron = {
   id: number;
-  title: string;
+  name: string;
   branch: string;
   schedule: string;
   next_exec: number;

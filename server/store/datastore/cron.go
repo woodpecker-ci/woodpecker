@@ -23,8 +23,8 @@ import (
 )
 
 func (s storage) CronCreate(job *model.CronJob) error {
-	if job.RepoID == 0 || job.Title == "" {
-		return fmt.Errorf("repoID and Title required")
+	if job.RepoID == 0 || job.Name == "" {
+		return fmt.Errorf("repoID and Name required")
 	}
 	_, err := s.engine.Insert(job)
 	return err

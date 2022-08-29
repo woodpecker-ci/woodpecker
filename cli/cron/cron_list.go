@@ -54,7 +54,7 @@ func cronList(c *cli.Context) error {
 }
 
 // template for build list information
-var tmplCronList = "\x1b[33m{{ .Title }} \x1b[0m" + `
+var tmplCronList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 ID: {{ .ID }}
 Branch: {{ .Branch }}
 Schedule: {{ .Schedule }}
