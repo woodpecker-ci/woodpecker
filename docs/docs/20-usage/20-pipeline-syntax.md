@@ -338,6 +338,14 @@ when:
 
 #### `event`
 
+Default filter steps by event types.
+
+:::info
+**default is: `push, pull_request, tag, deployment`.**
+:::
+
+existing types: `push`, `pull_request`, `tag`, `deployment`, `cron`
+
 Execute a step if the build event is a `tag`:
 
 ```yaml
