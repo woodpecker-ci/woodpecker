@@ -340,7 +340,9 @@ when:
 
 Default filter steps by event types.
 
+:::warning
 **default is: `push, pull_request, tag, deployment`.**
+:::
 
 existing types: `push`, `pull_request`, `tag`, `deployment`, `cron`
 
