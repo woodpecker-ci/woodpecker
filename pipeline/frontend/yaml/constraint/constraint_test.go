@@ -458,6 +458,14 @@ func TestConstraints(t *testing.T) {
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
+		{
+			desc: "no constraints, and event get filtered by default default event filter",
+			conf: "",
+			with: frontend.Metadata{
+				Curr: frontend.Build{Event: "non-default"},
+			},
+			want: false,
+		},
 	}
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
