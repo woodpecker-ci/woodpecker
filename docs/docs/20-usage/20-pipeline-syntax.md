@@ -338,13 +338,13 @@ when:
 
 #### `event`
 
-Default filter steps by event types.
-
 :::info
-**default is: `push, pull_request, tag, deployment`.**
+**By default steps are filtered by following event types:**
+
+`push, pull_request, tag, deployment`.
 :::
 
-existing types: `push`, `pull_request`, `tag`, `deployment`, `cron`
+Available types: `push`, `pull_request`, `tag`, `deployment`, `cron`
 
 Execute a step if the build event is a `tag`:
 
@@ -361,14 +361,14 @@ when:
 +   branch: main
 ```
 
-Execute a step for all non-pull request events:
+Execute a step for multiple events:
 
 ```yaml
 when:
   - event: [push, tag, deployment]
 ```
 
-Execute a step for all build events:
+Execute a step for all pipeline events:
 
 ```yaml
 when:
