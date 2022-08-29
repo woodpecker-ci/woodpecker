@@ -270,7 +270,7 @@
     },
     "event_enum": {
       "default": ["push", "pull_request", "tag", "deployment"],
-      "enum": ["push", "pull_request", "tag", "deployment", "cron"]
+      "enum": ["push", "pull_request", "tag", "deployment"]
     },
     "step_image": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
