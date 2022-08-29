@@ -129,3 +129,14 @@ pipeline:
         repo: test/test
       - event: push
         branch: main
+
+  when-cron-list:
+    image: alpine
+    commands: echo "test"
+    when:
+      event: cron
+      cron:
+        include:
+          - test
+          - hello
+        exclude: hi
