@@ -1,13 +1,16 @@
 # Cron
 
-To enable cron jobs you need at least have push access to the repo.
+To configure cron jobs you need at least push access to the repo.
 
 :::warning
-by default cron wont trigger any step in pipelines, as the default event branch filters it.  
+By default pipelines triggered by cron jobs wont execute any steps in pipelines, as they are not part of the default event filter and you explicitly need to set a `event: cron` filter.
 Read more at: [pipeline-syntax#event](/docs/usage/pipeline-syntax#event)
 :::
 
-1. So to start add the event filter to all steps where you like to run:
+
+## Add a new cron job
+
+1. To create a new cron job adjust your pipeline config(s) and add the event filter to all steps you would like to run with the cron job:
 
     ```diff
      pipeline:
@@ -19,11 +22,16 @@ Read more at: [pipeline-syntax#event](/docs/usage/pipeline-syntax#event)
              from_secret: weblate_token
     +    when:
     +      event: cron
+    +      cron: "name of the cron job" # if you only want to execute this step by a specific cron job
     ```
-
-2. Create a new cron job at repo settings
+1. Create a new cron job in the repository settings:
 
     ![cron settings](./cron-settings.png)
 
-    Schedule syntax can be found at https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format.  
+    The supported schedule syntax can be found at <https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format>. 
+    
     Examples: `@every 5m`, `@daily`, `0 30 * * * *` ...
+
+    :::info
+    Woodpeckers cron syntax starts with seconds instead of minutes (used by most linux cron-jobs).  Example: "At minute 30 every hour" would be `0 30 * * * *` instead of `30 * * * *` 
+    :::
