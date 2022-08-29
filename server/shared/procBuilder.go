@@ -338,10 +338,6 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 }
 
 func metadataBuildFromModelBuild(build *model.Build, includeParent bool) frontend.Build {
-	cron := ""
-	if build.Event == model.EventCron {
-		cron = build.Sender
-	}
 
 	parent := int64(0)
 	if includeParent {
