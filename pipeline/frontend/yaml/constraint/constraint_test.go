@@ -465,7 +465,7 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "filter cron by name",
+			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron, Cron: "job1"}},
 			want: true,
@@ -475,8 +475,17 @@ func TestConstraints(t *testing.T) {
 			conf: "{ event: cron, cron: job2 }",
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron, Cron: "job1"}},
 			want: false,
-		},
-	}
+    },
+    {
+      desc: "no constraints, event gets filtered by default event filter",
+			conf: "",
+			with: frontend.Metadata{
+				Curr: frontend.Build{Event: "non-default"},
+			},
+			want: false,
+		}
+  }
+
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
 			c := parseConstraints(t, test.conf)
