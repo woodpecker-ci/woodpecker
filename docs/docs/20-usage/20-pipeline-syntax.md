@@ -368,7 +368,6 @@ when:
   - event: [push, tag, deployment]
 ```
 
-
 #### `tag`
 
 This filter only applies to tag events.
