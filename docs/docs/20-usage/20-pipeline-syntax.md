@@ -340,7 +340,7 @@ when:
 
 Default filter steps by event types.
 
-:::warning
+:::info
 **default is: `push, pull_request, tag, deployment`.**
 :::
 
@@ -387,6 +387,8 @@ when:
   - event: cron
     cron: sync_*
 ```
+
+[Read more about cron](/docs/usage/cron)
 
 #### `tag`
 
