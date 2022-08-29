@@ -341,10 +341,10 @@ when:
 :::info
 **By default steps are filtered by following event types:**
 
-`push, pull_request, tag, deployment`.
+`push`, `pull_request, `tag`, `deployment`.
 :::
 
-Available types: `push`, `pull_request`, `tag`, `deployment`, `cron`
+Available types: `push`, `pull_request`, `tag`, `deployment`
 
 Execute a step if the build event is a `tag`:
 
@@ -368,12 +368,6 @@ when:
   - event: [push, tag, deployment]
 ```
 
-Execute a step for all pipeline events:
-
-```yaml
-when:
-  - event: [push, pull_request, tag, deployment]
-```
 
 #### `tag`
 
