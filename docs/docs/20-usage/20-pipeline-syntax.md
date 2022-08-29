@@ -338,6 +338,12 @@ when:
 
 #### `event`
 
+Default filter steps by event types.
+
+**default is: `push, pull_request, tag, deployment`.**
+
+existing types: `push`, `pull_request`, `tag`, `deployment`, `cron`
+
 Execute a step if the build event is a `tag`:
 
 ```yaml
@@ -371,6 +377,8 @@ when:
 
 This filter only applys to cron events.
 It filters based on cron names.
+
+Make sure you have "cron" in the event filter.
 
 ```yaml
 when:
