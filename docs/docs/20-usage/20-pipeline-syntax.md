@@ -344,7 +344,7 @@ when:
 `push`, `pull_request, `tag`, `deployment`.
 :::
 
-Available types: `push`, `pull_request`, `tag`, `deployment`
+Available events: `push`, `pull_request`, `tag`, `deployment`
 
 Execute a step if the build event is a `tag`:
 
