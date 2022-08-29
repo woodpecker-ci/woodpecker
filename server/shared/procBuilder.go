@@ -338,7 +338,6 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 }
 
 func metadataBuildFromModelBuild(build *model.Build, includeParent bool) frontend.Build {
-
 	parent := int64(0)
 	if includeParent {
 		parent = build.Parent
