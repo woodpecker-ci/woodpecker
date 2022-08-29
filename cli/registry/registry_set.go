@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -17,10 +17,7 @@ var registryUpdateCmd = &cli.Command{
 	ArgsUsage: "[repo/name]",
 	Action:    registryUpdate,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
@@ -62,7 +59,7 @@ func registryUpdate(c *cli.Context) error {
 	}
 	if strings.HasPrefix(registry.Password, "@") {
 		path := strings.TrimPrefix(registry.Password, "@")
-		out, ferr := ioutil.ReadFile(path)
+		out, ferr := os.ReadFile(path)
 		if ferr != nil {
 			return ferr
 		}
