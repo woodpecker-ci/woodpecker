@@ -155,8 +155,7 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	}
 
 	if metadata.Curr.Event == frontend.EventCron {
-		// cron title is storend in message
-		match = match && c.Cron.Match(metadata.Curr.Commit.Message)
+		match = match && c.Cron.Match(metadata.Curr.Cron)
 	}
 
 	return match
