@@ -19,19 +19,19 @@ import (
 	"xorm.io/xorm"
 )
 
-type RepoV007 struct {
+type RepoV008 struct {
 	RemoteID string `json:"-" xorm:"'remote_id'"`
 }
 
 // TableName return database table name for xorm
-func (RepoV007) TableName() string {
+func (RepoV008) TableName() string {
 	return "repos"
 }
 
 var alterTableReposAddRemoteIDCol = task{
 	name: "alter-table-repos-add-remote-id-col",
 	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync2(new(RepoV007)); err != nil {
+		if err := sess.Sync2(new(RepoV008)); err != nil {
 			return err
 		}
 		return sess.Sync2(new(model.Redirection))
