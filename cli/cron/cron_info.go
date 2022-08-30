@@ -19,7 +19,7 @@ var cronInfoCmd = &cli.Command{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
-			Usage:    "cron job id",
+			Usage:    "cron id",
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),

@@ -72,7 +72,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runJob(job *model.CronJob, store store.Store, now time.Time) error {
+func runJob(job *model.Cron, store store.Store, now time.Time) error {
 	log.Trace().Msgf("Cron: run job [%d]", job.ID)
 	ctx := context.Background()
 
@@ -100,7 +100,7 @@ func runJob(job *model.CronJob, store store.Store, now time.Time) error {
 	return err
 }
 
-func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*model.Repo, *model.Build, error) {
+func createBuild(ctx context.Context, job *model.Cron, store store.Store) (*model.Repo, *model.Build, error) {
 	remote := server.Config.Services.Remote
 
 	repo, err := store.GetRepo(job.RepoID)
@@ -118,7 +118,7 @@ func createBuild(ctx context.Context, job *model.CronJob, store store.Store) (*m
 		return nil, nil, err
 	}
 
-	commit, err := remote.BranchCommit(ctx, creator, repo, job.Branch)
+	commit, err := remote.BranchHead(ctx, creator, repo, job.Branch)
 	if err != nil {
 		return nil, nil, err
 	}

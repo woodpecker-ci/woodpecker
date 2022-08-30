@@ -451,8 +451,8 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 	return branches, nil
 }
 
-// BranchCommit returns sha of commit on top of the specified branch
-func (c *Gitea) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token

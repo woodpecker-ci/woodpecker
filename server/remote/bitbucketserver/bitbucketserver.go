@@ -236,9 +236,9 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchCommit returns sha of commit on top of the specified branch
-func (c *Config) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	// TODO(1138): implement
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): implement #1138
 	return "", fmt.Errorf("missing implementation")
 }
 

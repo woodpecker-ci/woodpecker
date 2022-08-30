@@ -164,8 +164,8 @@ type (
 		Output string `json:"out"`
 	}
 
-	// CronJob is the JSON data of a cron job
-	CronJob struct {
+	// Cron is the JSON data of a cron job
+	Cron struct {
 		ID        int64  `json:"id"`
 		Name      string `json:"name"`
 		RepoID    int64  `json:"repo_id"`

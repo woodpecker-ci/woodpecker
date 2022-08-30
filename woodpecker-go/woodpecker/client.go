@@ -465,20 +465,20 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 	return out, err
 }
 
-func (c *client) CronList(owner, repo string) ([]*CronJob, error) {
-	out := make([]*CronJob, 0, 5)
+func (c *client) CronList(owner, repo string) ([]*Cron, error) {
+	out := make([]*Cron, 0, 5)
 	uri := fmt.Sprintf(pathRepoCronJobs, c.addr, owner, repo)
 	return out, c.get(uri, &out)
 }
 
-func (c *client) CronCreate(owner, repo string, in *CronJob) (*CronJob, error) {
-	out := new(CronJob)
+func (c *client) CronCreate(owner, repo string, in *Cron) (*Cron, error) {
+	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCronJobs, c.addr, owner, repo)
 	return out, c.post(uri, in, out)
 }
 
-func (c *client) CronUpdate(owner, repo string, in *CronJob) (*CronJob, error) {
-	out := new(CronJob)
+func (c *client) CronUpdate(owner, repo string, in *Cron) (*Cron, error) {
+	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCronJob, c.addr, owner, repo, in.ID)
 	err := c.patch(uri, in, out)
 	return out, err
@@ -489,8 +489,8 @@ func (c *client) CronDelete(owner, repo string, cronID int64) error {
 	return c.delete(uri)
 }
 
-func (c *client) CronGet(owner, repo string, cronID int64) (*CronJob, error) {
-	out := new(CronJob)
+func (c *client) CronGet(owner, repo string, cronID int64) (*Cron, error) {
+	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCronJob, c.addr, owner, repo, cronID)
 	return out, c.get(uri, out)
 }

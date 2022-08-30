@@ -22,7 +22,7 @@ import (
 	"xorm.io/builder"
 )
 
-func (s storage) CronCreate(job *model.CronJob) error {
+func (s storage) CronCreate(job *model.Cron) error {
 	if job.RepoID == 0 || job.Name == "" {
 		return fmt.Errorf("repoID and Name required")
 	}
@@ -30,40 +30,40 @@ func (s storage) CronCreate(job *model.CronJob) error {
 	return err
 }
 
-func (s storage) CronFind(repo *model.Repo, id int64) (*model.CronJob, error) {
-	cronJob := &model.CronJob{
+func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
+	cronJob := &model.Cron{
 		RepoID: repo.ID,
 		ID:     id,
 	}
 	return cronJob, wrapGet(s.engine.Get(cronJob))
 }
 
-func (s storage) CronList(repo *model.Repo) ([]*model.CronJob, error) {
-	cronJobs := make([]*model.CronJob, 0, perPage)
+func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
+	cronJobs := make([]*model.Cron, 0, perPage)
 	return cronJobs, s.engine.Where("repo_id = ?", repo.ID).Find(&cronJobs)
 }
 
-func (s storage) CronUpdate(repo *model.Repo, cronJob *model.CronJob) error {
+func (s storage) CronUpdate(repo *model.Repo, cronJob *model.Cron) error {
 	_, err := s.engine.ID(cronJob.ID).AllCols().Update(cronJob)
 	return err
 }
 
 func (s storage) CronDelete(repo *model.Repo, id int64) error {
-	_, err := s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.CronJob))
+	_, err := s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.Cron))
 	return err
 }
 
 // CronList return limited number of jobs based on NextExec
 // is less or equal than unitx timestamp
-func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.CronJob, error) {
-	jobs := make([]*model.CronJob, 0, limit)
+func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, error) {
+	jobs := make([]*model.Cron, 0, limit)
 	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
 }
 
 // CronGetLock try to get a lock by updating NextExec
-func (s storage) CronGetLock(job *model.CronJob, newNextExec int64) (bool, error) {
+func (s storage) CronGetLock(job *model.Cron, newNextExec int64) (bool, error) {
 	cols, err := s.engine.ID(job.ID).Where(builder.Eq{"next_exec": job.NextExec}).
-		Cols("next_exec").Update(&model.CronJob{NextExec: newNextExec})
+		Cols("next_exec").Update(&model.Cron{NextExec: newNextExec})
 	gotLock := cols != 0
 
 	if err == nil && gotLock {

@@ -21,78 +21,78 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/cron"
+	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// GetCronJob gets the cron-job by id from the database and writes
+// GetCron gets a cron job by id from the database and writes
 // to the response in json format.
-func GetCronJob(c *gin.Context) {
+func GetCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron-job id. %s", err)
+		c.String(400, "Error parsing cron id. %s", err)
 		return
 	}
 
-	cronJob, err := store.FromContext(c).CronFind(repo, id)
+	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		c.String(404, "Error getting cron-job %q. %s", id, err)
+		c.String(404, "Error getting cron %q. %s", id, err)
 		return
 	}
-	c.JSON(200, cronJob)
+	c.JSON(200, cron)
 }
 
-// PostCronJob persists the cron-job to the database.
-func PostCronJob(c *gin.Context) {
+// PostCron persists the cron job to the database.
+func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	store := store.FromContext(c)
 	remote := server.Config.Services.Remote
 
-	in := new(model.CronJob)
+	in := new(model.Cron)
 	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, "Error parsing request. %s", err)
 		return
 	}
-	cronJob := &model.CronJob{
+	cron := &model.Cron{
 		RepoID:    repo.ID,
 		Name:      in.Name,
 		CreatorID: user.ID,
 		Schedule:  in.Schedule,
 		Branch:    in.Branch,
 	}
-	if err := cronJob.Validate(); err != nil {
-		c.String(400, "Error inserting cron-job. validate failed: %s", err)
+	if err := cron.Validate(); err != nil {
+		c.String(400, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 
-	nextExec, err := cron.CalcNewNext(in.Schedule, time.Now())
+	nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
 	if err != nil {
-		c.String(400, "Error inserting cron-job. schedule could not parsed: %s", err)
+		c.String(400, "Error inserting cron. schedule could not parsed: %s", err)
 		return
 	}
-	cronJob.NextExec = nextExec.Unix()
+	cron.NextExec = nextExec.Unix()
 
 	if in.Branch != "" {
 		// check if branch exists on remote
-		_, err := remote.BranchCommit(c, user, repo, in.Branch)
+		_, err := remote.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
-			c.String(400, "Error inserting cron-job. branch not resolved: %s", err)
+			c.String(400, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
 	}
 
-	if err := store.CronCreate(cronJob); err != nil {
-		c.String(500, "Error inserting cron-job %q. %s", in.Name, err)
+	if err := store.CronCreate(cron); err != nil {
+		c.String(500, "Error inserting cron %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, cronJob)
+	c.JSON(200, cron)
 }
 
-// PatchCronJob updates the cron-job in the database.
+// PatchCronJob updates the cron job in the database.
 func PatchCronJob(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -101,78 +101,78 @@ func PatchCronJob(c *gin.Context) {
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron-job id. %s", err)
+		c.String(400, "Error parsing cron id. %s", err)
 		return
 	}
 
-	in := new(model.CronJob)
+	in := new(model.Cron)
 	err = c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing request. %s", err)
 		return
 	}
 
-	cronJob, err := store.CronFind(repo, id)
+	cron, err := store.CronFind(repo, id)
 	if err != nil {
-		c.String(404, "Error getting cron-job %d. %s", id, err)
+		c.String(404, "Error getting cron %d. %s", id, err)
 		return
 	}
 	if in.Branch != "" {
 		// check if branch exists on remote
-		_, err := remote.BranchCommit(c, user, repo, in.Branch)
+		_, err := remote.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
-			c.String(400, "Error inserting cron-job. branch not resolved: %s", err)
+			c.String(400, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
-		cronJob.Branch = in.Branch
+		cron.Branch = in.Branch
 	}
 	if in.Schedule != "" {
-		cronJob.Schedule = in.Schedule
-		nextExec, err := cron.CalcNewNext(in.Schedule, time.Now())
+		cron.Schedule = in.Schedule
+		nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
 		if err != nil {
-			c.String(400, "Error inserting cron-job. schedule could not parsed: %s", err)
+			c.String(400, "Error inserting cron. schedule could not parsed: %s", err)
 			return
 		}
-		cronJob.NextExec = nextExec.Unix()
+		cron.NextExec = nextExec.Unix()
 	}
 	if in.Name != "" {
-		cronJob.Name = in.Name
+		cron.Name = in.Name
 	}
-	cronJob.CreatorID = user.ID
+	cron.CreatorID = user.ID
 
-	if err := cronJob.Validate(); err != nil {
-		c.String(400, "Error inserting cron-job. validate failed: %s", err)
+	if err := cron.Validate(); err != nil {
+		c.String(400, "Error inserting cron. validate failed: %s", err)
 		return
 	}
-	if err := store.CronUpdate(repo, cronJob); err != nil {
-		c.String(500, "Error updating cron-job %q. %s", in.Name, err)
+	if err := store.CronUpdate(repo, cron); err != nil {
+		c.String(500, "Error updating cron %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, cronJob)
+	c.JSON(200, cron)
 }
 
-// GetCronJobList gets the cron-job list from the database and writes
+// GetCronList gets the cron job list from the database and writes
 // to the response in json format.
-func GetCronJobList(c *gin.Context) {
+func GetCronList(c *gin.Context) {
 	repo := session.Repo(c)
 	list, err := store.FromContext(c).CronList(repo)
 	if err != nil {
-		c.String(500, "Error getting cron-job list. %s", err)
+		c.String(500, "Error getting cron list. %s", err)
 		return
 	}
 	c.JSON(200, list)
 }
 
-// DeleteCronJob deletes the named cron-job from the database.
-func DeleteCronJob(c *gin.Context) {
+// DeleteCron deletes the named cron job from the database.
+func DeleteCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron-job id. %s", err)
+		c.String(400, "Error parsing cron id. %s", err)
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		c.String(500, "Error deleting cron-job %d. %s", id, err)
+		c.String(500, "Error deleting cron %d. %s", id, err)
 		return
 	}
 	c.String(204, "")

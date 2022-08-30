@@ -24,11 +24,11 @@ import (
 )
 
 func TestCronCreate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.CronJob))
+	store, closer := newTestStore(t, new(model.Cron))
 	defer closer()
 
 	repo := &model.Repo{ID: 1, Name: "repo"}
-	job1 := &model.CronJob{RepoID: repo.ID, CreatorID: 1, Name: "sync", NextExec: 10000}
+	job1 := &model.Cron{RepoID: repo.ID, CreatorID: 1, Name: "sync", NextExec: 10000}
 	assert.NoError(t, store.CronCreate(job1))
 	assert.NotEqualValues(t, 0, job1.ID)
 
@@ -43,7 +43,7 @@ func TestCronCreate(t *testing.T) {
 }
 
 func TestCronListNextExecute(t *testing.T) {
-	store, closer := newTestStore(t, new(model.CronJob))
+	store, closer := newTestStore(t, new(model.Cron))
 	defer closer()
 
 	jobs, err := store.CronListNextExecute(0, 10)
@@ -52,11 +52,11 @@ func TestCronListNextExecute(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	assert.NoError(t, store.CronCreate(&model.CronJob{Name: "some", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.CronJob{Name: "aaaa", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.CronJob{Name: "bbbb", RepoID: 1, NextExec: now}))
-	assert.NoError(t, store.CronCreate(&model.CronJob{Name: "none", RepoID: 1, NextExec: now + 1000}))
-	assert.NoError(t, store.CronCreate(&model.CronJob{Name: "test", RepoID: 1, NextExec: now + 2000}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Name: "some", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Name: "aaaa", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Name: "bbbb", RepoID: 1, NextExec: now}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Name: "none", RepoID: 1, NextExec: now + 1000}))
+	assert.NoError(t, store.CronCreate(&model.Cron{Name: "test", RepoID: 1, NextExec: now + 2000}))
 
 	jobs, err = store.CronListNextExecute(now, 10)
 	assert.NoError(t, err)
@@ -68,15 +68,15 @@ func TestCronListNextExecute(t *testing.T) {
 }
 
 func TestCronGetLock(t *testing.T) {
-	store, closer := newTestStore(t, new(model.CronJob))
+	store, closer := newTestStore(t, new(model.Cron))
 	defer closer()
 
-	nonExistingJob := &model.CronJob{ID: 1000, Name: "locales", NextExec: 10000}
+	nonExistingJob := &model.Cron{ID: 1000, Name: "locales", NextExec: 10000}
 	gotLock, err := store.CronGetLock(nonExistingJob, time.Now().Unix()+100)
 	assert.NoError(t, err)
 	assert.False(t, gotLock)
 
-	job1 := &model.CronJob{RepoID: 1, Name: "some-title", NextExec: 10000}
+	job1 := &model.Cron{RepoID: 1, Name: "some-title", NextExec: 10000}
 	assert.NoError(t, store.CronCreate(job1))
 
 	oldJob := *job1

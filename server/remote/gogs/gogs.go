@@ -284,8 +284,8 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchCommit returns sha of commit on top of the specified branch
-func (c *client) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+// BranchHead returns sha of commit on top of the specified branch
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token

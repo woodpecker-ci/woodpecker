@@ -168,17 +168,17 @@ type Client interface {
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo
-	CronList(owner, repo string) ([]*CronJob, error)
+	CronList(owner, repo string) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id
-	CronGet(owner, repo string, cronID int64) (*CronJob, error)
+	CronGet(owner, repo string, cronID int64) (*Cron, error)
 
 	// CronDelete delete a specific cron job of a repo by id
 	CronDelete(owner, repo string, cronID int64) error
 
 	// CronCreate create a new cron job in a repo
-	CronCreate(owner, repo string, cron *CronJob) (*CronJob, error)
+	CronCreate(owner, repo string, cron *Cron) (*Cron, error)
 
 	// CronUpdate update an existing cron job of a repo
-	CronUpdate(owner, repo string, cron *CronJob) (*CronJob, error)
+	CronUpdate(owner, repo string, cron *Cron) (*Cron, error)
 }

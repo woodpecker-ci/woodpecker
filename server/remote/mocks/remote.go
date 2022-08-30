@@ -53,8 +53,8 @@ func (_m *Remote) Auth(ctx context.Context, token string, secret string) (string
 	return r0, r1
 }
 
-// BranchCommit provides a mock function with given fields: ctx, u, r, branch
-func (_m *Remote) BranchCommit(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+// BranchHead provides a mock function with given fields: ctx, u, r, branch
+func (_m *Remote) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	ret := _m.Called(ctx, u, r, branch)
 
 	var r0 string

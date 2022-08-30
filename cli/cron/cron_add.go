@@ -20,16 +20,16 @@ var cronCreateCmd = &cli.Command{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "name",
-			Usage:    "cron job name",
+			Usage:    "cron name",
 			Required: true,
 		},
 		&cli.StringFlag{
 			Name:  "branch",
-			Usage: "cron job branch",
+			Usage: "cron branch",
 		},
 		&cli.StringFlag{
 			Name:     "schedule",
-			Usage:    "cron job schedule",
+			Usage:    "cron schedule",
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),
@@ -55,7 +55,7 @@ func cronCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	cron := &woodpecker.CronJob{
+	cron := &woodpecker.Cron{
 		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,

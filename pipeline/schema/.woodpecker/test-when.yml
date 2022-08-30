@@ -48,14 +48,6 @@ pipeline:
     when:
       platform: linux/amd64
 
-  when-cron:
-    image: alpine
-    commands:
-      - echo "test"
-    when:
-      cron: "update locales"
-      event: cron
-
   when-platform-array:
     image: alpine
     commands:
@@ -129,6 +121,14 @@ pipeline:
         repo: test/test
       - event: push
         branch: main
+
+  when-cron:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      cron: "update locales"
+      event: cron
 
   when-cron-list:
     image: alpine

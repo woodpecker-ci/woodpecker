@@ -21,9 +21,9 @@ import (
 )
 
 // swagger:model cron_job
-type CronJob struct {
+type Cron struct {
 	ID        int64  `json:"id"                  xorm:"pk autoincr"`
-	Name      string `json:"name"               xorm:"UNIQUE(s) INDEX"`
+	Name      string `json:"name"                xorm:"UNIQUE(s) INDEX"`
 	RepoID    int64  `json:"repo_id"             xorm:"repo_id UNIQUE(s) INDEX"`
 	CreatorID int64  `json:"creator_id"          xorm:"creator_id INDEX"`
 	NextExec  int64  `json:"next_exec"`
@@ -33,11 +33,11 @@ type CronJob struct {
 }
 
 // TableName returns the database table name for xorm
-func (CronJob) TableName() string {
-	return "cron_jobs"
+func (Cron) TableName() string {
+	return "crons"
 }
 
-func (c *CronJob) Validate() error {
+func (c *Cron) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("title is required")
 	}

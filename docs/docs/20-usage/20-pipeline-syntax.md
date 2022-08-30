@@ -341,7 +341,7 @@ when:
 :::info
 **By default steps are filtered by following event types:**
 
-`push`, `pull_request, `tag`, `deployment`.
+`push`, `pull_request`, `tag`, `deployment`.
 :::
 
 Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`
@@ -372,7 +372,7 @@ when:
 
 This filter **only** applies to cron events and filters based on the name of a cron job.
 
-Make sure to have `event: cron` in the filter as well.
+Make sure to have a `event: cron` condition in the `when`-filters as well.
 
 ```yaml
 when:
