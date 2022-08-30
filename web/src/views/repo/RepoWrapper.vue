@@ -91,7 +91,7 @@ async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
-    // no access and not authenticated, redirect to log in
+    // no access and not authenticated, redirect to login
     if (!isAuthenticated) {
       await router.replace({ name: 'login', query: { url: route.fullPath } });
       return;
