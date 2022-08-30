@@ -20,7 +20,7 @@ import (
 	"github.com/robfig/cron"
 )
 
-// swagger:model cron_job
+// swagger:model cron
 type Cron struct {
 	ID        int64  `json:"id"                  xorm:"pk autoincr"`
 	Name      string `json:"name"                xorm:"UNIQUE(s) INDEX"`
