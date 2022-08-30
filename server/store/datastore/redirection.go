@@ -29,5 +29,5 @@ func (s storage) createRedirection(e *xorm.Session, redirect *model.Redirection)
 }
 
 func (s storage) HasRedirectionForRepo(repoID int64, fullName string) (bool, error) {
-	return s.engine.Where("repo_id = ? AND repo_full_name = ?", repoID, fullName).Get(new(model.Redirection))
+	return s.engine.Where("repo_id = ? ", repoID).And("repo_full_name = ?", fullName).Get(new(model.Redirection))
 }
