@@ -3,7 +3,7 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.18'
+  - &golang_image 'golang:1.19'
   - &node_image 'node:16-alpine'
   - &xgo_image 'techknowlogick/xgo:go-1.19.x'
   - &xgo_version 'go-1.19.x'
