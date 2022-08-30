@@ -165,7 +165,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			continue
 		}
 
-		repo, err := s.GetRepoNameFallback(repos[i].RemoteID, repos[i].FullName)
+		repo, err := s.getRepoNameFallback(sess, repos[i].RemoteID, repos[i].FullName)
 		if err != nil && err != RecordNotExist {
 			return err
 		}
