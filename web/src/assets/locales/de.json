@@ -38,7 +38,7 @@
         },
         "settings": {
             "settings": "Einstellungen",
-            "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
+            "not_allowed": "Zugriff auf die Einstellungen dieses Repositories nicht erlaubt",
             "general": {
                 "general": "Allgemein",
                 "project": "Projekt-Einstellungen",
@@ -69,7 +69,7 @@
                     },
                     "private": {
                         "private": "Privat",
-                        "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
+                        "desc": "Nur du und andere Besitzer des Repositories können dieses Projekt sehen."
                     },
                     "internal": {
                         "internal": "Intern",

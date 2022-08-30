@@ -17,7 +17,7 @@ package coding
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -94,7 +94,7 @@ type MergeRequestHook struct {
 }
 
 func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
-	raw, err := ioutil.ReadAll(r.Body)
+	raw, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
 		return nil, nil, err

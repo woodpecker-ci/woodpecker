@@ -24,8 +24,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/mrjones/oauth"
 
@@ -86,7 +86,7 @@ func New(opts Opts) (remote.Remote, error) {
 	var keyFileBytes []byte
 	if opts.ConsumerRSA != "" {
 		var err error
-		keyFileBytes, err = ioutil.ReadFile(opts.ConsumerRSA)
+		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
 		if err != nil {
 			return nil, err
 		}

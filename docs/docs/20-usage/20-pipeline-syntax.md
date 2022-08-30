@@ -100,7 +100,7 @@ pipeline:
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
-```diff
+```sh
 git commit -m "updated README [CI SKIP]"
 ```
 
@@ -234,7 +234,7 @@ Commands of every pipeline step are executed serially as if you would enter them
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```diff
+```sh
 #!/bin/sh
 set -e
 
@@ -244,7 +244,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```bash
+```sh
 docker run --entrypoint=build.sh golang
 ```
 
@@ -315,21 +315,21 @@ pipeline:
 
 Execute a step if the branch is `master` or `develop`:
 
-```diff
+```yaml
 when:
   - branch: [master, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
 
-```diff
+```yaml
 when:
   - branch: prefix/*
 ```
 
 Execute a step using custom include and exclude logic:
 
-```diff
+```yaml
 when:
   - branch:
       include: [ master, release/* ]
@@ -338,9 +338,17 @@ when:
 
 #### `event`
 
+:::info
+**By default steps are filtered by following event types:**
+
+`push`, `pull_request, `tag`, `deployment`.
+:::
+
+Available events: `push`, `pull_request`, `tag`, `deployment`
+
 Execute a step if the build event is a `tag`:
 
-```diff
+```yaml
 when:
   - event: tag
 ```
@@ -353,18 +361,11 @@ when:
 +   branch: main
 ```
 
-Execute a step for all non-pull request events:
+Execute a step for multiple events:
 
-```diff
+```yaml
 when:
   - event: [push, tag, deployment]
-```
-
-Execute a step for all build events:
-
-```diff
-when:
-  - event: [push, pull_request, tag, deployment]
 ```
 
 #### `tag`
@@ -372,7 +373,7 @@ when:
 This filter only applies to tag events.
 Use glob expression to execute a step if the tag name starts with `v`:
 
-```diff
+```yaml
 when:
   - event: tag
     tag: v*
@@ -400,14 +401,14 @@ This condition should be used in conjunction with a [matrix](/docs/usage/matrix-
 
 Execute a step for a specific platform:
 
-```diff
+```yaml
 when:
   - platform: linux/amd64
 ```
 
 Execute a step for a specific platform using wildcards:
 
-```diff
+```yaml
 when:
   - platform:  [ linux/*, windows/amd64 ]
 ```
@@ -416,7 +417,7 @@ when:
 
 Execute a step for deployment events matching the target deployment environment:
 
-```diff
+```yaml
 when:
   - environment: production
   - event: deployment
@@ -426,7 +427,7 @@ when:
 
 Execute a step for a single matrix permutation:
 
-```diff
+```yaml
 when:
   - matrix:
       GO_VERSION: 1.5
@@ -437,7 +438,7 @@ when:
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
-```diff
+```yaml
 when:
   - instance: stage.woodpecker.company.com
 ```
@@ -452,14 +453,14 @@ Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github
 
 Execute a step only on a pipeline with certain files being changed:
 
-```diff
+```yaml
 when:
   - path: "src/*"
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-```diff
+```yaml
 when:
   - path:
       include: [ '.woodpecker/*.yml', '*.ini' ]
@@ -559,7 +560,7 @@ The base attribute defines a shared base volume available to all pipeline steps.
 
 This would be equivalent to the following docker commands:
 
-```bash
+```sh
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest

@@ -1,6 +1,6 @@
 # Databases
 
-The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL or Postgres database.
+The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL/MariaDB or Postgres database.
 
 ## Configure sqlite
 
@@ -17,7 +17,7 @@ services:
 +     - woodpecker-server-data:/var/lib/woodpecker/
 ```
 
-## Configure MySQL
+## Configure MySQL/MariaDB
 
 The below example demonstrates mysql database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
 

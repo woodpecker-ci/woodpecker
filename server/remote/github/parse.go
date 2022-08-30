@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -46,7 +45,7 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 		reader = bytes.NewBufferString(payload)
 	}
 
-	raw, err := ioutil.ReadAll(reader)
+	raw, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, nil, nil, err
 	}

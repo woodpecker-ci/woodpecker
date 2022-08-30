@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -252,7 +251,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 		return nil, json.NewDecoder(resp.Body).Decode(out)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

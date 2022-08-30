@@ -14,7 +14,8 @@
 
 package remote
 
-//go:generate mockery -name Remote -output mocks -case=underscore
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Remote --output mocks --case underscore
 
 import (
 	"context"
