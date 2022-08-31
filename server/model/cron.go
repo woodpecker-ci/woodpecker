@@ -37,6 +37,7 @@ func (Cron) TableName() string {
 	return "crons"
 }
 
+// Validate a cron
 func (c *Cron) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("name is required")
