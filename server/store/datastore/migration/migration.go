@@ -35,7 +35,6 @@ var migrationTasks = []*task{
 	&dropSenders,
 	&alterTableLogUpdateColumnLogDataType,
 	&alterTableSecretsAddUserCol,
-	&alterTableReposAddRemoteIDCol,
 }
 
 var allBeans = []interface{}{
