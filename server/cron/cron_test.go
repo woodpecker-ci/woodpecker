@@ -15,24 +15,52 @@
 package cron
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	mocks_remote "github.com/woodpecker-ci/woodpecker/server/remote/mocks"
+	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
 )
 
 func TestCreateBuild(t *testing.T) {
-	rOld := server.Config.Services.Remote
-	defer func() {
-		server.Config.Services.Remote = rOld
-	}()
-	server.Config.Services.Remote = mocks.NewRemote(t)
+	remote := mocks_remote.NewRemote(t)
+	store := mocks_store.NewStore(t)
+	ctx := context.Background()
 
-	// TODO: mockStore
-	// createBuild(context.TODO(), &model.Cron{}, mockStore)
+	creator := &model.User{
+		ID:    1,
+		Login: "user1",
+	}
+	repo1 := &model.Repo{
+		ID:       1,
+		Name:     "repo1",
+		Owner:    "owner1",
+		FullName: "repo1/owner1",
+		Branch:   "default",
+	}
+
+	// mock things
+	store.On("GetRepo", mock.Anything).Return(repo1, nil)
+	store.On("GetUser", mock.Anything).Return(creator, nil)
+	remote.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
+
+	_, build, err := createBuild(ctx, store, remote, &model.Cron{
+		Name: "test",
+	})
+	assert.NoError(t, err)
+	assert.EqualValues(t, &model.Build{
+		Event:   "cron",
+		Commit:  "sha1",
+		Branch:  "default",
+		Ref:     "refs/heads/default",
+		Message: "test",
+		Sender:  "test",
+	}, build)
 }
 
 func TestCalcNewNext(t *testing.T) {
