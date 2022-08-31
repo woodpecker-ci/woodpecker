@@ -46,12 +46,7 @@
     <div v-else class="space-y-4">
       <form @submit.prevent="createCron">
         <InputField :label="$t('repo.settings.crons.name.name')">
-          <TextField
-            v-model="selectedCron.name"
-            :placeholder="$t('repo.settings.crons.name.placeholder')"
-            required
-            :disabled="isEditingCron"
-          />
+          <TextField v-model="selectedCron.name" :placeholder="$t('repo.settings.crons.name.placeholder')" required />
         </InputField>
 
         <InputField :label="$t('repo.settings.crons.branch.title')">
