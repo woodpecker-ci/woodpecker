@@ -16,7 +16,6 @@ package github
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/google/go-github/v39/github"
 

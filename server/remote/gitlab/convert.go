@@ -19,7 +19,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/xanzy/go-gitlab"
