@@ -26,6 +26,7 @@ type (
 		Environment List
 		Event       List
 		Branch      List
+		Cron        List
 		Status      List
 		Matrix      Map
 		Local       types.BoolTrue
@@ -151,6 +152,10 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 
 	if metadata.Curr.Event != frontend.EventTag {
 		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
+	}
+
+	if metadata.Curr.Event == frontend.EventCron {
+		match = match && c.Cron.Match(metadata.Curr.Cron)
 	}
 
 	return match

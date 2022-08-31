@@ -39,6 +39,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cron"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -184,6 +185,10 @@ func run(c *cli.Context) error {
 	})
 
 	setupMetrics(&g, _store)
+
+	g.Go(func() error {
+		return cron.Start(c.Context, _store)
+	})
 
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {

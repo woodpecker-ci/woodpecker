@@ -451,6 +451,25 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 	return branches, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return "", err
+	}
+
+	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
+}
+
 // Hook parses the incoming Gitea hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
