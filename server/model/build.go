@@ -40,7 +40,7 @@ type Build struct {
 	Title        string       `json:"title"                   xorm:"build_title"`
 	Message      string       `json:"message"                 xorm:"build_message"`
 	Timestamp    int64        `json:"timestamp"               xorm:"build_timestamp"`
-	Sender       string       `json:"sender"                  xorm:"build_sender"` // uses reported user for webhook s and name of cron for cron pipelines
+	Sender       string       `json:"sender"                  xorm:"build_sender"` // uses reported user for webhooks and name of cron for cron pipelines
 	Avatar       string       `json:"author_avatar"           xorm:"build_avatar"`
 	Email        string       `json:"author_email"            xorm:"build_email"`
 	Link         string       `json:"link_url"                xorm:"build_link"`
