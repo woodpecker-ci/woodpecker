@@ -37,6 +37,7 @@
   <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
   <i-ic-baseline-edit v-else-if="name === 'edit'" class="h-6 w-6" />
   <i-ic-baseline-download v-else-if="name === 'download'" class="h-6 w-6" />
+  <i-icon-park-outline-alarm-clock v-else-if="name === 'stopwatch'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -82,6 +83,7 @@ export type IconNames =
   | 'turn-off'
   | 'close'
   | 'edit'
+  | 'stopwatch'
   | 'download';
 
 export default defineComponent({

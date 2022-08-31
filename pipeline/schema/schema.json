@@ -157,29 +157,11 @@
       "properties": {
         "repo": {
           "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#repo",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/definitions/constraint_list"
         },
         "branch": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/definitions/constraint_list"
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
@@ -198,29 +180,31 @@
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
           "type": "string"
         },
+        "cron": {
+          "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#cron",
+          "$ref": "#/definitions/constraint_list"
+        },
         "status": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#status",
-          "type": "array",
-          "items": {
-            "enum": ["success", "failure"]
-          }
-        },
-        "platform": {
-          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#platform",
           "oneOf": [
             {
               "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
+              "minLength": 1,
+              "items": { "type": "string", "enum": ["success", "failure"] }
             },
-            { "type": "string" }
+            {
+              "type": "string",
+              "enum": ["success", "failure"]
+            }
           ]
+        },
+        "platform": {
+          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#platform",
+          "$ref": "#/definitions/constraint_list"
         },
         "environment": {
           "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "matrix": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/matrix-pipelines",
@@ -231,7 +215,7 @@
         },
         "instance": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#instance",
-          "type": "string"
+          "$ref": "#/definitions/constraint_list"
         },
         "path": {
           "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#path",
@@ -270,7 +254,49 @@
     },
     "event_enum": {
       "default": ["push", "pull_request", "tag", "deployment"],
-      "enum": ["push", "pull_request", "tag", "deployment"]
+      "enum": ["push", "pull_request", "tag", "deployment", "cron"]
+    },
+    "constraint_list": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": { "type": "string" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": { "type": "string" }
+                }
+              ]
+            },
+            "exclude": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": { "type": "string" }
+                }
+              ]
+            }
+          }
+        }
+      ]
     },
     "step_image": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",

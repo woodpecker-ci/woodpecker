@@ -29,6 +29,8 @@ const (
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
 	pathRepoRegistry   = "%s/api/repos/%s/%s/registry/%s"
+	pathRepoCrons      = "%s/api/repos/%s/%s/cron"
+	pathRepoCron       = "%s/api/repos/%s/%s/cron/%d"
 	pathOrgSecrets     = "%s/api/orgs/%s/secrets"
 	pathOrgSecret      = "%s/api/orgs/%s/secrets/%s"
 	pathGlobalSecrets  = "%s/api/secrets"
@@ -461,6 +463,36 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 	uri := fmt.Sprintf(pathLogLevel, c.addr)
 	err := c.post(uri, in, out)
 	return out, err
+}
+
+func (c *client) CronList(owner, repo string) ([]*Cron, error) {
+	out := make([]*Cron, 0, 5)
+	uri := fmt.Sprintf(pathRepoCrons, c.addr, owner, repo)
+	return out, c.get(uri, &out)
+}
+
+func (c *client) CronCreate(owner, repo string, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCrons, c.addr, owner, repo)
+	return out, c.post(uri, in, out)
+}
+
+func (c *client) CronUpdate(owner, repo string, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCron, c.addr, owner, repo, in.ID)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+func (c *client) CronDelete(owner, repo string, cronID int64) error {
+	uri := fmt.Sprintf(pathRepoCron, c.addr, owner, repo, cronID)
+	return c.delete(uri)
+}
+
+func (c *client) CronGet(owner, repo string, cronID int64) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCron, c.addr, owner, repo, cronID)
+	return out, c.get(uri, out)
 }
 
 //

@@ -26,10 +26,7 @@ var secretListCmd = &cli.Command{
 			Name:  "organization",
 			Usage: "organization name (e.g. octocat)",
 		},
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+		common.RepoFlag,
 		common.FormatFlag(tmplSecretList, true),
 	),
 }

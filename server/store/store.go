@@ -153,6 +153,15 @@ type Store interface {
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
 
+	// Cron
+	CronCreate(*model.Cron) error
+	CronFind(*model.Repo, int64) (*model.Cron, error)
+	CronList(*model.Repo) ([]*model.Cron, error)
+	CronUpdate(*model.Repo, *model.Cron) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.Cron, error)
+	CronGetLock(*model.Cron, int64) (bool, error)
+
 	// Store operations
 	Ping() error
 	Close() error

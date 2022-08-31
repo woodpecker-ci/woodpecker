@@ -77,6 +77,9 @@ type Remote interface {
 	// Branches returns the names of all branches for the named repository.
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
 
+	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
+
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)

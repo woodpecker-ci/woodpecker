@@ -341,10 +341,10 @@ when:
 :::info
 **By default steps are filtered by following event types:**
 
-`push`, `pull_request, `tag`, `deployment`.
+`push`, `pull_request`, `tag`, `deployment`.
 :::
 
-Available events: `push`, `pull_request`, `tag`, `deployment`
+Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`
 
 Execute a step if the build event is a `tag`:
 
@@ -367,6 +367,20 @@ Execute a step for multiple events:
 when:
   - event: [push, tag, deployment]
 ```
+
+#### `cron`
+
+This filter **only** applies to cron events and filters based on the name of a cron job.
+
+Make sure to have a `event: cron` condition in the `when`-filters as well.
+
+```yaml
+when:
+  - event: cron
+    cron: sync_* # name of your cron job
+```
+
+[Read more about cron](/docs/usage/cron)
 
 #### `tag`
 
