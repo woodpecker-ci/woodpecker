@@ -112,7 +112,7 @@ func apiRoutes(e *gin.Engine) {
 			repo.GET("/cron", session.MustPush, api.GetCronList)
 			repo.POST("/cron", session.MustPush, api.PostCron)
 			repo.GET("/cron/:cron", session.MustPush, api.GetCron)
-			repo.PATCH("/cron/:cron", session.MustPush, api.PatchCronJob)
+			repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
 			repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
 
 			// requires admin permissions

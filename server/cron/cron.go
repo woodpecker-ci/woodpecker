@@ -29,10 +29,10 @@ import (
 )
 
 const (
-	// checkTime specifies the interval woodpecker checks for new cron jobs to exec
+	// checkTime specifies the interval woodpecker checks for new crons to exec
 	checkTime = 10 * time.Second
 
-	// checkItems specifies the batch size of jobs to retrieve per check from database
+	// checkItems specifies the batch size of crons to retrieve per check from database
 	checkItems = 10
 )
 
@@ -45,17 +45,17 @@ func Start(ctx context.Context, store store.Store) error {
 		case <-time.After(checkTime):
 			go func() {
 				now := time.Now()
-				log.Trace().Msg("Cron: fetch next jobs")
+				log.Trace().Msg("Cron: fetch next crons")
 
-				jobs, err := store.CronListNextExecute(now.Unix(), checkItems)
+				crons, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
-					log.Error().Err(err).Int64("now", now.Unix()).Msg("obtain cron job list")
+					log.Error().Err(err).Int64("now", now.Unix()).Msg("obtain cron cron list")
 					return
 				}
 
-				for _, job := range jobs {
-					if err := runJob(job, store, now); err != nil {
-						log.Error().Err(err).Int64("jobID", job.ID).Msg("run cron job failed")
+				for _, cron := range crons {
+					if err := runCron(cron, store, now); err != nil {
+						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
 			}()
@@ -77,26 +77,26 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runJob(job *model.Cron, store store.Store, now time.Time) error {
-	log.Trace().Msgf("Cron: run job [%d]", job.ID)
+func runCron(cron *model.Cron, store store.Store, now time.Time) error {
+	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
-	newNext, err := CalcNewNext(job.Schedule, now)
+	newNext, err := CalcNewNext(cron.Schedule, now)
 	if err != nil {
 		return err
 	}
 
-	// try to get lock on cron job
-	gotLock, err := store.CronGetLock(job, newNext.Unix())
+	// try to get lock on cron
+	gotLock, err := store.CronGetLock(cron, newNext.Unix())
 	if err != nil {
 		return err
 	}
 	if !gotLock {
-		// an other go routine caught it
+		// another go routine caught it
 		return nil
 	}
 
-	repo, newBuild, err := createBuild(ctx, job, store)
+	repo, newBuild, err := createBuild(ctx, cron, store)
 	if err != nil {
 		return err
 	}
@@ -105,25 +105,25 @@ func runJob(job *model.Cron, store store.Store, now time.Time) error {
 	return err
 }
 
-func createBuild(ctx context.Context, job *model.Cron, store store.Store) (*model.Repo, *model.Build, error) {
+func createBuild(ctx context.Context, cron *model.Cron, store store.Store) (*model.Repo, *model.Build, error) {
 	remote := server.Config.Services.Remote
 
-	repo, err := store.GetRepo(job.RepoID)
+	repo, err := store.GetRepo(cron.RepoID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if job.Branch == "" {
+	if cron.Branch == "" {
 		// fallback to the repos default branch
-		job.Branch = repo.Branch
+		cron.Branch = repo.Branch
 	}
 
-	creator, err := store.GetUser(job.CreatorID)
+	creator, err := store.GetUser(cron.CreatorID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	commit, err := remote.BranchHead(ctx, creator, repo, job.Branch)
+	commit, err := remote.BranchHead(ctx, creator, repo, cron.Branch)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -131,11 +131,11 @@ func createBuild(ctx context.Context, job *model.Cron, store store.Store) (*mode
 	return repo, &model.Build{
 		Event:     model.EventCron,
 		Commit:    commit,
-		Ref:       "refs/heads/" + job.Branch,
-		Branch:    job.Branch,
-		Message:   job.Name,
-		Timestamp: job.NextExec,
-		Sender:    job.Name,
+		Ref:       "refs/heads/" + cron.Branch,
+		Branch:    cron.Branch,
+		Message:   cron.Name,
+		Timestamp: cron.NextExec,
+		Sender:    cron.Name,
 		Link:      repo.Link,
 	}, nil
 }
