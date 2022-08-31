@@ -4,7 +4,7 @@
 
 Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-If registration is open every user with an account at the configured [forges](/docs/administration/forges/overview) can login to Woodpecker.
+If registration is open every user with an account at the configured [forges](./11-forges/10-overview.md) can login to Woodpecker.
 This example enables open registration for users that are members of approved organizations:
 
 ```diff
@@ -354,7 +354,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 > Default: ``
 
-Specify a configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
+Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
 
 ---
 
