@@ -63,7 +63,13 @@ func (when *When) Match(metadata frontend.Metadata) bool {
 			return true
 		}
 	}
-	return when.IsEmpty()
+
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata)
+	}
+	return false
 }
 
 func (when *When) IncludesStatus(status string) bool {
@@ -120,6 +126,16 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraint) Match(metadata frontend.Metadata) bool {
+	// if event filter is not set, set default
+	if c.Event.IsEmpty() {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+		}
+	}
+
 	match := c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
@@ -138,6 +154,11 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	}
 
 	return match
+}
+
+// IsEmpty return true if a constraint has no conditions
+func (c List) IsEmpty() bool {
+	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
 
 // Match returns true if the string matches the include patterns and does not

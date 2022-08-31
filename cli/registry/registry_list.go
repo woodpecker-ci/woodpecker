@@ -16,10 +16,7 @@ var registryListCmd = &cli.Command{
 	ArgsUsage: "[repo/name]",
 	Action:    registryList,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+		common.RepoFlag,
 		common.FormatFlag(tmplRegistryList, true),
 	),
 }

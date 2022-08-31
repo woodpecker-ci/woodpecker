@@ -18,7 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -84,7 +84,7 @@ func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 		return nil, fmt.Errorf("%s %s respond %d", req.Method, req.URL, resp.StatusCode)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("fail to read response from %s %s: %v", req.Method, req.URL.String(), err)
 	}
