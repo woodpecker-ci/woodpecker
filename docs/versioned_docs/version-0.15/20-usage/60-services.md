@@ -1,10 +1,6 @@
 # Services
 
-Woodpecker provides a services section in the YAML file used for defining service containers.
-The below configuration composes database and cache containers.
-
-Services are accessed using custom hostnames.
-In the example below, the MySQL service is assigned the hostname `database` and is available at `database:3306`.
+Woodpecker provides a services section in the Yaml file used for defining service containers. The below configuration composes database and cache containers.
 
 ```diff
 pipeline:
@@ -21,6 +17,8 @@ services:
   cache:
     image: redis
 ```
+
+Services are accessed using custom hostnames. In the above example the mysql service is assigned the hostname `database` and is available at `database:3306`.
 
 ## Configuration
 
@@ -78,22 +76,4 @@ pipeline:
 services:
   database:
     image: mysql
-```
-
-## Complete Pipeline Example
-
-```yml
-services:
-  database:
-    image: mysql
-    environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_ROOT_PASSWORD=example
-pipeline:
-  get-version:
-    image: ubuntu
-    commands:
-      - ( apt update && apt dist-upgrade -y && apt install -y mysql-client 2>&1 )> /dev/null
-      - sleep 30s # need to wait for mysql-server init
-      - echo 'SHOW VARIABLES LIKE "version"' | mysql -uroot -hdatabase test -pexample
 ```

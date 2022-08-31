@@ -21,7 +21,7 @@ services:
 
 ## Registration
 
-Register your application with GitHub to create your client id and secret. It is very important that the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
+Register your application with GitHub to create your client id and secret. It is very import the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
 
 Please use this screenshot for reference:
 
@@ -46,20 +46,10 @@ Configures the GitHub server address.
 
 Configures the GitHub OAuth client id. This is used to authorize access.
 
-### `WOODPECKER_GITHUB_CLIENT_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath
-
 ### `WOODPECKER_GITHUB_SECRET`
 > Default: empty
 
 Configures the GitHub OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_GITHUB_SECRET_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
 
 ### `WOODPECKER_GITHUB_MERGE_REF`
 > Default: `true`

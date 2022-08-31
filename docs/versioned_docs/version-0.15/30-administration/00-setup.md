@@ -13,7 +13,7 @@ A Woodpecker deployment consists of two parts:
 ## Installation
 
 You can install Woodpecker on multiple ways:
-- Using [docker-compose](/docs/administration/setup#docker-compose) with the official [container images](/docs/downloads#docker-images)
+- Using [docker-compose](/docs/administration/setup#docker-compose) with the official [docker images](/docs/downloads#docker-images)
 - By deploying to a [Kubernetes](/docs/administration/kubernetes) with manifests or Woodpeckers official Helm charts
 - Using [binaries](/docs/downloads)
 
@@ -120,9 +120,9 @@ services:
 
 ## Authentication
 
-Authentication is done using OAuth and is delegated to your forge which is configured by using environment variables. The example above demonstrates basic GitHub integration.
+Authentication is done using OAuth and is delegated to one of multiple version control providers, configured using environment variables. The example above demonstrates basic GitHub integration.
 
-See the complete reference for all supported forges [here](/docs/administration/forges/overview).
+See the complete reference for all supported version control systems [here](/docs/administration/vcs/overview).
 
 ## Database
 

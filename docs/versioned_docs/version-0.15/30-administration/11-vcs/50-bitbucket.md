@@ -53,20 +53,10 @@ Enables the Bitbucket driver.
 
 Configures the Bitbucket OAuth client id. This is used to authorize access.
 
-### `WOODPECKER_BITBUCKET_CLIENT_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_BITBUCKET_CLIENT` from the specified filepath
-
 ### `WOODPECKER_BITBUCKET_SECRET`
 > Default: empty
 
 Configures the Bitbucket OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_BITBUCKET_SECRET_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath
 
 ## Missing Features
 

@@ -10,7 +10,7 @@ This is a full list of configuration options. Please note that many of these opt
 Enables the Gogs driver.
 
 ### `WOODPECKER_GOGS_URL`
-> Default: `https://try.gogs.io`
+> Default: `https://github.com`
 
 Configures the Gogs server address.
 
@@ -19,20 +19,10 @@ Configures the Gogs server address.
 
 This username is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_GOGS_GIT_USERNAME_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_GOGS_GIT_USERNAME` from the specified filepath
-
 ### `WOODPECKER_GOGS_GIT_PASSWORD`
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_GOGS_GIT_PASSWORD_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_GOGS_GIT_PASSWORD` from the specified filepath
 
 ### `WOODPECKER_GOGS_PRIVATE_MODE`
 > Default: `false`

@@ -4,7 +4,7 @@ This provides a brief tutorial for creating a Woodpecker webhook plugin, using s
 
 ## What end users will see
 
-The below example demonstrates how we might configure a webhook plugin in the YAML file:
+The below example demonstrates how we might configure a webhook plugin in the Yaml file:
 
 ```yaml
 pipeline:
@@ -19,7 +19,7 @@ pipeline:
 
 ## Write the logic
 
-Create a simple shell script that invokes curl using the YAML configuration parameters, which are passed to the script as environment variables in uppercase and prefixed with `PLUGIN_`.
+Create a simple shell script that invokes curl using the Yaml configuration parameters, which are passed to the script as environment variables in uppercase and prefixed with `PLUGIN_`.
 
 ```bash
 #!/bin/sh

@@ -115,11 +115,6 @@ Configures the Bitbucket Server address.
 
 Configures your Bitbucket Server consumer key.
 
-### `WOODPECKER_STASH_CONSUMER_KEY_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_STASH_CONSUMER_KEY` from the specified filepath
-
 ### `WOODPECKER_STASH_CONSUMER_RSA`
 > Default: empty
 
@@ -135,20 +130,10 @@ Configures your Bitbucket Server private key.
 
 This username is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_STASH_GIT_USERNAME_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_STASH_GIT_USERNAME` from the specified filepath
-
 ### `WOODPECKER_STASH_GIT_PASSWORD`
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
-
-### `WOODPECKER_STASH_GIT_PASSWORD_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_STASH_GIT_PASSWORD` from the specified filepath
 
 ### `WOODPECKER_STASH_SKIP_VERIFY`
 > Default: `false`
