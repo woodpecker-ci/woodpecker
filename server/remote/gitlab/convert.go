@@ -38,7 +38,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
-		RemoteID:     strconv.FormatInt(int64(_repo.ID), 10),
+		RemoteID:     fmt.Sprint(_repo.ID),
 		Owner:        owner,
 		Name:         name,
 		FullName:     _repo.PathWithNamespace,
@@ -89,7 +89,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.FullName = fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	}
 
-	repo.RemoteID = strconv.FormatInt(int64(obj.TargetProjectID), 10)
+	repo.RemoteID = fmt.Sprint(obj.TargetProjectID)
 	repo.Link = target.WebURL
 
 	if target.GitHTTPURL != "" {
@@ -143,7 +143,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 		return nil, nil, err
 	}
 
-	repo.RemoteID = strconv.FormatInt(int64(hook.ProjectID), 10)
+	repo.RemoteID = fmt.Sprint(hook.ProjectID)
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
@@ -195,7 +195,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	repo.RemoteID = strconv.FormatInt(int64(hook.ProjectID), 10)
+	repo.RemoteID = fmt.Sprint(hook.ProjectID)
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL

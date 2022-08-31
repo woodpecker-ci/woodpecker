@@ -15,6 +15,7 @@
 package github
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/google/go-github/v39/github"
@@ -84,7 +85,7 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
-		RemoteID:     strconv.FormatInt(from.GetID(), 10),
+		RemoteID:     fmt.Sprint(from.GetID()),
 		Name:         from.GetName(),
 		FullName:     from.GetFullName(),
 		Link:         from.GetHTMLURL(),
@@ -145,7 +146,7 @@ func convertTeam(from *github.Organization) *model.Team {
 // from a webhook and convert to the common Woodpecker repository structure.
 func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	repo := &model.Repo{
-		RemoteID:     strconv.FormatInt(eventRepo.GetID(), 10),
+		RemoteID:     fmt.Sprint(eventRepo.GetID()),
 		Owner:        eventRepo.GetOwner().GetLogin(),
 		Name:         eventRepo.GetName(),
 		FullName:     eventRepo.GetFullName(),

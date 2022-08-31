@@ -37,7 +37,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		from.Owner.AvatarURL,
 	)
 	return &model.Repo{
-		RemoteID:     strconv.FormatInt(from.ID, 10),
+		RemoteID:     fmt.Sprint(from.ID),
 		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,
@@ -181,7 +181,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 // helper function that extracts the Repository data from a Gitea push hook
 func repoFromPush(hook *pushHook) *model.Repo {
 	return &model.Repo{
-		RemoteID: strconv.FormatInt(hook.Repo.ID, 10),
+		RemoteID: fmt.Sprint(hook.Repo.ID),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,
@@ -192,7 +192,7 @@ func repoFromPush(hook *pushHook) *model.Repo {
 // helper function that extracts the Repository data from a Gitea pull_request hook
 func repoFromPullRequest(hook *pullRequestHook) *model.Repo {
 	return &model.Repo{
-		RemoteID: strconv.FormatInt(hook.Repo.ID, 10),
+		RemoteID: fmt.Sprint(hook.Repo.ID),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,

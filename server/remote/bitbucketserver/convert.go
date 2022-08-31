@@ -19,7 +19,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -52,7 +51,7 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		RemoteID:     strconv.FormatInt(int64(from.ID), 10),
+		RemoteID:     fmt.Sprint(from.ID),
 		Name:         from.Slug,
 		Owner:        from.Project.Key,
 		Branch:       "master",
