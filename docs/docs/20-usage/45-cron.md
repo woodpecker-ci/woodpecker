@@ -4,7 +4,7 @@ To configure cron jobs you need at least push access to the repository.
 
 :::warning
 By default pipelines triggered by cron jobs wont execute any steps in pipelines, as they are not part of the default event filter and you explicitly need to set a `event: cron` filter.
-Read more at: [pipeline-syntax#event](/docs/usage/pipeline-syntax#event)
+Read more at: [pipeline-syntax#event](./20-pipeline-syntax.md#event)
 :::
 
 ## Add a new cron job
