@@ -15,6 +15,7 @@ variables:
 pipeline:
   vendor:
     image: *golang_image
+    pull: true
     commands:
       - go mod vendor
 
@@ -30,6 +31,7 @@ pipeline:
 
   cross-compile-server:
     image: *xgo_image
+    pull: true
     commands:
       - apt update
       - apt install -y tree
