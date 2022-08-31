@@ -15,8 +15,6 @@
 package datastore
 
 import (
-	"fmt"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
 	"xorm.io/builder"
@@ -35,16 +33,16 @@ func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 		RepoID: repo.ID,
 		ID:     id,
 	}
-	return cronJob, wrapGet(s.engine.Get(cron))
+	return cron, wrapGet(s.engine.Get(cron))
 }
 
 func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
 	crons := make([]*model.Cron, 0, perPage)
-	return cronJobs, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
+	return crons, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
 }
 
 func (s storage) CronUpdate(repo *model.Repo, cron *model.Cron) error {
-	_, err := s.engine.ID(cronJob.ID).AllCols().Update(cron)
+	_, err := s.engine.ID(cron.ID).AllCols().Update(cron)
 	return err
 }
 
@@ -56,7 +54,7 @@ func (s storage) CronDelete(repo *model.Repo, id int64) error {
 // CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp
 func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, error) {
 	crons := make([]*model.Cron, 0, limit)
-	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&crons)
+	return crons, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&crons)
 }
 
 // CronGetLock try to get a lock by updating NextExec
