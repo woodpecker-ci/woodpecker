@@ -172,7 +172,7 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, id, owner, name string
 		return nil, err
 	}
 	return &model.Repo{
-		// TODO RemoteID:     project.ID,
+		// TODO(1138) RemoteID:     project.ID,
 		Owner:        project.Owner,
 		Name:         project.Name,
 		FullName:     projectFullName(project.Owner, project.Name),
