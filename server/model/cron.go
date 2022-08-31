@@ -39,7 +39,7 @@ func (Cron) TableName() string {
 
 func (c *Cron) Validate() error {
 	if c.Name == "" {
-		return fmt.Errorf("title is required")
+		return fmt.Errorf("name is required")
 	}
 
 	if c.Schedule == "" {

@@ -68,8 +68,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	// remove local timezone
 	now = now.UTC()
 
-	// TODO: let timezone set as server setting
-	//       will UI adjustments and server flag
+	// TODO: allow the users / the admin to set a specific timezone
 
 	c, err := cron.Parse(schedule)
 	if err != nil {

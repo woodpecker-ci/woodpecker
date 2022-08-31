@@ -22,29 +22,29 @@ import (
 	"xorm.io/builder"
 )
 
-func (s storage) CronCreate(job *model.Cron) error {
-	if job.RepoID == 0 || job.Name == "" {
-		return fmt.Errorf("repoID and Name required")
+func (s storage) CronCreate(cron *model.Cron) error {
+	if err := cron.Validate(); err != nil {
+		return err
 	}
 	_, err := s.engine.Insert(job)
 	return err
 }
 
 func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
-	cronJob := &model.Cron{
+	cron := &model.Cron{
 		RepoID: repo.ID,
 		ID:     id,
 	}
-	return cronJob, wrapGet(s.engine.Get(cronJob))
+	return cronJob, wrapGet(s.engine.Get(cron))
 }
 
 func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
-	cronJobs := make([]*model.Cron, 0, perPage)
-	return cronJobs, s.engine.Where("repo_id = ?", repo.ID).Find(&cronJobs)
+	crons := make([]*model.Cron, 0, perPage)
+	return cronJobs, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
 }
 
-func (s storage) CronUpdate(repo *model.Repo, cronJob *model.Cron) error {
-	_, err := s.engine.ID(cronJob.ID).AllCols().Update(cronJob)
+func (s storage) CronUpdate(repo *model.Repo, cron *model.Cron) error {
+	_, err := s.engine.ID(cronJob.ID).AllCols().Update(cron)
 	return err
 }
 
@@ -53,8 +53,8 @@ func (s storage) CronDelete(repo *model.Repo, id int64) error {
 	return err
 }
 
-// CronList return limited number of jobs based on NextExec
-// is less or equal than unitx timestamp
+```suggestion
+// CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp
 func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, error) {
 	jobs := make([]*model.Cron, 0, limit)
 	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
