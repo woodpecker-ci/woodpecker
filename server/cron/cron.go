@@ -22,9 +22,9 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -37,7 +37,7 @@ const (
 )
 
 // Start starts the cron scheduler loop
-func Start(ctx context.Context, store store.Store) error {
+func Start(ctx context.Context, store store.Store, remote remote.Remote) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -54,7 +54,7 @@ func Start(ctx context.Context, store store.Store) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(cron, store, now); err != nil {
+					if err := runCron(store, remote, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -77,7 +77,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runCron(cron *model.Cron, store store.Store, now time.Time) error {
+func runCron(store store.Store, remote remote.Remote, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func runCron(cron *model.Cron, store store.Store, now time.Time) error {
 		return nil
 	}
 
-	repo, newBuild, err := createBuild(ctx, cron, store)
+	repo, newBuild, err := createBuild(ctx, store, remote, cron)
 	if err != nil {
 		return err
 	}
@@ -105,9 +105,7 @@ func runCron(cron *model.Cron, store store.Store, now time.Time) error {
 	return err
 }
 
-func createBuild(ctx context.Context, cron *model.Cron, store store.Store) (*model.Repo, *model.Build, error) {
-	remote := server.Config.Services.Remote
-
+func createBuild(ctx context.Context, store store.Store, remote remote.Remote, cron *model.Cron) (*model.Repo, *model.Build, error) {
 	repo, err := store.GetRepo(cron.RepoID)
 	if err != nil {
 		return nil, nil, err
