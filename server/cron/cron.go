@@ -65,6 +65,12 @@ func Start(ctx context.Context, store store.Store) error {
 
 // CalcNewNext parses a cron string and calculates the next exec time based on it
 func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
+	// remove local timezone
+	now = now.UTC()
+
+	// TODO: let timezone set as server setting
+	//       will UI adjustments and server flag
+
 	c, err := cron.Parse(schedule)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %v", err)
