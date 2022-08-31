@@ -22,6 +22,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+// TODO(974) move to server/pipeline/*
+
 type mockUpdateBuildStore struct{}
 
 func (m *mockUpdateBuildStore) UpdateBuild(build *model.Build) error {

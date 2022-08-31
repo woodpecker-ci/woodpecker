@@ -67,6 +67,11 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "gogs"
+}
+
 // Login authenticates an account with Gogs using basic authentication. The
 // Gogs account details are returned when the user is successfully authenticated.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -283,6 +288,25 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // details. If the hook is unsupported nil values are returned.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(u.Token)
+
+	orgs, err := client.ListMyOrgs()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, org := range orgs {
+		if org.UserName == owner {
+			// TODO: API does not support checking if user is admin/owner of org
+			return &model.OrgPerm{Member: true}, nil
+		}
+	}
+	return &model.OrgPerm{}, nil
 }
 
 // helper function to return the Gogs client

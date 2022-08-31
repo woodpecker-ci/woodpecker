@@ -74,6 +74,11 @@ type Coding struct {
 	SkipVerify bool
 }
 
+// Name returns the string name of this driver
+func (c *Coding) Name() string {
+	return "coding"
+}
+
 // Login authenticates the session and returns the
 // remote user details.
 func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -294,6 +299,13 @@ func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		build.Avatar = c.resourceLink(build.Avatar)
 	}
 	return repo, build, err
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not supported in Coding OAuth API
+	return nil, nil
 }
 
 // helper function to return the Coding oauth2 context using an HTTPClient that

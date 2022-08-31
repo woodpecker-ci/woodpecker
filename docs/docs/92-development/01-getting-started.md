@@ -1,6 +1,22 @@
 # Getting started
 
-## Preparation
+You can develop on your local computer by following the [steps below](#preparation-for-local-development) or you can start with a fully prepared online setup using [Gitpod](https://github.com/gitpod-io/gitpod) and [Gitea](https://github.com/go-gitea/gitea).
+
+## Gitpod
+
+If you want to start development or updating docs as easy as possible you can use our preconfigured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
+
+- An IDE in the browser or bridged to your local VS-Code or Jetbrains
+- A preconfigured [Gitea](https://github.com/go-gitea/gitea) instance as forge
+- A preconfigured Woodpecker server
+- A single preconfigured Woodpecker agent node
+- Our docs preview server
+
+Simply start Woodpecker in Gitpod by clicking on the following badge. You can login with `woodpecker` and `password`.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
+
+## Preparation for local development
 
 ### Install Go
 
@@ -63,7 +79,9 @@ Create an O-Auth app for your forge as describe in the [forges documentation](/d
 
 ## Developing with VS-Code
 
-You can use different methods for debugging the Woodpecker applications. One of the currently recommend ways to debug and test the Woodpecker application is using [VS-Code](https://code.visualstudio.com/) or [VS-Codium](https://vscodium.com/) (Open-Source binaries of VS-Code) as most maintainers are using it and Woodpecker already includes the needed debug configurations for it.
+You can use different methods for debugging the Woodpecker applications. One of the currently recommended ways to debug and test the Woodpecker application is using [VS-Code](https://code.visualstudio.com/) or [VS-Codium](https://vscodium.com/) (Open-Source binaries of VS-Code) as most maintainers are using it and Woodpecker already includes the needed debug configurations for it.
+
+To launch all needed services for local development you can use "Woodpecker CI" debugging configuration that will launch UI, server and agent in debugging mode. Then open `http://localhost:8000` to access it.
 
 As a starting guide for programming Go with VS-Code you can use this video guide:
 [![Getting started with Go in VS-Code](https://img.youtube.com/vi/1MXIGYrMk80/0.jpg)](https://www.youtube.com/watch?v=1MXIGYrMk80)

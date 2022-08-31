@@ -14,7 +14,8 @@
 
 package remote
 
-//go:generate mockery -name Remote -output mocks -case=underscore
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Remote --output mocks --case underscore
 
 import (
 	"context"
@@ -27,6 +28,9 @@ import (
 // TODO: add Driver() who return source forge back
 
 type Remote interface {
+	// Name returns the string name of this driver
+	Name() string
+
 	// Login authenticates the session and returns the
 	// remote user details.
 	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)
@@ -76,6 +80,10 @@ type Remote interface {
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
+
+	// OrgMembership returns if user is member of organization and if user
+	// is admin/owner in that organization.
+	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
 }
 
 // FileMeta represents a file in version control

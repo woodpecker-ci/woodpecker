@@ -4,12 +4,12 @@
 
 | Feature | [GitHub](github/) | [Gitea](gitea/) | [Gitlab](gitlab/) | [Bitbucket](bitbucket/) | [Bitbucket Server](bitbucket_server/) | [Gogs](gogs/) | [Coding](coding/) |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Event: Push | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Event: Tag | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Event: Pull-Request | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Event: Deploy | :white_check_mark: | :x: | :x: |
-| Event: Release | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: 
-| OAuth | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Event: Push | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Event: Tag | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Event: Pull-Request | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: |
+| Event: Deploy | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
+| Event: Release | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: |
+| OAuth | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: |
 | [Multi pipeline](/docs/usage/multi-pipeline) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: |
 | [when.path filter](/docs/usage/pipeline-syntax#path) | :white_check_mark: | :white_check_mark:¹ | :white_check_mark: | :x: | :x: | :x: | :x: |
 

@@ -1,27 +1,11 @@
 <template>
   <div
-    class="
-      w-full
-      border border-gray-200
-      py-1
-      px-2
-      rounded-md
-      bg-white
-      hover:border-gray-300
-      dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:border-dark-800
-    "
+    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white hover:border-gray-300 dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:border-dark-800"
   >
     <input
       v-if="lines === 1"
       v-model="innerValue"
-      class="
-        w-full
-        bg-transparent
-        text-gray-600
-        placeholder-gray-400
-        focus:outline-none focus:border-blue-400
-        dark:placeholder-gray-600 dark:text-gray-500
-      "
+      class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
       :disabled="disabled"
       :type="type"
       :placeholder="placeholder"
@@ -29,14 +13,7 @@
     <textarea
       v-else
       v-model="innerValue"
-      class="
-        w-full
-        bg-transparent
-        text-gray-600
-        placeholder-gray-400
-        focus:outline-none focus:border-blue-400
-        dark:placeholder-gray-600 dark:text-gray-500
-      "
+      class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
       :disabled="disabled"
       :placeholder="placeholder"
       :rows="lines"

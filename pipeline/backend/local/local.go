@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +35,7 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	dir, err := os.MkdirTemp("", "woodpecker-local-*")
 	e.workingdir = dir
 	return err
 }
@@ -49,20 +48,21 @@ func (e *local) Setup(ctx context.Context, proc *types.Config) error {
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	// Get environment variables
-	Command := []string{}
+	Env := os.Environ()
 	for a, b := range proc.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Command = append(Command, a+"="+b)
+			Env = append(Env, a+"="+b)
 		}
 	}
 
+	Command := []string{}
 	if proc.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
+		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, proc.Image[18:len(proc.Image)-7])
+		Command = append(Command, proc.Image)
 		Command = append(Command, "-c")
 
 		// Decode script and delete initial lines
@@ -72,7 +72,8 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
+	e.cmd = exec.CommandContext(ctx, Command[0], Command[1:]...)
+	e.cmd.Env = Env
 
 	// Prepare working directory
 	if proc.Image == constant.DefaultCloneImage {
@@ -94,9 +95,17 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
+	err := e.cmd.Wait()
+	ExitCode := 0
+	if eerr, ok := err.(*exec.ExitError); ok {
+		ExitCode = eerr.ExitCode()
+		// Non-zero exit code is a build failure, but not an agent error.
+		err = nil
+	}
 	return &types.State{
-		Exited: true,
-	}, e.cmd.Wait()
+		Exited:   true,
+		ExitCode: ExitCode,
+	}, err
 }
 
 // Tail the pipeline step logs.

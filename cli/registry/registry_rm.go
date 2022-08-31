@@ -13,10 +13,7 @@ var registryDeleteCmd = &cli.Command{
 	ArgsUsage: "[repo/name]",
 	Action:    registryDelete,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",

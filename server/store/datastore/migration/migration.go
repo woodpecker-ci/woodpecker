@@ -33,6 +33,8 @@ var migrationTasks = []*task{
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
 	&dropSenders,
+	&alterTableLogUpdateColumnLogDataType,
+	&alterTableSecretsAddUserCol,
 }
 
 var allBeans = []interface{}{
@@ -49,6 +51,7 @@ var allBeans = []interface{}{
 	new(model.Secret),
 	new(model.Task),
 	new(model.User),
+	new(model.ServerConfig),
 }
 
 type migrations struct {

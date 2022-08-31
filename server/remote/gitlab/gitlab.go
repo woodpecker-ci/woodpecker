@@ -18,21 +18,22 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
+	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
@@ -70,17 +71,33 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
+// Name returns the string name of this driver
+func (g *Gitlab) Name() string {
+	return "gitlab"
+}
+
+func (g *Gitlab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
+	return &oauth2.Config{
+			ClientID:     g.ClientID,
+			ClientSecret: g.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
+				TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+			},
+			Scopes:      []string{defaultScope},
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+		},
+
+		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		}})
+}
+
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := &oauth2.Config{
-		ClientID:     g.ClientID,
-		ClientSecret: g.ClientSecret,
-		Scope:        defaultScope,
-		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
-		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
-	}
+	config, oauth2Ctx := g.oauth2Config(ctx)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -94,19 +111,11 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		authCodeURL, err := config.AuthCodeURL("drone")
-		if err != nil {
-			return nil, fmt.Errorf("authCodeURL error: %v", err)
-		}
-		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
+		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
-	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}}
-	token, err := trans.Exchange(code)
+	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -133,6 +142,29 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	return user, nil
+}
+
+// Refresh refreshes the Gitlab oauth2 access token. If the token is
+// refreshed the user is updated and a true value is returned.
+func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
+	config, oauth2Ctx := g.oauth2Config(ctx)
+	config.RedirectURL = ""
+
+	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
+		AccessToken:  user.Token,
+		RefreshToken: user.Secret,
+		Expiry:       time.Unix(user.Expiry, 0),
+	})
+
+	token, err := source.Token()
+	if err != nil || len(token.AccessToken) == 0 {
+		return false, err
+	}
+
+	user.Token = token.AccessToken
+	user.Secret = token.RefreshToken
+	user.Expiry = token.Expiry.UTC().Unix()
+	return true, nil
 }
 
 // Auth authenticates the session and returns the remote user login for the given token
@@ -358,7 +390,6 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
 		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
 		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
-		PipelineID:  gitlab.Int(int(build.Number)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -519,7 +550,7 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
-	payload, err := ioutil.ReadAll(req.Body)
+	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -558,6 +589,62 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	default:
 		return nil, nil, nil
 	}
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (g *Gitlab) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 100,
+		},
+		Search: gitlab.String(owner),
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	var gid int
+	for _, group := range groups {
+		if group.Name == owner {
+			gid = group.ID
+			break
+		}
+	}
+	if gid == 0 {
+		return &model.OrgPerm{}, nil
+	}
+
+	opts := &gitlab.ListGroupMembersOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 100,
+		},
+	}
+
+	for i := 1; true; i++ {
+		opts.Page = i
+		members, _, err := client.Groups.ListAllGroupMembers(gid, opts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, member := range members {
+			if member.Username == u.Login {
+				return &model.OrgPerm{Member: true, Admin: member.AccessLevel >= gitlab.OwnerPermissions}, nil
+			}
+		}
+
+		if len(members) < opts.PerPage {
+			break
+		}
+	}
+
+	return &model.OrgPerm{}, nil
 }
 
 func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {

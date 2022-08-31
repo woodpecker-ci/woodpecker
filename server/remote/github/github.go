@@ -97,6 +97,11 @@ type client struct {
 	ReleaseActions []string // On which actions to trigger a release.
 }
 
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "github"
+}
+
 // Login authenticates the session and returns the remote user details.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)
@@ -317,6 +322,18 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	}
 	_, err = client.Repositories.DeleteHook(ctx, r.Owner, r.Name, *match.ID)
 	return err
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(ctx, u.Token)
+	org, _, err := client.Organizations.GetOrgMembership(ctx, u.Login, owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
 // helper function to return the GitHub oauth2 context using an HTTPClient that

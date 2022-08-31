@@ -35,6 +35,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+// TODO(974) move to pipeline/*
+
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo  *model.Repo
@@ -87,6 +89,15 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
+			// add global environment variables for substituting
+			for k, v := range b.Envs {
+				if _, exists := environ[k]; exists {
+					// don't override existing values
+					continue
+				}
+				environ[k] = v
+			}
+
 			// substitute vars
 			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
@@ -96,14 +107,14 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			// parse yaml pipeline
 			parsed, err := yaml.ParseString(substituted)
 			if err != nil {
-				return nil, err
+				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
 			// lint pipeline
 			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
 			).Lint(parsed); err != nil {
-				return nil, err
+				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
@@ -311,53 +322,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
-		Curr: frontend.Build{
-			Number:   build.Number,
-			Parent:   build.Parent,
-			Created:  build.Created,
-			Started:  build.Started,
-			Finished: build.Finished,
-			Status:   string(build.Status),
-			Event:    string(build.Event),
-			Link:     build.Link,
-			Target:   build.Deploy,
-			Commit: frontend.Commit{
-				Sha:     build.Commit,
-				Ref:     build.Ref,
-				Refspec: build.Refspec,
-				Branch:  build.Branch,
-				Message: build.Message,
-				Author: frontend.Author{
-					Name:   build.Author,
-					Email:  build.Email,
-					Avatar: build.Avatar,
-				},
-				ChangedFiles: build.ChangedFiles,
-			},
-		},
-		Prev: frontend.Build{
-			Number:   last.Number,
-			Created:  last.Created,
-			Started:  last.Started,
-			Finished: last.Finished,
-			Status:   string(last.Status),
-			Event:    string(last.Event),
-			Link:     last.Link,
-			Target:   last.Deploy,
-			Commit: frontend.Commit{
-				Sha:     last.Commit,
-				Ref:     last.Ref,
-				Refspec: last.Refspec,
-				Branch:  last.Branch,
-				Message: last.Message,
-				Author: frontend.Author{
-					Name:   last.Author,
-					Email:  last.Email,
-					Avatar: last.Avatar,
-				},
-				ChangedFiles: last.ChangedFiles,
-			},
-		},
+		Curr: metadataBuildFromModelBuild(build, true),
+		Prev: metadataBuildFromModelBuild(last, false),
 		Job: frontend.Job{
 			Number: proc.PID,
 			Matrix: proc.Environ,
@@ -367,6 +333,38 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Link:     link,
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
+		},
+	}
+}
+
+func metadataBuildFromModelBuild(build *model.Build, includeParent bool) frontend.Build {
+	parent := int64(0)
+	if includeParent {
+		parent = build.Parent
+	}
+
+	return frontend.Build{
+		Number:   build.Number,
+		Parent:   parent,
+		Created:  build.Created,
+		Started:  build.Started,
+		Finished: build.Finished,
+		Status:   string(build.Status),
+		Event:    string(build.Event),
+		Link:     build.Link,
+		Target:   build.Deploy,
+		Commit: frontend.Commit{
+			Sha:     build.Commit,
+			Ref:     build.Ref,
+			Refspec: build.Refspec,
+			Branch:  build.Branch,
+			Message: build.Message,
+			Author: frontend.Author{
+				Name:   build.Author,
+				Email:  build.Email,
+				Avatar: build.Avatar,
+			},
+			ChangedFiles: build.ChangedFiles,
 		},
 	}
 }
