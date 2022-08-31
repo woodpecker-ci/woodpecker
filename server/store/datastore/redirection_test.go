@@ -38,7 +38,7 @@ func TestGetRedirection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, redirectionFromStore)
 	assert.Equal(t, redirection.RepoID, redirectionFromStore.RepoID)
-	redirectionFromStore, err = store.GetRedirection("foo/baz")
+	_, err = store.GetRedirection("foo/baz")
 	assert.ErrorIs(t, err, RecordNotExist)
 }
 
