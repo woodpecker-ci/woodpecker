@@ -26,7 +26,7 @@ func (s storage) CronCreate(cron *model.Cron) error {
 	if err := cron.Validate(); err != nil {
 		return err
 	}
-	_, err := s.engine.Insert(job)
+	_, err := s.engine.Insert(cron)
 	return err
 }
 
@@ -53,21 +53,20 @@ func (s storage) CronDelete(repo *model.Repo, id int64) error {
 	return err
 }
 
-```suggestion
 // CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp
 func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, error) {
-	jobs := make([]*model.Cron, 0, limit)
-	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&jobs)
+	crons := make([]*model.Cron, 0, limit)
+	return jobs, s.engine.Where(builder.Lte{"next_exec": nextExec}).Limit(int(limit)).Find(&crons)
 }
 
 // CronGetLock try to get a lock by updating NextExec
-func (s storage) CronGetLock(job *model.Cron, newNextExec int64) (bool, error) {
-	cols, err := s.engine.ID(job.ID).Where(builder.Eq{"next_exec": job.NextExec}).
+func (s storage) CronGetLock(cron *model.Cron, newNextExec int64) (bool, error) {
+	cols, err := s.engine.ID(cron.ID).Where(builder.Eq{"next_exec": cron.NextExec}).
 		Cols("next_exec").Update(&model.Cron{NextExec: newNextExec})
 	gotLock := cols != 0
 
 	if err == nil && gotLock {
-		job.NextExec = newNextExec
+		cron.NextExec = newNextExec
 	}
 
 	return gotLock, err
