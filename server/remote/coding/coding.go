@@ -200,7 +200,7 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		repo := &model.Repo{
-			// TODO RemoteID:     project.ID,
+			// TODO(1138) RemoteID:     project.ID,
 			Owner:        project.Owner,
 			Name:         project.Name,
 			FullName:     projectFullName(project.Owner, project.Name),
