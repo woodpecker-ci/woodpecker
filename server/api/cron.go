@@ -92,8 +92,8 @@ func PostCron(c *gin.Context) {
 	c.JSON(200, cron)
 }
 
-// PatchCronJob updates the cron job in the database.
-func PatchCronJob(c *gin.Context) {
+// PatchCron updates the cron job in the database.
+func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	store := store.FromContext(c)
