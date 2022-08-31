@@ -545,6 +545,30 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	return branches, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (g *Gitlab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := newClient(g.URL, token, g.SkipVerify)
+	if err != nil {
+		return "", err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	if err != nil {
+		return "", err
+	}
+
+	b, _, err := client.Branches.GetBranch(_repo.ID, branch, gitlab.WithContext(ctx))
+	if err != nil {
+		return "", err
+	}
+
+	return b.Commit.ID, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {

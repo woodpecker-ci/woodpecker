@@ -111,6 +111,7 @@ export default defineComponent({
         description: i18n.t('repo.settings.secrets.events.pr_warning'),
       },
       { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+      { value: WebhookEvents.Cron, text: i18n.t('repo.build.event.cron') },
     ];
 
     function save() {

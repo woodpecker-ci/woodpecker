@@ -58,7 +58,9 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  branch: master
+  - branch: master
+  - event: cron
+    cron: job1
 settings:
   foo: bar
   baz: false
@@ -114,6 +116,14 @@ func TestUnmarshalContainer(t *testing.T) {
 				{
 					Branch: constraint.List{
 						Include: []string{"master"},
+					},
+				},
+				{
+					Event: constraint.List{
+						Include: []string{"cron"},
+					},
+					Cron: constraint.List{
+						Include: []string{"job1"},
 					},
 				},
 			},
