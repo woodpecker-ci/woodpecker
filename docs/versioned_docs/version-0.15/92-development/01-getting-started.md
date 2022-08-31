@@ -59,7 +59,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup O-Auth
 
-Create an O-Auth app for your SCM as describe in the [SCM documentation](/docs/administration/vcs/overview). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific SCM to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an O-Auth app for your SCM as describe in the [SCM documentation](../11-vcs/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific SCM to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
 
 ## Developing with VS-Code
 

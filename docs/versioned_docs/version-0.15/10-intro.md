@@ -84,4 +84,4 @@ pipeline:
     template: config/k8s/service.yml
 ```
 
-See [plugin docs](/docs/usage/plugins/plugins).
+See [plugin docs](./20-usage/51-plugins/10-plugins.md).

@@ -2,7 +2,7 @@
 
 Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
 
-> Volumes are only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
+> Volumes are only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
 
 ```diff
 pipeline:

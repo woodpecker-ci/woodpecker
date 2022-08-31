@@ -128,7 +128,7 @@ git commit -m "updated README [CI SKIP]"
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
 
-For more details check the [services docs](/docs/usage/services/).
+For more details check the [services docs](./60-services.md).
 
 ## Steps
 
@@ -237,7 +237,7 @@ Example registry hostname matching logic:
 
 #### Global registry support
 
-To make a private registry globally available check the [server configuration docs](/docs/administration/server-config#global-registry-setting).
+To make a private registry globally available check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
 
 #### GCR registry support
 
@@ -278,19 +278,19 @@ docker run --entrypoint=build.sh golang
 
 Woodpecker provides the ability to pass environment variables to individual pipeline steps.
 
-For more details check the [environment docs](/docs/usage/environment/).
+For more details check the [environment docs](./50-environment.md).
 
 ### `secrets`
 
 Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
-For more details check the [secrets docs](/docs/usage/secrets/).
+For more details check the [secrets docs](./40-secrets.md).
 
 ### `when` - Conditional Execution
 
 Woodpecker supports defining conditional pipeline steps in the `when` block.
 
-For more details check the [Conditional Step Execution](/docs/usage/conditional-execution/).
+For more details check the [Conditional Step Execution](./22-conditional-execution.md).
 
 ### `group` - Parallel execution
 
@@ -324,13 +324,13 @@ In the above example, the `frontend` and `backend` steps are executed in paralle
 
 Woodpecker gives the ability to define Docker volumes in the Yaml. You can use this parameter to mount files or folders on the host machine into your containers.
 
-For more details check the [volumes docs](/docs/usage/volumes/).
+For more details check the [volumes docs](./70-volumes.md).
 
 ### `detach`
 
 Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
 
-For more details check the [service docs](/docs/usage/services#detachment).
+For more details check the [service docs](./60-services.md#detachment).
 
 ## Advanced Configurations
 
@@ -402,7 +402,7 @@ git clone https://github.com/octocat/hello-world \
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
-For more details check the [matrix build docs](/docs/usage/matrix-builds/).
+For more details check the [matrix build docs](./30-matrix-builds.md).
 
 ### `clone`
 
@@ -479,7 +479,7 @@ pipeline:
 
 Woodpecker gives the ability to configure privileged mode in the Yaml. You can use this parameter to launch containers with escalated capabilities.
 
-> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
+> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
 
 ```diff
  pipeline:

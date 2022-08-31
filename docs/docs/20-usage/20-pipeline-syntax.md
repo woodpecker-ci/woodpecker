@@ -380,7 +380,7 @@ when:
     cron: sync_* # name of your cron job
 ```
 
-[Read more about cron](/docs/usage/cron)
+[Read more about cron](./45-cron.md)
 
 #### `tag`
 

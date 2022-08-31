@@ -10,7 +10,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
+  Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
@@ -43,7 +43,7 @@ Some versions need some changes to the server configuration or the pipeline conf
     - CI_SOURCE_BRANCH => use CI_COMMIT_SOURCE_BRANCH
     - CI_TARGET_BRANCH => use CI_COMMIT_TARGET_BRANCH
 
-  For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
+  For all available variables and their descriptions have a look at [built-in-environment-variables](./20-usage/50-environment.md#built-in-environment-variables).
 
 - Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
 

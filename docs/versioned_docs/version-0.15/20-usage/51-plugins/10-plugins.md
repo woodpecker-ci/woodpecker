@@ -32,4 +32,4 @@ Plugins are just pipeline steps. They share the build workspace, mounted as a vo
 
 ## Creating a plugin
 
-See a [detailed plugin example](/docs/usage/plugins/sample-plugin).
+See a [detailed plugin example](./20-sample-plugin.md).
