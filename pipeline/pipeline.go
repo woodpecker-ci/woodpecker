@@ -206,13 +206,6 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
-	for key, value := range step.Environment {
-		if strings.HasPrefix(key, "CI_") {
-			step.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
-		}
-	}
-
 	if err := r.engine.Exec(r.ctx, step); err != nil {
 		return nil, err
 	}
