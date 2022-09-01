@@ -63,6 +63,7 @@
 <script lang="ts">
 import '~/style/console.css';
 
+import { useStorage } from '@vueuse/core';
 import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, defineComponent, inject, nextTick, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
@@ -126,11 +127,7 @@ export default defineComponent({
         // we do not have logs for skipped jobs
         repo?.value && build.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
     );
-    // Get last state
-    const autoScrollDefault = window.localStorage.getItem('log-auto-scroll');
-    const autoScroll = ref(
-      window.localStorage.getItem(autoScrollDefault === null ? false : JSON.parse(autoScrollDefault)),
-    );
+    const autoScroll = useStorage('log-auto-scroll', false);
     const showActions = ref(false);
     const downloadInProgress = ref(false);
     const ansiUp = ref(new AnsiUp());
@@ -284,10 +281,6 @@ export default defineComponent({
 
     watch(procSlug, () => {
       loadLogs();
-    });
-
-    watch(autoScroll, () => {
-      window.localStorage.setItem('log-auto-scroll', JSON.stringify(autoScroll.value));
     });
 
     watch(proc, (oldProc, newProc) => {
