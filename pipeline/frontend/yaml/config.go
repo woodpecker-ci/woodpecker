@@ -13,7 +13,6 @@ type (
 		When      constraint.When `yaml:"when,omitempty"`
 		Cache     types.Stringorslice
 		Platform  string
-		Branches  constraint.List
 		Workspace Workspace
 		Clone     Containers
 		Pipeline  Containers
@@ -24,6 +23,8 @@ type (
 		DependsOn []string `yaml:"depends_on,omitempty"`
 		RunsOn    []string `yaml:"runs_on,omitempty"`
 		SkipClone bool     `yaml:"skip_clone"`
+		// Deprecated use When.Branch
+		Branches constraint.List
 	}
 
 	// Workspace defines a pipeline workspace.
