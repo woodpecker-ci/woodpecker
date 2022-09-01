@@ -3,4 +3,5 @@ export enum WebhookEvents {
   Tag = 'tag',
   PullRequest = 'pull_request',
   Deploy = 'deployment',
+  Cron = 'cron',
 }

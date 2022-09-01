@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -36,7 +35,7 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	dir, err := ioutil.TempDir("", "woodpecker-local-*")
+	dir, err := os.MkdirTemp("", "woodpecker-local-*")
 	e.workingdir = dir
 	return err
 }
@@ -63,7 +62,7 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, proc.Image[18:len(proc.Image)-7])
+		Command = append(Command, proc.Image)
 		Command = append(Command, "-c")
 
 		// Decode script and delete initial lines

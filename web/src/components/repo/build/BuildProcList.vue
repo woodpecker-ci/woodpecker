@@ -4,7 +4,10 @@
       class="flex md:ml-2 p-4 space-x-1 justify-between flex-shrink-0 border-b-1 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
-        <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
+        <div class="flex items-center">
+          <Icon v-if="build.event === 'cron'" name="stopwatch" />
+          <img v-else class="w-6" :src="build.author_avatar" />
+        </div>
         <span>{{ build.author }}</span>
       </div>
       <div class="flex space-x-1 items-center min-w-0">
@@ -42,7 +45,7 @@
       <div class="md:absolute top-0 left-0 w-full">
         <div v-for="proc in build.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <div class="flex items-center">
+            <div v-if="build.procs.length > 1" class="flex items-center">
               <span class="ml-2">{{ proc.name }}</span>
             </div>
             <div v-if="proc.environ" class="text-xs">

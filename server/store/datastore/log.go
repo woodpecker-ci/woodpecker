@@ -17,7 +17,6 @@ package datastore
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -30,11 +29,11 @@ func (s storage) LogFind(proc *model.Proc) (io.ReadCloser, error) {
 		return nil, err
 	}
 	buf := bytes.NewBuffer(logs.Data)
-	return ioutil.NopCloser(buf), nil
+	return io.NopCloser(buf), nil
 }
 
 func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
-	data, _ := ioutil.ReadAll(reader)
+	data, _ := io.ReadAll(reader)
 
 	sess := s.engine.NewSession()
 	defer sess.Close()

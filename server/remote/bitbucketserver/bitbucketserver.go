@@ -24,8 +24,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/mrjones/oauth"
 
@@ -86,7 +86,7 @@ func New(opts Opts) (remote.Remote, error) {
 	var keyFileBytes []byte
 	if opts.ConsumerRSA != "" {
 		var err error
-		keyFileBytes, err = ioutil.ReadFile(opts.ConsumerRSA)
+		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
 		if err != nil {
 			return nil, err
 		}
@@ -234,6 +234,12 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 		branches = append(branches, branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {

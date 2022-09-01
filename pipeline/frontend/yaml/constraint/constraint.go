@@ -26,6 +26,7 @@ type (
 		Environment List
 		Event       List
 		Branch      List
+		Cron        List
 		Status      List
 		Matrix      Map
 		Local       types.BoolTrue
@@ -63,7 +64,13 @@ func (when *When) Match(metadata frontend.Metadata) bool {
 			return true
 		}
 	}
-	return when.IsEmpty()
+
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata)
+	}
+	return false
 }
 
 func (when *When) IncludesStatus(status string) bool {
@@ -97,37 +104,39 @@ func (when *When) IsLocal() bool {
 }
 
 func (when *When) UnmarshalYAML(value *yaml.Node) error {
-	unmarshelAsList := func() error {
-		lst := []Constraint{}
-		err := value.Decode(&lst)
-		if err != nil {
+	switch value.Kind {
+	case yaml.SequenceNode:
+		if err := value.Decode(&when.Constraints); err != nil {
 			return err
 		}
-		when.Constraints = lst
-		return nil
-	}
 
-	unmarshelAsDict := func() error {
+	case yaml.MappingNode:
 		c := Constraint{}
-		err := value.Decode(&c)
-		if err != nil {
+		if err := value.Decode(&c); err != nil {
 			return err
 		}
 		when.Constraints = append(when.Constraints, c)
-		return nil
+
+	default:
+		return fmt.Errorf("not supported yaml kind: %v", value.Kind)
 	}
 
-	err := unmarshelAsList()
-	if err != nil {
-		err = unmarshelAsDict()
-	}
-
-	return err
+	return nil
 }
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraint) Match(metadata frontend.Metadata) bool {
+	// if event filter is not set, set default
+	if c.Event.IsEmpty() {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+		}
+	}
+
 	match := c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
@@ -145,7 +154,16 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
 	}
 
+	if metadata.Curr.Event == frontend.EventCron {
+		match = match && c.Cron.Match(metadata.Curr.Cron)
+	}
+
 	return match
+}
+
+// IsEmpty return true if a constraint has no conditions
+func (c List) IsEmpty() bool {
+	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
 
 // Match returns true if the string matches the include patterns and does not

@@ -42,7 +42,7 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	perPage           = 50
-	giteaDevVersion   = "v1.17.0"
+	giteaDevVersion   = "v1.18.0"
 )
 
 type Gitea struct {
@@ -84,10 +84,8 @@ func (c *Gitea) Name() string {
 	return "gitea"
 }
 
-// Login authenticates an account with Gitea using basic authentication. The
-// Gitea account details are returned when the user is successfully authenticated.
-func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := &oauth2.Config{
+func (c *Gitea) oauth2Config() *oauth2.Config {
+	return &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
 		Endpoint: oauth2.Endpoint{
@@ -96,6 +94,12 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
+}
+
+// Login authenticates an account with Gitea using basic authentication. The
+// Gitea account details are returned when the user is successfully authenticated.
+func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+	config := c.oauth2Config()
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -154,14 +158,9 @@ func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) 
 // Refresh refreshes the Gitea oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := &oauth2.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
-			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
-		},
-	}
+	config := c.oauth2Config()
+	config.RedirectURL = ""
+
 	source := config.TokenSource(ctx, &oauth2.Token{RefreshToken: user.Secret})
 
 	token, err := source.Token()
@@ -450,6 +449,25 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		branches = append(branches, branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return "", err
+	}
+
+	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
 }
 
 // Hook parses the incoming Gitea hook and returns the Repository and Build
