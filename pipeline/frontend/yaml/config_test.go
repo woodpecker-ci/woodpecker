@@ -94,14 +94,14 @@ func TestParse(t *testing.T) {
 				}, false)).Equal(true)
 			})
 
-			g.It("Should match branch master", func() {
+			g.It("Should match branch tester", func() {
 				g.Assert(matchConfig.When.Match(frontend.Metadata{
 					Curr: frontend.Build{
 						Commit: frontend.Commit{
 							Branch: "tester",
 						},
 					},
-				}, false)).Equal(true)
+				}, true)).Equal(true)
 			})
 
 			g.It("Should not match event push", func() {
