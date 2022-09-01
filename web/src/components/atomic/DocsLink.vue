@@ -1,32 +1,22 @@
 <template>
-  <a :href="`${docsBaseUrl}${url}`" target="_blank" class="text-blue-500 hover:text-blue-600 cursor-pointer mt-1"
+  <a :href="`${docsUrl}`" target="_blank" class="text-blue-500 hover:text-blue-600 cursor-pointer mt-1"
     ><Icon name="question" class="!w-4 !h-4"
   /></a>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+import { computed, defineProps, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 
-export default defineComponent({
-  name: 'DocsLink',
-
-  components: {
-    Icon,
-  },
-
-  props: {
-    url: {
-      type: String,
-      required: true,
-    },
-  },
-
-  setup() {
-    const docsBaseUrl = window.WOODPECKER_DOCS;
-
-    return { docsBaseUrl };
+const props = defineProps({
+  url: {
+    type: String,
+    required: true,
   },
 });
+
+const docsBaseUrl = window.WOODPECKER_DOCS;
+const url = toRef(props, 'url');
+const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `${docsBaseUrl}${url.value}`));
 </script>

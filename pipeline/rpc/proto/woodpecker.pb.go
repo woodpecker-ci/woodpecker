@@ -1192,6 +1192,7 @@ var (
 		nil,                                    // 19: proto.Filter.LabelsEntry
 	}
 )
+
 var file_woodpecker_proto_depIdxs = []int32{
 	18, // 0: proto.File.meta:type_name -> proto.File.MetaEntry
 	19, // 1: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry

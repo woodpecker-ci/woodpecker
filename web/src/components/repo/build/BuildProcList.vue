@@ -4,7 +4,10 @@
       class="flex md:ml-2 p-4 space-x-1 justify-between flex-shrink-0 border-b-1 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
-        <div class="flex items-center"><img class="w-6" :src="build.author_avatar" /></div>
+        <div class="flex items-center">
+          <Icon v-if="build.event === 'cron'" name="stopwatch" />
+          <img v-else class="w-6" :src="build.author_avatar" />
+        </div>
         <span>{{ build.author }}</span>
       </div>
       <div class="flex space-x-1 items-center min-w-0">
