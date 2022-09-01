@@ -20,7 +20,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		privileged  = container.Privileged
 		entrypoint  = container.Entrypoint
 		command     = container.Command
-		image       = expandImage(container.Image)
 		networkMode = container.NetworkMode
 		ipcMode     = container.IpcMode
 		// network    = container.Network
@@ -78,7 +77,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Arch == "windows/amd64" {
+		if c.metadata.Sys.Platform == "windows/amd64" {
 			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
 			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
@@ -105,7 +104,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Email:    container.AuthConfig.Email,
 	}
 	for _, registry := range c.registries {
-		if matchHostname(image, registry.Hostname) {
+		if matchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			authConfig.Email = registry.Email
@@ -115,7 +114,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	for _, requested := range container.Secrets.Secrets {
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && (len(secret.Match) == 0 || matchImage(image, secret.Match...)) {
+		if ok && (len(secret.Match) == 0 || matchImage(container.Image, secret.Match...)) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		}
 	}
@@ -145,10 +144,16 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	// all constraints must exclude success.
+	onSuccess := container.When.IsEmpty() ||
+		!container.When.ExcludesStatus("success")
+	// at least one constraint must include the status failure.
+	onFailure := container.When.IncludesStatus("failure")
+
 	return &backend.Step{
 		Name:         name,
 		Alias:        container.Name,
-		Image:        image,
+		Image:        container.Image,
 		Pull:         container.Pull,
 		Detached:     detached,
 		Privileged:   privileged,
@@ -172,11 +177,9 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.Status.Match("success"),
-		OnFailure: (len(container.Constraints.Status.Include)+
-			len(container.Constraints.Status.Exclude) != 0) &&
-			container.Constraints.Status.Match("failure"),
-		NetworkMode: networkMode,
-		IpcMode:     ipcMode,
+		OnSuccess:    onSuccess,
+		OnFailure:    onFailure,
+		NetworkMode:  networkMode,
+		IpcMode:      ipcMode,
 	}
 }

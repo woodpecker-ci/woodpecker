@@ -60,6 +60,11 @@ func New(opts *Opts) (remote.Remote, error) {
 	// TODO: add checks
 }
 
+// Name returns the string name of this driver
+func (c *config) Name() string {
+	return "bitbucket"
+}
+
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -278,8 +283,22 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Branches returns the names of all branches for the named repository.
 func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range bitbucketBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
@@ -288,8 +307,21 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	return parseHook(req)
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	perm, err := c.newClient(ctx, u).GetUserWorkspaceMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
+}
+
 // helper function to return the bitbucket oauth2 client
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
+	if u == nil {
+		return c.newClientToken(ctx, "", "")
+	}
 	return c.newClientToken(ctx, u.Token, u.Secret)
 }
 

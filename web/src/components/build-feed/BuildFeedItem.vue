@@ -1,5 +1,5 @@
 <template>
-  <div v-if="build" class="flex text-gray-600 dark:text-gray-500 w-full">
+  <div v-if="build" class="flex text-color w-full">
     <BuildStatusIcon :build="build" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
       <span class="underline">{{ build.owner }} / {{ build.name }}</span>
@@ -7,7 +7,12 @@
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
           <Icon name="since" />
-          <span>{{ since }}</span>
+          <Tooltip>
+            <span>{{ since }}</span>
+            <template #popper
+              ><span class="font-bold">{{ $t('created') }}</span> {{ created }}</template
+            >
+          </Tooltip>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="duration" />
@@ -19,6 +24,7 @@
 </template>
 
 <script lang="ts">
+import { Tooltip } from 'floating-vue';
 import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -29,7 +35,7 @@ import { BuildFeed } from '~/lib/api/types';
 export default defineComponent({
   name: 'BuildFeedItem',
 
-  components: { BuildStatusIcon, Icon },
+  components: { BuildStatusIcon, Icon, Tooltip },
 
   props: {
     build: {
@@ -40,9 +46,9 @@ export default defineComponent({
 
   setup(props) {
     const build = toRef(props, 'build');
-    const { since, duration, message } = useBuild(build);
+    const { since, duration, message, created } = useBuild(build);
 
-    return { since, duration, message };
+    return { since, duration, message, created };
   },
 });
 </script>

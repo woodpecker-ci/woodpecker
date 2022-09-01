@@ -8,4 +8,6 @@ type State struct {
 	Exited bool `json:"exited"`
 	// Container is oom killed, true or false
 	OOMKilled bool `json:"oom_killed"`
+	// Container error
+	Error error
 }

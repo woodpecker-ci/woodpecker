@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
@@ -17,38 +18,59 @@ type ConfigFetcher interface {
 	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
 }
 
+// TODO(974) move to new package
+
 type configFetcher struct {
-	remote remote.Remote
-	user   *model.User
-	repo   *model.Repo
-	build  *model.Build
+	remote          remote.Remote
+	user            *model.User
+	repo            *model.Repo
+	build           *model.Build
+	configExtension config.Extension
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
-		remote: remote,
-		user:   user,
-		repo:   repo,
-		build:  build,
+		remote:          remote,
+		user:            user,
+		repo:            repo,
+		build:           build,
+		configExtension: configExtension,
 	}
 }
 
 // configFetchTimeout determine seconds the configFetcher wait until cancel fetch process
-var configFetchTimeout = 3 // seconds
+var configFetchTimeout = time.Second * 3
 
 // Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
-	// try to fetch 3 times, timeout is one second longer each time
+	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, configFetchTimeout, strings.TrimSpace(cf.repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
 		}
+
+		if cf.configExtension != nil && cf.configExtension.IsConfigured() {
+			fetchCtx, cancel := context.WithTimeout(ctx, configFetchTimeout)
+			defer cancel() // ok here as we only try http fetching once, returning on fail and success
+
+			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.build, files)
+			if err != nil {
+				log.Error().Msg("Got error " + err.Error())
+				return nil, fmt.Errorf("On Fetching config via http : %s", err)
+			}
+
+			if !useOld {
+				return newConfigs, nil
+			}
+		}
+
 		return
 	}
 	return

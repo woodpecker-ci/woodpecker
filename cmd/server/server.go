@@ -39,9 +39,11 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cron"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
@@ -184,6 +186,10 @@ func run(c *cli.Context) error {
 
 	setupMetrics(&g, _store)
 
+	g.Go(func() error {
+		return cron.Start(c.Context, _store, _remote)
+	})
+
 	// start the server with tls enabled
 	if c.String("server-cert") != "" {
 		g.Go(func() error {
@@ -264,12 +270,28 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Senders = sender.New(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Membership = setupMembershipService(c, r)
 
-	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewRemote(endpoint)
+	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
+
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
 	}
+
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+
+	// Execution
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
@@ -292,6 +314,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
+	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")

@@ -1,10 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import vueI18n from '@intlify/vite-plugin-vue-i18n';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 
@@ -25,6 +27,9 @@ function woodpeckerInfoPlugin() {
 export default defineConfig({
   plugins: [
     vue(),
+    vueI18n({
+      include: path.resolve(__dirname, 'src/assets/locales/**'),
+    }),
     WindiCSS(),
     Icons(),
     svgLoader(),
@@ -32,6 +37,9 @@ export default defineConfig({
       resolvers: IconsResolver(),
     }),
     woodpeckerInfoPlugin(),
+    prismjs({
+      languages: ['yaml'],
+    }),
   ],
   resolve: {
     alias: {

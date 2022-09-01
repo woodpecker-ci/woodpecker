@@ -1,24 +1,25 @@
 # Changelog
 
-## [v0.15.0-rc2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc2) - 2022-01-31
+## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
 
 * BUGFIXES
-  * Fix pipeline timestamps (#730)
-  * Remove "panic()" as much as possible from code (#682)
-* ENHANCEMENTS
-  * Let non required migration tasks fail and continue (#729)
-  * Improve pipeline compiler (#699)
-  * Support ChangedFiles for Github & Gitlab PRs and Gitea pushes (#697)
-  * Remove unused flags / options (#693)
-  * Automatically determine platform of agent (#690)
+  * Fix uppercase from_secrets (#842) (#925)
+  * Fix key/val format for dind env vars (#889) (#890)
+  * Update helm chart releasing (#882) (#888)
 * DOCUMENTATION
-  * Minor updates to docs (#712)
-  * Add note about Gitlab & Gitea internal connections to docs (#711)
-* MISC
-  * Update deps (#724)
-  * Compile for more platforms on release (#703)
+  * Fix run_on references with runs_on in docs (#965)
 
-## [v0.15.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0-rc1) - 2022-01-11
+## [0.15.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.1) - 2022-04-13
+
+* SECURITY
+  * Escape html / xml in log view (#879) (#880)
+* FEATURES
+  * Build multiarch images for server (#821) (#822)
+* BUGFIXES
+  * Branch list enhancements (#808) (#809)
+  * Get Netrc machine from clone url (#800) (#803)
+
+## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-02-24
 
 * BREAKING
   * Change paths to use woodpecker instead of drone (#494)
@@ -31,6 +32,8 @@
   * Change pipeline config path resolution (#299)
   * Remove push, tag and deployment webhook filters (#281)
   * Clean up config environment variables for server and agent (#218)
+* SECURITY
+  * Add linter bidichk to prevent malicious utf8 chars (#516)
 * FEATURES
   * Show changed files of pipeline in UI (#650)
   * Show yml config of pipeline in UI (#649)
@@ -41,9 +44,10 @@
   * Add repo permission endpoint (#436)
   * Add web-config endpoint (#433)
   * Replace www-path with www-proxy option for development (#248)
-* SECURITY
-  * Add linter bidichk to prevent malicious utf8 chars (#516)
 * BUGFIXES
+  * Make gRPC error "too many keepalive pings" only show up in trace logs (#787)
+  * WOODPECKER_ENVIRONMENT: ignore items only containing a key and no value (#781)
+  * Fix pipeline timestamps (#730)
   * Remove "panic()" as much as possible from code (#682)
   * Send decline events back to UI (#680)
   * Notice all changed files of all related commits for gitea push webhooks (#675)
@@ -64,6 +68,18 @@
   * Append trailing slash to default GH API URL (#411)
   * Fix filter pipeline config files (#279)
 * ENHANCEMENTS
+  * Return better error if repo was deleted/renamed (#780)
+  * Add support to set default clone image via environment variable (#769)
+  * Add flag to always authenticate when cloning public repositories from locked down / private only forges (#760)
+  * UI: show date time on hover over time items (#756)
+  * Add repo-link to badge markdown in UI (#753)
+  * Allow specifying dind container in values (#750)
+  * Add page to view all projects of a user / group (#741)
+  * Let non required migration tasks fail and continue (#729)
+  * Improve pipeline compiler (#699)
+  * Support ChangedFiles for Github & Gitlab PRs and pushes and Gitea pushes (#697)
+  * Remove unused flags / options (#693)
+  * Automatically determine platform of agent (#690)
   * Build ref link point to commit not compare if only one commit was pushed (#673)
   * Hide multi line secrets from log (#671)
   * Do not exclude repo owner from gated rule (#641)
@@ -107,7 +123,7 @@
   * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
-  * Use std methode to get SystemCertPool (#488)
+  * Use std method to get SystemCertPool (#488)
   * Upgrade urfave/cli to v2 (#483)
   * Remove some wrapper and make code more redable (#478)
   * More logging and refactor (#457)
@@ -133,58 +149,40 @@
   * Reorganize into server/{api,grpc,shared} packages (#337)
 * TESTING
   * Add tests framework for storage migration (#630)
-  * Add golangci-lint (#502)
-  * Add more golangci-lint linters & sort them (#499)
-  * Add `TestPipelineName` to `procBuilder_test.go` (#461)
-  * Improve CI tests (#353)
+  * Add more golangci-lint linters & sort them (#499) (#502)
   * Compile on pull too (#287)
 * DOCUMENTATION
+  * Add note about Gitlab & Gitea internal connections to docs (#711)
   * Add registries docs (#679)
   * Add documentation of all agent configuration options (#667)
-  * Add WoodpeckerCI tag to README (#663)
   * Add `repo` to `when` block (#642)
   * Add development docs (#610)
   * Clarify Docs on Docker for new users in intro (#606)
-  * Update proxy docs (#573)
   * Update Documentation (fix diffs and add settings) (#569)
-  * Update README (#560)
   * Add notice of supported YAML versions in docs (#556)
-  * Update docs dependencies (#553)
   * Update Agent and Pipeline syntax documentation (#506)
   * Update docs about selecting agent based on platform (#470)
   * Add plugin marketplace (for official plugins) (#451)
-  * Improve docs (#450)
   * Add search to docs (#448)
-  * Update links to woodpecker-ci.org (#445)
   * Add image migration docs (#406)
   * Add security policy (#396)
-  * Add Migrations to header (#386)
-  * Delete Gerrit placeholder (#372)
   * Explain open registration setting (#361)
-  * Simplify docker-compose samples (#356)
   * Add json schema and cli lint command (#342)
   * Improve docs deployment (#333)
   * Improve plugin docs (#313)
   * Add Support section to README (#310)
-  * Improve administration docs (#307)
-  * Issue templates (#298)
   * Community Guide (#296)
   * Migrate docs framework to Docusaurus (#282)
   * Use woodpecker env variable instead of drone in docker-compose (#264)
 * MISC
-  * github.com/xanzy/go-gitlab v0.51.1 -> v0.52.2 (#599)
-  * Update gogs client (#487)
-  * Update Dependencies (#486)
-  * Zerolint (#441)
+  * Add support for building in docker (#759)
+  * Compile for more platforms on release (#703)
   * Build agent for multiple platforms (arm, arm64, amd64, linux, windows, darwin) (#408)
   * Release deb, rpm bundles (#405)
   * Release cli images (#404)
-  * Improve release (#400)
   * Publish alpine container (#398)
-  * Upgrade github client (#381)
   * Migrate go-docker to docker/docker (#363)
   * Use go's vendoring (#284)
-  * code.gitea.io/sdk/gitea v0.14.1 -> v0.15.0 (#263)
 
 ## [v0.14.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.4) - 2022-01-31
 

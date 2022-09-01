@@ -383,94 +383,122 @@ func TestConstraintMap(t *testing.T) {
 
 func TestConstraints(t *testing.T) {
 	testdata := []struct {
+		desc string
 		conf string
 		with frontend.Metadata
 		want bool
 	}{
-		// no constraints, must match
 		{
+			desc: "no constraints, must match on default events",
 			conf: "",
-			with: frontend.Metadata{},
+			with: frontend.Metadata{
+				Curr: frontend.Build{
+					Event: frontend.EventPush,
+				},
+			},
 			want: true,
 		},
-		// branch constraint
 		{
+			desc: "global branch filter",
 			conf: "{ branch: develop }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
 			want: false,
 		},
 		{
+			desc: "global branch filter",
 			conf: "{ branch: master }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
 			want: true,
 		},
-		// environment constraint
 		{
-			conf: "{ branch: develop }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
-			want: false,
-		},
-		{
-			conf: "{ branch: master }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Branch: "master"}}},
-			want: true,
-		},
-		// repo constraint
-		{
+			desc: "repo constraint",
 			conf: "{ repo: owner/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
 			want: true,
 		},
 		{
+			desc: "repo constraint",
 			conf: "{ repo: octocat/* }",
-			with: frontend.Metadata{Repo: frontend.Repo{Name: "owner/repo"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
 			want: false,
 		},
-		// ref constraint
 		{
+			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/tags/v1.0.0"}}},
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/tags/v1.0.0"}, Event: frontend.EventPush}},
 			want: true,
 		},
 		{
+			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/heads/master"}}},
+			with: frontend.Metadata{Curr: frontend.Build{Commit: frontend.Commit{Ref: "refs/heads/master"}, Event: frontend.EventPush}},
 			want: false,
 		},
-		// platform constraint
 		{
+			desc: "platform constraint",
 			conf: "{ platform: linux/amd64 }",
-			with: frontend.Metadata{Sys: frontend.System{Arch: "linux/amd64"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Platform: "linux/amd64"}},
 			want: true,
 		},
 		{
+			desc: "platform constraint",
 			conf: "{ repo: linux/amd64 }",
-			with: frontend.Metadata{Sys: frontend.System{Arch: "windows/amd64"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Platform: "windows/amd64"}},
 			want: false,
 		},
-		// instance constraint
 		{
+			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "agent.tld"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Host: "agent.tld"}},
 			want: true,
 		},
 		{
+			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Sys: frontend.System{Host: "beta.agent.tld"}},
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Sys: frontend.System{Host: "beta.agent.tld"}},
+			want: false,
+		},
+		{
+			desc: "filter cron by default constraint",
+			conf: "{}",
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron}},
+			want: false,
+		},
+		{
+			desc: "filter cron by matching name",
+			conf: "{ event: cron, cron: job1 }",
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron, Cron: "job1"}},
+			want: true,
+		},
+		{
+			desc: "filter cron by name",
+			conf: "{ event: cron, cron: job2 }",
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventCron, Cron: "job1"}},
+			want: false,
+		},
+		{
+			desc: "no constraints, event gets filtered by default event filter",
+			conf: "",
+			with: frontend.Metadata{
+				Curr: frontend.Build{Event: "non-default"},
+			},
 			want: false,
 		},
 	}
+
 	for _, test := range testdata {
-		c := parseConstraints(t, test.conf)
-		got, want := c.Match(test.with), test.want
-		if got != want {
-			t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			c := parseConstraints(t, test.conf)
+			got, want := c.Match(test.with), test.want
+			if got != want {
+				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
+			}
+		})
 	}
 }
 
-func parseConstraints(t *testing.T, s string) *Constraints {
-	c := &Constraints{}
+func parseConstraints(t *testing.T, s string) *When {
+	c := &When{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))
 	return c
 }

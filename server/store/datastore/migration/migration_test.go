@@ -31,16 +31,16 @@ func testDriver() string {
 }
 
 func createSQLiteDB(t *testing.T) string {
-	tmpF, err := ioutil.TempFile("./testfiles", "tmp_")
+	tmpF, err := os.CreateTemp("./testfiles", "tmp_")
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	dbF, err := ioutil.ReadFile(sqliteDB)
+	dbF, err := os.ReadFile(sqliteDB)
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
 
-	if !assert.NoError(t, ioutil.WriteFile(tmpF.Name(), dbF, 0o644)) {
+	if !assert.NoError(t, os.WriteFile(tmpF.Name(), dbF, 0o644)) {
 		t.FailNow()
 	}
 	return tmpF.Name()

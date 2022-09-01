@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Client is used to communicate with a Drone server.
+// Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
 	SetClient(*http.Client)
@@ -88,6 +88,9 @@ type Client interface {
 	// BuildKill force kills the running build.
 	BuildKill(string, string, int) error
 
+	// BuildLogs returns the logs for the given build
+	BuildLogs(string, string, int, int) ([]*Logs, error)
+
 	// Deploy triggers a deployment for an existing build using the specified
 	// target environment.
 	Deploy(string, string, int, string, map[string]string) (*Build, error)
@@ -116,14 +119,44 @@ type Client interface {
 	// SecretList returns a list of all repository secrets.
 	SecretList(owner, name string) ([]*Secret, error)
 
-	// SecretCreate creates a registry.
+	// SecretCreate creates a secret.
 	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
 
-	// SecretUpdate updates a registry.
+	// SecretUpdate updates a secret.
 	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
 
 	// SecretDelete deletes a secret.
 	SecretDelete(owner, name, secret string) error
+
+	// OrgSecret returns an organization secret by name.
+	OrgSecret(owner, secret string) (*Secret, error)
+
+	// OrgSecretList returns a list of all organization secrets.
+	OrgSecretList(owner string) ([]*Secret, error)
+
+	// OrgSecretCreate creates an organization secret.
+	OrgSecretCreate(owner string, secret *Secret) (*Secret, error)
+
+	// OrgSecretUpdate updates an organization secret.
+	OrgSecretUpdate(owner string, secret *Secret) (*Secret, error)
+
+	// OrgSecretDelete deletes an organization secret.
+	OrgSecretDelete(owner, secret string) error
+
+	// GlobalSecret returns an global secret by name.
+	GlobalSecret(secret string) (*Secret, error)
+
+	// GlobalSecretList returns a list of all global secrets.
+	GlobalSecretList() ([]*Secret, error)
+
+	// GlobalSecretCreate creates a global secret.
+	GlobalSecretCreate(secret *Secret) (*Secret, error)
+
+	// GlobalSecretUpdate updates a global secret.
+	GlobalSecretUpdate(secret *Secret) (*Secret, error)
+
+	// GlobalSecretDelete deletes a global secret.
+	GlobalSecretDelete(secret string) error
 
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
@@ -133,4 +166,19 @@ type Client interface {
 
 	// SetLogLevel sets the server's logging level
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
+
+	// CronList list all cron jobs of a repo
+	CronList(owner, repo string) ([]*Cron, error)
+
+	// CronGet get a specific cron job of a repo by id
+	CronGet(owner, repo string, cronID int64) (*Cron, error)
+
+	// CronDelete delete a specific cron job of a repo by id
+	CronDelete(owner, repo string, cronID int64) error
+
+	// CronCreate create a new cron job in a repo
+	CronCreate(owner, repo string, cron *Cron) (*Cron, error)
+
+	// CronUpdate update an existing cron job of a repo
+	CronUpdate(owner, repo string, cron *Cron) (*Cron, error)
 }

@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -39,7 +40,6 @@ type Opts struct {
 	Client     string   // Coding oauth client id.
 	Secret     string   // Coding oauth client secret.
 	Scopes     []string // Coding oauth scopes.
-	Machine    string   // Optional machine name.
 	Username   string   // Optional machine account username.
 	Password   string   // Optional machine account password.
 	SkipVerify bool     // Skip ssl verification.
@@ -53,7 +53,6 @@ func New(opts Opts) (remote.Remote, error) {
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		Scopes:     opts.Scopes,
-		Machine:    opts.Machine,
 		Username:   opts.Username,
 		Password:   opts.Password,
 		SkipVerify: opts.SkipVerify,
@@ -70,10 +69,14 @@ type Coding struct {
 	Client     string
 	Secret     string
 	Scopes     []string
-	Machine    string
 	Username   string
 	Password   string
 	SkipVerify bool
+}
+
+// Name returns the string name of this driver
+func (c *Coding) Name() string {
+	return "coding"
 }
 
 // Login authenticates the session and returns the
@@ -251,17 +254,23 @@ func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 // Netrc returns a .netrc file that can be used to clone
 // private repositories from a remote system.
 func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
+
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -282,6 +291,12 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return []string{r.Branch}, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
+}
+
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
 func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
@@ -290,6 +305,13 @@ func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		build.Avatar = c.resourceLink(build.Avatar)
 	}
 	return repo, build, err
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not supported in Coding OAuth API
+	return nil, nil
 }
 
 // helper function to return the Coding oauth2 context using an HTTPClient that

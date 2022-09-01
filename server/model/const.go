@@ -21,11 +21,12 @@ const (
 	EventPull   WebhookEvent = "pull_request"
 	EventTag    WebhookEvent = "tag"
 	EventDeploy WebhookEvent = "deployment"
+	EventCron   WebhookEvent = "cron"
 )
 
 func ValidateWebhookEvent(s WebhookEvent) bool {
 	switch s {
-	case EventPush, EventPull, EventTag, EventDeploy:
+	case EventPush, EventPull, EventTag, EventDeploy, EventCron:
 		return true
 	default:
 		return false

@@ -372,7 +372,6 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Proc),
 		new(model.File),
 		new(model.Secret),
-		new(model.Sender),
 		new(model.Registry),
 		new(model.Config))
 	defer closer()

@@ -1,10 +1,14 @@
 import { computed, Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Build } from '~/lib/api/types';
 import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
 import timeAgo from '~/utils/timeAgo';
+
+const { toLocaleString } = useDate();
 
 export default (build: Ref<Build | undefined>) => {
   const sinceRaw = computed(() => {
@@ -22,9 +26,10 @@ export default (build: Ref<Build | undefined>) => {
   );
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
+  const i18n = useI18n();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
-      return 'not started yet';
+      return i18n.t('time.not_started');
     }
 
     if (sinceElapsed.value === undefined) {
@@ -63,7 +68,7 @@ export default (build: Ref<Build | undefined>) => {
     }
 
     if (durationRaw.value === 0) {
-      return 'not started yet';
+      return i18n.t('time.not_started');
     }
 
     return prettyDuration(durationElapsed.value);
@@ -82,6 +87,10 @@ export default (build: Ref<Build | undefined>) => {
       return build.value.branch;
     }
 
+    if (build.value?.event === 'cron') {
+      return build.value.ref.replaceAll('refs/heads/', '');
+    }
+
     if (build.value?.event === 'tag') {
       return build.value.ref.replaceAll('refs/tags/', '');
     }
@@ -97,5 +106,15 @@ export default (build: Ref<Build | undefined>) => {
     return build.value?.ref;
   });
 
-  return { since, duration, message, prettyRef };
+  const created = computed(() => {
+    if (!build.value) {
+      return undefined;
+    }
+
+    const start = build.value.created_at || 0;
+
+    return toLocaleString(new Date(start * 1000));
+  });
+
+  return { since, duration, message, prettyRef, created };
 };

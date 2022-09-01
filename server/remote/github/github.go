@@ -18,7 +18,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -54,14 +53,6 @@ type Opts struct {
 // New returns a Remote implementation that integrates with a GitHub Cloud or
 // GitHub Enterprise version control hosting provider.
 func New(opts Opts) (remote.Remote, error) {
-	u, err := url.Parse(opts.URL)
-	if err != nil {
-		return nil, err
-	}
-	host, _, err := net.SplitHostPort(u.Host)
-	if err == nil {
-		u.Host = host
-	}
 	r := &client{
 		API:        defaultAPI,
 		URL:        defaultURL,
@@ -69,7 +60,6 @@ func New(opts Opts) (remote.Remote, error) {
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
-		Machine:    u.Host,
 	}
 	if opts.URL != defaultURL {
 		r.URL = strings.TrimSuffix(opts.URL, "/")
@@ -84,9 +74,13 @@ type client struct {
 	API        string
 	Client     string
 	Secret     string
-	Machine    string
 	SkipVerify bool
 	MergeRef   bool
+}
+
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "github"
 }
 
 // Login authenticates the session and returns the remote user details.
@@ -283,10 +277,15 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		token = "x-oauth-basic"
 	}
 
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.Netrc{
 		Login:    login,
 		Password: token,
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -304,6 +303,18 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	}
 	_, err = client.Repositories.DeleteHook(ctx, r.Owner, r.Name, *match.ID)
 	return err
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(ctx, u.Token)
+	org, _, err := client.Organizations.GetOrgMembership(ctx, u.Login, owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
 // helper function to return the GitHub oauth2 context using an HTTPClient that
@@ -464,7 +475,11 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	client := c.newClientToken(ctx, u.Token)
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
 	if err != nil {
@@ -476,6 +491,19 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 		branches = append(branches, *branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
+	if err != nil {
+		return "", err
+	}
+	return b.GetCommit().GetSHA(), nil
 }
 
 // Hook parses the post-commit hook from the Request body
