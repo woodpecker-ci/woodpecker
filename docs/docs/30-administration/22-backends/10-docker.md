@@ -16,7 +16,7 @@ Enable IPv6 for the networks used by pipeline containers (steps). Make sure you 
 
 ## Docker credentials
 
-Woodpecker supports [Docker credentials](https://github.com/docker/docker-credential-helpers) to securely store registry credentials. Install your corresponding credential helper and configure it in your Docker config file passed via [`WOODPECKER_DOCKER_CONFIG`](/docs/administration/server-config#woodpecker_docker_config).
+Woodpecker supports [Docker credentials](https://github.com/docker/docker-credential-helpers) to securely store registry credentials. Install your corresponding credential helper and configure it in your Docker config file passed via [`WOODPECKER_DOCKER_CONFIG`](../10-server-config.md#woodpecker_docker_config).
 
 To add your credential helper to the Woodpecker server container you could use the following code to build a custom image:
 

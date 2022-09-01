@@ -21,10 +21,7 @@ var secretDeleteCmd = &cli.Command{
 			Name:  "organization",
 			Usage: "organization name (e.g. octocat)",
 		},
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",

@@ -322,53 +322,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
-		Curr: frontend.Build{
-			Number:   build.Number,
-			Parent:   build.Parent,
-			Created:  build.Created,
-			Started:  build.Started,
-			Finished: build.Finished,
-			Status:   string(build.Status),
-			Event:    string(build.Event),
-			Link:     build.Link,
-			Target:   build.Deploy,
-			Commit: frontend.Commit{
-				Sha:     build.Commit,
-				Ref:     build.Ref,
-				Refspec: build.Refspec,
-				Branch:  build.Branch,
-				Message: build.Message,
-				Author: frontend.Author{
-					Name:   build.Author,
-					Email:  build.Email,
-					Avatar: build.Avatar,
-				},
-				ChangedFiles: build.ChangedFiles,
-			},
-		},
-		Prev: frontend.Build{
-			Number:   last.Number,
-			Created:  last.Created,
-			Started:  last.Started,
-			Finished: last.Finished,
-			Status:   string(last.Status),
-			Event:    string(last.Event),
-			Link:     last.Link,
-			Target:   last.Deploy,
-			Commit: frontend.Commit{
-				Sha:     last.Commit,
-				Ref:     last.Ref,
-				Refspec: last.Refspec,
-				Branch:  last.Branch,
-				Message: last.Message,
-				Author: frontend.Author{
-					Name:   last.Author,
-					Email:  last.Email,
-					Avatar: last.Avatar,
-				},
-				ChangedFiles: last.ChangedFiles,
-			},
-		},
+		Curr: metadataBuildFromModelBuild(build, true),
+		Prev: metadataBuildFromModelBuild(last, false),
 		Job: frontend.Job{
 			Number: proc.PID,
 			Matrix: proc.Environ,
@@ -379,6 +334,44 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 		},
+	}
+}
+
+func metadataBuildFromModelBuild(build *model.Build, includeParent bool) frontend.Build {
+	cron := ""
+	if build.Event == model.EventCron {
+		cron = build.Sender
+	}
+
+	parent := int64(0)
+	if includeParent {
+		parent = build.Parent
+	}
+
+	return frontend.Build{
+		Number:   build.Number,
+		Parent:   parent,
+		Created:  build.Created,
+		Started:  build.Started,
+		Finished: build.Finished,
+		Status:   string(build.Status),
+		Event:    string(build.Event),
+		Link:     build.Link,
+		Target:   build.Deploy,
+		Commit: frontend.Commit{
+			Sha:     build.Commit,
+			Ref:     build.Ref,
+			Refspec: build.Refspec,
+			Branch:  build.Branch,
+			Message: build.Message,
+			Author: frontend.Author{
+				Name:   build.Author,
+				Email:  build.Email,
+				Avatar: build.Avatar,
+			},
+			ChangedFiles: build.ChangedFiles,
+		},
+		Cron: cron,
 	}
 }
 

@@ -15,7 +15,7 @@
 package coding
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -30,7 +30,7 @@ func Test_hook(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Coding hook", func() {
 		g.It("Should parse hook", func() {
-			reader := ioutil.NopCloser(strings.NewReader(fixtures.PushHook))
+			reader := io.NopCloser(strings.NewReader(fixtures.PushHook))
 			r := &http.Request{
 				Header: map[string][]string{
 					hookEvent: {hookPush},

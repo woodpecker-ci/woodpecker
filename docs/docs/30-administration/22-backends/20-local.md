@@ -58,7 +58,7 @@ At the minimum you need the following information:
 ```ini
 # .env for the agent
 WOODPECKER_AGENT_SECRET=replace_with_your_server_secret
-WOODPECKER_HOST=replace_with_your_server_address:9000
+WOODPECKER_SERVER=replace_with_your_server_address:9000
 ```
 
 ## Running the agent
@@ -95,8 +95,8 @@ pipeline:
 ### Using labels to filter tasks
 
 You can use the [agent configuration
-options](/docs/administration/agent-config#woodpecker_filter_labels) and the
-[pipeline syntax](/docs/usage/pipeline-syntax#labels) to only run certain
+options](../15-agent-config.md#woodpecker_filter_labels) and the
+[pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
 pipelines on certain agents. Example:
 
 Define a `label` `type` with value `exec` for a particular agent:

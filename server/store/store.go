@@ -14,6 +14,9 @@
 
 package store
 
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Store --output mocks --case underscore
+
 import (
 	"io"
 
@@ -152,6 +155,15 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+
+	// Cron
+	CronCreate(*model.Cron) error
+	CronFind(*model.Repo, int64) (*model.Cron, error)
+	CronList(*model.Repo) ([]*model.Cron, error)
+	CronUpdate(*model.Repo, *model.Cron) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.Cron, error)
+	CronGetLock(*model.Cron, int64) (bool, error)
 
 	// Store operations
 	Ping() error
