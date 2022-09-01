@@ -77,11 +77,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}, nil
 }
 
-// Name returns the string name of this driver
-func (c *Gitea) Name() string {
-	return "gitea"
-}
-
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
 			ClientID:     c.ClientID,
