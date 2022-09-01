@@ -27,6 +27,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/rs/zerolog/log"
@@ -84,22 +85,27 @@ func (c *Gitea) Name() string {
 	return "gitea"
 }
 
-func (c *Gitea) oauth2Config() *oauth2.Config {
+func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
-			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+			ClientID:     c.ClientID,
+			ClientSecret: c.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
+				TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+			},
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
-	}
+
+		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		}})
 }
 
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.oauth2Config()
+	config, oauth2Ctx := c.oauth2Config(ctx)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -117,7 +123,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		return nil, nil
 	}
 
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -158,10 +164,14 @@ func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) 
 // Refresh refreshes the Gitea oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := c.oauth2Config()
+	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
 
-	source := config.TokenSource(ctx, &oauth2.Token{RefreshToken: user.Secret})
+	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
+		AccessToken:  user.Token,
+		RefreshToken: user.Secret,
+		Expiry:       time.Unix(user.Expiry, 0),
+	})
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
