@@ -144,13 +144,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	stepName := container.Name
-	if len(stepName) == 0 {
-		stepName = name
-	} else {
-		stepName = section + "." + stepName
-	}
-
 	// all constraints must exclude success.
 	onSuccess := container.When.IsEmpty() ||
 		!container.When.ExcludesStatus("success")
@@ -158,7 +151,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	onFailure := container.When.IncludesStatus("failure")
 
 	return &backend.Step{
-		Name:         stepName,
+		Name:         name,
 		Alias:        container.Name,
 		Image:        container.Image,
 		Pull:         container.Pull,
