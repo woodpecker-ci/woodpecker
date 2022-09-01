@@ -13,13 +13,19 @@
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div v-show="showActions" class="absolute top-0 right-0 z-50 mt-2 mr-4 hidden md:flex">
+      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-2 mr-4 hidden md:flex">
         <Button
           v-if="proc?.end_time !== undefined"
           :is-loading="downloadInProgress"
           :title="$t('repo.build.actions.log_download')"
           start-icon="download"
           @click="download"
+        />
+        <Button
+          v-if="proc?.end_time === undefined"
+          :title="autoScroll ? $t('repo.build.actions.log_auto_scroll_off') : $t('repo.build.actions.log_auto_scroll')"
+          :start-icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
+          @click="autoScroll = !autoScroll"
         />
       </div>
 
@@ -120,7 +126,11 @@ export default defineComponent({
         // we do not have logs for skipped jobs
         repo?.value && build.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
     );
-    const autoScroll = ref(true); // TODO: allow enable / disable
+    // Get last state
+    const autoScrollDefault = window.localStorage.getItem('log-auto-scroll');
+    const autoScroll = ref(
+      window.localStorage.getItem(autoScrollDefault === null ? false : JSON.parse(autoScrollDefault)),
+    );
     const showActions = ref(false);
     const downloadInProgress = ref(false);
     const ansiUp = ref(new AnsiUp());
@@ -276,6 +286,10 @@ export default defineComponent({
       loadLogs();
     });
 
+    watch(autoScroll, () => {
+      window.localStorage.setItem('log-auto-scroll', JSON.stringify(autoScroll.value));
+    });
+
     watch(proc, (oldProc, newProc) => {
       if (oldProc && oldProc.name === newProc?.name && oldProc?.end_time !== newProc?.end_time) {
         if (autoScroll.value) {
@@ -284,7 +298,18 @@ export default defineComponent({
       }
     });
 
-    return { consoleElement, proc, log, loadedLogs, hasLogs, formatTime, showActions, download, downloadInProgress };
+    return {
+      consoleElement,
+      proc,
+      log,
+      loadedLogs,
+      hasLogs,
+      formatTime,
+      showActions,
+      download,
+      downloadInProgress,
+      autoScroll,
+    };
   },
 });
 </script>
