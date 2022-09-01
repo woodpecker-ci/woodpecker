@@ -27,6 +27,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Opts defines configuration options.
@@ -40,7 +41,6 @@ type Opts struct {
 
 type client struct {
 	URL         string
-	Machine     string
 	Username    string
 	Password    string
 	PrivateMode bool
@@ -60,12 +60,16 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &client{
 		URL:         opts.URL,
-		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,
 		SkipVerify:  opts.SkipVerify,
 	}, nil
+}
+
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "gogs"
 }
 
 // Login authenticates an account with Gogs using basic authentication. The
@@ -171,9 +175,9 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	repo, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +213,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
 	return nil
 }
 
@@ -217,17 +221,22 @@ func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 // cloning Gogs repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -258,14 +267,59 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(token)
+	gogsBranches, err := client.ListRepoBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gogsBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
+// BranchHead returns sha of commit on top of the specified branch
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	b, err := c.newClientToken(token).GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(u.Token)
+
+	orgs, err := client.ListMyOrgs()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, org := range orgs {
+		if org.UserName == owner {
+			// TODO: API does not support checking if user is admin/owner of org
+			return &model.OrgPerm{Member: true}, nil
+		}
+	}
+	return &model.OrgPerm{}, nil
 }
 
 // helper function to return the Gogs client

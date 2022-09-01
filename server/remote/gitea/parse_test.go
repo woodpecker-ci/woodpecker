@@ -23,6 +23,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func Test_parser(t *testing.T) {
@@ -49,7 +50,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
-				g.Assert(b.ChangedFiles).Equal([]string{"CHANGELOG.md", "app/controller/application.rb"})
+				g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 			})
 		})
 	})

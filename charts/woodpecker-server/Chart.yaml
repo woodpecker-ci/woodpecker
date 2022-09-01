@@ -3,7 +3,7 @@ name: woodpecker-server
 description: A Helm chart for the Woodpecker server
 type: application
 version: <version>
-appVersion: "<version>"
+appVersion: "v<version>"
 keywords:
 - continuous-delivery
 - continuous-deployment
@@ -13,5 +13,5 @@ keywords:
 sources:
 - https://github.com/woodpecker-ci/woodpecker
 maintainers:
-- name: Laszlo Fogas
-  email: laszlo@laszlo.cloud
+- name: Woodpecker Maintainers
+  email: owner@woodpecker-ci.org

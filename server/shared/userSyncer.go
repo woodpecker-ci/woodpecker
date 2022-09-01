@@ -24,6 +24,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
+// TODO(974) move to new package
+
 // UserSyncer syncs the user repository and permissions.
 type UserSyncer interface {
 	Sync(ctx context.Context, user *model.User) error
@@ -59,7 +61,7 @@ func (s *Syncer) SetFilter(fn FilterFunc) {
 	s.Match = fn
 }
 
-func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
+func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions bool) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
 	repos, err := s.Remote.Repos(ctx, user)
 	if err != nil {
@@ -75,13 +77,23 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User) error {
 				Repo:   repo.FullName,
 				Synced: unix,
 			}
-			remotePerm, err := s.Remote.Perm(ctx, user, repo.Owner, repo.Name)
-			if err != nil {
-				return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+
+			// TODO(485) temporary workaround to not hit api rate limits
+			if flatPermissions {
+				if repo.Perm == nil {
+					repo.Perm.Pull = true
+					repo.Perm.Push = true
+					repo.Perm.Admin = true
+				}
+			} else {
+				remotePerm, err := s.Remote.Perm(ctx, user, repo)
+				if err != nil {
+					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+				}
+				repo.Perm.Pull = remotePerm.Pull
+				repo.Perm.Push = remotePerm.Push
+				repo.Perm.Admin = remotePerm.Admin
 			}
-			repo.Perm.Pull = remotePerm.Pull
-			repo.Perm.Push = remotePerm.Push
-			repo.Perm.Admin = remotePerm.Admin
 
 			remoteRepos = append(remoteRepos, repo)
 		}

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -45,6 +44,8 @@ const (
 	pathHooks       = "%s/2.0/repositories/%s/%s/hooks?%s"
 	pathSource      = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus      = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches    = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathOrgPerms    = "%s/2.0/workspaces/%s/permissions?%s"
 )
 
 type Client struct {
@@ -106,7 +107,7 @@ func (c *Client) ListRepos(account string, opts *ListOpts) (*RepoResp, error) {
 }
 
 func (c *Client) ListReposAll(account string) ([]*Repo, error) {
-	var page = 1
+	page := 1
 	var repos []*Repo
 
 	for {
@@ -164,7 +165,6 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
 	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
 	_, err := c.do(uri, get, nil, out)
-
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +173,35 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 		return nil, fmt.Errorf("no permissions in repository %s", fullName)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+	out := new(BranchResp)
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	_, err := c.do(uri, get, nil, out)
+	return out.Values, err
+}
+
+func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
+	out := new(WorkspaceMembershipResp)
+	opts := &ListOpts{Page: 1, PageLen: 100}
+	for {
+		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
+		_, err := c.do(uri, get, nil, out)
+		if err != nil {
+			return "", err
+		}
+		for _, m := range out.Values {
+			if m.User.Nickname == user {
+				return m.Permission, nil
+			}
+		}
+		if len(out.Next) == 0 {
+			break
+		}
+		opts.Page++
+	}
+	return "", nil
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
@@ -222,7 +251,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 		return nil, json.NewDecoder(resp.Body).Decode(out)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

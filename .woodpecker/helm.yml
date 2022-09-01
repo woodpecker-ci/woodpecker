@@ -11,7 +11,10 @@ pipeline:
       - cat charts/woodpecker-agent/Chart.yaml
       - cat charts/woodpecker-server/Chart.yaml
     when:
-      path: "charts/**"
+      path:
+        include:
+          - "charts/**"
+          - ".woodpecker/helm.yml"
 
   lint:
     image: alpine/helm:3.5.3
@@ -19,19 +22,28 @@ pipeline:
       - helm lint charts/woodpecker-agent/
       - helm lint charts/woodpecker-server/
     when:
-      path: "charts/**"
+      path:
+        include:
+          - "charts/**"
+          - ".woodpecker/helm.yml"
 
   release:
-    image: quay.io/helmpack/chart-releaser:v1.2.1
+    image: quay.io/helmpack/chart-releaser:v1.4.0
     secrets:
       - source: github_token
         target: CR_TOKEN
     commands:
+      - git config --global user.email "woodpecker-bot@obermui.de"
+      - git config --global user.name "woodpecker-bot"
       - mkdir -p .cr-index
       - cr package charts/woodpecker-server
       - cr package charts/woodpecker-agent
       - cr upload --owner woodpecker-ci --git-repo woodpecker-ci.github.io --release-name-template "helm-{{ .Name }}-{{ .Version }}"
-      - cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch main --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
+      - git clone https://github.com/woodpecker-ci/woodpecker-ci.github.io.git
+      - cd woodpecker-ci.github.io/ && cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch master --package-path ../.cr-release-packages --index-path ../.cr-index/index.yaml --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
-      path: "charts/**"
+      path:
+        include:
+          - "charts/**"
+          - ".woodpecker/helm.yml"

@@ -1,0 +1,18 @@
+{
+  "git.ignoreLimitWarning": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "vendor/": true
+  },
+  "go.lintTool":"golangci-lint",
+  "go.lintFlags": [
+    "--fast"
+  ],
+  "eslint.workingDirectories": [
+      "./web"
+  ],
+  "prettier.configPath": "./web/.prettierrc.js",
+  "prettier.ignorePath": "./web/.prettierignore"
+}

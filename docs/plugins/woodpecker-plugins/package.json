@@ -9,17 +9,17 @@
     "build": "tsc && tsc -p tsconfig.jsx.json"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.0.0-beta.13",
-    "@docusaurus/theme-classic": "^2.0.0-beta.13",
-    "@docusaurus/types": "^2.0.0-beta.13",
+    "@docusaurus/module-type-aliases": "^2.0.0-beta.18",
+    "@docusaurus/theme-classic": "^2.0.0-beta.18",
+    "@docusaurus/types": "^2.0.0-beta.18",
     "@octokit/openapi-types": "^11.2.0",
     "@octokit/rest": "^18.12.0",
-    "@tsconfig/docusaurus": "^1.0.4",
-    "@types/marked": "^4.0.1",
+    "@tsconfig/docusaurus": "^1.0.5",
+    "@types/marked": "^4.0.3",
     "clsx": "^1.1.1",
-    "concurrently": "^6.4.0",
-    "marked": "^4.0.5",
-    "typescript": "^4.5.2"
+    "concurrently": "^7.0.0",
+    "marked": "^4.0.12",
+    "typescript": "^4.6.3"
   },
   "peerDependencies": {
     "react": "^17.0.2",

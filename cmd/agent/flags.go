@@ -15,6 +15,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/urfave/cli/v2"
@@ -29,19 +30,25 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_USERNAME"},
-		Name:    "username",
+		Name:    "grpc-username",
 		Usage:   "auth username",
 		Value:   "x-oauth-basic",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
-		Name:    "password",
-		Usage:   "server-agent shared password",
+		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
+		Name:     "grpc-password",
+		Usage:    "server-agent shared password",
+		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG"},
-		Name:    "debug",
-		Usage:   "enable agent debug mode",
+		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
+		Name:    "grpc-secure",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
+		Name:    "grpc-skip-insecure",
+		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
 	},
 	&cli.StringFlag{
@@ -65,16 +72,10 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PLATFORM"},
-		Name:    "platform",
-		Usage:   "restrict builds by platform conditions",
-		Value:   "linux/amd64",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_FILTER"},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
-		Usage:   "filter expression to restrict builds by label",
+		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
@@ -98,17 +99,6 @@ var flags = []cli.Flag{
 		Name:    "keepalive-timeout",
 		Usage:   "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
 		Value:   time.Second * 20,
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
-		Name:    "secure-grpc",
-		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
-		Name:    "skip-insecure-grpc",
-		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		Value:   true,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND"},

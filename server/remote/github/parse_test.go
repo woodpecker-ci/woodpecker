@@ -17,6 +17,7 @@ package github
 import (
 	"bytes"
 	"net/http"
+	"sort"
 	"testing"
 
 	"github.com/franela/goblin"
@@ -25,85 +26,91 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 )
 
+const (
+	hookEvent  = "X-Github-Event"
+	hookDeploy = "deployment"
+	hookPush   = "push"
+	hookPull   = "pull_request"
+)
+
+func testHookRequest(payload []byte, event string) *http.Request {
+	buf := bytes.NewBuffer(payload)
+	req, _ := http.NewRequest("POST", "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, event)
+	return req
+}
+
 func Test_parser(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("GitHub parser", func() {
 		g.It("should ignore unsupported hook events", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, "issues")
-
-			r, b, err := parseHook(req, false)
+			req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
+			p, r, b, err := parseHook(req, false)
 			g.Assert(r).IsNil()
 			g.Assert(b).IsNil()
 			g.Assert(err).IsNil()
+			g.Assert(p).IsNil()
 		})
 
 		g.Describe("given a push hook", func() {
 			g.It("should skip when action is deleted", func() {
-				raw := []byte(fixtures.HookPushDeleted)
-				r, b, err := parsePushHook(raw)
+				req := testHookRequest([]byte(fixtures.HookPushDeleted), hookPush)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
+				g.Assert(p).IsNil()
 			})
 			g.It("should extract repository and build details", func() {
-				buf := bytes.NewBufferString(fixtures.HookPush)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPush)
-
-				r, b, err := parseHook(req, false)
+				req := testHookRequest([]byte(fixtures.HookPush), hookPush)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
+				g.Assert(p).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
-				expectedFiles := []string{"CHANGELOG.md", "app/controller/application.rb"}
-				g.Assert(b.ChangedFiles).Equal(expectedFiles)
+				sort.Strings(b.ChangedFiles)
+				g.Assert(b.ChangedFiles).Equal([]string{"pipeline/shared/replace_secrets.go", "pipeline/shared/replace_secrets_test.go"})
 			})
 		})
 
 		g.Describe("given a pull request hook", func() {
 			g.It("should skip when action is not open or sync", func() {
-				raw := []byte(fixtures.HookPullRequestInvalidAction)
-				r, b, err := parsePullHook(raw, false)
+				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidAction), hookPull)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
+				g.Assert(p).IsNil()
 			})
 			g.It("should skip when state is not open", func() {
-				raw := []byte(fixtures.HookPullRequestInvalidState)
-				r, b, err := parsePullHook(raw, false)
+				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidState), hookPull)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
+				g.Assert(p).IsNil()
 			})
 			g.It("should extract repository and build details", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequest)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPull)
-
-				r, b, err := parseHook(req, false)
+				req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
+				g.Assert(p).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPull)
 			})
 		})
 
 		g.Describe("given a deployment hook", func() {
 			g.It("should extract repository and build details", func() {
-				buf := bytes.NewBufferString(fixtures.HookDeploy)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookDeploy)
-
-				r, b, err := parseHook(req, false)
+				req := testHookRequest([]byte(fixtures.HookDeploy), hookDeploy)
+				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
+				g.Assert(p).IsNil()
 				g.Assert(b.Event).Equal(model.EventDeploy)
 			})
 		})

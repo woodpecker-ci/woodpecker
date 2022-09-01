@@ -3,27 +3,14 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="
-        radio
-        relative
-        border border-gray-400
-        dark:border-gray-600
-        cursor-pointer
-        rounded-full
-        w-5
-        h-5
-        checked:bg-lime-600 checked:border-lime-600
-        dark:checked:bg-lime-700 dark:checked:border-lime-700
-      "
+      class="radio relative flex-shrink-0 border border-gray-400 dark:border-gray-600 cursor-pointer rounded-full w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-700 dark:checked:border-lime-700"
       :value="option.value"
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
     />
     <div class="flex flex-col ml-4">
-      <label class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`radio-${id}-${option.value}`">{{
-        option.text
-      }}</label>
-      <span v-if="option.description" class="text-sm text-gray-400 dark:text-gray-600">{{ option.description }}</span>
+      <label class="cursor-pointer text-color" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+      <span v-if="option.description" class="text-sm text-color-alt">{{ option.description }}</span>
     </div>
   </div>
 </template>

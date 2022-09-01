@@ -17,11 +17,13 @@ package session
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 func User(c *gin.Context) *model.User {
@@ -114,5 +116,41 @@ func MustUser() gin.HandlerFunc {
 		default:
 			c.Next()
 		}
+	}
+}
+
+func MustOrgMember(admin bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := User(c)
+		owner := c.Param("owner")
+		if user == nil {
+			c.String(http.StatusUnauthorized, "User not authorized")
+			c.Abort()
+			return
+		}
+		if owner == "" {
+			c.String(http.StatusForbidden, "User not authorized")
+			c.Abort()
+			return
+		}
+		// User can access his own, admin can access all
+		if user.Login == owner || user.Admin {
+			c.Next()
+			return
+		}
+
+		perm, err := server.Config.Services.Membership.Get(c, user, owner)
+		if err != nil {
+			log.Error().Msgf("Failed to check membership: %v", err)
+			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			c.Abort()
+			return
+		}
+		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
+			c.String(http.StatusForbidden, "User not authorized")
+			c.Abort()
+			return
+		}
+		c.Next()
 	}
 }

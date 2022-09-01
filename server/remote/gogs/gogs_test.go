@@ -52,7 +52,6 @@ func Test_gogs(t *testing.T) {
 					PrivateMode: true,
 				})
 				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*client).Machine).Equal("localhost")
 				g.Assert(remote.(*client).Username).Equal("someuser")
 				g.Assert(remote.(*client).Password).Equal("password")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)
@@ -66,21 +65,18 @@ func Test_gogs(t *testing.T) {
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{
-					URL: "http://gogs.com",
-				})
-				netrc, _ := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gogs.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 			})
 			g.It("Should return a netrc with the machine account", func() {
 				remote, _ := New(Opts{
-					URL:      "http://gogs.com",
 					Username: "someuser",
 					Password: "password",
 				})
-				netrc, _ := remote.Netrc(nil, nil)
+				netrc, _ := remote.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gogs.com")
 				g.Assert(netrc.Login).Equal("someuser")
 				g.Assert(netrc.Password).Equal("password")
@@ -106,14 +102,14 @@ func Test_gogs(t *testing.T) {
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -164,7 +160,7 @@ func Test_gogs(t *testing.T) {
 
 		g.It("Should return no-op for usupporeted features", func() {
 			_, err1 := c.Auth(ctx, "octocat", "4vyW6b49Z")
-			err2 := c.Status(ctx, nil, nil, nil, "", nil)
+			err2 := c.Status(ctx, nil, nil, nil, nil)
 			err3 := c.Deactivate(ctx, nil, nil, "")
 			g.Assert(err1).IsNotNil()
 			g.Assert(err2).IsNil()
@@ -185,6 +181,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
+		Clone:    "http://gogs.com/test_name/repo_name.git",
 		Owner:    "test_name",
 		Name:     "repo_name",
 		FullName: "test_name/repo_name",

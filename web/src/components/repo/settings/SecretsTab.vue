@@ -2,76 +2,51 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
       <div class="ml-2">
-        <h1 class="text-xl text-gray-500">Secrets</h1>
-        <p class="text-sm text-gray-400 dark:text-gray-600">
-          Secrets can be passed to individual pipeline steps at runtime as environmental variables.
+        <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
+        <p class="text-sm text-color-alt">
+          {{ $t('repo.settings.secrets.desc') }}
           <DocsLink url="docs/usage/secrets" />
         </p>
       </div>
       <Button
-        v-if="showAddSecret"
+        v-if="selectedSecret"
         class="ml-auto"
-        text="Show secrets"
-        start-icon="list"
-        @click="showAddSecret = false"
+        :text="$t('repo.settings.secrets.show')"
+        start-icon="back"
+        @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" text="Add secret" start-icon="plus" @click="showAddSecret = true" />
+      <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
     </div>
 
-    <div v-if="!showAddSecret" class="space-y-4 text-gray-500">
-      <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
-        <span>{{ secret.name }}</span>
-        <div class="ml-auto">
-          <span
-            v-for="event in secret.event"
-            :key="event"
-            class="bg-gray-400 dark:bg-dark-200 dark:text-gray-500 text-white rounded-md mx-1 py-1 px-2 text-sm"
-            >{{ event }}</span
-          >
-        </div>
-        <IconButton
-          icon="trash"
-          class="ml-2 w-8 h-8 hover:text-red-400"
-          :is-loading="isDeleting"
-          @click="deleteSecret(secret)"
-        />
-      </ListItem>
+    <SecretList
+      v-if="!selectedSecret"
+      v-model="secrets"
+      i18n-prefix="repo.settings.secrets."
+      :is-deleting="isDeleting"
+      @edit="editSecret"
+      @delete="deleteSecret"
+    />
 
-      <div v-if="secrets?.length === 0" class="ml-2">There are no secrets yet.</div>
-    </div>
-
-    <div v-else class="space-y-4">
-      <form @submit.prevent="createSecret">
-        <InputField label="Name">
-          <TextField v-model="selectedSecret.name" placeholder="Name" required />
-        </InputField>
-
-        <InputField label="Value">
-          <TextField v-model="selectedSecret.value" placeholder="Value" :lines="5" required />
-        </InputField>
-
-        <InputField label="Available at following events">
-          <CheckboxesField v-model="selectedSecret.event" :options="secretEventsOptions" />
-        </InputField>
-
-        <Button :is-loading="isSaving" type="submit" text="Add secret" />
-      </form>
-    </div>
+    <SecretEdit
+      v-else
+      v-model="selectedSecret"
+      i18n-prefix="repo.settings.secrets."
+      :is-saving="isSaving"
+      @save="createSecret"
+    />
   </Panel>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { cloneDeep } from 'lodash';
+import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
-import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import { CheckboxOption } from '~/components/form/form.types';
-import InputField from '~/components/form/InputField.vue';
-import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
+import SecretEdit from '~/components/secrets/SecretEdit.vue';
+import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
@@ -84,40 +59,26 @@ const emptySecret = {
   event: [WebhookEvents.Push],
 };
 
-const secretEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: 'Push' },
-  { value: WebhookEvents.Tag, text: 'Tag' },
-  {
-    value: WebhookEvents.PullRequest,
-    text: 'Pull Request',
-    description:
-      'Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets.',
-  },
-  { value: WebhookEvents.Deploy, text: 'Deploy' },
-];
-
 export default defineComponent({
   name: 'SecretsTab',
 
   components: {
     Button,
     Panel,
-    ListItem,
-    IconButton,
-    InputField,
-    TextField,
     DocsLink,
-    CheckboxesField,
+    SecretList,
+    SecretEdit,
   },
 
   setup() {
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
-    const secrets = ref<Secret[]>();
-    const showAddSecret = ref(false);
-    const selectedSecret = ref<Partial<Secret>>({ ...emptySecret });
+    const secrets = ref<Secret[]>([]);
+    const selectedSecret = ref<Partial<Secret>>();
+    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
     async function loadSecrets() {
       if (!repo?.value) {
@@ -132,10 +93,20 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
-      notifications.notify({ title: 'Secret created', type: 'success' });
-      showAddSecret.value = false;
-      selectedSecret.value = { ...emptySecret };
+      if (!selectedSecret.value) {
+        throw new Error("Unexpected: Can't get secret");
+      }
+
+      if (isEditingSecret.value) {
+        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+      } else {
+        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+      }
+      notifications.notify({
+        title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
+        type: 'success',
+      });
+      selectedSecret.value = undefined;
       await loadSecrets();
     });
 
@@ -145,22 +116,30 @@ export default defineComponent({
       }
 
       await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
-      notifications.notify({ title: 'Secret deleted', type: 'success' });
+      notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
       await loadSecrets();
     });
+
+    function editSecret(secret: Secret) {
+      selectedSecret.value = cloneDeep(secret);
+    }
+
+    function showAddSecret() {
+      selectedSecret.value = cloneDeep(emptySecret);
+    }
 
     onMounted(async () => {
       await loadSecrets();
     });
 
     return {
-      secretEventsOptions,
       selectedSecret,
       secrets,
-      showAddSecret,
-      isSaving,
       isDeleting,
+      isSaving,
+      showAddSecret,
       createSecret,
+      editSecret,
       deleteSecret,
     };
   },

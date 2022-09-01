@@ -32,8 +32,10 @@ import (
 )
 
 // TODO: make it set system wide via environment variables
-const defaultTimeout = 60 // 1 hour default build time
-const maxTimeout = defaultTimeout * 2
+const (
+	defaultTimeout int64 = 60 // 1 hour default build time
+	maxTimeout     int64 = defaultTimeout * 2
+)
 
 func PostRepo(c *gin.Context) {
 	remote := server.Config.Services.Remote
@@ -49,6 +51,7 @@ func PostRepo(c *gin.Context) {
 	repo.IsActive = true
 	repo.UserID = user.ID
 	repo.AllowPull = true
+	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -137,6 +140,9 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.Config != nil {
 		repo.Config = *in.Config
+	}
+	if in.CancelPreviousPipelineEvents != nil {
+		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {

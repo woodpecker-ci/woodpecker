@@ -6,6 +6,13 @@ pipeline:
     when:
       branch: master
 
+  when-branch-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      branch: [master, deploy]
+
   when-event:
     image: alpine
     commands:
@@ -79,6 +86,15 @@ pipeline:
     when:
       path: "folder/**"
 
+  when-path-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      path:
+        - "folder/**"
+        - "**/*.c"
+
   when-path-include-exclude:
     image: alpine
     commands:
@@ -88,3 +104,39 @@ pipeline:
         include: [ '.woodpecker/*.yml', '*.ini' ]
         exclude: [ '*.md', 'docs/**' ]
         ignore_message: "[ALL]"
+
+  when-repo:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      repo: test/test
+
+  when-multi:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      - event: pull_request
+        repo: test/test
+      - event: push
+        branch: main
+
+  when-cron:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      cron: "update locales"
+      event: cron
+
+  when-cron-list:
+    image: alpine
+    commands: echo "test"
+    when:
+      event: cron
+      cron:
+        include:
+          - test
+          - hello
+        exclude: hi

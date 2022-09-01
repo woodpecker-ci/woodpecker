@@ -1,6 +1,9 @@
 <template>
-  <div class="rounded-md w-full p-4 shadow border bg-white dark:bg-dark-gray-700 dark:border-dark-200">
-    <slot />
+  <div class="rounded-md w-full shadow overflow-hidden bg-gray-300 dark:bg-dark-gray-700">
+    <div v-if="title" class="font-bold text-gray-200 bg-gray-400 dark:bg-dark-gray-800 px-4 py-2">{{ title }}</div>
+    <div class="w-full p-4 bg-white dark:bg-dark-gray-700">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -10,8 +13,11 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'Panel',
 
-  setup() {
-    return {};
+  props: {
+    title: {
+      type: String,
+      default: '',
+    },
   },
 });
 </script>

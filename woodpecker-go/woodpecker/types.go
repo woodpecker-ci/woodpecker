@@ -157,4 +157,22 @@ type (
 	LogLevel struct {
 		Level string `json:"log-level"`
 	}
+
+	// Logs is the JSON data for a logs response
+	Logs struct {
+		Proc   string `json:"proc"`
+		Output string `json:"out"`
+	}
+
+	// Cron is the JSON data of a cron job
+	Cron struct {
+		ID        int64  `json:"id"`
+		Name      string `json:"name"`
+		RepoID    int64  `json:"repo_id"`
+		CreatorID int64  `json:"creator_id"`
+		NextExec  int64  `json:"next_exec"`
+		Schedule  string `json:"schedule"`
+		Created   int64  `json:"created_at"`
+		Branch    string `json:"branch"`
+	}
 )

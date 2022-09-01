@@ -47,7 +47,7 @@ pipeline:
 This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
 
 | NAME                           | Description                                                                                  |
-| ------------------------------ | -------------------------------------------------------------------------------------------- |
+|--------------------------------|----------------------------------------------------------------------------------------------|
 | `CI=woodpecker`                | environment is woodpecker                                                                    |
 |                                | **Repository**                                                                               |
 | `CI_REPO`                      | repository full name `<owner>/<name>`                                                        |
@@ -63,7 +63,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_SHA`                | commit sha                                                                                   |
 | `CI_COMMIT_REF`                | commit ref                                                                                   |
 | `CI_COMMIT_REFSPEC`            | commit ref spec                                                                              |
-| `CI_COMMIT_BRANCH`             | commit branch                                                                                |
+| `CI_COMMIT_BRANCH`             | commit branch (equals target branch for pull requests)                                       |
 | `CI_COMMIT_SOURCE_BRANCH`      | commit source branch                                                                         |
 | `CI_COMMIT_TARGET_BRANCH`      | commit target branch                                                                         |
 | `CI_COMMIT_TAG`                | commit tag name (empty if event is not `tag`)                                                |
@@ -110,14 +110,14 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_BUILD_CREATED`        | previous build created unix timestamp                                                        |
 | `CI_PREV_BUILD_STARTED`        | previous build started unix timestamp                                                        |
 | `CI_PREV_BUILD_FINISHED`       | previous build finished unix timestamp                                                       |
-|                                | &emsp;                                                                                             |
+|                                | &emsp;                                                                                       |
 | `CI_WORKSPACE`                 | Path of the workspace where source code gets cloned to                                       |
 |                                | **System**                                                                                   |
 | `CI_SYSTEM_NAME`               | name of the ci system: `woodpecker`                                                          |
 | `CI_SYSTEM_LINK`               | link to ci system                                                                            |
 | `CI_SYSTEM_HOST`               | hostname of ci server                                                                        |
 | `CI_SYSTEM_VERSION`            | version of the server                                                                        |
-|                                | **Internal** - Please don't use!                                                               |
+|                                | **Internal** - Please don't use!                                                             |
 | `CI_SCRIPT`                    | Internal script path. Used to call pipeline step commands.                                   |
 | `CI_NETRC_USERNAME`            | Credentials for private repos to be able to clone data. (Only available for specific images) |
 | `CI_NETRC_PASSWORD`            | Credentials for private repos to be able to clone data. (Only available for specific images) |
@@ -125,15 +125,29 @@ This is the reference list of all environment variables available to your pipeli
 
 ## Global environment variables
 
-If you want specific environment variables to be available in all of your builds use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server.
+If you want specific environment variables to be available in all of your builds use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
 
-```.diff
+```diff
 services:
   woodpecker-server:
     [...]
     environment:
       - [...]
 +     - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
+```
+
+These can be used, for example, to manage the image tag used by multiple projects.
+
+```diff
+pipeline:
+  build:
+-   image: golang:1.18
++   image: golang:${GOLANG_VERSION}
+    commands:
+      - [...]
+    environment:
+      - [...]
++     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
 ```
 
 ## String Substitution

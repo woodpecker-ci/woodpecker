@@ -188,7 +188,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should correct a malformed avatar url", func() {
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -217,7 +217,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should expand the avatar url", func() {
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -235,7 +235,7 @@ func Test_parse(t *testing.T) {
 				},
 			}
 
-			var repo = "http://gogs.io/foo/bar"
+			repo := "http://gogs.io/foo/bar"
 			for _, url := range urls {
 				got := expandAvatar(repo, url.Before)
 				g.Assert(got).Equal(url.After)

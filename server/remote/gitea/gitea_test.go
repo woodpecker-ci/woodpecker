@@ -45,20 +45,11 @@ func Test_gitea(t *testing.T) {
 		g.Describe("Creating a remote", func() {
 			g.It("Should return client with specified options", func() {
 				remote, _ := New(Opts{
-					URL:         "http://localhost:8080",
-					Context:     "continuous-integration/test",
-					Username:    "someuser",
-					Password:    "password",
-					SkipVerify:  true,
-					PrivateMode: true,
+					URL:        "http://localhost:8080",
+					SkipVerify: true,
 				})
 				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*Gitea).Context).Equal("continuous-integration/test")
-				g.Assert(remote.(*Gitea).Machine).Equal("localhost")
-				g.Assert(remote.(*Gitea).Username).Equal("someuser")
-				g.Assert(remote.(*Gitea).Password).Equal("password")
 				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
-				g.Assert(remote.(*Gitea).PrivateMode).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
@@ -68,24 +59,18 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{
-					URL: "http://gitea.com",
-				})
-				netrc, _ := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Login)
 				g.Assert(netrc.Password).Equal(fakeUser.Token)
 			})
 			g.It("Should return a netrc with the machine account", func() {
-				remote, _ := New(Opts{
-					URL:      "http://gitea.com",
-					Username: "someuser",
-					Password: "password",
-				})
-				netrc, _ := remote.Netrc(nil, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
-				g.Assert(netrc.Login).Equal("someuser")
-				g.Assert(netrc.Password).Equal("password")
+				g.Assert(netrc.Login).Equal("")
+				g.Assert(netrc.Password).Equal("")
 			})
 		})
 
@@ -108,14 +93,14 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -151,7 +136,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return nil from send build status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, "http://gitea.io", nil)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, fakeProc)
 			g.Assert(err).IsNil()
 		})
 
@@ -182,6 +167,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
+		Clone:    "http://gitea.com/test_name/repo_name.git",
 		Owner:    "test_name",
 		Name:     "repo_name",
 		FullName: "test_name/repo_name",
@@ -195,5 +181,10 @@ var (
 
 	fakeBuild = &model.Build{
 		Commit: "9ecad50",
+	}
+
+	fakeProc = &model.Proc{
+		Name:  "test",
+		State: model.StatusSuccess,
 	}
 )

@@ -10,7 +10,6 @@ type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
 		Labels map[string]string `json:"labels"`
-		Expr   string            `json:"expr"`
 	}
 
 	// State defines the pipeline state.
@@ -41,9 +40,6 @@ type (
 		Meta map[string]string `json:"meta"`
 	}
 )
-
-// NoFilter is an empty filter.
-var NoFilter = Filter{}
 
 // Peer defines a peer-to-peer connection.
 type Peer interface {

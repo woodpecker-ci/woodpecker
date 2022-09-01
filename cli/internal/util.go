@@ -37,7 +37,9 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
-	log.Error().Msgf("failed to find system CA certs: %v", err)
+	if err != nil {
+		log.Error().Msgf("failed to find system CA certs: %v", err)
+	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
 		InsecureSkipVerify: skip,
@@ -75,7 +77,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
-	var parts = strings.Split(str, "/")
+	parts := strings.Split(str, "/")
 	if len(parts) != 2 {
 		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
 		return

@@ -39,8 +39,8 @@ func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 // isRead is a helper function that returns true if the
 // user has Read-only access to the repository.
 func isRead(proj *gitlab.Project) bool {
-	var user = proj.Permissions.ProjectAccess
-	var group = proj.Permissions.GroupAccess
+	user := proj.Permissions.ProjectAccess
+	group := proj.Permissions.GroupAccess
 
 	switch {
 	case proj.Public:
@@ -57,8 +57,8 @@ func isRead(proj *gitlab.Project) bool {
 // isWrite is a helper function that returns true if the
 // user has Read-Write access to the repository.
 func isWrite(proj *gitlab.Project) bool {
-	var user = proj.Permissions.ProjectAccess
-	var group = proj.Permissions.GroupAccess
+	user := proj.Permissions.ProjectAccess
+	group := proj.Permissions.GroupAccess
 
 	switch {
 	case user != nil && user.AccessLevel >= 30:
@@ -73,8 +73,8 @@ func isWrite(proj *gitlab.Project) bool {
 // isAdmin is a helper function that returns true if the
 // user has Admin access to the repository.
 func isAdmin(proj *gitlab.Project) bool {
-	var user = proj.Permissions.ProjectAccess
-	var group = proj.Permissions.GroupAccess
+	user := proj.Permissions.ProjectAccess
+	group := proj.Permissions.GroupAccess
 
 	switch {
 	case user != nil && user.AccessLevel >= 40:

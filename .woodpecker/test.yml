@@ -1,26 +1,57 @@
+variables:
+  - &golang_image 'golang:1.18'
+  - &node_image 'node:16-alpine'
+  - &when_path
+      # related config files
+      - ".woodpecker/test.yml"
+      - ".golangci.yml"
+      # go source code
+      - "**/*.go"
+      - "go.*"
+      # schema changes
+      - "pipeline/schema/**"
+
 pipeline:
+  vendor:
+    image: *golang_image
+    group: prepare
+    commands:
+      - go mod vendor
+    when:
+      path: *when_path
+
+  lint-pipeline:
+    image: *golang_image
+    commands:
+      - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
+    when:
+      path:
+        - ".woodpecker/**"
+        - "pipeline/schema/**"
+
   dummy-web:
-    image: golang:1.16
+    image: *golang_image
+    group: prepare
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
+    when:
+      path: *when_path
 
   lint:
-    image: golang:1.16
+    image: *golang_image
     group: test
     commands:
       - make lint
     when:
-      path:
-        include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
-          - "**/*.go"
-          - ".golangci.yml"
+      path: *when_path
+
+  lint-editorconfig:
+    image: mstruebing/editorconfig-checker
+    group: test
 
   test:
-    image: golang:1.16
+    image: *golang_image
     group: test
     commands:
       - make test-agent
@@ -28,49 +59,69 @@ pipeline:
       - make test-cli
       - make test-lib
     when:
-      path:
-        include:
-          - "vendor/**"
-          - "go.mod"
-          - "go.sum"
-          - "**/*.go"
+      path: *when_path
 
   sqlite:
-    image: golang:1.16
+    image: *golang_image
     group: test
     environment:
-      - DATABASE_DRIVER=sqlite3
+      - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
-      - make test-server-datastore
+      - make test-server-datastore-coverage
+    when:
+      path: *when_path
 
   postgres:
-    image: golang:1.16
+    image: *golang_image
     group: test
     environment:
-      - DATABASE_DRIVER=postgres
-      - DATABASE_CONFIG=host=postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
+    when:
+      path: *when_path
 
   mysql:
-    image: golang:1.16
+    image: *golang_image
     group: test
     environment:
-      - DATABASE_DRIVER=mysql
-      - DATABASE_CONFIG=root@tcp(mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DRIVER=mysql
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
+    when:
+      path: *when_path
+
+  codecov:
+    pull: true
+    image: woodpeckerci/plugin-codecov:next-alpine
+    settings:
+      files:
+        - agent-coverage.out
+        - cli-coverage.out
+        - server-coverage.out
+        - datastore-coverage.out
+      token:
+        from_secret: codecov_token
+    when:
+      path: *when_path
 
 services:
   service-postgres:
-    image: postgres:9.6
+    image: postgres:11
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+    when:
+      path: *when_path
+
   service-mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when:
+      path: *when_path

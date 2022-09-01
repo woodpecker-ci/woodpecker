@@ -61,9 +61,6 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	if _, err := sess.Where("sender_repo_id = ?", repo.ID).Delete(new(model.Sender)); err != nil {
-		return err
-	}
 	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
@@ -101,7 +98,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 	return sess.Commit()
 }
 
-// RepoList list all repos where permissions fo specific user are stored
+// RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
 func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0, perPage)

@@ -7,6 +7,12 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+dind:
+  image: "docker:20.10.12-dind"
+  env:
+    DOCKER_DRIVER: "overlay2"
+  resources: {}
+
 env:
   WOODPECKER_SERVER: "woodpecker-server.<namespace>.svc.cluster.local:9000"
 
