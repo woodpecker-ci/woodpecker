@@ -83,7 +83,7 @@ func TestParse(t *testing.T) {
 					Curr: frontend.Build{
 						Event: "tester",
 					},
-				})).Equal(true)
+				}, false)).Equal(true)
 			})
 
 			g.It("Should match event tester2", func() {
@@ -91,7 +91,7 @@ func TestParse(t *testing.T) {
 					Curr: frontend.Build{
 						Event: "tester2",
 					},
-				})).Equal(true)
+				}, false)).Equal(true)
 			})
 
 			g.It("Should match branch master", func() {
@@ -101,7 +101,7 @@ func TestParse(t *testing.T) {
 							Branch: "tester",
 						},
 					},
-				})).Equal(true)
+				}, false)).Equal(true)
 			})
 
 			g.It("Should not match event push", func() {
@@ -109,7 +109,7 @@ func TestParse(t *testing.T) {
 					Curr: frontend.Build{
 						Event: "push",
 					},
-				})).Equal(false)
+				}, false)).Equal(false)
 			})
 		})
 	})

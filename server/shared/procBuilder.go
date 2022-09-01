@@ -119,8 +119,8 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// checking if filtered.
-			if !parsed.When.Match(metadata) {
-				log.Debug().Str("Step", proc.Name).Msg(
+			if !parsed.When.Match(metadata, true) {
+				log.Debug().Str("pipeline", proc.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
 				proc.State = model.StatusSkipped
@@ -128,7 +128,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 			// TODO: deprecated branches filter => remove after some time
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				log.Debug().Str("Step", proc.Name).Msg(
+				log.Debug().Str("pipeline", proc.Name).Msg(
 					"Marked as skipped, dose not match branch",
 				)
 				proc.State = model.StatusSkipped
