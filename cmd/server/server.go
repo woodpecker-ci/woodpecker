@@ -187,7 +187,7 @@ func run(c *cli.Context) error {
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store)
+		return cron.Start(c.Context, _store, _remote)
 	})
 
 	// start the server with tls enabled
