@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isBuildFeedOpen"
-    class="flex flex-col overflow-y-auto items-center bg-white dark:bg-dark-gray-800 dark:border-dark-500"
+    class="flex flex-col z-50 overflow-y-auto items-center bg-white dark:bg-dark-gray-800 dark:border-dark-500"
   >
     <router-link
       v-for="build in sortedBuildFeed"

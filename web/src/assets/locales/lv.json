@@ -165,7 +165,9 @@
                 "canceled": "Šis solis tika atcelts.",
                 "cancel_success": "Konvejerdarbs atcelts",
                 "restart_success": "Konvejerdarbs pārstartēts",
-                "log_download": "Lejupielādēt"
+                "log_download": "Lejupielādēt",
+                "log_auto_scroll": "Automātiski ritināt",
+                "log_auto_scroll_off": "Atslēgt automātisko ritināšanu"
             },
             "protected": {
                 "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",

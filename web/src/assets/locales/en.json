@@ -190,7 +190,9 @@
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
                 "restart_success": "Pipeline restarted",
-                "log_download": "Download"
+                "log_download": "Download",
+                "log_auto_scroll": "Automatically scroll down",
+                "log_auto_scroll_off": "Turn off automatic scrolling"
             },
             "protected": {
                 "awaits": "This pipeline is awaiting approval by some maintainer!",
