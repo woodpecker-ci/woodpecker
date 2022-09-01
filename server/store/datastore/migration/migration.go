@@ -55,23 +55,6 @@ var allBeans = []interface{}{
 	new(model.Cron),
 }
 
-var allBeans = []interface{}{
-	new(model.Agent),
-	new(model.Build),
-	new(model.BuildConfig),
-	new(model.Config),
-	new(model.File),
-	new(model.Logs),
-	new(model.Perm),
-	new(model.Proc),
-	new(model.Registry),
-	new(model.Repo),
-	new(model.Secret),
-	new(model.Sender),
-	new(model.Task),
-	new(model.User),
-}
-
 type migrations struct {
 	Name string `xorm:"UNIQUE"`
 }

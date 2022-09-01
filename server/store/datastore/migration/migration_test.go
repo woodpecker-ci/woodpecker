@@ -2,7 +2,6 @@ package migration
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -96,7 +95,7 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
 }
 
 func restorePostgresDump(t *testing.T, config string) {
-	dump, err := ioutil.ReadFile(postgresDump)
+	dump, err := os.ReadFile(postgresDump)
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
