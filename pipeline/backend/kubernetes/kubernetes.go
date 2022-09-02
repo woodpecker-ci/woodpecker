@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -29,7 +28,6 @@ import (
 var noContext = context.Background()
 
 type kube struct {
-	logs         *bytes.Buffer // TODO remove
 	namespace    string
 	storageClass string
 	volumeSize   string
@@ -40,7 +38,6 @@ type kube struct {
 // New returns a new Kubernetes Engine.
 func New(namespace, storageClass, volumeSize string, storageRwx bool) types.Engine {
 	return &kube{
-		logs:         new(bytes.Buffer),
 		namespace:    namespace,
 		storageClass: storageClass,
 		volumeSize:   volumeSize,
@@ -77,7 +74,7 @@ func (e *kube) Load() error {
 
 // Setup the pipeline environment.
 func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
-	e.logs.WriteString("Setting up Kubernetes primitives\n")
+	log.Trace().Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
 		pvc := PersistentVolumeClaim(e.namespace, vol.Name, e.storageClass, e.volumeSize, e.storageRwx)
@@ -92,7 +89,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				e.logs.WriteString("Creating service\n")
+				log.Trace().Str("pod-name", podName(step)).Msgf("Creating service: %s", step.Name)
 				// TODO: support ports setting
 				// svc, err := Service(e.namespace, step.Name, podName(step), step.Ports)
 				svc, err := Service(e.namespace, step.Name, podName(step), []string{})
@@ -110,7 +107,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 		}
 	}
 
-	e.logs.WriteString(strings.Join(extraHosts, ", ") + "\n")
+	log.Trace().Msgf("Adding extra hosts: %s", strings.Join(extraHosts, ", "))
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			step.ExtraHosts = extraHosts
@@ -122,9 +119,8 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	e.logs.WriteString("Creating pod\n")
-	e.logs.WriteString(strings.Join(step.ExtraHosts, " ") + "\n")
 	pod := Pod(e.namespace, step)
+	log.Trace().Msgf("Creating pod: %s", pod.Name)
 	_, err := e.client.CoreV1().Pods(e.namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
@@ -224,16 +220,10 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 	rc, wc := io.Pipe()
 
 	go func() {
-		defer e.logs.Reset()
 		defer logs.Close()
 		defer wc.Close()
 		defer rc.Close()
 
-		systemLogs := io.NopCloser(bytes.NewReader(e.logs.Bytes()))
-		_, err := io.Copy(wc, systemLogs)
-		if err != nil {
-			return
-		}
 		_, err = io.Copy(wc, logs)
 		if err != nil {
 			return
@@ -262,7 +252,7 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			e.logs.WriteString("Deleting pod\n")
+			log.Trace().Msgf("Deleting pod: %s", podName(step))
 			if err := e.client.CoreV1().Pods(e.namespace).Delete(noContext, podName(step), deleteOpts); err != nil {
 				if errors.IsNotFound(err) {
 					log.Trace().Err(err).Msgf("Unable to delete pod %s", podName(step))
@@ -276,7 +266,7 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				e.logs.WriteString("Deleting service\n")
+				log.Trace().Msgf("Deleting service: %s", step.Name)
 				// TODO: support ports setting
 				// svc, err := Service(e.namespace, step.Name, step.Alias, step.Ports)
 				svc, err := Service(e.namespace, step.Name, step.Alias, []string{})
