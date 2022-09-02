@@ -52,6 +52,7 @@ func CreateBuild(c *gin.Context) {
 	user, _ := _store.GetUser(repo.UserID)
 
 	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+	vars, _ := json.Marshal(p.Variables)
 
 	tmpBuild := &model.Build{
 		Event:     model.EventManual,
@@ -60,12 +61,16 @@ func CreateBuild(c *gin.Context) {
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: "Manual build",
+		Message: p.Branch + ":" + string(vars),
 
 		Ref:       p.Branch,
 		Variables: p.Variables,
 
-		// TODO: Add missing fileds (author, repo link, etc...)
+		Author: user.Login,
+		Email:  user.Email,
+
+		// TODO: Generate proper link to commit
+		Link: repo.Link,
 	}
 	build, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
