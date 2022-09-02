@@ -134,6 +134,7 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 			frontend.EventPull,
 			frontend.EventTag,
 			frontend.EventDeploy,
+			frontend.EventManual,
 		}
 	}
 

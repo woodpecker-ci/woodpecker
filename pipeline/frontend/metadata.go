@@ -15,6 +15,7 @@ const (
 	EventTag    = "tag"
 	EventDeploy = "deployment"
 	EventCron   = "cron"
+	EventManual = "manual"
 )
 
 type (

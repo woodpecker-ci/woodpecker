@@ -54,8 +54,7 @@ func CreateBuild(c *gin.Context) {
 	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
 
 	tmpBuild := &model.Build{
-		// TODO: Find why adding 'model.EventManual' leads to only clone step being executed
-		Event:     model.EventPush,
+		Event:     model.EventManual,
 		Commit:    lastCommit,
 		Branch:    p.Branch,
 		Timestamp: time.Now().UTC().Unix(),
