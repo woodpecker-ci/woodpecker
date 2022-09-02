@@ -22,6 +22,7 @@
         <Icon v-else name="repo" />
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton class="ml-2" icon="status-running" @click="runManual" />
     </div>
 
     <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
@@ -136,4 +137,19 @@ const activeTab = computed({
     }
   },
 });
+
+const runManual = () => {
+  const apiClient = useApiClient();
+  apiClient
+    .manualBuild(`${repo.value.owner}`, `${repo.value.name}`, {
+      branch: 'main',
+      variables: {
+        VAR1: 'VAL1',
+        VAR2: 'VAL2',
+      },
+    })
+    .finally(() => {
+      alert('finally!');
+    });
+};
 </script>

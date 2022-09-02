@@ -19,6 +19,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -33,6 +34,45 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
+
+func CreateBuild(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+
+	type ManualBuildReq struct {
+		Branch    string            `json:"branch"`
+		Variables map[string]string `json:"variables"`
+	}
+
+	var p ManualBuildReq
+
+	err := json.NewDecoder(c.Request.Body).Decode(&p)
+
+	user, _ := _store.GetUser(repo.UserID)
+
+	tmpBuild := &model.Build{
+		// TODO: Find why adding 'model.EventManual' leads to only clone step being executed
+		Event: model.EventPush,
+		// TODO: Find a way to fetch last commit id of branch
+		Commit:    "0000000000000000000000000000000000000000",
+		Branch:    p.Branch,
+		Timestamp: time.Now().UTC().Unix(),
+
+		Avatar:  user.Avatar,
+		Message: "Manual build",
+
+		Ref:       p.Branch,
+		Variables: p.Variables,
+
+		// TODO: Add missing fileds (author, repo link, etc...)
+	}
+	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(200, []interface{}{user, build, c.Params, repo})
+	}
+}
 
 func GetBuilds(c *gin.Context) {
 	repo := session.Repo(c)
