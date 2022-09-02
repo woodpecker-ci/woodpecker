@@ -47,7 +47,11 @@ func CreateBuild(c *gin.Context) {
 
 	var p ManualBuildReq
 
-	json.NewDecoder(c.Request.Body).Decode(&p)
+	err := json.NewDecoder(c.Request.Body).Decode(&p)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	user := session.User(c)
 
