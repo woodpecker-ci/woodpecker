@@ -24,8 +24,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/mrjones/oauth"
 
@@ -86,7 +86,7 @@ func New(opts Opts) (remote.Remote, error) {
 	var keyFileBytes []byte
 	if opts.ConsumerRSA != "" {
 		var err error
-		keyFileBytes, err = ioutil.ReadFile(opts.ConsumerRSA)
+		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
 		if err != nil {
 			return nil, err
 		}
@@ -102,6 +102,11 @@ func New(opts Opts) (remote.Remote, error) {
 
 	config.Consumer = CreateConsumer(opts.URL, opts.ConsumerKey, PrivateKey)
 	return config, nil
+}
+
+// Name returns the string name of this driver
+func (c *Config) Name() string {
+	return "stash"
 }
 
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
@@ -231,6 +236,12 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
+}
+
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)
@@ -238,6 +249,13 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r, c.URL)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not implemented currently
+	return nil, nil
 }
 
 func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {

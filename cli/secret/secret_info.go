@@ -8,18 +8,24 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 var secretInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display secret info",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[org/repo|org]",
 	Action:    secretInfo,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
 		},
+		&cli.StringFlag{
+			Name:  "organization",
+			Usage: "organization name (e.g. octocat)",
+		},
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
@@ -31,24 +37,36 @@ var secretInfoCmd = &cli.Command{
 func secretInfo(c *cli.Context) error {
 	var (
 		secretName = c.String("name")
-		repoName   = c.String("repository")
 		format     = c.String("format") + "\n"
 	)
-	if repoName == "" {
-		repoName = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(repoName)
-	if err != nil {
-		return err
-	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	secret, err := client.Secret(owner, name, secretName)
+
+	global, owner, repo, err := parseTargetArgs(c)
 	if err != nil {
 		return err
 	}
+
+	var secret *woodpecker.Secret
+	if global {
+		secret, err = client.GlobalSecret(secretName)
+		if err != nil {
+			return err
+		}
+	} else if repo == "" {
+		secret, err = client.OrgSecret(owner, secretName)
+		if err != nil {
+			return err
+		}
+	} else {
+		secret, err = client.Secret(owner, repo, secretName)
+		if err != nil {
+			return err
+		}
+	}
+
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err

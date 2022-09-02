@@ -87,6 +87,10 @@ export default (build: Ref<Build | undefined>) => {
       return build.value.branch;
     }
 
+    if (build.value?.event === 'cron') {
+      return build.value.ref.replaceAll('refs/heads/', '');
+    }
+
     if (build.value?.event === 'tag') {
       return build.value.ref.replaceAll('refs/tags/', '');
     }

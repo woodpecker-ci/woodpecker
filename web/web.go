@@ -2,8 +2,8 @@ package web
 
 import (
 	"embed"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func Lookup(path string) (buf []byte, err error) {
 	}
 	defer file.Close()
 
-	buf, err = ioutil.ReadAll(file)
+	buf, err = io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}

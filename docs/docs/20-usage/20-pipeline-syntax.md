@@ -21,12 +21,12 @@ pipeline:
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
-
 ## Global Pipeline Conditionals
 
 Woodpecker gives the ability to skip whole pipelines (not just steps) based on certain conditions.
 
 ### `branches`
+
 Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
 
 Example skipping a commit when the target branch is not master:
@@ -100,7 +100,7 @@ pipeline:
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
-```diff
+```sh
 git commit -m "updated README [CI SKIP]"
 ```
 
@@ -213,7 +213,7 @@ Example registry hostname matching logic:
 
 ##### Global registry support
 
-To make a private registry globally available check the [server configuration docs](/docs/administration/server-config#global-registry-setting).
+To make a private registry globally available check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
 
 ##### GCR registry support
 
@@ -234,7 +234,7 @@ Commands of every pipeline step are executed serially as if you would enter them
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```diff
+```sh
 #!/bin/sh
 set -e
 
@@ -244,7 +244,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```
+```sh
 docker run --entrypoint=build.sh golang
 ```
 
@@ -254,17 +254,30 @@ docker run --entrypoint=build.sh golang
 
 Woodpecker provides the ability to pass environment variables to individual pipeline steps.
 
-For more details check the [environment docs](/docs/usage/environment/).
+For more details check the [environment docs](./50-environment.md).
 
 ### `secrets`
 
 Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
-For more details check the [secrets docs](/docs/usage/secrets/).
+For more details check the [secrets docs](./40-secrets.md).
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining conditions for pipeline step by a `when` block. If all conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
+Woodpecker supports defining a list of conditions for a pipeline step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+
+```diff
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      - event: pull_request
++        repo: test/test
++      - event: push
++        branch: main
+```
 
 #### `repo`
 
@@ -277,7 +290,7 @@ Example conditional execution by repository:
      settings:
        channel: dev
 +    when:
-+      repo: test/test
++      - repo: test/test
 ```
 
 #### `branch`
@@ -295,74 +308,89 @@ pipeline:
     settings:
       channel: dev
 +   when:
-+     branch: master
++     - branch: master
 ```
 
 > The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
 
 Execute a step if the branch is `master` or `develop`:
 
-```diff
+```yaml
 when:
-  branch: [master, develop]
+  - branch: [master, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
 
-```diff
+```yaml
 when:
-  branch: prefix/*
+  - branch: prefix/*
 ```
 
 Execute a step using custom include and exclude logic:
 
-```diff
+```yaml
 when:
-  branch:
-    include: [ master, release/* ]
-    exclude: [ release/1.0.0, release/1.1.* ]
+  - branch:
+      include: [ master, release/* ]
+      exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
 #### `event`
 
+:::info
+**By default steps are filtered by following event types:**
+
+`push`, `pull_request`, `tag`, `deployment`.
+:::
+
+Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`
+
 Execute a step if the build event is a `tag`:
 
-```diff
+```yaml
 when:
-  event: tag
+  - event: tag
 ```
 
-Execute a step if the build event is a `tag` created from the specified branch:
-
-```diff
-when:
-  event: tag
-+ branch: master
-```
-
-Execute a step for all non-pull request events:
+Execute a step if the pipeline event is a `push` to a specified branch:
 
 ```diff
 when:
-  event: [push, tag, deployment]
+  - event: push
++   branch: main
 ```
 
-Execute a step for all build events:
+Execute a step for multiple events:
 
-```diff
+```yaml
 when:
-  event: [push, pull_request, tag, deployment]
+  - event: [push, tag, deployment]
 ```
+
+#### `cron`
+
+This filter **only** applies to cron events and filters based on the name of a cron job.
+
+Make sure to have a `event: cron` condition in the `when`-filters as well.
+
+```yaml
+when:
+  - event: cron
+    cron: sync_* # name of your cron job
+```
+
+[Read more about cron](./45-cron.md)
 
 #### `tag`
 
 This filter only applies to tag events.
 Use glob expression to execute a step if the tag name starts with `v`:
 
-```diff
+```yaml
 when:
-  event: tag
-  tag: v*
+  - event: tag
+    tag: v*
 ```
 
 #### `status`
@@ -376,57 +404,57 @@ pipeline:
     settings:
       channel: dev
 +   when:
-+     status: [ success, failure ]
++     - status: [ success, failure ]
 ```
 
 #### `platform`
 
 :::note
-This condition should be used in conjunction with a [matrix](/docs/usage/matrix-pipelines#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
+This condition should be used in conjunction with a [matrix](./30-matrix-pipelines.md#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
 :::
 
 Execute a step for a specific platform:
 
-```diff
+```yaml
 when:
-  platform: linux/amd64
+  - platform: linux/amd64
 ```
 
 Execute a step for a specific platform using wildcards:
 
-```diff
+```yaml
 when:
-  platform:  [ linux/*, windows/amd64 ]
+  - platform:  [ linux/*, windows/amd64 ]
 ```
 
 #### `environment`
 
 Execute a step for deployment events matching the target deployment environment:
 
-```diff
+```yaml
 when:
-  environment: production
-  event: deployment
+  - environment: production
+  - event: deployment
 ```
 
 #### `matrix`
 
 Execute a step for a single matrix permutation:
 
-```diff
+```yaml
 when:
-  matrix:
-    GO_VERSION: 1.5
-    REDIS_VERSION: 2.8
+  - matrix:
+      GO_VERSION: 1.5
+      REDIS_VERSION: 2.8
 ```
 
 #### `instance`
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
-```diff
+```yaml
 when:
-  instance: stage.woodpecker.company.com
+  - instance: stage.woodpecker.company.com
 ```
 
 #### `path`
@@ -439,22 +467,22 @@ Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github
 
 Execute a step only on a pipeline with certain files being changed:
 
-```diff
+```yaml
 when:
-  path: "src/*"
+  - path: "src/*"
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-```diff
+```yaml
 when:
-  path:
-    include: [ '.woodpecker/*.yml', '*.ini' ]
-    exclude: [ '*.md', 'docs/**' ]
-    ignore_message: "[ALL]"
+  - path:
+      include: [ '.woodpecker/*.yml', '*.ini' ]
+      exclude: [ '*.md', 'docs/**' ]
+      ignore_message: "[ALL]"
 ```
 
-** Hint: ** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+**Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 ### `group` - Parallel execution
 
@@ -488,26 +516,26 @@ In the above example, the `frontend` and `backend` steps are executed in paralle
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
 
-For more details check the [volumes docs](/docs/usage/volumes/).
+For more details check the [volumes docs](./70-volumes.md).
 
 ### `detach`
 
 Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
 
-For more details check the [service docs](/docs/usage/services#detachment).
+For more details check the [service docs](./60-services.md#detachment).
 
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
 
-For more details check the [services docs](/docs/usage/services/).
+For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
 The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
 
-```
-/drone/src/github.com/octocat/hello-world
+```txt
+/woodpecker/src/github.com/octocat/hello-world
 ```
 
 The workspace can be customized using the workspace block in the YAML file:
@@ -546,7 +574,7 @@ The base attribute defines a shared base volume available to all pipeline steps.
 
 This would be equivalent to the following docker commands:
 
-```
+```sh
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest
@@ -570,7 +598,7 @@ git clone https://github.com/octocat/hello-world \
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
-For more details check the [matrix build docs](/docs/usage/matrix-pipelines/).
+For more details check the [matrix build docs](./30-matrix-pipelines.md).
 
 ## `platform`
 
@@ -596,7 +624,7 @@ pipeline:
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
 
-To set additional agent labels check the [agent configuration options](/docs/administration/agent-config#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Pipeline labels with an empty value will be ignored.
 By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
@@ -616,6 +644,12 @@ pipeline:
       - go build
       - go test
 ```
+
+## `variables`
+
+Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+
+For more details and examples check the [Advanced YAML syntax docs](./35-advanced-yaml-syntax.md)
 
 ## `clone`
 
@@ -690,11 +724,15 @@ pipeline:
   ...
 ```
 
+## `depends_on`
+
+Woodpecker supports to define multiple pipelines for a repository. Those pipelines will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/multi-pipeline#flow-control) keyword.
+
 ## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
-> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](/docs/usage/project-settings#trusted) to enable trusted mode.
+> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
 
 ```diff
  pipeline:

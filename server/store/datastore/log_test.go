@@ -16,7 +16,7 @@ package datastore
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -41,7 +41,7 @@ func TestLogCreateFind(t *testing.T) {
 	}
 
 	defer rc.Close()
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "echo hi"; got != want {
 		t.Errorf("Want log data %s, got %s", want, got)
 	}
@@ -71,7 +71,7 @@ func TestLogUpdate(t *testing.T) {
 	}
 
 	defer rc.Close()
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "echo allo?"; got != want {
 		t.Errorf("Want log data %s, got %s", want, got)
 	}

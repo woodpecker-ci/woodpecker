@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -46,6 +45,7 @@ const (
 	pathSource      = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus      = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches    = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathOrgPerms    = "%s/2.0/workspaces/%s/permissions?%s"
 )
 
 type Client struct {
@@ -182,6 +182,28 @@ func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
 	return out.Values, err
 }
 
+func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
+	out := new(WorkspaceMembershipResp)
+	opts := &ListOpts{Page: 1, PageLen: 100}
+	for {
+		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
+		_, err := c.do(uri, get, nil, out)
+		if err != nil {
+			return "", err
+		}
+		for _, m := range out.Values {
+			if m.User.Nickname == user {
+				return m.Permission, nil
+			}
+		}
+		if len(out.Next) == 0 {
+			break
+		}
+		opts.Page++
+	}
+	return "", nil
+}
+
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
@@ -229,7 +251,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 		return nil, json.NewDecoder(resp.Body).Decode(out)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

@@ -51,6 +51,10 @@ module.exports = {
           label: 'Awesome',
         },
         {
+          type: 'docsVersionDropdown',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/woodpecker-ci/woodpecker',
           position: 'right',
           className: 'header-github-link',
@@ -126,12 +130,6 @@ module.exports = {
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
-    algolia: {
-      appId: 'BH4D9OD16A',
-      apiKey: '148f85e216b68d20ffa49d46a2b89d0e',
-      indexName: 'woodpecker-ci',
-      debug: false, // Set debug to true if you want to inspect the modal
-    },
     tableOfContents: {
       minHeadingLevel: 2,
       maxHeadingLevel: 4,
@@ -164,7 +162,15 @@ module.exports = {
       },
     }),
   ],
-  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
+  themes: [
+    path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+      },
+    ],
+  ],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -172,6 +178,18 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          includeCurrentVersion: true,
+          lastVersion: '0.15',
+          versions: {
+            current: {
+              label: 'Next',
+              banner: 'unreleased',
+            },
+            '0.15': {
+              label: '0.15.x',
+              banner: 'none',
+            },
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

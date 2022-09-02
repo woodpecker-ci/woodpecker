@@ -16,7 +16,7 @@ package datastore
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,7 +71,7 @@ func TestFileFind(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "hello world"; got != want {
 		t.Errorf("Want file data %s, got %s", want, got)
 	}

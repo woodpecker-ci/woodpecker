@@ -58,7 +58,9 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  branch: master
+  - branch: master
+  - event: cron
+    cron: job1
 settings:
   foo: bar
   baz: false
@@ -72,7 +74,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Command:       types.Command{"bundle exec thin -p 3000"},
 		Commands:      types.Stringorslice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
@@ -109,9 +111,21 @@ func TestUnmarshalContainer(t *testing.T) {
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: constraint.Constraints{
-			Branch: constraint.List{
-				Include: []string{"master"},
+		When: constraint.When{
+			Constraints: []constraint.Constraint{
+				{
+					Branch: constraint.List{
+						Include: []string{"master"},
+					},
+				},
+				{
+					Event: constraint.List{
+						Include: []string{"cron"},
+					},
+					Cron: constraint.List{
+						Include: []string{"job1"},
+					},
+				},
 			},
 		},
 		Settings: map[string]interface{}{
@@ -185,9 +199,13 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next", "latest"),
 						"dry_run":    true,
 					},
-					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
 					},
 				},
 			},
@@ -213,9 +231,38 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
 					},
-					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    image: print/env
+    when:
+      - branch: ${CI_REPO_DEFAULT_BRANCH}
+        event: push
+      - event: pull_request`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+							{
+								Event: constraint.List{Include: []string{"pull_request"}},
+							},
+						},
 					},
 				},
 			},

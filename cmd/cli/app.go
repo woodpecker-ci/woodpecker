@@ -23,6 +23,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/build"
 	"github.com/woodpecker-ci/woodpecker/cli/common"
+	"github.com/woodpecker-ci/woodpecker/cli/cron"
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
 	"github.com/woodpecker-ci/woodpecker/cli/info"
@@ -56,6 +57,7 @@ func newApp() *cli.App {
 		user.Command,
 		lint.Command,
 		loglevel.Command,
+		cron.Command,
 	}
 
 	zlog.Logger = zlog.Output(

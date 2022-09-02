@@ -18,6 +18,11 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Woodpecker-CI](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
 
+## Tools
+
+- [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
+- [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker-CI and Gitea
+
 ## Templates
 
 ## Blogs, guides, videos

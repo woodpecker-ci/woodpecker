@@ -78,6 +78,11 @@ type client struct {
 	MergeRef   bool
 }
 
+// Name returns the string name of this driver
+func (c *client) Name() string {
+	return "github"
+}
+
 // Login authenticates the session and returns the remote user details.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)
@@ -300,6 +305,18 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return err
 }
 
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	client := c.newClientToken(ctx, u.Token)
+	org, _, err := client.Organizations.GetOrgMembership(ctx, u.Login, owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
+}
+
 // helper function to return the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the remote settings.
 func (c *client) newContext(ctx context.Context) context.Context {
@@ -474,6 +491,19 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 		branches = append(branches, *branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
+	if err != nil {
+		return "", err
+	}
+	return b.GetCommit().GetSHA(), nil
 }
 
 // Hook parses the post-commit hook from the Request body

@@ -3,8 +3,10 @@ package pipeline
 import (
 	"context"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
@@ -40,12 +42,15 @@ type Runtime struct {
 	ctx    context.Context
 	tracer Tracer
 	logger Logger
+
+	Description map[string]string // The runtime descriptors.
 }
 
 // New returns a new runtime using the specified runtime
 // configuration and runtime engine.
 func New(spec *backend.Config, opts ...Option) *Runtime {
 	r := new(Runtime)
+	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
 	for _, opts := range opts {
@@ -54,11 +59,33 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	return r
 }
 
+func (r *Runtime) MakeLogger() zerolog.Logger {
+	logCtx := log.With()
+	for key, val := range r.Description {
+		logCtx = logCtx.Str(key, val)
+	}
+	return logCtx.Logger()
+}
+
 // Starts the execution of the pipeline and waits for it to complete
 func (r *Runtime) Run() error {
+	logger := r.MakeLogger()
+	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
+	for _, stage := range r.spec.Stages {
+		steps := []string{}
+		for _, step := range stage.Steps {
+			steps = append(steps, step.Name)
+		}
+
+		logger.Debug().
+			Str("Stage", stage.Name).
+			Str("Steps", strings.Join(steps, ",")).
+			Msg("stage")
+	}
+
 	defer func() {
 		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
-			log.Error().Err(err).Msg("could not destroy pipeline")
+			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
@@ -104,13 +131,17 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err
 
-	return r.tracer.Trace(state)
+	if traceErr := r.tracer.Trace(state); traceErr != nil {
+		return traceErr
+	}
+	return err
 }
 
 // Executes a set of parallel steps
 func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
+	logger := r.MakeLogger()
 
 	for _, step := range steps {
 		// required since otherwise the loop variable
@@ -119,10 +150,21 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Prepare")
+
 			switch {
 			case r.err != nil && !step.OnFailure:
+				logger.Debug().
+					Str("Step", step.Name).
+					Err(r.err).
+					Msgf("Skipped due to OnFailure=%t", step.OnFailure)
 				return nil
 			case r.err == nil && !step.OnSuccess:
+				logger.Debug().
+					Str("Step", step.Name).
+					Msgf("Skipped due to OnSuccess=%t", step.OnSuccess)
 				return nil
 			}
 
@@ -132,15 +174,26 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				return err
 			}
 
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Executing")
+
 			processState, err := r.exec(step)
 
-			// Return the error after tracing it.
-			traceErr := r.traceStep(processState, err, step)
-			if traceErr != nil {
-				return traceErr
+			logger.Debug().
+				Str("Step", step.Name).
+				Msg("Complete")
+
+			// if we got a nil process but an error state
+			// then we need to log the internal error to the step.
+			if r.logger != nil && err != nil && processState == nil {
+				_ = r.logger.Log(step, multipart.New(strings.NewReader(
+					"Backend engine error while running step: "+err.Error(),
+				)))
 			}
 
-			return err
+			// Return the error after tracing it.
+			return r.traceStep(processState, err, step)
 		})
 	}
 
@@ -153,26 +206,24 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
-	for key, value := range step.Environment {
-		if strings.HasPrefix(key, "CI_") {
-			step.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
-		}
-	}
-
 	if err := r.engine.Exec(r.ctx, step); err != nil {
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
 	if r.logger != nil {
 		rc, err := r.engine.Tail(r.ctx, step)
 		if err != nil {
 			return nil, err
 		}
 
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
+			logger := r.MakeLogger()
+
 			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
-				log.Error().Err(err).Msg("process logging failed")
+				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
 		}()
@@ -183,6 +234,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
+	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
+	// so first make sure all reading has finished.
+	wg.Wait()
 	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
 		return nil, err

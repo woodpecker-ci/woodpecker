@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"runtime"
 	"strconv"
 	"sync"
@@ -81,17 +80,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
+	repoName := extractRepositoryName(work.Config) // hack
+	buildNumber := extractBuildNumber(work.Config) // hack
+
 	r.counter.Add(
 		work.ID,
 		timeout,
-		extractRepositoryName(work.Config), // hack
-		extractBuildNumber(work.Config),    // hack
+		repoName,
+		buildNumber,
 	)
 	defer r.counter.Done(work.ID)
 
 	logger := log.With().
-		Str("repo", extractRepositoryName(work.Config)). // hack
-		Str("build", extractBuildNumber(work.Config)).   // hack
+		Str("repo", repoName).
+		Str("build", buildNumber).
 		Str("id", work.ID).
 		Logger()
 
@@ -208,7 +210,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		data, err = ioutil.ReadAll(limitedPart)
+		data, err = io.ReadAll(limitedPart)
 		if err != nil {
 			loglogger.Err(err).Msg("could not read limited part")
 		}
@@ -308,6 +310,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
+		pipeline.WithDescription(map[string]string{
+			"ID":    work.ID,
+			"Repo":  repoName,
+			"Build": buildNumber,
+		}),
 	).Run()
 
 	state.Finished = time.Now().Unix()

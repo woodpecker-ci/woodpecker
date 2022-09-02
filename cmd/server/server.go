@@ -42,6 +42,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cron"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -191,8 +192,13 @@ func run(c *cli.Context) error {
 
 	setupMetrics(&g, _store)
 
+	g.Go(func() error {
+		return cron.Start(c.Context, _store, _remote)
+	})
+
 	// start http => https redirect if https is active
 	if len(c.String("server-cert")) != 0 || c.Bool("lets-encrypt") {
+		>>>>>>> upstream/master
 		g.Go(func() error {
 			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
 		})
@@ -284,6 +290,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Membership = setupMembershipService(c, r)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 

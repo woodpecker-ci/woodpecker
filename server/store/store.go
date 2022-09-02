@@ -14,6 +14,9 @@
 
 package store
 
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Store --output mocks --case underscore
+
 import (
 	"io"
 
@@ -106,10 +109,14 @@ type Store interface {
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool) ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	OrgSecretFind(string, string) (*model.Secret, error)
+	OrgSecretList(string) ([]*model.Secret, error)
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList() ([]*model.Secret, error)
 
 	// Registrys
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
@@ -148,6 +155,15 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+
+	// Cron
+	CronCreate(*model.Cron) error
+	CronFind(*model.Repo, int64) (*model.Cron, error)
+	CronList(*model.Repo) ([]*model.Cron, error)
+	CronUpdate(*model.Repo, *model.Cron) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.Cron, error)
+	CronGetLock(*model.Cron, int64) (bool, error)
 
 	// Store operations
 	Ping() error
