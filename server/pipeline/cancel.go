@@ -29,8 +29,8 @@ import (
 
 // Cancel the build and returns the status.
 func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *model.Build) error {
-	if build.Status != model.StatusRunning && build.Status != model.StatusPending {
-		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending build"}
+	if build.Status != model.StatusRunning && build.Status != model.StatusPending && build.Status != model.StatusBlocked {
+		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked build"}
 	}
 
 	procs, err := store.ProcList(build)
