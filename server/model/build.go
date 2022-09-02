@@ -51,7 +51,7 @@ type Build struct {
 	Procs        []*Proc           `json:"procs,omitempty"         xorm:"-"`
 	Files        []*File           `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
-	Variables    map[string]string `json:"variables"               xorm:"-"`
+	Variables    map[string]string `json:"variables,omitempty"     xorm:"json 'variables'"`
 }
 
 // TableName return database table name for xorm
