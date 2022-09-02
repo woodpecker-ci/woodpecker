@@ -13,13 +13,19 @@
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div v-show="showActions" class="absolute top-0 right-0 z-50 mt-2 mr-4 hidden md:flex">
+      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-2 mr-4 hidden md:flex">
         <Button
           v-if="proc?.end_time !== undefined"
           :is-loading="downloadInProgress"
           :title="$t('repo.build.actions.log_download')"
           start-icon="download"
           @click="download"
+        />
+        <Button
+          v-if="proc?.end_time === undefined"
+          :title="autoScroll ? $t('repo.build.actions.log_auto_scroll_off') : $t('repo.build.actions.log_auto_scroll')"
+          :start-icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
+          @click="autoScroll = !autoScroll"
         />
       </div>
 
@@ -57,6 +63,7 @@
 <script lang="ts">
 import '~/style/console.css';
 
+import { useStorage } from '@vueuse/core';
 import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, defineComponent, inject, nextTick, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
@@ -120,7 +127,7 @@ export default defineComponent({
         // we do not have logs for skipped jobs
         repo?.value && build.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
     );
-    const autoScroll = ref(true); // TODO: allow enable / disable
+    const autoScroll = useStorage('log-auto-scroll', false);
     const showActions = ref(false);
     const downloadInProgress = ref(false);
     const ansiUp = ref(new AnsiUp());
@@ -284,7 +291,18 @@ export default defineComponent({
       }
     });
 
-    return { consoleElement, proc, log, loadedLogs, hasLogs, formatTime, showActions, download, downloadInProgress };
+    return {
+      consoleElement,
+      proc,
+      log,
+      loadedLogs,
+      hasLogs,
+      formatTime,
+      showActions,
+      download,
+      downloadInProgress,
+      autoScroll,
+    };
   },
 });
 </script>
