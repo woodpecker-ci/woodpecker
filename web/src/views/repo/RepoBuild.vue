@@ -35,7 +35,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
@@ -56,6 +57,8 @@ export default defineComponent({
   },
 
   setup() {
+    const route = useRoute();
+    const router = useRouter();
     const branches = ref<{ text: string; value: string }[]>([]);
     const payload = ref<{ branch: string; variables: Record<string, string> }>({
       branch: 'main',
@@ -63,63 +66,56 @@ export default defineComponent({
         MANUAL_BUILD: 'true',
       },
     });
+    const loading = ref<boolean>(true);
+    const tmpVar = ref<{ key: string; value: string }>({ key: '', value: '' });
 
-    return {
-      branches,
-      payload,
-    };
-  },
-
-  data: () => ({
-    loading: true,
-    tmpVar: {
-      key: '',
-      value: '',
-    },
-  }),
-
-  mounted() {
-    this.loadBranches();
-  },
-
-  methods: {
-    async loadBranches() {
-      const data = await apiClient.getRepoBranches(`${this.$route.params.repoOwner}`, `${this.$route.params.repoName}`);
-      this.branches = data.map((e) => ({
+    async function loadBranches() {
+      const data = await apiClient.getRepoBranches(`${route.params.repoOwner}`, `${route.params.repoName}`);
+      branches.value = data.map((e) => ({
         text: e,
         value: e,
       }));
-      this.loading = false;
-    },
+      loading.value = false;
+    }
 
-    addVar() {
-      this.payload.variables[this.tmpVar.key] = this.tmpVar.value;
-      this.tmpVar.key = '';
-      this.tmpVar.value = '';
-    },
+    function addVar() {
+      payload.value.variables[tmpVar.value.key] = tmpVar.value.value;
+      tmpVar.value.key = '';
+      tmpVar.value.value = '';
+    }
 
-    deleteVar(key: string) {
-      delete this.payload.variables[key];
-    },
+    function deleteVar(key: string) {
+      delete payload.value.variables[key];
+    }
 
-    async runManual() {
-      this.loading = true;
-      const build = await apiClient.manualBuild(
-        `${this.$route.params.repoOwner}`,
-        `${this.$route.params.repoName}`,
-        this.payload,
-      );
+    async function runManual() {
+      loading.value = true;
+      const build = await apiClient.manualBuild(`${route.params.repoOwner}`, `${route.params.repoName}`, payload.value);
 
-      this.$router.push({
+      router.push({
         name: 'repo-build',
         params: {
-          repoOwner: `${this.$route.params.repoOwner}`,
-          repoName: `${this.$route.params.repoName}`,
+          repoOwner: `${route.params.repoOwner}`,
+          repoName: `${route.params.repoName}`,
           buildId: build.number,
         },
       });
-      this.loading = false;
-    },
+      loading.value = false;
+    }
+
+    onMounted(() => {
+      loadBranches();
+    });
+
+    return {
+      loading,
+      branches,
+      payload,
+      tmpVar,
+      addVar,
+      deleteVar,
+      runManual,
+    };
   },
 });
 </script>
