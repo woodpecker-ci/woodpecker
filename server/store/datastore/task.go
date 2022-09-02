@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,24 +15,21 @@
 package datastore
 
 import (
-	"github.com/russross/meddler"
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/sql"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (db *datastore) TaskList() ([]*model.Task, error) {
-	stmt := sql.Lookup(db.driver, "task-list")
-	data := []*model.Task{}
-	err := meddler.QueryAll(db, &data, stmt)
-	return data, err
+func (s storage) TaskList() ([]*model.Task, error) {
+	tasks := make([]*model.Task, 0, perPage)
+	return tasks, s.engine.Find(&tasks)
 }
 
-func (db *datastore) TaskInsert(task *model.Task) error {
-	return meddler.Insert(db, "tasks", task)
+func (s storage) TaskInsert(task *model.Task) error {
+	// only Insert set auto created ID back to object
+	_, err := s.engine.Insert(task)
+	return err
 }
 
-func (db *datastore) TaskDelete(id string) error {
-	stmt := sql.Lookup(db.driver, "task-delete")
-	_, err := db.Exec(stmt, id)
+func (s storage) TaskDelete(id string) error {
+	_, err := s.engine.Where("task_id = ?", id).Delete(new(model.Task))
 	return err
 }

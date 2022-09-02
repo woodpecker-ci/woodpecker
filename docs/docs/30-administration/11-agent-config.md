@@ -1,3 +1,0 @@
-# Agent configuration
-
-TODO

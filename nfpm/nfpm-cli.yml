@@ -1,0 +1,12 @@
+name: woodpecker-cli
+arch: amd64
+platform: linux
+version: ${VERSION_NUMBER}
+description: Woodpecker CLI
+homepage: https://github.com/woodpecker-ci/woodpecker
+license: Apache 2.0
+maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
+section: daemon/system
+contents:
+- src: ./dist/cli/linux_amd64/woodpecker-cli
+  dst: /usr/local/bin/woodpecker

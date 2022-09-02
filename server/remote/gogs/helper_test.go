@@ -18,22 +18,20 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gogits/go-gogs-client"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/gogs/fixtures"
 )
 
 func Test_parse(t *testing.T) {
-
 	g := goblin.Goblin(t)
 	g.Describe("Gogs", func() {
-
 		g.It("Should parse push hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("refs/heads/master")
 			g.Assert(hook.After).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
@@ -55,7 +53,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse tag hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPushTag)
 			hook, err := parsePush(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("v1.0.0")
 			g.Assert(hook.Repo.Name).Equal("hello-world")
 			g.Assert(hook.Repo.URL).Equal("http://gogs.golang.org/gordon/hello-world")
@@ -70,7 +68,7 @@ func Test_parse(t *testing.T) {
 		g.It("Should parse pull_request hook payload", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, err := parsePullRequest(buf)
-			g.Assert(err == nil).IsTrue()
+			g.Assert(err).IsNil()
 			g.Assert(hook.Action).Equal("opened")
 			g.Assert(hook.Number).Equal(int64(1))
 
@@ -105,7 +103,6 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Message).Equal(hook.Commits[0].Message)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(build.Author).Equal(hook.Sender.Login)
-
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {
@@ -130,7 +127,6 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Message).Equal(hook.PullRequest.Title)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(build.Author).Equal(hook.PullRequest.User.Username)
-
 		})
 
 		g.It("Should return a Repo struct from a pull_request hook", func() {
@@ -144,7 +140,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should return a Perm struct from a Gogs Perm", func() {
-			perms := []gogs.Permission{
+			perms := []*gogs.Permission{
 				{Admin: true, Pull: true, Push: true},
 				{Admin: true, Pull: true, Push: false},
 				{Admin: true, Push: false, Pull: false},
@@ -159,7 +155,7 @@ func Test_parse(t *testing.T) {
 
 		g.It("Should return a Team struct from a Gogs Org", func() {
 			from := &gogs.Organization{
-				UserName:  "drone",
+				UserName:  "woodpecker",
 				AvatarUrl: "/avatars/1",
 			}
 
@@ -171,28 +167,28 @@ func Test_parse(t *testing.T) {
 		g.It("Should return a Repo struct from a Gogs Repo", func() {
 			from := gogs.Repository{
 				FullName: "gophers/hello-world",
-				Owner: gogs.User{
+				Owner: &gogs.User{
 					UserName:  "gordon",
 					AvatarUrl: "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				},
-				CloneUrl: "http://gogs.golang.org/gophers/hello-world.git",
-				HtmlUrl:  "http://gogs.golang.org/gophers/hello-world",
-				Private:  true,
+				CloneURL:      "http://gogs.golang.org/gophers/hello-world.git",
+				HTMLURL:       "http://gogs.golang.org/gophers/hello-world",
+				Private:       true,
+				DefaultBranch: "master",
 			}
 			repo := toRepo(&from, false)
 			g.Assert(repo.FullName).Equal(from.FullName)
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")
 			g.Assert(repo.Branch).Equal("master")
-			g.Assert(repo.Link).Equal(from.HtmlUrl)
-			g.Assert(repo.Clone).Equal(from.CloneUrl)
+			g.Assert(repo.Link).Equal(from.HTMLURL)
+			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarUrl)
-			g.Assert(repo.IsPrivate).Equal(from.Private)
+			g.Assert(repo.IsSCMPrivate).Equal(from.Private)
 		})
 
 		g.It("Should correct a malformed avatar url", func() {
-
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -221,7 +217,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should expand the avatar url", func() {
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -239,7 +235,7 @@ func Test_parse(t *testing.T) {
 				},
 			}
 
-			var repo = "http://gogs.io/foo/bar"
+			repo := "http://gogs.io/foo/bar"
 			for _, url := range urls {
 				got := expandAvatar(repo, url.Before)
 				g.Assert(got).Equal(url.After)

@@ -17,11 +17,11 @@ package session
 import (
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-
-	"github.com/gin-gonic/gin"
 )
 
 func User(c *gin.Context) *model.User {
@@ -36,25 +36,13 @@ func User(c *gin.Context) *model.User {
 	return u
 }
 
-func Token(c *gin.Context) *token.Token {
-	v, ok := c.Get("token")
-	if !ok {
-		return nil
-	}
-	u, ok := v.(*token.Token)
-	if !ok {
-		return nil
-	}
-	return u
-}
-
 func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.GetUserLogin(c, t.Text)
+			user, err = store.FromContext(c).GetUserLogin(t.Text)
 			return user.Hash, err
 		})
 		if err == nil {
@@ -90,7 +78,7 @@ func MustAdmin() gin.HandlerFunc {
 		case user == nil:
 			c.String(401, "User not authorized")
 			c.Abort()
-		case user.Admin == false:
+		case !user.Admin:
 			c.String(403, "User not authorized")
 			c.Abort()
 		default:
@@ -107,7 +95,7 @@ func MustRepoAdmin() gin.HandlerFunc {
 		case user == nil:
 			c.String(401, "User not authorized")
 			c.Abort()
-		case perm.Admin == false:
+		case !perm.Admin:
 			c.String(403, "User not authorized")
 			c.Abort()
 		default:

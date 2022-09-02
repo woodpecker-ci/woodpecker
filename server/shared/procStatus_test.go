@@ -18,12 +18,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/model"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type mockUpdateProcStore struct {
-}
+type mockUpdateProcStore struct{}
 
 func (m *mockUpdateProcStore) ProcUpdate(build *model.Proc) error {
 	return nil

@@ -23,34 +23,32 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
-// helper function that converts a Gitea repository to a Drone repository.
-func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
+// helper function that converts a Gitea repository to a Woodpecker repository.
+func toRepo(from *gitea.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
-	private := from.Private
-	if privateMode {
-		private = true
-	}
 	return &model.Repo{
-		Kind:      model.RepoGit,
-		Name:      name,
-		Owner:     from.Owner.UserName,
-		FullName:  from.FullName,
-		Avatar:    avatar,
-		Link:      from.HTMLURL,
-		IsPrivate: private,
-		Clone:     from.CloneURL,
-		Branch:    "master",
+		SCMKind:      model.RepoGit,
+		Name:         name,
+		Owner:        from.Owner.UserName,
+		FullName:     from.FullName,
+		Avatar:       avatar,
+		Link:         from.HTMLURL,
+		IsSCMPrivate: from.Private,
+		Clone:        from.CloneURL,
+		Branch:       from.DefaultBranch,
 	}
 }
 
-// helper function that converts a Gitea permission to a Drone permission.
+// helper function that converts a Gitea permission to a Woodpecker permission.
 func toPerm(from *gitea.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
@@ -59,7 +57,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 	}
 }
 
-// helper function that converts a Gitea team to a Drone team.
+// helper function that converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
 		Login:  from.UserName,
@@ -83,15 +81,20 @@ func buildFromPush(hook *pushHook) *model.Build {
 	}
 
 	message := ""
+	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	}
+
+	if len(hook.Commits) == 1 {
+		link = hook.Commits[0].URL
 	}
 
 	return &model.Build{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         hook.Compare,
+		Link:         link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
@@ -104,17 +107,15 @@ func buildFromPush(hook *pushHook) *model.Build {
 }
 
 func getChangedFilesFromPushHook(hook *pushHook) []string {
-	files := make([]string, 0)
-
-	if len(hook.Commits) == 0 {
-		return files
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
+	for _, c := range hook.Commits {
+		files = append(files, c.Added...)
+		files = append(files, c.Removed...)
+		files = append(files, c.Modified...)
 	}
 
-	files = append(files, hook.Commits[0].Added...)
-	files = append(files, hook.Commits[0].Removed...)
-	files = append(files, hook.Commits[0].Modified...)
-
-	return files
+	return utils.DedupStrings(files)
 }
 
 // helper function that extracts the Build data from a Gitea tag hook

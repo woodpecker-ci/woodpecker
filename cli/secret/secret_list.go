@@ -5,28 +5,24 @@ import (
 	"os"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var secretListCmd = cli.Command{
+var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
 	ArgsUsage: "[repo/name]",
 	Action:    secretList,
-	Flags: []cli.Flag{
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
-			Name:   "format",
-			Usage:  "format output",
-			Value:  tmplSecretList,
-			Hidden: true,
-		},
-	},
+		common.FormatFlag(tmplSecretList, true),
+	),
 }
 
 func secretList(c *cli.Context) error {
@@ -54,7 +50,9 @@ func secretList(c *cli.Context) error {
 		return err
 	}
 	for _, registry := range list {
-		tmpl.Execute(os.Stdout, registry)
+		if err := tmpl.Execute(os.Stdout, registry); err != nil {
+			return err
+		}
 	}
 	return nil
 }

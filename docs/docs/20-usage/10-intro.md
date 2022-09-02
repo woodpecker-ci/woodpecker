@@ -2,9 +2,9 @@
 
 ## Repository Activation
 
-To activate your project navigate to your account settings. You will see a list of repositories which can be activated with a simple toggle. When you activate your repository, Woodpecker automatically adds webhooks to your version control system (e.g. GitHub).
+To activate your project navigate to your account settings. You will see a list of repositories which can be activated with a simple toggle. When you activate your repository, Woodpecker automatically adds webhooks to your forge (e.g. GitHub).
 
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
+Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your forge will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
 
 ![repository list](repo-list.png)
 
@@ -16,13 +16,18 @@ Webhooks are used to trigger pipeline executions. When you push code to your rep
 
 # Webhooks
 
-When you activate your repository Woodpecker automatically add webhooks to your version control system (e.g. GitHub). There is no manual configuration required.
+When you activate your repository Woodpecker automatically add webhooks to your forge (e.g. GitHub). There is no manual configuration required.
 
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
+Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your forge will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
 
 ## Configuration
 
 To configure your pipeline you should place a `.woodpecker.yml` file in the root of your repository. The .woodpecker.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
+
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
+:::
 
 Example pipeline configuration:
 
@@ -67,4 +72,4 @@ pipeline:
 
 ## Execution
 
-To trigger your first pipeline execution you can push code to your repository, open a pull request, or push a tag. Any of these events triggers a webhook from your version control system and execute your pipeline.
+To trigger your first pipeline execution you can push code to your repository, open a pull request, or push a tag. Any of these events triggers a webhook from your forge and execute your pipeline.

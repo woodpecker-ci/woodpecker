@@ -15,14 +15,15 @@
 package github
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
-
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/github/fixtures"
 )
 
 func Test_github(t *testing.T) {
@@ -34,9 +35,9 @@ func Test_github(t *testing.T) {
 		SkipVerify: true,
 	})
 
+	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("GitHub", func() {
-
 		g.After(func() {
 			s.Close()
 		})
@@ -44,83 +45,64 @@ func Test_github(t *testing.T) {
 		g.Describe("Creating a remote", func() {
 			g.It("Should return client with specified options", func() {
 				remote, _ := New(Opts{
-					URL:         "http://localhost:8080/",
-					Client:      "0ZXh0IjoiI",
-					Secret:      "I1NiIsInR5",
-					Username:    "someuser",
-					Password:    "password",
-					SkipVerify:  true,
-					PrivateMode: true,
-					Context:     "continuous-integration/test",
+					URL:        "http://localhost:8080/",
+					Client:     "0ZXh0IjoiI",
+					Secret:     "I1NiIsInR5",
+					SkipVerify: true,
 				})
 				g.Assert(remote.(*client).URL).Equal("http://localhost:8080")
 				g.Assert(remote.(*client).API).Equal("http://localhost:8080/api/v3/")
-				g.Assert(remote.(*client).Machine).Equal("localhost")
-				g.Assert(remote.(*client).Username).Equal("someuser")
-				g.Assert(remote.(*client).Password).Equal("password")
 				g.Assert(remote.(*client).Client).Equal("0ZXh0IjoiI")
 				g.Assert(remote.(*client).Secret).Equal("I1NiIsInR5")
 				g.Assert(remote.(*client).SkipVerify).Equal(true)
-				g.Assert(remote.(*client).PrivateMode).Equal(true)
-				g.Assert(remote.(*client).Context).Equal("continuous-integration/test")
-			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err != nil).IsTrue()
 			})
 		})
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{
-					URL: "http://github.com:443",
-				})
-				netrc, _ := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("github.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 			})
 			g.It("Should return a netrc with the machine account", func() {
-				remote, _ := New(Opts{
-					URL:      "http://github.com:443",
-					Username: "someuser",
-					Password: "password",
-				})
-				netrc, _ := remote.Netrc(nil, nil)
+				remote, _ := New(Opts{})
+				netrc, _ := remote.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("github.com")
-				g.Assert(netrc.Login).Equal("someuser")
-				g.Assert(netrc.Password).Equal("password")
+				g.Assert(netrc.Login).Equal("")
+				g.Assert(netrc.Password).Equal("")
 			})
 		})
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
-				g.Assert(repo.IsPrivate).IsTrue()
+				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
 				g.Assert(repo.Link).Equal(fakeRepo.Link)
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("Requesting repository permissions", func() {
 			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(fakeUser, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err == nil).IsTrue()
+				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
+				g.Assert(err).IsNil()
 				g.Assert(perm.Admin).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Pull).IsTrue()
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err != nil).IsTrue()
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
+				g.Assert(err).IsNotNil()
 			})
 		})
 
@@ -148,28 +130,19 @@ var (
 		Token: "cfcd2084",
 	}
 
-	fakeUserNoRepos = &model.User{
-		Login: "octocat",
-		Token: "repos_not_found",
-	}
-
 	fakeRepo = &model.Repo{
-		Owner:     "octocat",
-		Name:      "Hello-World",
-		FullName:  "octocat/Hello-World",
-		Avatar:    "https://github.com/images/error/octocat_happy.gif",
-		Link:      "https://github.com/octocat/Hello-World",
-		Clone:     "https://github.com/octocat/Hello-World.git",
-		IsPrivate: true,
+		Owner:        "octocat",
+		Name:         "Hello-World",
+		FullName:     "octocat/Hello-World",
+		Avatar:       "https://github.com/images/error/octocat_happy.gif",
+		Link:         "https://github.com/octocat/Hello-World",
+		Clone:        "https://github.com/octocat/Hello-World.git",
+		IsSCMPrivate: true,
 	}
 
 	fakeRepoNotFound = &model.Repo{
 		Owner:    "test_name",
 		Name:     "repo_not_found",
 		FullName: "test_name/repo_not_found",
-	}
-
-	fakeBuild = &model.Build{
-		Commit: "9ecad50",
 	}
 )

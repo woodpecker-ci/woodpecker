@@ -1,15 +1,16 @@
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const path = require('path');
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple CI engine with great extensibility.',
-  url: 'https://woodpecker-ci.github.io',
+  url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  onBrokenMarkdownLinks: 'throw',
+  onDuplicateRoutes: 'throw',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
@@ -23,22 +24,42 @@ module.exports = {
       },
       items: [
         {
-          type: 'doc',
-          docId: 'intro',
+          to: 'docs/intro',
+          activeBaseRegex: 'docs/(?!migrations|awesome)',
           position: 'left',
           label: 'Docs',
         },
         {
-          type: 'doc',
-          docId: 'faq',
+          to: '/plugins',
+          position: 'left',
+          label: 'Plugins',
+        },
+        {
+          to: '/docs/migrations',
+          activeBaseRegex: 'docs/migrations',
+          position: 'left',
+          label: 'Migrations',
+        },
+        {
+          to: '/faq',
           position: 'left',
           label: 'FAQ',
         },
-        // {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          to: '/docs/awesome',
+          position: 'left',
+          label: 'Awesome',
+        },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
-          label: 'GitHub',
           position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
+        },
+        {
+          label: '🧡 Sponsor Us',
+          position: 'right',
+          href: 'https://opencollective.com/woodpecker-ci',
         },
       ],
     },
@@ -58,7 +79,7 @@ module.exports = {
             },
             {
               label: 'FAQ',
-              to: '/docs/faq',
+              to: '/faq',
             },
           ],
         },
@@ -69,21 +90,25 @@ module.exports = {
               label: 'Discord',
               href: 'https://discord.gg/fcMQqSMXJy',
             },
+            {
+              label: 'Matrix',
+              href: 'https://matrix.to/#/#woodpecker:matrix.org',
+            },
+            {
+              label: 'Mastodon',
+              href: 'https://mastodon.technology/@WoodpeckerCI',
+            },
           ],
         },
         {
           title: 'More',
           items: [
-            // {
-            //   label: 'Blog',
-            //   to: '/blog',
-            // },
             {
               label: 'GitHub',
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://wp.laszlo.cloud/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
               label: 'CI',
             },
           ],
@@ -95,7 +120,51 @@ module.exports = {
       theme: lightCodeTheme,
       darkTheme: darkCodeTheme,
     },
+    announcementBar: {
+      id: 'github-star',
+      content: ` If you like Woodpecker-CI, <a href=https://github.com/woodpecker-ci/woodpecker rel="noopener noreferrer" target="_blank">give us a star on GitHub</a> ! ⭐️`,
+      backgroundColor: 'var(--ifm-color-primary)',
+      textColor: 'var(--ifm-color-gray-900)',
+    },
+    algolia: {
+      appId: 'BH4D9OD16A',
+      apiKey: '148f85e216b68d20ffa49d46a2b89d0e',
+      indexName: 'woodpecker-ci',
+      debug: false, // Set debug to true if you want to inspect the modal
+    },
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 4,
+    },
   },
+  plugins: [
+    () => ({
+      name: 'docusaurus-plugin-favicon',
+      injectHtmlTags() {
+        return {
+          headTags: [
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.ico',
+                sizes: 'any',
+              },
+            },
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.svg',
+                type: 'image/svg+xml',
+              },
+            },
+          ],
+        };
+      },
+    }),
+  ],
+  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -104,10 +173,6 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
         },
-        // blog: {
-        //   showReadingTime: true,
-        //   editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/blog/',
-        // },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },

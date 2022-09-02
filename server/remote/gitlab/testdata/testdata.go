@@ -17,20 +17,25 @@ package testdata
 import (
 	"net/http"
 	"net/http/httptest"
+	"testing"
 )
 
-// setup a mock server for testing purposes.
-func NewServer() *httptest.Server {
+// NewServer setup a mock server for testing purposes.
+func NewServer(t *testing.T) *httptest.Server {
 	mux := http.NewServeMux()
 	server := httptest.NewServer(mux)
 
 	// handle requests and serve mock data
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		//println(r.URL.Path + "  " + r.Method)
+		t.Logf("gitlab remote mock server: [%s] %s", r.Method, r.URL.Path)
 		// evaluate the path to serve a dummy data file
+
+		// TODO: find source of "/api/v4/" requests
+		// assert.EqualValues(t, "go-gitlab", r.Header.Get("user-agent"), "on request: "+r.URL.Path)
+
 		switch r.URL.Path {
 		case "/api/v4/projects":
-			if r.URL.Query().Get("archived") == "false" {
+			if r.FormValue("archived") == "false" {
 				w.Write(notArchivedProjectsPayload)
 			} else {
 				w.Write(allProjectsPayload)
@@ -43,18 +48,17 @@ func NewServer() *httptest.Server {
 		case "/api/v4/projects/brightbox/puppet":
 			w.Write(project6Paylod)
 			return
-		case "/api/v4/projects/diaspora/diaspora-client/services/drone-ci":
+		case "/api/v4/projects/4/hooks":
 			switch r.Method {
-			case "PUT":
-				if r.FormValue("token") == "" {
-					w.WriteHeader(404)
-				} else {
-					w.WriteHeader(201)
-				}
-			case "DELETE":
+			case "GET":
+				w.Write(project4PayloadHooks)
+			case "POST":
+				w.Write(project4PayloadHook)
 				w.WriteHeader(201)
 			}
-
+			return
+		case "/api/v4/projects/4/hooks/10717088":
+			w.WriteHeader(201)
 			return
 		case "/oauth/token":
 			w.Write(accessTokenPayload)

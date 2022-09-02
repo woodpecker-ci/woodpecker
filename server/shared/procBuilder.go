@@ -23,14 +23,15 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
@@ -87,7 +88,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			environ := b.environmentVariables(metadata, axis)
 
 			// substitute vars
-			substituted, err := b.envsubst_(string(y.Data), environ)
+			substituted, err := b.envsubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -99,18 +100,15 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// lint pipeline
-			lerr := linter.New(
+			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
-			).Lint(parsed)
-			if lerr != nil {
-				return nil, lerr
+			).Lint(parsed); err != nil {
+				return nil, err
 			}
 
-			if !parsed.Branches.Match(b.Curr.Branch) {
+			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
 				proc.State = model.StatusSkipped
 			}
-
-			metadata.SetPlatform(parsed.Platform)
 
 			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
 
@@ -124,7 +122,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
 				RunsOn:    parsed.RunsOn,
-				Platform:  metadata.Sys.Arch,
+				Platform:  parsed.Platform,
 			}
 			if item.Labels == nil {
 				item.Labels = map[string]string{}
@@ -137,7 +135,22 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
+	// check if at least one proc can start, if list is not empty
+	procListContainsItemsToRun(items)
+	if len(items) > 0 && !procListContainsItemsToRun(items) {
+		return nil, fmt.Errorf("build has no startpoint")
+	}
+
 	return items, nil
+}
+
+func procListContainsItemsToRun(items []*BuildItem) bool {
+	for i := range items {
+		if items[i].Proc.State == model.StatusPending {
+			return true
+		}
+	}
+	return false
 }
 
 func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
@@ -174,7 +187,7 @@ func containsItemWithName(name string, items []*BuildItem) bool {
 	return false
 }
 
-func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, error) {
+func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -186,9 +199,6 @@ func (b *ProcBuilder) envsubst_(y string, environ map[string]string) (string, er
 
 func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
-	for k, v := range metadata.EnvironDrone() {
-		environ[k] = v
-	}
 	for k, v := range axis {
 		environ[k] = v
 	}
@@ -232,8 +242,9 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 				b.Netrc.Password,
 				b.Netrc.Machine,
 			),
-			b.Repo.IsPrivate,
+			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
+		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
@@ -244,7 +255,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 			),
 		),
 		compiler.WithProxy(),
-		compiler.WithWorkspaceFromURL("/drone", b.Repo.Link),
+		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
 	).Compile(parsed)
 }
@@ -297,7 +308,7 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Name:    repo.FullName,
 			Link:    repo.Link,
 			Remote:  repo.Clone,
-			Private: repo.IsPrivate,
+			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
 		Curr: frontend.Build{
@@ -306,8 +317,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  build.Created,
 			Started:  build.Started,
 			Finished: build.Finished,
-			Status:   build.Status,
-			Event:    build.Event,
+			Status:   string(build.Status),
+			Event:    string(build.Event),
 			Link:     build.Link,
 			Target:   build.Deploy,
 			Commit: frontend.Commit{
@@ -329,8 +340,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Created:  last.Created,
 			Started:  last.Started,
 			Finished: last.Finished,
-			Status:   last.Status,
-			Event:    last.Event,
+			Status:   string(last.Status),
+			Event:    string(last.Event),
 			Link:     last.Link,
 			Target:   last.Deploy,
 			Commit: frontend.Commit{
@@ -352,10 +363,10 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Matrix: proc.Environ,
 		},
 		Sys: frontend.System{
-			Name: "drone",
-			Link: link,
-			Host: host,
-			Arch: "linux/amd64",
+			Name:     "woodpecker",
+			Link:     link,
+			Host:     host,
+			Platform: "", // will be set by pipeline platform option or by agent
 		},
 	}
 }

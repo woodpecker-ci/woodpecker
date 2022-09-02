@@ -100,15 +100,10 @@ func getDepot(c *gin.Context) {
 	}
 }
 
-func getProjects(c *gin.Context) {
-	c.Header("Content-Type", "application/json;charset=UTF-8")
-	c.String(200, fakeProjectsPayload)
-}
-
 func getFile(c *gin.Context) {
 	c.Header("Content-Type", "application/json;charset=UTF-8")
 	switch fmt.Sprintf("%s/%s/%s/%s", c.Param("gk"), c.Param("prj"), c.Param("ref"), c.Param("path")) {
-	case "demo1/test1/master/.drone.yml", "demo1/test1/4504a072cc/.drone.yml":
+	case "demo1/test1/master/.woodpecker.yml", "demo1/test1/4504a072cc/.woodpecker.yml":
 		c.String(200, fakeFilePayload)
 	default:
 		c.String(200, fileNotFoundPayload)
@@ -270,23 +265,6 @@ const projectNotFoundPayload = `
     "msg":{
         "project_not_exists":"项目不存在"
 		}
-}
-`
-
-const fakeProjectsPayload = `
-{
-    "code":0,
-    "data":{
-        "list":{
-            "owner_user_name":"demo1",
-            "name":"test1",
-            "icon":"/static/project_icon/scenery-5.png",
-        },
-        "page":1,
-        "pageSize":1,
-        "totalPage":1,
-        "totalRow":1
-    }
 }
 `
 

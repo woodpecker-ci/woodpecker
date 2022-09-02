@@ -4,18 +4,17 @@ The default database engine of Woodpecker is an embedded SQLite database which r
 
 ## Configure sqlite
 
-By default Woodpecker uses a sqlite database stored under `/var/lib/drone/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the sqlite database.
+By default Woodpecker uses a sqlite database stored under `/var/lib/woodpecker/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the sqlite database.
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
-    ports:
-      - 80:8000
-      - 9000
+    [...]
 +   volumes:
-+     - woodpecker-server-data:/var/lib/drone/
-    restart: always
++     - woodpecker-server-data:/var/lib/woodpecker/
 ```
 
 ## Configure MySQL
@@ -23,29 +22,32 @@ services:
 The below example demonstrates mysql database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
 
 ```diff
+# docker-compose.yml
 version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-+     WOODPECKER_DATABASE_DRIVER: mysql
-+     WOODPECKER_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
++     - WOODPECKER_DATABASE_DRIVER=mysql
++     - WOODPECKER_DATABASE_DATASOURCE=root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
 ```
 
 ## Configure Postgres
 
 The below example demonstrates postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
+Please use postgres versions equal or higher than **11**.
 
 ```diff
+# docker-compose.yml
 version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-+     WOODPECKER_DATABASE_DRIVER: postgres
-+     WOODPECKER_DATABASE_DATASOURCE: postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
++     - WOODPECKER_DATABASE_DRIVER=postgres
++     - WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
 ```
 
 ## Database Creation

@@ -30,7 +30,7 @@ var allProjectsPayload = []byte(`
 			"id": 3,
 			"name": "Diaspora",
 			"username": "some_user",
-			"created_at": "2013-09-30T13: 46: 02Z"
+			"created_at": "2013-09-30T13:46:02Z"
 		},
 		"name": "Diaspora Client",
 		"name_with_namespace": "Diaspora / Diaspora Client",
@@ -40,16 +40,16 @@ var allProjectsPayload = []byte(`
 		"merge_requests_enabled": true,
 		"wiki_enabled": true,
 		"snippets_enabled": false,
-		"created_at": "2013-09-30T13: 46: 02Z",
-		"last_activity_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
+		"last_activity_at": "2013-09-30T13:46:02Z",
 		"namespace": {
-			"created_at": "2013-09-30T13: 46: 02Z",
+			"created_at": "2013-09-30T13:46:02Z",
 			"description": "",
 			"id": 3,
 			"name": "Diaspora",
 			"owner_id": 1,
 			"path": "diaspora",
-			"updated_at": "2013-09-30T13: 46: 02Z"
+			"updated_at": "2013-09-30T13:46:02Z"
 		},
 		"archived": false
 	},
@@ -107,7 +107,7 @@ var notArchivedProjectsPayload = []byte(`
 			"id": 3,
 			"name": "Diaspora",
 			"username": "some_user",
-			"created_at": "2013-09-30T13: 46: 02Z"
+			"created_at": "2013-09-30T13:46:02Z"
 		},
 		"name": "Diaspora Client",
 		"name_with_namespace": "Diaspora / Diaspora Client",
@@ -117,16 +117,16 @@ var notArchivedProjectsPayload = []byte(`
 		"merge_requests_enabled": true,
 		"wiki_enabled": true,
 		"snippets_enabled": false,
-		"created_at": "2013-09-30T13: 46: 02Z",
-		"last_activity_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
+		"last_activity_at": "2013-09-30T13:46:02Z",
 		"namespace": {
-			"created_at": "2013-09-30T13: 46: 02Z",
+			"created_at": "2013-09-30T13:46:02Z",
 			"description": "",
 			"id": 3,
 			"name": "Diaspora",
 			"owner_id": 1,
 			"path": "diaspora",
-			"updated_at": "2013-09-30T13: 46: 02Z"
+			"updated_at": "2013-09-30T13:46:02Z"
 		},
 		"archived": false
 	}
@@ -147,7 +147,7 @@ var project4Paylod = []byte(`
 		"id": 3,
 		"name": "Diaspora",
 		"username": "some_user",
-		"created_at": "2013-09-30T13: 46: 02Z"
+		"created_at": "2013-09-30T13:46:02Z"
 	},
 	"name": "Diaspora Client",
 	"name_with_namespace": "Diaspora / Diaspora Client",
@@ -157,16 +157,16 @@ var project4Paylod = []byte(`
 	"merge_requests_enabled": true,
 	"wiki_enabled": true,
 	"snippets_enabled": false,
-	"created_at": "2013-09-30T13: 46: 02Z",
-	"last_activity_at": "2013-09-30T13: 46: 02Z",
+	"created_at": "2013-09-30T13:46:02Z",
+	"last_activity_at": "2013-09-30T13:46:02Z",
 	"namespace": {
-		"created_at": "2013-09-30T13: 46: 02Z",
+		"created_at": "2013-09-30T13:46:02Z",
 		"description": "",
 		"id": 3,
 		"name": "Diaspora",
 		"owner_id": 1,
 		"path": "diaspora",
-		"updated_at": "2013-09-30T13: 46: 02Z"
+		"updated_at": "2013-09-30T13:46:02Z"
 	},
 	"archived": false,
 	"permissions": {
@@ -223,4 +223,54 @@ var project6Paylod = []byte(`
 		"group_access": null
 	}
 }
+`)
+
+var project4PayloadHook = []byte(`
+{
+	"id": 10717088,
+	"url": "http://example.com/api/hook",
+	"created_at": "2021-12-18T23:29:33.852Z",
+	"push_events": true,
+	"tag_push_events": true,
+	"merge_requests_events": true,
+	"repository_update_events": false,
+	"enable_ssl_verification": true,
+	"project_id": 4,
+	"issues_events": false,
+	"confidential_issues_events": false,
+	"note_events": false,
+	"confidential_note_events": null,
+	"pipeline_events": false,
+	"wiki_page_events": false,
+	"deployment_events": true,
+	"job_events": false,
+	"releases_events": false,
+	"push_events_branch_filter": null
+}
+`)
+
+var project4PayloadHooks = []byte(`
+[
+  {
+    "id": 10717088,
+    "url": "http://example.com/api/hook",
+    "created_at": "2021-12-18T23:29:33.852Z",
+    "push_events": true,
+    "tag_push_events": true,
+    "merge_requests_events": true,
+    "repository_update_events": false,
+    "enable_ssl_verification": true,
+    "project_id": 4,
+    "issues_events": false,
+    "confidential_issues_events": false,
+    "note_events": false,
+    "confidential_note_events": null,
+    "pipeline_events": false,
+    "wiki_page_events": false,
+    "deployment_events": true,
+    "job_events": false,
+    "releases_events": false,
+    "push_events_branch_filter": null
+  }
+]
 `)

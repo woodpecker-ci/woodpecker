@@ -4,23 +4,20 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var userListCmd = cli.Command{
+var userListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplUserList,
-		},
-	},
+	Flags: append(common.GlobalFlags,
+		common.FormatFlag(tmplUserList),
+	),
 }
 
 func userList(c *cli.Context) error {
@@ -39,7 +36,9 @@ func userList(c *cli.Context) error {
 		return err
 	}
 	for _, user := range users {
-		tmpl.Execute(os.Stdout, user)
+		if err := tmpl.Execute(os.Stdout, user); err != nil {
+			return err
+		}
 	}
 	return nil
 }

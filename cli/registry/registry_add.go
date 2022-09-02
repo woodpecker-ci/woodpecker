@@ -4,36 +4,37 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/drone-go/drone"
+	"github.com/urfave/cli/v2"
 
-	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/cli/common"
+	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-var registryCreateCmd = cli.Command{
+var registryCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a registry",
 	ArgsUsage: "[repo/name]",
 	Action:    registryCreate,
-	Flags: []cli.Flag{
-		cli.StringFlag{
+	Flags: append(common.GlobalFlags,
+		&cli.StringFlag{
 			Name:  "repository",
 			Usage: "repository name (e.g. octocat/hello-world)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "username",
 			Usage: "registry username",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	},
+	),
 }
 
 func registryCreate(c *cli.Context) error {
@@ -54,7 +55,7 @@ func registryCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry := &drone.Registry{
+	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
 		Password: password,

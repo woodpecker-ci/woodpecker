@@ -23,7 +23,7 @@ func WithOption(option Option, b bool) Option {
 	}
 }
 
-// WithVolumes configutes the compiler with default volumes that
+// WithVolumes configures the compiler with default volumes that
 // are mounted to each container in the pipeline.
 func WithVolumes(volumes ...string) Option {
 	return func(compiler *Compiler) {
@@ -49,7 +49,7 @@ func WithSecret(secrets ...Secret) Option {
 	}
 }
 
-// WithMetadata configutes the compiler with the repostiory, build
+// WithMetadata configures the compiler with the repository, build
 // and system metadata. The metadata is used to remove steps from
 // the compiled pipeline configuration that should be skipped. The
 // metadata is also added to each container as environment variables.
@@ -60,30 +60,17 @@ func WithMetadata(metadata frontend.Metadata) Option {
 		for k, v := range metadata.Environ() {
 			compiler.env[k] = v
 		}
-		// TODO this is present for backward compatibility and should
-		// be removed in a future version.
-		for k, v := range metadata.EnvironDrone() {
-			compiler.env[k] = v
-		}
 	}
 }
 
 // WithNetrc configures the compiler with netrc authentication
 // credentials added by default to every container in the pipeline.
 func WithNetrc(username, password, machine string) Option {
-	return WithEnviron(
-		map[string]string{
-			"CI_NETRC_USERNAME": username,
-			"CI_NETRC_PASSWORD": password,
-			"CI_NETRC_MACHINE":  machine,
-
-			// TODO: This is present for backward compatibility and should
-			// be removed in a future version.
-			"DRONE_NETRC_USERNAME": username,
-			"DRONE_NETRC_PASSWORD": password,
-			"DRONE_NETRC_MACHINE":  machine,
-		},
-	)
+	return func(compiler *Compiler) {
+		compiler.cloneEnv["CI_NETRC_USERNAME"] = username
+		compiler.cloneEnv["CI_NETRC_PASSWORD"] = password
+		compiler.cloneEnv["CI_NETRC_MACHINE"] = machine
+	}
 }
 
 // WithWorkspace configures the compiler with the workspace base
@@ -189,7 +176,7 @@ func WithProxy() Option {
 	)
 }
 
-// WithNetworks configures the compiler with additionnal networks
+// WithNetworks configures the compiler with additional networks
 // to be connected to build containers
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
@@ -209,6 +196,12 @@ func WithResourceLimit(swap, mem, shmsize, cpuQuota, cpuShares int64, cpuSet str
 			CPUShares:    cpuShares,
 			CPUSet:       cpuSet,
 		}
+	}
+}
+
+func WithDefaultCloneImage(cloneImage string) Option {
+	return func(compiler *Compiler) {
+		compiler.defaultCloneImage = cloneImage
 	}
 }
 

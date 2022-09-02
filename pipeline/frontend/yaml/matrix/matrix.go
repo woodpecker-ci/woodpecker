@@ -29,7 +29,6 @@ func (a Axis) String() string {
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
-
 	axis, err := parseList(data)
 	if err == nil && len(axis) != 0 {
 		return axis, nil
@@ -68,7 +67,7 @@ func calc(matrix Matrix) []Axis {
 	// structure to hold the transformed result set
 	var axisList []Axis
 
-	// for each axis calculate the uniqe set of values that should be used.
+	// for each axis calculate the unique set of values that should be used.
 	for p := 0; p < perm; p++ {
 		axis := map[string]string{}
 		decr := perm

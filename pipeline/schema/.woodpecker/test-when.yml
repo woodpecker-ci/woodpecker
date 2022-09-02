@@ -6,6 +6,13 @@ pipeline:
     when:
       branch: master
 
+  when-branch-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      branch: [master, deploy]
+
   when-event:
     image: alpine
     commands:
@@ -34,19 +41,19 @@ pipeline:
     when:
       status: [success, failure]
 
-  when-plattform:
+  when-platform:
     image: alpine
     commands:
       - echo "test"
     when:
-      plattform: linux/amd64
+      platform: linux/amd64
 
-  when-plattform-array:
+  when-platform-array:
     image: alpine
     commands:
       - echo "test"
     when:
-      plattform: [ linux/*, windows/amd64 ]
+      platform: [ linux/*, windows/amd64 ]
 
   when-environment:
     image: alpine
@@ -79,6 +86,15 @@ pipeline:
     when:
       path: "folder/**"
 
+  when-path-array:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      path:
+        - "folder/**"
+        - "**/*.c"
+
   when-path-include-exclude:
     image: alpine
     commands:
@@ -88,3 +104,10 @@ pipeline:
         include: [ '.woodpecker/*.yml', '*.ini' ]
         exclude: [ '*.md', 'docs/**' ]
         ignore_message: "[ALL]"
+
+  when-repo:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      repo: test/test

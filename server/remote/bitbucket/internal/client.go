@@ -16,6 +16,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,7 +30,6 @@ import (
 
 const (
 	get  = "GET"
-	put  = "PUT"
 	post = "POST"
 	del  = "DELETE"
 )
@@ -45,24 +45,30 @@ const (
 	pathHooks       = "%s/2.0/repositories/%s/%s/hooks?%s"
 	pathSource      = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus      = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches    = "%s/2.0/repositories/%s/%s/refs/branches"
 )
 
 type Client struct {
 	*http.Client
 	base string
+	ctx  context.Context
 }
 
-func NewClient(url string, client *http.Client) *Client {
-	return &Client{client, url}
+func NewClient(ctx context.Context, url string, client *http.Client) *Client {
+	return &Client{
+		Client: client,
+		base:   url,
+		ctx:    ctx,
+	}
 }
 
-func NewClientToken(url, client, secret string, token *oauth2.Token) *Client {
+func NewClientToken(ctx context.Context, url, client, secret string, token *oauth2.Token) *Client {
 	config := &oauth2.Config{
 		ClientID:     client,
 		ClientSecret: secret,
 		Endpoint:     bitbucket.Endpoint,
 	}
-	return NewClient(url, config.Client(oauth2.NoContext, token))
+	return NewClient(ctx, url, config.Client(ctx, token))
 }
 
 func (c *Client) FindCurrent() (*Account, error) {
@@ -101,7 +107,7 @@ func (c *Client) ListRepos(account string, opts *ListOpts) (*RepoResp, error) {
 }
 
 func (c *Client) ListReposAll(account string) ([]*Repo, error) {
-	var page = 1
+	page := 1
 	var repos []*Repo
 
 	for {
@@ -159,20 +165,24 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
 	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
 	_, err := c.do(uri, get, nil, out)
-
 	if err != nil {
 		return nil, err
 	}
 
 	if len(out.Values) == 0 {
 		return nil, fmt.Errorf("no permissions in repository %s", fullName)
-	} else {
-		return out.Values[0], nil
 	}
+	return out.Values[0], nil
+}
+
+func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+	out := new(BranchResp)
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	_, err := c.do(uri, get, nil, out)
+	return out.Values, err
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
-
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
@@ -190,7 +200,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 	}
 
 	// creates a new http request to bitbucket.
-	req, err := http.NewRequest(method, uri.String(), buf)
+	req, err := http.NewRequestWithContext(c.ctx, method, uri.String(), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +218,7 @@ func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error)
 	// error response.
 	if resp.StatusCode > http.StatusPartialContent {
 		err := Error{}
-		json.NewDecoder(resp.Body).Decode(&err)
+		_ = json.NewDecoder(resp.Body).Decode(&err)
 		err.Status = resp.StatusCode
 		return nil, err
 	}

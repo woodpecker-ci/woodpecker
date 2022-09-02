@@ -23,14 +23,15 @@ import (
 	"time"
 
 	"github.com/gogits/go-gogs-client"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// helper function that converts a Gogs repository to a Drone repository.
+// helper function that converts a Gogs repository to a Woodpecker repository.
 func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
-		from.HtmlUrl,
+		from.HTMLURL,
 		from.Owner.AvatarUrl,
 	)
 	private := from.Private
@@ -38,20 +39,20 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
-		Kind:      model.RepoGit,
-		Name:      name,
-		Owner:     from.Owner.UserName,
-		FullName:  from.FullName,
-		Avatar:    avatar,
-		Link:      from.HtmlUrl,
-		IsPrivate: private,
-		Clone:     from.CloneUrl,
-		Branch:    "master",
+		SCMKind:      model.RepoGit,
+		Name:         name,
+		Owner:        from.Owner.UserName,
+		FullName:     from.FullName,
+		Avatar:       avatar,
+		Link:         from.HTMLURL,
+		IsSCMPrivate: private,
+		Clone:        from.CloneURL,
+		Branch:       from.DefaultBranch,
 	}
 }
 
-// helper function that converts a Gogs permission to a Drone permission.
-func toPerm(from gogs.Permission) *model.Perm {
+// helper function that converts a Gogs permission to a Woodpecker permission.
+func toPerm(from *gogs.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
 		Push:  from.Push,
@@ -59,7 +60,7 @@ func toPerm(from gogs.Permission) *model.Perm {
 	}
 }
 
-// helper function that converts a Gogs team to a Drone team.
+// helper function that converts a Gogs team to a Woodpecker team.
 func toTeam(from *gogs.Organization, link string) *model.Team {
 	return &model.Team{
 		Login:  from.UserName,

@@ -3,12 +3,13 @@ package queue
 import (
 	"container/list"
 	"context"
-	"log"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -20,13 +21,12 @@ const (
 type entry struct {
 	item     *Task
 	done     chan bool
-	retry    int
 	error    error
 	deadline time.Time
 }
 
 type worker struct {
-	filter  Filter
+	filter  FilterFn
 	channel chan *Task
 }
 
@@ -42,7 +42,7 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
-func New() Queue {
+func New(ctx context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
@@ -74,7 +74,7 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
+func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 	q.Lock()
 	w := &worker{
 		channel: make(chan *Task, 1),
@@ -98,8 +98,8 @@ func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string, exitStatus string) error {
-	return q.finished([]string{id}, exitStatus, nil)
+func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+	return q.finished([]string{id}, string(exitStatus), nil)
 }
 
 // Error signals that the item is done executing with error.
@@ -237,7 +237,7 @@ func (q *fifo) process() {
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			log.Printf("queue: unexpected panic: %v\n%s", err, buf)
+			log.Error().Msgf("queue: unexpected panic: %v\n%s", err, buf)
 		}
 	}()
 
@@ -273,7 +273,7 @@ func (q *fifo) filterWaiting() {
 		nextPending = e.Next()
 		task := e.Value.(*Task)
 		if q.depsInQueue(task) {
-			logrus.Debugf("queue: waiting due to unmet dependencies %v", task.ID)
+			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
 			filtered = append(filtered, e)
 		}
@@ -290,11 +290,11 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		task := e.Value.(*Task)
-		logrus.Debugf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
+		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {
 			if w.filter(task) {
-				logrus.Debugf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
+				log.Debug().Msgf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
 				return e, w
 			}
 		}
@@ -318,7 +318,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		possibleDep, ok := e.Value.(*Task)
-		logrus.Debugf("queue: pending right now: %v", possibleDep.ID)
+		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
 				return true
@@ -326,7 +326,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 		}
 	}
 	for possibleDepID := range q.running {
-		logrus.Debugf("queue: running right now: %v", possibleDepID)
+		log.Debug().Msgf("queue: running right now: %v", possibleDepID)
 		for _, dep := range task.Dependencies {
 			if possibleDepID == dep {
 				return true
@@ -336,7 +336,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
+func (q *fifo) updateDepStatusInQueue(taskID, status string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
@@ -356,7 +356,6 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 		}
 	}
 
-	next = nil
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
 		waiting, ok := e.Value.(*Task)
@@ -369,13 +368,13 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 }
 
 func (q *fifo) removeFromPending(taskID string) {
-	logrus.Debugf("queue: trying to remove %s", taskID)
+	log.Debug().Msgf("queue: trying to remove %s", taskID)
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		task := e.Value.(*Task)
 		if task.ID == taskID {
-			logrus.Debugf("queue: %s is removed from pending", taskID)
+			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			q.pending.Remove(e)
 			return
 		}

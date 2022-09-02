@@ -19,19 +19,20 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog/log"
+	"github.com/tevino/abool"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-
-	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // TODO: Implement log streaming.
@@ -61,8 +62,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 }
 
 func (r *Runner) Run(ctx context.Context) error {
-	log.Debug().
-		Msg("request next execution")
+	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(ctx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
@@ -95,27 +95,29 @@ func (r *Runner) Run(ctx context.Context) error {
 		Str("id", work.ID).
 		Logger()
 
-	logger.Debug().
-		Msg("received execution")
+	logger.Debug().Msg("received execution")
 
 	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
-	cancelled := abool.New()
+	// Add sigterm support for internal context.
+	// Required when the pipeline is terminated by external signals
+	// like kubernetes.
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
+
+	canceled := abool.New()
 	go func() {
-		logger.Debug().
-			Msg("listen for cancel signal")
+		logger.Debug().Msg("listen for cancel signal")
 
 		if werr := r.client.Wait(ctx, work.ID); werr != nil {
-			cancelled.SetTo(true)
-			logger.Warn().
-				Err(werr).
-				Msg("cancel signal received")
+			canceled.SetTo(true)
+			logger.Warn().Err(werr).Msg("cancel signal received")
 
 			cancel()
 		} else {
-			logger.Debug().
-				Msg("stop listening for cancel signal")
+			logger.Debug().Msg("stop listening for cancel signal")
 		}
 	}()
 
@@ -123,15 +125,15 @@ func (r *Runner) Run(ctx context.Context) error {
 		for {
 			select {
 			case <-ctx.Done():
-				logger.Debug().
-					Msg("pipeline done")
+				logger.Debug().Msg("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
-				logger.Debug().
-					Msg("pipeline lease renewed")
+				logger.Debug().Msg("pipeline lease renewed")
 
-				r.client.Extend(ctx, work.ID)
+				if err := r.client.Extend(ctx, work.ID); err != nil {
+					log.Error().Err(err).Msg("extending pipeline deadline failed")
+				}
 			}
 		}
 	}()
@@ -141,14 +143,11 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	err = r.client.Init(ctxmeta, work.ID, state)
 	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("pipeline initialization failed")
+		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
 	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
-
 		loglogger := logger.With().
 			Str("image", proc.Image).
 			Str("stage", proc.Alias).
@@ -170,35 +169,36 @@ func (r *Runner) Run(ctx context.Context) error {
 		loglogger.Debug().Msg("log stream opened")
 
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logstream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
-		io.Copy(logstream, limitedPart)
+		logStream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
+		if _, err := io.Copy(logStream, limitedPart); err != nil {
+			log.Error().Err(err).Msg("copy limited logStream part")
+		}
 
 		loglogger.Debug().Msg("log stream copied")
 
-		file := &rpc.File{}
-		file.Mime = "application/json+logs"
-		file.Proc = proc.Alias
-		file.Name = "logs.json"
-		file.Data, _ = json.Marshal(logstream.Lines())
-		file.Size = len(file.Data)
-		file.Time = time.Now().Unix()
-
-		loglogger.Debug().
-			Msg("log stream uploading")
-
-		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().
-				Err(serr).
-				Msg("log stream upload error")
+		data, err := json.Marshal(logStream.Lines())
+		if err != nil {
+			loglogger.Err(err).Msg("could not marshal logstream")
 		}
 
-		loglogger.Debug().
-			Msg("log stream upload complete")
+		file := &rpc.File{
+			Mime: "application/json+logs",
+			Proc: proc.Alias,
+			Name: "logs.json",
+			Data: data,
+			Size: len(data),
+			Time: time.Now().Unix(),
+		}
+
+		loglogger.Debug().Msg("log stream uploading")
+		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
+			loglogger.Error().Err(serr).Msg("log stream upload error")
+		} else {
+			loglogger.Debug().Msg("log stream upload complete")
+		}
 
 		defer func() {
-			loglogger.Debug().
-				Msg("log stream closed")
-
+			loglogger.Debug().Msg("log stream closed")
 			uploads.Done()
 		}()
 
@@ -208,15 +208,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 		// TODO should be configurable
 		limitedPart = io.LimitReader(part, maxFileUpload)
-		file = &rpc.File{}
-		file.Mime = part.Header().Get("Content-Type")
-		file.Proc = proc.Alias
-		file.Name = part.FileName()
-		file.Data, _ = ioutil.ReadAll(limitedPart)
-		file.Size = len(file.Data)
-		file.Time = time.Now().Unix()
-		file.Meta = map[string]string{}
+		data, err = ioutil.ReadAll(limitedPart)
+		if err != nil {
+			loglogger.Err(err).Msg("could not read limited part")
+		}
 
+		file = &rpc.File{
+			Mime: part.Header().Get("Content-Type"),
+			Proc: proc.Alias,
+			Name: part.FileName(),
+			Data: data,
+			Size: len(data),
+			Time: time.Now().Unix(),
+			Meta: make(map[string]string),
+		}
 		for key, value := range part.Header() {
 			file.Meta[key] = value[0]
 		}
@@ -245,6 +250,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		proclogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
+			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
@@ -256,9 +262,12 @@ func (r *Runner) Run(ctx context.Context) error {
 			Started:  time.Now().Unix(), // TODO do not do this
 			Finished: time.Now().Unix(),
 		}
+		if state.Process.Error != nil {
+			procState.Error = state.Process.Error.Error()
+		}
+
 		defer func() {
-			proclogger.Debug().
-				Msg("update step status")
+			proclogger.Debug().Msg("update step status")
 
 			if uerr := r.client.Update(ctxmeta, work.ID, procState); uerr != nil {
 				proclogger.Debug().
@@ -266,8 +275,7 @@ func (r *Runner) Run(ctx context.Context) error {
 					Msg("update step status error")
 			}
 
-			proclogger.Debug().
-				Msg("update step status complete")
+			proclogger.Debug().Msg("update step status complete")
 		}()
 		if state.Process.Exited {
 			return nil
@@ -276,26 +284,21 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment = map[string]string{}
 		}
 
-		state.Pipeline.Step.Environment["DRONE_MACHINE"] = r.hostname
+		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
+		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "success"
-		state.Pipeline.Step.Environment["DRONE_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["DRONE_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_BUILD_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["DRONE_JOB_STATUS"] = "failure"
 		}
 		return nil
 	})
@@ -317,7 +320,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}
-		if cancelled.IsSet() {
+		if canceled.IsSet() {
 			state.ExitCode = 137
 		}
 	}
@@ -327,13 +330,11 @@ func (r *Runner) Run(ctx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("pipeline complete")
 
-	logger.Debug().
-		Msg("uploading logs")
+	logger.Debug().Msg("uploading logs")
 
 	uploads.Wait()
 
-	logger.Debug().
-		Msg("uploading logs complete")
+	logger.Debug().Msg("uploading logs complete")
 
 	logger.Debug().
 		Str("error", state.Error).
@@ -342,11 +343,9 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	err = r.client.Done(ctxmeta, work.ID, state)
 	if err != nil {
-		logger.Error().Err(err).
-			Msg("updating pipeline status failed")
+		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
-		logger.Debug().
-			Msg("updating pipeline status complete")
+		logger.Debug().Msg("updating pipeline status complete")
 	}
 
 	return nil
@@ -354,10 +353,10 @@ func (r *Runner) Run(ctx context.Context) error {
 
 // extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_REPO"]
+	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
 // extract build number from the configuration
 func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["DRONE_BUILD_NUMBER"]
+	return config.Stages[0].Steps[0].Environment["CI_BUILD_NUMBER"]
 }

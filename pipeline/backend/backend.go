@@ -1,24 +1,45 @@
 package backend
 
 import (
-	"context"
-	"io"
+	"fmt"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-// Engine defines a container orchestration backend and is used
-// to create and manage container resources.
-type Engine interface {
-	// Setup the pipeline environment.
-	Setup(context.Context, *Config) error
-	// Start the pipeline step.
-	Exec(context.Context, *Step) error
-	// Kill the pipeline step.
-	Kill(context.Context, *Step) error
-	// Wait for the pipeline step to complete and returns
-	// the completion results.
-	Wait(context.Context, *Step) (*State, error)
-	// Tail the pipeline step logs.
-	Tail(context.Context, *Step) (io.ReadCloser, error)
-	// Destroy the pipeline environment.
-	Destroy(context.Context, *Config) error
+var engines map[string]types.Engine
+
+func init() {
+	loadedEngines := []types.Engine{
+		docker.New(),
+		local.New(),
+		ssh.New(),
+		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
+	}
+
+	engines = make(map[string]types.Engine)
+	for _, engine := range loadedEngines {
+		engines[engine.Name()] = engine
+	}
+}
+
+func FindEngine(engineName string) (types.Engine, error) {
+	if engineName == "auto-detect" {
+		for _, engine := range engines {
+			if engine.IsAvailable() {
+				return engine, nil
+			}
+		}
+
+		return nil, fmt.Errorf("Can't detect an available backend engine")
+	}
+
+	engine, ok := engines[engineName]
+	if !ok {
+		return nil, fmt.Errorf("Backend engine '%s' not found", engineName)
+	}
+
+	return engine, nil
 }

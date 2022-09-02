@@ -1,12 +1,13 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
-	libcompose "github.com/docker/libcompose/yaml"
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 var containerYaml = []byte(`
@@ -58,6 +59,9 @@ tmpfs:
   - /var/lib/test
 when:
   branch: master
+settings:
+  foo: bar
+  baz: false
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -68,27 +72,27 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       libcompose.Command{"bundle", "exec", "thin", "-p", "3000"},
-		Commands:      libcompose.Stringorslice{"go build", "go test"},
-		CPUQuota:      libcompose.StringorInt(11),
+		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Commands:      types.Stringorslice{"go build", "go test"},
+		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
-		CPUShares:     libcompose.StringorInt(99),
+		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		DNS:           libcompose.Stringorslice{"8.8.8.8"},
-		DNSSearch:     libcompose.Stringorslice{"example.com"},
-		Entrypoint:    libcompose.Command{"/code/entrypoint.sh"},
-		Environment:   libcompose.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
+		DNS:           types.Stringorslice{"8.8.8.8"},
+		DNSSearch:     types.Stringorslice{"example.com"},
+		Entrypoint:    types.Command{"/code/entrypoint.sh"},
+		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		Labels:        libcompose.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
-		MemLimit:      libcompose.MemStringorInt(1024),
-		MemSwapLimit:  libcompose.MemStringorInt(1024),
-		MemSwappiness: libcompose.MemStringorInt(1024),
+		Labels:        types.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
+		MemLimit:      types.MemStringorInt(1024),
+		MemSwapLimit:  types.MemStringorInt(1024),
+		MemSwappiness: types.MemStringorInt(1024),
 		Name:          "my-build-container",
-		Networks: libcompose.Networks{
-			Networks: []*libcompose.Network{
+		Networks: types.Networks{
+			Networks: []*types.Network{
 				{Name: "some-network"},
 				{Name: "other-network"},
 			},
@@ -96,29 +100,29 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     libcompose.MemStringorInt(1024),
-		Tmpfs:       libcompose.Stringorslice{"/var/lib/test"},
-		Volumes: libcompose.Volumes{
-			Volumes: []*libcompose.Volume{
+		ShmSize:     types.MemStringorInt(1024),
+		Tmpfs:       types.Stringorslice{"/var/lib/test"},
+		Volumes: types.Volumes{
+			Volumes: []*types.Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
 				{Source: "/opt/data", Destination: "/var/lib/mysql"},
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: Constraints{
-			Branch: Constraint{
+		Constraints: constraint.Constraints{
+			Branch: constraint.List{
 				Include: []string{"master"},
 			},
+		},
+		Settings: map[string]interface{}{
+			"foo": "bar",
+			"baz": false,
 		},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(want, got) {
-		t.Errorf("problem parsing container")
-		pretty.Ldiff(t, want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
 // TestUnmarshalContainersErr unmarshals a map of containers. The order is
@@ -139,11 +143,80 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node }",
+			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
+					Settings: map[string]interface{}{
+						"normal_setting": true,
+					},
+				},
+			},
+		},
+		{
+			from: `publish-agent:
+    group: bundle
+    image: print/env
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dry_run: true
+      dockerfile: docker/Dockerfile.agent
+      tag: [next, latest]
+    secrets: [docker_username, docker_password]
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-agent",
+					Image: "print/env",
+					Group: "bundle",
+					Secrets: Secrets{Secrets: []*Secret{{
+						Source: "docker_username",
+						Target: "docker_username",
+					}, {
+						Source: "docker_password",
+						Target: "docker_password",
+					}}},
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-agent",
+						"dockerfile": "docker/Dockerfile.agent",
+						"tag":        stringsToInterface("next", "latest"),
+						"dry_run":    true,
+					},
+					Constraints: constraint.Constraints{
+						Event:  constraint.List{Include: []string{"push"}},
+						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    group: docker
+    image: print/env
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli
+      tag: [next]
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					Group: "docker",
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-cli",
+						"dockerfile": "docker/Dockerfile.cli",
+						"tag":        stringsToInterface("next"),
+					},
+					Constraints: constraint.Constraints{
+						Event:  constraint.List{Include: []string{"push"}},
+						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					},
 				},
 			},
 		},
@@ -152,12 +225,8 @@ func TestUnmarshalContainers(t *testing.T) {
 		in := []byte(test.from)
 		got := Containers{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			t.Errorf("problem parsing containers %q", test.from)
-			pretty.Ldiff(t, test.want, got.Containers)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -172,8 +241,14 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		in := []byte(test)
 		containers := new(Containers)
 		err := yaml.Unmarshal(in, &containers)
-		if err == nil {
-			t.Errorf("wanted error for containers %q", test)
-		}
+		assert.Error(t, err, "wanted error for containers %q", test)
 	}
+}
+
+func stringsToInterface(val ...string) []interface{} {
+	res := make([]interface{}, len(val))
+	for i := range val {
+		res[i] = val[i]
+	}
+	return res
 }

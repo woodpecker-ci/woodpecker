@@ -19,84 +19,104 @@ import (
 	"crypto/tls"
 	"net/http"
 	"os"
+	"runtime"
+	"strings"
 	"sync"
-
-	grpccredentials "google.golang.org/grpc/credentials"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
-
-	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
-	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
+	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
+	grpccredentials "google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/metadata"
+
+	"github.com/woodpecker-ci/woodpecker/agent"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func loop(c *cli.Context) error {
-	filter := rpc.Filter{
-		Labels: map[string]string{
-			"platform": c.String("platform"),
-		},
-		Expr: c.String("filter"),
-	}
-
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
 	}
 
-	if c.BoolT("debug") {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	labels := map[string]string{
+		"hostname": hostname,
+		"platform": runtime.GOOS + "/" + runtime.GOARCH,
+		"repo":     "*", // allow all repos by default
+	}
+
+	for _, v := range c.StringSlice("filter-labels") {
+		parts := strings.SplitN(v, "=", 2)
+		labels[parts[0]] = parts[1]
+	}
+
+	filter := rpc.Filter{
+		Labels: labels,
 	}
 
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
 				Out:     os.Stderr,
-				NoColor: c.BoolT("nocolor"),
+				NoColor: c.Bool("nocolor"),
 			},
 		)
+	}
+
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	}
+
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
 	}
 
 	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
-	if c.BoolT("healthcheck") {
-		go http.ListenAndServe(":3000", nil)
+	if c.Bool("healthcheck") {
+		go func() {
+			if err := http.ListenAndServe(":3000", nil); err != nil {
+				log.Error().Msgf("can not listen on port 3000: %v", err)
+			}
+		}()
 	}
 
 	// TODO pass version information to grpc server
 	// TODO authenticate to grpc server
 
 	// grpc.Dial(target, ))
-
-	var transport = grpc.WithInsecure()
-
-	if c.Bool("secure-grpc") {
+	var transport grpc.DialOption
+	if c.Bool("grpc-secure") {
 		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+	} else {
+		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
 	conn, err := grpc.Dial(
 		c.String("server"),
 		transport,
 		grpc.WithPerRPCCredentials(&credentials{
-			username: c.String("username"),
-			password: c.String("password"),
+			username: c.String("grpc-username"),
+			password: c.String("grpc-password"),
 		}),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("keepalive-time"),
-			Timeout: c.Duration("keepalive-timeout"),
+			Time:    c.Duration("grpc-keepalive-time"),
+			Timeout: c.Duration("grpc-keepalive-timeout"),
 		}),
 	)
-
 	if err != nil {
 		return err
 	}
@@ -109,7 +129,7 @@ func loop(c *cli.Context) error {
 		context.Background(),
 		metadata.Pairs("hostname", hostname),
 	)
-	ctx = WithContextFunc(ctx, func() {
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
 		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})
@@ -121,19 +141,31 @@ func loop(c *cli.Context) error {
 	for i := 0; i < parallel; i++ {
 		go func() {
 			defer wg.Done()
+
+			// new engine
+			engine, err := backend.FindEngine(c.String("backend-engine"))
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
+				return
+			}
+
+			// load engine (e.g. init api client)
+			err = engine.Load()
+			if err != nil {
+				log.Error().Err(err).Msg("cannot load backend engine")
+				return
+			}
+
+			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+
+			log.Debug().Msgf("loaded %s backend engine", engine.Name())
+
 			for {
 				if sigterm.IsSet() {
 					return
 				}
 
-				// new docker engine
-				engine, err := docker.NewEnv()
-				if err != nil {
-					log.Error().Err(err).Msg("cannot create docker client")
-					return
-				}
-
-				r := agent.NewRunner(client, filter, hostname, counter, &engine)
+				log.Debug().Msg("polling new jobs")
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
@@ -151,7 +183,7 @@ type credentials struct {
 	password string
 }
 
-func (c *credentials) GetRequestMetadata(oldcontext.Context, ...string) (map[string]string, error) {
+func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
 	return map[string]string{
 		"username": c.username,
 		"password": c.password,

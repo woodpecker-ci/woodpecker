@@ -4,7 +4,7 @@ workspace:
 
 clone:
   git:
-    image: plugins/git
+    image: woodpeckerci/plugin-git
     depth: 50
 
 pipeline:

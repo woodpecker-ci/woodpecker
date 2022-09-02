@@ -1,6 +1,6 @@
 # Project settings
 
-As the owner of a project in Woodpecker you can change some project related settings via the Webinterface.
+As the owner of a project in Woodpecker you can change project related settings via the web interface.
 
 ![project settings](./project-settings.png)
 
@@ -10,7 +10,7 @@ The path to the pipeline config file or folder. By default it is left empty whic
 
 ## Repository hooks
 
-Your Version-Control-System will notify Woodpecker about some events via webhooks. If you want your pipeline to only run on specific webhooks, you can check them by this setting.
+Your Version-Control-System will notify Woodpecker about events via webhooks. If you want your pipeline to only run on specific webhooks, you can check them with this setting.
 
 ## Project settings
 
@@ -21,6 +21,12 @@ Every build initiated by a user (not including the project owner) needs to be ap
 ### Trusted
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
+
+:::note
+
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
+
+:::
 
 ## Project visibility
 
@@ -34,3 +40,6 @@ You can change the visibility of your project by this setting. If a user has acc
 
 After this timeout a pipeline has to finish or will be treated as timed out.
 
+## Cancel previous pipelines
+
+By enabling this option for a pipeline event previous pipelines of the same event and context will be canceled before starting the newly triggered one.

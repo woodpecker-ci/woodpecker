@@ -3,17 +3,13 @@ package rpc
 import (
 	"context"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
-
-// ErrCancelled signals the pipeine is cancelled.
-// var ErrCancelled = errors.New("cancelled")
 
 type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
 		Labels map[string]string `json:"labels"`
-		Expr   string            `json:"expr"`
 	}
 
 	// State defines the pipeline state.
@@ -44,9 +40,6 @@ type (
 		Meta map[string]string `json:"meta"`
 	}
 )
-
-// NoFilter is an empty filter.
-var NoFilter = Filter{}
 
 // Peer defines a peer-to-peer connection.
 type Peer interface {

@@ -20,10 +20,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
-
 	"golang.org/x/oauth2"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
 )
 
 const (
@@ -32,18 +32,9 @@ const (
 	statusFailure = "FAILED"
 )
 
-const (
-	descPending  = "this build is pending"
-	descSuccess  = "the build was successful"
-	descFailure  = "the build failed"
-	descBlocked  = "the build requires approval"
-	descDeclined = "the build was rejected"
-	descError    = "oops, something went wrong"
-)
-
-// convertStatus is a helper function used to convert a Drone status to a
+// convertStatus is a helper function used to convert a Woodpecker status to a
 // Bitbucket commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning, model.StatusBlocked:
 		return statusPending
@@ -54,40 +45,21 @@ func convertStatus(status string) string {
 	}
 }
 
-// convertDesc is a helper function used to convert a Drone status to a
-// Bitbucket status description.
-func convertDesc(status string) string {
-	switch status {
-	case model.StatusPending, model.StatusRunning:
-		return descPending
-	case model.StatusSuccess:
-		return descSuccess
-	case model.StatusFailure:
-		return descFailure
-	case model.StatusBlocked:
-		return descBlocked
-	case model.StatusDeclined:
-		return descDeclined
-	default:
-		return descError
-	}
-}
-
 // convertRepo is a helper function used to convert a Bitbucket repository
-// structure to the common Drone repository structure.
+// structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		Clone:     cloneLink(from),
-		Owner:     strings.Split(from.FullName, "/")[0],
-		Name:      strings.Split(from.FullName, "/")[1],
-		FullName:  from.FullName,
-		Link:      from.Links.Html.Href,
-		IsPrivate: from.IsPrivate,
-		Avatar:    from.Owner.Links.Avatar.Href,
-		Kind:      from.Scm,
-		Branch:    "master",
+		Clone:        cloneLink(from),
+		Owner:        strings.Split(from.FullName, "/")[0],
+		Name:         strings.Split(from.FullName, "/")[1],
+		FullName:     from.FullName,
+		Link:         from.Links.HTML.Href,
+		IsSCMPrivate: from.IsPrivate,
+		Avatar:       from.Owner.Links.Avatar.Href,
+		SCMKind:      model.SCMKind(from.Scm),
+		Branch:       "master",
 	}
-	if repo.Kind == model.RepoHg {
+	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
 	}
 	return &repo
@@ -110,7 +82,7 @@ func cloneLink(repo *internal.Repo) string {
 	// if no repository name is provided, we use the Html link. this excludes the
 	// .git suffix, but will still clone the repo.
 	if len(clone) == 0 {
-		clone = repo.Links.Html.Href
+		clone = repo.Links.HTML.Href
 	}
 
 	// if bitbucket tries to automatically populate the user in the url we must
@@ -125,7 +97,7 @@ func cloneLink(repo *internal.Repo) string {
 }
 
 // convertUser is a helper function used to convert a Bitbucket user account
-// structure to the Drone User structure.
+// structure to the Woodpecker User structure.
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
 		Login:  from.Login,
@@ -137,7 +109,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 }
 
 // convertTeamList is a helper function used to convert a Bitbucket team list
-// structure to the Drone Team structure.
+// structure to the Woodpecker Team structure.
 func convertTeamList(from []*internal.Account) []*model.Team {
 	var teams []*model.Team
 	for _, team := range from {
@@ -147,7 +119,7 @@ func convertTeamList(from []*internal.Account) []*model.Team {
 }
 
 // convertTeam is a helper function used to convert a Bitbucket team account
-// structure to the Drone Team structure.
+// structure to the Woodpecker Team structure.
 func convertTeam(from *internal.Account) *model.Team {
 	return &model.Team{
 		Login:  from.Login,
@@ -156,7 +128,7 @@ func convertTeam(from *internal.Account) *model.Team {
 }
 
 // convertPullHook is a helper function used to convert a Bitbucket pull request
-// hook to the Drone build struct holding commit information.
+// hook to the Woodpecker build struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Build {
 	return &model.Build{
 		Event:  model.EventPull,
@@ -167,7 +139,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 			from.PullRequest.Dest.Branch.Name,
 		),
 		Remote:    fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		Link:      from.PullRequest.Links.Html.Href,
+		Link:      from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -178,11 +150,11 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
-// hook to the Drone build struct holding commit information.
+// hook to the Woodpecker build struct holding commit information.
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
 	build := &model.Build{
 		Commit:    change.New.Target.Hash,
-		Link:      change.New.Target.Links.Html.Href,
+		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,

@@ -1,9 +1,7 @@
 package docker
 
 // import (
-// 	"context"
-//
-// 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+
 // )
 //
 // // Pool manages a pool of Docker clients.
@@ -22,15 +20,15 @@ package docker
 // func (p *Pool) Reserve(c context.Context) backend.Engine {
 // 	select {
 // 	case <-c.Done():
-// 	case engine := <-p.queue:
-// 		return engine
+// 	case docker := <-p.queue:
+// 		return docker
 // 	}
 // 	return nil
 // }
 //
 // // Release releases the Docker client back to the pool.
-// func (p *Pool) Release(engine backend.Engine) {
-// 	p.queue <- engine
+// func (p *Pool) Release(docker backend.Engine) {
+// 	p.queue <- docker
 // }
 
 // pool := docker.Pool(

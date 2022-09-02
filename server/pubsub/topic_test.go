@@ -10,7 +10,7 @@ func TestTopicSubscribe(t *testing.T) {
 	top := newTopic("foo")
 	top.subscribe(sub)
 	if _, ok := top.subs[sub]; !ok {
-		t.Errorf("Exepect subscription registered with topic on subscribe")
+		t.Errorf("Expect subscription registered with topic on subscribe")
 	}
 }
 
@@ -19,11 +19,11 @@ func TestTopicUnsubscribe(t *testing.T) {
 	top := newTopic("foo")
 	top.subscribe(sub)
 	if _, ok := top.subs[sub]; !ok {
-		t.Errorf("Exepect subscription registered with topic on subscribe")
+		t.Errorf("Expect subscription registered with topic on subscribe")
 	}
 	top.unsubscribe(sub)
 	if _, ok := top.subs[sub]; ok {
-		t.Errorf("Exepect subscription de-registered with topic on unsubscribe")
+		t.Errorf("Expect subscription de-registered with topic on unsubscribe")
 	}
 }
 

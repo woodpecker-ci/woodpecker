@@ -21,6 +21,8 @@ pipeline:
   publish:
     image: plugins/docker
     repo: foo/bar
+    settings:
+      foo: bar
 services:
   redis:
     image: redis

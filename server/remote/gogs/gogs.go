@@ -15,6 +15,7 @@
 package gogs
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -23,8 +24,10 @@ import (
 	"strings"
 
 	"github.com/gogits/go-gogs-client"
-	"github.com/woodpecker-ci/woodpecker/model"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Opts defines configuration options.
@@ -38,7 +41,6 @@ type Opts struct {
 
 type client struct {
 	URL         string
-	Machine     string
 	Username    string
 	Password    string
 	PrivateMode bool
@@ -58,7 +60,6 @@ func New(opts Opts) (remote.Remote, error) {
 	}
 	return &client{
 		URL:         opts.URL,
-		Machine:     u.Host,
 		Username:    opts.Username,
 		Password:    opts.Password,
 		PrivateMode: opts.PrivateMode,
@@ -68,7 +69,7 @@ func New(opts Opts) (remote.Remote, error) {
 
 // Login authenticates an account with Gogs using basic authentication. The
 // Gogs account details are returned when the user is successfully authenticated.
-func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	var (
 		username = req.FormValue("username")
 		password = req.FormValue("password")
@@ -82,24 +83,24 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 
 	client := c.newClient()
 
-	// try to fetch drone token if it exists
+	// try to fetch woodpecker token if it exists
 	var accessToken string
 	tokens, err := client.ListAccessTokens(username, password)
 	if err == nil {
 		for _, token := range tokens {
-			if token.Name == "drone" {
+			if token.Name == "woodpecker" {
 				accessToken = token.Sha1
 				break
 			}
 		}
 	}
 
-	// if drone token not found, create it
+	// if woodpecker token not found, create it
 	if accessToken == "" {
 		token, terr := client.CreateAccessToken(
 			username,
 			password,
-			gogs.CreateAccessTokenOption{Name: "drone"},
+			gogs.CreateAccessTokenOption{Name: "woodpecker"},
 		)
 		if terr != nil {
 			return nil, terr
@@ -122,12 +123,12 @@ func (c *client) Login(res http.ResponseWriter, req *http.Request) (*model.User,
 }
 
 // Auth is not supported by the Gogs driver.
-func (c *client) Auth(token, secret string) (string, error) {
+func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
 
 // Teams is not supported by the Gogs driver.
-func (c *client) Teams(u *model.User) ([]*model.Team, error) {
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	client := c.newClientToken(u.Token)
 	orgs, err := client.ListMyOrgs()
 	if err != nil {
@@ -142,7 +143,7 @@ func (c *client) Teams(u *model.User) ([]*model.Team, error) {
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
@@ -153,7 +154,7 @@ func (c *client) Repo(u *model.User, owner, name string) (*model.Repo, error) {
 
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
-func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	repos := []*model.Repo{}
 
 	client := c.newClientToken(u.Token)
@@ -169,9 +170,9 @@ func (c *client) Repos(u *model.User) ([]*model.Repo, error) {
 }
 
 // Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
+func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(owner, name)
+	repo, err := client.GetRepo(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +180,7 @@ func (c *client) Perm(u *model.User, owner, name string) (*model.Perm, error) {
 }
 
 // File fetches the file from the Gogs repository and returns its contents.
-func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)
 	ref := b.Commit
 
@@ -202,12 +203,12 @@ func (c *client) File(u *model.User, r *model.Repo, b *model.Build, f string) ([
 	return cfg, err
 }
 
-func (c *client) Dir(u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
 	return nil
 }
 
@@ -215,23 +216,28 @@ func (c *client) Status(u *model.User, r *model.Repo, b *model.Build, link strin
 // cloning Gogs repositories. The netrc will use the global machine account
 // when configured.
 func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
 // Activate activates the repository by registering post-commit hooks with
 // the Gogs repository.
-func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
+func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
 		"secret":       r.Hash,
@@ -250,13 +256,32 @@ func (c *client) Activate(u *model.User, r *model.Repo, link string) error {
 }
 
 // Deactivate is not supported by the Gogs driver.
-func (c *client) Deactivate(u *model.User, r *model.Repo, link string) error {
+func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	return nil
+}
+
+// Branches returns the names of all branches for the named repository.
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(token)
+	gogsBranches, err := client.ListRepoBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range gogsBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r)
 }
 

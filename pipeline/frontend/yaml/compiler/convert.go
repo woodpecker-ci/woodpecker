@@ -5,7 +5,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/rs/zerolog/log"
+
+	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
@@ -14,18 +16,18 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		detached   bool
 		workingdir string
 
-		workspace    = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
-		privileged   = container.Privileged
-		entrypoint   = container.Entrypoint
-		command      = container.Command
-		image        = expandImage(container.Image)
-		network_mode = container.NetworkMode
-		ipc_mode     = container.IpcMode
+		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
+		privileged  = container.Privileged
+		entrypoint  = container.Entrypoint
+		command     = container.Command
+		image       = expandImage(container.Image)
+		networkMode = container.NetworkMode
+		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
 	networks := []backend.Conn{
-		backend.Conn{
+		{
 			Name:    fmt.Sprintf("%s_default", c.prefix),
 			Aliases: []string{container.Name},
 		},
@@ -60,23 +62,23 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	// TODO: This is here for backward compatibility and will eventually be removed.
-	environment["DRONE_WORKSPACE"] = path.Join(c.base, c.path)
 
 	if section == "services" || container.Detached {
 		detached = true
 	}
 
-	if detached == false || len(container.Commands) != 0 {
+	if !detached || len(container.Commands) != 0 {
 		workingdir = path.Join(c.base, c.path)
 	}
 
-	if detached == false {
-		paramsToEnv(container.Vargs, environment)
+	if !detached {
+		if err := paramsToEnv(container.Settings, environment, c.secrets); err != nil {
+			log.Error().Err(err).Msg("paramsToEnv")
+		}
 	}
 
 	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Arch == "windows/amd64" {
+		if c.metadata.Sys.Platform == "windows/amd64" {
 			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
 			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
@@ -174,7 +176,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		OnFailure: (len(container.Constraints.Status.Include)+
 			len(container.Constraints.Status.Exclude) != 0) &&
 			container.Constraints.Status.Match("failure"),
-		NetworkMode: network_mode,
-		IpcMode:     ipc_mode,
+		NetworkMode: networkMode,
+		IpcMode:     ipcMode,
 	}
 }

@@ -1,7 +1,7 @@
 # Setup
 
 A Woodpecker deployment consists of two parts:
-- A server which is the heard of Woodpecker and ships the webinterface.
+- A server which is the heart of Woodpecker and ships the webinterface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
 > Each agent is able to process one pipeline step by default.
@@ -12,9 +12,9 @@ A Woodpecker deployment consists of two parts:
 
 ## Installation
 
-You can install Woodpecker [images](/docs/downloads#docker-images) on multiple ways:
-- Using [docker-compose](https://docs.docker.com/compose/)
-- By deploying to a [Kubernetes](/docs/administration/kubernetes) with manifests or a Helm charts
+You can install Woodpecker on multiple ways:
+- Using [docker-compose](/docs/administration/setup#docker-compose) with the official [container images](/docs/downloads#docker-images)
+- By deploying to a [Kubernetes](/docs/administration/kubernetes) with manifests or Woodpeckers official Helm charts
 - Using [binaries](/docs/downloads)
 
 ### docker-compose
@@ -33,14 +33,14 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - woodpecker-server-data:/var/lib/drone/
+      - woodpecker-server-data:/var/lib/woodpecker/
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_HOST=${WOODPECKER_HOST}
       - WOODPECKER_GITHUB=true
       - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
       - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
@@ -52,7 +52,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
 volumes:
   woodpecker-server-data:
@@ -61,27 +61,27 @@ volumes:
 Woodpecker needs to know its own address. You must therefore provide the public address of it in `<scheme>://<hostname>` format. Please omit trailing slashes:
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
+      - [...]
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
+  [...]
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:latest
-    command: agent
-    restart: always
-    depends_on: [ woodpecker-server ]
+    [...]
 +   volumes:
 +     - /var/run/docker.sock:/var/run/docker.sock
 ```
@@ -89,45 +89,40 @@ services:
 Agents require the server address for agent-to-server communication:
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:latest
-    command: agent
-    restart: always
-    depends_on: [ woodpecker-server ]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    [...]
     environment:
 +     - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
 ```
 
 The server and agents use a shared secret to authenticate communication. This should be a random string of your choosing and should be kept private. You can generate such string with `openssl rand -hex 32`:
 
 ```diff
+# docker-compose.yml
+version: '3'
+
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    [...]
     environment:
-      - WOODPECKER_OPEN=true
-      - WOODPECKER_HOST=${WOODPECKER_HOST}
-      - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-+     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - [...]
++     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:latest
+    [...]
     environment:
-      - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_DEBUG=true
-+     - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - [...]
++     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
 ## Authentication
 
-Authentication is done using OAuth and is delegated to one of multiple version control providers, configured using environment variables. The example above demonstrates basic GitHub integration.
+Authentication is done using OAuth and is delegated to your forge which is configured by using environment variables. The example above demonstrates basic GitHub integration.
 
-See the complete reference for all supported version control systems [here](/docs/administration/vcs/overview).
+See the complete reference for all supported forges [here](/docs/administration/forges/overview).
 
 ## Database
 

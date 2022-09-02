@@ -16,50 +16,76 @@ package gitlab
 
 import (
 	"bytes"
+	"context"
 	"net/http"
+	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/woodpecker-ci/woodpecker/model"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab/testdata"
 )
 
+func load(t *testing.T, config string) *Gitlab {
+	_url, err := url.Parse(config)
+	if err != nil {
+		t.FailNow()
+	}
+	params := _url.Query()
+	_url.RawQuery = ""
+
+	gitlab := Gitlab{}
+	gitlab.URL = _url.String()
+	gitlab.ClientID = params.Get("client_id")
+	gitlab.ClientSecret = params.Get("client_secret")
+	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
+	gitlab.HideArchives, _ = strconv.ParseBool(params.Get("hide_archives"))
+
+	// this is a temp workaround
+	gitlab.Search, _ = strconv.ParseBool(params.Get("search"))
+
+	return &gitlab
+}
+
 func Test_Gitlab(t *testing.T) {
-	// setup a dummy github server
-	var server = testdata.NewServer()
+	// setup a dummy gitlab server
+	server := testdata.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	gitlab := Load(env)
+	client := load(t, env)
 
-	var user = model.User{
+	user := model.User{
 		Login: "test_user",
 		Token: "e3b0c44298fc1c149afbf4c8996fb",
 	}
 
-	var repo = model.Repo{
+	repo := model.Repo{
 		Name:  "diaspora-client",
 		Owner: "diaspora",
 	}
 
+	ctx := context.Background()
 	g := goblin.Goblin(t)
 	g.Describe("Gitlab Plugin", func() {
 		// Test projects method
 		g.Describe("AllProjects", func() {
 			g.It("Should return only non-archived projects is hidden", func() {
-				gitlab.HideArchives = true
-				_projects, err := gitlab.Repos(&user)
-
-				g.Assert(err == nil).IsTrue()
-				g.Assert(len(_projects)).Equal(1)
+				client.HideArchives = true
+				_projects, err := client.Repos(ctx, &user)
+				assert.NoError(t, err)
+				assert.Len(t, _projects, 1)
 			})
 
 			g.It("Should return all the projects", func() {
-				gitlab.HideArchives = false
-				_projects, err := gitlab.Repos(&user)
+				client.HideArchives = false
+				_projects, err := client.Repos(ctx, &user)
 
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 				g.Assert(len(_projects)).Equal(2)
 			})
 		})
@@ -67,193 +93,138 @@ func Test_Gitlab(t *testing.T) {
 		// Test repository method
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
-				_repo, err := gitlab.Repo(&user, "diaspora", "diaspora-client")
-
-				g.Assert(err == nil).IsTrue()
-				g.Assert(_repo.Name).Equal("diaspora-client")
-				g.Assert(_repo.Owner).Equal("diaspora")
-				g.Assert(_repo.IsPrivate).Equal(true)
+				_repo, err := client.Repo(ctx, &user, "diaspora", "diaspora-client")
+				assert.NoError(t, err)
+				assert.Equal(t, "diaspora-client", _repo.Name)
+				assert.Equal(t, "diaspora", _repo.Owner)
+				assert.True(t, _repo.IsSCMPrivate)
 			})
 
 			g.It("Should return error, when repo not exist", func() {
-				_, err := gitlab.Repo(&user, "not-existed", "not-existed")
-
-				g.Assert(err != nil).IsTrue()
+				_, err := client.Repo(ctx, &user, "not-existed", "not-existed")
+				assert.Error(t, err)
 			})
 		})
 
 		// Test permissions method
 		g.Describe("Perm", func() {
 			g.It("Should return repo permissions", func() {
-				perm, err := gitlab.Perm(&user, "diaspora", "diaspora-client")
-				g.Assert(err == nil).IsTrue()
-				g.Assert(perm.Admin).Equal(true)
-				g.Assert(perm.Pull).Equal(true)
-				g.Assert(perm.Push).Equal(true)
+				perm, err := client.Perm(ctx, &user, &repo)
+				assert.NoError(t, err)
+				assert.True(t, perm.Admin)
+				assert.True(t, perm.Pull)
+				assert.True(t, perm.Push)
 			})
 			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := gitlab.Perm(&user, "brightbox", "puppet")
-				g.Assert(err == nil).IsTrue()
+				perm, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "brightbox",
+					Name:  "puppet",
+				})
+				assert.NoError(t, err)
 				g.Assert(perm.Admin).Equal(true)
 				g.Assert(perm.Pull).Equal(true)
 				g.Assert(perm.Push).Equal(true)
 			})
 			g.It("Should return error, when repo is not exist", func() {
-				_, err := gitlab.Perm(&user, "not-existed", "not-existed")
+				_, err := client.Perm(ctx, &user, &model.Repo{
+					Owner: "not-existed",
+					Name:  "not-existed",
+				})
 
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		// Test activate method
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
-
-				g.Assert(err == nil).IsTrue()
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				assert.NoError(t, err)
 			})
 
 			g.It("Should be failed, when token not given", func() {
-				err := gitlab.Activate(&user, &repo, "http://example.com/api/hook/test/test")
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test")
 
-				g.Assert(err != nil).IsTrue()
+				g.Assert(err).IsNotNil()
 			})
 		})
 
 		// Test deactivate method
 		g.Describe("Deactivate", func() {
 			g.It("Should be success", func() {
-				err := gitlab.Deactivate(&user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Deactivate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
 
-				g.Assert(err == nil).IsTrue()
+				g.Assert(err).IsNil()
 			})
 		})
-
-		// Test login method
-		// g.Describe("Login", func() {
-		// 	g.It("Should return user", func() {
-		// 		user, err := gitlab.Login("valid_token", "")
-
-		// 		g.Assert(err == nil).IsTrue()
-		// 		g.Assert(user == nil).IsFalse()
-		// 	})
-
-		// 	g.It("Should return error, when token is invalid", func() {
-		// 		_, err := gitlab.Login("invalid_token", "")
-
-		// 		g.Assert(err != nil).IsTrue()
-		// 	})
-		// })
 
 		// Test hook method
 		g.Describe("Hook", func() {
 			g.Describe("Push hook", func() {
-				g.It("Should parse actual push hoook", func() {
+				g.It("Should parse actual push hook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.PushHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.ServiceHookPushBody),
 					)
+					req.Header = testdata.ServiceHookHeaders
 
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("mike")
-					g.Assert(repo.Name).Equal("diaspora")
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(build.Ref).Equal("refs/heads/master")
-
-				})
-
-				g.It("Should parse legacy push hoook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyPushHook),
-					)
-
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
-					g.Assert(repo.Avatar).Equal("")
-					g.Assert(repo.Branch).Equal("master")
-					g.Assert(build.Ref).Equal("refs/heads/master")
-
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, build.Event, model.EventPush)
+						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "develop", hookRepo.Branch)
+						assert.Equal(t, "refs/heads/master", build.Ref)
+						assert.Equal(t, []string{"cmd/cli/main.go"}, build.ChangedFiles)
+					}
 				})
 			})
 
 			g.Describe("Tag push hook", func() {
 				g.It("Should parse tag push hook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.TagHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.ServiceHookTagPushBody),
 					)
+					req.Header = testdata.ServiceHookHeaders
 
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("jsmith")
-					g.Assert(repo.Name).Equal("example")
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
-
-				})
-
-				g.It("Should parse legacy tag push hook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyTagHook),
-					)
-
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
-					g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
-
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "test", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "develop", hookRepo.Branch)
+						assert.Equal(t, "refs/tags/v22", build.Ref)
+						assert.Len(t, build.ChangedFiles, 0)
+					}
 				})
 			})
 
 			g.Describe("Merge request hook", func() {
 				g.It("Should parse merge request hook", func() {
 					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.MergeRequestHook),
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.WebhookMergeRequestBody),
 					)
+					req.Header = testdata.ServiceHookHeaders
 
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Avatar).Equal("http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg")
-					g.Assert(repo.Branch).Equal("develop")
-					g.Assert(repo.Owner).Equal("awesome_space")
-					g.Assert(repo.Name).Equal("awesome_project")
-
-					g.Assert(build.Title).Equal("MS-Viewport")
-				})
-
-				g.It("Should parse legacy merge request hook", func() {
-					req, _ := http.NewRequest(
-						"POST",
-						"http://example.com/api/hook?owner=diaspora&name=diaspora-client",
-						bytes.NewReader(testdata.LegacyMergeRequestHook),
-					)
-
-					repo, build, err := gitlab.Hook(req)
-
-					g.Assert(err == nil).IsTrue()
-					g.Assert(repo.Owner).Equal("diaspora")
-					g.Assert(repo.Name).Equal("diaspora-client")
-
-					g.Assert(build.Title).Equal("MS-Viewport")
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten", hookRepo.Owner)
+						assert.Equal(t, "woodpecker", hookRepo.Name)
+						assert.Equal(t, "Update client.go 🎉", build.Title)
+						assert.Len(t, build.ChangedFiles, 0) // see L217
+					}
 				})
 			})
 		})

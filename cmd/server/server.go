@@ -28,6 +28,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
@@ -38,7 +44,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/sender"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
@@ -46,59 +53,82 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/caddyserver/certmagic"
-	"github.com/gin-gonic/contrib/ginrus"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	oldcontext "golang.org/x/net/context"
+	"github.com/woodpecker-ci/woodpecker/server/web"
 )
 
-func loop(c *cli.Context) error {
-
-	// debug level if requested by user
-	if c.Bool("debug") {
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		logrus.SetLevel(logrus.WarnLevel)
+func run(c *cli.Context) error {
+	if c.Bool("pretty") {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{
+				Out:     os.Stderr,
+				NoColor: c.Bool("nocolor"),
+			},
+		)
 	}
 
-	// must configure the drone_host variable
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	if c.IsSet("log-level") {
+		logLevelFlag := c.String("log-level")
+		lvl, err := zerolog.ParseLevel(logLevelFlag)
+		if err != nil {
+			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
+		}
+		zerolog.SetGlobalLevel(lvl)
+	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+
 	if c.String("server-host") == "" {
-		logrus.Fatalln("DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST is not properly configured")
+		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must be <scheme>://<hostname> format",
+		log.Fatal().Msg(
+			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
-		logrus.Warningln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST should probably be publicly accessible (not localhost)",
+		log.Warn().Msg(
+			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
 		)
 	}
 
 	if strings.HasSuffix(c.String("server-host"), "/") {
-		logrus.Fatalln(
-			"DRONE_HOST/DRONE_SERVER_HOST/WOODPECKER_HOST/WOODPECKER_SERVER_HOST must not have trailing slash",
+		log.Fatal().Msg(
+			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
-	remote_, err := SetupRemote(c)
+	_remote, err := setupRemote(c)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal().Err(err).Msg("")
 	}
 
-	store_ := setupStore(c)
-	setupEvilGlobals(c, store_, remote_)
+	_store, err := setupStore(c)
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+	defer func() {
+		if err := _store.Close(); err != nil {
+			log.Error().Err(err).Msg("could not close store")
+		}
+	}()
+
+	setupEvilGlobals(c, _store, _remote)
 
 	proxyWebUI := c.String("www-proxy")
 
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		// we are switching from gin to httpservermux|treemux,
-		webUIServe = setupTree(c).ServeHTTP
+		webUIServe = web.New().ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -116,52 +146,50 @@ func loop(c *cli.Context) error {
 	// setup the server and start the listener
 	handler := router.Load(
 		webUIServe,
-		ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true),
+		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
-		middleware.Store(c, store_),
-		middleware.Remote(remote_),
+		middleware.Store(c, _store),
 	)
 
 	var g errgroup.Group
 
 	// start the grpc server
 	g.Go(func() error {
-
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
-		auther := &authorizer{
+		authorizer := &authorizer{
 			password: c.String("agent-secret"),
 		}
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(auther.streamInterceptor),
-			grpc.UnaryInterceptor(auther.unaryIntercaptor),
+			grpc.StreamInterceptor(authorizer.streamInterceptor),
+			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
-		droneServer := woodpeckerGrpcServer.NewDroneServer(
-			remote_,
+		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
+			_remote,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
-			store_,
+			_store,
 			server.Config.Server.Host,
 		)
-		proto.RegisterDroneServer(grpcServer, droneServer)
+		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			logrus.Error(err)
+			log.Err(err).Msg("")
 			return err
 		}
 		return nil
 	})
 
-	setupMetrics(&g, store_)
+	setupMetrics(&g, _store)
 
 	// start http => https redirect if https is active
 	if len(c.String("server-cert")) != 0 || c.Bool("lets-encrypt") {
@@ -177,7 +205,7 @@ func loop(c *cli.Context) error {
 				Addr:    ":https",
 				Handler: handler,
 				TLSConfig: &tls.Config{
-					NextProtos: []string{"http/1.1"}, // disable h2 because Safari :(
+					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
 			return serve.ListenAndServeTLS(
@@ -189,10 +217,33 @@ func loop(c *cli.Context) error {
 	}
 
 	// start the server with lets encrypt enabled
-	if c.Bool("lets-encrypt") {
-		address, err := url.Parse(c.String("server-host"))
-		if err != nil {
-			return err
+	// listen on ports 443 and 80
+	address, err := url.Parse(c.String("server-host"))
+	if err != nil {
+		return err
+	}
+
+	dir := cacheDir()
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+
+	manager := &autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist(address.Host),
+		Cache:      autocert.DirCache(dir),
+	}
+	g.Go(func() error {
+		return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
+	})
+	g.Go(func() error {
+		serve := &http.Server{
+			Addr:    ":https",
+			Handler: handler,
+			TLSConfig: &tls.Config{
+				GetCertificate: manager.GetCertificate,
+				NextProtos:     []string{"h2", "http/1.1"},
+			},
 		}
 
 		email := c.String("lets-encrypt-email")
@@ -207,7 +258,7 @@ func loop(c *cli.Context) error {
 			return certmagic.HTTPS([]string{address.Host}, handler)
 		})
 		return g.Wait()
-	}
+	})
 
 	// start the server without tls enabled
 	return http.ListenAndServe(
@@ -217,24 +268,42 @@ func loop(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
-
 	// storage
 	server.Config.Storage.Files = v
-	server.Config.Storage.Config = v
+
+	// remote
+	server.Config.Services.Remote = r
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Pubsub.Create(context.Background(), "topic/events")
+	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
+		log.Error().Err(err).Msg("could not create pubsub service")
+	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
-	server.Config.Services.Senders = sender.New(v, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 
-	if endpoint := c.String("gating-service"); endpoint != "" {
-		server.Config.Services.Senders = sender.NewRemote(endpoint)
+	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
+
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
 	}
+
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+
+	// Execution
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
@@ -249,8 +318,15 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.Pass = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-dev-oauth-host") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	} else {
+		server.Config.Server.OAuthHost = c.String("server-host")
+	}
 	server.Config.Server.Port = c.String("server-addr")
-	server.Config.Server.RepoConfig = c.String("repo-config")
+	server.Config.Server.Docs = c.String("docs")
+	server.Config.Server.StatusContext = c.String("status-context")
+	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
@@ -258,6 +334,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// TODO(485) temporary workaround to not hit api rate limits
+	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }
 
 type authorizer struct {
@@ -271,7 +350,7 @@ func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, stream)
 }
 
-func (a *authorizer) unaryIntercaptor(ctx oldcontext.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if err := a.authorize(ctx); err != nil {
 		return nil, err
 	}

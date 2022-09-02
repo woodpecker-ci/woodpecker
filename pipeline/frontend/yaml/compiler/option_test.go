@@ -3,6 +3,7 @@ package compiler
 import (
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -91,7 +92,7 @@ func TestWithResourceLimit(t *testing.T) {
 }
 
 func TestWithPrefix(t *testing.T) {
-	if New(WithPrefix("drone_")).prefix != "drone_" {
+	if New(WithPrefix("someprefix_")).prefix != "someprefix_" {
 		t.Errorf("WithPrefix must set the prefix")
 	}
 }
@@ -111,7 +112,8 @@ func TestWithMetadata(t *testing.T) {
 	if !reflect.DeepEqual(compiler.metadata, metadata) {
 		t.Errorf("WithMetadata must set compiler the metadata")
 	}
-	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
+
+	if compiler.env["CI_REPO_NAME"] != strings.Split(metadata.Repo.Name, "/")[1] {
 		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
 	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
@@ -139,13 +141,13 @@ func TestWithNetrc(t *testing.T) {
 			"github.com",
 		),
 	)
-	if compiler.env["CI_NETRC_USERNAME"] != "octocat" {
+	if compiler.cloneEnv["CI_NETRC_USERNAME"] != "octocat" {
 		t.Errorf("WithNetrc should set CI_NETRC_USERNAME")
 	}
-	if compiler.env["CI_NETRC_PASSWORD"] != "password" {
+	if compiler.cloneEnv["CI_NETRC_PASSWORD"] != "password" {
 		t.Errorf("WithNetrc should set CI_NETRC_PASSWORD")
 	}
-	if compiler.env["CI_NETRC_MACHINE"] != "github.com" {
+	if compiler.cloneEnv["CI_NETRC_MACHINE"] != "github.com" {
 		t.Errorf("WithNetrc should set CI_NETRC_MACHINE")
 	}
 }
@@ -235,6 +237,15 @@ func TestWithVolumeCacher(t *testing.T) {
 	}
 	if got, want := cacher.base, "/cache"; got != want {
 		t.Errorf("Expected volume cacher with base %s, got %s", want, got)
+	}
+}
+
+func TestWithDefaultCloneImage(t *testing.T) {
+	compiler := New(
+		WithDefaultCloneImage("not-an-image"),
+	)
+	if compiler.defaultCloneImage != "not-an-image" {
+		t.Errorf("Expected default clone image 'not-an-image' not found")
 	}
 }
 

@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/shared"
 )
 
 // Identifies the type of line in the logs.
@@ -21,7 +25,7 @@ type Line struct {
 	Proc string `json:"proc,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omityempty"`
+	Pos  int    `json:"pos,omitempty"`
 	Out  string `json:"out,omitempty"`
 }
 
@@ -47,22 +51,14 @@ type LineWriter struct {
 
 // NewLineWriter returns a new line reader.
 func NewLineWriter(peer Peer, id, name string, secret ...string) *LineWriter {
-	w := new(LineWriter)
-	w.peer = peer
-	w.id = id
-	w.name = name
-	w.num = 0
-	w.now = time.Now().UTC()
-
-	var oldnew []string
-	for _, old := range secret {
-		oldnew = append(oldnew, old)
-		oldnew = append(oldnew, "********")
+	return &LineWriter{
+		peer:  peer,
+		id:    id,
+		name:  name,
+		now:   time.Now().UTC(),
+		rep:   shared.NewSecretsReplacer(secret),
+		lines: nil,
 	}
-	if len(oldnew) != 0 {
-		w.rep = strings.NewReplacer(oldnew...)
-	}
-	return w
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
@@ -70,6 +66,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	if w.rep != nil {
 		out = w.rep.Replace(out)
 	}
+	log.Trace().Str("name", w.name).Str("ID", w.id).Msgf("grpc write line: %s", out)
 
 	line := &Line{
 		Out:  out,
@@ -78,7 +75,9 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Time: int64(time.Since(w.now).Seconds()),
 		Type: LineStdout,
 	}
-	w.peer.Log(context.Background(), w.id, line)
+	if err := w.peer.Log(context.Background(), w.id, line); err != nil {
+		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%s'", w.id)
+	}
 	w.num++
 
 	// for _, part := range bytes.Split(p, []byte{'\n'}) {

@@ -3,16 +3,20 @@ package build
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/woodpecker-ci/woodpecker/cli/common"
+
+	"github.com/urfave/cli/v2"
 )
 
-var buildLogsCmd = cli.Command{
+var buildLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show build logs",
 	ArgsUsage: "<repo/name> [build] [job]",
 	Action:    buildLogs,
+	Flags:     common.GlobalFlags,
 }
 
 func buildLogs(c *cli.Context) error {
-	return fmt.Errorf("Command temporarily disabled. See https://github.com/drone/drone/issues/2005")
+	// TODO: add logs command
+	return fmt.Errorf("Command temporarily disabled. See https://github.com/woodpecker-ci/woodpecker/issues/383")
 }

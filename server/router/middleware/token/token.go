@@ -17,12 +17,14 @@ package token
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func Refresh(c *gin.Context) {
@@ -34,8 +36,8 @@ func Refresh(c *gin.Context) {
 
 	// check if the remote includes the ability to
 	// refresh the user token.
-	remote_ := remote.FromContext(c)
-	refresher, ok := remote_.(remote.Refresher)
+	_remote := server.Config.Services.Remote
+	refresher, ok := _remote.(remote.Refresher)
 	if !ok {
 		c.Next()
 		return
@@ -52,15 +54,17 @@ func Refresh(c *gin.Context) {
 	// attempts to refresh the access token. If the
 	// token is refreshed, we must also persist to the
 	// database.
-	ok, _ = refresher.Refresh(user)
-	if ok {
-		err := store.UpdateUser(c, user)
+	ok, err := refresher.Refresh(c, user)
+	if err != nil {
+		log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
+	} else if ok {
+		err := store.FromContext(c).UpdateUser(user)
 		if err != nil {
 			// we only log the error at this time. not sure
 			// if we really want to fail the request, do we?
-			log.Errorf("cannot refresh access token for %s. %s", user.Login, err)
+			log.Error().Msgf("cannot refresh access token for %s. %s", user.Login, err)
 		} else {
-			log.Infof("refreshed access token for %s", user.Login)
+			log.Info().Msgf("refreshed access token for %s", user.Login)
 		}
 	}
 

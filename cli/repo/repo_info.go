@@ -4,22 +4,20 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var repoInfoCmd = cli.Command{
+var repoInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show repository details",
 	ArgsUsage: "<repo/name>",
 	Action:    repoInfo,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "format",
-			Usage: "format output",
-			Value: tmplRepoInfo,
-		},
-	},
+	Flags: append(common.GlobalFlags,
+		common.FormatFlag(tmplRepoInfo),
+	),
 }
 
 func repoInfo(c *cli.Context) error {
@@ -49,10 +47,10 @@ func repoInfo(c *cli.Context) error {
 // template for repo information
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
+Type: {{ .SCMKind }}
 Config: {{ .Config }}
 Visibility: {{ .Visibility }}
-Private: {{ .IsPrivate }}
+Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
 Remote: {{ .Clone }}

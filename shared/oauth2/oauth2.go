@@ -88,7 +88,7 @@ func (f CacheFile) Token() (*Token, error) {
 }
 
 func (f CacheFile) PutToken(tok *Token) error {
-	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(string(f), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return OAuthError{"CacheFile.PutToken", err.Error()}
 	}
@@ -104,9 +104,9 @@ func (f CacheFile) PutToken(tok *Token) error {
 
 // Config is the configuration of an OAuth consumer.
 type Config struct {
-	// ClientId is the OAuth client identifier used when communicating with
+	// ClientID is the OAuth client identifier used when communicating with
 	// the configured OAuth provider.
-	ClientId string
+	ClientID string
 
 	// ClientSecret is the OAuth client secret used when communicating with
 	// the configured OAuth provider.
@@ -213,29 +213,29 @@ func (t *Transport) transport() http.RoundTripper {
 
 // AuthCodeURL returns a URL that the end-user should be redirected to,
 // so that they may obtain an authorization code.
-func (c *Config) AuthCodeURL(state string) string {
-	url_, err := url.Parse(c.AuthURL)
+func (c *Config) AuthCodeURL(state string) (string, error) {
+	_url, err := url.Parse(c.AuthURL)
 	if err != nil {
-		panic("AuthURL malformed: " + err.Error())
+		return "", fmt.Errorf("AuthURL malformed: %v", err)
 	}
-	if err := url_.Query().Get("error"); err != "" {
-		panic("AuthURL contains error: " + err)
+	if err := _url.Query().Get("error"); err != "" {
+		return "", fmt.Errorf("AuthURL contains error: %v", err)
 	}
 	q := url.Values{
 		"response_type":   {"code"},
-		"client_id":       {c.ClientId},
+		"client_id":       {c.ClientID},
 		"state":           condVal(state),
 		"scope":           condVal(c.Scope),
 		"redirect_uri":    condVal(c.RedirectURL),
 		"access_type":     condVal(c.AccessType),
 		"approval_prompt": condVal(c.ApprovalPrompt),
 	}.Encode()
-	if url_.RawQuery == "" {
-		url_.RawQuery = q
+	if _url.RawQuery == "" {
+		_url.RawQuery = q
 	} else {
-		url_.RawQuery += "&" + q
+		_url.RawQuery += "&" + q
 	}
-	return url_.String()
+	return _url.String(), nil
 }
 
 func condVal(v string) []string {
@@ -382,7 +382,7 @@ func (t *Transport) AuthenticateClient() error {
 
 // updateToken mutates both tok and v.
 func (t *Transport) updateToken(tok *Token, v url.Values) error {
-	v.Set("client_id", t.ClientId)
+	v.Set("client_id", t.ClientID)
 	v.Set("client_secret", t.ClientSecret)
 	client := &http.Client{Transport: t.transport()}
 	req, err := http.NewRequest("POST", t.TokenURL, strings.NewReader(v.Encode()))
@@ -390,7 +390,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.SetBasicAuth(t.ClientId, t.ClientSecret)
+	req.SetBasicAuth(t.ClientID, t.ClientSecret)
 	r, err := client.Do(req)
 	if err != nil {
 		return err
@@ -403,7 +403,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		Access    string `json:"access_token"`
 		Refresh   string `json:"refresh_token"`
 		ExpiresIn int64  `json:"expires_in"` // seconds
-		Id        string `json:"id_token"`
+		ID        string `json:"id_token"`
 	}
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1<<20))
@@ -422,7 +422,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		b.Access = vals.Get("access_token")
 		b.Refresh = vals.Get("refresh_token")
 		b.ExpiresIn, _ = strconv.ParseInt(vals.Get("expires_in"), 10, 64)
-		b.Id = vals.Get("id_token")
+		b.ID = vals.Get("id_token")
 	default:
 		if err = json.Unmarshal(body, &b); err != nil {
 			return fmt.Errorf("got bad response from server: %q", body)
@@ -441,11 +441,11 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 	} else {
 		tok.Expiry = time.Now().Add(time.Duration(b.ExpiresIn) * time.Second)
 	}
-	if b.Id != "" {
+	if b.ID != "" {
 		if tok.Extra == nil {
 			tok.Extra = make(map[string]string)
 		}
-		tok.Extra["id_token"] = b.Id
+		tok.Extra["id_token"] = b.ID
 	}
 	return nil
 }

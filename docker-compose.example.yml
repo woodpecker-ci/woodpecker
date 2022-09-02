@@ -9,15 +9,15 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - /var/lib/drone:/var/lib/drone/
+      - /var/lib/woodpecker:/var/lib/woodpecker/
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ADMIN=laszlocph
-      - WOODPECKER_HOST=${HOST}
+      - WOODPECKER_HOST=${WOODPECKER_HOST}
       - WOODPECKER_GITHUB=true
-      - WOODPECKER_GITHUB_CLIENT=${GITHUB_CLIENT}
-      - WOODPECKER_GITHUB_SECRET=${GITHUB_SECRET}
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+      - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
   woodpecker-agent:
     build:
       context: .
@@ -27,5 +27,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
-      - WOODPECKER_SECRET=${WOODPECKER_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
       - WOODPECKER_MAX_PROCS=2

@@ -15,12 +15,9 @@
 package github
 
 import (
-	"fmt"
-	"strings"
+	"github.com/google/go-github/v39/github"
 
-	"github.com/woodpecker-ci/woodpecker/model"
-
-	"github.com/google/go-github/github"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const defaultBranch = "master"
@@ -44,12 +41,12 @@ const (
 const (
 	headRefs  = "refs/pull/%d/head"  // pull request unmerged
 	mergeRefs = "refs/pull/%d/merge" // pull request merged with base
-	refspec   = "%s:%s"
+	refSpec   = "%s:%s"
 )
 
-// convertStatus is a helper function used to convert a Drone status to a
+// convertStatus is a helper function used to convert a Woodpecker status to a
 // GitHub commit status.
-func convertStatus(status string) string {
+func convertStatus(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped:
 		return statusPending
@@ -62,9 +59,9 @@ func convertStatus(status string) string {
 	}
 }
 
-// convertDesc is a helper function used to convert a Drone status to a
+// convertDesc is a helper function used to convert a Woodpecker status to a
 // GitHub status description.
-func convertDesc(status string) string {
+func convertDesc(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending, model.StatusRunning:
 		return descPending
@@ -82,75 +79,49 @@ func convertDesc(status string) string {
 }
 
 // convertRepo is a helper function used to convert a GitHub repository
-// structure to the common Drone repository structure.
-func convertRepo(from *github.Repository, private bool) *model.Repo {
+// structure to the common Woodpecker repository structure.
+func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
-		Owner:     *from.Owner.Login,
-		Name:      *from.Name,
-		FullName:  *from.FullName,
-		Link:      *from.HTMLURL,
-		IsPrivate: *from.Private,
-		Clone:     *from.CloneURL,
-		Avatar:    *from.Owner.AvatarURL,
-		Kind:      model.RepoGit,
-		Branch:    defaultBranch,
-		Perm:      convertPerm(from),
+		Name:         from.GetName(),
+		FullName:     from.GetFullName(),
+		Link:         from.GetHTMLURL(),
+		IsSCMPrivate: from.GetPrivate(),
+		Clone:        from.GetCloneURL(),
+		Branch:       from.GetDefaultBranch(),
+		Owner:        from.GetOwner().GetLogin(),
+		Avatar:       from.GetOwner().GetAvatarURL(),
+		Perm:         convertPerm(from.GetPermissions()),
+		SCMKind:      model.RepoGit,
 	}
-	if from.DefaultBranch != nil {
-		repo.Branch = *from.DefaultBranch
-	}
-	if private {
-		repo.IsPrivate = true
+	if len(repo.Branch) == 0 {
+		repo.Branch = defaultBranch
 	}
 	return repo
 }
 
 // convertPerm is a helper function used to convert a GitHub repository
-// permissions to the common Drone permissions structure.
-func convertPerm(from *github.Repository) *model.Perm {
+// permissions to the common Woodpecker permissions structure.
+func convertPerm(perm map[string]bool) *model.Perm {
 	return &model.Perm{
-		Admin: (*from.Permissions)["admin"],
-		Push:  (*from.Permissions)["push"],
-		Pull:  (*from.Permissions)["pull"],
-	}
-}
-
-// convertTeamPerm is a helper function used to convert a GitHub organization
-// permissions to the common Drone permissions structure.
-func convertTeamPerm(from *github.Membership) *model.Perm {
-	admin := false
-	if *from.Role == "admin" {
-		admin = true
-	}
-	return &model.Perm{
-		Admin: admin,
+		Admin: perm["admin"],
+		Push:  perm["push"],
+		Pull:  perm["pull"],
 	}
 }
 
 // convertRepoList is a helper function used to convert a GitHub repository
-// list to the common Drone repository structure.
-func convertRepoList(from []github.Repository, private bool) []*model.Repo {
+// list to the common Woodpecker repository structure.
+func convertRepoList(from []*github.Repository) []*model.Repo {
 	var repos []*model.Repo
 	for _, repo := range from {
-		repos = append(repos, convertRepo(&repo, private))
+		repos = append(repos, convertRepo(repo))
 	}
 	return repos
 }
 
-// // convertRepoLite is a helper function used to convert a GitHub repository
-// // structure to the common Drone repository structure.
-// func convertRepoLite(from github.Repository) *model.RepoLite {
-// 	return &model.RepoLite{
-// 		Owner:    *from.Owner.Login,
-// 		Name:     *from.Name,
-// 		FullName: *from.FullName,
-// 		Avatar:   *from.Owner.AvatarURL,
-// 	}
-// }
-
 // convertTeamList is a helper function used to convert a GitHub team list to
-// the common Drone repository structure.
-func convertTeamList(from []github.Organization) []*model.Team {
+// the common Woodpecker repository structure.
+func convertTeamList(from []*github.Organization) []*model.Team {
 	var teams []*model.Team
 	for _, team := range from {
 		teams = append(teams, convertTeam(team))
@@ -159,139 +130,32 @@ func convertTeamList(from []github.Organization) []*model.Team {
 }
 
 // convertTeam is a helper function used to convert a GitHub team structure
-// to the common Drone repository structure.
-func convertTeam(from github.Organization) *model.Team {
+// to the common Woodpecker repository structure.
+func convertTeam(from *github.Organization) *model.Team {
 	return &model.Team{
-		Login:  *from.Login,
-		Avatar: *from.AvatarURL,
+		Login:  from.GetLogin(),
+		Avatar: from.GetAvatarURL(),
 	}
 }
 
 // convertRepoHook is a helper function used to extract the Repository details
-// from a webhook and convert to the common Drone repository structure.
-func convertRepoHook(from *webhook) *model.Repo {
+// from a webhook and convert to the common Woodpecker repository structure.
+func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	repo := &model.Repo{
-		Owner:     from.Repo.Owner.Login,
-		Name:      from.Repo.Name,
-		FullName:  from.Repo.FullName,
-		Link:      from.Repo.HTMLURL,
-		IsPrivate: from.Repo.Private,
-		Clone:     from.Repo.CloneURL,
-		Branch:    from.Repo.DefaultBranch,
-		Kind:      model.RepoGit,
+		Owner:        eventRepo.GetOwner().GetLogin(),
+		Name:         eventRepo.GetName(),
+		FullName:     eventRepo.GetFullName(),
+		Link:         eventRepo.GetHTMLURL(),
+		IsSCMPrivate: eventRepo.GetPrivate(),
+		Clone:        eventRepo.GetCloneURL(),
+		Branch:       eventRepo.GetDefaultBranch(),
+		SCMKind:      model.RepoGit,
 	}
 	if repo.Branch == "" {
 		repo.Branch = defaultBranch
-	}
-	if repo.Owner == "" { // legacy webhooks
-		repo.Owner = from.Repo.Owner.Name
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
 	}
 	return repo
-}
-
-// convertPushHook is a helper function used to extract the Build details
-// from a push webhook and convert to the common Drone Build structure.
-func convertPushHook(from *webhook) *model.Build {
-	files := getChangedFilesFromWebhook(from)
-	build := &model.Build{
-		Event:        model.EventPush,
-		Commit:       from.Head.ID,
-		Ref:          from.Ref,
-		Link:         from.Head.URL,
-		Branch:       strings.Replace(from.Ref, "refs/heads/", "", -1),
-		Message:      from.Head.Message,
-		Email:        from.Head.Author.Email,
-		Avatar:       from.Sender.Avatar,
-		Author:       from.Sender.Login,
-		Remote:       from.Repo.CloneURL,
-		Sender:       from.Sender.Login,
-		ChangedFiles: files,
-	}
-	if len(build.Author) == 0 {
-		build.Author = from.Head.Author.Username
-	}
-	if len(build.Email) == 0 {
-		// default to gravatar?
-	}
-	if strings.HasPrefix(build.Ref, "refs/tags/") {
-		// just kidding, this is actually a tag event. Why did this come as a push
-		// event we'll never know!
-		build.Event = model.EventTag
-		// For tags, if the base_ref (tag's base branch) is set, we're using it
-		// as build's branch so that we can filter events base on it
-		if strings.HasPrefix(from.BaseRef, "refs/heads/") {
-			build.Branch = strings.Replace(from.BaseRef, "refs/heads/", "", -1)
-		}
-	}
-	return build
-}
-
-// convertPushHook is a helper function used to extract the Build details
-// from a deploy webhook and convert to the common Drone Build structure.
-func convertDeployHook(from *webhook) *model.Build {
-	build := &model.Build{
-		Event:   model.EventDeploy,
-		Commit:  from.Deployment.Sha,
-		Link:    from.Deployment.URL,
-		Message: from.Deployment.Desc,
-		Avatar:  from.Sender.Avatar,
-		Author:  from.Sender.Login,
-		Ref:     from.Deployment.Ref,
-		Branch:  from.Deployment.Ref,
-		Deploy:  from.Deployment.Env,
-		Sender:  from.Sender.Login,
-	}
-	// if the ref is a sha or short sha we need to manuallyconstruct the ref.
-	if strings.HasPrefix(build.Commit, build.Ref) || build.Commit == build.Ref {
-		build.Branch = from.Repo.DefaultBranch
-		if build.Branch == "" {
-			build.Branch = defaultBranch
-		}
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
-	}
-	// if the ref is a branch we should make sure it has refs/heads prefix
-	if !strings.HasPrefix(build.Ref, "refs/") { // branch or tag
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
-	}
-	return build
-}
-
-// convertPullHook is a helper function used to extract the Build details
-// from a pull request webhook and convert to the common Drone Build structure.
-func convertPullHook(from *webhook, merge bool) *model.Build {
-	build := &model.Build{
-		Event:   model.EventPull,
-		Commit:  from.PullRequest.Head.SHA,
-		Link:    from.PullRequest.HTMLURL,
-		Ref:     fmt.Sprintf(headRefs, from.PullRequest.Number),
-		Branch:  from.PullRequest.Base.Ref,
-		Message: from.PullRequest.Title,
-		Author:  from.PullRequest.User.Login,
-		Avatar:  from.PullRequest.User.Avatar,
-		Title:   from.PullRequest.Title,
-		Sender:  from.Sender.Login,
-		Remote:  from.PullRequest.Head.Repo.CloneURL,
-		Refspec: fmt.Sprintf(refspec,
-			from.PullRequest.Head.Ref,
-			from.PullRequest.Base.Ref,
-		),
-	}
-	if merge {
-		build.Ref = fmt.Sprintf(mergeRefs, from.PullRequest.Number)
-	}
-	return build
-}
-
-func getChangedFilesFromWebhook(from *webhook) []string {
-	var files []string
-	files = append(files, from.Head.Added...)
-	files = append(files, from.Head.Removed...)
-	files = append(files, from.Head.Modified...)
-	if len(files) == 0 {
-		files = make([]string, 0)
-	}
-	return files
 }

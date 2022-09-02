@@ -42,7 +42,7 @@ type BuildStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 	Desc  string `json:"description,omitempty"`
 }
 
@@ -218,4 +218,12 @@ type HookSettings struct {
 	HookURL17 string `json:"hook-url-17,omitempty"`
 	HookURL18 string `json:"hook-url-18,omitempty"`
 	HookURL19 string `json:"hook-url-19,omitempty"`
+}
+
+type BranchResp struct {
+	Values []*Branch `json:"values"`
+}
+
+type Branch struct {
+	Name string `json:"name"`
 }

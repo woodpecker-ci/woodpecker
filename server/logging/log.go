@@ -28,10 +28,9 @@ type stream struct {
 	sync.Mutex
 
 	path string
-	hist []*Entry
+	list []*Entry
 	subs map[*subscriber]struct{}
 	done chan struct{}
-	wait sync.WaitGroup
 }
 
 type log struct {
@@ -69,7 +68,7 @@ func (l *log) Write(c context.Context, path string, entry *Entry) error {
 		return ErrNotFound
 	}
 	s.Lock()
-	s.hist = append(s.hist, entry)
+	s.list = append(s.list, entry)
 	for sub := range s.subs {
 		go sub.handler(entry)
 	}
@@ -89,8 +88,8 @@ func (l *log) Tail(c context.Context, path string, handler Handler) error {
 		handler: handler,
 	}
 	s.Lock()
-	if len(s.hist) != 0 {
-		sub.handler(s.hist...)
+	if len(s.list) != 0 {
+		sub.handler(s.list...)
 	}
 	s.subs[sub] = struct{}{}
 	s.Unlock()
@@ -132,11 +131,15 @@ func (l *log) Snapshot(c context.Context, path string, w io.Writer) error {
 		return ErrNotFound
 	}
 	s.Lock()
-	for _, entry := range s.hist {
-		w.Write(entry.Data)
-		w.Write(cr)
+	defer s.Unlock()
+	for _, entry := range s.list {
+		if _, err := w.Write(entry.Data); err != nil {
+			return err
+		}
+		if _, err := w.Write(cr); err != nil {
+			return err
+		}
 	}
-	s.Unlock()
 	return nil
 }
 

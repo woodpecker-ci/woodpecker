@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: Drone API
+  title: Woodpecker API
   license:
     name: Creative Commons 4.0 International
     url: "http://creativecommons.org/licenses/by/4.0/"
@@ -181,7 +181,7 @@ paths:
 
 
   #
-  # Repos Param Encryption Enpoint
+  # Repos Param Encryption Endpoint
   # TODO: properly add the input output schema
 
   /repos/{owner}/{name}/encrypt:
@@ -377,7 +377,7 @@ paths:
         - accessToken: []
       responses:
         200:
-          description: Successfully cancelled the Job
+          description: Successfully canceled the Job
         404:
           description: |
             Unable to find the Repository or Job
@@ -600,7 +600,7 @@ definitions:
         description: The url for the avatar image.
         type: string
       admin:
-        description: Whether the account has administrative priviledges.
+        description: Whether the account has administrative privileges.
         type: boolean
       active:
         description: Whether the account is currently active.
