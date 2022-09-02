@@ -26,11 +26,11 @@ services:
 +     - WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` is set the certificate is requested for `foo.com`. To receive emails before certificates expire lets-encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` is set the certificate is requested for `foo.com`. To receive emails before certificates expire Let's Encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
 
-The ssl certificates are stored in `$HOME/.local/share/certmagic` for binary versions of Woodpecker and in `/var/lib/woodpecker` for the Container versions of it. You can set a custom path by setting `XDG_DATA_HOME` if required.
+The SSL certificates are stored in `$HOME/.local/share/certmagic` for binary versions of Woodpecker and in `/var/lib/woodpecker` for the Container versions of it. You can set a custom path by setting `XDG_DATA_HOME` if required.
 
-> Once enabled you can visit the Woodpecker UI with http and the https address. Http will be redirected to https.
+> Once enabled you can visit the Woodpecker UI with http and the HTTPS address. HTTP will be redirected to HTTPS.
 
 ### Certificate Cache
 
