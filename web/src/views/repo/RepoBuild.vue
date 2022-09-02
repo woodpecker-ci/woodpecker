@@ -67,8 +67,8 @@ export default defineComponent({
   },
 
   mounted() {
-    apiClient.getRepoBranches(`${this.$route.params.repoOwner}`, `${this.$route.params.repoName}`).then((b)=> {
-      this.branches = b.map((e)=>{
+    apiClient.getRepoBranches(`${this.$route.params.repoOwner}`, `${this.$route.params.repoName}`).then((b) => {
+      this.branches = b.map((e) => {
         return {
           text: e,
           value: e
@@ -103,10 +103,20 @@ export default defineComponent({
       this.loading = true
       apiClient
         .manualBuild(`${this.$route.params.repoOwner}`, `${this.$route.params.repoName}`, this.payload)
-        .finally(() => {
-          this.loading = false
-          this.$router.push({ name: 'repo' });
-        });
+        .then((build) => {
+          this.$router.push({
+            name: 'repo-build',
+            params: {
+              repoOwner: `${this.$route.params.repoOwner}`,
+              repoName: `${this.$route.params.repoName}`,
+              buildId: build.number
+            }
+          });
+        }).catch((error) => {
+        alert(JSON.stringify(error))
+      }).finally(() => {
+        this.loading = false
+      });
     }
   }
 });
