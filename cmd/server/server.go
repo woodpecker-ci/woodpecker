@@ -64,7 +64,7 @@ func run(c *cli.Context) error {
 	}
 
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -190,7 +190,7 @@ func run(c *cli.Context) error {
 		middleware.Store(c, _store),
 	)
 
-	if len(c.String("server-cert")) != 0 {
+	if c.String("server-cert") != "" {
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
@@ -245,7 +245,7 @@ func run(c *cli.Context) error {
 		})
 	}
 
-	log.Info().Msgf("Starting Woodpecker server version %s", version.String())
+	log.Info().Msgf("Starting Woodpecker server with version %s", version.String())
 
 	return g.Wait()
 }
