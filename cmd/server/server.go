@@ -198,7 +198,6 @@ func run(c *cli.Context) error {
 
 	// start http => https redirect if https is active
 	if len(c.String("server-cert")) != 0 || c.Bool("lets-encrypt") {
-		>>>>>>> upstream/master
 		g.Go(func() error {
 			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
 		})
