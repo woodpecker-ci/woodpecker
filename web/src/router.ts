@@ -54,6 +54,12 @@ const routes: RouteRecordRaw[] = [
     props: true,
     children: [
       {
+        path: 'manual',
+        name: 'manual',
+        component: (): Component => import('~/views/repo/RepoBuild.vue'),
+        meta: { repoHeader: true },
+      },
+      {
         path: '',
         name: 'repo',
         component: (): Component => import('~/views/repo/RepoBuilds.vue'),

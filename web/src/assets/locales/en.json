@@ -24,6 +24,7 @@
         "not_started": "not started yet"
     },
     "repo": {
+        "manual": "Manual build",
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",

@@ -22,12 +22,12 @@
         <Icon v-else name="repo" />
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
-      <IconButton class="ml-2" icon="status-running" @click="runManual" />
     </div>
 
     <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
       <Tab id="activity" :title="$t('repo.activity')" />
       <Tab id="branches" :title="$t('repo.branches')" />
+      <Tab id="manual" :title="$t('repo.manual')" />
     </Tabs>
 
     <router-view />
@@ -132,24 +132,11 @@ const activeTab = computed({
   set(tab: string) {
     if (tab === 'branches') {
       router.push({ name: 'repo-branches' });
+    } else if (tab === 'manual') {
+      router.push({ name: 'manual' });
     } else {
       router.push({ name: 'repo' });
     }
   },
 });
-
-const runManual = () => {
-  const apiClient = useApiClient();
-  apiClient
-    .manualBuild(`${repo.value.owner}`, `${repo.value.name}`, {
-      branch: 'main',
-      variables: {
-        VAR1: 'VAL1',
-        VAR2: 'VAL2',
-      },
-    })
-    .finally(() => {
-      alert('finally!');
-    });
-};
 </script>
