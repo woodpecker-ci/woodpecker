@@ -1,43 +1,57 @@
 <template>
-  <InputField :label="$t('manual.select_branch')">
-    <SelectField
-      v-model="this.payload.branch"
-      :options="this.branches"
-      :disabled="loading"
-      required
-    />
-  </InputField>
-  <div class="flex">
-    <InputField :label="$t('manual.variable_key')">
-      <TextField
-        v-model="this.tmpVar.key"
-        :placeholder="$t('manual.var_key')"
-        required
+  <Panel>
+    <InputField :label="$t('manual.select_branch')">
+      <SelectField
+        v-model="this.payload.branch"
+        :options="this.branches"
         :disabled="loading"
+        required
+        class="bg-transparent text-color"
       />
     </InputField>
-    <InputField :label="$t('manual.variable_value')">
-      <TextField
-        v-model="this.tmpVar.value"
-        :placeholder="$t('manual.var_value')"
-        required
-        :disabled="loading"
+    <div>
+      <InputField :label="$t('manual.variable_key')">
+        <TextField
+          v-model="this.tmpVar.key"
+          :placeholder="$t('manual.var_key')"
+          required
+          :disabled="loading"
+        />
+      </InputField>
+      <InputField :label="$t('manual.variable_value')">
+        <TextField
+          v-model="this.tmpVar.value"
+          :placeholder="$t('manual.var_value')"
+          required
+          :disabled="loading"
+        />
+      </InputField>
+      <Button
+        :is-loading="loading"
+        type="submit"
+        :text="$t('manual.add_variable')"
+        @click="addVar()"
       />
-    </InputField>
+    </div>
+    <br>
+    <div class="text-color">
+      <div v-for="(v, k) in this.payload.variables" :key="k">
+      <pre><Button
+        type="submit"
+        text="X"
+        @click="deleteVar(k)"
+        style="display: inline-block;"
+      />&nbsp;<span class="font-bold">{{ k }}</span>&#9;{{ v }}</pre>
+      </div>
+    </div>
+    <br>
     <Button
       :is-loading="loading"
       type="submit"
-      :text="$t('manual.add_variable')"
-      @click="addVar()"
+      :text="$t('manual.launch_build')"
+      @click="runManual()"
     />
-  </div>
-  <pre>{{ payload }}</pre>
-  <Button
-    :is-loading="loading"
-    type="submit"
-    :text="$t('manual.run')"
-    @click="runManual()"
-  />
+  </Panel>
 </template>
 
 <script lang="ts">
@@ -49,6 +63,7 @@ import useApiClient from '~/compositions/useApiClient';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import SelectField from "../../components/form/SelectField.vue";
+import Panel from "../../components/layout/Panel.vue";
 
 const apiClient = useApiClient();
 
@@ -56,6 +71,7 @@ export default defineComponent({
   name: 'RepoBuild',
 
   components: {
+    Panel,
     SelectField,
     IconButton,
     InputField,
@@ -84,7 +100,9 @@ export default defineComponent({
       branches: [],
       payload: {
         branch: 'main',
-        variables: {}
+        variables: {
+          MANUAL_BUILD: "true"
+        }
       },
       tmpVar: {
         key: "",
@@ -98,6 +116,10 @@ export default defineComponent({
       this.payload.variables[this.tmpVar.key] = this.tmpVar.value
       this.tmpVar.key = ''
       this.tmpVar.value = ''
+    },
+    deleteVar(key: string) {
+      console.log(key)
+      delete this.payload.variables[key]
     },
     runManual() {
       this.loading = true
