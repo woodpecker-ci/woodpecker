@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"io"
 	"net/http"
 	"strconv"
@@ -50,11 +51,12 @@ func CreateBuild(c *gin.Context) {
 
 	user, _ := _store.GetUser(repo.UserID)
 
+	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+
 	tmpBuild := &model.Build{
 		// TODO: Find why adding 'model.EventManual' leads to only clone step being executed
-		Event: model.EventPush,
-		// TODO: Find a way to fetch last commit id of branch
-		Commit:    "0000000000000000000000000000000000000000",
+		Event:     model.EventPush,
+		Commit:    lastCommit,
 		Branch:    p.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
