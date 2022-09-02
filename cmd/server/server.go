@@ -50,6 +50,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func run(c *cli.Context) error {
@@ -243,6 +244,8 @@ func run(c *cli.Context) error {
 			)
 		})
 	}
+
+	log.Info().Msgf("Starting Woodpecker server version %s", version.String())
 
 	return g.Wait()
 }
