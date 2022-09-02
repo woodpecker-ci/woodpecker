@@ -21,7 +21,7 @@ type RepoListOptions = {
 
 type ManualBuildOptions = {
   branch: string;
-  variables: object;
+  variables: Record<string, string>;
 };
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
