@@ -49,7 +49,7 @@ func CreateBuild(c *gin.Context) {
 
 	err := json.NewDecoder(c.Request.Body).Decode(&p)
 
-	user, _ := _store.GetUser(repo.UserID)
+	user := session.User(c)
 
 	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
 	vars, _ := json.Marshal(p.Variables)
