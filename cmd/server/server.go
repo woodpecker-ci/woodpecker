@@ -118,36 +118,13 @@ func run(c *cli.Context) error {
 
 	setupEvilGlobals(c, _store, _remote)
 
-	proxyWebUI := c.String("www-proxy")
-
-	var webUIServe func(w http.ResponseWriter, r *http.Request)
-
-	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
-	} else {
-		origin, _ := url.Parse(proxyWebUI)
-
-		director := func(req *http.Request) {
-			req.Header.Add("X-Forwarded-Host", req.Host)
-			req.Header.Add("X-Origin-Host", origin.Host)
-			req.URL.Scheme = origin.Scheme
-			req.URL.Host = origin.Host
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
-		webUIServe = proxy.ServeHTTP
-	}
-
-	// setup the server and start the listener
-	handler := router.Load(
-		webUIServe,
-		middleware.Logger(time.RFC3339, true),
-		middleware.Version,
-		middleware.Config(c),
-		middleware.Store(c, _store),
-	)
-
 	var g errgroup.Group
+
+	setupMetrics(&g, _store)
+
+	g.Go(func() error {
+		return cron.Start(c.Context, _store, _remote)
+	})
 
 	// start the grpc server
 	g.Go(func() error {
@@ -184,20 +161,36 @@ func run(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, _store)
+	proxyWebUI := c.String("www-proxy")
+	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
-	g.Go(func() error {
-		return cron.Start(c.Context, _store, _remote)
-	})
+	if proxyWebUI == "" {
+		webUIServe = web.New().ServeHTTP
+	} else {
+		origin, _ := url.Parse(proxyWebUI)
+
+		director := func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", origin.Host)
+			req.URL.Scheme = origin.Scheme
+			req.URL.Host = origin.Host
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		webUIServe = proxy.ServeHTTP
+	}
+
+	// setup the server and start the listener
+	handler := router.Load(
+		webUIServe,
+		middleware.Logger(time.RFC3339, true),
+		middleware.Version,
+		middleware.Config(c),
+		middleware.Store(c, _store),
+	)
 
 	if len(c.String("server-cert")) != 0 {
 		// start the server with tls enabled
-
-		// http to https redirect
-		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
-		})
-
 		g.Go(func() error {
 			serve := &http.Server{
 				Addr:    ":https",
@@ -211,6 +204,23 @@ func run(c *cli.Context) error {
 				c.String("server-key"),
 			)
 		})
+
+		// http to https redirect
+		redirect := func(w http.ResponseWriter, req *http.Request) {
+			serverHost := server.Config.Server.Host
+			serverHost = strings.TrimPrefix(serverHost, "http://")
+			serverHost = strings.TrimPrefix(serverHost, "https://")
+			req.URL.Scheme = "https"
+			req.URL.Host = serverHost
+
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
+
+			http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
+		}
+
+		g.Go(func() error {
+			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
@@ -221,9 +231,11 @@ func run(c *cli.Context) error {
 			return err
 		}
 
-		certmagic.HTTPS([]string{address.Host}, handler)
+		g.Go(func() error {
+			return certmagic.HTTPS([]string{address.Host}, handler)
+		})
 	} else {
-		// start the server without tls enabled
+		// start the server without tls
 		g.Go(func() error {
 			return http.ListenAndServe(
 				c.String("server-addr"),
@@ -334,18 +346,6 @@ func (a *authorizer) authorize(ctx context.Context) error {
 		return errors.New("invalid agent token")
 	}
 	return errors.New("missing agent token")
-}
-
-func redirect(w http.ResponseWriter, req *http.Request) {
-	serverHost := server.Config.Server.Host
-	serverHost = strings.TrimPrefix(serverHost, "http://")
-	serverHost = strings.TrimPrefix(serverHost, "https://")
-	req.URL.Scheme = "https"
-	req.URL.Host = serverHost
-
-	w.Header().Set("Strict-Transport-Security", "max-age=31536000")
-
-	http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
 }
 
 func cacheDir() string {
