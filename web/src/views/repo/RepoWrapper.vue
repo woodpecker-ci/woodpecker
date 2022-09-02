@@ -23,13 +23,18 @@
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
+    <div class="flex flex-wrap gap-y-2 items-center justify-between">
+      <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
+        <Tab id="activity" :title="$t('repo.activity')" />
+        <Tab id="branches" :title="$t('repo.branches')" />
+      </Tabs>
 
-    <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab id="activity" :title="$t('repo.activity')" />
-      <Tab id="branches" :title="$t('repo.branches')" />
-      <Tab id="manual" :title="$t('repo.manual')" />
-    </Tabs>
-
+      <div class="flex justify-between text-color flex-shrink-0 md:p-0 mx-auto md:mr-0">
+        <div class="flex items-center flex-shrink-0">
+          <Button type="submit" :text="$t('manual.launch_build')" @click="router.push({ name: 'manual' })" />
+        </div>
+      </div>
+    </div>
     <router-view />
   </FluidContainer>
   <router-view v-else-if="repo && repoPermissions" />
@@ -132,8 +137,6 @@ const activeTab = computed({
   set(tab: string) {
     if (tab === 'branches') {
       router.push({ name: 'repo-branches' });
-    } else if (tab === 'manual') {
-      router.push({ name: 'manual' });
     } else {
       router.push({ name: 'repo' });
     }
