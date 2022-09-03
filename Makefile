@@ -35,7 +35,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   $(eval $(MAKE_ARGS):;@:)
 
   in_docker:
-	@[ "1" == "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
 	@echo run in docker:
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
