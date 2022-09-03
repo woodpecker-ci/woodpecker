@@ -71,10 +71,6 @@ func loop(c *cli.Context) error {
 	}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	}
-
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -82,6 +78,9 @@ func loop(c *cli.Context) error {
 			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
 		}
 		zerolog.SetGlobalLevel(lvl)
+	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
 	}
 
 	counter.Polling = c.Int("max-procs")
