@@ -54,8 +54,8 @@ pipeline:
     group: test
     image: aquasec/trivy:latest
     commands:
-      - trivy fs --exit-code 0 --skip-dirs web/ --severity UNKNOWN,LOW .
-      - trivy fs --exit-code 1 --skip-dirs web/ --severity MEDIUM,HIGH,CRITICAL .
+      - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
+      - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
     when:
       path: *when_path
 
