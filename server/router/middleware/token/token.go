@@ -64,7 +64,7 @@ func Refresh(c *gin.Context) {
 			// if we really want to fail the request, do we?
 			log.Error().Msgf("cannot refresh access token for %s. %s", user.Login, err)
 		} else {
-			log.Info().Msgf("refreshed access token for %s", user.Login)
+			log.Debug().Msgf("refreshed access token for %s", user.Login)
 		}
 	}
 
