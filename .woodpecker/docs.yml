@@ -1,5 +1,5 @@
 variables:
-  - &node_image 'node:14-alpine'
+  - &node_image 'node:16-alpine'
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
