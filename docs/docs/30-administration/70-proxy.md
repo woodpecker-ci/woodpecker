@@ -116,7 +116,7 @@ version: '3.8'
 
 services:
   server:
-    image: woodpeckerci/woodpecker-server:v0.15.3
+    image: woodpeckerci/woodpecker-server:latest
     environment:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ADMIN=your_admin_user
@@ -144,9 +144,9 @@ services:
         - traefik.http.routers.woodpecker.entrypoints=web
         - traefik.http.routers.woodpecker.service=woodpecker-service
 
-        - "traefik.http.middlewares.woodpecker-redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.woodpecker-redirect.redirectscheme.permanent=true"
-        - "traefik.http.routers.woodpecker.middlewares=woodpecker-redirect@docker"
+        - traefik.http.middlewares.woodpecker-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.woodpecker-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.woodpecker.middlewares=woodpecker-redirect@docker
     
         #  gRPC service 
         - traefik.http.services.woodpecker-grpc.loadbalancer.server.port=9000
@@ -162,9 +162,9 @@ services:
         - traefik.http.routers.woodpecker-grpc.entrypoints=web
         - traefik.http.routers.woodpecker-grpc.service=woodpecker-grpc
 
-        - "traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true"
-        - "traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker"
+        - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker
     
   
 volumes:
