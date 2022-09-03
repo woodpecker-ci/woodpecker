@@ -118,7 +118,7 @@ pipeline:
 
 services:
   service-postgres:
-    image: postgres:11
+    image: postgres:14
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
