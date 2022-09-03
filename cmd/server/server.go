@@ -50,6 +50,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func run(c *cli.Context) error {
@@ -63,7 +64,7 @@ func run(c *cli.Context) error {
 	}
 
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -118,36 +119,13 @@ func run(c *cli.Context) error {
 
 	setupEvilGlobals(c, _store, _remote)
 
-	proxyWebUI := c.String("www-proxy")
-
-	var webUIServe func(w http.ResponseWriter, r *http.Request)
-
-	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
-	} else {
-		origin, _ := url.Parse(proxyWebUI)
-
-		director := func(req *http.Request) {
-			req.Header.Add("X-Forwarded-Host", req.Host)
-			req.Header.Add("X-Origin-Host", origin.Host)
-			req.URL.Scheme = origin.Scheme
-			req.URL.Host = origin.Host
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
-		webUIServe = proxy.ServeHTTP
-	}
-
-	// setup the server and start the listener
-	handler := router.Load(
-		webUIServe,
-		middleware.Logger(time.RFC3339, true),
-		middleware.Version,
-		middleware.Config(c),
-		middleware.Store(c, _store),
-	)
-
 	var g errgroup.Group
+
+	setupMetrics(&g, _store)
+
+	g.Go(func() error {
+		return cron.Start(c.Context, _store, _remote)
+	})
 
 	// start the grpc server
 	g.Go(func() error {
@@ -184,17 +162,36 @@ func run(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, _store)
+	proxyWebUI := c.String("www-proxy")
+	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
-	g.Go(func() error {
-		return cron.Start(c.Context, _store, _remote)
-	})
+	if proxyWebUI == "" {
+		webUIServe = web.New().ServeHTTP
+	} else {
+		origin, _ := url.Parse(proxyWebUI)
 
-	// start the server with tls enabled
+		director := func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", origin.Host)
+			req.URL.Scheme = origin.Scheme
+			req.URL.Host = origin.Host
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		webUIServe = proxy.ServeHTTP
+	}
+
+	// setup the server and start the listener
+	handler := router.Load(
+		webUIServe,
+		middleware.Logger(time.RFC3339, true),
+		middleware.Version,
+		middleware.Config(c),
+		middleware.Store(c, _store),
+	)
+
 	if c.String("server-cert") != "" {
-		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
-		})
+		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
 				Addr:    ":https",
@@ -208,48 +205,55 @@ func run(c *cli.Context) error {
 				c.String("server-key"),
 			)
 		})
-		return g.Wait()
-	}
 
-	// start the server without tls enabled
-	if !c.Bool("lets-encrypt") {
-		return http.ListenAndServe(
-			c.String("server-addr"),
-			handler,
-		)
-	}
-
-	// start the server with lets encrypt enabled
-	// listen on ports 443 and 80
-	address, err := url.Parse(c.String("server-host"))
-	if err != nil {
-		return err
-	}
-
-	dir := cacheDir()
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-
-	manager := &autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(address.Host),
-		Cache:      autocert.DirCache(dir),
-	}
-	g.Go(func() error {
-		return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
-	})
-	g.Go(func() error {
-		serve := &http.Server{
-			Addr:    ":https",
-			Handler: handler,
-			TLSConfig: &tls.Config{
-				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"h2", "http/1.1"},
-			},
+		// http to https redirect
+		g.Go(func() error {
+			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+		})
+	} else if c.Bool("lets-encrypt") {
+		// start the server with lets-encrypt
+		address, err := url.Parse(c.String("server-host"))
+		if err != nil {
+			return err
 		}
-		return serve.ListenAndServeTLS("", "")
-	})
+
+		dir := cacheDir()
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return err
+		}
+
+		manager := &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(address.Host),
+			Cache:      autocert.DirCache(dir),
+		}
+		g.Go(func() error {
+			serve := &http.Server{
+				Addr:    ":https",
+				Handler: handler,
+				TLSConfig: &tls.Config{
+					GetCertificate: manager.GetCertificate,
+					NextProtos:     []string{"h2", "http/1.1"},
+				},
+			}
+			return serve.ListenAndServeTLS("", "")
+		})
+
+		// http to https redirect
+		g.Go(func() error {
+			return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
+		})
+	} else {
+		// start the server without tls
+		g.Go(func() error {
+			return http.ListenAndServe(
+				c.String("server-addr"),
+				handler,
+			)
+		})
+	}
+
+	log.Info().Msgf("Starting Woodpecker server with version '%s'", version.String())
 
 	return g.Wait()
 }
