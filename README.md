@@ -11,7 +11,7 @@
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
     <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
   </a>
-  <a href="http://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+  <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
@@ -88,6 +88,14 @@ https://woodpecker-ci.org/
 See [Contributing Guide](CONTRIBUTING.md)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#gitpod)
+
+## 📣 Translate
+
+We use a own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+
+<a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+  <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />
+</a>
 
 ## 👋 Who uses Woodpecker?
 
