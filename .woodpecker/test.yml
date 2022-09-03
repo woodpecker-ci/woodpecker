@@ -22,6 +22,7 @@ pipeline:
 
   dummy-web:
     image: *golang_image
+    pull: true
     group: prepare
     commands:
       - mkdir -p web/dist/
