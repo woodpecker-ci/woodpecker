@@ -44,7 +44,7 @@ export function isProcRunning(proc: BuildProc): boolean {
  * @returns {number}
  */
 export function compareBuilds(a: Build, b: Build): number {
-  return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
+  return (b.created_at || -1) - (a.created_at || -1);
 }
 
 export function isBuildActive(build: Build): boolean {
