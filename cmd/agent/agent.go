@@ -175,10 +175,9 @@ func loop(c *cli.Context) error {
 		}()
 	}
 
-	log.Info().
-		Msgf(
-			"Starting Woodpecker agent with version '%s' and backend '%s' running up to %d pipelines in parallel",
-			version.String(), engine.Name(), parallel)
+	log.Info().Msgf(
+		"Starting Woodpecker agent with version '%s' and backend '%s' running up to %d pipelines in parallel",
+		version.String(), engine.Name(), parallel)
 
 	wg.Wait()
 	return nil
