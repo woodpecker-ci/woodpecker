@@ -58,9 +58,9 @@ func (when *When) IsEmpty() bool {
 }
 
 // Returns true if at least one of the internal constraints is true.
-func (when *When) Match(metadata frontend.Metadata, golbal bool) bool {
+func (when *When) Match(metadata frontend.Metadata, global bool) bool {
 	for _, c := range when.Constraints {
-		if c.Match(metadata, golbal) {
+		if c.Match(metadata, global) {
 			return true
 		}
 	}
@@ -68,7 +68,7 @@ func (when *When) Match(metadata frontend.Metadata, golbal bool) bool {
 	if when.IsEmpty() {
 		// test against default Constraints
 		empty := &Constraint{}
-		return empty.Match(metadata, golbal)
+		return empty.Match(metadata, global)
 	}
 	return false
 }
@@ -126,9 +126,9 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraint) Match(metadata frontend.Metadata, golbal bool) bool {
+func (c *Constraint) Match(metadata frontend.Metadata, global bool) bool {
 	match := true
-	if !golbal {
+	if !global {
 		c.SetDefaultEventFilter()
 
 		// apply step only filters
