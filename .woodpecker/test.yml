@@ -85,7 +85,7 @@ pipeline:
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DATASOURCE=postgres://root:pgSecret@service-postgres/woodpeckerci?sslmode=disable
     commands:
       - make test-server-datastore
     when:
@@ -121,7 +121,9 @@ services:
     image: postgres:14
     ports: ["5432"]
     environment:
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=root
+      - POSTGRES_DB=woodpeckerci
+      - POSTGRES_PASSWORD=pgSecret
       - POSTGRES_HOST_AUTH_METHOD=trust
     when:
       path: *when_path
