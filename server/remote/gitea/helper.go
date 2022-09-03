@@ -84,6 +84,8 @@ func buildFromPush(hook *pushHook) *model.Build {
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	} else {
+		message = hook.HeadCommit.Message
 	}
 
 	if len(hook.Commits) == 1 {
@@ -114,6 +116,10 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 		files = append(files, c.Removed...)
 		files = append(files, c.Modified...)
 	}
+
+	files = append(files, hook.HeadCommit.Added...)
+	files = append(files, hook.HeadCommit.Removed...)
+	files = append(files, hook.HeadCommit.Modified...)
 
 	return utils.DedupStrings(files)
 }
