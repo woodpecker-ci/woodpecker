@@ -18,6 +18,7 @@ pipeline:
   securitycheck:
     image: aquasec/trivy:latest
     commands:
+      # TODO: solve issue at docs/plugins/woodpecker-plugins and remove skip
       - trivy fs --exit-code 0 --skip-dirs docs/node_modules --skip-dirs docs/plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
       - trivy fs --exit-code 1 --skip-dirs docs/node_modules --skip-dirs docs/plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
     when:
