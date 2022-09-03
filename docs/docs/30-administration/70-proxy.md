@@ -105,3 +105,75 @@ ngrok http 8000
 ```
 
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok url (usually xxx.ngrok.io) and start the server.
+
+
+## Traefik
+
+To install the Woodpecker server behind a [traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
+
+```yml
+version: '3.8'
+
+services:
+  server:
+    image: woodpeckerci/woodpecker-server:v0.15.3
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ADMIN=your_admin_user
+      # other settings ...
+      
+    networks:
+      - dmz # externally defined network, so that traefik can connect to the server
+    volumes:
+      - woodpecker-server-data:/var/lib/woodpecker/
+
+    deploy:
+      labels:
+        - traefik.enable=true
+        
+        # web server
+        - traefik.http.services.woodpecker-service.loadbalancer.server.port=8000
+
+        - traefik.http.routers.woodpecker-secure.rule=Host(`cd.yourdomain.com`)
+        - traefik.http.routers.woodpecker-secure.tls=true
+        - traefik.http.routers.woodpecker-secure.tls.certresolver=letsencrypt
+        - traefik.http.routers.woodpecker-secure.entrypoints=websecure
+        - traefik.http.routers.woodpecker-secure.service=woodpecker-service
+
+        - traefik.http.routers.woodpecker.rule=Host(`cd.yourdomain.com`)
+        - traefik.http.routers.woodpecker.entrypoints=web
+        - traefik.http.routers.woodpecker.service=woodpecker-service
+
+        - "traefik.http.middlewares.woodpecker-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.woodpecker-redirect.redirectscheme.permanent=true"
+        - "traefik.http.routers.woodpecker.middlewares=woodpecker-redirect@docker"
+    
+        #  gRPC service 
+        - traefik.http.services.woodpecker-grpc.loadbalancer.server.port=9000
+        - traefik.http.services.woodpecker-grpc.loadbalancer.server.scheme=h2c
+
+        - traefik.http.routers.woodpecker-grpc-secure.rule=Host(`woodpecker-grpc.yourdomain.com`)
+        - traefik.http.routers.woodpecker-grpc-secure.tls=true
+        - traefik.http.routers.woodpecker-grpc-secure.tls.certresolver=letsencrypt
+        - traefik.http.routers.woodpecker-grpc-secure.entrypoints=websecure
+        - traefik.http.routers.woodpecker-grpc-secure.service=woodpecker-grpc
+
+        - traefik.http.routers.woodpecker-grpc.rule=Host(`woodpecker-grpc.yourdomain.com`)
+        - traefik.http.routers.woodpecker-grpc.entrypoints=web
+        - traefik.http.routers.woodpecker-grpc.service=woodpecker-grpc
+
+        - "traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true"
+        - "traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker"
+    
+  
+volumes:
+  woodpecker-server-data:
+    driver: local
+
+networks:
+  dmz: 
+    external: true
+```
+
+You should pass `WOODPECKER_GRPC_SECURE=true` and `WOODPECKER_GRPC_VERIFY=true` to your agent when using this configuration.
