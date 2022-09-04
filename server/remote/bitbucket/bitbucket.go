@@ -143,7 +143,7 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 
 // Repo returns the named Bitbucket repository.
 func (c *config) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
-	if id == "" {
+	if id == "" || id == "0" {
 		id = name
 	}
 	repo, err := c.newClient(ctx, u).FindRepo(owner, id)
