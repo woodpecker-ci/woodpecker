@@ -464,9 +464,6 @@ func TestRepoRedirection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
 
-	repoFromStore, err = store.GetRepoNameFallback("1", "bradrydzewski/test")
-	assert.NoError(t, err)
-
 	// test getting repo without remote ID (use name fallback)
 	repo = model.Repo{
 		UserID:   1,
