@@ -311,7 +311,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote.Repo(c, user, "0", owner, name)
+	from, err := remote.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
