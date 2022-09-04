@@ -42,7 +42,7 @@ func Logger(timeFormat string, utc bool) gin.HandlerFunc {
 			// Append error field if this is an erroneous request.
 			log.Error().Str("error", c.Errors.String()).Fields(entry).Msg("")
 		} else {
-			log.Info().Fields(entry).Msg("")
+			log.Debug().Fields(entry).Msg("")
 		}
 	}
 }

@@ -14,6 +14,15 @@
 
 package gitea
 
+type commit struct {
+	ID       string   `json:"id"`
+	Message  string   `json:"message"`
+	URL      string   `json:"url"`
+	Added    []string `json:"added"`
+	Removed  []string `json:"removed"`
+	Modified []string `json:"modified"`
+}
+
 type pushHook struct {
 	Sha     string `json:"sha"`
 	Ref     string `json:"ref"`
@@ -42,14 +51,9 @@ type pushHook struct {
 		} `json:"owner"`
 	} `json:"repository"`
 
-	Commits []struct {
-		ID       string   `json:"id"`
-		Message  string   `json:"message"`
-		URL      string   `json:"url"`
-		Added    []string `json:"added"`
-		Removed  []string `json:"removed"`
-		Modified []string `json:"modified"`
-	} `json:"commits"`
+	Commits []commit `json:"commits"`
+
+	HeadCommit commit `json:"head_commit"`
 
 	Sender struct {
 		ID       int64  `json:"id"`

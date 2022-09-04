@@ -92,7 +92,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	return store, nil
 }
 
-// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: remove it in v1.1.0
 // TODO: add it to the "how to migrate from drone docs"
 func fallbackSqlite3File(path string) (string, error) {
 	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
@@ -149,9 +149,7 @@ func fallbackSqlite3File(path string) (string, error) {
 	// file is still at old location
 	_, err = os.Stat(dockerOldPath)
 	if err == nil {
-		// TODO: use log.Fatal()... in next version
-		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
-		return dockerOldPath, nil
+		log.Fatal().Msgf("found sqlite3 file at old path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
 	}
 
 	// file does not exist at all
@@ -378,7 +376,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
 			return nil, nil
 		}
-		log.Info().Msg("Created private key")
+		log.Debug().Msg("Created private key")
 		return privKey, privKey.Public()
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load private key")

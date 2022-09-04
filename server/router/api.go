@@ -16,6 +16,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
@@ -155,19 +156,21 @@ func apiRoutes(e *gin.Engine) {
 		secrets.DELETE("/:secret", api.DeleteGlobalSecret)
 	}
 
-	debugger := e.Group("/api/debug")
-	{
-		debugger.Use(session.MustAdmin())
-		debugger.GET("/pprof/", debug.IndexHandler())
-		debugger.GET("/pprof/heap", debug.HeapHandler())
-		debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
-		debugger.GET("/pprof/block", debug.BlockHandler())
-		debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
-		debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
-		debugger.GET("/pprof/profile", debug.ProfileHandler())
-		debugger.GET("/pprof/symbol", debug.SymbolHandler())
-		debugger.POST("/pprof/symbol", debug.SymbolHandler())
-		debugger.GET("/pprof/trace", debug.TraceHandler())
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		debugger := e.Group("/api/debug")
+		{
+			debugger.Use(session.MustAdmin())
+			debugger.GET("/pprof/", debug.IndexHandler())
+			debugger.GET("/pprof/heap", debug.HeapHandler())
+			debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
+			debugger.GET("/pprof/block", debug.BlockHandler())
+			debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
+			debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
+			debugger.GET("/pprof/profile", debug.ProfileHandler())
+			debugger.GET("/pprof/symbol", debug.SymbolHandler())
+			debugger.POST("/pprof/symbol", debug.SymbolHandler())
+			debugger.GET("/pprof/trace", debug.TraceHandler())
+		}
 	}
 
 	logLevel := e.Group("/api/log-level")

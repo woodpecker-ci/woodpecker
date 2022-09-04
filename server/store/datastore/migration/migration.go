@@ -144,7 +144,7 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
 				continue
 			}
-			log.Info().Msgf("migration task '%s' done", task.name)
+			log.Debug().Msgf("migration task '%s' done", task.name)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
 		}
