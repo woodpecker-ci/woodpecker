@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.4) - 2022-09-06
+
+* BUGFIXES
+  * Extract commit message from branch creation (#1150) (#1153)
+  * Respect WOODPECKER_GITEA_SKIP_VERIFY (#1152) (#1151)
+  * update golang.org/x/crypto (#1124)
+  * Implement Refresher for GitLab (#1031) (#1120)
+  * Make returned proc list to be returned always in correct order (#1060) (#1065)
+  * Update type of 'log_data' from blob to longblob (#1050) (#1052)
+  * Make ListItem component more accessible by using a button tag when clickable (#1044) (#1046)
+* MISC
+  * Update base images (#1024) (#1025)
+
 ## [0.15.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.3) - 2022-06-16
 
 * SECURITY
