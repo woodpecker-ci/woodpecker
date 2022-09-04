@@ -108,6 +108,10 @@ module.exports = {
           title: 'More',
           items: [
             {
+              label: "Translate",
+              href: 'https://translate.woodpecker-ci.org/engage/woodpecker-ci/'
+            },
+            {
               label: 'GitHub',
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
