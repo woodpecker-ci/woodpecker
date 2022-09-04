@@ -3,7 +3,6 @@
 Woodpecker supports two ways of enabling SSL communication. You can either use Let's Encrypt to get automated SSL support with
 renewal or provide your own SSL certificates.
 
-
 ## Let's Encrypt
 
 Woodpecker supports automated SSL configuration and updates using Let's Encrypt.
@@ -24,19 +23,18 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_LETS_ENCRYPT=true
++     - WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` is set the certificate is requested for `foo.com`. To receive emails before certificates expire Let's Encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
 
->Once enabled you can visit your website at both the http and the https address
+The SSL certificates are stored in `$HOME/.local/share/certmagic` for binary versions of Woodpecker and in `/var/lib/woodpecker` for the Container versions of it. You can set a custom path by setting `XDG_DATA_HOME` if required.
+
+> Once enabled you can visit the Woodpecker UI with http and the HTTPS address. HTTP will be redirected to HTTPS.
 
 ### Certificate Cache
 
-Woodpecker writes the certificates to the below directory:
-
-```
-/var/lib/woodpecker/golang-autocert
-```
+Woodpecker writes the certificates to `/var/lib/woodpecker/certmagic/`.
 
 ### Certificate Updates
 
