@@ -26,7 +26,7 @@ import (
 type Repo struct {
 	ID                           int64          `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID                       int64          `json:"-"                               xorm:"repo_user_id"`
-	RemoteID                     string         `json:"-"                               xorm:"'remote_id'"`
+	RemoteID                     RemoteID       `json:"-"                               xorm:"'remote_id'"`
 	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
@@ -103,4 +103,10 @@ type RepoPatch struct {
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
+}
+
+type RemoteID string
+
+func (r RemoteID) IsSet() bool {
+	return r != "" && r != "0"
 }

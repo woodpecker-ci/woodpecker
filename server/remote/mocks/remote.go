@@ -296,11 +296,11 @@ func (_m *Remote) Perm(ctx context.Context, u *model.User, r *model.Repo) (*mode
 }
 
 // Repo provides a mock function with given fields: ctx, u, id, owner, name
-func (_m *Remote) Repo(ctx context.Context, u *model.User, id string, owner string, name string) (*model.Repo, error) {
+func (_m *Remote) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner string, name string) (*model.Repo, error) {
 	ret := _m.Called(ctx, u, id, owner, name)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string, string, string) *model.Repo); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, model.RemoteID, string, string) *model.Repo); ok {
 		r0 = rf(ctx, u, id, owner, name)
 	} else {
 		if ret.Get(0) != nil {
@@ -309,7 +309,7 @@ func (_m *Remote) Repo(ctx context.Context, u *model.User, id string, owner stri
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, string, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, model.RemoteID, string, string) error); ok {
 		r1 = rf(ctx, u, id, owner, name)
 	} else {
 		r1 = ret.Error(1)

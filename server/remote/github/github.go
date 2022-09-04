@@ -164,10 +164,14 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, id, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
-	intID, err := strconv.ParseInt(id, 10, 64)
-	if intID > 0 && err == nil {
+
+	if id.IsSet() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
 		repo, _, err := client.Repositories.GetByID(ctx, intID)
 		if err != nil {
 			return nil, err

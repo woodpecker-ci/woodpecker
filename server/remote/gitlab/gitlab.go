@@ -227,21 +227,24 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 }
 
 // Repo fetches the repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, id, owner, name string) (*model.Repo, error) {
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	intID, err := strconv.ParseInt(id, 10, 64)
-	if intID > 0 && err == nil {
+	if id.IsSet() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
 		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
 		}
-
 		return g.convertGitlabRepo(_repo)
 	}
+
 	_repo, err := g.getProject(ctx, client, owner, name)
 	if err != nil {
 		return nil, err

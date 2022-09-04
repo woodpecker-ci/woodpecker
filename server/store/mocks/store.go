@@ -748,11 +748,11 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 }
 
 // GetRepoNameFallback provides a mock function with given fields: remoteID, fullName
-func (_m *Store) GetRepoNameFallback(remoteID string, fullName string) (*model.Repo, error) {
+func (_m *Store) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
 	ret := _m.Called(remoteID, fullName)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(string, string) *model.Repo); ok {
+	if rf, ok := ret.Get(0).(func(model.RemoteID, string) *model.Repo); ok {
 		r0 = rf(remoteID, fullName)
 	} else {
 		if ret.Get(0) != nil {
@@ -761,7 +761,7 @@ func (_m *Store) GetRepoNameFallback(remoteID string, fullName string) (*model.R
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(model.RemoteID, string) error); ok {
 		r1 = rf(remoteID, fullName)
 	} else {
 		r1 = ret.Error(1)
@@ -771,11 +771,11 @@ func (_m *Store) GetRepoNameFallback(remoteID string, fullName string) (*model.R
 }
 
 // GetRepoRemoteID provides a mock function with given fields: _a0
-func (_m *Store) GetRepoRemoteID(_a0 string) (*model.Repo, error) {
+func (_m *Store) GetRepoRemoteID(_a0 model.RemoteID) (*model.Repo, error) {
 	ret := _m.Called(_a0)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(string) *model.Repo); ok {
+	if rf, ok := ret.Get(0).(func(model.RemoteID) *model.Repo); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -784,7 +784,7 @@ func (_m *Store) GetRepoRemoteID(_a0 string) (*model.Repo, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
+	if rf, ok := ret.Get(1).(func(model.RemoteID) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)

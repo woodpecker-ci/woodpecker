@@ -27,24 +27,24 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoRemoteID(id string) (*model.Repo, error) {
+func (s storage) GetRepoRemoteID(id model.RemoteID) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoRemoteID(sess, id)
 }
 
-func (s storage) getRepoRemoteID(e *xorm.Session, id string) (*model.Repo, error) {
+func (s storage) getRepoRemoteID(e *xorm.Session, id model.RemoteID) (*model.Repo, error) {
 	repo := new(model.Repo)
 	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(remoteID, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoNameFallback(sess, remoteID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, remoteID, fullName string) (*model.Repo, error) {
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.RemoteID, fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoRemoteID(e, remoteID)
 	if err == RecordNotExist {
 		return s.getRepoName(e, fullName)
@@ -179,7 +179,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 					return err
 				}
 			}
-			if repos[i].RemoteID != "" && repos[i].RemoteID != "0" {
+			if repos[i].RemoteID.IsSet() {
 				if _, err := sess.
 					Where("remote_id = ?", repos[i].RemoteID).
 					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
