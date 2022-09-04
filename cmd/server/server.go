@@ -232,7 +232,11 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return certmagic.HTTPS([]string{address.Host}, handler)
+			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
+				log.Err(err).Msg("certmagic does not work")
+				os.Exit(1)
+			}
+			return nil
 		})
 	} else {
 		// start the server without tls
