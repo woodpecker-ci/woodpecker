@@ -179,11 +179,21 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 					return err
 				}
 			}
-			if _, err := sess.
-				Where("remote_id = ?", repos[i].RemoteID).
-				Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
-				Update(repos[i]); err != nil {
-				return err
+			if repos[i].RemoteID != "" && repos[i].RemoteID != "0" {
+				if _, err := sess.
+					Where("remote_id = ?", repos[i].RemoteID).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
+			} else {
+				if _, err := sess.
+					Where("repo_owner = ?", repos[i].Owner).
+					And(" repo_name = ?", repos[i].Name).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
 			}
 
 			_, err := sess.
