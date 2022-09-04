@@ -77,14 +77,14 @@ func (e *kube) IsAvailable() bool {
 }
 
 func (e *kube) Load() error {
-	if config, err := configFromCliContext(e.ctx); err != nil {
+	config, err := configFromCliContext(e.ctx)
+	if err != nil {
 		return err
-	} else {
-		e.config = config
 	}
+	e.config = config
 
 	var kubeClient kubernetes.Interface
-	_, err := rest.InClusterConfig()
+	_, err = rest.InClusterConfig()
 	if err != nil {
 		kubeClient, err = getClientOutOfCluster()
 	} else {
