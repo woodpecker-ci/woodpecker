@@ -434,3 +434,49 @@ func TestRepoCrud(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, buildCount)
 }
+
+func TestRepoRedirection(t *testing.T) {
+	store, closer := newTestStore(t,
+		new(model.Repo),
+		new(model.Redirection))
+	defer closer()
+
+	repo := model.Repo{
+		UserID:   1,
+		RemoteID: "1",
+		FullName: "bradrydzewski/test",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+
+	repoUpdated := model.Repo{
+		RemoteID: "1",
+		FullName: "bradrydzewski/test-renamed",
+		Owner:    "bradrydzewski",
+		Name:     "test-renamed",
+	}
+
+	assert.NoError(t, store.RepoBatch([]*model.Repo{&repoUpdated}))
+
+	// test redirection from old repo name
+	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	assert.NoError(t, err)
+	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
+
+	repoFromStore, err = store.GetRepoNameFallback("1", "bradrydzewski/test")
+	assert.NoError(t, err)
+
+	// test getting repo without remote ID (use name fallback)
+	repo = model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/test-no-remote-id",
+		Owner:    "bradrydzewski",
+		Name:     "test-no-remote-id",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+
+	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-remote-id")
+	assert.NoError(t, err)
+	assert.Equal(t, repoFromStore.FullName, repo.FullName)
+}
