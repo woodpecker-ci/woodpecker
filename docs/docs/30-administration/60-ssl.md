@@ -34,7 +34,7 @@ The SSL certificates are stored in `$HOME/.local/share/certmagic` for binary ver
 
 ### Certificate Cache
 
-Woodpecker writes the certificates to `/var/lib/woodpecker/golang-autocert`.
+Woodpecker writes the certificates to `/var/lib/woodpecker/certmagic/`.
 
 ### Certificate Updates
 
