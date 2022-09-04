@@ -23,15 +23,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -207,41 +206,37 @@ func run(c *cli.Context) error {
 		})
 
 		// http to https redirect
+		redirect := func(w http.ResponseWriter, req *http.Request) {
+			serverHost := server.Config.Server.Host
+			serverHost = strings.TrimPrefix(serverHost, "http://")
+			serverHost = strings.TrimPrefix(serverHost, "https://")
+			req.URL.Scheme = "https"
+			req.URL.Host = serverHost
+
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
+
+			http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
+		}
+
 		g.Go(func() error {
 			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
+		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
+		certmagic.DefaultACME.Agreed = true
+
 		address, err := url.Parse(c.String("server-host"))
 		if err != nil {
 			return err
 		}
 
-		dir := cacheDir()
-		if err := os.MkdirAll(dir, 0o700); err != nil {
-			return err
-		}
-
-		manager := &autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(address.Host),
-			Cache:      autocert.DirCache(dir),
-		}
 		g.Go(func() error {
-			serve := &http.Server{
-				Addr:    ":https",
-				Handler: handler,
-				TLSConfig: &tls.Config{
-					GetCertificate: manager.GetCertificate,
-					NextProtos:     []string{"h2", "http/1.1"},
-				},
+			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
+				log.Err(err).Msg("certmagic does not work")
+				os.Exit(1)
 			}
-			return serve.ListenAndServeTLS("", "")
-		})
-
-		// http to https redirect
-		g.Go(func() error {
-			return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
+			return nil
 		})
 	} else {
 		// start the server without tls
@@ -357,24 +352,4 @@ func (a *authorizer) authorize(ctx context.Context) error {
 		return errors.New("invalid agent token")
 	}
 	return errors.New("missing agent token")
-}
-
-func redirect(w http.ResponseWriter, req *http.Request) {
-	serverHost := server.Config.Server.Host
-	serverHost = strings.TrimPrefix(serverHost, "http://")
-	serverHost = strings.TrimPrefix(serverHost, "https://")
-	req.URL.Scheme = "https"
-	req.URL.Host = serverHost
-
-	w.Header().Set("Strict-Transport-Security", "max-age=31536000")
-
-	http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
-}
-
-func cacheDir() string {
-	const base = "golang-autocert"
-	if xdg := os.Getenv("XDG_CACHE_HOME"); xdg != "" {
-		return filepath.Join(xdg, base)
-	}
-	return filepath.Join(os.Getenv("HOME"), ".cache", base)
 }
