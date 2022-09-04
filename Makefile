@@ -35,7 +35,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   $(eval $(MAKE_ARGS):;@:)
 
   in_docker:
-	@[ "1" == "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
 	@echo run in docker:
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
@@ -187,6 +187,31 @@ release-cli:
 	tar -cvzf dist/woodpecker-cli_windows_amd64.tar.gz -C dist/cli/windows_amd64 woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
+
+release-tarball:
+	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
+		agent \
+		cli \
+		cmd \
+		go.??? \
+		LICENSE \
+		Makefile \
+		pipeline \
+		server \
+		shared \
+		vendor \
+		version \
+		woodpecker-go \
+		web/index.html \
+		web/node_modules \
+		web/package.json \
+		web/public \
+		web/src \
+		web/package.json \
+		web/tsconfig.* \
+		web/*.ts \
+		web/yarn.lock \
+		web/web.go
 
 release-checksums:
 	# generate shas for tar files
