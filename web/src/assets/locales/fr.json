@@ -1,1 +1,84 @@
-{}
+{
+  "docs": "Docs",
+  "login": "Connexion",
+  "logout": "Déconnexion",
+  "not_found": {
+    "back_home": "Retour à l'accueil",
+    "not_found": "Whoa 404, soit nous avons cassé quelque chose ou vous avez fait une faute de frappe :-/"
+  },
+  "password": "Mot de passe",
+  "repo": {
+    "activity": "Activité",
+    "add": "Ajouter un dépôt",
+    "branches": "Branches",
+    "enable": {
+      "enable": "Activer",
+      "enabled": "Déjà activer",
+      "list_reloaded": "Liste des dépôts actualisé",
+      "reload": "Actualiser les dépôts",
+      "success": "Dépôt activer"
+    },
+    "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
+    "settings": {
+      "general": {
+        "allow_pr": {
+          "allow": "Autorisé les demandes de fusions"
+        },
+        "general": "Générale",
+        "pipeline_path": {
+          "default": "Par défaut: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "desc": "Le chemin vers votre configuration de pipeline (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mon/chemin/</span>). Le dossier doit se terminer par <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "path": "Chemin vers la pipeline"
+        },
+        "project": "Paramètres du projet",
+        "protected": {
+          "protected": "Protégé"
+        },
+        "save": "Sauvegarder les paramètres",
+        "success": "Paramètres du dépôt mis à jour",
+        "timeout": {
+          "minutes": "minutes"
+        },
+        "trusted": {
+          "trusted": "Vérifier"
+        },
+        "visibility": {
+          "internal": {
+            "internal": "Interne"
+          },
+          "private": {
+            "desc": "Seulement vous et les autres propriétaires de ce dépôt peuvent voir ce projet.",
+            "private": "Privé"
+          },
+          "public": {
+            "desc": "Tout les utilisateurs peuvent voire votre projet sans être connecté.",
+            "public": "Publique"
+          },
+          "visibility": "Visibilité du projet"
+        }
+      },
+      "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
+      "secrets": {
+        "secrets": "Secrets"
+      },
+      "settings": "Paramètres"
+    },
+    "user_none": "Cet(te) organisation / utilisateur n'a pas encore de projets."
+  },
+  "repos": "Dépôt",
+  "repositories": "Dépôts",
+  "search": "Rechercher…",
+  "time": {
+    "days_short": "d",
+    "hours_short": "h",
+    "min_short": "min",
+    "not_started": "Pas encore démarrer",
+    "sec_short": "sec",
+    "tmpl": "D MMM, YYYY, HH:mm z",
+    "weeks_short": "w"
+  },
+  "unknown_error": "Une erreur inconnue est survenue",
+  "url": "URL",
+  "username": "Pseudo",
+  "welcome": "Bienvenue sur Woodpecker"
+}
