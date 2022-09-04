@@ -47,10 +47,10 @@
                 "pipeline_path": {
                     "path": "Pipeline-Pfad",
                     "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-                    "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Ordner sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden."
+                    "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Verzeichnisse sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden."
                 },
                 "allow_pr": {
-                    "allow": "Pull Requests zulassen",
+                    "allow": "Pull-Requests zulassen",
                     "desc": "Pipelines können für Pull-Requests genutzt werden."
                 },
                 "protected": {
@@ -65,7 +65,7 @@
                     "visibility": "Sichtbarkeit des Projekts",
                     "public": {
                         "public": "Öffentlich",
-                        "desc": "Jeder Benutzer kann Ihr Projekt sehen, ohne eingeloggt zu sein."
+                        "desc": "Jeder Benutzer kann dein Projekt sehen, ohne eingeloggt zu sein."
                     },
                     "private": {
                         "private": "Privat",
@@ -86,30 +86,30 @@
                 }
             },
             "secrets": {
-                "secrets": "Secrets",
-                "desc": "Secrets können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
-                "none": "Es gibt noch keine Secrets.",
-                "add": "Secret hinzufügen",
-                "save": "Secret speichern",
-                "show": "Secret anzeigen",
+                "secrets": "Geheimnisse",
+                "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+                "none": "Es gibt noch keine Geheimnisse.",
+                "add": "Geheimnis hinzufügen",
+                "save": "Geheimnis speichern",
+                "show": "Geheimnis anzeigen",
                 "name": "Name",
                 "value": "Wert",
-                "deleted": "Secret gelöscht",
-                "created": "Secret erstellt",
-                "saved": "Secret gespeichert",
+                "deleted": "Geheimnis gelöscht",
+                "created": "Geheimnis erstellt",
+                "saved": "Geheimnis gespeichert",
                 "images": {
                     "images": "Verfügbar für folgende Images",
-                    "desc": "Durch Kommata getrennte Liste der Images, für die dieses Secret verfügbar ist; leer lassen, um alle Images zuzulassen"
+                    "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen"
                 },
                 "events": {
                     "events": "Verfügbar bei folgenden Ereignissen",
-                    "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull Request erstellen kann, der deine Secrets preisgibt."
+                    "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnis preisgibt."
                 }
             },
             "registries": {
                 "registries": "Registries",
                 "creds": "Zugangsdaten für die Registry",
-                "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für Ihre Pipeline zu verwenden.",
+                "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
                 "show": "Registries anzeigen",
                 "add": "Registry hinzufügen",
                 "none": "Es gibt noch keine Zugangsdaten für die Registry.",
@@ -142,6 +142,31 @@
                     "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
                     "success": "Repository gelöscht"
                 }
+            },
+            "crons": {
+                "show": "Zeige Crons",
+                "crons": "Crons",
+                "desc": "Cron Aufgaben können dazu verwendet werden in regelmäßigen Abständen die Pipeline(s) zu starten",
+                "add": "Füge einen Cron hinzu",
+                "none": "Derzeit existieren keine Crons.",
+                "save": "Cron speichern",
+                "created": "Cron erstellt",
+                "saved": "Cron gespeichert",
+                "deleted": "Cron gelöscht",
+                "next_exec": "Nächste Ausführung",
+                "not_executed_yet": "Noch nicht ausgeführt",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (Verwendet Standard-Branch wenn leer)"
+                },
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name des Cron"
+                },
+                "schedule": {
+                    "title": "Zeitplan (basierend auf UTC)",
+                    "placeholder": "Zeitplan"
+                }
             }
         },
         "build": {
@@ -164,7 +189,9 @@
                 "canceled": "Dieser Schritt wurde abgebrochen.",
                 "cancel_success": "Pipeline abgebrochen",
                 "restart_success": "Pipeline neu gestartet",
-                "log_download": "Herunterladen"
+                "log_download": "Herunterladen",
+                "log_auto_scroll": "Automatisches folgen",
+                "log_auto_scroll_off": "Schalte automatisches folgen aus"
             },
             "protected": {
                 "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
@@ -177,10 +204,11 @@
             "event": {
                 "push": "Push",
                 "tag": "Tag",
-                "pr": "Pull Request",
-                "deploy": "Deploy"
+                "pr": "Pull-Request",
+                "deploy": "Deploy",
+                "cron": "Cron"
             },
-            "log_download_error": "Beim Herunterladen der Logdatei ist ein Fehler aufgetreten."
+            "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten."
         }
     },
     "user": {
@@ -197,25 +225,25 @@
     "org": {
         "settings": {
             "secrets": {
-                "none": "Es existieren noch keine Organisations Secrets.",
-                "deleted": "Organisations Secret gelöscht",
+                "none": "Es existieren noch keine Organisations Geheimnis.",
+                "deleted": "Organisations-Geheimnis gelöscht",
                 "images": {
-                    "desc": "Komma getrennte Liste aller Images, für die dieses Secret verwendet werden kann. Freilassen, um alle Images zu erlauben",
+                    "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
                     "images": "Verfügbar für die folgenden Images"
                 },
-                "secrets": "Secrets",
-                "add": "Secret hinzufügen",
-                "save": "Secret speichern",
-                "show": "Secrets anzeigen",
+                "secrets": "Geheimnis",
+                "add": "Geheimnis hinzufügen",
+                "save": "Geheimnis speichern",
+                "show": "Geheimnis anzeigen",
                 "name": "Name",
                 "value": "Wert",
-                "created": "Organisations Secret erstellt",
-                "saved": "Organisations Secret gespeichert",
+                "created": "Organisations-Geheimnis erstellt",
+                "saved": "Organisations-Geheimnis gespeichert",
                 "events": {
-                    "events": "Verfügbar für folgende Events",
+                    "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig"
                 },
-                "desc": "Organisationsecrets können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden."
+                "desc": "Organisation-Geheimnisse können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden."
             },
             "settings": "Einstellungen",
             "not_allowed": "Du bist nicht berechtigt auf die Einstellungen dieser Organsitation zuzugreifen."
@@ -225,25 +253,25 @@
         "settings": {
             "secrets": {
                 "events": {
-                    "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Secrets zu erhalten",
-                    "events": "Verfügbar für folgende Events"
+                    "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten",
+                    "events": "Verfügbar für folgende Ereignisse"
                 },
                 "name": "Name",
                 "value": "Wert",
                 "images": {
-                    "desc": "Komma getrennte Liste aller Images, für die dieses Secret verwendet werden kann. Freilassen, um alle Images zu erlauben",
+                    "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
                     "images": "Verfügbar für folgende Images"
                 },
-                "saved": "Globales Secret gespeichert",
-                "created": "Globales Secret erstellt",
-                "deleted": "Globales Secret gelöscht",
-                "show": "Secrets anzeigen",
-                "save": "Secret speichern",
-                "add": "Secret hinzufügen",
-                "none": "Es gibt noch keine globalen Secrets.",
-                "warning": "Diese Secrets können von allen Nutzern des Server eingesehen werden.",
-                "secrets": "Secrets",
-                "desc": "Globale Secrets können an alle Repositories als Umgebungsvariablen übergeben werden."
+                "saved": "Globales Geheimnis gespeichert",
+                "created": "Globales Geheimnis erstellt",
+                "deleted": "Globales Geheimnis gelöscht",
+                "show": "Geheimnis anzeigen",
+                "save": "Geheimnis speichern",
+                "add": "Geheimnis hinzufügen",
+                "none": "Es gibt noch keine globalen Geheimnisse.",
+                "warning": "Diese Geheimnis können von allen Nutzern des Server eingesehen werden.",
+                "secrets": "Geheimnis",
+                "desc": "Globale Geheimnis können an alle Repositories als Umgebungsvariablen übergeben werden."
             },
             "not_allowed": "Du bist nicht berechtigt auf die Server Einstellungen zuzugreifen.",
             "settings": "Einstellungen"
