@@ -18,21 +18,22 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/xanzy/go-gitlab"
+	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/oauth2"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
@@ -75,21 +76,28 @@ func (g *Gitlab) Name() string {
 	return "gitlab"
 }
 
-func (g *Gitlab) oauth2Config() *oauth2.Config {
+func (g *Gitlab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-		ClientID:     g.ClientID,
-		ClientSecret: g.ClientSecret,
-		Scope:        defaultScope,
-		AuthURL:      fmt.Sprintf("%s/oauth/authorize", g.URL),
-		TokenURL:     fmt.Sprintf("%s/oauth/token", g.URL),
-		RedirectURL:  fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
-	}
+			ClientID:     g.ClientID,
+			ClientSecret: g.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
+				TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+			},
+			Scopes:      []string{defaultScope},
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+		},
+
+		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		}})
 }
 
 // Login authenticates the session and returns the
 // remote user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := g.oauth2Config()
+	config, oauth2Ctx := g.oauth2Config(ctx)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -103,19 +111,11 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	// get the OAuth code
 	code := req.FormValue("code")
 	if len(code) == 0 {
-		authCodeURL, err := config.AuthCodeURL("woodpecker")
-		if err != nil {
-			return nil, fmt.Errorf("authCodeURL error: %v", err)
-		}
-		http.Redirect(res, req, authCodeURL, http.StatusSeeOther)
+		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
 		return nil, nil
 	}
 
-	trans := &oauth2.Transport{Config: config, Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-		Proxy:           http.ProxyFromEnvironment,
-	}}
-	token, err := trans.Exchange(code)
+	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("Error exchanging token. %s", err)
 	}
@@ -147,29 +147,23 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := g.oauth2Config()
+	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
-	trans := &oauth2.Transport{
-		Config: config,
-		Token: &oauth2.Token{
-			AccessToken:  user.Token,
-			RefreshToken: user.Secret,
-			Expiry:       time.Unix(user.Expiry, 0),
-		},
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: g.SkipVerify},
-			Proxy:           http.ProxyFromEnvironment,
-		},
-	}
+	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
+		AccessToken:  user.Token,
+		RefreshToken: user.Secret,
+		Expiry:       time.Unix(user.Expiry, 0),
+	})
 
-	if err := trans.Refresh(); err != nil {
+	token, err := source.Token()
+	if err != nil || len(token.AccessToken) == 0 {
 		return false, err
 	}
 
-	user.Token = trans.Token.AccessToken
-	user.Secret = trans.Token.RefreshToken
-	user.Expiry = trans.Token.Expiry.UTC().Unix()
+	user.Token = token.AccessToken
+	user.Secret = token.RefreshToken
+	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
 
@@ -232,11 +226,23 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 	return repo, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
+	}
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		return g.convertGitlabRepo(_repo)
 	}
 
 	_repo, err := g.getProject(ctx, client, owner, name)
@@ -552,11 +558,35 @@ func (g *Gitlab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	return branches, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (g *Gitlab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := newClient(g.URL, token, g.SkipVerify)
+	if err != nil {
+		return "", err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	if err != nil {
+		return "", err
+	}
+
+	b, _, err := client.Branches.GetBranch(_repo.ID, branch, gitlab.WithContext(ctx))
+	if err != nil {
+		return "", err
+	}
+
+	return b.Commit.ID, nil
+}
+
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
 func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	defer req.Body.Close()
-	payload, err := ioutil.ReadAll(req.Body)
+	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -650,7 +680,7 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

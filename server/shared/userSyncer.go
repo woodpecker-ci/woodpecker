@@ -74,7 +74,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 			repo.Perm = &model.Perm{
 				UserID: user.ID,
 				RepoID: repo.ID,
-				Repo:   repo.FullName,
+				Repo:   repo,
 				Synced: unix,
 			}
 

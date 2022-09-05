@@ -148,7 +148,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
@@ -160,7 +160,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos := []*model.Repo{}
+	var repos []*model.Repo
 
 	client := c.newClientToken(u.Token)
 	all, err := client.ListMyRepos()
@@ -282,6 +282,19 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 		branches = append(branches, branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns sha of commit on top of the specified branch
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	b, err := c.newClientToken(token).GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Build

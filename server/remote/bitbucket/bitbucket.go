@@ -142,7 +142,10 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
+	if id.IsValid() {
+		name = string(id)
+	}
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -293,6 +296,12 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 		branches = append(branches, branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and

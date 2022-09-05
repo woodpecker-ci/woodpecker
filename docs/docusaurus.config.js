@@ -51,6 +51,10 @@ module.exports = {
           label: 'Awesome',
         },
         {
+          type: 'docsVersionDropdown',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/woodpecker-ci/woodpecker',
           position: 'right',
           className: 'header-github-link',
@@ -103,6 +107,10 @@ module.exports = {
         {
           title: 'More',
           items: [
+            {
+              label: "Translate",
+              href: 'https://translate.woodpecker-ci.org/engage/woodpecker-ci/'
+            },
             {
               label: 'GitHub',
               href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -174,6 +182,18 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          includeCurrentVersion: true,
+          lastVersion: '0.15',
+          versions: {
+            current: {
+              label: 'Next',
+              banner: 'unreleased',
+            },
+            '0.15': {
+              label: '0.15.x',
+              banner: 'none',
+            },
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

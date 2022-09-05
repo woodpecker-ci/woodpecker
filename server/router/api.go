@@ -16,6 +16,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
@@ -108,6 +109,13 @@ func apiRoutes(e *gin.Engine) {
 			repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
 			repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
 
+			// requires push permissions
+			repo.GET("/cron", session.MustPush, api.GetCronList)
+			repo.POST("/cron", session.MustPush, api.PostCron)
+			repo.GET("/cron/:cron", session.MustPush, api.GetCron)
+			repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
+			repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+
 			// requires admin permissions
 			repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
 			repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
@@ -148,19 +156,21 @@ func apiRoutes(e *gin.Engine) {
 		secrets.DELETE("/:secret", api.DeleteGlobalSecret)
 	}
 
-	debugger := e.Group("/api/debug")
-	{
-		debugger.Use(session.MustAdmin())
-		debugger.GET("/pprof/", debug.IndexHandler())
-		debugger.GET("/pprof/heap", debug.HeapHandler())
-		debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
-		debugger.GET("/pprof/block", debug.BlockHandler())
-		debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
-		debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
-		debugger.GET("/pprof/profile", debug.ProfileHandler())
-		debugger.GET("/pprof/symbol", debug.SymbolHandler())
-		debugger.POST("/pprof/symbol", debug.SymbolHandler())
-		debugger.GET("/pprof/trace", debug.TraceHandler())
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		debugger := e.Group("/api/debug")
+		{
+			debugger.Use(session.MustAdmin())
+			debugger.GET("/pprof/", debug.IndexHandler())
+			debugger.GET("/pprof/heap", debug.HeapHandler())
+			debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
+			debugger.GET("/pprof/block", debug.BlockHandler())
+			debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
+			debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
+			debugger.GET("/pprof/profile", debug.ProfileHandler())
+			debugger.GET("/pprof/symbol", debug.SymbolHandler())
+			debugger.POST("/pprof/symbol", debug.SymbolHandler())
+			debugger.GET("/pprof/trace", debug.TraceHandler())
+		}
 	}
 
 	logLevel := e.Group("/api/log-level")

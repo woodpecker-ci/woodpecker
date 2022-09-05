@@ -17,6 +17,15 @@ pipeline:
       event: [push, pull_request]
       path: *when_path
 
+  securitycheck:
+    image: aquasec/trivy:latest
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
+      # TODO currently it is not fixable so just do not block currently
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+    when:
+      path: *when_path
+
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
     settings:

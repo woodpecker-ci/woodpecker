@@ -51,6 +51,7 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(from.ID)),
 		Name:         from.Slug,
 		Owner:        from.Project.Key,
 		Branch:       "master",

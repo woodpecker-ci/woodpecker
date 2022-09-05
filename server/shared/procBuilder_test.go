@@ -465,7 +465,9 @@ depends_on: [ shouldbefiltered ]
 func TestTree(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{}
+	build := &model.Build{
+		Event: model.EventPush,
+	}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},

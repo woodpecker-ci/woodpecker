@@ -69,8 +69,9 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 // PostHook start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
+	remote := server.Config.Services.Remote
 
-	tmpRepo, tmpBuild, err := server.Config.Services.Remote.Hook(c, c.Request)
+	tmpRepo, tmpBuild, err := remote.Hook(c, c.Request)
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
@@ -100,7 +101,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -114,6 +115,23 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
+	oldFullName := repo.FullName
+	if oldFullName != tmpRepo.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	repo.Update(tmpRepo)
+	err = _store.UpdateRepo(repo)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	// get the token and verify the hook is authorized
 	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
 		return repo.Hash, nil
@@ -124,7 +142,18 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	if parsed.Text != repo.FullName {
+	verifiedKey := parsed.Text == oldFullName
+	if !verifiedKey {
+		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
+		if err != nil {
+			msg := "failure to verify token from hook. Could not check for redirections of the repo"
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
+			return
+		}
+	}
+
+	if !verifiedKey {
 		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
 		log.Debug().Msg(msg)
 		c.String(http.StatusForbidden, msg)

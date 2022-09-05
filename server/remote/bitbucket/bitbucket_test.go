@@ -126,12 +126,12 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})

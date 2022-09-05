@@ -61,6 +61,11 @@ var flags = []cli.Flag{
 		Name:    "server-key",
 		Usage:   "server ssl key path",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
+		Name:    "lets-encrypt-email",
+		Usage:   "let's encrypt email",
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
 		Name:    "lets-encrypt",

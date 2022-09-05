@@ -160,8 +160,8 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
@@ -172,6 +172,7 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 		return nil, err
 	}
 	return &model.Repo{
+		// TODO(1138) RemoteID:     project.ID,
 		Owner:        project.Owner,
 		Name:         project.Name,
 		FullName:     projectFullName(project.Owner, project.Name),
@@ -199,6 +200,7 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		repo := &model.Repo{
+			// TODO(1138) RemoteID:     project.ID,
 			Owner:        project.Owner,
 			Name:         project.Name,
 			FullName:     projectFullName(project.Owner, project.Name),
@@ -289,6 +291,12 @@ func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
 	// TODO: fetch all branches
 	return []string{r.Branch}, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 // Hook parses the post-commit hook from the Request body and returns the

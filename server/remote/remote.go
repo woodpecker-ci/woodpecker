@@ -14,7 +14,8 @@
 
 package remote
 
-//go:generate mockery -name Remote -output mocks -case=underscore
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Remote --output mocks --case underscore
 
 import (
 	"context"
@@ -41,8 +42,8 @@ type Remote interface {
 	// Teams fetches a list of team memberships from the remote system.
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
-	// Repo fetches the named repository from the remote system.
-	Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error)
+	// Repo fetches the repository from the remote system, preferred is using the ID, fallback is owner/name.
+	Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
@@ -75,6 +76,9 @@ type Remote interface {
 
 	// Branches returns the names of all branches for the named repository.
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
+
+	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.

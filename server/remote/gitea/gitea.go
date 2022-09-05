@@ -26,7 +26,9 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/rs/zerolog/log"
@@ -84,22 +86,27 @@ func (c *Gitea) Name() string {
 	return "gitea"
 }
 
-func (c *Gitea) oauth2Config() *oauth2.Config {
+func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
-			TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+			ClientID:     c.ClientID,
+			ClientSecret: c.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.URL),
+				TokenURL: fmt.Sprintf(accessTokenURL, c.URL),
+			},
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
-	}
+
+		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.SkipVerify},
+			Proxy:           http.ProxyFromEnvironment,
+		}})
 }
 
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.oauth2Config()
+	config, oauth2Ctx := c.oauth2Config(ctx)
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -117,7 +124,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		return nil, nil
 	}
 
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -158,10 +165,14 @@ func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) 
 // Refresh refreshes the Gitea oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := c.oauth2Config()
+	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
 
-	source := config.TokenSource(ctx, &oauth2.Token{RefreshToken: user.Secret})
+	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
+		AccessToken:  user.Token,
+		RefreshToken: user.Secret,
+		Expiry:       time.Unix(user.Expiry, 0),
+	})
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
@@ -215,11 +226,23 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo returns the named Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the Gitea repository.
+func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
+	}
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err := client.GetRepoByID(intID)
+		if err != nil {
+			return nil, err
+		}
+		return toRepo(repo), nil
 	}
 
 	repo, _, err := client.GetRepo(owner, name)
@@ -449,6 +472,25 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		branches = append(branches, branch.Name)
 	}
 	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return "", err
+	}
+
+	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
+	if err != nil {
+		return "", err
+	}
+	return b.Commit.ID, nil
 }
 
 // Hook parses the incoming Gitea hook and returns the Repository and Build

@@ -39,6 +39,7 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		private = true
 	}
 	return &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(from.ID)),
 		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,
@@ -159,6 +160,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 // helper function that extracts the Repository data from a Gogs push hook
 func repoFromPush(hook *pushHook) *model.Repo {
 	return &model.Repo{
+		RemoteID: model.RemoteID(fmt.Sprint(hook.Repo.ID)),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,
@@ -169,6 +171,7 @@ func repoFromPush(hook *pushHook) *model.Repo {
 // helper function that extracts the Repository data from a Gogs pull_request hook
 func repoFromPullRequest(hook *pullRequestHook) *model.Repo {
 	return &model.Repo{
+		RemoteID: model.RemoteID(fmt.Sprint(hook.Repo.ID)),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,

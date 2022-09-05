@@ -122,6 +122,31 @@
                     "placeholder": "Registry Address (e.g. docker.io)"
                 }
             },
+            "crons": {
+                "crons": "Crons",
+                "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
+                "show": "Show crons",
+                "add": "Add cron",
+                "none": "There are no crons yet.",
+                "save": "Save cron",
+                "created": "Cron created",
+                "saved": "Cron saved",
+                "deleted": "Cron deleted",
+                "next_exec": "Next execution",
+                "not_executed_yet": "Not executed yet",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (uses default branch if empty)"
+                },
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the cron job"
+                },
+                "schedule": {
+                    "title": "Schedule (based on UTC)",
+                    "placeholder": "Schedule"
+                }
+            },
             "badge": {
                 "badge": "Badge",
                 "url_branch": "URL for specific branch",
@@ -165,7 +190,9 @@
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
                 "restart_success": "Pipeline restarted",
-                "log_download": "Download"
+                "log_download": "Download",
+                "log_auto_scroll": "Automatically scroll down",
+                "log_auto_scroll_off": "Turn off automatic scrolling"
             },
             "protected": {
                 "awaits": "This pipeline is awaiting approval by some maintainer!",
@@ -179,7 +206,8 @@
                 "push": "Push",
                 "tag": "Tag",
                 "pr": "Pull Request",
-                "deploy": "Deploy"
+                "deploy": "Deploy",
+                "cron": "Cron"
             }
         }
     },

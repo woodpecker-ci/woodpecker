@@ -21,6 +21,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 ## Tools
 
 - [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
+- [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker-CI and Gitea
 
 ## Templates
 

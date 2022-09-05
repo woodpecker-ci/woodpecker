@@ -36,6 +36,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		from.Owner.AvatarURL,
 	)
 	return &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(from.ID)),
 		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,
@@ -84,6 +85,8 @@ func buildFromPush(hook *pushHook) *model.Build {
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	} else {
+		message = hook.HeadCommit.Message
 	}
 
 	if len(hook.Commits) == 1 {
@@ -114,6 +117,10 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 		files = append(files, c.Removed...)
 		files = append(files, c.Modified...)
 	}
+
+	files = append(files, hook.HeadCommit.Added...)
+	files = append(files, hook.HeadCommit.Removed...)
+	files = append(files, hook.HeadCommit.Modified...)
 
 	return utils.DedupStrings(files)
 }
@@ -179,6 +186,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 // helper function that extracts the Repository data from a Gitea push hook
 func repoFromPush(hook *pushHook) *model.Repo {
 	return &model.Repo{
+		RemoteID: model.RemoteID(fmt.Sprint(hook.Repo.ID)),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,
@@ -189,6 +197,7 @@ func repoFromPush(hook *pushHook) *model.Repo {
 // helper function that extracts the Repository data from a Gitea pull_request hook
 func repoFromPullRequest(hook *pullRequestHook) *model.Repo {
 	return &model.Repo{
+		RemoteID: model.RemoteID(fmt.Sprint(hook.Repo.ID)),
 		Name:     hook.Repo.Name,
 		Owner:    hook.Repo.Owner.Username,
 		FullName: hook.Repo.FullName,

@@ -14,6 +14,7 @@ const (
 	EventPull   = "pull_request"
 	EventTag    = "tag"
 	EventDeploy = "deployment"
+	EventCron   = "cron"
 )
 
 type (
@@ -51,6 +52,7 @@ type (
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
 		Parent   int64  `json:"parent,omitempty"`
+		Cron     string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -185,7 +187,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
 		"CI_SYSTEM_VERSION":  version.Version,
 
-		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after next version
+		// DEPRECATED
+		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

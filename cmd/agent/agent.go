@@ -35,8 +35,10 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func loop(c *cli.Context) error {
@@ -69,11 +71,7 @@ func loop(c *cli.Context) error {
 		)
 	}
 
-	zerolog.SetGlobalLevel(zerolog.WarnLevel)
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	}
-
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -81,6 +79,9 @@ func loop(c *cli.Context) error {
 			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
 		}
 		zerolog.SetGlobalLevel(lvl)
+	}
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
 	}
 
 	counter.Polling = c.Int("max-procs")
@@ -134,20 +135,22 @@ func loop(c *cli.Context) error {
 		sigterm.Set()
 	})
 
+	backend.Init(context.WithValue(ctx, types.CliContext, c))
+
 	var wg sync.WaitGroup
 	parallel := c.Int("max-procs")
 	wg.Add(parallel)
 
+	// new engine
+	engine, err := backend.FindEngine(c.String("backend-engine"))
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
+		return err
+	}
+
 	for i := 0; i < parallel; i++ {
 		go func() {
 			defer wg.Done()
-
-			// new engine
-			engine, err := backend.FindEngine(c.String("backend-engine"))
-			if err != nil {
-				log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
-				return
-			}
 
 			// load engine (e.g. init api client)
 			err = engine.Load()
@@ -173,6 +176,10 @@ func loop(c *cli.Context) error {
 			}
 		}()
 	}
+
+	log.Info().Msgf(
+		"Starting Woodpecker agent with version '%s' and backend '%s' running up to %d pipelines in parallel",
+		version.String(), engine.Name(), parallel)
 
 	wg.Wait()
 	return nil

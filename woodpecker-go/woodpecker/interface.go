@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Client is used to communicate with a Drone server.
+// Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
 	SetClient(*http.Client)
@@ -166,4 +166,19 @@ type Client interface {
 
 	// SetLogLevel sets the server's logging level
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
+
+	// CronList list all cron jobs of a repo
+	CronList(owner, repo string) ([]*Cron, error)
+
+	// CronGet get a specific cron job of a repo by id
+	CronGet(owner, repo string, cronID int64) (*Cron, error)
+
+	// CronDelete delete a specific cron job of a repo by id
+	CronDelete(owner, repo string, cronID int64) error
+
+	// CronCreate create a new cron job in a repo
+	CronCreate(owner, repo string, cron *Cron) (*Cron, error)
+
+	// CronUpdate update an existing cron job of a repo
+	CronUpdate(owner, repo string, cron *Cron) (*Cron, error)
 }
