@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,11 +226,23 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo returns the named Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the Gitea repository.
+func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
+	}
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err := client.GetRepoByID(intID)
+		if err != nil {
+			return nil, err
+		}
+		return toRepo(repo), nil
 	}
 
 	repo, _, err := client.GetRepo(owner, name)

@@ -53,6 +53,7 @@ var allBeans = []interface{}{
 	new(model.User),
 	new(model.ServerConfig),
 	new(model.Cron),
+	new(model.Redirection),
 }
 
 type migrations struct {

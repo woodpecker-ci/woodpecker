@@ -163,9 +163,22 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	return teams, nil
 }
 
-// Repo returns the named GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the GitHub repository.
+func (c *client) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err := client.Repositories.GetByID(ctx, intID)
+		if err != nil {
+			return nil, err
+		}
+		return convertRepo(repo), nil
+	}
+
 	repo, _, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
 		return nil, err
@@ -531,7 +544,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

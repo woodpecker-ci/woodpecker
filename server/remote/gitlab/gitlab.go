@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,11 +226,23 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 	return repo, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
+	}
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		return g.convertGitlabRepo(_repo)
 	}
 
 	_repo, err := g.getProject(ctx, client, owner, name)
@@ -667,7 +680,7 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return build, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

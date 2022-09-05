@@ -144,6 +144,20 @@ func (_m *Store) CreateBuild(_a0 *model.Build, _a1 ...*model.Proc) error {
 	return r0
 }
 
+// CreateRedirection provides a mock function with given fields: redirection
+func (_m *Store) CreateRedirection(redirection *model.Redirection) error {
+	ret := _m.Called(redirection)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Redirection) error); ok {
+		r0 = rf(redirection)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateRepo provides a mock function with given fields: _a0
 func (_m *Store) CreateRepo(_a0 *model.Repo) error {
 	ret := _m.Called(_a0)
@@ -643,6 +657,29 @@ func (_m *Store) GetBuildRef(_a0 *model.Repo, _a1 string) (*model.Build, error) 
 	return r0, r1
 }
 
+// GetRedirection provides a mock function with given fields: _a0
+func (_m *Store) GetRedirection(_a0 string) (*model.Redirection, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Redirection
+	if rf, ok := ret.Get(0).(func(string) *model.Redirection); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Redirection)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRepo provides a mock function with given fields: _a0
 func (_m *Store) GetRepo(_a0 int64) (*model.Repo, error) {
 	ret := _m.Called(_a0)
@@ -702,6 +739,52 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRepoNameFallback provides a mock function with given fields: remoteID, fullName
+func (_m *Store) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
+	ret := _m.Called(remoteID, fullName)
+
+	var r0 *model.Repo
+	if rf, ok := ret.Get(0).(func(model.RemoteID, string) *model.Repo); ok {
+		r0 = rf(remoteID, fullName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Repo)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(model.RemoteID, string) error); ok {
+		r1 = rf(remoteID, fullName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRepoRemoteID provides a mock function with given fields: _a0
+func (_m *Store) GetRepoRemoteID(_a0 model.RemoteID) (*model.Repo, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Repo
+	if rf, ok := ret.Get(0).(func(model.RemoteID) *model.Repo); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Repo)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(model.RemoteID) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -839,6 +922,27 @@ func (_m *Store) GlobalSecretList() ([]*model.Secret, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// HasRedirectionForRepo provides a mock function with given fields: _a0, _a1
+func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(int64, string) bool); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}

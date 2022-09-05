@@ -137,6 +137,7 @@ func convertRepository(repo *Repository) (*model.Repo, error) {
 	}
 
 	return &model.Repo{
+		// TODO RemoteID: repo.ID,
 		Owner:    matches[1],
 		Name:     repo.Name,
 		FullName: projectFullName(repo.Owner.GlobalKey, repo.Name),

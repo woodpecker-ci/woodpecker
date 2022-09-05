@@ -46,6 +46,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
+	// GetRepoRemoteID gets a repo by its remote ID.
+	GetRepoRemoteID(model.RemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its remote ID and if this doesn't exist by its full name.
+	GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
@@ -56,6 +60,14 @@ type Store interface {
 	UpdateRepo(*model.Repo) error
 	// DeleteRepo deletes a user repository.
 	DeleteRepo(*model.Repo) error
+
+	// Redirections
+	// GetRedirection returns the redirection for the given full repo name
+	GetRedirection(string) (*model.Redirection, error)
+	// CreateRedirection creates a redirection
+	CreateRedirection(redirection *model.Redirection) error
+	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
+	HasRedirectionForRepo(int64, string) (bool, error)
 
 	// Builds
 	// GetBuild gets a build by unique ID.
@@ -87,7 +99,7 @@ type Store interface {
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	// Repositorys
+	// Repositories
 	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)

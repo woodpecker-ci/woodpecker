@@ -86,15 +86,23 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
+	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
+	if err == nil {
+		if repo.FullName != from.FullName {
+			// create a redirection
+			err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+		}
+		repo.Update(from)
+	}
+
 	err = remote.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
-	if err == nil {
-		repo.Update(from)
 	}
 
 	err = _store.UpdateRepo(repo)
@@ -251,32 +259,33 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
-	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
-		return
-	}
-
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
+	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	repo.Name = from.Name
-	repo.Owner = from.Owner
-	repo.FullName = from.FullName
-	repo.Avatar = from.Avatar
-	repo.Link = from.Link
-	repo.Clone = from.Clone
-	repo.IsSCMPrivate = from.IsSCMPrivate
-	if repo.IsSCMPrivate != from.IsSCMPrivate {
-		repo.ResetVisibility()
+
+	if repo.FullName != from.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
+
+	repo.Update(from)
 	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := remote.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
+	}
+	if err := remote.Activate(c, user, repo, link); err != nil {
+		c.String(500, err.Error())
 		return
 	}
 
@@ -302,7 +311,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote.Repo(c, user, owner, name)
+	from, err := remote.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -312,16 +321,13 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	repo.Name = from.Name
-	repo.Owner = from.Owner
-	repo.FullName = from.FullName
-	repo.Avatar = from.Avatar
-	repo.Link = from.Link
-	repo.Clone = from.Clone
-	repo.IsSCMPrivate = from.IsSCMPrivate
-	if repo.IsSCMPrivate != from.IsSCMPrivate {
-		repo.ResetVisibility()
+	err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+
+	repo.Update(from)
 
 	errStore := _store.UpdateRepo(repo)
 	if errStore != nil {
