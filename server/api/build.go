@@ -21,11 +21,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -49,7 +50,7 @@ func CreateBuild(c *gin.Context) {
 
 	err := json.NewDecoder(c.Request.Body).Decode(&p)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
