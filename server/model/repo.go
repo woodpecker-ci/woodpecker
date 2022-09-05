@@ -107,6 +107,6 @@ type RepoPatch struct {
 
 type RemoteID string
 
-func (r RemoteID) IsSet() bool {
+func (r RemoteID) IsValid() bool {
 	return r != "" && r != "0"
 }

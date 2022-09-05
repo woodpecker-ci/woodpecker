@@ -167,7 +167,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 func (c *client) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
 
-	if id.IsSet() {
+	if id.IsValid() {
 		intID, err := strconv.ParseInt(string(id), 10, 64)
 		if err != nil {
 			return nil, err

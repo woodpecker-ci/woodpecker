@@ -233,7 +233,7 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.RemoteID, owne
 		return nil, err
 	}
 
-	if id.IsSet() {
+	if id.IsValid() {
 		intID, err := strconv.ParseInt(string(id), 10, 64)
 		if err != nil {
 			return nil, err

@@ -179,7 +179,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 					return err
 				}
 			}
-			if repos[i].RemoteID.IsSet() {
+			if repos[i].RemoteID.IsValid() {
 				if _, err := sess.
 					Where("remote_id = ?", repos[i].RemoteID).
 					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").

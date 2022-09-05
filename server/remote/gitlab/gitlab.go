@@ -233,7 +233,7 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.RemoteID, 
 		return nil, err
 	}
 
-	if id.IsSet() {
+	if id.IsValid() {
 		intID, err := strconv.ParseInt(string(id), 10, 64)
 		if err != nil {
 			return nil, err
