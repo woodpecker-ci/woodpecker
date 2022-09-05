@@ -24,7 +24,17 @@
         "not_started": "not started yet"
     },
     "repo": {
-        "manual": "Manual build",
+        "manual": {
+          "trigger": "Run build",
+          "select_branch": "Select branch",
+          "add_variable": "Add variable",
+          "variables": {
+            "title": "Build variables",
+            "desc": "Build variables can be used to inject env parameters",
+            "key": "Variable key",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",

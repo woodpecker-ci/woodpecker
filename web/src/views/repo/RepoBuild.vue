@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <InputField :label="$t('manual.select_branch')">
+    <InputField :label="$t('repo.manual.select_branch')">
       <SelectField
         v-model="payload.branch"
         :options="branches"
@@ -9,16 +9,36 @@
         class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
       />
     </InputField>
-    <div>
-      <InputField :label="$t('manual.variable_key')">
-        <TextField v-model="tmpVar.key" :placeholder="$t('manual.var_key')" required :disabled="loading" />
-      </InputField>
-      <InputField :label="$t('manual.variable_value')">
-        <TextField v-model="tmpVar.value" :placeholder="$t('manual.var_value')" required :disabled="loading" />
-      </InputField>
-      <Button :is-loading="loading" type="submit" :text="$t('manual.add_variable')" @click="addVar" />
+    <div class="flex flex-row mb-4 pb-4 items-center">
+      <div class="">
+        <h1 class="text-xl text-color">{{ $t('repo.manual.variables.title') }}</h1>
+        <p class="text-sm text-color-alt">
+          {{ $t('repo.manual.variables.desc') }}
+        </p>
+        <TextField
+          class="m-2"
+          v-model="tmpVar.key"
+          :placeholder="$t('repo.manual.variables.key')"
+          required
+          :disabled="loading"
+        />
+        <TextField
+          class="m-2"
+          v-model="tmpVar.value"
+          :placeholder="$t('repo.manual.variables.value')"
+          required
+          :disabled="loading"
+        />
+      </div>
+      <Button
+        class="ml-auto"
+        start-icon="plus"
+        :is-loading="loading"
+        type="submit"
+        :text="$t('repo.manual.add_variable')"
+        @click="addVar"
+      />
     </div>
-    <br />
     <div class="text-color">
       <div v-for="(v, k) in payload.variables" :key="k">
         <pre><span class="inline-block"><Button
@@ -30,7 +50,7 @@
       </div>
     </div>
     <br />
-    <Button :is-loading="loading" type="submit" :text="$t('manual.launch_build')" @click="runManual" />
+    <Button :is-loading="loading" type="submit" :text="$t('repo.manual.trigger')" @click="runManual" />
   </Panel>
 </template>
 
