@@ -16,15 +16,15 @@
           {{ $t('repo.manual.variables.desc') }}
         </p>
         <TextField
-          class="m-2"
           v-model="tmpVar.key"
+          class="m-2"
           :placeholder="$t('repo.manual.variables.key')"
           required
           :disabled="loading"
         />
         <TextField
-          class="m-2"
           v-model="tmpVar.value"
+          class="m-2"
           :placeholder="$t('repo.manual.variables.value')"
           required
           :disabled="loading"
