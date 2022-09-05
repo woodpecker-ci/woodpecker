@@ -35,6 +35,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
@@ -133,6 +134,8 @@ func loop(c *cli.Context) error {
 		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})
+
+	backend.Init(context.WithValue(ctx, types.CliContext, c))
 
 	var wg sync.WaitGroup
 	parallel := c.Int("max-procs")

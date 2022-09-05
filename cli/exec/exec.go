@@ -16,6 +16,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -184,6 +185,8 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
+
+	backend.Init(context.WithValue(c.Context, types.CliContext, c))
 
 	engine, err := backend.FindEngine(c.String("backend-engine"))
 	if err != nil {
