@@ -215,6 +215,18 @@ func (c *client) BuildList(owner, name string) ([]*Build, error) {
 	return out, err
 }
 
+func (c *client) BuildCreate(owner, name, branch string, variables map[string]string) (*Build, error) {
+	type ManualBuildReq struct {
+		Branch    string            `json:"branch"`
+		Variables map[string]string `json:"variables"`
+	}
+
+	var out *Build
+	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+	err := c.post(uri, &ManualBuildReq{Branch: branch, Variables: variables}, &out)
+	return out, err
+}
+
 // BuildQueue returns a list of enqueued builds.
 func (c *client) BuildQueue() ([]*Activity, error) {
 	var out []*Activity
