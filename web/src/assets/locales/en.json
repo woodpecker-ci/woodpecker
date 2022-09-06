@@ -30,7 +30,7 @@
           "add_variable": "Add variable",
           "variables": {
             "title": "Build variables",
-            "desc": "Build variables can be used to inject env parameters",
+            "desc": "Build variables can be used to inject environment variables",
             "key": "Variable key",
             "value": "Variable value"
           }
