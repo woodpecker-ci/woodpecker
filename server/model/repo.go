@@ -82,7 +82,9 @@ func (r *Repo) Update(from *Repo) {
 	r.Avatar = from.Avatar
 	r.Link = from.Link
 	r.SCMKind = from.SCMKind
-	r.Clone = from.Clone
+	if len(from.Clone) > 0 {
+		r.Clone = from.Clone
+	}
 	r.Branch = from.Branch
 	if from.IsSCMPrivate != r.IsSCMPrivate {
 		if from.IsSCMPrivate {
