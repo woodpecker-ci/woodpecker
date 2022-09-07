@@ -35,7 +35,7 @@
         start-icon="plus"
         :is-loading="loading"
         type="submit"
-        :text="$t('repo.manual.add_variable')"
+        :text="$t('repo.manual.variables.add')"
         @click="addVar"
       />
     </div>
