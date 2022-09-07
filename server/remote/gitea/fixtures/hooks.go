@@ -49,6 +49,7 @@ const HookPush = `
     "owner": {
       "name": "gordon",
       "email": "gordon@golang.org",
+      "login": "gordon",
       "username": "gordon"
     },
     "private": true
@@ -229,6 +230,7 @@ const HookPushTag = `{
     "owner": {
       "id": 1,
       "username": "gordon",
+      "login": "gordon",
       "full_name": "Gordon the Gopher",
       "email": "gordon@golang.org",
       "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
@@ -248,6 +250,7 @@ const HookPushTag = `{
   "sender": {
     "id": 1,
     "username": "gordon",
+    "login": "gordon",
     "full_name": "Gordon the Gopher",
     "email": "gordon@golang.org",
     "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
@@ -266,6 +269,7 @@ const HookPullRequest = `{
     "user": {
       "id": 1,
       "username": "gordon",
+      "login": "gordon",
       "full_name": "Gordon the Gopher",
       "email": "gordon@golang.org",
       "avatar_url": "http://gitea.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
@@ -288,6 +292,7 @@ const HookPullRequest = `{
     "owner": {
       "id": 1,
       "username": "gordon",
+      "login": "gordon",
       "full_name": "Gordon the Gopher",
       "email": "gordon@golang.org",
       "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"

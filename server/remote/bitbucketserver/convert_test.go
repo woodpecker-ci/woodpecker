@@ -86,7 +86,9 @@ func Test_helper(t *testing.T) {
 
 			change.Changesets.Values = append(change.Changesets.Values, value)
 
-			change.Repository.Project.Key = "octocat"
+			change.Repository.Project = internal.Project{
+				Key: "octocat",
+			}
 			change.Repository.Slug = "hello-world"
 			build := convertPushHook(&change, "http://base.com")
 			g.Assert(build.Branch).Equal("")

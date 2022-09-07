@@ -43,8 +43,11 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
+
+			//repo := &model.Repo{ID:0, UserID:0, RemoteID:"", Owner:"demo1", Name:"test1", FullName:"demo1/test1", Avatar:"", Link:"https://coding.net/u/demo1/p/test1", Clone:"https://git.coding.net/demo1/test1.git", Branch:"", SCMKind:"git", Timeout:0, Visibility:"", IsSCMPrivate:false, IsTrusted:false, IsStarred:false, IsGated:false, IsActive:false, AllowPull:false, Config:"", Hash:"", Perm:(*model.Perm)(nil), CancelPreviousPipelineEvents:[]model.WebhookEvent(nil)} does not equal &model.Repo{ID:0, UserID:0, RemoteID:"", Owner:"demo1", Name:"test1", FullName:"demo1/test1", Avatar:"", Link:"https://coding.net/u/demo1/p/test1", Clone:"", Branch:"", SCMKind:"git", Timeout:0, Visibility:"", IsSCMPrivate:false, IsTrusted:false, IsStarred:false, IsGated:false, IsActive:false, AllowPull:false, Config:"", Hash:"", Perm:(*model.Perm)(nil), CancelPreviousPipelineEvents:[]model.WebhookEvent(nil)}
 
 			build := &model.Build{
 				Event:   model.EventPush,
@@ -96,6 +99,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test_project",
 				FullName: "kelvin/test_project",
 				Link:     "https://coding.net/u/kelvin/p/test_project",
+				Clone:    "https://git.coding.net/kelvin/test_project.git",
 				SCMKind:  model.RepoGit,
 			}
 			actual, err := convertRepository(repository)
@@ -109,6 +113,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -144,6 +149,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test2",
 				FullName: "demo1/test2",
 				Link:     "https://coding.net/u/demo1/p/test2",
+				Clone:    "https://git.coding.net/demo1/test2.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -173,6 +179,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
