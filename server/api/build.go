@@ -57,7 +57,6 @@ func CreateBuild(c *gin.Context) {
 	user := session.User(c)
 
 	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
-	vars, _ := json.Marshal(p.Variables)
 
 	tmpBuild := &model.Build{
 		Event:     model.EventManual,
@@ -66,7 +65,7 @@ func CreateBuild(c *gin.Context) {
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: p.Branch + ":" + string(vars),
+		Message: "MANUAL BUILD @ " + p.Branch,
 
 		Ref:       p.Branch,
 		Variables: p.Variables,
