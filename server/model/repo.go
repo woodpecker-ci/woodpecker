@@ -82,7 +82,7 @@ func (r *Repo) Update(from *Repo) {
 	r.Avatar = from.Avatar
 	r.Link = from.Link
 	r.SCMKind = from.SCMKind
-	if len(from.Clone) != 0 {
+	if len(from.Clone) > 0 {
 		r.Clone = from.Clone
 	}
 	r.Branch = from.Branch
