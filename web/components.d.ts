@@ -50,6 +50,7 @@ declare module '@vue/runtime-core' {
     IMdiChevronRight: typeof import('~icons/mdi/chevron-right')['default']
     IMdiClockTimeEightOutline: typeof import('~icons/mdi/clock-time-eight-outline')['default']
     IMdiFormatListBulleted: typeof import('~icons/mdi/format-list-bulleted')['default']
+    IMdiGestureTap: typeof import('~icons/mdi/gesture-tap')['default']
     IMdiGithub: typeof import('~icons/mdi/github')['default']
     IMdiLoading: typeof import('~icons/mdi/loading')['default']
     IMdiSourceBranch: typeof import('~icons/mdi/source-branch')['default']

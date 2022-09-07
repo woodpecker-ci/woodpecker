@@ -11,6 +11,7 @@
         <span>{{ build.author }}</span>
       </div>
       <div class="flex space-x-1 items-center min-w-0">
+        <Icon v-if="build.event === 'manual'" name="manual" />
         <Icon v-if="build.event === 'push'" name="push" />
         <Icon v-if="build.event === 'deployment'" name="deployment" />
         <Icon v-else-if="build.event === 'tag'" name="tag" />
