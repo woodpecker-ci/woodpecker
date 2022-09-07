@@ -83,7 +83,7 @@ func Test_parse(t *testing.T) {
 
 			g.Assert(hook.PullRequest.Title).Equal("Update the README with new information")
 			g.Assert(hook.PullRequest.Body).Equal("please merge")
-			g.Assert(hook.PullRequest.State).Equal("open")
+			g.Assert(hook.PullRequest.State).Equal(gitea.StateOpen)
 			g.Assert(hook.PullRequest.Poster.UserName).Equal("gordon")
 			g.Assert(hook.PullRequest.Base.Name).Equal("master")
 			g.Assert(hook.PullRequest.Base.Ref).Equal("master")

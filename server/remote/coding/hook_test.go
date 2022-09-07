@@ -47,8 +47,6 @@ func Test_hook(t *testing.T) {
 				SCMKind:  model.RepoGit,
 			}
 
-			//repo := &model.Repo{ID:0, UserID:0, RemoteID:"", Owner:"demo1", Name:"test1", FullName:"demo1/test1", Avatar:"", Link:"https://coding.net/u/demo1/p/test1", Clone:"https://git.coding.net/demo1/test1.git", Branch:"", SCMKind:"git", Timeout:0, Visibility:"", IsSCMPrivate:false, IsTrusted:false, IsStarred:false, IsGated:false, IsActive:false, AllowPull:false, Config:"", Hash:"", Perm:(*model.Perm)(nil), CancelPreviousPipelineEvents:[]model.WebhookEvent(nil)} does not equal &model.Repo{ID:0, UserID:0, RemoteID:"", Owner:"demo1", Name:"test1", FullName:"demo1/test1", Avatar:"", Link:"https://coding.net/u/demo1/p/test1", Clone:"", Branch:"", SCMKind:"git", Timeout:0, Visibility:"", IsSCMPrivate:false, IsTrusted:false, IsStarred:false, IsGated:false, IsActive:false, AllowPull:false, Config:"", Hash:"", Perm:(*model.Perm)(nil), CancelPreviousPipelineEvents:[]model.WebhookEvent(nil)}
-
 			build := &model.Build{
 				Event:   model.EventPush,
 				Commit:  "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
