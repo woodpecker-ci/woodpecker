@@ -91,7 +91,7 @@ See [Contributing Guide](CONTRIBUTING.md)
 
 ## 📣 Translate
 
-We use a own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
 
 <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
   <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />
