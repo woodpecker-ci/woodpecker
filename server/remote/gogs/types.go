@@ -27,11 +27,7 @@ type pushHook struct {
 
 	Repo *gogs.Repository `json:"repository"`
 
-	Commits []struct {
-		ID      string `json:"id"`
-		Message string `json:"message"`
-		URL     string `json:"url"`
-	} `json:"commits"`
+	Commits []gogs.PayloadCommit `json:"commits"`
 
 	Sender *gogs.User `json:"sender"`
 }

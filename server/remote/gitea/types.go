@@ -16,15 +16,6 @@ package gitea
 
 import "code.gitea.io/sdk/gitea"
 
-type commit struct {
-	ID       string   `json:"id"`
-	Message  string   `json:"message"`
-	URL      string   `json:"url"`
-	Added    []string `json:"added"`
-	Removed  []string `json:"removed"`
-	Modified []string `json:"modified"`
-}
-
 type pushHook struct {
 	Sha     string `json:"sha"`
 	Ref     string `json:"ref"`
@@ -37,9 +28,9 @@ type pushHook struct {
 
 	Repo *gitea.Repository `json:"repository"`
 
-	Commits []commit `json:"commits"`
+	Commits []gitea.PayloadCommit `json:"commits"`
 
-	HeadCommit commit `json:"head_commit"`
+	HeadCommit gitea.PayloadCommit `json:"head_commit"`
 
 	Sender *gitea.User `json:"sender"`
 }
