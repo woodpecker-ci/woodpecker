@@ -21,13 +21,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
