@@ -52,6 +52,7 @@ export type IconNames =
   | 'since'
   | 'push'
   | 'pull_request'
+  | 'manual'
   | 'tag'
   | 'deployment'
   | 'commit'
