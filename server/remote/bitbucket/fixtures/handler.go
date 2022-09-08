@@ -27,6 +27,7 @@ func Handler() http.Handler {
 	gin.SetMode(gin.TestMode)
 
 	e := gin.New()
+	e.GET("/2.0/workspaces/", getWorkspace)
 	e.POST("/site/oauth2/access_token", getOauth)
 	e.GET("/2.0/repositories/:owner/:name", getRepo)
 	e.GET("/2.0/repositories/:owner/:name/hooks", getRepoHooks)
@@ -40,6 +41,11 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
 
 	return e
+}
+
+func getWorkspace(c *gin.Context) {
+	// role, _ := c.Params.Get("role")
+	// TODO: add dummy response for get workplace
 }
 
 func getOauth(c *gin.Context) {

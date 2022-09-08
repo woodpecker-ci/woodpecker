@@ -36,10 +36,10 @@ type Workspace struct {
 }
 
 type WorkspacesResp struct {
-	Page   int         `json:"page"`
-	Pages  int         `json:"pagelen"`
-	Size   int         `json:"size"`
-	Next   string      `json:"next"`
+	Page   int          `json:"page"`
+	Pages  int          `json:"pagelen"`
+	Size   int          `json:"size"`
+	Next   string       `json:"next"`
 	Values []*Workspace `json:"values"`
 }
 
@@ -82,6 +82,7 @@ type HookResp struct {
 }
 
 type Links struct {
+	Self   Link   `json:"self"`
 	Avatar Link   `json:"avatar"`
 	HTML   Link   `json:"html"`
 	Clone  []Link `json:"clone"`
