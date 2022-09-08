@@ -73,7 +73,7 @@ clean:
 .PHONY: lint
 lint: install-tools
 	@echo "Running golangci-lint"
-	golangci-lint run --timeout 5m
+	golangci-lint run --timeout 10m
 	@echo "Running zerolog linter"
 	lint github.com/woodpecker-ci/woodpecker/cmd/agent
 	lint github.com/woodpecker-ci/woodpecker/cmd/cli
