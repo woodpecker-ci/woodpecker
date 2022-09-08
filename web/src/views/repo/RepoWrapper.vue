@@ -29,7 +29,7 @@
         <Tab id="branches" :title="$t('repo.branches')" />
       </Tabs>
 
-      <div class="flex justify-between text-color flex-shrink-0 md:p-0 mx-auto md:mr-0">
+      <div class="flex justify-between text-color flex-shrink-0 md:p-0 mx-auto md:mr-0" v-if="repoPermissions.push">
         <div class="flex items-center flex-shrink-0">
           <Button type="submit" :text="$t('repo.manual.trigger')" @click="router.push({ name: 'manual' })" />
         </div>
