@@ -110,7 +110,7 @@ export default defineComponent({
 
     async function runManual() {
       loading.value = true;
-      const build = await apiClient.manualBuild(`${route.params.repoOwner}`, `${route.params.repoName}`, payload.value);
+      const build = await apiClient.createBuild(`${route.params.repoOwner}`, `${route.params.repoName}`, payload.value);
 
       router.push({
         name: 'repo-build',

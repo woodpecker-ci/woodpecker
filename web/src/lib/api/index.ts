@@ -19,7 +19,7 @@ type RepoListOptions = {
   flush?: boolean;
 };
 
-type ManualBuildOptions = {
+type BuildOptions = {
   branch: string;
   variables: Record<string, string>;
 };
@@ -63,7 +63,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/builds?${query}`) as Promise<Build[]>;
   }
 
-  manualBuild(owner: string, repo: string, options: ManualBuildOptions): Promise<Build> {
+  createBuild(owner: string, repo: string, options: BuildOptions): Promise<Build> {
     return this._post(`/api/repos/${owner}/${repo}/builds`, options) as Promise<Build>;
   }
 
