@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 	"io"
 	"net/http"
 	"strconv"
@@ -41,12 +42,7 @@ func CreateBuild(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	type ManualBuildReq struct {
-		Branch    string            `json:"branch"`
-		Variables map[string]string `json:"variables"`
-	}
-
-	var p ManualBuildReq
+	var p woodpecker.BuildOptions
 
 	err := json.NewDecoder(c.Request.Body).Decode(&p)
 	if err != nil {
