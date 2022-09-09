@@ -29,11 +29,13 @@
         <Tab id="branches" :title="$t('repo.branches')" />
       </Tabs>
 
-      <div class="flex justify-between text-color flex-shrink-0 md:p-0 mx-auto md:mr-0" v-if="repoPermissions.push">
-        <div class="flex items-center flex-shrink-0">
-          <Button type="submit" :text="$t('repo.manual.trigger')" @click="router.push({ name: 'manual' })" />
-        </div>
-      </div>
+      <Button
+        v-if="repoPermissions.push"
+        type="submit"
+        :text="$t('repo.manual.trigger')"
+        class="ml-auto"
+        @click="router.push({ name: 'manual' })"
+      />
     </div>
     <router-view />
   </FluidContainer>
@@ -59,15 +61,11 @@ import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoOwner: {
     type: String,
     required: true,
   },
 
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoName: {
     type: String,
     required: true,
