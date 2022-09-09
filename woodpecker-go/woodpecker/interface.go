@@ -71,7 +71,7 @@ type Client interface {
 	BuildList(string, string) ([]*Build, error)
 
 	// BuildCreate returns creates a build on specified branch.
-	BuildCreate(string, string, string, map[string]string) (*Build, error)
+	BuildCreate(string, string, *BuildOptions) (*Build, error)
 
 	// BuildQueue returns a list of enqueued builds.
 	BuildQueue() ([]*Activity, error)

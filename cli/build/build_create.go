@@ -1,6 +1,7 @@
 package build
 
 import (
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 	"os"
 	"strings"
 	"text/template"
@@ -53,7 +54,12 @@ func buildCreate(c *cli.Context) error {
 		}
 	}
 
-	build, err := client.BuildCreate(owner, name, branch, variables)
+	options := &woodpecker.BuildOptions{
+		Branch:    branch,
+		Variables: variables,
+	}
+
+	build, err := client.BuildCreate(owner, name, options)
 	if err != nil {
 		return err
 	}

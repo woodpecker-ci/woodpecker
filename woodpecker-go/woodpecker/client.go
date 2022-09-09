@@ -215,10 +215,10 @@ func (c *client) BuildList(owner, name string) ([]*Build, error) {
 	return out, err
 }
 
-func (c *client) BuildCreate(owner, name, branch string, variables map[string]string) (*Build, error) {
+func (c *client) BuildCreate(owner, name string, options *BuildOptions) (*Build, error) {
 	var out *Build
 	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
-	err := c.post(uri, &BuildOptions{Branch: branch, Variables: variables}, &out)
+	err := c.post(uri, options, &out)
 	return out, err
 }
 
