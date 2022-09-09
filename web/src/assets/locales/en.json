@@ -29,7 +29,7 @@
           "select_branch": "Select branch",
           "variables": {
             "add": "Add variable",
-            "title": "Build variables",
+            "title": "Additional Build variables",
             "desc": "Build variables can be used to inject environment variables",
             "key": "Variable key",
             "value": "Variable value"
