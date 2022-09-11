@@ -11,18 +11,57 @@
     "activity": "Activité",
     "add": "Ajouter un dépôt",
     "branches": "Branches",
+    "build": {
+      "actions": {
+        "cancel": "Annuler"
+      },
+      "config": "Configuration",
+      "tasks": "Tâches"
+    },
     "enable": {
       "enable": "Activer",
-      "enabled": "Déjà activer",
-      "list_reloaded": "Liste des dépôts actualisé",
+      "enabled": "Déjà activé",
+      "list_reloaded": "Liste des dépôts actualisée",
       "reload": "Actualiser les dépôts",
-      "success": "Dépôt activer"
+      "success": "Dépôt activé"
     },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
     "settings": {
+      "actions": {
+        "actions": "Actions",
+        "repair": {
+          "repair": "Réparer un dépôt"
+        }
+      },
+      "badge": {
+        "badge": "Badge",
+        "markdown": "Markdown"
+      },
+      "crons": {
+        "add": "Ajouter une tâche planifiée",
+        "branch": {
+          "title": "Branche"
+        },
+        "created": "Tâche planifiée crée",
+        "crons": "Tâches planifiées",
+        "deleted": "Tâche planifiée effacée",
+        "desc": "Les tâches planifiées peuvent déclencher des pipelines à intervalles réguliers.",
+        "name": {
+          "name": "Nom"
+        },
+        "next_exec": "Prochaine exécution",
+        "none": "Il n'y a pas de tâche planifié pour le moment.",
+        "save": "Enregistrer la tâche planifiée",
+        "saved": "Tâche planifiée enregistrée",
+        "schedule": {
+          "placeholder": "Horaire",
+          "title": "Horaire (basé sur UTC)"
+        },
+        "show": "Afficher les taches planifiées"
+      },
       "general": {
         "allow_pr": {
-          "allow": "Autorisé les demandes de fusions"
+          "allow": "Autoriser les demandes de fusions"
         },
         "general": "Générale",
         "pipeline_path": {
@@ -34,32 +73,65 @@
         "protected": {
           "protected": "Protégé"
         },
-        "save": "Sauvegarder les paramètres",
+        "save": "Enregistrer les paramètres",
         "success": "Paramètres du dépôt mis à jour",
         "timeout": {
-          "minutes": "minutes"
+          "minutes": "minutes",
+          "timeout": "Délai d’inactivité"
         },
         "trusted": {
-          "trusted": "Vérifier"
+          "trusted": "Vérifié"
         },
         "visibility": {
           "internal": {
+            "desc": "Seuls les utilisateurs authentifiés de l'instance peuvent voir ce projet.",
             "internal": "Interne"
           },
           "private": {
             "desc": "Seulement vous et les autres propriétaires de ce dépôt peuvent voir ce projet.",
-            "private": "Privé"
+            "private": "Privée"
           },
           "public": {
-            "desc": "Tout les utilisateurs peuvent voire votre projet sans être connecté.",
+            "desc": "Tout les utilisateurs peuvent voir votre projet sans être connecté.",
             "public": "Publique"
           },
           "visibility": "Visibilité du projet"
         }
       },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
+      "registries": {
+        "add": "Ajouter un registre",
+        "address": {
+          "address": "Adresse",
+          "placeholder": "Adresse du registre (e.g. docker.io)"
+        },
+        "created": "Authentifiant de registre crée",
+        "creds": "Authentifiants de connexion pour le registre",
+        "deleted": "Authentifiant de registre effacé",
+        "desc": "Des authentifiant de connexion pour les registres peuvent être ajouter pour permettre d'utiliser des images privés pour vos pipelines.",
+        "none": "Il n'y a pas d’authentifiant de connexion de registre pour le moment.",
+        "registries": "Registres",
+        "save": "Enregistrer le registre",
+        "saved": "Authentifiant de registre enregistré",
+        "show": "Afficher les registres"
+      },
       "secrets": {
-        "secrets": "Secrets"
+        "add": "Ajouter un secret",
+        "created": "Secret crée",
+        "deleted": "Secret effacé",
+        "events": {
+          "events": "Disponible pour les événements suivants"
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "none": "Il n'y a pas de secrets pour le moment.",
+        "save": "Enregistrer un secret",
+        "saved": "Secret enregistré",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur"
       },
       "settings": "Paramètres"
     },
@@ -72,13 +144,13 @@
     "days_short": "d",
     "hours_short": "h",
     "min_short": "min",
-    "not_started": "Pas encore démarrer",
+    "not_started": "Pas encore démarré",
     "sec_short": "sec",
     "tmpl": "D MMM, YYYY, HH:mm z",
     "weeks_short": "w"
   },
   "unknown_error": "Une erreur inconnue est survenue",
   "url": "URL",
-  "username": "Pseudo",
+  "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"
 }
