@@ -76,6 +76,7 @@ declare module '@vue/runtime-core' {
     NumberField: typeof import('./src/components/form/NumberField.vue')['default']
     OrgSecretsTab: typeof import('./src/components/org/settings/OrgSecretsTab.vue')['default']
     Panel: typeof import('./src/components/layout/Panel.vue')['default']
+    Popup: typeof import('./src/components/layout/Popup.vue')['default']
     RadioField: typeof import('./src/components/form/RadioField.vue')['default']
     RegistriesTab: typeof import('./src/components/repo/settings/RegistriesTab.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

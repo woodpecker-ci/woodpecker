@@ -34,8 +34,11 @@
         type="submit"
         :text="$t('repo.manual.trigger')"
         class="ml-auto"
-        @click="router.push({ name: 'repo-manual-pipeline' })"
+        @click="popupOpen = true"
       />
+      <Popup :open="popupOpen" @close="popupOpen = false">
+        <RepoBuild />
+      </Popup>
     </div>
     <router-view />
   </FluidContainer>
@@ -59,6 +62,8 @@ import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
+import Popup from "~/components/layout/Popup.vue";
+import RepoBuild from "~/views/repo/RepoBuild.vue";
 
 const props = defineProps({
   repoOwner: {
@@ -90,6 +95,8 @@ const builds = buildStore.getSortedBuilds(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('builds', builds);
+
+const popupOpen = ref<boolean>(false);
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
