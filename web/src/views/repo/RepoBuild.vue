@@ -58,9 +58,7 @@ const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
 const payload = ref<{ branch: string; variables: Record<string, string> }>({
   branch: 'main',
-  variables: {
-    MANUAL_BUILD: 'true',
-  },
+  variables: {},
 });
 const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', value: '' });
 
