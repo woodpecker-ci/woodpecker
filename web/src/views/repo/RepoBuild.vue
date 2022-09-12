@@ -17,7 +17,9 @@
             <TextField :model-value="name" disabled />
             <TextField :model-value="value" disabled />
             <div class="w-34 flex-shrink-0">
-              <Button type="submit" text="X" class="ml-auto" @click="deleteVar(name)" />
+              <Button type="submit" class="ml-auto" @click="deleteVar(name)">
+                <i-la-times />
+              </Button>
             </div>
           </div>
           <form class="flex gap-4" @submit.prevent="addPipelineVariable">
