@@ -94,8 +94,6 @@ async function triggerManualPipeline() {
   await router.push({
     name: 'repo-build',
     params: {
-      repoOwner: repo.value.owner,
-      repoName: repo.value.name,
       buildId: build.number,
     },
   });
