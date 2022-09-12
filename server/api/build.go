@@ -63,8 +63,8 @@ func CreateBuild(c *gin.Context) {
 		Avatar:  user.Avatar,
 		Message: "MANUAL BUILD @ " + p.Branch,
 
-		Ref:       p.Branch,
-		Variables: p.Variables,
+		Ref:                 p.Branch,
+		AdditionalVariables: p.Variables,
 
 		Author: user.Login,
 		Email:  user.Email,

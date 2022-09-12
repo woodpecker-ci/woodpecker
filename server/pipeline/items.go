@@ -60,7 +60,7 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		}
 	}
 
-	for k, v := range build.Variables {
+	for k, v := range build.AdditionalVariables {
 		envs[k] = v
 	}
 
