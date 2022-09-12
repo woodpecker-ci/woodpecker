@@ -46,6 +46,7 @@ declare module '@vue/runtime-core' {
     IIcRoundLightMode: typeof import('~icons/ic/round-light-mode')['default']
     IIcSharpTimelapse: typeof import('~icons/ic/sharp-timelapse')['default']
     IIcTwotoneAdd: typeof import('~icons/ic/twotone-add')['default']
+    ILaTimes: typeof import('~icons/la/times')['default']
     IMdiBitbucket: typeof import('~icons/mdi/bitbucket')['default']
     IMdiChevronRight: typeof import('~icons/mdi/chevron-right')['default']
     IMdiClockTimeEightOutline: typeof import('~icons/mdi/clock-time-eight-outline')['default']

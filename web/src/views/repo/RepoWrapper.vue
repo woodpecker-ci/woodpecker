@@ -34,7 +34,7 @@
         type="submit"
         :text="$t('repo.manual.trigger')"
         class="ml-auto"
-        @click="router.push({ name: 'manual' })"
+        @click="router.push({ name: 'repo-manual-pipeline' })"
       />
     </div>
     <router-view />
