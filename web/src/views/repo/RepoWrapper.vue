@@ -53,6 +53,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Popup from '~/components/layout/Popup.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -62,8 +63,7 @@ import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
-import Popup from "~/components/layout/Popup.vue";
-import RepoBuild from "~/views/repo/RepoBuild.vue";
+import RepoBuild from '~/views/repo/RepoBuild.vue';
 
 const props = defineProps({
   repoOwner: {

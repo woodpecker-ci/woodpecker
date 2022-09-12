@@ -1,10 +1,11 @@
 package build
 
 import (
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli/v2"
 
