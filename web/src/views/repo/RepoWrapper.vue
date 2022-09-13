@@ -34,11 +34,9 @@
         type="submit"
         :text="$t('repo.manual.trigger')"
         class="ml-auto"
-        @click="popupOpen = true"
+        @click="showManualPipelinePopup = true"
       />
-      <Popup :open="popupOpen" @close="popupOpen = false">
-        <RepoBuild />
-      </Popup>
+      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
     </div>
     <router-view />
   </FluidContainer>
@@ -53,7 +51,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
-import Popup from '~/components/layout/Popup.vue';
+import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -63,7 +61,6 @@ import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
 import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
-import RepoBuild from '~/views/repo/RepoBuild.vue';
 
 const props = defineProps({
   repoOwner: {
@@ -96,7 +93,7 @@ provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('builds', builds);
 
-const popupOpen = ref<boolean>(false);
+const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);

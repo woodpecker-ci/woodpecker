@@ -1,6 +1,6 @@
 <template>
-  <Panel>
-    <template v-if="!loading">
+  <Popup :open="open" @close="$emit('close')">
+    <Panel v-if="!loading">
       <span class="text-xl text-color">{{ $t('repo.manual.title') }}</span>
       <InputField :label="$t('repo.manual.select_branch')">
         <SelectField
@@ -35,8 +35,8 @@
         </div>
       </InputField>
       <Button type="submit" :text="$t('repo.manual.trigger')" @click="triggerManualPipeline" />
-    </template>
-  </Panel>
+    </Panel>
+  </Popup>
 </template>
 
 <script lang="ts" setup>
@@ -47,8 +47,17 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
+import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
+
+defineProps<{
+  open: boolean;
+}>();
+
+const emit = defineEmits<{
+  (event: 'close'): void;
+}>();
 
 const apiClient = useApiClient();
 
@@ -88,6 +97,8 @@ function deleteVar(key: string) {
 async function triggerManualPipeline() {
   loading.value = true;
   const build = await apiClient.createBuild(repo.value.owner, repo.value.name, payload.value);
+
+  emit('close');
 
   await router.push({
     name: 'repo-build',

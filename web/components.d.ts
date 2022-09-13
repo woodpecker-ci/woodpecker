@@ -72,6 +72,7 @@ declare module '@vue/runtime-core' {
     ITeenyiconsGitSolid: typeof import('~icons/teenyicons/git-solid')['default']
     IVaadinQuestionCircleO: typeof import('~icons/vaadin/question-circle-o')['default']
     ListItem: typeof import('./src/components/atomic/ListItem.vue')['default']
+    ManualPipelinePopup: typeof import('./src/components/layout/popups/ManualPipelinePopup.vue')['default']
     Navbar: typeof import('./src/components/layout/header/Navbar.vue')['default']
     NumberField: typeof import('./src/components/form/NumberField.vue')['default']
     OrgSecretsTab: typeof import('./src/components/org/settings/OrgSecretsTab.vue')['default']
