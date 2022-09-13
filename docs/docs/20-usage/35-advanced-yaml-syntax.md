@@ -37,10 +37,9 @@ Just add a new section called **variables** like this:
 ```yml
 variables: 
   &some-plugin-settings
-      settings:
-        target: dist
-        recursive: false
-        try: true
+    target: dist
+    recursive: false
+    try: true
 
 pipelines:
   develop:
@@ -50,7 +49,7 @@ pipelines:
     when:
       branch: develop
 
-  main
+  main:
     name: Build and test
     image: some-plugin
     settings:
