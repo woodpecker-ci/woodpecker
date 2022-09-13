@@ -35,7 +35,7 @@
           <Icon v-else-if="build.event === 'deployment'" name="deployment" />
           <Icon v-else-if="build.event === 'tag'" name="tag" />
           <Icon v-else-if="build.event === 'cron'" name="push" />
-          <Icon v-else-if="build.event === 'manual'" name="manual" />
+          <Icon v-else-if="build.event === 'manual'" name="manual-pipeline" />
           <Icon v-else name="push" />
           <span class="truncate">{{ prettyRef }}</span>
         </div>

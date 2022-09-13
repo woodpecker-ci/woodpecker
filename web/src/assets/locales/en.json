@@ -24,7 +24,7 @@
         "not_started": "not started yet"
     },
     "repo": {
-        "manual": {
+        "manual_pipeline": {
           "title": "Trigger a manual pipeline run",
           "trigger": "Run pipeline",
           "select_branch": "Select branch",

@@ -11,7 +11,7 @@
         <span>{{ build.author }}</span>
       </div>
       <div class="flex space-x-1 items-center min-w-0">
-        <Icon v-if="build.event === 'manual'" name="manual" />
+        <Icon v-if="build.event === 'manual'" name="manual-pipeline" />
         <Icon v-if="build.event === 'push'" name="push" />
         <Icon v-if="build.event === 'deployment'" name="deployment" />
         <Icon v-else-if="build.event === 'tag'" name="tag" />
@@ -46,7 +46,7 @@
       <div class="md:absolute top-0 left-0 w-full">
         <div v-for="proc in build.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <div v-if="build.procs.length > 1" class="flex items-center">
+            <div v-if="build.procs && build.procs.length > 1" class="flex items-center">
               <span class="ml-2">{{ proc.name }}</span>
             </div>
             <div v-if="proc.environ" class="text-xs">
