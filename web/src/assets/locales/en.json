@@ -31,7 +31,7 @@
           "variables": {
             "add": "Add variable",
             "title": "Additional pipeline variables",
-            "desc": "Pipeline variables can be used to inject additional environment variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
             "name": "Variable name",
             "value": "Variable value"
           }
