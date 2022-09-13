@@ -219,7 +219,8 @@
                 "tag": "Tag",
                 "pr": "Pull Request",
                 "deploy": "Deploy",
-                "cron": "Cron"
+                "cron": "Cron",
+                "manual": "Manual"
             }
         }
     },
