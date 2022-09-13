@@ -6,29 +6,19 @@
     @click="$emit('close')"
   />
   <!-- overlay end -->
-  <transition class="print:hidden fixed flex left-0 top-0 right-0 bottom-0">
-    <div v-if="open" class="m-auto flex flex-col shadow-all z-1000 max-w-3/5 max-h-3/5">
-      <div class="m-auto flex">
-        <slot />
-      </div>
+  <transition class="print:hidden fixed flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    <div v-if="open" class="m-auto flex flex-col shadow-all z-1000 max-w-3/5 max-h-3/5 h-auto">
+      <slot />
     </div>
   </transition>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+defineProps<{
+  open: boolean;
+}>();
 
-export default defineComponent({
-  name: 'Popup',
-
-  props: {
-    open: {
-      type: Boolean,
-    },
-  },
-
-  emits: {
-    close: () => true,
-  },
-});
+defineEmits<{
+  (event: 'close'): void;
+}>();
 </script>
