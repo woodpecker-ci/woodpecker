@@ -63,7 +63,7 @@ func (e *engine) Name() string {
 	return "podman"
 }
 
-func (e *engine) IsAvivable() bool {
+func (e *engine) IsAvailable() bool {
 	_, err := os.Stat("/run/.containerenv")
 	return os.IsNotExist(err)
 }
