@@ -14,7 +14,8 @@
 
 package frontend
 
-func (m *Metadata) droneEnviron(env map[string]string) {
+// setDroneEnviron set  dedicated to DroneCI environment vars as compatibility layer
+func (m *Metadata) setDroneEnviron(env map[string]string) {
 	// webhook
 	env["DRONE_BRANCH"] = env["CI_COMMIT_BRANCH"]
 	env["DRONE_PULL_REQUEST"] = env["CI_COMMIT_PULL_REQUEST"]
