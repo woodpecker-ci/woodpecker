@@ -27,12 +27,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/expr"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -55,7 +52,7 @@ type RPC struct {
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) {
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
@@ -64,7 +61,7 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 		}
 	}
 
-	fn, err := createFilterFunc(filter)
+	fn, err := createFilterFunc(agentFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -80,10 +77,9 @@ func (s *RPC) Next(c context.Context, filter rpc.Filter) (*rpc.Pipeline, error) 
 			pipeline := new(rpc.Pipeline)
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
-		} else {
-			if err := s.Done(c, task.ID, rpc.State{}); err != nil {
-				log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
-			}
+		}
+		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
+			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
 }
@@ -138,11 +134,16 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	}
 
 	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
-		log.Error().Msgf("error: rpc.update: cannot update proc: %s", err)
+		log.Error().Err(err).Msg("rpc.update: cannot update proc")
 	}
 
-	build.Procs, _ = s.store.ProcList(build)
-	build.Procs = model.Tree(build.Procs)
+	if build.Procs, err = s.store.ProcList(build); err != nil {
+		log.Error().Err(err).Msg("can not get proc list from store")
+	}
+	if build.Procs, err = model.Tree(build.Procs); err != nil {
+		log.Error().Err(err).Msg("can not build tree from proc list")
+		return err
+	}
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -317,6 +318,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
+	log.Trace().
+		Str("repo_id", fmt.Sprint(repo.ID)).
+		Str("build_id", fmt.Sprint(build.ID)).
+		Str("proc_id", id).
+		Msgf("gRPC Done with state: %#v", state)
+
 	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
@@ -331,48 +338,37 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: done: cannot ack proc_id %d: %s", procID, err)
 	}
 
-	procs, _ := s.store.ProcList(build)
+	procs, err := s.store.ProcList(build)
+	if err != nil {
+		return err
+	}
 	s.completeChildrenIfParentCompleted(procs, proc)
 
-	if !isThereRunningStage(procs) {
-		if build, err = shared.UpdateStatusToDone(s.store, *build, buildStatus(procs), proc.Stopped); err != nil {
-			log.Error().Msgf("error: done: cannot update build_id %d final state: %s", build.ID, err)
-		}
-
-		if !isMultiPipeline(procs) {
-			s.updateRemoteStatus(c, repo, build, nil)
+	if !model.IsThereRunningStage(procs) {
+		if build, err = shared.UpdateStatusToDone(s.store, *build, model.BuildStatus(procs), proc.Stopped); err != nil {
+			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", build.ID)
 		}
 	}
 
-	if isMultiPipeline(procs) {
-		s.updateRemoteStatus(c, repo, build, proc)
-	}
+	s.updateRemoteStatus(c, repo, build, proc)
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Msgf("error: done: cannot close build_id %d logger: %s", proc.ID, err)
+		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
 	}
 
-	s.notify(c, repo, build, procs)
+	if err := s.notify(c, repo, build, procs); err != nil {
+		return err
+	}
 
 	if build.Status == model.StatusSuccess || build.Status == model.StatusFailure {
 		s.buildCount.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Inc()
 		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Set(float64(build.Finished - build.Started))
 	}
-	if isMultiPipeline(procs) {
+	if model.IsMultiPipeline(procs) {
 		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(proc.State), proc.Name).Set(float64(proc.Stopped - proc.Started))
 	}
 
 	return nil
-}
-
-func isMultiPipeline(procs []*model.Proc) bool {
-	countPPIDZero := 0
-	for _, proc := range procs {
-		if proc.PPID == 0 {
-			countPPIDZero++
-		}
-	}
-	return countPPIDZero > 1
 }
 
 // Log implements the rpc.Log function
@@ -395,54 +391,37 @@ func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedPr
 	}
 }
 
-func isThereRunningStage(procs []*model.Proc) bool {
-	for _, p := range procs {
-		if p.PPID == 0 {
-			if p.Running() {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func buildStatus(procs []*model.Proc) model.StatusValue {
-	status := model.StatusSuccess
-
-	for _, p := range procs {
-		if p.PPID == 0 {
-			if p.Failing() {
-				status = p.State
-			}
-		}
-	}
-
-	return status
-}
-
 func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
-	if err == nil {
-		if refresher, ok := s.remote.(remote.Refresher); ok {
-			ok, err := refresher.Refresh(ctx, user)
-			if err != nil {
-				log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-			} else if ok {
-				if err := s.store.UpdateUser(user); err != nil {
-					log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-				}
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		return
+	}
+
+	if refresher, ok := s.remote.(remote.Refresher); ok {
+		ok, err := refresher.Refresh(ctx, user)
+		if err != nil {
+			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
+		} else if ok {
+			if err := s.store.UpdateUser(user); err != nil {
+				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
 			}
 		}
-		uri := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, build.Number)
-		err = s.remote.Status(ctx, user, repo, build, uri, proc)
+	}
+
+	// only do status updates for parent procs
+	if proc != nil && proc.IsParent() {
+		err = s.remote.Status(ctx, user, repo, build, proc)
 		if err != nil {
-			log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
 		}
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) {
-	build.Procs = model.Tree(procs)
+func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) (err error) {
+	if build.Procs, err = model.Tree(procs); err != nil {
+		return err
+	}
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -456,169 +435,5 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
-}
-
-func createFilterFunc(filter rpc.Filter) (queue.Filter, error) {
-	var st *expr.Selector
-	var err error
-
-	if filter.Expr != "" {
-		st, err = expr.ParseString(filter.Expr)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return func(task *queue.Task) bool {
-		if st != nil {
-			match, _ := st.Eval(expr.NewRow(task.Labels))
-			return match
-		}
-
-		for k, v := range filter.Labels {
-			if task.Labels[k] != v {
-				return false
-			}
-		}
-		return true
-	}, nil
-}
-
-//
-//
-//
-
-// WoodpeckerServer is a grpc server implementation.
-type WoodpeckerServer struct {
-	proto.UnimplementedWoodpeckerServer
-	peer RPC
-}
-
-func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
-	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "build_time",
-		Help:      "Build time.",
-	}, []string{"repo", "branch", "status", "pipeline"})
-	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "woodpecker",
-		Name:      "build_count",
-		Help:      "Build count.",
-	}, []string{"repo", "branch", "status", "pipeline"})
-	peer := RPC{
-		remote:     remote,
-		store:      store,
-		queue:      queue,
-		pubsub:     pubsub,
-		logger:     logger,
-		host:       host,
-		buildTime:  buildTime,
-		buildCount: buildCount,
-	}
-	return &WoodpeckerServer{peer: peer}
-}
-
-func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
-	filter := rpc.Filter{
-		Labels: req.GetFilter().GetLabels(),
-		Expr:   req.GetFilter().GetExpr(),
-	}
-
-	res := new(proto.NextReply)
-	pipeline, err := s.peer.Next(c, filter)
-	if err != nil {
-		return res, err
-	}
-	if pipeline == nil {
-		return res, err
-	}
-
-	res.Pipeline = new(proto.Pipeline)
-	res.Pipeline.Id = pipeline.ID
-	res.Pipeline.Timeout = pipeline.Timeout
-	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
-
-	return res, err
-}
-
-func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
-	}
-	res := new(proto.Empty)
-	err := s.peer.Init(c, req.GetId(), state)
-	return res, err
-}
-
-func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
-	}
-	res := new(proto.Empty)
-	err := s.peer.Update(c, req.GetId(), state)
-	return res, err
-}
-
-func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (*proto.Empty, error) {
-	file := &rpc.File{
-		Data: req.GetFile().GetData(),
-		Mime: req.GetFile().GetMime(),
-		Name: req.GetFile().GetName(),
-		Proc: req.GetFile().GetProc(),
-		Size: int(req.GetFile().GetSize()),
-		Time: req.GetFile().GetTime(),
-		Meta: req.GetFile().GetMeta(),
-	}
-
-	res := new(proto.Empty)
-	err := s.peer.Upload(c, req.GetId(), file)
-	return res, err
-}
-
-func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
-	}
-	res := new(proto.Empty)
-	err := s.peer.Done(c, req.GetId(), state)
-	return res, err
-}
-
-func (s *WoodpeckerServer) Wait(c context.Context, req *proto.WaitRequest) (*proto.Empty, error) {
-	res := new(proto.Empty)
-	err := s.peer.Wait(c, req.GetId())
-	return res, err
-}
-
-func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (*proto.Empty, error) {
-	res := new(proto.Empty)
-	err := s.peer.Extend(c, req.GetId())
-	return res, err
-}
-
-func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
-	line := &rpc.Line{
-		Out:  req.GetLine().GetOut(),
-		Pos:  int(req.GetLine().GetPos()),
-		Time: req.GetLine().GetTime(),
-		Proc: req.GetLine().GetProc(),
-	}
-	res := new(proto.Empty)
-	err := s.peer.Log(c, req.GetId(), line)
-	return res, err
+	return nil
 }

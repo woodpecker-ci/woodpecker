@@ -25,18 +25,24 @@ type PermStore interface {
 
 // Perm defines a repository permission for an individual user.
 type Perm struct {
-	UserID  int64  `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
-	RepoID  int64  `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
-	Repo    string `json:"-"       xorm:"-"` // TODO: better caching (use type *Repo)
-	Pull    bool   `json:"pull"    xorm:"perm_pull"`
-	Push    bool   `json:"push"    xorm:"perm_push"`
-	Admin   bool   `json:"admin"   xorm:"perm_admin"`
-	Synced  int64  `json:"synced"  xorm:"perm_synced"`
-	Created int64  `json:"created" xorm:"created"`
-	Updated int64  `json:"updated" xorm:"updated"`
+	UserID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
+	RepoID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
+	Repo    *Repo `json:"-"       xorm:"-"`
+	Pull    bool  `json:"pull"    xorm:"perm_pull"`
+	Push    bool  `json:"push"    xorm:"perm_push"`
+	Admin   bool  `json:"admin"   xorm:"perm_admin"`
+	Synced  int64 `json:"synced"  xorm:"perm_synced"`
+	Created int64 `json:"created" xorm:"created"`
+	Updated int64 `json:"updated" xorm:"updated"`
 }
 
 // TableName return database table name for xorm
 func (Perm) TableName() string {
 	return "perms"
+}
+
+// OrgPerm defines a organization permission for an individual user.
+type OrgPerm struct {
+	Member bool `json:"member"`
+	Admin  bool `json:"admin"`
 }

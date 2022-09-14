@@ -8,41 +8,69 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
-type configFetcher struct {
-	remote_ remote.Remote
-	user    *model.User
-	repo    *model.Repo
-	build   *model.Build
+type ConfigFetcher interface {
+	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
 }
 
-func NewConfigFetcher(remote remote.Remote, user *model.User, repo *model.Repo, build *model.Build) *configFetcher {
+// TODO(974) move to new package
+
+type configFetcher struct {
+	remote          remote.Remote
+	user            *model.User
+	repo            *model.Repo
+	build           *model.Build
+	configExtension config.Extension
+}
+
+func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
 	return &configFetcher{
-		remote_: remote,
-		user:    user,
-		repo:    repo,
-		build:   build,
+		remote:          remote,
+		user:            user,
+		repo:            repo,
+		build:           build,
+		configExtension: configExtension,
 	}
 }
 
 // configFetchTimeout determine seconds the configFetcher wait until cancel fetch process
-var configFetchTimeout = 3 // seconds
+var configFetchTimeout = time.Second * 3
 
 // Fetch pipeline config from source forge
 func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
-	// try to fetch 3 times, timeout is one second longer each time
+	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*time.Duration(configFetchTimeout), strings.TrimSpace(cf.repo.Config))
-		log.Trace().Msgf("%d try failed: %v", i, err)
+		files, err = cf.fetch(ctx, configFetchTimeout, strings.TrimSpace(cf.repo.Config))
+		if err != nil {
+			log.Trace().Err(err).Msgf("%d. try failed", i+1)
+		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
 		}
+
+		if cf.configExtension != nil && cf.configExtension.IsConfigured() {
+			fetchCtx, cancel := context.WithTimeout(ctx, configFetchTimeout)
+			defer cancel() // ok here as we only try http fetching once, returning on fail and success
+
+			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.build, files)
+			if err != nil {
+				log.Error().Msg("Got error " + err.Error())
+				return nil, fmt.Errorf("On Fetching config via http : %s", err)
+			}
+
+			if !useOld {
+				return newConfigs, nil
+			}
+		}
+
 		return
 	}
 	return
@@ -58,7 +86,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
-			file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+			file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 			if err == nil && len(file) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 				return []*remote.FileMeta{{
@@ -69,7 +97,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		}
 
 		// or a folder
-		files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
+		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
 		if err == nil && len(files) != 0 {
 			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
@@ -84,7 +112,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	// test .woodpecker/ folder
 	// if folder is not supported we will get a "Not implemented" error and continue
 	config = ".woodpecker"
-	files, err := cf.remote_.Dir(ctx, cf.user, cf.repo, cf.build, config)
+	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
@@ -92,7 +120,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".woodpecker.yml"
-	file, err := cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
@@ -102,7 +130,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".drone.yml"
-	file, err = cf.remote_.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err = cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{

@@ -23,6 +23,15 @@ pipeline:
   environment:
     image: golang
     environment:
+      CGO: 0
+      GOOS: linux
+      GOARCH: amd64
+    commands:
+      - go test
+
+  environment-array:
+    image: golang
+    environment:
       - CGO=0
       - GOOS=linux
       - GOARCH=amd64
@@ -32,8 +41,8 @@ pipeline:
   secrets:
     image: docker
     commands:
-     - echo $DOCKER_USERNAME
-     - echo $DOCKER_PASSWORD
+      - echo $DOCKER_USERNAME
+      - echo $DOCKER_PASSWORD
     secrets:
       - docker_username
       - source: docker_prod_password

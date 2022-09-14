@@ -27,10 +27,44 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
+func (s storage) GetRepoRemoteID(id model.RemoteID) (*model.Repo, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoRemoteID(sess, id)
+}
+
+func (s storage) getRepoRemoteID(e *xorm.Session, id model.RemoteID) (*model.Repo, error) {
+	repo := new(model.Repo)
+	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
+}
+
+func (s storage) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoNameFallback(sess, remoteID, fullName)
+}
+
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.RemoteID, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoRemoteID(e, remoteID)
+	if err == RecordNotExist {
+		return s.getRepoName(e, fullName)
+	}
+	return repo, err
+}
+
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoName(sess, fullName)
+	repo, err := s.getRepoName(sess, fullName)
+	if err == RecordNotExist {
+		// the repository does not exist, so look for a redirection
+		redirect, err := s.getRedirection(sess, fullName)
+		if err != nil {
+			return nil, err
+		}
+		return s.GetRepo(redirect.RepoID)
+	}
+	return repo, err
 }
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
@@ -54,12 +88,54 @@ func (s storage) UpdateRepo(repo *model.Repo) error {
 }
 
 func (s storage) DeleteRepo(repo *model.Repo) error {
-	_, err := s.engine.ID(repo.ID).Delete(new(model.Repo))
-	// TODO: delete related within a session
-	return err
+	const batchSize = perPage
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("perm_repo_id = ?", repo.ID).Delete(new(model.Perm)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("registry_repo_id = ?", repo.ID).Delete(new(model.Registry)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection)); err != nil {
+		return err
+	}
+
+	// delete related builds
+	for startBuilds := 0; ; startBuilds += batchSize {
+		buildIDs := make([]int64, 0, batchSize)
+		if err := sess.Limit(batchSize, startBuilds).Table("builds").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&buildIDs); err != nil {
+			return err
+		}
+		if len(buildIDs) == 0 {
+			break
+		}
+
+		for i := range buildIDs {
+			if err := deleteBuild(sess, buildIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+
+	if _, err := sess.ID(repo.ID).Delete(new(model.Repo)); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
-// RepoList list all repos where permissions fo specific user are stored
+// RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
 func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0, perPage)
@@ -89,23 +165,39 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			continue
 		}
 
-		exist, err := sess.
-			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-			Exist(new(model.Repo))
-		if err != nil {
+		repo, err := s.getRepoNameFallback(sess, repos[i].RemoteID, repos[i].FullName)
+		if err != nil && err != RecordNotExist {
 			return err
 		}
+		exist := err == nil // if there's an error, it must be a RecordNotExist
 
 		if exist {
-			if _, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-				Cols("repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch").
-				Update(repos[i]); err != nil {
-				return err
+			if repos[i].FullName != repo.FullName {
+				// create redirection
+				err := s.createRedirection(sess, &model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+				if err != nil {
+					return err
+				}
+			}
+			if repos[i].RemoteID.IsValid() {
+				if _, err := sess.
+					Where("remote_id = ?", repos[i].RemoteID).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
+			} else {
+				if _, err := sess.
+					Where("repo_owner = ?", repos[i].Owner).
+					And(" repo_name = ?", repos[i].Name).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
 			}
 
 			_, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+				Where("remote_id = ?", repos[i].RemoteID).
 				Get(repos[i])
 			if err != nil {
 				return err
@@ -119,7 +211,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 
 		if repos[i].Perm != nil {
 			repos[i].Perm.RepoID = repos[i].ID
-			repos[i].Perm.Repo = repos[i].FullName
+			repos[i].Perm.Repo = repos[i]
 			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}

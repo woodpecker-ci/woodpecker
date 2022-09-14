@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -15,15 +15,16 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/pipeline/interrupt"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Command exports the exec command.
@@ -31,17 +32,47 @@ var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local build",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
-	Action:    exec,
+	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
 }
 
-func exec(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
+func run(c *cli.Context) error {
+	return common.RunPipelineFunc(c, execFile, execDir)
+}
 
-	dat, err := ioutil.ReadFile(file)
+func execDir(c *cli.Context, dir string) error {
+	// TODO: respect pipeline dependency
+	repoPath, _ := filepath.Abs(filepath.Dir(dir))
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+
+		// check if it is a regular file (not dir)
+		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+			fmt.Println("#", info.Name())
+			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
+			fmt.Println("")
+			return nil
+		}
+
+		return nil
+	})
+}
+
+func execFile(c *cli.Context, file string) error {
+	repoPath, _ := filepath.Abs(filepath.Dir(file))
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return runExec(c, file, repoPath)
+}
+
+func runExec(c *cli.Context, file, repoPath string) error {
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -55,7 +86,7 @@ func exec(c *cli.Context) error {
 		axes = append(axes, matrix.Axis{})
 	}
 	for _, axis := range axes {
-		err := execWithAxis(c, axis)
+		err := execWithAxis(c, file, repoPath, axis)
 		if err != nil {
 			return err
 		}
@@ -63,12 +94,7 @@ func exec(c *cli.Context) error {
 	return nil
 }
 
-func execWithAxis(c *cli.Context, axis matrix.Axis) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
-
+func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error {
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
@@ -84,6 +110,11 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
 		droneEnv[envs[0]] = envs[1]
+		if _, exists := environ[envs[0]]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -115,13 +146,9 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		if workspacePath == "" {
 			workspacePath = c.String("workspace-path")
 		}
-		dir, _ := filepath.Abs(filepath.Dir(file))
 
-		if runtime.GOOS == "windows" {
-			dir = convertPathForWindows(dir)
-		}
 		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
-		volumes = append(volumes, dir+":"+path.Join(workspaceBase, workspacePath))
+		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
 	// lint the yaml file
@@ -158,25 +185,42 @@ func execWithAxis(c *cli.Context, axis matrix.Axis) error {
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
-	engine := docker.New()
+
+	backend.Init(context.WithValue(c.Context, types.CliContext, c))
+
+	engine, err := backend.FindEngine(c.String("backend-engine"))
+	if err != nil {
+		return err
+	}
+
 	if err = engine.Load(); err != nil {
 		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = interrupt.WithContext(ctx)
+	ctx = utils.WithContextSigtermCallback(ctx, func() {
+		println("ctrl+c received, terminating process")
+	})
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
+		pipeline.WithDescription(map[string]string{
+			"CLI": "exec",
+		}),
 	).Run()
 }
 
 // return the metadata from the cli context.
 func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
+	platform := c.String("system-platform")
+	if platform == "" {
+		platform = runtime.GOOS + "/" + runtime.GOARCH
+	}
+
 	return frontend.Metadata{
 		Repo: frontend.Repo{
 			Name:    c.String("repo-name"),
@@ -233,9 +277,9 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Matrix: axis,
 		},
 		Sys: frontend.System{
-			Name: c.String("system-name"),
-			Link: c.String("system-link"),
-			Arch: c.String("system-arch"),
+			Name:     c.String("system-name"),
+			Link:     c.String("system-link"),
+			Platform: platform,
 		},
 	}
 }
@@ -251,7 +295,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
+var defaultLogger = pipeline.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
 	part, err := rc.NextPart()
 	if err != nil {
 		return err

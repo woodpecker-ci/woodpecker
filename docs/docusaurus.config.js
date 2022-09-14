@@ -11,7 +11,6 @@ module.exports = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   onDuplicateRoutes: 'throw',
-  favicon: 'img/favicon.ico',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
@@ -25,8 +24,8 @@ module.exports = {
       },
       items: [
         {
-          type: 'doc',
-          docId: 'intro',
+          to: 'docs/intro',
+          activeBaseRegex: 'docs/(?!migrations|awesome)',
           position: 'left',
           label: 'Docs',
         },
@@ -36,8 +35,8 @@ module.exports = {
           label: 'Plugins',
         },
         {
-          type: 'doc',
-          docId: 'migrations',
+          to: '/docs/migrations',
+          activeBaseRegex: 'docs/migrations',
           position: 'left',
           label: 'Migrations',
         },
@@ -45,6 +44,15 @@ module.exports = {
           to: '/faq',
           position: 'left',
           label: 'FAQ',
+        },
+        {
+          to: '/docs/awesome',
+          position: 'left',
+          label: 'Awesome',
+        },
+        {
+          type: 'docsVersionDropdown',
+          position: 'right',
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -87,6 +95,10 @@ module.exports = {
               href: 'https://discord.gg/fcMQqSMXJy',
             },
             {
+              label: 'Matrix',
+              href: 'https://matrix.to/#/#woodpecker:matrix.org',
+            },
+            {
               label: 'Mastodon',
               href: 'https://mastodon.technology/@WoodpeckerCI',
             },
@@ -96,11 +108,15 @@ module.exports = {
           title: 'More',
           items: [
             {
+              label: "Translate",
+              href: 'https://translate.woodpecker-ci.org/engage/woodpecker-ci/'
+            },
+            {
               label: 'GitHub',
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://wp.laszlo.cloud/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
               label: 'CI',
             },
           ],
@@ -118,14 +134,47 @@ module.exports = {
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
-    algolia: {
-      appId: 'BH4D9OD16A',
-      apiKey: '148f85e216b68d20ffa49d46a2b89d0e',
-      indexName: 'woodpecker-ci',
-      debug: false, // Set debug to true if you want to inspect the modal
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 4,
     },
   },
-  themes: [path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist')],
+  plugins: [
+    () => ({
+      name: 'docusaurus-plugin-favicon',
+      injectHtmlTags() {
+        return {
+          headTags: [
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.ico',
+                sizes: 'any',
+              },
+            },
+            {
+              tagName: 'link',
+              attributes: {
+                rel: 'icon',
+                href: '/img/favicon.svg',
+                type: 'image/svg+xml',
+              },
+            },
+          ],
+        };
+      },
+    }),
+  ],
+  themes: [
+    path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
+    [
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      {
+        hashed: true,
+      },
+    ],
+  ],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -133,6 +182,18 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          includeCurrentVersion: true,
+          lastVersion: '0.15',
+          versions: {
+            current: {
+              label: 'Next',
+              banner: 'unreleased',
+            },
+            '0.15': {
+              label: '0.15.x',
+              banner: 'none',
+            },
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

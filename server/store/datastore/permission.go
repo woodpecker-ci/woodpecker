@@ -45,17 +45,17 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if perm.RepoID == 0 && len(perm.Repo) == 0 {
+	if perm.RepoID == 0 && perm.Repo == nil {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
-	// lookup repo based on name if possible
-	if perm.RepoID == 0 && len(perm.Repo) != 0 {
-		if r, err := s.getRepoName(sess, perm.Repo); err != nil {
+	// lookup repo based on name or remote ID if possible
+	if perm.RepoID == 0 && perm.Repo != nil {
+		r, err := s.getRepoNameFallback(sess, perm.Repo.RemoteID, perm.Repo.FullName)
+		if err != nil {
 			return err
-		} else {
-			perm.RepoID = r.ID
 		}
+		perm.RepoID = r.ID
 	}
 
 	exist, err := sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).

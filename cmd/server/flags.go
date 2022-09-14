@@ -15,17 +15,15 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG"},
-		Name:    "debug",
-		Usage:   "enable server debug mode",
-	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
 		Name:    "log-level",
@@ -64,26 +62,20 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_ADDR"},
-		Name:    "grpc-addr",
-		Usage:   "grpc address",
-		Value:   ":9000",
+		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
+		Name:    "lets-encrypt-email",
+		Usage:   "let's encrypt email",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
 		Name:    "lets-encrypt",
 		Usage:   "enable let's encrypt",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_QUIC"},
-		Name:    "quic",
-		Usage:   "enable quic",
-	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WWW_PROXY"},
-		Name:    "www-proxy",
-		Usage:   "serve the website by using a proxy (used for development)",
-		Hidden:  true,
+		EnvVars: []string{"WOODPECKER_GRPC_ADDR"},
+		Name:    "grpc-addr",
+		Usage:   "grpc address",
+		Value:   ":9000",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
@@ -105,6 +97,23 @@ var flags = []cli.Flag{
 		Name:    "open",
 		Usage:   "enable open user registration",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_AUTHENTICATE_PUBLIC_REPOS"},
+		Name:    "authenticate-public-repos",
+		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
+	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"},
+		Name:    "default-cancel-previous-pipeline-events",
+		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
+		Value:   cli.NewStringSlice("push", "pull_request"),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
+		Name:    "default-clone-image",
+		Usage:   "The default docker image to be used when cloning the repo",
+		Value:   constant.DefaultCloneImage,
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
 		Name:    "docs",
@@ -121,11 +130,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_ESCALATE"},
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value:   cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_VOLUME"},
@@ -144,9 +149,15 @@ var flags = []cli.Flag{
 		Name:    "network",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
-		Name:    "agent-secret",
-		Usage:   "server-agent shared password",
+		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
+		Name:     "agent-secret",
+		Usage:    "server-agent shared password",
+		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
+	},
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
+		Name:    "keepalive-min-time",
+		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},
@@ -159,9 +170,9 @@ var flags = []cli.Flag{
 		Usage:   "registry plugin endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GATEKEEPER_ENDPOINT"},
-		Name:    "gating-service",
-		Usage:   "gated build endpoint",
+		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
+		Name:    "config-service-endpoint",
+		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
@@ -170,16 +181,30 @@ var flags = []cli.Flag{
 		Value:   "sqlite3",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DATABASE_DATASOURCE"},
-		Name:    "datasource",
-		Usage:   "database driver configuration string",
-		Value:   "woodpecker.sqlite",
+		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
+		Name:     "datasource",
+		Usage:    "database driver configuration string",
+		Value:    "woodpecker.sqlite",
+		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
-		Name:    "prometheus-auth-token",
-		Usage:   "token to secure prometheus metrics endpoint",
-		Value:   "",
+		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
+		Name:     "prometheus-auth-token",
+		Usage:    "token to secure prometheus metrics endpoint",
+		Value:    "",
+		FilePath: os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"},
+		Name:    "status-context",
+		Usage:   "status context prefix",
+		Value:   "ci/woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
+		Name:    "status-context-format",
+		Usage:   "status context format",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
 	//
 	// resource limit parameters
@@ -215,7 +240,7 @@ var flags = []cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
-	// remote parameters
+	// Github
 	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
@@ -229,41 +254,16 @@ var flags = []cli.Flag{
 		Value:   "https://github.com",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_CONTEXT"},
-		Name:    "github-context",
-		Usage:   "github status context",
-		Value:   "continuous-integration/woodpecker",
+		EnvVars:  []string{"WOODPECKER_GITHUB_CLIENT"},
+		Name:     "github-client",
+		Usage:    "github oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_GITHUB_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_CLIENT"},
-		Name:    "github-client",
-		Usage:   "github oauth2 client id",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_SECRET"},
-		Name:    "github-secret",
-		Usage:   "github oauth2 client secret",
-	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_SCOPE"},
-		Name:    "github-scope",
-		Usage:   "github oauth scope",
-		Value: cli.NewStringSlice(
-			"repo",
-			"repo:status",
-			"user:email",
-			"read:org",
-		),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_GIT_USERNAME"},
-		Name:    "github-git-username",
-		Usage:   "github machine user username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_GIT_PASSWORD"},
-		Name:    "github-git-password",
-		Usage:   "github machine user password",
+		EnvVars:  []string{"WOODPECKER_GITHUB_SECRET"},
+		Name:     "github-secret",
+		Usage:    "github oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_GITHUB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_MERGE_REF"},
@@ -272,15 +272,13 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_PRIVATE_MODE"},
-		Name:    "github-private-mode",
-		Usage:   "github is running in private mode",
-	},
-	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
 	},
+	//
+	// Gogs
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GOGS"},
 		Name:    "gogs",
@@ -290,17 +288,19 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GOGS_URL"},
 		Name:    "gogs-server",
 		Usage:   "gogs server address",
-		Value:   "https://github.com",
+		Value:   "https://try.gogs.io",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_GIT_USERNAME"},
-		Name:    "gogs-git-username",
-		Usage:   "gogs service account username",
+		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
+		Name:     "gogs-git-username",
+		Usage:    "gogs service account username",
+		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_USERNAME_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_GIT_PASSWORD"},
-		Name:    "gogs-git-password",
-		Usage:   "gogs service account password",
+		EnvVars:  []string{"WOODPECKER_GOGS_GIT_PASSWORD"},
+		Name:     "gogs-git-password",
+		Usage:    "gogs service account password",
+		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GOGS_PRIVATE_MODE"},
@@ -312,6 +312,9 @@ var flags = []cli.Flag{
 		Name:    "gogs-skip-verify",
 		Usage:   "gogs skip ssl verification",
 	},
+	//
+	// Gitea
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITEA"},
 		Name:    "gitea",
@@ -324,56 +327,45 @@ var flags = []cli.Flag{
 		Value:   "https://try.gitea.io",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_CLIENT"},
-		Name:    "gitea-client",
-		Usage:   "gitea oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_GITEA_CLIENT"},
+		Name:     "gitea-client",
+		Usage:    "gitea oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_GITEA_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_SECRET"},
-		Name:    "gitea-secret",
-		Usage:   "gitea oauth2 client secret",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_CONTEXT"},
-		Name:    "gitea-context",
-		Usage:   "gitea status context",
-		Value:   "continuous-integration/woodpecker",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_GIT_USERNAME"},
-		Name:    "gitea-git-username",
-		Usage:   "gitea service account username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_GIT_PASSWORD"},
-		Name:    "gitea-git-password",
-		Usage:   "gitea service account password",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_PRIVATE_MODE"},
-		Name:    "gitea-private-mode",
-		Usage:   "gitea private mode enabled",
+		EnvVars:  []string{"WOODPECKER_GITEA_SECRET"},
+		Name:     "gitea-secret",
+		Usage:    "gitea oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_GITEA_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
 		Name:    "gitea-skip-verify",
 		Usage:   "gitea skip ssl verification",
 	},
+	//
+	// Bitbucket
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_BITBUCKET"},
 		Name:    "bitbucket",
 		Usage:   "bitbucket driver is enabled",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_CLIENT"},
-		Name:    "bitbucket-client",
-		Usage:   "bitbucket oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_CLIENT"},
+		Name:     "bitbucket-client",
+		Usage:    "bitbucket oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_SECRET"},
-		Name:    "bitbucket-secret",
-		Usage:   "bitbucket oauth2 client secret",
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_SECRET"},
+		Name:     "bitbucket-secret",
+		Usage:    "bitbucket oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_SECRET_FILE"),
 	},
+	//
+	// Gitlab
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITLAB"},
 		Name:    "gitlab",
@@ -386,35 +378,25 @@ var flags = []cli.Flag{
 		Value:   "https://gitlab.com",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_CLIENT"},
-		Name:    "gitlab-client",
-		Usage:   "gitlab oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_GITLAB_CLIENT"},
+		Name:     "gitlab-client",
+		Usage:    "gitlab oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_GITLAB_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_SECRET"},
-		Name:    "gitlab-secret",
-		Usage:   "gitlab oauth2 client secret",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_GIT_USERNAME"},
-		Name:    "gitlab-git-username",
-		Usage:   "gitlab service account username",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_GIT_PASSWORD"},
-		Name:    "gitlab-git-password",
-		Usage:   "gitlab service account password",
+		EnvVars:  []string{"WOODPECKER_GITLAB_SECRET"},
+		Name:     "gitlab-secret",
+		Usage:    "gitlab oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
 		Name:    "gitlab-skip-verify",
 		Usage:   "gitlab skip ssl verification",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_PRIVATE_MODE"},
-		Name:    "gitlab-private-mode",
-		Usage:   "gitlab is running in private mode",
-	},
+	//
+	// Bitbucket Stash
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_STASH"},
 		Name:    "stash",
@@ -426,9 +408,10 @@ var flags = []cli.Flag{
 		Usage:   "stash server address",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_KEY"},
-		Name:    "stash-consumer-key",
-		Usage:   "stash oauth1 consumer key",
+		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_KEY"},
+		Name:     "stash-consumer-key",
+		Usage:    "stash oauth1 consumer key",
+		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
@@ -441,20 +424,25 @@ var flags = []cli.Flag{
 		Usage:   "stash oauth1 private key string",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_GIT_USERNAME"},
-		Name:    "stash-git-username",
-		Usage:   "stash service account username",
+		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},
+		Name:     "stash-git-username",
+		Usage:    "stash service account username",
+		FilePath: os.Getenv("WOODPECKER_STASH_GIT_USERNAME_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_GIT_PASSWORD"},
-		Name:    "stash-git-password",
-		Usage:   "stash service account password",
+		EnvVars:  []string{"WOODPECKER_STASH_GIT_PASSWORD"},
+		Name:     "stash-git-password",
+		Usage:    "stash service account password",
+		FilePath: os.Getenv("WOODPECKER_STASH_GIT_PASSWORD_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
 		Name:    "stash-skip-verify",
 		Usage:   "stash skip ssl verification",
 	},
+	//
+	// Coding
+	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_CODING"},
 		Name:    "coding",
@@ -467,14 +455,16 @@ var flags = []cli.Flag{
 		Value:   "https://coding.net",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_CLIENT"},
-		Name:    "coding-client",
-		Usage:   "coding oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_CODING_CLIENT"},
+		Name:     "coding-client",
+		Usage:    "coding oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_CODING_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_SECRET"},
-		Name:    "coding-secret",
-		Usage:   "coding oauth2 client secret",
+		EnvVars:  []string{"WOODPECKER_CODING_SECRET"},
+		Name:     "coding-secret",
+		Usage:    "coding oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_CODING_SECRET_FILE"),
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_CODING_SCOPE"},
@@ -493,23 +483,46 @@ var flags = []cli.Flag{
 		Value:   "git.coding.net",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_GIT_USERNAME"},
-		Name:    "coding-git-username",
-		Usage:   "coding machine user username",
+		EnvVars:  []string{"WOODPECKER_CODING_GIT_USERNAME"},
+		Name:     "coding-git-username",
+		Usage:    "coding machine user username",
+		FilePath: os.Getenv("WOODPECKER_CODING_GIT_USERNAME_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_GIT_PASSWORD"},
-		Name:    "coding-git-password",
-		Usage:   "coding machine user password",
+		EnvVars:  []string{"WOODPECKER_CODING_GIT_PASSWORD"},
+		Name:     "coding-git-password",
+		Usage:    "coding machine user password",
+		FilePath: os.Getenv("WOODPECKER_CODING_GIT_PASSWORD_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_CODING_SKIP_VERIFY"},
 		Name:    "coding-skip-verify",
 		Usage:   "coding skip ssl verification",
 	},
-	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_KEEPALIVE_MIN_TIME"},
-		Name:    "keepalive-min-time",
-		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	//
+	// development flags
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_WWW_PROXY"},
+		Name:    "www-proxy",
+		Usage:   "serve the website by using a proxy (used for development)",
+		Hidden:  true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
+		Name:    "server-dev-oauth-host",
+		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Value:   "",
+		Hidden:  true,
+	},
+	//
+	// misc
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
+		Name:    "flat-permissions",
+		Usage:   "no remote call for permissions should be made",
+		Hidden:  true,
+		// TODO(485) temporary workaround to not hit api rate limits
 	},
 }

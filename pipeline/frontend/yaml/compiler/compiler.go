@@ -2,14 +2,28 @@ package compiler
 
 import (
 	"fmt"
+	"strings"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
 // TODO(bradrydzewski) compiler should handle user-defined networks from YAML
+
+const (
+	windowsPrefix = "windows/"
+
+	defaultCloneName = "clone"
+
+	networkDriverNAT    = "nat"
+	networkDriverBridge = "bridge"
+
+	nameServices = "services"
+	namePipeline = "pipeline"
+)
 
 type Registry struct {
 	Hostname string
@@ -36,20 +50,21 @@ type ResourceLimit struct {
 
 // Compiler compiles the yaml
 type Compiler struct {
-	local      bool
-	escalated  []string
-	prefix     string
-	volumes    []string
-	networks   []string
-	env        map[string]string
-	cloneEnv   map[string]string
-	base       string
-	path       string
-	metadata   frontend.Metadata
-	registries []Registry
-	secrets    map[string]Secret
-	cacher     Cacher
-	reslimit   ResourceLimit
+	local             bool
+	escalated         []string
+	prefix            string
+	volumes           []string
+	networks          []string
+	env               map[string]string
+	cloneEnv          map[string]string
+	base              string
+	path              string
+	metadata          frontend.Metadata
+	registries        []Registry
+	secrets           map[string]Secret
+	cacher            Cacher
+	reslimit          ResourceLimit
+	defaultCloneImage string
 }
 
 // New creates a new Compiler with options.
@@ -77,15 +92,15 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	})
 
 	// create a default network
-	if c.metadata.Sys.Arch == "windows/amd64" {
+	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: "nat",
+			Driver: networkDriverNAT,
 		})
 	} else {
 		config.Networks = append(config.Networks, &backend.Network{
 			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: "bridge",
+			Driver: networkDriverBridge,
 		})
 	}
 
@@ -109,26 +124,32 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
+		cloneImage := constant.DefaultCloneImage
+		if len(c.defaultCloneImage) > 0 {
+			cloneImage = c.defaultCloneImage
+		}
+		cloneSettings := map[string]interface{}{"depth": "0"}
+		if c.metadata.Curr.Event == frontend.EventTag {
+			cloneSettings["tags"] = "true"
+		}
 		container := &yaml.Container{
-			Name: "clone",
-			// TODO: switch to `:latest` once v1.1.0 got released
-			//       https://github.com/woodpecker-ci/plugin-git/issues/3
-			Image:       "woodpeckerci/plugin-git:next",
-			Vargs:       map[string]interface{}{"depth": "0"},
+			Name:        defaultCloneName,
+			Image:       cloneImage,
+			Settings:    cloneSettings,
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, "clone")
+		step := c.createProcess(name, container, defaultCloneName)
 
 		stage := new(backend.Stage)
 		stage.Name = name
-		stage.Alias = "clone"
+		stage.Alias = defaultCloneName
 		stage.Steps = append(stage.Steps, step)
 
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
-			if !container.Constraints.Match(c.metadata) {
+			if !container.When.Match(c.metadata) {
 				continue
 			}
 			stage := new(backend.Stage)
@@ -136,7 +157,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step := c.createProcess(name, container, "clone")
+			step := c.createProcess(name, container, defaultCloneName)
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}
@@ -151,16 +172,16 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	// add services steps
 	if len(conf.Services.Containers) != 0 {
 		stage := new(backend.Stage)
-		stage.Name = fmt.Sprintf("%s_services", c.prefix)
-		stage.Alias = "services"
+		stage.Name = fmt.Sprintf("%s_%s", c.prefix, nameServices)
+		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
-			if !container.Constraints.Match(c.metadata) {
+			if !container.When.Match(c.metadata) {
 				continue
 			}
 
-			name := fmt.Sprintf("%s_services_%d", c.prefix, i)
-			step := c.createProcess(name, container, "services")
+			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
+			step := c.createProcess(name, container, nameServices)
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -170,12 +191,12 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	var stage *backend.Stage
 	var group string
 	for i, container := range conf.Pipeline.Containers {
-		//Skip if local and should not run local
-		if c.local && !container.Constraints.Local.Bool() {
+		// Skip if local and should not run local
+		if c.local && !container.When.IsLocal() {
 			continue
 		}
 
-		if !container.Constraints.Match(c.metadata) {
+		if !container.When.Match(c.metadata) {
 			continue
 		}
 
@@ -189,7 +210,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
-		step := c.createProcess(name, container, "pipeline")
+		step := c.createProcess(name, container, namePipeline)
 		stage.Steps = append(stage.Steps, step)
 	}
 
@@ -216,7 +237,7 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 }
 
 func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
-	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != "push" || c.cacher == nil {
+	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != frontend.EventPush || c.cacher == nil {
 		return
 	}
 	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)

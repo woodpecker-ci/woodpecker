@@ -26,7 +26,7 @@ type entry struct {
 }
 
 type worker struct {
-	filter  Filter
+	filter  FilterFn
 	channel chan *Task
 }
 
@@ -42,7 +42,7 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
-func New() Queue {
+func New(ctx context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
@@ -74,7 +74,7 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
+func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 	q.Lock()
 	w := &worker{
 		channel: make(chan *Task, 1),
@@ -336,7 +336,7 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
+func (q *fifo) updateDepStatusInQueue(taskID, status string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
@@ -356,7 +356,6 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status string) {
 		}
 	}
 
-	next = nil
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
 		waiting, ok := e.Value.(*Task)

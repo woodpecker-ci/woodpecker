@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -39,7 +40,6 @@ type Opts struct {
 	Client     string   // Coding oauth client id.
 	Secret     string   // Coding oauth client secret.
 	Scopes     []string // Coding oauth scopes.
-	Machine    string   // Optional machine name.
 	Username   string   // Optional machine account username.
 	Password   string   // Optional machine account password.
 	SkipVerify bool     // Skip ssl verification.
@@ -53,7 +53,6 @@ func New(opts Opts) (remote.Remote, error) {
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		Scopes:     opts.Scopes,
-		Machine:    opts.Machine,
 		Username:   opts.Username,
 		Password:   opts.Password,
 		SkipVerify: opts.SkipVerify,
@@ -70,10 +69,14 @@ type Coding struct {
 	Client     string
 	Secret     string
 	Scopes     []string
-	Machine    string
 	Username   string
 	Password   string
 	SkipVerify bool
+}
+
+// Name returns the string name of this driver
+func (c *Coding) Name() string {
+	return "coding"
 }
 
 // Login authenticates the session and returns the
@@ -157,8 +160,8 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
@@ -169,13 +172,14 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, owner, name string) (*
 		return nil, err
 	}
 	return &model.Repo{
+		// TODO(1138) RemoteID:     project.ID,
 		Owner:        project.Owner,
 		Name:         project.Name,
 		FullName:     projectFullName(project.Owner, project.Name),
 		Avatar:       c.resourceLink(project.Icon),
 		Link:         c.resourceLink(project.DepotPath),
 		SCMKind:      model.RepoGit,
-		Clone:        project.HttpsURL,
+		Clone:        project.HTTPSURL,
 		Branch:       depot.DefaultBranch,
 		IsSCMPrivate: !project.IsPublic,
 	}, nil
@@ -196,13 +200,14 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		repo := &model.Repo{
+			// TODO(1138) RemoteID:     project.ID,
 			Owner:        project.Owner,
 			Name:         project.Name,
 			FullName:     projectFullName(project.Owner, project.Name),
 			Avatar:       c.resourceLink(project.Icon),
 			Link:         c.resourceLink(project.DepotPath),
 			SCMKind:      model.RepoGit,
-			Clone:        project.HttpsURL,
+			Clone:        project.HTTPSURL,
 			Branch:       depot.DefaultBranch,
 			IsSCMPrivate: !project.IsPublic,
 		}
@@ -213,8 +218,8 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 // Perm fetches the named repository permissions from
 // the remote system for the specified user.
-func (c *Coding) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
-	project, err := c.newClient(ctx, u).GetProject(owner, repo)
+func (c *Coding) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
+	project, err := c.newClient(ctx, u).GetProject(repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +248,7 @@ func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status sends the commit status to the remote system.
-func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }
@@ -251,17 +256,23 @@ func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *mo
 // Netrc returns a .netrc file that can be used to clone
 // private repositories from a remote system.
 func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
+	if err != nil {
+		return nil, err
+	}
+
 	if c.Password != "" {
 		return &model.Netrc{
 			Login:    c.Username,
 			Password: c.Password,
-			Machine:  c.Machine,
+			Machine:  host,
 		}, nil
 	}
+
 	return &model.Netrc{
 		Login:    u.Token,
 		Password: "x-oauth-basic",
-		Machine:  c.Machine,
+		Machine:  host,
 	}, nil
 }
 
@@ -282,14 +293,27 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return []string{r.Branch}, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
+}
+
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
-func (c *Coding) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	repo, build, err := parseHook(r)
 	if build != nil {
 		build.Avatar = c.resourceLink(build.Avatar)
 	}
 	return repo, build, err
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not supported in Coding OAuth API
+	return nil, nil
 }
 
 // helper function to return the Coding oauth2 context using an HTTPClient that

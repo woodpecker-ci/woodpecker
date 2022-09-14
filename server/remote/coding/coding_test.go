@@ -48,7 +48,6 @@ func Test_coding(t *testing.T) {
 					Client:     "KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP",
 					Secret:     "zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp",
 					Scopes:     []string{"user", "project", "project:depot"},
-					Machine:    "git.coding.net",
 					Username:   "someuser",
 					Password:   "password",
 					SkipVerify: true,
@@ -57,7 +56,6 @@ func Test_coding(t *testing.T) {
 				g.Assert(remote.(*Coding).Client).Equal("KTNF2ALdm3ofbtxLh6IbV95Ro5AKWJUP")
 				g.Assert(remote.(*Coding).Secret).Equal("zVtxJrKhNhBcNyqCz1NggNAAmehAxnRO3Z0fXmCp")
 				g.Assert(remote.(*Coding).Scopes).Equal([]string{"user", "project", "project:depot"})
-				g.Assert(remote.(*Coding).Machine).Equal("git.coding.net")
 				g.Assert(remote.(*Coding).Username).Equal("someuser")
 				g.Assert(remote.(*Coding).Password).Equal("password")
 				g.Assert(remote.(*Coding).SkipVerify).Equal(true)
@@ -110,7 +108,7 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
@@ -121,42 +119,42 @@ func Test_coding(t *testing.T) {
 				g.Assert(repo.IsSCMPrivate).Equal(fakeRepo.IsSCMPrivate)
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
 
 		g.Describe("When requesting repository permissions", func() {
 			g.It("Should authorize admin access for project owner", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_owner")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_owner"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize admin access for project admin", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_admin")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_admin"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsTrue()
 			})
 			g.It("Should authorize read access for project member", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_member")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_member"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsTrue()
 				g.Assert(perm.Push).IsTrue()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should authorize no access for project guest", func() {
-				perm, err := c.Perm(ctx, fakeUser, "demo1", "perm_guest")
+				perm, err := c.Perm(ctx, fakeUser, &model.Repo{Owner: "demo1", Name: "perm_guest"})
 				g.Assert(err).IsNil()
 				g.Assert(perm.Pull).IsFalse()
 				g.Assert(perm.Push).IsFalse()
 				g.Assert(perm.Admin).IsFalse()
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -172,21 +170,18 @@ func Test_coding(t *testing.T) {
 		g.Describe("When requesting a netrc config", func() {
 			g.It("Should return the netrc file for global credential", func() {
 				remote, _ := New(Opts{
-					Machine:  "git.coding.net",
 					Username: "someuser",
 					Password: "password",
 				})
-				netrc, err := remote.Netrc(fakeUser, nil)
+				netrc, err := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal("someuser")
 				g.Assert(netrc.Password).Equal("password")
 				g.Assert(netrc.Machine).Equal("git.coding.net")
 			})
 			g.It("Should return the netrc file for specified user", func() {
-				remote, _ := New(Opts{
-					Machine: "git.coding.net",
-				})
-				netrc, err := remote.Netrc(fakeUser, nil)
+				remote, _ := New(Opts{})
+				netrc, err := remote.Netrc(fakeUser, fakeRepo)
 				g.Assert(err).IsNil()
 				g.Assert(netrc.Login).Equal(fakeUser.Token)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
@@ -223,7 +218,7 @@ func Test_coding(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
-				r, _, err := c.Hook(req)
+				r, _, err := c.Hook(ctx, req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("demo1/test1")
 			})

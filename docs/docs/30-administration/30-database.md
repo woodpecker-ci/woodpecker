@@ -1,6 +1,6 @@
 # Databases
 
-The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL or Postgres database.
+The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL/MariaDB or Postgres database.
 
 ## Configure sqlite
 
@@ -17,7 +17,7 @@ services:
 +     - woodpecker-server-data:/var/lib/woodpecker/
 ```
 
-## Configure MySQL
+## Configure MySQL/MariaDB
 
 The below example demonstrates mysql database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
 
@@ -29,13 +29,14 @@ services:
   woodpecker-server:
     [...]
     environment:
-+     WOODPECKER_DATABASE_DRIVER: mysql
-+     WOODPECKER_DATABASE_DATASOURCE: root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
++     - WOODPECKER_DATABASE_DRIVER=mysql
++     - WOODPECKER_DATABASE_DATASOURCE=root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true
 ```
 
 ## Configure Postgres
 
 The below example demonstrates postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
+Please use postgres versions equal or higher than **11**.
 
 ```diff
 # docker-compose.yml
@@ -45,8 +46,8 @@ services:
   woodpecker-server:
     [...]
     environment:
-+     WOODPECKER_DATABASE_DRIVER: postgres
-+     WOODPECKER_DATABASE_DATASOURCE: postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
++     - WOODPECKER_DATABASE_DRIVER=postgres
++     - WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
 ```
 
 ## Database Creation

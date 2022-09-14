@@ -14,6 +14,9 @@
 
 package store
 
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Store --output mocks --case underscore
+
 import (
 	"io"
 
@@ -23,122 +26,118 @@ import (
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
 
 type Store interface {
+	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
-
 	// GetUserLogin gets a user by unique Login name.
 	GetUserLogin(string) (*model.User, error)
-
 	// GetUserList gets a list of all users in the system.
 	// TODO: paginate
 	GetUserList() ([]*model.User, error)
-
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
-
 	// CreateUser creates a new user account.
 	CreateUser(*model.User) error
-
 	// UpdateUser updates a user account.
 	UpdateUser(*model.User) error
-
 	// DeleteUser deletes a user account.
 	DeleteUser(*model.User) error
 
+	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
-
+	// GetRepoRemoteID gets a repo by its remote ID.
+	GetRepoRemoteID(model.RemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its remote ID and if this doesn't exist by its full name.
+	GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
-
 	// GetRepoCount gets a count of all repositories in the system.
 	GetRepoCount() (int64, error)
-
 	// CreateRepo creates a new repository.
 	CreateRepo(*model.Repo) error
-
 	// UpdateRepo updates a user repository.
 	UpdateRepo(*model.Repo) error
-
 	// DeleteRepo deletes a user repository.
 	DeleteRepo(*model.Repo) error
 
+	// Redirections
+	// GetRedirection returns the redirection for the given full repo name
+	GetRedirection(string) (*model.Redirection, error)
+	// CreateRedirection creates a redirection
+	CreateRedirection(redirection *model.Redirection) error
+	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
+	HasRedirectionForRepo(int64, string) (bool, error)
+
+	// Builds
 	// GetBuild gets a build by unique ID.
 	GetBuild(int64) (*model.Build, error)
-
 	// GetBuildNumber gets a build by number.
 	GetBuildNumber(*model.Repo, int64) (*model.Build, error)
-
 	// GetBuildRef gets a build by its ref.
 	GetBuildRef(*model.Repo, string) (*model.Build, error)
-
 	// GetBuildCommit gets a build by its commit sha.
 	GetBuildCommit(*model.Repo, string, string) (*model.Build, error)
-
 	// GetBuildLast gets the last build for the branch.
 	GetBuildLast(*model.Repo, string) (*model.Build, error)
-
 	// GetBuildLastBefore gets the last build before build number N.
 	GetBuildLastBefore(*model.Repo, string, int64) (*model.Build, error)
-
 	// GetBuildList gets a list of builds for the repository
 	// TODO: paginate
 	GetBuildList(*model.Repo, int) ([]*model.Build, error)
-
+	// GetBuildList gets a list of the active builds for the repository
+	GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error)
 	// GetBuildQueue gets a list of build in queue.
 	GetBuildQueue() ([]*model.Feed, error)
-
 	// GetBuildCount gets a count of all builds in the system.
 	GetBuildCount() (int64, error)
-
 	// CreateBuild creates a new build and jobs.
 	CreateBuild(*model.Build, ...*model.Proc) error
-
 	// UpdateBuild updates a build.
 	UpdateBuild(*model.Build) error
 
-	//
-	// new functions
-	//
-
+	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
 
+	// Repositories
 	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
 	RepoBatch([]*model.Repo) error
 
+	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
 	PermDelete(perm *model.Perm) error
 	PermFlush(user *model.User, before int64) error
 
+	// Configs
 	ConfigsForBuild(buildID int64) ([]*model.Config, error)
 	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
 	BuildConfigCreate(*model.BuildConfig) error
 
-	SenderFind(*model.Repo, string) (*model.Sender, error)
-	// SenderList TODO: paginate
-	SenderList(*model.Repo) ([]*model.Sender, error)
-	SenderCreate(*model.Sender) error
-	SenderUpdate(*model.Sender) error
-	SenderDelete(*model.Sender) error
-
+	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool) ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	OrgSecretFind(string, string) (*model.Secret, error)
+	OrgSecretList(string) ([]*model.Secret, error)
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList() ([]*model.Secret, error)
 
+	// Registrys
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
 
+	// Procs
 	ProcLoad(int64) (*model.Proc, error)
 	ProcFind(*model.Build, int) (*model.Proc, error)
 	ProcChild(*model.Build, int, string) (*model.Proc, error)
@@ -147,21 +146,38 @@ type Store interface {
 	ProcUpdate(*model.Proc) error
 	ProcClear(*model.Build) error
 
+	// Logs
 	LogFind(*model.Proc) (io.ReadCloser, error)
 	// TODO: since we do ReadAll in any case a ioReader is not the best idear
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Proc, io.Reader) error
 
+	// Files
 	FileList(*model.Build) ([]*model.File, error)
 	FileFind(*model.Proc, string) (*model.File, error)
 	FileRead(*model.Proc, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
+	// Tasks
 	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskDelete(string) error
 
+	// ServerConfig
+	ServerConfigGet(string) (string, error)
+	ServerConfigSet(string, string) error
+
+	// Cron
+	CronCreate(*model.Cron) error
+	CronFind(*model.Repo, int64) (*model.Cron, error)
+	CronList(*model.Repo) ([]*model.Cron, error)
+	CronUpdate(*model.Repo, *model.Cron) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.Cron, error)
+	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Store operations
 	Ping() error
 	Close() error
 	Migrate() error

@@ -96,7 +96,7 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *persistentQueue) Poll(c context.Context, f Filter) (*Task, error) {
+func (q *persistentQueue) Poll(c context.Context, f FilterFn) (*Task, error) {
 	task, err := q.Queue.Poll(c, f)
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)

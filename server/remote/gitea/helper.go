@@ -25,27 +25,25 @@ import (
 	"code.gitea.io/sdk/gitea"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
-func toRepo(from *gitea.Repository, privateMode bool) *model.Repo {
+func toRepo(from *gitea.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
-	private := from.Private
-	if privateMode {
-		private = true
-	}
 	return &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(from.ID)),
 		SCMKind:      model.RepoGit,
 		Name:         name,
 		Owner:        from.Owner.UserName,
 		FullName:     from.FullName,
 		Avatar:       avatar,
 		Link:         from.HTMLURL,
-		IsSCMPrivate: private,
+		IsSCMPrivate: from.Private,
 		Clone:        from.CloneURL,
 		Branch:       from.DefaultBranch,
 	}
@@ -71,78 +69,71 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 // helper function that extracts the Build data from a Gitea push hook
 func buildFromPush(hook *pushHook) *model.Build {
 	avatar := expandAvatar(
-		hook.Repo.URL,
-		fixMalformedAvatar(hook.Sender.Avatar),
+		hook.Repo.HTMLURL,
+		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
-	author := hook.Sender.Login
-	if author == "" {
-		author = hook.Sender.Username
-	}
-	sender := hook.Sender.Username
-	if sender == "" {
-		sender = hook.Sender.Login
-	}
 
 	message := ""
+	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+	} else {
+		message = hook.HeadCommit.Message
+	}
+
+	if len(hook.Commits) == 1 {
+		link = hook.Commits[0].URL
 	}
 
 	return &model.Build{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         hook.Compare,
+		Link:         link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
-		Author:       author,
+		Author:       hook.Sender.UserName,
 		Email:        hook.Sender.Email,
 		Timestamp:    time.Now().UTC().Unix(),
-		Sender:       sender,
+		Sender:       hook.Sender.UserName,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
 }
 
 func getChangedFilesFromPushHook(hook *pushHook) []string {
-	files := make([]string, 0)
-
-	if len(hook.Commits) == 0 {
-		return files
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
+	for _, c := range hook.Commits {
+		files = append(files, c.Added...)
+		files = append(files, c.Removed...)
+		files = append(files, c.Modified...)
 	}
 
-	files = append(files, hook.Commits[0].Added...)
-	files = append(files, hook.Commits[0].Removed...)
-	files = append(files, hook.Commits[0].Modified...)
+	files = append(files, hook.HeadCommit.Added...)
+	files = append(files, hook.HeadCommit.Removed...)
+	files = append(files, hook.HeadCommit.Modified...)
 
-	return files
+	return utils.DedupStrings(files)
 }
 
 // helper function that extracts the Build data from a Gitea tag hook
 func buildFromTag(hook *pushHook) *model.Build {
 	avatar := expandAvatar(
-		hook.Repo.URL,
-		fixMalformedAvatar(hook.Sender.Avatar),
+		hook.Repo.HTMLURL,
+		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
-	author := hook.Sender.Login
-	if author == "" {
-		author = hook.Sender.Username
-	}
-	sender := hook.Sender.Username
-	if sender == "" {
-		sender = hook.Sender.Login
-	}
 
 	return &model.Build{
 		Event:     model.EventTag,
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
-		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.URL, hook.Ref),
+		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
 		Branch:    fmt.Sprintf("refs/tags/%s", hook.Ref),
 		Message:   fmt.Sprintf("created tag %s", hook.Ref),
 		Avatar:    avatar,
-		Author:    author,
-		Sender:    sender,
+		Author:    hook.Sender.UserName,
+		Sender:    hook.Sender.UserName,
 		Timestamp: time.Now().UTC().Unix(),
 	}
 }
@@ -150,13 +141,9 @@ func buildFromTag(hook *pushHook) *model.Build {
 // helper function that extracts the Build data from a Gitea pull_request hook
 func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 	avatar := expandAvatar(
-		hook.Repo.URL,
-		fixMalformedAvatar(hook.PullRequest.User.Avatar),
+		hook.Repo.HTMLURL,
+		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
-	sender := hook.Sender.Username
-	if sender == "" {
-		sender = hook.Sender.Login
-	}
 	build := &model.Build{
 		Event:   model.EventPull,
 		Commit:  hook.PullRequest.Head.Sha,
@@ -164,9 +151,9 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 		Ref:     fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:  hook.PullRequest.Base.Ref,
 		Message: hook.PullRequest.Title,
-		Author:  hook.PullRequest.User.Username,
+		Author:  hook.PullRequest.Poster.UserName,
 		Avatar:  avatar,
-		Sender:  sender,
+		Sender:  hook.Sender.UserName,
 		Title:   hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
@@ -174,26 +161,6 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 		),
 	}
 	return build
-}
-
-// helper function that extracts the Repository data from a Gitea push hook
-func repoFromPush(hook *pushHook) *model.Repo {
-	return &model.Repo{
-		Name:     hook.Repo.Name,
-		Owner:    hook.Repo.Owner.Username,
-		FullName: hook.Repo.FullName,
-		Link:     hook.Repo.URL,
-	}
-}
-
-// helper function that extracts the Repository data from a Gitea pull_request hook
-func repoFromPullRequest(hook *pullRequestHook) *model.Repo {
-	return &model.Repo{
-		Name:     hook.Repo.Name,
-		Owner:    hook.Repo.Owner.Username,
-		FullName: hook.Repo.FullName,
-		Link:     hook.Repo.URL,
-	}
 }
 
 // helper function that parses a push hook from a read closer.

@@ -1,7 +1,9 @@
 ### IDEs ###
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 !.vscode/launch.json
+!.vscode/extensions.json
 
 ### GO ###
 # Binaries for programs and plugins
@@ -10,6 +12,8 @@
 *.dll
 *.so
 *.dylib
+vendor/
+__debug_bin
 
 # Test binary, built with `go test -c`
 *.test
@@ -40,3 +44,7 @@ server/swagger/files/*.json
 server/swagger/swagger_gen.go
 
 docs/venv
+
+# helm charts
+.cr-index/
+.cr-release-packages/

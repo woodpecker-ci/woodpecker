@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
@@ -17,38 +19,50 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-type engine struct {
-	client client.APIClient
+type docker struct {
+	client     client.APIClient
+	enableIPv6 bool
+	network    string
 }
+
+// make sure docker implements Engine
+var _ backend.Engine = &docker{}
 
 // New returns a new Docker Engine.
 func New() backend.Engine {
-	return &engine{
+	return &docker{
 		client: nil,
 	}
 }
 
-func (e *engine) Name() string {
+func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *engine) IsAvivable() bool {
-	_, err := os.Stat("/.dockerenv")
-	return os.IsNotExist(err)
+func (e *docker) IsAvailable() bool {
+	if os.Getenv("DOCKER_HOST") != "" {
+		return true
+	}
+	_, err := os.Stat("/var/run/docker.sock")
+	return err == nil
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *engine) Load() error {
+func (e *docker) Load() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
 	}
 	e.client = cli
 
+	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+
+	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+
 	return nil
 }
 
-func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:       vol.Name,
@@ -62,8 +76,9 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:  n.Driver,
-			Options: n.DriverOpts,
+			Driver:     n.Driver,
+			Options:    n.DriverOpts,
+			EnableIPv6: e.enableIPv6,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -73,7 +88,7 @@ func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
+func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 	config := toConfig(proc)
 	hostConfig := toHostConfig(proc)
 
@@ -130,25 +145,20 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 				return err
 			}
 		}
-	}
 
-	// if proc.Network != "host" { // or bridge, overlay, none, internal, container:<name> ....
-	// 	err = e.client.NetworkConnect(ctx, proc.Network, proc.Name, &network.EndpointSettings{
-	// 		Aliases: proc.NetworkAliases,
-	// 	})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+		// join the container to an existing network
+		if e.network != "" {
+			err = e.client.NetworkConnect(ctx, e.network, proc.Name, &network.EndpointSettings{})
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	return e.client.ContainerStart(ctx, proc.Name, startOpts)
 }
 
-func (e *engine) Kill(_ context.Context, proc *backend.Step) error {
-	return e.client.ContainerKill(noContext, proc.Name, "9")
-}
-
-func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
+func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
 	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
 	select {
 	case <-wait:
@@ -170,7 +180,7 @@ func (e *engine) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
+func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
 	logs, err := e.client.ContainerLogs(ctx, proc.Name, logsOpts)
 	if err != nil {
 		return nil, err
@@ -187,13 +197,13 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 	return rc, nil
 }
 
-func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil {
+			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil {
+			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
@@ -230,3 +240,10 @@ var (
 		Timestamps: false,
 	}
 )
+
+func isErrContainerNotFoundOrNotRunning(err error) bool {
+	// Error response from daemon: Cannot kill container: ...: No such container: ...
+	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
+	// Error: No such container: ...
+	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
+}

@@ -17,7 +17,7 @@ package coding
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -39,8 +39,8 @@ type User struct {
 
 type Repository struct {
 	Name     string `json:"name"`
-	HttpsURL string `json:"https_url"`
-	SshURL   string `json:"ssh_url"`
+	HTTPSURL string `json:"https_url"`
+	SSHURL   string `json:"ssh_url"`
 	WebURL   string `json:"web_url"`
 	Owner    *User  `json:"owner"`
 }
@@ -94,7 +94,7 @@ type MergeRequestHook struct {
 }
 
 func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
-	raw, err := ioutil.ReadAll(r.Body)
+	raw, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
 		return nil, nil, err
@@ -131,16 +131,18 @@ func findLastCommit(commits []*Commit, sha string) *Commit {
 func convertRepository(repo *Repository) (*model.Repo, error) {
 	// tricky stuff for a team project without a team owner instead of a user owner
 	re := regexp.MustCompile(`git@.+:([^/]+)/.+\.git`)
-	matches := re.FindStringSubmatch(repo.SshURL)
+	matches := re.FindStringSubmatch(repo.SSHURL)
 	if len(matches) != 2 {
-		return nil, fmt.Errorf("Unable to resolve owner from ssh url %q", repo.SshURL)
+		return nil, fmt.Errorf("Unable to resolve owner from ssh url %q", repo.SSHURL)
 	}
 
 	return &model.Repo{
+		// TODO RemoteID: repo.ID,
 		Owner:    matches[1],
 		Name:     repo.Name,
 		FullName: projectFullName(repo.Owner.GlobalKey, repo.Name),
 		Link:     repo.WebURL,
+		Clone:    repo.HTTPSURL,
 		SCMKind:  model.RepoGit,
 	}, nil
 }
@@ -173,7 +175,7 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Email:   lastCommit.Committer.Email,
 		Avatar:  hook.User.Avatar,
 		Author:  hook.User.GlobalKey,
-		Remote:  hook.Repository.HttpsURL,
+		Remote:  hook.Repository.HTTPSURL,
 	}
 	return repo, build, nil
 }
@@ -203,7 +205,7 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Author:  hook.PullRequest.User.GlobalKey,
 		Avatar:  hook.PullRequest.User.Avatar,
 		Title:   hook.PullRequest.Title,
-		Remote:  hook.Repository.HttpsURL,
+		Remote:  hook.Repository.HTTPSURL,
 		Refspec: fmt.Sprintf("%s:%s", hook.PullRequest.SourceBranch, hook.PullRequest.TargetBranch),
 	}
 
@@ -236,7 +238,7 @@ func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Author:  hook.MergeRequest.User.GlobalKey,
 		Avatar:  hook.MergeRequest.User.Avatar,
 		Title:   hook.MergeRequest.Title,
-		Remote:  hook.Repository.HttpsURL,
+		Remote:  hook.Repository.HTTPSURL,
 		Refspec: fmt.Sprintf("%s:%s", hook.MergeRequest.SourceBranch, hook.MergeRequest.TargetBranch),
 	}
 	return repo, build, nil

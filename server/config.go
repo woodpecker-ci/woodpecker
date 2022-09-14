@@ -18,43 +18,53 @@
 package server
 
 import (
+	"crypto"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 var Config = struct {
 	Services struct {
-		Pubsub     pubsub.Publisher
-		Queue      queue.Queue
-		Logs       logging.Log
-		Senders    model.SenderService
-		Secrets    model.SecretService
-		Registries model.RegistryService
-		Environ    model.EnvironService
+		Pubsub              pubsub.Publisher
+		Queue               queue.Queue
+		Logs                logging.Log
+		Secrets             model.SecretService
+		Registries          model.RegistryService
+		Environ             model.EnvironService
+		Remote              remote.Remote
+		Membership          cache.MembershipService
+		ConfigService       config.Extension
+		SignaturePrivateKey crypto.PrivateKey
+		SignaturePublicKey  crypto.PublicKey
 	}
 	Storage struct {
 		// Users  model.UserStore
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Config model.ConfigStore
-		Files  model.FileStore
-		Procs  model.ProcStore
+		Files model.FileStore
+		Procs model.ProcStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
 	}
 	Server struct {
-		Key            string
-		Cert           string
-		Host           string
-		Port           string
-		Pass           string
-		Docs           string
-		SessionExpires time.Duration
+		Key                 string
+		Cert                string
+		OAuthHost           string
+		Host                string
+		Port                string
+		Pass                string
+		Docs                string
+		StatusContext       string
+		StatusContextFormat string
+		SessionExpires      time.Duration
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -63,9 +73,13 @@ var Config = struct {
 		AuthToken string
 	}
 	Pipeline struct {
-		Limits     model.ResourceLimit
-		Volumes    []string
-		Networks   []string
-		Privileged []string
+		AuthenticatePublicRepos             bool
+		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
+		DefaultCloneImage                   string
+		Limits                              model.ResourceLimit
+		Volumes                             []string
+		Networks                            []string
+		Privileged                          []string
 	}
+	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

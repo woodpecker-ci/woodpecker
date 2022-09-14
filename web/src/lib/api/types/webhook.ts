@@ -1,6 +1,7 @@
 export enum WebhookEvents {
   Push = 'push',
   Tag = 'tag',
-  PullRequest = 'pull-request',
-  Deploy = 'deploy',
+  PullRequest = 'pull_request',
+  Deploy = 'deployment',
+  Cron = 'cron',
 }

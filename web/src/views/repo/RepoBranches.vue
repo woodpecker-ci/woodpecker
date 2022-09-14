@@ -6,7 +6,7 @@
       :to="{ name: 'repo-branch', params: { branch } }"
       class="flex"
     >
-      <ListItem clickable class="text-gray-600 dark:text-gray-500">
+      <ListItem clickable class="text-color">
         {{ branch }}
       </ListItem>
     </router-link>

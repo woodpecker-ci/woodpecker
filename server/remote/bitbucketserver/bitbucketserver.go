@@ -24,16 +24,15 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
+	"os"
 
 	"github.com/mrjones/oauth"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 const (
@@ -87,7 +86,7 @@ func New(opts Opts) (remote.Remote, error) {
 	var keyFileBytes []byte
 	if opts.ConsumerRSA != "" {
 		var err error
-		keyFileBytes, err = ioutil.ReadFile(opts.ConsumerRSA)
+		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
 		if err != nil {
 			return nil, err
 		}
@@ -105,12 +104,17 @@ func New(opts Opts) (remote.Remote, error) {
 	return config, nil
 }
 
+// Name returns the string name of this driver
+func (c *Config) Name() string {
+	return "stash"
+}
+
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
 		return nil, err
 	}
-	var code = req.FormValue("oauth_verifier")
+	code := req.FormValue("oauth_verifier")
 	if len(code) == 0 {
 		http.Redirect(res, req, u, http.StatusSeeOther)
 		return nil, nil
@@ -147,7 +151,7 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *Config) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -168,10 +172,10 @@ func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	return all, nil
 }
 
-func (c *Config) Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
+func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
-	return client.FindRepoPerms(owner, repo)
+	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
@@ -185,36 +189,30 @@ func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
-		State: convertStatus(b.Status),
-		Desc:  convertDesc(b.Status),
-		Name:  fmt.Sprintf("Woodpecker #%d - %s", b.Number, b.Branch),
+		State: convertStatus(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", build.Number, build.Branch),
 		Key:   "Woodpecker",
-		Url:   link,
+		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}
 
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, user.Token)
 
-	return client.CreateStatus(b.Commit, &status)
+	return client.CreateStatus(build.Commit, &status)
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
-	u, err := url.Parse(c.URL)
+	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
-	//remove the port
-	tmp := strings.Split(u.Host, ":")
-	var host = tmp[0]
 
-	if err != nil {
-		return nil, err
-	}
 	return &model.Netrc{
-		Machine:  host,
 		Login:    c.Username,
 		Password: c.Password,
+		Machine:  host,
 	}, nil
 }
 
@@ -226,8 +224,22 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range bitbucketBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
@@ -235,11 +247,18 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Hook(r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(r, c.URL)
 }
 
-func CreateConsumer(URL string, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	// TODO: Not implemented currently
+	return nil, nil
+}
+
+func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
 		ConsumerKey,
 		PrivateKey,

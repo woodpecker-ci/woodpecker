@@ -1,0 +1,19 @@
+FROM --platform=$BUILDPLATFORM golang:1.18 AS build
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    make build-cli
+
+FROM scratch
+ENV GODEBUG=netdns=go
+
+# copy certs from golang:1.18 image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy cli binary
+COPY --from=build /src/dist/woodpecker-cli /bin/
+
+HEALTHCHECK CMD ["/bin/woodpecker-cli", "ping"]
+ENTRYPOINT ["/bin/woodpecker-cli"]

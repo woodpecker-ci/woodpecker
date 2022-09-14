@@ -15,6 +15,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/urfave/cli/v2"
@@ -29,19 +30,25 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_USERNAME"},
-		Name:    "username",
+		Name:    "grpc-username",
 		Usage:   "auth username",
 		Value:   "x-oauth-basic",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_AGENT_SECRET"},
-		Name:    "password",
-		Usage:   "server-agent shared password",
+		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
+		Name:     "grpc-password",
+		Usage:    "server-agent shared password",
+		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG"},
-		Name:    "debug",
-		Usage:   "enable agent debug mode",
+		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
+		Name:    "grpc-secure",
+		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
+		Name:    "grpc-skip-insecure",
+		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
 		Value:   true,
 	},
 	&cli.StringFlag{
@@ -65,16 +72,10 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PLATFORM"},
-		Name:    "platform",
-		Usage:   "restrict builds by platform conditions",
-		Value:   "linux/amd64",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_FILTER"},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
-		Usage:   "filter expression to restrict builds by label",
+		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
@@ -99,21 +100,38 @@ var flags = []cli.Flag{
 		Usage:   "after pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity",
 		Value:   time.Second * 20,
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECURE"},
-		Name:    "secure-grpc",
-		Usage:   "should the connection to WOODPECKER_SERVER be made using a secure transport",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_VERIFY"},
-		Name:    "skip-insecure-grpc",
-		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		Value:   true,
-	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND"},
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
+	},
+
+	// TODO: add flags of backends
+
+	// backend k8s
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
+		Name:    "backend-k8s-namespace",
+		Usage:   "backend k8s namespace",
+		Value:   "woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
+		Name:    "backend-k8s-volume-size",
+		Usage:   "backend k8s volume size (default 10G)",
+		Value:   "10G",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
+		Name:    "backend-k8s-storage-class",
+		Usage:   "backend k8s storage class",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Name:    "backend-k8s-storage-rwx",
+		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
+		Value:   true,
 	},
 }

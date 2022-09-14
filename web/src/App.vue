@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
@@ -37,9 +38,11 @@ export default defineComponent({
     const route = useRoute();
     const apiClient = useApiClient();
     const notifications = useNotifications();
+    const i18n = useI18n();
+
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     apiClient.setErrorHandler((err) => {
-      notifications.notify({ title: err.message || 'An unkown error occurred', type: 'error' });
+      notifications.notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
     });
 
     const blank = computed(() => route.meta.blank);
@@ -48,54 +51,6 @@ export default defineComponent({
   },
 });
 </script>
-
-<!-- eslint-disable-next-line vue-scoped-css/require-scoped -->
-<style>
-html,
-body,
-#app {
-  width: 100%;
-  height: 100%;
-}
-
-.vue-notification {
-  @apply rounded-md text-base border-l-6;
-}
-
-.vue-notification .notification-title {
-  @apply font-normal;
-}
-
-.vue-notification.success {
-  @apply bg-lime-600 border-l-lime-700;
-}
-
-.vue-notification.error {
-  @apply bg-red-600 border-l-red-700;
-}
-
-*::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
-}
-
-* {
-  scrollbar-width: thin;
-}
-
-*::-webkit-scrollbar-thumb {
-  transition: background 0.2s ease-in-out;
-  border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  @apply bg-cool-gray-300 dark:bg-dark-100;
-}
-
-*::-webkit-scrollbar-corner {
-  @apply bg-transparent;
-}
-</style>
 
 <style scoped>
 .app {

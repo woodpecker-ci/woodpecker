@@ -1,10 +1,9 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,12 +35,8 @@ func TestUnmarshalVolume(t *testing.T) {
 		in := []byte(test.from)
 		got := Volume{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got) {
-			t.Errorf("problem parsing volume %q", test.from)
-			pretty.Ldiff(t, test.want, got)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got, "problem parsing volume %q", test.from)
 	}
 }
 
@@ -83,12 +78,8 @@ func TestUnmarshalVolumes(t *testing.T) {
 		in := []byte(test.from)
 		got := Volumes{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Volumes) {
-			t.Errorf("problem parsing volumes %q", test.from)
-			pretty.Ldiff(t, test.want, got.Volumes)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Volumes, "problem parsing volumes %q", test.from)
 	}
 }
 
@@ -101,8 +92,6 @@ func TestUnmarshalVolumesErr(t *testing.T) {
 	for _, test := range testdata {
 		in := []byte(test)
 		err := yaml.Unmarshal(in, new(Volumes))
-		if err == nil {
-			t.Errorf("wanted error for volumes %q", test)
-		}
+		assert.Error(t, err, "wanted error for volumes %q", test)
 	}
 }

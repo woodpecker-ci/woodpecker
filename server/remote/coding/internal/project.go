@@ -24,7 +24,7 @@ type Project struct {
 	Owner     string `json:"owner_user_name"`
 	Name      string `json:"name"`
 	DepotPath string `json:"depot_path"`
-	HttpsURL  string `json:"https_url"`
+	HTTPSURL  string `json:"https_url"`
 	IsPublic  bool   `json:"is_public"`
 	Icon      string `json:"icon"`
 	Role      string `json:"current_user_role"`

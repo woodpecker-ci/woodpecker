@@ -33,7 +33,7 @@ func Test_helper(t *testing.T) {
 			}
 			from.Project.Key = "octocat"
 
-			//var links [1]internal.LinkType
+			// var links [1]internal.LinkType
 			link := internal.CloneLink{
 				Name: "http",
 				Href: "https://x7hw@server.org/foo/bar.git",
@@ -86,7 +86,9 @@ func Test_helper(t *testing.T) {
 
 			change.Changesets.Values = append(change.Changesets.Values, value)
 
-			change.Repository.Project.Key = "octocat"
+			change.Repository.Project = internal.Project{
+				Key: "octocat",
+			}
 			change.Repository.Slug = "hello-world"
 			build := convertPushHook(&change, "http://base.com")
 			g.Assert(build.Branch).Equal("")

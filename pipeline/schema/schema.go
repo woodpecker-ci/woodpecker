@@ -1,32 +1,35 @@
 package schema
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
+	"io"
 
+	"codeberg.org/6543/go-yaml2json"
 	"github.com/xeipuuv/gojsonschema"
-
-	"github.com/woodpecker-ci/woodpecker/shared/yml"
 )
 
 //go:embed schema.json
 var schemaDefinition []byte
 
-func Lint(file string) (error, []gojsonschema.ResultError) {
+// Lint lints an io.Reader against the Woodpecker schema.json
+func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
-	j, err := yml.LoadYmlFileAsJson(file)
+	buff := new(bytes.Buffer)
+	err := yaml2json.StreamConvert(r, buff)
 	if err != nil {
-		return fmt.Errorf("Failed to load yml file %w", err), nil
+		return nil, fmt.Errorf("Failed to load yml file %w", err)
 	}
 
-	documentLoader := gojsonschema.NewBytesLoader(j)
+	documentLoader := gojsonschema.NewBytesLoader(buff.Bytes())
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return fmt.Errorf("Validation failed %w", err), nil
+		return nil, fmt.Errorf("Validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return fmt.Errorf("Config not valid"), result.Errors()
+		return result.Errors(), fmt.Errorf("Config not valid")
 	}
 
 	return nil, nil

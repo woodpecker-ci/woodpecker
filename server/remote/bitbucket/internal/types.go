@@ -39,7 +39,7 @@ type BuildStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
-	Url   string `json:"url"`
+	URL   string `json:"url"`
 	Desc  string `json:"description,omitempty"`
 }
 
@@ -58,9 +58,9 @@ type EmailResp struct {
 }
 
 type Hook struct {
-	Uuid   string   `json:"uuid,omitempty"`
+	UUID   string   `json:"uuid,omitempty"`
 	Desc   string   `json:"description"`
-	Url    string   `json:"url"`
+	URL    string   `json:"url"`
 	Events []string `json:"events"`
 	Active bool     `json:"active"`
 }
@@ -75,7 +75,7 @@ type HookResp struct {
 
 type Links struct {
 	Avatar Link   `json:"avatar"`
-	Html   Link   `json:"html"`
+	HTML   Link   `json:"html"`
 	Clone  []Link `json:"clone"`
 }
 
@@ -89,6 +89,7 @@ type LinkClone struct {
 }
 
 type Repo struct {
+	UUID      string  `json:"uuid"`
 	Owner     Account `json:"owner"`
 	Name      string  `json:"name"`
 	FullName  string  `json:"full_name"`
@@ -171,6 +172,19 @@ type PullRequestHook struct {
 	} `json:"pullrequest"`
 }
 
+type WorkspaceMembershipResp struct {
+	Page   int    `json:"page"`
+	Pages  int    `json:"pagelen"`
+	Size   int    `json:"size"`
+	Next   string `json:"next"`
+	Values []struct {
+		Permission string `json:"permission"`
+		User       struct {
+			Nickname string `json:"nickname"`
+		}
+	} `json:"values"`
+}
+
 type ListOpts struct {
 	Page    int
 	PageLen int
@@ -226,4 +240,12 @@ type RepoPermResp struct {
 
 type RepoPerm struct {
 	Permission string `json:"permission"`
+}
+
+type BranchResp struct {
+	Values []*Branch `json:"values"`
+}
+
+type Branch struct {
+	Name string `json:"name"`
 }

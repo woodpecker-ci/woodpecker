@@ -47,6 +47,12 @@ var GlobalFlags = []cli.Flag{
 		Usage:   "socks proxy ignored",
 		Hidden:  true,
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Name:    "log-level",
+		Usage:   "set logging level",
+		Value:   "info",
+	},
 }
 
 // FormatFlag return format flag with value set based on template
@@ -58,4 +64,11 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 		Value:  tmpl,
 		Hidden: len(hidden) != 0,
 	}
+}
+
+// specify repository
+var RepoFlag = &cli.StringFlag{
+	Name:    "repository",
+	Aliases: []string{"repo"},
+	Usage:   "repository name (e.g. octocat/hello-world)",
 }

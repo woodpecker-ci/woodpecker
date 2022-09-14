@@ -17,44 +17,65 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
+	"regexp"
 )
 
 var (
 	errSecretNameInvalid  = errors.New("Invalid Secret Name")
 	errSecretValueInvalid = errors.New("Invalid Secret Value")
+	errSecretEventInvalid = errors.New("Invalid Secret Event")
 )
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
+	SecretListBuild(*Repo, *Build) ([]*Secret, error)
+	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
 	SecretList(*Repo) ([]*Secret, error)
-	SecretListBuild(*Repo, *Build) ([]*Secret, error)
 	SecretCreate(*Repo, *Secret) error
 	SecretUpdate(*Repo, *Secret) error
 	SecretDelete(*Repo, string) error
+	// Organization secrets
+	OrgSecretFind(string, string) (*Secret, error)
+	OrgSecretList(string) ([]*Secret, error)
+	OrgSecretCreate(string, *Secret) error
+	OrgSecretUpdate(string, *Secret) error
+	OrgSecretDelete(string, string) error
+	// Global secrets
+	GlobalSecretFind(string) (*Secret, error)
+	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretCreate(*Secret) error
+	GlobalSecretUpdate(*Secret) error
+	GlobalSecretDelete(string) error
 }
 
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo) ([]*Secret, error)
+	SecretList(*Repo, bool) ([]*Secret, error)
 	SecretCreate(*Secret) error
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error
+	OrgSecretFind(string, string) (*Secret, error)
+	OrgSecretList(string) ([]*Secret, error)
+	GlobalSecretFind(string) (*Secret, error)
+	GlobalSecretList() ([]*Secret, error)
 }
 
 // Secret represents a secret variable, such as a password or token.
 // swagger:model registry
 type Secret struct {
-	ID         int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	RepoID     int64    `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name       string   `json:"name"            xorm:"UNIQUE(s) INDEX 'secret_name'"`
-	Value      string   `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images     []string `json:"image"           xorm:"json 'secret_images'"`
-	Events     []string `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool     `json:"-"               xorm:"secret_skip_verify"`
-	Conceal    bool     `json:"-"               xorm:"secret_conceal"`
+	ID         int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	Owner      string         `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
+	RepoID     int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name       string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
+	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
+	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"`
+	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
 }
 
 // TableName return database table name for xorm
@@ -62,21 +83,56 @@ func (Secret) TableName() string {
 	return "secrets"
 }
 
+// Global secret.
+func (s Secret) Global() bool {
+	return s.RepoID == 0 && s.Owner == ""
+}
+
+// Organization secret.
+func (s Secret) Organization() bool {
+	return s.RepoID == 0 && s.Owner != ""
+}
+
 // Match returns true if an image and event match the restricted list.
-func (s *Secret) Match(event string) bool {
+func (s *Secret) Match(event WebhookEvent) bool {
 	if len(s.Events) == 0 {
 		return true
 	}
 	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(pattern, event); match {
+		if match, _ := filepath.Match(string(pattern), string(event)); match {
 			return true
 		}
 	}
 	return false
 }
 
+var validDockerImageString = regexp.MustCompile(
+	`^([\w\d\-_\.\/]*` + // optional url prefix
+		`[\w\d\-_]+` + // image name
+		`)+` +
+		`(:[\w\d\-_]+)?$`, // optional image tag
+)
+
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
+	for _, event := range s.Events {
+		if !ValidateWebhookEvent(event) {
+			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
+		}
+	}
+	if len(s.Events) == 0 {
+		return fmt.Errorf("%s: no event specified", errSecretEventInvalid)
+	}
+
+	for _, image := range s.Images {
+		if len(image) == 0 {
+			return fmt.Errorf("empty image in images")
+		}
+		if !validDockerImageString.MatchString(image) {
+			return fmt.Errorf("image '%s' do not match regexp '%s'", image, validDockerImageString.String())
+		}
+	}
+
 	switch {
 	case len(s.Name) == 0:
 		return errSecretNameInvalid
@@ -91,6 +147,7 @@ func (s *Secret) Validate() error {
 func (s *Secret) Copy() *Secret {
 	return &Secret{
 		ID:     s.ID,
+		Owner:  s.Owner,
 		RepoID: s.RepoID,
 		Name:   s.Name,
 		Images: s.Images,

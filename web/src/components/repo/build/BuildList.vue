@@ -9,7 +9,7 @@
       <BuildItem :build="build" />
     </router-link>
     <Panel v-if="builds.length === 0">
-      <span class="text-gray-500">No pipelines have been started yet.</span>
+      <span class="text-color">{{ $t('repo.build.no_pipelines') }}</span>
     </Panel>
   </div>
 </template>

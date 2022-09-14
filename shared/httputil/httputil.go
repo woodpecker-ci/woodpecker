@@ -19,11 +19,11 @@ import (
 	"strings"
 )
 
-// IsHttps is a helper function that evaluates the http.Request
+// IsHTTPS is a helper function that evaluates the http.Request
 // and returns True if the Request uses HTTPS. It is able to detect,
 // using the X-Forwarded-Proto, if the original request was HTTPS and
 // routed through a reverse proxy with SSL termination.
-func IsHttps(r *http.Request) bool {
+func IsHTTPS(r *http.Request) bool {
 	switch {
 	case r.URL.Scheme == "https":
 		return true
@@ -46,7 +46,7 @@ func SetCookie(w http.ResponseWriter, r *http.Request, name, value string) {
 		Path:     "/",
 		Domain:   r.URL.Host,
 		HttpOnly: true,
-		Secure:   IsHttps(r),
+		Secure:   IsHTTPS(r),
 		MaxAge:   2147483647, // the cooke value (token) is responsible for expiration
 	}
 

@@ -1,45 +1,41 @@
 package backend
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/podman"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-var (
-	engines map[string]types.Engine
-)
+var engines map[string]types.Engine
 
-func init() {
+func Init(ctx context.Context) {
+	loadedEngines := []types.Engine{
+		docker.New(),
+		local.New(),
+		ssh.New(),
+		kubernetes.New(ctx),
+	}
+
 	engines = make(map[string]types.Engine)
-
-	var engine types.Engine
-
-	// TODO: disabled for now as kubernetes backend has not been implemented yet
-	// kubernetes
-	// engine = kubernetes.New("", "", "")
-	// engines[engine.Name()] = engine
-
-	// podman
-	engine = podman.New()
-	engines[engine.Name()] = engine
-
-	// docker
-	engine = docker.New()
-	engines[engine.Name()] = engine
+	for _, engine := range loadedEngines {
+		engines[engine.Name()] = engine
+	}
 }
 
 func FindEngine(engineName string) (types.Engine, error) {
 	if engineName == "auto-detect" {
 		for _, engine := range engines {
-			if engine.IsAvivable() {
+			if engine.IsAvailable() {
 				return engine, nil
 			}
 		}
 
-		return nil, fmt.Errorf("Can't detect an avivable backend engine")
+		return nil, fmt.Errorf("Can't detect an available backend engine")
 	}
 
 	engine, ok := engines[engineName]

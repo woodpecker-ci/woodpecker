@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -42,7 +44,10 @@ func (s storage) ProcChild(build *model.Build, ppid int, child string) (*model.P
 
 func (s storage) ProcList(build *model.Build) ([]*model.Proc, error) {
 	procList := make([]*model.Proc, 0, perPage)
-	return procList, s.engine.Where("proc_build_id = ?", build.ID).Find(&procList)
+	return procList, s.engine.
+		Where("proc_build_id = ?", build.ID).
+		OrderBy("proc_pid").
+		Find(&procList)
 }
 
 func (s storage) ProcCreate(procs []*model.Proc) error {
@@ -83,4 +88,15 @@ func (s storage) ProcClear(build *model.Build) error {
 	}
 
 	return sess.Commit()
+}
+
+func deleteProc(sess *xorm.Session, procID int64) error {
+	if _, err := sess.Where("log_job_id = ?", procID).Delete(new(model.Logs)); err != nil {
+		return err
+	}
+	if _, err := sess.Where("file_proc_id = ?", procID).Delete(new(model.File)); err != nil {
+		return err
+	}
+	_, err := sess.ID(procID).Delete(new(model.Proc))
+	return err
 }

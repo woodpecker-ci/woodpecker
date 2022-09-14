@@ -22,6 +22,76 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
+// TODO(974) move to pipeline/*
+
+func TestGlobalEnvsubst(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Envs: map[string]string{
+			"KEY_K": "VALUE_V",
+			"IMAGE": "scratch",
+		},
+		Repo: &model.Repo{},
+		Curr: &model.Build{
+			Message: "aaa",
+		},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+pipeline:
+  build:
+    image: ${IMAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	if buildItems, err := b.Build(); err != nil {
+		t.Fatal(err)
+	} else {
+		fmt.Println(buildItems)
+	}
+}
+
+func TestMissingGlobalEnvsubst(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Envs: map[string]string{
+			"KEY_K":    "VALUE_V",
+			"NO_IMAGE": "scratch",
+		},
+		Repo: &model.Repo{},
+		Curr: &model.Build{
+			Message: "aaa",
+		},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+pipeline:
+  build:
+    image: ${IMAGE}
+    yyy: ${CI_COMMIT_MESSAGE}
+`)},
+		},
+	}
+
+	if _, err := b.Build(); err != nil {
+		fmt.Println("test rightfully failed")
+	} else {
+		t.Fatal("test erroneously succeeded")
+	}
+}
+
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
@@ -49,7 +119,8 @@ pipeline:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
-		}}
+		},
+	}
 
 	if buildItems, err := b.Build(); err != nil {
 		t.Fatal(err)
@@ -332,7 +403,7 @@ depends_on: [ zerostep ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -386,7 +457,7 @@ depends_on: [ shouldbefiltered ]
 	if len(buildItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
 	}
-	if "justastep" != buildItems[0].Proc.Name {
+	if buildItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -394,7 +465,9 @@ depends_on: [ shouldbefiltered ]
 func TestTree(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{}
+	build := &model.Build{
+		Event: model.EventPush,
+	}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
@@ -404,7 +477,8 @@ func TestTree(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{{Data: []byte(`
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
 pipeline:
   build:
     image: scratch

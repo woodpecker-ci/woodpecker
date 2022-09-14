@@ -18,27 +18,18 @@
 package api
 
 import (
-	"context"
-	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -75,363 +66,118 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// PostHook start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
-	remote_ := remote.FromContext(c)
-	store_ := store.FromContext(c)
+	_store := store.FromContext(c)
+	remote := server.Config.Services.Remote
 
-	tmpRepo, build, err := remote_.Hook(c.Request)
+	tmpRepo, tmpBuild, err := remote.Hook(c, c.Request)
 	if err != nil {
-		log.Error().Msgf("failure to parse hook. %s", err)
-		_ = c.AbortWithError(400, err)
+		msg := "failure to parse hook"
+		log.Debug().Err(err).Msg(msg)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	if build == nil {
-		c.Writer.WriteHeader(200)
+	if tmpBuild == nil {
+		msg := "ignoring hook: hook parsing resulted in empty build"
+		log.Debug().Msg(msg)
+		c.String(http.StatusOK, msg)
 		return
 	}
 	if tmpRepo == nil {
-		log.Error().Msgf("failure to ascertain repo from hook.")
-		c.Writer.WriteHeader(400)
+		msg := "failure to ascertain repo from hook"
+		log.Debug().Msg(msg)
+		c.String(http.StatusBadRequest, msg)
 		return
 	}
 
-	// skip the build if any case-insensitive combination of the words "skip" and "ci"
+	// skip the tmpBuild if any case-insensitive combination of the words "skip" and "ci"
 	// wrapped in square brackets appear in the commit message
-	skipMatch := skipRe.FindString(build.Message)
+	skipMatch := skipRe.FindString(tmpBuild.Message)
 	if len(skipMatch) > 0 {
-		log.Info().Msgf("ignoring hook. %s found in %s", skipMatch, build.Commit)
-		c.Writer.WriteHeader(204)
+		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, tmpBuild.Commit)
+		log.Debug().Msg(msg)
+		c.String(http.StatusNoContent, msg)
 		return
 	}
 
-	repo, err := store_.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
-		log.Error().Msgf("failure to find repo %s/%s from hook. %s", tmpRepo.Owner, tmpRepo.Name, err)
-		_ = c.AbortWithError(404, err)
+		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusNotFound, msg)
 		return
 	}
 	if !repo.IsActive {
-		log.Error().Msgf("ignoring hook. %s/%s is inactive.", tmpRepo.Owner, tmpRepo.Name)
-		_ = c.AbortWithError(204, err)
+		msg := fmt.Sprintf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
+		log.Debug().Msg(msg)
+		c.String(http.StatusNoContent, msg)
 		return
 	}
 
-	// get the token and verify the hook is authorized
-	parsed, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
-		return repo.Hash, nil
-	})
-	if err != nil {
-		log.Error().Msgf("failure to parse token from hook for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(400, err)
-		return
-	}
-	if parsed.Text != repo.FullName {
-		log.Error().Msgf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
-		c.AbortWithStatus(403)
-		return
-	}
-
-	if repo.UserID == 0 {
-		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
-		c.Writer.WriteHeader(204)
-		return
-	}
-
-	if build.Event == model.EventPull && !repo.AllowPull {
-		log.Info().Msgf("ignoring hook. repo %s is disabled for pull requests.", repo.FullName)
-		_, _ = c.Writer.Write([]byte("pulls are disabled on woodpecker for this repo"))
-		c.Writer.WriteHeader(204)
-		return
-	}
-
-	user, err := store_.GetUser(repo.UserID)
-	if err != nil {
-		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
-		return
-	}
-
-	// if the remote has a refresh token, the current access token
-	// may be stale. Therefore, we should refresh prior to dispatching
-	// the build.
-	if refresher, ok := remote_.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(c, user)
+	oldFullName := repo.FullName
+	if oldFullName != tmpRepo.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 		if err != nil {
-			log.Error().Msgf("failed to refresh oauth2 token: %s", err)
-		} else if ok {
-			if err := store_.UpdateUser(user); err != nil {
-				log.Error().Msgf("error while updating user: %s", err)
-				// move forward
-			}
-		}
-	}
-
-	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(remote_, user, repo, build)
-	remoteYamlConfigs, err := configFetcher.Fetch(c)
-	if err != nil {
-		log.Error().Msgf("error: %s: cannot find %s in %s: %s", repo.FullName, repo.Config, build.Ref, err)
-		_ = c.AbortWithError(404, err)
-		return
-	}
-
-	filtered, err := branchFiltered(build, remoteYamlConfigs)
-	if err != nil {
-		log.Error().Msgf("failure to parse yaml from hook for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(400, err)
-	}
-	if filtered {
-		c.String(200, "Branch does not match restrictions defined in yaml")
-		return
-	}
-
-	if zeroSteps(build, remoteYamlConfigs) {
-		c.String(200, "Step conditions yield zero runnable steps")
-		return
-	}
-
-	// update some build fields
-	build.RepoID = repo.ID
-	build.Verified = true
-	build.Status = model.StatusPending
-
-	if repo.IsGated && build.Sender != user.Login {
-		build.Status = model.StatusBlocked
-	}
-
-	err = store_.CreateBuild(build, build.Procs...)
-	if err != nil {
-		log.Error().Msgf("failure to save commit for %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
-		return
-	}
-
-	// persist the build config for historical correctness, restarts, etc
-	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(repo, build, remoteYamlConfig)
-		if err != nil {
-			log.Error().Msgf("failure to find or persist build config for %s. %s", repo.FullName, err)
-			_ = c.AbortWithError(500, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 	}
 
-	c.JSON(200, build)
-
-	if build.Status == model.StatusBlocked {
+	repo.Update(tmpRepo)
+	err = _store.UpdateRepo(repo)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	netrc, err := remote_.Netrc(user, repo)
-	if err != nil {
-		c.String(500, "Failed to generate netrc file. %s", err)
-		return
-	}
-
-	envs := map[string]string{}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
-		for _, global := range globals {
-			envs[global.Name] = global.Value
-		}
-	}
-
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
-	if err != nil {
-		log.Debug().Msgf("Error getting secrets for %s#%d. %s", repo.FullName, build.Number, err)
-	}
-
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
-	if err != nil {
-		log.Debug().Msgf("Error getting registry credentials for %s#%d. %s", repo.FullName, build.Number, err)
-	}
-
-	// get the previous build so that we can send status change notifications
-	last, _ := store_.GetBuildLastBefore(repo, build.Branch, build.ID)
-
-	b := shared.ProcBuilder{
-		Repo:  repo,
-		Curr:  build,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Link:  server.Config.Server.Host,
-		Yamls: remoteYamlConfigs,
-	}
-	buildItems, err := b.Build()
-	if err != nil {
-		if _, err = shared.UpdateToStatusError(store_, *build, err); err != nil {
-			log.Error().Msgf("Error setting error status of build for %s#%d. %s", repo.FullName, build.Number, err)
-		}
-		return
-	}
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
-
-	err = store_.ProcCreate(build.Procs)
-	if err != nil {
-		log.Error().Msgf("error persisting procs %s/%d: %s", repo.FullName, build.Number, err)
-	}
-
-	defer func() {
-		for _, item := range buildItems {
-			uri := fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
-			if len(buildItems) > 1 {
-				err = remote_.Status(c, user, repo, build, uri, item.Proc)
-			} else {
-				err = remote_.Status(c, user, repo, build, uri, nil)
-			}
-			if err != nil {
-				log.Error().Msgf("error setting commit status for %s/%d: %v", repo.FullName, build.Number, err)
-			}
-		}
-	}()
-
-	if err := publishToTopic(c, build, repo, model.Enqueued); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-	if err := queueBuild(build, repo, buildItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
-	}
-}
-
-// TODO: parse yaml once and not for each filter function
-func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
-	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
-	for _, remoteYamlConfig := range remoteYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseString(string(remoteYamlConfig.Data))
-		if err != nil {
-			log.Trace().Msgf("parse config '%s': %s", remoteYamlConfig.Name, err)
-			return false, err
-		}
-		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
-
-		if !parsedPipelineConfig.Branches.Match(build.Branch) && build.Event != model.EventTag && build.Event != model.EventDeploy {
-		} else {
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := shared.ProcBuilder{
-		Repo:  &model.Repo{},
-		Curr:  build,
-		Last:  &model.Build{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Link:  "",
-		Yamls: remoteYamlConfigs,
-	}
-
-	buildItems, err := b.Build()
-	if err != nil {
-		return false
-	}
-	if len(buildItems) == 0 {
-		return true
-	}
-
-	return false
-}
-
-func findOrPersistPipelineConfig(repo *model.Repo, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
-	sha := shasum(remoteYamlConfig.Data)
-	conf, err := server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
-	if err != nil {
-		conf = &model.Config{
-			RepoID: build.RepoID,
-			Data:   remoteYamlConfig.Data,
-			Hash:   sha,
-			Name:   shared.SanitizePath(remoteYamlConfig.Name),
-		}
-		err = server.Config.Storage.Config.ConfigCreate(conf)
-		if err != nil {
-			// retry in case we receive two hooks at the same time
-			conf, err = server.Config.Storage.Config.ConfigFindIdentical(build.RepoID, sha)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	buildConfig := &model.BuildConfig{
-		ConfigID: conf.ID,
-		BuildID:  build.ID,
-	}
-	err = server.Config.Storage.Config.BuildConfigCreate(buildConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return conf, nil
-}
-
-// publishes message to UI clients
-func publishToTopic(c *gin.Context, build *model.Build, repo *model.Repo, event model.EventType) error {
-	message := pubsub.Message{
-		Labels: map[string]string{
-			"repo":    repo.FullName,
-			"private": strconv.FormatBool(repo.IsSCMPrivate),
-		},
-	}
-	buildCopy := *build
-	buildCopy.Procs = model.Tree(buildCopy.Procs)
-	message.Data, _ = json.Marshal(model.Event{
-		Type:  model.Enqueued,
-		Repo:  *repo,
-		Build: buildCopy,
+	// get the token and verify the hook is authorized
+	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+		return repo.Hash, nil
 	})
-	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
-}
-
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) error {
-	var tasks []*queue.Task
-	for _, item := range buildItems {
-		if item.Proc.State == model.StatusSkipped {
-			continue
-		}
-		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Proc.ID)
-		task.Labels = map[string]string{}
-		for k, v := range item.Labels {
-			task.Labels[k] = v
-		}
-		task.Labels["platform"] = item.Platform
-		task.Labels["repo"] = repo.FullName
-		task.Dependencies = taskIds(item.DependsOn, buildItems)
-		task.RunOn = item.RunsOn
-		task.DepStatus = make(map[string]string)
-
-		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Proc.ID),
-			Config:  item.Config,
-			Timeout: repo.Timeout,
-		})
-
-		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
-			return err
-		}
-		tasks = append(tasks, task)
+	if err != nil {
+		msg := fmt.Sprintf("failure to parse token from hook for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusBadRequest, msg)
+		return
 	}
-	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
-}
-
-func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {
-	for _, dep := range dependsOn {
-		for _, buildItem := range buildItems {
-			if buildItem.Proc.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(buildItem.Proc.ID))
-			}
+	verifiedKey := parsed.Text == oldFullName
+	if !verifiedKey {
+		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
+		if err != nil {
+			msg := "failure to verify token from hook. Could not check for redirections of the repo"
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
+			return
 		}
 	}
-	return
-}
 
-func shasum(raw []byte) string {
-	sum := sha256.Sum256(raw)
-	return fmt.Sprintf("%x", sum)
+	if !verifiedKey {
+		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
+		log.Debug().Msg(msg)
+		c.String(http.StatusForbidden, msg)
+		return
+	}
+
+	if repo.UserID == 0 {
+		msg := fmt.Sprintf("ignoring hook. repo %s has no owner.", repo.FullName)
+		log.Warn().Msg(msg)
+		c.String(http.StatusNoContent, msg)
+		return
+	}
+
+	if tmpBuild.Event == model.EventPull && !repo.AllowPull {
+		msg := "ignoring hook: pull requests are disabled for this repo in woodpecker"
+		log.Debug().Str("repo", repo.FullName).Msg(msg)
+		c.String(http.StatusNoContent, msg)
+		return
+	}
+
+	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(200, build)
+	}
 }

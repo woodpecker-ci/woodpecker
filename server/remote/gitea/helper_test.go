@@ -23,6 +23,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func Test_parse(t *testing.T) {
@@ -37,19 +38,15 @@ func Test_parse(t *testing.T) {
 			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
 			g.Assert(hook.Compare).Equal("http://gitea.golang.org/gordon/hello-world/compare/4b2626259b5a97b6b4eab5e6cca66adb986b672b...ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.URL).Equal("http://gitea.golang.org/gordon/hello-world")
-			g.Assert(hook.Repo.Owner.Name).Equal("gordon")
+			g.Assert(hook.Repo.HTMLURL).Equal("http://gitea.golang.org/gordon/hello-world")
+			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
 			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
 			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Owner.Username).Equal("gordon")
 			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Pusher.Name).Equal("gordon")
 			g.Assert(hook.Pusher.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Pusher.Username).Equal("gordon")
-			g.Assert(hook.Pusher.Login).Equal("gordon")
-			g.Assert(hook.Sender.Login).Equal("gordon")
-			g.Assert(hook.Sender.Username).Equal("gordon")
-			g.Assert(hook.Sender.Avatar).Equal("http://gitea.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(hook.Pusher.UserName).Equal("gordon")
+			g.Assert(hook.Sender.UserName).Equal("gordon")
+			g.Assert(hook.Sender.AvatarURL).Equal("http://gitea.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 		})
 
 		g.It("Should parse tag hook payload", func() {
@@ -59,13 +56,13 @@ func Test_parse(t *testing.T) {
 			g.Assert(hook.Ref).Equal("v1.0.0")
 			g.Assert(hook.Sha).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.URL).Equal("http://gitea.golang.org/gordon/hello-world")
+			g.Assert(hook.Repo.HTMLURL).Equal("http://gitea.golang.org/gordon/hello-world")
 			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
 			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Owner.Username).Equal("gordon")
+			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
 			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Sender.Username).Equal("gordon")
-			g.Assert(hook.Sender.Avatar).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(hook.Sender.UserName).Equal("gordon")
+			g.Assert(hook.Sender.AvatarURL).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 		})
 
 		g.It("Should parse pull_request hook payload", func() {
@@ -76,21 +73,21 @@ func Test_parse(t *testing.T) {
 			g.Assert(hook.Number).Equal(int64(1))
 
 			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.URL).Equal("http://gitea.golang.org/gordon/hello-world")
+			g.Assert(hook.Repo.HTMLURL).Equal("http://gitea.golang.org/gordon/hello-world")
 			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
 			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Owner.Username).Equal("gordon")
+			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
 			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Sender.Username).Equal("gordon")
-			g.Assert(hook.Sender.Avatar).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(hook.Sender.UserName).Equal("gordon")
+			g.Assert(hook.Sender.AvatarURL).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 
 			g.Assert(hook.PullRequest.Title).Equal("Update the README with new information")
 			g.Assert(hook.PullRequest.Body).Equal("please merge")
-			g.Assert(hook.PullRequest.State).Equal("open")
-			g.Assert(hook.PullRequest.User.Username).Equal("gordon")
-			g.Assert(hook.PullRequest.Base.Label).Equal("master")
+			g.Assert(hook.PullRequest.State).Equal(gitea.StateOpen)
+			g.Assert(hook.PullRequest.Poster.UserName).Equal("gordon")
+			g.Assert(hook.PullRequest.Base.Name).Equal("master")
 			g.Assert(hook.PullRequest.Base.Ref).Equal("master")
-			g.Assert(hook.PullRequest.Head.Label).Equal("feature/changes")
+			g.Assert(hook.PullRequest.Head.Name).Equal("feature/changes")
 			g.Assert(hook.PullRequest.Head.Ref).Equal("feature/changes")
 		})
 
@@ -101,21 +98,22 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Event).Equal(model.EventPush)
 			g.Assert(build.Commit).Equal(hook.After)
 			g.Assert(build.Ref).Equal(hook.Ref)
-			g.Assert(build.Link).Equal(hook.Compare)
+			g.Assert(build.Link).Equal(hook.Commits[0].URL)
 			g.Assert(build.Branch).Equal("master")
 			g.Assert(build.Message).Equal(hook.Commits[0].Message)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(build.Author).Equal(hook.Sender.Login)
+			g.Assert(build.Author).Equal(hook.Sender.UserName)
+			g.Assert(utils.EqualStringSlice(build.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, _ := parsePush(buf)
-			repo := repoFromPush(hook)
+			repo := toRepo(hook.Repo)
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
-			g.Assert(repo.Owner).Equal(hook.Repo.Owner.Username)
+			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.Link).Equal(hook.Repo.URL)
+			g.Assert(repo.Link).Equal(hook.Repo.HTMLURL)
 		})
 
 		g.It("Should return a Build struct from a tag hook", func() {
@@ -142,17 +140,17 @@ func Test_parse(t *testing.T) {
 			g.Assert(build.Refspec).Equal("feature/changes:master")
 			g.Assert(build.Message).Equal(hook.PullRequest.Title)
 			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(build.Author).Equal(hook.PullRequest.User.Username)
+			g.Assert(build.Author).Equal(hook.PullRequest.Poster.UserName)
 		})
 
 		g.It("Should return a Repo struct from a pull_request hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, _ := parsePullRequest(buf)
-			repo := repoFromPullRequest(hook)
+			repo := toRepo(hook.Repo)
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
-			g.Assert(repo.Owner).Equal(hook.Repo.Owner.Username)
+			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.Link).Equal(hook.Repo.URL)
+			g.Assert(repo.Link).Equal(hook.Repo.HTMLURL)
 		})
 
 		g.It("Should return a Perm struct from a Gitea Perm", func() {
@@ -204,7 +202,7 @@ func Test_parse(t *testing.T) {
 				Private:       true,
 				DefaultBranch: "master",
 			}
-			repo := toRepo(&from, false)
+			repo := toRepo(&from)
 			g.Assert(repo.FullName).Equal(from.FullName)
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")
@@ -216,7 +214,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should correct a malformed avatar url", func() {
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -245,7 +243,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should expand the avatar url", func() {
-			var urls = []struct {
+			urls := []struct {
 				Before string
 				After  string
 			}{
@@ -263,7 +261,7 @@ func Test_parse(t *testing.T) {
 				},
 			}
 
-			var repo = "http://gitea.io/foo/bar"
+			repo := "http://gitea.io/foo/bar"
 			for _, url := range urls {
 				got := expandAvatar(repo, url.Before)
 				g.Assert(got).Equal(url.After)

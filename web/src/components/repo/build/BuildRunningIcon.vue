@@ -2,19 +2,9 @@
   <WoodpeckerIcon class="woodpecker h-16" />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script lang="ts" setup>
 // eslint-disable-next-line import/no-relative-parent-imports
 import WoodpeckerIcon from '../../../assets/woodpecker.svg?component';
-
-export default defineComponent({
-  name: 'BuildRunningIcon',
-
-  components: {
-    WoodpeckerIcon,
-  },
-});
 </script>
 
 <style scoped>

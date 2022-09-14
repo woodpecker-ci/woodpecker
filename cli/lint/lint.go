@@ -22,20 +22,12 @@ var Command = &cli.Command{
 }
 
 func lint(c *cli.Context) error {
-	file := c.Args().First()
-	if file == "" {
-		file = ".woodpecker.yml"
-	}
+	return common.RunPipelineFunc(c, lintFile, lintDir)
+}
 
-	fi, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-	if !fi.IsDir() {
-		return lintFile(file)
-	}
-
-	return filepath.Walk(file, func(path string, info os.FileInfo, e error) error {
+func lintDir(c *cli.Context, dir string) error {
+	var errorStrings []string
+	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -43,17 +35,32 @@ func lint(c *cli.Context) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
 			fmt.Println("#", info.Name())
-			_ = lintFile(path) // TODO: should we drop errors or store them and report back?
+			if err := lintFile(c, path); err != nil {
+				errorStrings = append(errorStrings, err.Error())
+			}
 			fmt.Println("")
 			return nil
 		}
 
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	if len(errorStrings) != 0 {
+		return fmt.Errorf("ERRORS: %s", strings.Join(errorStrings, "; "))
+	}
+	return nil
 }
 
-func lintFile(file string) error {
-	err, configErrors := schema.Lint(file)
+func lintFile(_ *cli.Context, file string) error {
+	fi, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer fi.Close()
+
+	configErrors, err := schema.Lint(fi)
 	if err != nil {
 		fmt.Println("❌ Config is invalid")
 		for _, configError := range configErrors {

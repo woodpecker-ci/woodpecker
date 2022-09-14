@@ -5,6 +5,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -57,32 +58,55 @@ type (
 		Volumes       types.Volumes          `yaml:"volumes,omitempty"`
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
-		Constraints   Constraints            `yaml:"when,omitempty"`
-		Vargs         map[string]interface{} `yaml:",inline"`
+		When          constraint.When        `yaml:"when,omitempty"`
+		Settings      map[string]interface{} `yaml:"settings"`
 	}
 )
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
-	containers := map[string]Container{}
-	err := value.Decode(&containers)
-	if err != nil {
-		return err
-	}
+	switch value.Kind {
+	// We support mapps ...
+	case yaml.MappingNode:
+		c.Containers = make([]*Container, 0, len(value.Content)/2+1)
+		// We cannot use decode on specific values
+		// since if we try to load from a map, the order
+		// will not be kept. Therefore use value.Content
+		// and take the map values i%2=1
+		for i, n := range value.Content {
+			if i%2 == 1 {
+				container := &Container{}
+				if err := n.Decode(container); err != nil {
+					return err
+				}
 
-	for i, n := range value.Content {
-		if i%2 == 1 {
-			container := Container{}
-			err := n.Decode(&container)
-			if err != nil {
+				if container.Name == "" {
+					container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
+				}
+
+				c.Containers = append(c.Containers, container)
+			}
+		}
+
+	// ... and lists
+	case yaml.SequenceNode:
+		c.Containers = make([]*Container, 0, len(value.Content))
+		for i, n := range value.Content {
+			container := &Container{}
+			if err := n.Decode(container); err != nil {
 				return err
 			}
 
 			if container.Name == "" {
-				container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
+				container.Name = fmt.Sprintf("step-%d", i)
 			}
-			c.Containers = append(c.Containers, &container)
+
+			c.Containers = append(c.Containers, container)
 		}
+
+	default:
+		return fmt.Errorf("yaml node type[%d]: '%s' not supported", value.Kind, value.Tag)
 	}
+
 	return nil
 }

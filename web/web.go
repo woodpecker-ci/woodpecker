@@ -2,15 +2,15 @@ package web
 
 import (
 	"embed"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 )
 
 //go:embed dist/*
 var webFiles embed.FS
 
-func HttpFS() http.FileSystem {
+func HTTPFS() http.FileSystem {
 	httpFS, err := fs.Sub(webFiles, "dist")
 	if err != nil {
 		panic(err)
@@ -20,13 +20,13 @@ func HttpFS() http.FileSystem {
 }
 
 func Lookup(path string) (buf []byte, err error) {
-	file, err := HttpFS().Open(path)
+	file, err := HTTPFS().Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	buf, err = ioutil.ReadAll(file)
+	buf, err = io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}

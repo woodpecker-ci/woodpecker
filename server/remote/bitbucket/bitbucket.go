@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/server/remote/common"
 )
 
 // Bitbucket cloud endpoints.
@@ -57,6 +58,11 @@ func New(opts *Opts) (remote.Remote, error) {
 		Secret: opts.Secret,
 	}, nil
 	// TODO: add checks
+}
+
+// Name returns the string name of this driver
+func (c *config) Name() string {
+	return "bitbucket"
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -136,7 +142,10 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
+	if id.IsValid() {
+		name = string(id)
+	}
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -179,11 +188,11 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 // does not have an endpoint to access user permissions, we attempt to fetch
 // the repository hook list, which is restricted to administrators to calculate
 // administrative access to a repository.
-func (c *config) Perm(ctx context.Context, u *model.User, owner, name string) (*model.Perm, error) {
+func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
 	client := c.newClient(ctx, u)
 
 	perms := new(model.Perm)
-	repo, err := client.FindRepo(owner, name)
+	repo, err := client.FindRepo(r.Owner, r.Name)
 	if err != nil {
 		return perms, err
 	}
@@ -221,14 +230,14 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status creates a build status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
 	status := internal.BuildStatus{
-		State: convertStatus(b.Status),
-		Desc:  convertDesc(b.Status),
+		State: convertStatus(build.Status),
+		Desc:  common.GetBuildStatusDescription(build.Status),
 		Key:   "Woodpecker",
-		Url:   link,
+		URL:   common.GetBuildStatusLink(repo, build, nil),
 	}
-	return c.newClient(ctx, u).CreateStatus(r.Owner, r.Name, b.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, build.Commit, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
@@ -245,7 +254,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Active: true,
 		Desc:   rawurl.Host,
 		Events: []string{"repo:push"},
-		Url:    link,
+		URL:    link,
 	})
 }
 
@@ -260,7 +269,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	}
 	hook := matchingHooks(hooks.Values, link)
 	if hook != nil {
-		return client.DeleteHook(r.Owner, r.Name, hook.Uuid)
+		return client.DeleteHook(r.Owner, r.Name, hook.UUID)
 	}
 	return nil
 }
@@ -277,18 +286,45 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Branches returns the names of all branches for the named repository.
 func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	// TODO: fetch all branches
-	return []string{r.Branch}, nil
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	branches := make([]string, 0)
+	for _, branch := range bitbucketBranches {
+		branches = append(branches, branch.Name)
+	}
+	return branches, nil
+}
+
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Build details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(req *http.Request) (*model.Repo, *model.Build, error) {
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
 	return parseHook(req)
+}
+
+// OrgMembership returns if user is member of organization and if user
+// is admin/owner in this organization.
+func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+	perm, err := c.newClient(ctx, u).GetUserWorkspaceMembership(owner, u.Login)
+	if err != nil {
+		return nil, err
+	}
+	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
 }
 
 // helper function to return the bitbucket oauth2 client
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
+	if u == nil {
+		return c.newClientToken(ctx, "", "")
+	}
 	return c.newClientToken(ctx, u.Token, u.Secret)
 }
 
@@ -326,7 +362,7 @@ func matchingHooks(hooks []*internal.Hook, rawurl string) *internal.Hook {
 		return nil
 	}
 	for _, hook := range hooks {
-		hookurl, err := url.Parse(hook.Url)
+		hookurl, err := url.Parse(hook.URL)
 		if err == nil && hookurl.Host == link.Host {
 			return hook
 		}

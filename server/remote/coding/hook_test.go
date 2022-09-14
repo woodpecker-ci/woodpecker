@@ -15,7 +15,7 @@
 package coding
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -30,7 +30,7 @@ func Test_hook(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Coding hook", func() {
 		g.It("Should parse hook", func() {
-			reader := ioutil.NopCloser(strings.NewReader(fixtures.PushHook))
+			reader := io.NopCloser(strings.NewReader(fixtures.PushHook))
 			r := &http.Request{
 				Header: map[string][]string{
 					hookEvent: {hookPush},
@@ -43,6 +43,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -83,8 +84,8 @@ func Test_hook(t *testing.T) {
 		g.It("Should convert repository", func() {
 			repository := &Repository{
 				Name:     "test_project",
-				HttpsURL: "https://git.coding.net/kelvin/test_project.git",
-				SshURL:   "git@git.coding.net:kelvin/test_project.git",
+				HTTPSURL: "https://git.coding.net/kelvin/test_project.git",
+				SSHURL:   "git@git.coding.net:kelvin/test_project.git",
 				WebURL:   "https://coding.net/u/kelvin/p/test_project",
 				Owner: &User{
 					GlobalKey: "kelvin",
@@ -96,6 +97,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test_project",
 				FullName: "kelvin/test_project",
 				Link:     "https://coding.net/u/kelvin/p/test_project",
+				Clone:    "https://git.coding.net/kelvin/test_project.git",
 				SCMKind:  model.RepoGit,
 			}
 			actual, err := convertRepository(repository)
@@ -109,6 +111,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -144,6 +147,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test2",
 				FullName: "demo1/test2",
 				Link:     "https://coding.net/u/demo1/p/test2",
+				Clone:    "https://git.coding.net/demo1/test2.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -173,6 +177,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 

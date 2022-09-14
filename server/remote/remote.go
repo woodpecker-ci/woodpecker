@@ -14,7 +14,8 @@
 
 package remote
 
-//go:generate mockery -name Remote -output mocks -case=underscore
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Remote --output mocks --case underscore
 
 import (
 	"context"
@@ -27,6 +28,9 @@ import (
 // TODO: add Driver() who return source forge back
 
 type Remote interface {
+	// Name returns the string name of this driver
+	Name() string
+
 	// Login authenticates the session and returns the
 	// remote user details.
 	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)
@@ -38,15 +42,15 @@ type Remote interface {
 	// Teams fetches a list of team memberships from the remote system.
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
-	// Repo fetches the named repository from the remote system.
-	Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error)
+	// Repo fetches the repository from the remote system, preferred is using the ID, fallback is owner/name.
+	Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 
 	// Perm fetches the named repository permissions from
 	// the remote system for the specified user.
-	Perm(ctx context.Context, u *model.User, owner, repo string) (*model.Perm, error)
+	Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error)
 
 	// File fetches a file from the remote repository and returns in string
 	// format.
@@ -57,7 +61,7 @@ type Remote interface {
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.
@@ -73,9 +77,16 @@ type Remote interface {
 	// Branches returns the names of all branches for the named repository.
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
 
+	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
+
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(r *http.Request) (*model.Repo, *model.Build, error)
+	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
+
+	// OrgMembership returns if user is member of organization and if user
+	// is admin/owner in that organization.
+	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
 }
 
 // FileMeta represents a file in version control
@@ -95,79 +106,4 @@ func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 // and error if it failed to refersh.
 type Refresher interface {
 	Refresh(context.Context, *model.User) (bool, error)
-}
-
-// Login authenticates the session and returns the
-// remote user details.
-func Login(c context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error) {
-	return FromContext(c).Login(c, w, r)
-}
-
-// Auth authenticates the session and returns the remote user
-// login for the given token and secret
-func Auth(c context.Context, token, secret string) (string, error) {
-	return FromContext(c).Auth(c, token, secret)
-}
-
-// Teams fetches a list of team memberships from the remote system.
-func Teams(c context.Context, u *model.User) ([]*model.Team, error) {
-	return FromContext(c).Teams(c, u)
-}
-
-// Repo fetches the named repository from the remote system.
-func Repo(c context.Context, u *model.User, owner, repo string) (*model.Repo, error) {
-	return FromContext(c).Repo(c, u, owner, repo)
-}
-
-// Repos fetches a list of repos from the remote system.
-func Repos(c context.Context, u *model.User) ([]*model.Repo, error) {
-	return FromContext(c).Repos(c, u)
-}
-
-// Perm fetches the named repository permissions from
-// the remote system for the specified user.
-func Perm(c context.Context, u *model.User, owner, repo string) (*model.Perm, error) {
-	return FromContext(c).Perm(c, u, owner, repo)
-}
-
-// Status sends the commit status to the remote system.
-// An example would be the GitHub pull request status.
-func Status(c context.Context, u *model.User, r *model.Repo, b *model.Build, link string, proc *model.Proc) error {
-	return FromContext(c).Status(c, u, r, b, link, proc)
-}
-
-// Netrc returns a .netrc file that can be used to clone
-// private repositories from a remote system.
-func Netrc(c context.Context, u *model.User, r *model.Repo) (*model.Netrc, error) {
-	return FromContext(c).Netrc(u, r)
-}
-
-// Activate activates a repository by creating the post-commit hook and
-// adding the SSH deploy key, if applicable.
-func Activate(c context.Context, u *model.User, r *model.Repo, link string) error {
-	return FromContext(c).Activate(c, u, r, link)
-}
-
-// Deactivate removes a repository by removing all the post-commit hooks
-// which are equal to link and removing the SSH deploy key.
-func Deactivate(c context.Context, u *model.User, r *model.Repo, link string) error {
-	return FromContext(c).Deactivate(c, u, r, link)
-}
-
-// Hook parses the post-commit hook from the Request body
-// and returns the required data in a standard format.
-func Hook(c context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	return FromContext(c).Hook(r)
-}
-
-// Refresh refreshes an oauth token and expiration for the given
-// user. It returns true if the token was refreshed, false if the
-// token was not refreshed, and error if it failed to refersh.
-func Refresh(c context.Context, u *model.User) (bool, error) {
-	remote := FromContext(c)
-	refresher, ok := remote.(Refresher)
-	if !ok {
-		return false, nil
-	}
-	return refresher.Refresh(c, u)
 }

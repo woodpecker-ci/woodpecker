@@ -9,9 +9,7 @@ import (
 // to create and manage container resources.
 type Engine interface {
 	Name() string
-
-	IsAvivable() bool
-
+	IsAvailable() bool
 	Load() error
 
 	// Setup the pipeline environment.
@@ -19,9 +17,6 @@ type Engine interface {
 
 	// Exec start the pipeline step.
 	Exec(context.Context, *Step) error
-
-	// Kill the pipeline step.
-	Kill(context.Context, *Step) error
 
 	// Wait for the pipeline step to complete and returns
 	// the completion results.

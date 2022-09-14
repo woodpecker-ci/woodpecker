@@ -48,6 +48,10 @@ type Proc struct {
 	Children []*Proc           `json:"children,omitempty"   xorm:"-"`
 }
 
+type UpdateProcStore interface {
+	ProcUpdate(*Proc) error
+}
+
 // TableName return database table name for xorm
 func (Proc) TableName() string {
 	return "procs"
@@ -63,18 +67,74 @@ func (p *Proc) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
-// Tree creates a process tree from a flat process list.
-func Tree(procs []*Proc) []*Proc {
-	var nodes []*Proc
+// IsParent returns true if the process is a parent process.
+func (p *Proc) IsParent() bool {
+	return p.PPID == 0
+}
+
+// IsMultiPipeline checks if proc list contain more than one parent proc
+func IsMultiPipeline(procs []*Proc) bool {
+	c := 0
 	for _, proc := range procs {
-		if proc.PPID == 0 {
-			nodes = append(nodes, proc)
-		} else {
-			parent, _ := findNode(nodes, proc.PPID)
-			parent.Children = append(parent.Children, proc)
+		if proc.IsParent() {
+			c++
+		}
+		if c > 1 {
+			return true
 		}
 	}
-	return nodes
+	return false
+}
+
+// Tree creates a process tree from a flat process list.
+func Tree(procs []*Proc) ([]*Proc, error) {
+	var nodes []*Proc
+
+	// init parent nodes
+	for i := range procs {
+		if procs[i].IsParent() {
+			nodes = append(nodes, procs[i])
+		}
+	}
+
+	// assign children to parrents
+	for i := range procs {
+		if !procs[i].IsParent() {
+			parent, err := findNode(nodes, procs[i].PPID)
+			if err != nil {
+				return nil, err
+			}
+			parent.Children = append(parent.Children, procs[i])
+		}
+	}
+
+	return nodes, nil
+}
+
+// BuildStatus determine build status based on corresponding proc list
+func BuildStatus(procs []*Proc) StatusValue {
+	status := StatusSuccess
+
+	for _, p := range procs {
+		if p.IsParent() && p.Failing() {
+			status = p.State
+		}
+	}
+
+	return status
+}
+
+// IsThereRunningStage determine if it contains procs running or pending to run
+// TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
+func IsThereRunningStage(procs []*Proc) bool {
+	for _, p := range procs {
+		if p.IsParent() {
+			if p.Running() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func findNode(nodes []*Proc, pid int) (*Proc, error) {

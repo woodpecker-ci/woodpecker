@@ -1,15 +1,24 @@
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/docs/static/img/logo.svg" width="220"/>
+    <img alt="Woodpecker" src="docs/static/img/logo-auto-darkmode.svg" width="220"/>
   </a>
 </p>
 <br/>
 <p align="center">
-  <a href="https://wp.laszlo.cloud/woodpecker-ci/woodpecker" title="Build Status">
-    <img src="https://wp.laszlo.cloud/api/badges/woodpecker-ci/woodpecker/status.svg">
+  <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
+    <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
+  </a>
+  <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+  </a>
+  <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+    <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
-    <img src="https://img.shields.io/discord/838698813463724034.svg">
+    <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
+  </a>
+  <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
+    <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix">
   </a>
   <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
@@ -26,6 +35,12 @@
   <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
   </a>
+  <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
+    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge">
+  </a>
+  <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
+    <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
+  </a>
 </p>
 <br/>
 
@@ -35,12 +50,13 @@
 
 ![woodpecker](docs/docs/woodpecker.png)
 
-## Support
+## 🫶 Support
 
 Please consider to donate and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
-## Usage
+## 🚀 Usage
 
 ### .woodpecker.yml
 
@@ -48,91 +64,57 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-    image: debian
-    commands:
-      - echo "This is the build step"
-  a-test-step:
-    image: debian
-    commands:
-      - echo "Testing.."
-```
+[Read More](https://woodpecker-ci.org/docs/usage/intro)
 
 ### Build steps are containers
 
 - Define any Docker image as context
 - Install the needed tools in custom Docker images, use them as context
 
-```diff
- pipeline:
-   build:
--    image: debian
-+    image: mycompany/image-with-awscli
-     commands:
-       - aws help
-```
+[Read More](https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps)
 
-### File changes are incremental
+### Plugins
 
-- Woodpecker clones the source code in the beginning pipeline
-- Changes to files are persisted through steps as the same volume is mounted to all steps
+Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you can also use your own.
 
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-    image: debian
-    commands:
-      - touch myfile
-  a-test-step:
-    image: debian
-    commands:
-      - cat myfile
-```
+[Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
-### Plugins are straightforward
-
-- If you copy the same shell script from project to project
-- Pack it into a plugin instead
-- And make the yaml declarative
-- Plugins are Docker images with your script as an entrypoint
-
-```Dockerfile
-# Dockerfile
-FROM laszlocloud/kubectl
-COPY deploy /usr/local/deploy
-ENTRYPOINT ["/usr/local/deploy"]
-```
-
-```bash
-# deploy
-kubectl apply -f $PLUGIN_TEMPLATE
-```
-
-```yaml
-# .woodpecker.yml
-pipeline:
-  deploy-to-k8s:
-    image: laszlocloud/my-k8s-plugin
-    template: config/k8s/service.yml
-```
-
-## Documentation
+## 📖 Documentation
 
 https://woodpecker-ci.org/
 
-## Who uses Woodpecker?
-
-Currently, I know of one organization using Woodpecker. With 50+ users, 130+ repos and more than 1100 builds a week.
-
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
-
-## Contribution
+## ✨ Contribute
 
 See [Contributing Guide](CONTRIBUTING.md)
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#gitpod)
+
+## 📣 Translate
+
+We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+
+<a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+  <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />
+</a>
+
+## 👋 Who uses Woodpecker?
+
+[Codeberg](https://codeberg.org), the Woodpecker project itself, and many others.
+
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it as well.
+
+Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
+
+Here are some places where people mention Woodpecker:
+
+- [GitHub](https://github.com/topics/WoodpeckerCI)
+- [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
+- [Twitter](https://twitter.com/hashtag/WoodpeckerCI?f=live)
+- [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
+
+## ✨ Stars over time
+
+[![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
 
 ## License
 

@@ -1,7 +1,8 @@
 import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import useAuthentication from './compositions/useAuthentication';
+import useAuthentication from '~/compositions/useAuthentication';
+import useUserConfig from '~/compositions/useUserConfig';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -20,6 +21,31 @@ const routes: RouteRecordRaw[] = [
     name: 'repo-add',
     component: (): Component => import('~/views/RepoAdd.vue'),
     meta: { authentication: 'required' },
+  },
+  {
+    path: '/:repoOwner',
+    name: 'repos-owner',
+    component: (): Component => import('~/views/ReposOwner.vue'),
+    props: true,
+  },
+  {
+    path: '/org/:repoOwner',
+    component: (): Component => import('~/views/org/OrgWrapper.vue'),
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'org',
+        redirect: (route) => ({ name: 'repos-owner', params: route.params }),
+      },
+      {
+        path: 'settings',
+        name: 'org-settings',
+        component: (): Component => import('~/views/org/OrgSettings.vue'),
+        meta: { authentication: 'required' },
+        props: true,
+      },
+    ],
   },
   {
     path: '/:repoOwner/:repoName',
@@ -48,10 +74,28 @@ const routes: RouteRecordRaw[] = [
         props: (route) => ({ branch: route.params.branch }),
       },
       {
-        path: 'build/:buildId/:procId?',
-        name: 'repo-build',
-        component: (): Component => import('~/views/repo/RepoBuild.vue'),
+        path: 'build/:buildId',
+        component: (): Component => import('~/views/repo/build/BuildWrapper.vue'),
         props: true,
+        children: [
+          {
+            path: ':procId?',
+            name: 'repo-build',
+            component: (): Component => import('~/views/repo/build/Build.vue'),
+            props: true,
+          },
+          {
+            path: 'changed-files',
+            name: 'repo-build-changed-files',
+            component: (): Component => import('~/views/repo/build/BuildChangedFiles.vue'),
+          },
+          {
+            path: 'config',
+            name: 'repo-build-config',
+            component: (): Component => import('~/views/repo/build/BuildConfig.vue'),
+            props: true,
+          },
+        ],
       },
       {
         path: 'settings',
@@ -71,6 +115,13 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     name: 'admin',
     component: (): Component => import('~/views/admin/Admin.vue'),
+    meta: { authentication: 'required' },
+    props: true,
+  },
+  {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: (): Component => import('~/views/admin/AdminSettings.vue'),
     meta: { authentication: 'required' },
     props: true,
   },
@@ -108,6 +159,13 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _, next) => {
+  const config = useUserConfig();
+  const { redirectUrl } = config.userConfig.value;
+  if (redirectUrl !== '') {
+    config.setUserConfig('redirectUrl', '');
+    next(redirectUrl);
+  }
+
   const authentication = useAuthentication();
   if (to.meta.authentication === 'required' && !authentication.isAuthenticated) {
     next({ name: 'login', query: { url: to.fullPath } });

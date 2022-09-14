@@ -22,7 +22,8 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'airbnb-base-ts',
+    'airbnb-base',
+    'airbnb-typescript/base',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
@@ -120,6 +121,8 @@ module.exports = {
     ],
     'vue/new-line-between-multi-line-property': 'error',
     'vue/padding-line-between-blocks': 'error',
+    'vue/multi-word-component-names': 'off',
+    'vue/no-reserved-component-names': 'off',
 
     // css rules
     'vue-scoped-css/no-unused-selector': 'error',

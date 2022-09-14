@@ -22,8 +22,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type mockUpdateBuildStore struct {
-}
+// TODO(974) move to server/pipeline/*
+
+type mockUpdateBuildStore struct{}
 
 func (m *mockUpdateBuildStore) UpdateBuild(build *model.Build) error {
 	return nil
@@ -50,7 +51,7 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	if model.StatusPending != build.Status {
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusPending, build.Status)
-	} else if "Reviewer" != build.Reviewer {
+	} else if build.Reviewer != "Reviewer" {
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
 	} else if now > build.Reviewed {
 		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
@@ -66,7 +67,7 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	if model.StatusDeclined != build.Status {
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusDeclined, build.Status)
-	} else if "Reviewer" != build.Reviewer {
+	} else if build.Reviewer != "Reviewer" {
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
 	} else if now > build.Reviewed {
 		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
@@ -78,7 +79,7 @@ func TestUpdateToStatusToDone(t *testing.T) {
 
 	build, _ := UpdateStatusToDone(&mockUpdateBuildStore{}, model.Build{}, "status", int64(1))
 
-	if "status" != build.Status {
+	if build.Status != "status" {
 		t.Errorf("Build status not equals 'status' != '%s'", build.Status)
 	} else if int64(1) != build.Finished {
 		t.Errorf("Build finished not equals 1 != %d", build.Finished)
@@ -92,7 +93,7 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	build, _ := UpdateToStatusError(&mockUpdateBuildStore{}, model.Build{}, errors.New("error"))
 
-	if "error" != build.Error {
+	if build.Error != "error" {
 		t.Errorf("Build error not equals 'error' != '%s'", build.Error)
 	} else if model.StatusError != build.Status {
 		t.Errorf("Build status not equals '%s' != '%s'", model.StatusError, build.Status)

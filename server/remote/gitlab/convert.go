@@ -24,22 +24,29 @@ import (
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
-func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
-	parts := strings.Split(repo_.PathWithNamespace, "/")
-	// TODO: save repo id (support nested repos)
-	var owner = parts[0]
-	var name = parts[1]
+const (
+	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+)
+
+func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+	parts := strings.Split(_repo.PathWithNamespace, "/")
+	// TODO(648) save repo id (support nested repos)
+	owner := strings.Join(parts[:len(parts)-1], "/")
+	name := parts[len(parts)-1]
 	repo := &model.Repo{
-		Owner:      owner,
-		Name:       name,
-		FullName:   repo_.PathWithNamespace,
-		Avatar:     repo_.AvatarURL,
-		Link:       repo_.WebURL,
-		Clone:      repo_.HTTPURLToRepo,
-		Branch:     repo_.DefaultBranch,
-		Visibility: model.RepoVisibly(repo_.Visibility),
+		RemoteID:     model.RemoteID(fmt.Sprint(_repo.ID)),
+		Owner:        owner,
+		Name:         name,
+		FullName:     _repo.PathWithNamespace,
+		Avatar:       _repo.AvatarURL,
+		Link:         _repo.WebURL,
+		Clone:        _repo.HTTPURLToRepo,
+		Branch:       _repo.DefaultBranch,
+		Visibility:   model.RepoVisibly(_repo.Visibility),
+		IsSCMPrivate: !_repo.Public,
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -50,16 +57,10 @@ func (g *Gitlab) convertGitlabRepo(repo_ *gitlab.Project) (*model.Repo, error) {
 		repo.Avatar = fmt.Sprintf("%s/%s", g.URL, repo.Avatar)
 	}
 
-	if g.PrivateMode {
-		repo.IsSCMPrivate = true
-	} else {
-		repo.IsSCMPrivate = !repo_.Public
-	}
-
 	return repo, nil
 }
 
-func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model.Repo, *model.Build, error) {
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -68,17 +69,17 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	obj := hook.ObjectAttributes
 
 	if target == nil && source == nil {
-		return nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
 	} else if target == nil {
-		return nil, nil, fmt.Errorf("target key expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	} else if source == nil {
-		return nil, nil, fmt.Errorf("source key expected in merge request hook")
+		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
 		var err error
 		if repo.Owner, repo.Name, err = extractFromPath(target.PathWithNamespace); err != nil {
-			return nil, nil, err
+			return 0, nil, nil, err
 		}
 		repo.FullName = target.PathWithNamespace
 	} else {
@@ -87,6 +88,7 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 		repo.FullName = fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(obj.TargetProjectID))
 	repo.Link = target.WebURL
 
 	if target.GitHTTPURL != "" {
@@ -113,8 +115,7 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Commit = lastCommit.ID
 	build.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf("refs/merge-requests/%d/head", obj.IID)
-
+	build.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	build.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
@@ -129,10 +130,10 @@ func convertMergeRequestHock(hook *gitlab.MergeEvent, req *http.Request) (*model
 	build.Title = obj.Title
 	build.Link = obj.URL
 
-	return repo, build, nil
+	return obj.IID, repo, build, nil
 }
 
-func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
+func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -141,6 +142,7 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 		return nil, nil, err
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
@@ -161,6 +163,8 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	build.Ref = hook.Ref
 
+	// assume a capacity of 4 changed files per commit
+	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
 			build.Author = cm.Author.Name
@@ -170,14 +174,18 @@ func convertPushHock(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 			if len(build.Email) != 0 {
 				build.Avatar = getUserAvatar(build.Email)
 			}
-			break
 		}
+
+		files = append(files, cm.Added...)
+		files = append(files, cm.Removed...)
+		files = append(files, cm.Modified...)
 	}
+	build.ChangedFiles = utils.DedupStrings(files)
 
 	return repo, build, nil
 }
 
-func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 	repo := &model.Repo{}
 	build := &model.Build{}
 
@@ -186,6 +194,7 @@ func convertTagHock(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL

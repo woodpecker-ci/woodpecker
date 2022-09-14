@@ -43,9 +43,11 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.dind.enabled }}
           volumeMounts:
             - name: sock-dir
               mountPath: /var/run
+          {{- end }}
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -56,18 +58,22 @@ spec:
             - secretRef:
                 name: {{ . }}
             {{- end }}
+        {{- if .Values.dind.enabled }}
         - name: dind
-          image: "docker:19.03.5-dind"
+          image: {{ .Values.dind.image }}
           env:
-          - name: DOCKER_DRIVER
-            value: overlay2
+            {{- range $key, $value := .Values.dind.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.dind.resources | nindent 12 }}
           securityContext:
             privileged: true
           volumeMounts:
           - name: sock-dir
             mountPath: /var/run
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -80,6 +86,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.dind.enabled }}
       volumes:
       - name: sock-dir
         emptyDir: {}
+      {{- end }}

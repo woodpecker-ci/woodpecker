@@ -1,10 +1,9 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -54,11 +53,7 @@ func TestUnmarshalSecrets(t *testing.T) {
 		in := []byte(test.from)
 		got := Secrets{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Secrets) {
-			t.Errorf("problem parsing secrets %q", test.from)
-			pretty.Ldiff(t, test.want, got.Secrets)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Secrets, "problem parsing secrets %q", test.from)
 	}
 }

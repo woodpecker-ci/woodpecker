@@ -32,6 +32,7 @@ func TestPermFind(t *testing.T) {
 		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
 		Name:     "test",
+		RemoteID: "1",
 	}
 	assert.NoError(t, store.CreateRepo(repo))
 
@@ -39,7 +40,7 @@ func TestPermFind(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo.FullName,
+			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -76,6 +77,7 @@ func TestPermUpsert(t *testing.T) {
 		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
 		Name:     "test",
+		RemoteID: "1",
 	}
 	assert.NoError(t, store.CreateRepo(repo))
 
@@ -83,7 +85,7 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo.FullName,
+			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,
@@ -118,7 +120,7 @@ func TestPermUpsert(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo.FullName,
+			Repo:   repo,
 			Pull:   true,
 			Push:   true,
 			Admin:  true,
@@ -155,6 +157,7 @@ func TestPermDelete(t *testing.T) {
 		FullName: "bradrydzewski/test",
 		Owner:    "bradrydzewski",
 		Name:     "test",
+		RemoteID: "1",
 	}
 	assert.NoError(t, store.CreateRepo(repo))
 
@@ -162,7 +165,7 @@ func TestPermDelete(t *testing.T) {
 		&model.Perm{
 			UserID: user.ID,
 			RepoID: repo.ID,
-			Repo:   repo.FullName,
+			Repo:   repo,
 			Pull:   true,
 			Push:   false,
 			Admin:  false,

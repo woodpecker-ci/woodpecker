@@ -64,12 +64,12 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err
 		return nil, nil, nil
 	}
 
-	// is this even needed?
+	// TODO is this even needed?
 	if push.RefType == refBranch {
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = toRepo(push.Repo)
 	build = buildFromPush(push)
 	return repo, build, err
 }
@@ -86,7 +86,7 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = toRepo(push.Repo)
 	build = buildFromTag(push)
 	return repo, build, nil
 }
@@ -111,7 +111,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPullRequest(pr)
+	repo = toRepo(pr.Repo)
 	build = buildFromPullRequest(pr)
 	return repo, build, err
 }

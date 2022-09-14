@@ -1,0 +1,15 @@
+{
+  // List of extensions which should be recommended for users of this workspace.
+  "recommendations": [
+    "golang.go",
+    "EditorConfig.EditorConfig",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "voorjaar.windicss-intellisense",
+    "Vue.volar",
+    "redhat.vscode-yaml",
+    "davidanson.vscode-markdownlint"
+  ],
+  // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
+  "unwantedRecommendations": []
+}

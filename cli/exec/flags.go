@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -44,20 +46,22 @@ var flags = []cli.Flag{
 		Usage:   "external networks",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCKER_PREFIX"},
+		EnvVars: []string{"WOODPECKER_PREFIX"},
 		Name:    "prefix",
 		Value:   "woodpecker",
-		Usage:   "prefix containers created by woodpecker",
+		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
 		Hidden:  true,
 	},
 	&cli.StringSliceFlag{
 		Name:  "privileged",
 		Usage: "privileged plugins",
-		Value: cli.NewStringSlice(
-			"plugins/docker",
-			"plugins/gcr",
-			"plugins/ecr",
-		),
+		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Name:    "backend-engine",
+		Usage:   "backend engine to run pipelines on",
+		Value:   "auto-detect",
 	},
 
 	//
@@ -97,9 +101,8 @@ var flags = []cli.Flag{
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_ARCH"},
-		Name:    "system-arch",
-		Value:   "linux/amd64",
+		EnvVars: []string{"CI_SYSTEM_PLATFORM"},
+		Name:    "system-platform",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_NAME"},
@@ -262,5 +265,33 @@ var flags = []cli.Flag{
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
+	},
+
+	// TODO: add flags of backends
+
+	// backend k8s
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
+		Name:    "backend-k8s-namespace",
+		Usage:   "backend k8s namespace",
+		Value:   "woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
+		Name:    "backend-k8s-volume-size",
+		Usage:   "backend k8s volume size (default 10G)",
+		Value:   "10G",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
+		Name:    "backend-k8s-storage-class",
+		Usage:   "backend k8s storage class",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Name:    "backend-k8s-storage-rwx",
+		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
+		Value:   true,
 	},
 }

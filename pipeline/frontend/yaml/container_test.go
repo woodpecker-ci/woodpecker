@@ -1,12 +1,12 @@
 package yaml
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -58,7 +58,12 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  branch: master
+  - branch: master
+  - event: cron
+    cron: job1
+settings:
+  foo: bar
+  baz: false
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -69,7 +74,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
+		Command:       types.Command{"bundle exec thin -p 3000"},
 		Commands:      types.Stringorslice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
@@ -106,20 +111,32 @@ func TestUnmarshalContainer(t *testing.T) {
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: Constraints{
-			Branch: Constraint{
-				Include: []string{"master"},
+		When: constraint.When{
+			Constraints: []constraint.Constraint{
+				{
+					Branch: constraint.List{
+						Include: []string{"master"},
+					},
+				},
+				{
+					Event: constraint.List{
+						Include: []string{"cron"},
+					},
+					Cron: constraint.List{
+						Include: []string{"job1"},
+					},
+				},
 			},
+		},
+		Settings: map[string]interface{}{
+			"foo": "bar",
+			"baz": false,
 		},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
-	if err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(want, got) {
-		t.Errorf("problem parsing container")
-		pretty.Ldiff(t, want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
 // TestUnmarshalContainersErr unmarshals a map of containers. The order is
@@ -140,11 +157,113 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node }",
+			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
+					Settings: map[string]interface{}{
+						"normal_setting": true,
+					},
+				},
+			},
+		},
+		{
+			from: `publish-agent:
+    group: bundle
+    image: print/env
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dry_run: true
+      dockerfile: docker/Dockerfile.agent
+      tag: [next, latest]
+    secrets: [docker_username, docker_password]
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-agent",
+					Image: "print/env",
+					Group: "bundle",
+					Secrets: Secrets{Secrets: []*Secret{{
+						Source: "docker_username",
+						Target: "docker_username",
+					}, {
+						Source: "docker_password",
+						Target: "docker_password",
+					}}},
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-agent",
+						"dockerfile": "docker/Dockerfile.agent",
+						"tag":        stringsToInterface("next", "latest"),
+						"dry_run":    true,
+					},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    group: docker
+    image: print/env
+    settings:
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli
+      tag: [next]
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					Group: "docker",
+					Settings: map[string]interface{}{
+						"repo":       "woodpeckerci/woodpecker-cli",
+						"dockerfile": "docker/Dockerfile.cli",
+						"tag":        stringsToInterface("next"),
+					},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    image: print/env
+    when:
+      - branch: ${CI_REPO_DEFAULT_BRANCH}
+        event: push
+      - event: pull_request`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+							{
+								Event: constraint.List{Include: []string{"pull_request"}},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -153,12 +272,8 @@ func TestUnmarshalContainers(t *testing.T) {
 		in := []byte(test.from)
 		got := Containers{}
 		err := yaml.Unmarshal(in, &got)
-		if err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(test.want, got.Containers) {
-			t.Errorf("problem parsing containers %q", test.from)
-			pretty.Ldiff(t, test.want, got.Containers)
-		}
+		assert.NoError(t, err)
+		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -173,8 +288,14 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		in := []byte(test)
 		containers := new(Containers)
 		err := yaml.Unmarshal(in, &containers)
-		if err == nil {
-			t.Errorf("wanted error for containers %q", test)
-		}
+		assert.Error(t, err, "wanted error for containers %q", test)
 	}
+}
+
+func stringsToInterface(val ...string) []interface{} {
+	res := make([]interface{}, len(val))
+	for i := range val {
+		res[i] = val[i]
+	}
+	return res
 }

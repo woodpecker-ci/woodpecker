@@ -43,24 +43,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(convertStatus(model.StatusError)).Equal(statusFailure)
 		})
 
-		g.It("should convert passing desc", func() {
-			g.Assert(convertDesc(model.StatusSuccess)).Equal(descSuccess)
-		})
-
-		g.It("should convert pending desc", func() {
-			g.Assert(convertDesc(model.StatusPending)).Equal(descPending)
-			g.Assert(convertDesc(model.StatusRunning)).Equal(descPending)
-		})
-
-		g.It("should convert failing desc", func() {
-			g.Assert(convertDesc(model.StatusFailure)).Equal(descFailure)
-		})
-
-		g.It("should convert error desc", func() {
-			g.Assert(convertDesc(model.StatusKilled)).Equal(descError)
-			g.Assert(convertDesc(model.StatusError)).Equal(descError)
-		})
-
 		g.It("should convert repository", func() {
 			from := &internal.Repo{
 				FullName:  "octocat/hello-world",
@@ -68,7 +50,7 @@ func Test_helper(t *testing.T) {
 				Scm:       "hg",
 			}
 			from.Owner.Links.Avatar.Href = "http://..."
-			from.Links.Html.Href = "https://bitbucket.org/foo/bar"
+			from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
 
 			to := convertRepo(from)
 			g.Assert(to.Avatar).Equal(from.Owner.Links.Avatar.Href)
@@ -78,8 +60,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Branch).Equal("default")
 			g.Assert(string(to.SCMKind)).Equal(from.Scm)
 			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
-			g.Assert(to.Clone).Equal(from.Links.Html.Href)
-			g.Assert(to.Link).Equal(from.Links.Html.Href)
+			g.Assert(to.Clone).Equal(from.Links.HTML.Href)
+			g.Assert(to.Link).Equal(from.Links.HTML.Href)
 		})
 
 		g.It("should convert team", func() {
@@ -127,7 +109,7 @@ func Test_helper(t *testing.T) {
 
 		g.It("should build clone url", func() {
 			repo := &internal.Repo{}
-			repo.Links.Html.Href = "https://foo:bar@bitbucket.org/foo/bar.git"
+			repo.Links.HTML.Href = "https://foo:bar@bitbucket.org/foo/bar.git"
 			link := cloneLink(repo)
 			g.Assert(link).Equal("https://bitbucket.org/foo/bar.git")
 		})
@@ -138,10 +120,10 @@ func Test_helper(t *testing.T) {
 			hook.Actor.Links.Avatar.Href = "https://..."
 			hook.PullRequest.Dest.Commit.Hash = "73f9c44d"
 			hook.PullRequest.Dest.Branch.Name = "master"
-			hook.PullRequest.Dest.Repo.Links.Html.Href = "https://bitbucket.org/foo/bar"
+			hook.PullRequest.Dest.Repo.Links.HTML.Href = "https://bitbucket.org/foo/bar"
 			hook.PullRequest.Source.Branch.Name = "change"
 			hook.PullRequest.Source.Repo.FullName = "baz/bar"
-			hook.PullRequest.Links.Html.Href = "https://bitbucket.org/foo/bar/pulls/5"
+			hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
 			hook.PullRequest.Desc = "updated README"
 			hook.PullRequest.Updated = time.Now()
 
@@ -151,7 +133,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(build.Avatar).Equal(hook.Actor.Links.Avatar.Href)
 			g.Assert(build.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
 			g.Assert(build.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
-			g.Assert(build.Link).Equal(hook.PullRequest.Links.Html.Href)
+			g.Assert(build.Link).Equal(hook.PullRequest.Links.HTML.Href)
 			g.Assert(build.Ref).Equal("refs/heads/master")
 			g.Assert(build.Refspec).Equal("change:master")
 			g.Assert(build.Remote).Equal("https://bitbucket.org/baz/bar")
@@ -163,7 +145,7 @@ func Test_helper(t *testing.T) {
 			change := internal.Change{}
 			change.New.Target.Hash = "73f9c44d"
 			change.New.Name = "master"
-			change.New.Target.Links.Html.Href = "https://bitbucket.org/foo/bar/commits/73f9c44d"
+			change.New.Target.Links.HTML.Href = "https://bitbucket.org/foo/bar/commits/73f9c44d"
 			change.New.Target.Message = "updated README"
 			change.New.Target.Date = time.Now()
 			change.New.Target.Author.Raw = "Test <test@domain.tld>"
@@ -179,7 +161,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(build.Avatar).Equal(hook.Actor.Links.Avatar.Href)
 			g.Assert(build.Commit).Equal(change.New.Target.Hash)
 			g.Assert(build.Branch).Equal(change.New.Name)
-			g.Assert(build.Link).Equal(change.New.Target.Links.Html.Href)
+			g.Assert(build.Link).Equal(change.New.Target.Links.HTML.Href)
 			g.Assert(build.Ref).Equal("refs/heads/master")
 			g.Assert(build.Message).Equal(change.New.Target.Message)
 			g.Assert(build.Timestamp).Equal(change.New.Target.Date.Unix())

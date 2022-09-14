@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,7 +31,7 @@ import (
 )
 
 const (
-	currentUserId    = "%s/plugins/servlet/applinks/whoami"
+	currentUserID    = "%s/plugins/servlet/applinks/whoami"
 	pathUser         = "%s/rest/api/1.0/users/%s"
 	pathRepo         = "%s/rest/api/1.0/projects/%s/repos/%s"
 	pathRepos        = "%s/rest/api/1.0/repos?start=%s&limit=%s"
@@ -43,6 +42,7 @@ const (
 	pathHookEnabled  = "%s/rest/api/1.0/projects/%s/repos/%s/settings/hooks/%s/enabled"
 	pathHookSettings = "%s/rest/api/1.0/projects/%s/repos/%s/settings/hooks/%s/settings"
 	pathStatus       = "%s/rest/build-status/1.0/commits/%s"
+	pathBranches     = "%s/2.0/repositories/%s/%s/refs/branches"
 )
 
 type Client struct {
@@ -69,15 +69,15 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 }
 
 func (c *Client) FindCurrentUser() (*User, error) {
-	CurrentUserIdResponse, err := c.doGet(fmt.Sprintf(currentUserId, c.base))
-	if CurrentUserIdResponse != nil {
-		defer CurrentUserIdResponse.Body.Close()
+	CurrentUserIDResponse, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
+	if CurrentUserIDResponse != nil {
+		defer CurrentUserIDResponse.Body.Close()
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	bits, err := ioutil.ReadAll(CurrentUserIdResponse.Body)
+	bits, err := io.ReadAll(CurrentUserIDResponse.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *Client) FindCurrentUser() (*User, error) {
 		return nil, err
 	}
 
-	contents, err := ioutil.ReadAll(CurrentUserResponse.Body)
+	contents, err := io.ReadAll(CurrentUserResponse.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *Client) FindCurrentUser() (*User, error) {
 	return &user, nil
 }
 
-func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
+func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	urlString := fmt.Sprintf(pathRepo, c.base, owner, name)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -114,7 +114,7 @@ func (c *Client) FindRepo(owner string, name string) (*Repo, error) {
 	if err != nil {
 		log.Err(err).Msg("")
 	}
-	contents, err := ioutil.ReadAll(response.Body)
+	contents, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (c *Client) FindRepos() ([]*Repo, error) {
 	return c.paginatedRepos(0)
 }
 
-func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
+func (c *Client) FindRepoPerms(owner, repo string) (*model.Perm, error) {
 	perms := new(model.Perm)
 	// If you don't have access return none right away
 	_, err := c.FindRepo(owner, repo)
@@ -150,7 +150,7 @@ func (c *Client) FindRepoPerms(owner string, repo string) (*model.Perm, error) {
 	return perms, nil
 }
 
-func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref string) ([]byte, error) {
+func (c *Client) FindFileForRepo(owner, repo, fileName, ref string) ([]byte, error) {
 	response, err := c.doGet(fmt.Sprintf(pathSource, c.base, owner, repo, fileName, ref))
 	if response != nil {
 		defer response.Body.Close()
@@ -161,14 +161,14 @@ func (c *Client) FindFileForRepo(owner string, repo string, fileName string, ref
 	if response.StatusCode == 404 {
 		return nil, nil
 	}
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Err(err).Msg("")
 	}
 	return responseBytes, nil
 }
 
-func (c *Client) CreateHook(owner string, name string, callBackLink string) error {
+func (c *Client) CreateHook(owner, name, callBackLink string) error {
 	hookDetails, err := c.GetHookDetails(owner, name)
 	if err != nil {
 		return err
@@ -198,7 +198,7 @@ func (c *Client) CreateStatus(revision string, status *BuildStatus) error {
 	return c.doPost(uri, status)
 }
 
-func (c *Client) DeleteHook(owner string, name string, link string) error {
+func (c *Client) DeleteHook(owner, name, link string) error {
 	hookSettings, err := c.GetHooks(owner, name)
 	if err != nil {
 		return err
@@ -214,7 +214,7 @@ func (c *Client) DeleteHook(owner string, name string, link string) error {
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
-func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, error) {
+func (c *Client) GetHookDetails(owner, name string) (*HookPluginDetails, error) {
 	urlString := fmt.Sprintf(pathHookDetails, c.base, owner, name, hookName)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -229,7 +229,7 @@ func (c *Client) GetHookDetails(owner string, name string) (*HookPluginDetails, 
 	return &hookDetails, err
 }
 
-func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
+func (c *Client) GetHooks(owner, name string) (*HookSettings, error) {
 	urlString := fmt.Sprintf(pathHookSettings, c.base, owner, name, hookName)
 	response, err := c.doGet(urlString)
 	if response != nil {
@@ -244,9 +244,9 @@ func (c *Client) GetHooks(owner string, name string) (*HookSettings, error) {
 	return &hookSettings, err
 }
 
-//TODO: make these as as general do with the action
+// TODO: make these as as general do with the action
 
-//Helper function to help create get
+// Helper function to help create get
 func (c *Client) doGet(url string) (*http.Response, error) {
 	request, err := http.NewRequestWithContext(c.ctx, "GET", url, nil)
 	if err != nil {
@@ -256,7 +256,7 @@ func (c *Client) doGet(url string) (*http.Response, error) {
 	return c.client.Do(request)
 }
 
-//Helper function to help create the hook
+// Helper function to help create the hook
 func (c *Client) doPut(url string, body []byte) error {
 	request, err := http.NewRequestWithContext(c.ctx, "PUT", url, bytes.NewBuffer(body))
 	if err != nil {
@@ -273,7 +273,7 @@ func (c *Client) doPut(url string, body []byte) error {
 	return nil
 }
 
-//Helper function to help create the hook
+// Helper function to help create the hook
 func (c *Client) doPost(url string, status *BuildStatus) error {
 	// write it to the body of the request.
 	var buf io.ReadWriter
@@ -296,24 +296,11 @@ func (c *Client) doPost(url string, status *BuildStatus) error {
 	return err
 }
 
-//Helper function to do delete on the hook
-func (c *Client) doDelete(url string) error {
-	request, err := http.NewRequestWithContext(c.ctx, "DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-	response, err := c.client.Do(request)
-	if response != nil {
-		defer response.Body.Close()
-	}
-	return err
-}
-
-//Helper function to get repos paginated
+// Helper function to get repos paginated
 func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	limit := 1000
-	requestUrl := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
-	response, err := c.doGet(requestUrl)
+	requestURL := fmt.Sprintf(pathRepos, c.base, strconv.Itoa(start), strconv.Itoa(limit))
+	response, err := c.doGet(requestURL)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -335,6 +322,20 @@ func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	return repoResponse.Values, nil
 }
 
+func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	response, err := c.doGet(uri)
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+	out := new(BranchResp)
+	err = json.NewDecoder(response.Body).Decode(&out)
+	return out.Values, err
+}
+
 func filter(vs []string, f func(string) bool) []string {
 	var vsf []string
 	for _, v := range vs {
@@ -345,7 +346,7 @@ func filter(vs []string, f func(string) bool) []string {
 	return vsf
 }
 
-//TODO: find a clean way of doing these next two methods- bitbucket server hooks only support 20 cb hooks
+// TODO: find a clean way of doing these next two methods- bitbucket server hooks only support 20 cb hooks
 func arrayToHookSettings(hooks []string) HookSettings {
 	hookSettings := HookSettings{}
 	for loc, value := range hooks {
@@ -391,7 +392,7 @@ func arrayToHookSettings(hooks []string) HookSettings {
 		case 19:
 			hookSettings.HookURL19 = value
 
-			//Since there's only 19 hooks it will add to the latest if it doesn't exist :/
+			// Since there's only 19 hooks it will add to the latest if it doesn't exist :/
 		default:
 			hookSettings.HookURL19 = value
 		}

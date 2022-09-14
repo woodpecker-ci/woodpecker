@@ -16,7 +16,7 @@ package bitbucket
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -34,7 +34,7 @@ const (
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Build detail. If a hook type is unsupported nil values are returned.
 func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
-	payload, _ := ioutil.ReadAll(r.Body)
+	payload, _ := io.ReadAll(r.Body)
 
 	switch r.Header.Get(hookEvent) {
 	case hookPush:

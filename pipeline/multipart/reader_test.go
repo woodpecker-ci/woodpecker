@@ -2,7 +2,7 @@ package multipart
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 )
 
@@ -20,7 +20,7 @@ func TestReader(t *testing.T) {
 	if got, want := header.Get("Content-Type"), "text/plain"; got != want {
 		t.Errorf("Want Content-Type %q, got %q", want, got)
 	}
-	body, err := ioutil.ReadAll(part)
+	body, err := io.ReadAll(part)
 	if err != nil {
 		t.Error(err)
 		return

@@ -16,6 +16,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
@@ -43,6 +44,21 @@ func apiRoutes(e *gin.Engine) {
 		users.DELETE("/:login", api.DeleteUser)
 	}
 
+	orgBase := e.Group("/api/orgs/:owner")
+	{
+		orgBase.GET("/permissions", api.GetOrgPermissions)
+
+		org := orgBase.Group("")
+		{
+			org.Use(session.MustOrgMember(true))
+			org.GET("/secrets", api.GetOrgSecretList)
+			org.POST("/secrets", api.PostOrgSecret)
+			org.GET("/secrets/:secret", api.GetOrgSecret)
+			org.PATCH("/secrets/:secret", api.PatchOrgSecret)
+			org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+		}
+	}
+
 	repoBase := e.Group("/api/repos/:owner/:name")
 	{
 		repoBase.Use(session.SetRepo())
@@ -61,6 +77,7 @@ func apiRoutes(e *gin.Engine) {
 
 			repo.GET("/builds", api.GetBuilds)
 			repo.GET("/builds/:number", api.GetBuild)
+			repo.GET("/builds/:number/config", api.GetBuildConfig)
 
 			// requires push permissions
 			repo.POST("/builds/:number", session.MustPush, api.PostBuild)
@@ -92,6 +109,13 @@ func apiRoutes(e *gin.Engine) {
 			repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
 			repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
 
+			// requires push permissions
+			repo.GET("/cron", session.MustPush, api.GetCronList)
+			repo.POST("/cron", session.MustPush, api.PostCron)
+			repo.GET("/cron/:cron", session.MustPush, api.GetCron)
+			repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
+			repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+
 			// requires admin permissions
 			repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
 			repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
@@ -122,19 +146,31 @@ func apiRoutes(e *gin.Engine) {
 		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
 	}
 
-	debugger := e.Group("/api/debug")
+	secrets := e.Group("/api/secrets")
 	{
-		debugger.Use(session.MustAdmin())
-		debugger.GET("/pprof/", debug.IndexHandler())
-		debugger.GET("/pprof/heap", debug.HeapHandler())
-		debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
-		debugger.GET("/pprof/block", debug.BlockHandler())
-		debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
-		debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
-		debugger.GET("/pprof/profile", debug.ProfileHandler())
-		debugger.GET("/pprof/symbol", debug.SymbolHandler())
-		debugger.POST("/pprof/symbol", debug.SymbolHandler())
-		debugger.GET("/pprof/trace", debug.TraceHandler())
+		secrets.Use(session.MustAdmin())
+		secrets.GET("", api.GetGlobalSecretList)
+		secrets.POST("", api.PostGlobalSecret)
+		secrets.GET("/:secret", api.GetGlobalSecret)
+		secrets.PATCH("/:secret", api.PatchGlobalSecret)
+		secrets.DELETE("/:secret", api.DeleteGlobalSecret)
+	}
+
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		debugger := e.Group("/api/debug")
+		{
+			debugger.Use(session.MustAdmin())
+			debugger.GET("/pprof/", debug.IndexHandler())
+			debugger.GET("/pprof/heap", debug.HeapHandler())
+			debugger.GET("/pprof/goroutine", debug.GoroutineHandler())
+			debugger.GET("/pprof/block", debug.BlockHandler())
+			debugger.GET("/pprof/threadcreate", debug.ThreadCreateHandler())
+			debugger.GET("/pprof/cmdline", debug.CmdlineHandler())
+			debugger.GET("/pprof/profile", debug.ProfileHandler())
+			debugger.GET("/pprof/symbol", debug.SymbolHandler())
+			debugger.POST("/pprof/symbol", debug.SymbolHandler())
+			debugger.GET("/pprof/trace", debug.TraceHandler())
+		}
 	}
 
 	logLevel := e.Group("/api/log-level")
@@ -143,6 +179,8 @@ func apiRoutes(e *gin.Engine) {
 		logLevel.GET("", api.LogLevel)
 		logLevel.POST("", api.SetLogLevel)
 	}
+
+	e.GET("/api/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
 
 	// TODO: remove /hook in favor of /api/hook
 	e.POST("/hook", api.PostHook)

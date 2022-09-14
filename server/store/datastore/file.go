@@ -17,7 +17,6 @@ package datastore
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -41,11 +40,11 @@ func (s storage) FileRead(proc *model.Proc, name string) (io.ReadCloser, error) 
 		return nil, err
 	}
 	buf := bytes.NewBuffer(file.Data)
-	return ioutil.NopCloser(buf), err
+	return io.NopCloser(buf), err
 }
 
 func (s storage) FileCreate(file *model.File, reader io.Reader) error {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}

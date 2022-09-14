@@ -22,8 +22,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type mockUpdateProcStore struct {
-}
+// TODO(974) move to server/pipeline/*
+
+type mockUpdateProcStore struct{}
 
 func (m *mockUpdateProcStore) ProcUpdate(build *model.Proc) error {
 	return nil

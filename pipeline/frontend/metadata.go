@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package frontend
 
 import (
@@ -14,6 +28,7 @@ const (
 	EventPull   = "pull_request"
 	EventTag    = "tag"
 	EventDeploy = "deployment"
+	EventCron   = "cron"
 )
 
 type (
@@ -51,6 +66,7 @@ type (
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
 		Parent   int64  `json:"parent,omitempty"`
+		Cron     string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -87,11 +103,11 @@ type (
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name    string `json:"name,omitempty"`
-		Host    string `json:"host,omitempty"`
-		Link    string `json:"link,omitempty"`
-		Arch    string `json:"arch,omitempty"`
-		Version string `json:"version,omitempty"`
+		Name     string `json:"name,omitempty"`
+		Host     string `json:"host,omitempty"`
+		Link     string `json:"link,omitempty"`
+		Platform string `json:"arch,omitempty"`
+		Version  string `json:"version,omitempty"`
 	}
 )
 
@@ -141,8 +157,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_TAG":                  "", // will be set if event is tag
-		"CI_PULL_REQUEST":         "", // will be set if event is pr
+		"CI_COMMIT_TAG":           "", // will be set if event is tag
+		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
 
 		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -179,33 +195,23 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 
-		"CI_SYSTEM_NAME":    m.Sys.Name,
-		"CI_SYSTEM_LINK":    m.Sys.Link,
-		"CI_SYSTEM_HOST":    m.Sys.Host,
-		"CI_SYSTEM_ARCH":    m.Sys.Arch,
-		"CI_SYSTEM_VERSION": version.Version,
+		"CI_SYSTEM_NAME":     m.Sys.Name,
+		"CI_SYSTEM_LINK":     m.Sys.Link,
+		"CI_SYSTEM_HOST":     m.Sys.Host,
+		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
+		"CI_SYSTEM_VERSION":  version.Version,
 
 		// DEPRECATED
-		"CI_ARCH":                    m.Sys.Arch,                           // use CI_SYSTEM_ARCH
-		"CI_COMMIT":                  m.Curr.Commit.Sha,                    // use CI_COMMIT_SHA
-		"CI_REMOTE_URL":              m.Repo.Remote,                        // use CI_REPO_REMOTE
-		"CI_REPO_BRANCH":             m.Repo.Branch,                        // use CI_REPO_DEFAULT_BRANCH
-		"CI_PARENT_BUILD_NUMBER":     strconv.FormatInt(m.Curr.Parent, 10), // use CI_BUILD_PARENT
-		"CI_BUILD_TARGET":            m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
-		"CI_DEPLOY_TO":               m.Curr.Target,                        // use CI_BUILD_DEPLOY_TARGET
-		"CI_COMMIT_AUTHOR_NAME":      m.Curr.Commit.Author.Name,            // use CI_COMMIT_AUTHOR
-		"CI_PREV_COMMIT_AUTHOR_NAME": m.Prev.Commit.Author.Name,            // use CI_PREV_COMMIT_AUTHOR
-		"CI_SYSTEM":                  m.Sys.Name,                           // use CI_SYSTEM_NAME
-		"CI_BRANCH":                  m.Curr.Commit.Branch,                 // use CI_COMMIT_BRANCH
-		"CI_SOURCE_BRANCH":           sourceBranch,                         // use CI_COMMIT_SOURCE_BRANCH
-		"CI_TARGET_BRANCH":           targetBranch,                         // use CI_COMMIT_TARGET_BRANCH
+		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
 	}
 	if m.Curr.Event == EventTag {
-		params["CI_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
 	if m.Curr.Event == EventPull {
-		params["CI_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
+
+	m.setDroneEnviron(params)
 
 	return params
 }
@@ -213,8 +219,5 @@ func (m *Metadata) Environ() map[string]string {
 var pullRegexp = regexp.MustCompile(`\d+`)
 
 func (m *Metadata) SetPlatform(platform string) {
-	if platform == "" {
-		platform = "linux/amd64"
-	}
-	m.Sys.Arch = platform
+	m.Sys.Platform = platform
 }

@@ -16,8 +16,14 @@ package main
 
 import (
 	"context"
+	"crypto"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -27,6 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
@@ -85,7 +92,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	return store, nil
 }
 
-// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: remove it in v1.1.0
 // TODO: add it to the "how to migrate from drone docs"
 func fallbackSqlite3File(path string) (string, error) {
 	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
@@ -142,9 +149,7 @@ func fallbackSqlite3File(path string) (string, error) {
 	// file is still at old location
 	_, err = os.Stat(dockerOldPath)
 	if err == nil {
-		// TODO: use log.Fatal()... in next version
-		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
-		return dockerOldPath, nil
+		log.Fatal().Msgf("found sqlite3 file at old path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
 	}
 
 	// file does not exist at all
@@ -153,11 +158,11 @@ func fallbackSqlite3File(path string) (string, error) {
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(), s)
+	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	return secrets.New(s)
+	return secrets.New(c.Context, s)
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
@@ -166,17 +171,20 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 			registry.New(s),
 			registry.Filesystem(c.String("docker-config")),
 		)
-	} else {
-		return registry.New(s)
 	}
+	return registry.New(s)
 }
 
 func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
-	return environments.Filesystem(c.StringSlice("environment"))
+	return environments.Parse(c.StringSlice("environment"))
 }
 
-// SetupRemote helper function to setup the remote from the CLI arguments.
-func SetupRemote(c *cli.Context) (remote.Remote, error) {
+func setupMembershipService(_ *cli.Context, r remote.Remote) cache.MembershipService {
+	return cache.NewMembershipService(r)
+}
+
+// setupRemote helper function to setup the remote from the CLI arguments.
+func setupRemote(c *cli.Context) (remote.Remote, error) {
 	switch {
 	case c.Bool("github"):
 		return setupGithub(c)
@@ -222,15 +230,15 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 
 // helper function to setup the Gitea remote from the CLI arguments.
 func setupGitea(c *cli.Context) (remote.Remote, error) {
+	server, err := url.Parse(c.String("gitea-server"))
+	if err != nil {
+		return nil, err
+	}
 	opts := gitea.Opts{
-		URL:         c.String("gitea-server"),
-		Context:     c.String("gitea-context"),
-		Username:    c.String("gitea-git-username"),
-		Password:    c.String("gitea-git-password"),
-		Client:      c.String("gitea-client"),
-		Secret:      c.String("gitea-secret"),
-		PrivateMode: c.Bool("gitea-private-mode"),
-		SkipVerify:  c.Bool("gitea-skip-verify"),
+		URL:        strings.TrimRight(server.String(), "/"),
+		Client:     c.String("gitea-client"),
+		Secret:     c.String("gitea-secret"),
+		SkipVerify: c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
 		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
@@ -260,9 +268,6 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
 		ClientSecret: c.String("gitlab-secret"),
-		Username:     c.String("gitlab-git-username"),
-		Password:     c.String("gitlab-git-password"),
-		PrivateMode:  c.Bool("gitlab-private-mode"),
 		SkipVerify:   c.Bool("gitlab-skip-verify"),
 	})
 }
@@ -270,16 +275,11 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 // helper function to setup the GitHub remote from the CLI arguments.
 func setupGithub(c *cli.Context) (remote.Remote, error) {
 	opts := github.Opts{
-		URL:         c.String("github-server"),
-		Context:     c.String("github-context"),
-		Client:      c.String("github-client"),
-		Secret:      c.String("github-secret"),
-		Scopes:      c.StringSlice("github-scope"),
-		Username:    c.String("github-git-username"),
-		Password:    c.String("github-git-password"),
-		PrivateMode: c.Bool("github-private-mode"),
-		SkipVerify:  c.Bool("github-skip-verify"),
-		MergeRef:    c.Bool("github-merge-ref"),
+		URL:        c.String("github-server"),
+		Client:     c.String("github-client"),
+		Secret:     c.String("github-secret"),
+		SkipVerify: c.Bool("github-skip-verify"),
+		MergeRef:   c.Bool("github-merge-ref"),
 	}
 	log.Trace().Msgf("Remote (github) opts: %#v", opts)
 	return github.New(opts)
@@ -292,7 +292,6 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Client:     c.String("coding-client"),
 		Secret:     c.String("coding-secret"),
 		Scopes:     c.StringSlice("coding-scope"),
-		Machine:    c.String("coding-git-machine"),
 		Username:   c.String("coding-git-username"),
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),
@@ -301,7 +300,7 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 	return coding.New(opts)
 }
 
-func setupMetrics(g *errgroup.Group, store_ store.Store) {
+func setupMetrics(g *errgroup.Group, _store store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_jobs",
@@ -350,13 +349,45 @@ func setupMetrics(g *errgroup.Group, store_ store.Store) {
 	})
 	g.Go(func() error {
 		for {
-			repoCount, _ := store_.GetRepoCount()
-			userCount, _ := store_.GetUserCount()
-			buildCount, _ := store_.GetBuildCount()
+			repoCount, _ := _store.GetRepoCount()
+			userCount, _ := _store.GetUserCount()
+			buildCount, _ := _store.GetBuildCount()
 			builds.Set(float64(buildCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
 			time.Sleep(10 * time.Second)
 		}
 	})
+}
+
+// generate or load key pair to sign webhooks requests (i.e. used for extensions)
+func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
+	privKeyID := "signature-private-key"
+
+	privKey, err := _store.ServerConfigGet(privKeyID)
+	if err != nil && err == datastore.RecordNotExist {
+		_, privKey, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			return nil, nil
+		}
+		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			return nil, nil
+		}
+		log.Debug().Msg("Created private key")
+		return privKey, privKey.Public()
+	} else if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to load private key")
+		return nil, nil
+	} else {
+		privKeyStr, err := hex.DecodeString(privKey)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to decode private key")
+			return nil, nil
+		}
+		privKey := ed25519.PrivateKey(privKeyStr)
+		return privKey, privKey.Public()
+	}
 }

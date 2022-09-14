@@ -17,6 +17,8 @@ package datastore
 import (
 	"time"
 
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -54,7 +56,7 @@ func (s storage) GetBuildLast(repo *model.Repo, branch string) (*model.Build, er
 	build := &model.Build{
 		RepoID: repo.ID,
 		Branch: branch,
-		Event:  "push",
+		Event:  model.EventPush,
 	}
 	return build, wrapGet(s.engine.Desc("build_number").Get(build))
 }
@@ -78,6 +80,19 @@ func (s storage) GetBuildList(repo *model.Repo, page int) ([]*model.Build, error
 		Find(&builds)
 }
 
+// GetActiveBuildList get all builds that are pending, running or blocked
+func (s storage) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error) {
+	builds := make([]*model.Build, 0, perPage)
+	query := s.engine.
+		Where("build_repo_id = ?", repo.ID).
+		In("build_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
+		Desc("build_number")
+	if page > 0 {
+		query = query.Limit(perPage, perPage*(page-1))
+	}
+	return builds, query.Find(&builds)
+}
+
 func (s storage) GetBuildCount() (int64, error) {
 	return s.engine.Count(new(model.Build))
 }
@@ -89,17 +104,13 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 		return err
 	}
 
-	// increment counter
-	if _, err := sess.ID(build.RepoID).Incr("repo_counter").Update(new(model.Repo)); err != nil {
+	// calc build number
+	var number int64
+	if _, err := sess.SQL("SELECT MAX(build_number) FROM `builds` WHERE build_repo_id = ?", build.RepoID).Get(&number); err != nil {
 		return err
 	}
+	build.Number = number + 1
 
-	repo := new(model.Repo)
-	if err := wrapGet(sess.ID(build.RepoID).Get(repo)); err != nil {
-		return err
-	}
-
-	build.Number = repo.Counter
 	build.Created = time.Now().UTC().Unix()
 	build.Enqueued = build.Created
 	// only Insert set auto created ID back to object
@@ -108,6 +119,7 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 	}
 
 	for i := range procList {
+		procList[i].BuildID = build.ID
 		// only Insert set auto created ID back to object
 		if _, err := sess.Insert(procList[i]); err != nil {
 			return err
@@ -119,5 +131,29 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 
 func (s storage) UpdateBuild(build *model.Build) error {
 	_, err := s.engine.ID(build.ID).AllCols().Update(build)
+	return err
+}
+
+func deleteBuild(sess *xorm.Session, buildID int64) error {
+	// delete related procs
+	for startProcs := 0; ; startProcs += perPage {
+		procIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", buildID).Find(&procIDs); err != nil {
+			return err
+		}
+		if len(procIDs) == 0 {
+			break
+		}
+
+		for i := range procIDs {
+			if err := deleteProc(sess, procIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+	if _, err := sess.Where("build_id = ?", buildID).Delete(new(model.BuildConfig)); err != nil {
+		return err
+	}
+	_, err := sess.ID(buildID).Delete(new(model.Build))
 	return err
 }

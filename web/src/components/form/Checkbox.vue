@@ -3,28 +3,13 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="
-        checkbox
-        relative
-        border border-gray-400
-        dark:border-gray-600
-        cursor-pointer
-        rounded-md
-        transition-colors
-        duration-150
-        w-5
-        h-5
-        checked:bg-lime-600 checked:border-lime-600
-        dark:checked:bg-lime-800 dark:checked:border-lime-800
-      "
+      class="checkbox flex-shrink-0 relative border border-gray-400 dark:border-gray-600 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-800 dark:checked:border-lime-800"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`checkbox-${id}`">{{
-        label
-      }}</label>
-      <span v-if="description" class="text-sm text-gray-400 dark:text-gray-600">{{ description }}</span>
+      <label v-if="label" class="cursor-pointer text-color" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-sm text-color-alt">{{ description }}</span>
     </div>
   </div>
 </template>
