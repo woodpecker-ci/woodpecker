@@ -24,8 +24,7 @@ type Agent struct {
 	LastContact int64
 	Platform    string `xorm:"VARCHAR(100)"`
 	Backend     string `xorm:"VARCHAR(100)"`
-	Capacity    int64  `xorm:"agent_capacity"`
-	// Addr        string `xorm:"UNIQUE VARCHAR(250) 'agent_addr'"`
+	Capacity    int32
 }
 
 // TableName return database table name for xorm

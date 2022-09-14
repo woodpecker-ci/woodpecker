@@ -166,8 +166,8 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 
 func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
 	res := new(proto.RegisterAgentResponse)
-	id, err := s.peer.RegisterAgent(c, req.GetId(), req.GetPlatform(), req.GetBackend(), req.GetCapacity())
-	res.Id = id
+	agentID, err := s.peer.RegisterAgent(c, req.GetAgentId(), req.GetPlatform(), req.GetBackend(), req.GetCapacity())
+	res.AgentId = agentID
 	return res, err
 }
 

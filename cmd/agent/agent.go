@@ -22,6 +22,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -47,9 +48,11 @@ func loop(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
+	platform := runtime.GOOS + "/" + runtime.GOARCH
+
 	labels := map[string]string{
 		"hostname": hostname,
-		"platform": runtime.GOOS + "/" + runtime.GOARCH,
+		"platform": platform,
 		"repo":     "*", // allow all repos by default
 	}
 
@@ -147,6 +150,29 @@ func loop(c *cli.Context) error {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
 	}
+
+	agentId := int64(-1) // TODO: get agent id from some storage like file etc or use -1 if none exists
+	agentId, err = client.RegisterAgent(ctx, agentId, platform, engine.Name(), parallel)
+	if err != nil {
+		return err
+	}
+	// TODO: save returned agentId again
+
+	go func() {
+		for {
+			if sigterm.IsSet() {
+				return
+			}
+
+			err := client.ReportHealth(ctx)
+			if err != nil {
+				log.Err(err).Msgf("Failed to report health")
+				return
+			}
+
+			<-time.After(time.Second * 10)
+		}
+	}()
 
 	for i := 0; i < parallel; i++ {
 		go func() {

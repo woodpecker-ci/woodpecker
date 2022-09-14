@@ -384,7 +384,7 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int64) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int32) (int64, error) {
 	token, err := s.getAgentToken(ctx)
 	if err != nil {
 		return -1, err
@@ -407,11 +407,11 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 		} else if err != nil {
 			return -1, err
 		}
-	}
-
-	agent, err = s.store.GetAgentFromToken(token)
-	if err != nil {
-		return -1, err
+	} else {
+		agent, err = s.store.GetAgentFromToken(token)
+		if err != nil {
+			return -1, err
+		}
 	}
 
 	agent.Backend = backend
