@@ -303,7 +303,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
-	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
@@ -349,6 +349,9 @@ func (a *authorizer) authorize(ctx context.Context) error {
 		if len(md["password"]) > 0 && md["password"][0] == a.password {
 			return nil
 		}
+
+		// TODO: check if token is system token or a token of an pending agent from the database
+
 		return errors.New("invalid agent token")
 	}
 	return errors.New("missing agent token")

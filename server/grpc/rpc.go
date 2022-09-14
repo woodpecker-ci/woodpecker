@@ -23,10 +23,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -38,6 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 )
 
 type RPC struct {
@@ -381,6 +384,58 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
+func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int64) (int64, error) {
+	token, err := s.getAgentToken(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	var agent *model.Agent
+	if token == server.Config.Server.AgentToken {
+		// this is a system agent, check if we can find it based on its id or register it
+		agent, err = s.store.GetAgent(id)
+		if err == datastore.RecordNotExist {
+			agent := new(model.Agent)
+			agent.Name = ""
+			agent.OwnerID = -1 // system agent
+			agent.Token = server.Config.Server.AgentToken
+			agent.Backend = backend
+			agent.Platform = platform
+			agent.Capacity = capacity
+			err := s.store.CreateAgent(agent)
+			return agent.ID, err // TODO: check if the agent id will be set this way
+		} else if err != nil {
+			return -1, err
+		}
+	}
+
+	agent, err = s.store.GetAgentFromToken(token)
+	if err != nil {
+		return -1, err
+	}
+
+	agent.Backend = backend
+	agent.Platform = platform
+	agent.Capacity = capacity
+
+	return agent.ID, s.store.UpdateAgent(agent)
+}
+
+func (s *RPC) ReportHealth(ctx context.Context, status string) error {
+	agent, err := s.getAgentFromToken(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status != "I am alive!" {
+		return fmt.Errorf("Are you alive?")
+	}
+
+	agent.LastContact = time.Now().Unix()
+
+	return s.store.UpdateAgent(agent)
+}
+
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
@@ -436,4 +491,32 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
 	return nil
+}
+
+func (s *RPC) getAgentToken(ctx context.Context) (string, error) {
+	meta, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", fmt.Errorf("Can't get token")
+	}
+
+	tokens := meta.Get("token")
+	if len(tokens) != 1 {
+		return "", fmt.Errorf("Expected a single token")
+	}
+	token := tokens[0]
+
+	return token, nil
+}
+
+func (s *RPC) getAgentFromToken(ctx context.Context) (*model.Agent, error) {
+	token, err := s.getAgentToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if token == "" {
+		return nil, fmt.Errorf("Nice try :)")
+	}
+
+	return s.store.GetAgentFromToken(token)
 }

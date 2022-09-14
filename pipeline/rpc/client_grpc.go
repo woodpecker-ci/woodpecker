@@ -307,3 +307,37 @@ func (c *client) Log(ctx context.Context, id string, line *Line) (err error) {
 	}
 	return nil
 }
+
+func (c *client) RegisterAgent(ctx context.Context, platform, backend string, capacity int64) (err error) {
+	req := new(proto.RegisterAgentRequest)
+	req.Platform = platform
+	req.Backend = backend
+	req.Capacity = capacity
+
+	_, err = c.client.RegisterAgent(ctx, req)
+	return err
+}
+
+func (c *client) ReportHealth(ctx context.Context) (err error) {
+	req := new(proto.ReportHealthRequest)
+	req.Status = "I am alive!"
+
+	for {
+		_, err = c.client.ReportHealth(ctx, req)
+		if err == nil {
+			return nil
+		}
+		switch status.Code(err) {
+		case
+			codes.Aborted,
+			codes.DataLoss,
+			codes.DeadlineExceeded,
+			codes.Internal,
+			codes.Unavailable:
+			// non-fatal errors
+		default:
+			return err
+		}
+		<-time.After(backoff)
+	}
+}

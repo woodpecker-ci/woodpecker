@@ -30,6 +30,8 @@ type WoodpeckerClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error)
 	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*Empty, error)
 	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error)
+	RegisterAgent(ctx context.Context, in *RegisterAgentRequest, opts ...grpc.CallOption) (*RegisterAgentResponse, error)
+	ReportHealth(ctx context.Context, in *ReportHealthRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type woodpeckerClient struct {
@@ -112,6 +114,24 @@ func (c *woodpeckerClient) Log(ctx context.Context, in *LogRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *woodpeckerClient) RegisterAgent(ctx context.Context, in *RegisterAgentRequest, opts ...grpc.CallOption) (*RegisterAgentResponse, error) {
+	out := new(RegisterAgentResponse)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/RegisterAgent", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *woodpeckerClient) ReportHealth(ctx context.Context, in *ReportHealthRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/ReportHealth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WoodpeckerServer is the server API for Woodpecker service.
 // All implementations must embed UnimplementedWoodpeckerServer
 // for forward compatibility
@@ -124,6 +144,8 @@ type WoodpeckerServer interface {
 	Update(context.Context, *UpdateRequest) (*Empty, error)
 	Upload(context.Context, *UploadRequest) (*Empty, error)
 	Log(context.Context, *LogRequest) (*Empty, error)
+	RegisterAgent(context.Context, *RegisterAgentRequest) (*RegisterAgentResponse, error)
+	ReportHealth(context.Context, *ReportHealthRequest) (*Empty, error)
 	mustEmbedUnimplementedWoodpeckerServer()
 }
 
@@ -154,6 +176,12 @@ func (UnimplementedWoodpeckerServer) Upload(context.Context, *UploadRequest) (*E
 }
 func (UnimplementedWoodpeckerServer) Log(context.Context, *LogRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Log not implemented")
+}
+func (UnimplementedWoodpeckerServer) RegisterAgent(context.Context, *RegisterAgentRequest) (*RegisterAgentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterAgent not implemented")
+}
+func (UnimplementedWoodpeckerServer) ReportHealth(context.Context, *ReportHealthRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportHealth not implemented")
 }
 func (UnimplementedWoodpeckerServer) mustEmbedUnimplementedWoodpeckerServer() {}
 
@@ -312,6 +340,42 @@ func _Woodpecker_Log_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Woodpecker_RegisterAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WoodpeckerServer).RegisterAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Woodpecker/RegisterAgent",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WoodpeckerServer).RegisterAgent(ctx, req.(*RegisterAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Woodpecker_ReportHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReportHealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WoodpeckerServer).ReportHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Woodpecker/ReportHealth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WoodpeckerServer).ReportHealth(ctx, req.(*ReportHealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Woodpecker_ServiceDesc is the grpc.ServiceDesc for Woodpecker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -351,91 +415,13 @@ var Woodpecker_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Log",
 			Handler:    _Woodpecker_Log_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "woodpecker.proto",
-}
-
-// HealthClient is the client API for Health service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type HealthClient interface {
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
-}
-
-type healthClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewHealthClient(cc grpc.ClientConnInterface) HealthClient {
-	return &healthClient{cc}
-}
-
-func (c *healthClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, "/proto.Health/Check", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// HealthServer is the server API for Health service.
-// All implementations must embed UnimplementedHealthServer
-// for forward compatibility
-type HealthServer interface {
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
-	mustEmbedUnimplementedHealthServer()
-}
-
-// UnimplementedHealthServer must be embedded to have forward compatible implementations.
-type UnimplementedHealthServer struct {
-}
-
-func (UnimplementedHealthServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
-}
-func (UnimplementedHealthServer) mustEmbedUnimplementedHealthServer() {}
-
-// UnsafeHealthServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to HealthServer will
-// result in compilation errors.
-type UnsafeHealthServer interface {
-	mustEmbedUnimplementedHealthServer()
-}
-
-func RegisterHealthServer(s grpc.ServiceRegistrar, srv HealthServer) {
-	s.RegisterService(&Health_ServiceDesc, srv)
-}
-
-func _Health_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HealthServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.Health/Check",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HealthServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Health_ServiceDesc is the grpc.ServiceDesc for Health service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Health_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Health",
-	HandlerType: (*HealthServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Check",
-			Handler:    _Health_Check_Handler,
+			MethodName: "RegisterAgent",
+			Handler:    _Woodpecker_RegisterAgent_Handler,
+		},
+		{
+			MethodName: "ReportHealth",
+			Handler:    _Woodpecker_ReportHealth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -3,6 +3,19 @@ syntax = "proto3";
 option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
+service Woodpecker {
+  rpc Next          (NextRequest)          returns (NextReply) {}
+  rpc Init          (InitRequest)          returns (Empty) {}
+  rpc Wait          (WaitRequest)          returns (Empty) {}
+  rpc Done          (DoneRequest)          returns (Empty) {}
+  rpc Extend        (ExtendRequest)        returns (Empty) {}
+  rpc Update        (UpdateRequest)        returns (Empty) {}
+  rpc Upload        (UploadRequest)        returns (Empty) {}
+  rpc Log           (LogRequest)           returns (Empty) {}
+  rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
+  rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
+}
+
 message File {
   string name = 1;
   string proc = 2;
@@ -38,38 +51,6 @@ message Pipeline {
   int64 timeout = 2;
   bytes payload = 3;
 }
-
-message HealthCheckRequest {
-  string service = 1;
-}
-
-message HealthCheckResponse {
-  enum ServingStatus {
-    UNKNOWN = 0;
-    SERVING = 1;
-    NOT_SERVING = 2;
-  }
-  ServingStatus status = 1;
-}
-
-service Woodpecker {
-  rpc Next   (NextRequest)   returns (NextReply) {}
-  rpc Init   (InitRequest)   returns (Empty) {}
-  rpc Wait   (WaitRequest)   returns (Empty) {}
-  rpc Done   (DoneRequest)   returns (Empty) {}
-  rpc Extend (ExtendRequest) returns (Empty) {}
-  rpc Update (UpdateRequest) returns (Empty) {}
-  rpc Upload (UploadRequest) returns (Empty) {}
-  rpc Log    (LogRequest)    returns (Empty) {}
-}
-
-service Health {
-  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
-}
-
-//
-// next
-//
 
 message NextRequest {
   Filter filter = 1;
@@ -114,4 +95,20 @@ message LogRequest {
 
 message Empty {
 
+}
+
+message ReportHealthRequest {
+  // TODO: think about useful arguments
+  string status = 1;
+}
+
+message RegisterAgentRequest {
+  int64  id       = 1;
+  string platform = 2;
+  int64  capacity = 3;
+  string backend  = 4;
+}
+
+message RegisterAgentResponse {
+  int64 id = 1;
 }

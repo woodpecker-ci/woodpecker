@@ -66,4 +66,10 @@ type Peer interface {
 
 	// Log writes the pipeline log entry.
 	Log(c context.Context, id string, line *Line) error
+
+	// RegisterAgent register our agent to the server
+	RegisterAgent(ctx context.Context, platform, backend string, capacity int64) error
+
+	// ReportHealth reports health status of the agent to the server
+	ReportHealth(c context.Context) error
 }
