@@ -11,7 +11,7 @@ pipeline:
   webhook:
     image: foo/webhook
     settings:
-      url: http://foo.com
+      url: http://example.com
       method: post
       body: |
         hello world
@@ -54,7 +54,7 @@ Execute your plugin locally from the command line to verify it is working:
 ```nohighlight
 docker run --rm \
   -e PLUGIN_METHOD=post \
-  -e PLUGIN_URL=http://foo.com \
+  -e PLUGIN_URL=http://example.com \
   -e PLUGIN_BODY="hello world" \
   foo/webhook
 ```

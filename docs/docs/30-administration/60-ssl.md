@@ -26,7 +26,7 @@ services:
 +     - WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` is set the certificate is requested for `foo.com`. To receive emails before certificates expire Let's Encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://example.com` is set the certificate is requested for `example.com`. To receive emails before certificates expire Let's Encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
 
 The SSL certificates are stored in `$HOME/.local/share/certmagic` for binary versions of Woodpecker and in `/var/lib/woodpecker` for the Container versions of it. You can set a custom path by setting `XDG_DATA_HOME` if required.
 
@@ -56,12 +56,12 @@ services:
 +     - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
       - [...]
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to expose the following ports:
@@ -93,8 +93,8 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to provide the paths of your certificate and key:
@@ -111,11 +111,11 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-      - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-      - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
+      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
+      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 ### Certificate Chain
