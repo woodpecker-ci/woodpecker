@@ -32,6 +32,9 @@ Just add a new section called **variables** like this:
      commands: build
 ```
 
+<!--
+TODO(1192): Support YAML override and extension
+
 ## Example of YAML override and extension
 
 ```yml
@@ -59,3 +62,4 @@ pipelines:
     when:
       branch: main
 ```
+-->
