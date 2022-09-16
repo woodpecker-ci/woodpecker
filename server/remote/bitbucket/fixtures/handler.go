@@ -27,8 +27,8 @@ func Handler() http.Handler {
 	gin.SetMode(gin.TestMode)
 
 	e := gin.New()
-	e.GET("/2.0/workspaces/", getWorkspace)
 	e.POST("/site/oauth2/access_token", getOauth)
+	e.GET("/2.0/workspaces/", getWorkspaces)
 	e.GET("/2.0/repositories/:owner/:name", getRepo)
 	e.GET("/2.0/repositories/:owner/:name/hooks", getRepoHooks)
 	e.GET("/2.0/repositories/:owner/:name/src/:commit/:file", getRepoFile)
@@ -36,16 +36,10 @@ func Handler() http.Handler {
 	e.POST("/2.0/repositories/:owner/:name/hooks", createRepoHook)
 	e.POST("/2.0/repositories/:owner/:name/commit/:commit/statuses/build", createRepoStatus)
 	e.GET("/2.0/repositories/:owner", getUserRepos)
-	e.GET("/2.0/teams/", getUserTeams)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
 
 	return e
-}
-
-func getWorkspace(c *gin.Context) {
-	// role, _ := c.Params.Get("role")
-	// TODO: add dummy response for get workplace
 }
 
 func getOauth(c *gin.Context) {
@@ -71,6 +65,18 @@ func getOauth(c *gin.Context) {
 	default:
 		c.Header("Content-Type", "application/json")
 		c.String(200, tokenPayload)
+	}
+}
+
+func getWorkspaces(c *gin.Context) {
+	// TODO: should the role be used ?
+	// role, _ := c.Params.Get("role")
+
+	switch c.Request.Header.Get("Authorization") {
+	case "Bearer teams_not_found", "Bearer c81e728d":
+		c.String(404, "")
+	default:
+		c.String(200, workspacesPayload)
 	}
 }
 
@@ -133,15 +139,6 @@ func getUser(c *gin.Context) {
 		c.String(404, "")
 	default:
 		c.String(200, userPayload)
-	}
-}
-
-func getUserTeams(c *gin.Context) {
-	switch c.Request.Header.Get("Authorization") {
-	case "Bearer teams_not_found", "Bearer c81e728d":
-		c.String(404, "")
-	default:
-		c.String(200, userTeamPayload)
 	}
 }
 
@@ -254,18 +251,28 @@ const userRepoPayload = `
 }
 `
 
-const userTeamPayload = `
+const workspacesPayload = `
 {
+	"page": 1,
   "pagelen": 100,
+	"size": 1,
   "values": [
     {
-      "username": "superfriends",
+			"type": "workspace",
+			"uuid": "{c7a04a76-fa20-43e4-dc42-a7506db4c95b}",
+			"name": "Ueber Dev",
+			"slug": "ueberdev42",
       "links": {
-        "avatar": {
-          "href": "http:\/\/i.imgur.com\/ZygP55A.jpg"
-        }
-      },
-      "type": "team"
+				"avatar": {
+				  "href": "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964"
+			  },
+			  "html": {
+				  "href": "https://bitbucket.org/ueberdev42/"
+			  },
+			  "self": {
+				  "href": "https://api.bitbucket.org/2.0/workspaces/ueberdev42"
+			  }
+      }
     }
   ]
 }

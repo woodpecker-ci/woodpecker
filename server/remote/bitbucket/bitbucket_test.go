@@ -184,8 +184,8 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should return the details", func() {
 				teams, err := c.Teams(ctx, fakeUser)
 				g.Assert(err).IsNil()
-				g.Assert(teams[0].Login).Equal("superfriends")
-				g.Assert(teams[0].Avatar).Equal("http://i.imgur.com/ZygP55A.jpg")
+				g.Assert(teams[0].Login).Equal("ueberdev42")
+				g.Assert(teams[0].Avatar).Equal("https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964")
 			})
 			g.It("Should handle not found error", func() {
 				_, err := c.Teams(ctx, fakeUserNoTeams)
