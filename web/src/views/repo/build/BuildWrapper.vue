@@ -38,7 +38,7 @@
           <Tab id="config" :title="$t('repo.build.config')" />
           <Tab
             id="changed-files"
-            v-if="!(build.event === 'tag' || build.event === 'cron' || build.event === 'deploy')"
+            v-if="build.event === 'push' || build.event === 'pull_request'"
             :title="$t('repo.build.files', { files: build.changed_files?.length || 0 })"
           />
         </Tabs>
