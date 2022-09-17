@@ -32,15 +32,17 @@ Just add a new section called **variables** like this:
      commands: build
 ```
 
+<!--
+TODO(1192): Support YAML override and extension
+
 ## Example of YAML override and extension
 
 ```yml
 variables: 
   &some-plugin-settings
-      settings:
-        target: dist
-        recursive: false
-        try: true
+    target: dist
+    recursive: false
+    try: true
 
 pipelines:
   develop:
@@ -50,7 +52,7 @@ pipelines:
     when:
       branch: develop
 
-  main
+  main:
     name: Build and test
     image: some-plugin
     settings:
@@ -60,3 +62,4 @@ pipelines:
     when:
       branch: main
 ```
+-->
