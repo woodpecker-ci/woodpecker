@@ -113,8 +113,7 @@ func loop(c *cli.Context) error {
 		c.String("server"),
 		transport,
 		grpc.WithPerRPCCredentials(&credentials{
-			username: c.String("grpc-username"),
-			password: c.String("grpc-password"),
+			token: c.String("grpc-token"),
 		}),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			Time:    c.Duration("grpc-keepalive-time"),
@@ -212,14 +211,12 @@ func loop(c *cli.Context) error {
 }
 
 type credentials struct {
-	username string
-	password string
+	token string
 }
 
 func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
 	return map[string]string{
-		"username": c.username,
-		"password": c.password,
+		"token": c.token,
 	}, nil
 }
 

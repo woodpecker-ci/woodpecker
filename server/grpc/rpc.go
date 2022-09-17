@@ -494,16 +494,15 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, pr
 }
 
 func (s *RPC) getAgentToken(ctx context.Context) (string, error) {
-	meta, ok := metadata.FromIncomingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", fmt.Errorf("Can't get token")
 	}
 
-	tokens := meta.Get("token")
-	if len(tokens) != 1 {
-		return "", fmt.Errorf("Expected a single token")
+	if len(md["token"]) != 1 {
+		return "", fmt.Errorf("Token not found")
 	}
-	token := tokens[0]
+	token := md["token"][0]
 
 	return token, nil
 }

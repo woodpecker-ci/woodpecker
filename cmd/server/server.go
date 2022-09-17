@@ -134,11 +134,11 @@ func run(c *cli.Context) error {
 			return err
 		}
 		authorizer := &authorizer{
-			password: c.String("agent-secret"),
+			token: c.String("agent-secret"),
 		}
 		grpcServer := grpc.NewServer(
 			grpc.StreamInterceptor(authorizer.streamInterceptor),
-			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
+			grpc.UnaryInterceptor(authorizer.unaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
@@ -327,7 +327,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 }
 
 type authorizer struct {
-	password string
+	token string
 }
 
 func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
@@ -337,7 +337,7 @@ func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, stream)
 }
 
-func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *authorizer) unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if err := a.authorize(ctx); err != nil {
 		return nil, err
 	}
@@ -346,7 +346,7 @@ func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info
 
 func (a *authorizer) authorize(ctx context.Context) error {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if len(md["password"]) > 0 && md["password"][0] == a.password {
+		if len(md["token"]) > 0 && md["token"][0] == a.token {
 			return nil
 		}
 
