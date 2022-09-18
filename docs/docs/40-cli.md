@@ -198,6 +198,30 @@ State: {{ .State }}
 
 **--token, -t**="": server auth token
 
+### create
+
+create new build
+
+**--branch**="": branch to create build from
+
+**--format**="": format output (default: [33mBuild #{{ .Number }} [0m
+Status: {{ .Status }}
+Event: {{ .Event }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Message: {{ .Message }}
+)
+
+**--log-level**="": set logging level (default: info)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+**--var**="": <key>=<value>
+
 ## log
 
 manage logs
@@ -252,39 +276,47 @@ execute a local build
 
 **--backend-engine**="": backend engine to run pipelines on (default: auto-detect)
 
+**--backend-k8s-namespace**="": backend k8s namespace (default: woodpecker)
+
+**--backend-k8s-storage-class**="": backend k8s storage class
+
+**--backend-k8s-storage-rwx**: backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)
+
+**--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
+
 **--build-created**="":  (default: 0)
 
-**--build-event**="":
+**--build-event**="": 
 
 **--build-finished**="":  (default: 0)
 
-**--build-link**="":
+**--build-link**="": 
 
 **--build-number**="":  (default: 0)
 
 **--build-started**="":  (default: 0)
 
-**--build-status**="":
+**--build-status**="": 
 
-**--build-target**="":
+**--build-target**="": 
 
-**--commit-author-avatar**="":
+**--commit-author-avatar**="": 
 
-**--commit-author-email**="":
+**--commit-author-email**="": 
 
-**--commit-author-name**="":
+**--commit-author-name**="": 
 
-**--commit-branch**="":
+**--commit-branch**="": 
 
-**--commit-message**="":
+**--commit-message**="": 
 
-**--commit-ref**="":
+**--commit-ref**="": 
 
-**--commit-refspec**="":
+**--commit-refspec**="": 
 
-**--commit-sha**="":
+**--commit-sha**="": 
 
-**--env**="":
+**--env**="": 
 
 **--job-number**="":  (default: 0)
 
@@ -292,11 +324,11 @@ execute a local build
 
 **--log-level**="": set logging level (default: info)
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks
 
@@ -304,51 +336,51 @@ execute a local build
 
 **--prev-build-created**="":  (default: 0)
 
-**--prev-build-event**="":
+**--prev-build-event**="": 
 
 **--prev-build-finished**="":  (default: 0)
 
-**--prev-build-link**="":
+**--prev-build-link**="": 
 
 **--prev-build-number**="":  (default: 0)
 
 **--prev-build-started**="":  (default: 0)
 
-**--prev-build-status**="":
+**--prev-build-status**="": 
 
-**--prev-commit-author-avatar**="":
+**--prev-commit-author-avatar**="": 
 
-**--prev-commit-author-email**="":
+**--prev-commit-author-email**="": 
 
-**--prev-commit-author-name**="":
+**--prev-commit-author-name**="": 
 
-**--prev-commit-branch**="":
+**--prev-commit-branch**="": 
 
-**--prev-commit-message**="":
+**--prev-commit-message**="": 
 
-**--prev-commit-ref**="":
+**--prev-commit-ref**="": 
 
-**--prev-commit-refspec**="":
+**--prev-commit-refspec**="": 
 
-**--prev-commit-sha**="":
+**--prev-commit-sha**="": 
 
 **--privileged**="": privileged plugins (default: [plugins/docker plugins/gcr plugins/ecr woodpeckerci/plugin-docker woodpeckerci/plugin-docker-buildx])
 
-**--repo-link**="":
+**--repo-link**="": 
 
-**--repo-name**="":
+**--repo-name**="": 
 
-**--repo-private**="":
+**--repo-private**="": 
 
-**--repo-remote-url**="":
+**--repo-remote-url**="": 
 
 **--server, -s**="": server address
-
-**--system-arch**="":  (default: linux/amd64)
 
 **--system-link**="":  (default: https://github.com/cncd/pipec)
 
 **--system-name**="":  (default: pipec)
+
+**--system-platform**="": 
 
 **--timeout**="": build timeout (default: 1h0m0s)
 
@@ -390,7 +422,7 @@ adds a registry
 
 **--password**="": registry password
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -406,7 +438,7 @@ remove a registry
 
 **--log-level**="": set logging level (default: info)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -422,7 +454,7 @@ update a registry
 
 **--password**="": registry password
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -438,7 +470,7 @@ display registry info
 
 **--log-level**="": set logging level (default: info)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -450,7 +482,7 @@ list registries
 
 **--log-level**="": set logging level (default: info)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -472,17 +504,17 @@ adds a secret
 
 **--event**="": secret limited to these events
 
+**--global**: global secret
+
 **--image**="": secret limited to these images
 
 **--log-level**="": set logging level (default: info)
 
 **--name**="": secret name
 
-**--global**: global secret
-
 **--organization**="": organization name (e.g. octocat)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -494,15 +526,15 @@ adds a secret
 
 remove a secret
 
+**--global**: global secret
+
 **--log-level**="": set logging level (default: info)
 
 **--name**="": secret name
 
-**--global**: global secret
-
 **--organization**="": organization name (e.g. octocat)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -514,17 +546,17 @@ update a secret
 
 **--event**="": secret limited to these events
 
+**--global**: global secret
+
 **--image**="": secret limited to these images
 
 **--log-level**="": set logging level (default: info)
 
 **--name**="": secret name
 
-**--global**: global secret
-
 **--organization**="": organization name (e.g. octocat)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -536,15 +568,15 @@ update a secret
 
 display secret info
 
+**--global**: global secret
+
 **--log-level**="": set logging level (default: info)
 
 **--name**="": secret name
 
-**--global**: global secret
-
 **--organization**="": organization name (e.g. octocat)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -554,13 +586,13 @@ display secret info
 
 list secrets
 
-**--log-level**="": set logging level (default: info)
-
 **--global**: global secret
+
+**--log-level**="": set logging level (default: info)
 
 **--organization**="": organization name (e.g. octocat)
 
-**--repository**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -757,6 +789,94 @@ lint a pipeline configuration file
 get the logging level of the server, or set it with [level]
 
 **--log-level**="": set logging level (default: info)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+## cron
+
+manage cron jobs
+
+**--log-level**="": set logging level (default: info)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+### add
+
+adds a cron
+
+**--branch**="": cron branch
+
+**--log-level**="": set logging level (default: info)
+
+**--name**="": cron name
+
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+
+**--schedule**="": cron schedule
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+### rm
+
+remove a cron
+
+**--id**="": cron id
+
+**--log-level**="": set logging level (default: info)
+
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+### update
+
+update a cron
+
+**--branch**="": cron branch
+
+**--id**="": cron id
+
+**--log-level**="": set logging level (default: info)
+
+**--name**="": cron name
+
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+
+**--schedule**="": cron schedule
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+### info
+
+display cron info
+
+**--id**="": cron id
+
+**--log-level**="": set logging level (default: info)
+
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+### ls
+
+list registries
+
+**--log-level**="": set logging level (default: info)
+
+**--repository, --repo**="": repository name (e.g. octocat/hello-world)
 
 **--server, -s**="": server address
 
