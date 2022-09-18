@@ -90,7 +90,7 @@ func loop(c *cli.Context) error {
 
 	if c.Bool("healthcheck") {
 		go func() {
-			if err := http.ListenAndServe(fmt.Sprintf(":%s", c.String("healthcheck-port")), nil); err != nil {
+			if err := http.ListenAndServe(fmt.Sprintf(":%d", c.Int("healthcheck-port")), nil); err != nil {
 				log.Error().Msgf("can not listen on port 3000: %v", err)
 			}
 		}()
