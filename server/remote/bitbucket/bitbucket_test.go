@@ -184,8 +184,8 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should return the details", func() {
 				teams, err := c.Teams(ctx, fakeUser)
 				g.Assert(err).IsNil()
-				g.Assert(teams[0].Login).Equal("superfriends")
-				g.Assert(teams[0].Avatar).Equal("http://i.imgur.com/ZygP55A.jpg")
+				g.Assert(teams[0].Login).Equal("ueberdev42")
+				g.Assert(teams[0].Avatar).Equal("https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964")
 			})
 			g.It("Should handle not found error", func() {
 				_, err := c.Teams(ctx, fakeUserNoTeams)
@@ -264,9 +264,10 @@ func Test_bitbucket(t *testing.T) {
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 
-			r, _, err := c.Hook(ctx, req)
+			r, b, err := c.Hook(ctx, req)
 			g.Assert(err).IsNil()
-			g.Assert(r.FullName).Equal("user_name/repo_name")
+			g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
+			g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
 		})
 	})
 }
