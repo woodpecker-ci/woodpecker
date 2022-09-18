@@ -49,7 +49,7 @@ func buildCreate(c *cli.Context) error {
 	variables := make(map[string]string)
 
 	for _, vaz := range c.StringSlice("var") {
-		sp := strings.Split(vaz, "=")
+		sp := strings.SplitN(vaz, "=", 2)
 		if len(sp) == 2 {
 			variables[sp[0]] = sp[1]
 		}
