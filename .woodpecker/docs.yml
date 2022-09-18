@@ -8,6 +8,7 @@ pipeline:
   build:
     image: *node_image
     commands:
+      - apk add golang
       - cd docs/
       - yarn install --frozen-lockfile
       - yarn build
