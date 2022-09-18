@@ -54,29 +54,34 @@ func CreateBuild(c *gin.Context) {
 
 	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
 
-	tmpBuild := &model.Build{
+	tmpBuild := createTmpBuild(model.EventManual, lastCommit, repo, user, &p)
+
+	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(http.StatusOK, build)
+	}
+}
+
+func createTmpBuild(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *woodpecker.BuildOptions) *model.Build {
+	return &model.Build{
 		Event:     model.EventManual,
-		Commit:    lastCommit,
-		Branch:    p.Branch,
+		Commit:    commitSHA,
+		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: "MANUAL BUILD @ " + p.Branch,
+		Message: "MANUAL BUILD @ " + opts.Branch,
 
-		Ref:                 p.Branch,
-		AdditionalVariables: p.Variables,
+		Ref:                 opts.Branch,
+		AdditionalVariables: opts.Variables,
 
 		Author: user.Login,
 		Email:  user.Email,
 
 		// TODO: Generate proper link to commit
 		Link: repo.Link,
-	}
-	build, err := pipeline.Create(c, _store, repo, tmpBuild)
-	if err != nil {
-		handlePipelineErr(c, err)
-	} else {
-		c.JSON(http.StatusOK, build)
 	}
 }
 
