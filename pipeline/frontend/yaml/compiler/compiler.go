@@ -87,7 +87,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	if !conf.When.Match(c.metadata, true) {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
-		// An empty pipeline will just be skipped and wont be shown in the UI as well.
+		// An empty pipeline will just be skipped completely.
 		return config
 	}
 

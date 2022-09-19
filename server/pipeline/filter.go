@@ -50,7 +50,7 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 }
 
 // TODO: parse yaml once and not for each filter function
-// Check if at least one pipeline config will be execute otherwise we will just ignore this webhook
+// Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
 func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
@@ -71,12 +71,12 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		// check filtered by match constraints.
+		// ignore if the pipeline was filtered by matched constraints
 		if !parsedPipelineConfig.When.Match(matchMetadata, true) {
 			continue
 		}
 
-		// if was filtered by the branch (legacy) continue
+		// ignore if the pipeline was filtered by the branch (legacy)
 		if !parsedPipelineConfig.Branches.Match(build.Branch) {
 			continue
 		}
