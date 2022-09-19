@@ -1,4 +1,5 @@
 // Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,48 +18,333 @@ package fixtures
 const HookPush = `
 {
   "actor": {
-    "username": "emmap1",
+    "display_name": "Martin Herren",
     "links": {
-      "avatar": {
-        "href": "https:\/\/bitbucket-api-assetroot.s3.amazonaws.com\/c\/photos\/2015\/Feb\/26\/3613917261-0-emmap1-avatar_avatar.png"
-      }
-    }
-  },
-  "repository": {
-    "links": {
-      "html": {
-        "href": "https:\/\/api.bitbucket.org\/team_name\/repo_name"
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
       },
       "avatar": {
-        "href": "https:\/\/api-staging-assetroot.s3.amazonaws.com\/c\/photos\/2014\/Aug\/01\/bitbucket-logo-2629490769-3_avatar.png"
+        "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+      },
+      "html": {
+        "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
       }
     },
-    "full_name": "user_name\/repo_name",
+    "type": "user",
+    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+    "account_id": "5cf8e3a9678ca90f8e7cc8a8",
+    "nickname": "Martin Herren"
+  },
+  "repository": {
+    "type": "repository",
+    "full_name": "martinherren1984/publictestrepo",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo"
+      },
+      "html": {
+        "href": "https://bitbucket.org/martinherren1984/publictestrepo"
+      },
+      "avatar": {
+        "href": "https://bytebucket.org/ravatar/%7B898477b2-a080-4089-b385-597a783db392%7D?ts=default"
+      }
+    },
+    "name": "PublicTestRepo",
     "scm": "git",
-    "is_private": true
+    "website": null,
+    "owner": {
+      "display_name": "Martin Herren",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
+        },
+        "avatar": {
+          "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+      "account_id": "5cf8e3a9678ca90f8e7cc8a8",
+      "nickname": "Martin Herren"
+    },
+    "workspace": {
+      "type": "workspace",
+      "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+      "name": "Martin Herren",
+      "slug": "martinherren1984",
+      "links": {
+        "avatar": {
+          "href": "https://bitbucket.org/workspaces/martinherren1984/avatar/?ts=1658761964"
+        },
+        "html": {
+          "href": "https://bitbucket.org/martinherren1984/"
+        },
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984"
+        }
+      }
+    },
+    "is_private": false,
+    "project": {
+      "type": "project",
+      "key": "PUB",
+      "uuid": "{2cede481-f59e-49ec-88d0-a85629b7925d}",
+      "name": "PublicTestProject",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984/projects/PUB"
+        },
+        "html": {
+          "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB"
+        },
+        "avatar": {
+          "href": "https://bitbucket.org/account/user/martinherren1984/projects/PUB/avatar/32?ts=1658768453"
+        }
+      }
+    },
+    "uuid": "{898477b2-a080-4089-b385-597a783db392}"
   },
   "push": {
     "changes": [
       {
-        "new": {
-          "type": "branch",
-          "name": "name-of-branch",
+        "old": {
+          "name": "master",
           "target": {
             "type": "commit",
-            "hash": "709d658dc5b6d6afcd46049c2f332ee3f515a67d",
+            "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
+            "date": "2022-08-17T15:24:29+00:00",
             "author": {
-              "raw": "emmap1 <email@domain.tld>",
-              "username": "emmap1",
-              "links": {
-                "avatar": {
-                  "href": "https:\/\/bitbucket-api-assetroot.s3.amazonaws.com\/c\/photos\/2015\/Feb\/26\/3613917261-0-emmap1-avatar_avatar.png"
-                }
+              "type": "author",
+              "raw": "Martin Herren <martin.herren@xxx.com>",
+              "user": {
+                "display_name": "Martin Herren",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/users/%7B69cc59f2-706b-4a9c-b99c-eac2ace320da%7D"
+                  },
+                  "avatar": {
+                    "href": "https://secure.gravatar.com/avatar/7b2e50690b4ab7bb9e1db18ea3b8ae95?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-5.png"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/%7B69cc59f2-706b-4a9c-b99c-eac2ace320da%7D/"
+                  }
+                },
+                "type": "user",
+                "uuid": "{69cc59f2-706b-4a9c-b99c-eac2ace320da}",
+                "account_id": "5d286e857133f10c17e026cb",
+                "nickname": "Martin Herren"
               }
             },
-            "message": "new commit message\n",
-            "date": "2015-06-09T03:34:49+00:00"
+            "message": "Add test .woodpecker.yml\n",
+            "summary": {
+              "type": "rendered",
+              "raw": "Add test .woodpecker.yml\n",
+              "markup": "markdown",
+              "html": "<p>Add test .woodpecker.yml</p>"
+            },
+            "links": {
+              "self": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+              },
+              "html": {
+                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
+              }
+            },
+            "parents": [],
+            "rendered": {},
+            "properties": {}
+          },
+          "links": {
+            "self": {
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/master"
+            },
+            "commits": {
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/master"
+            },
+            "html": {
+              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/master"
+            }
+          },
+          "type": "branch",
+          "merge_strategies": [
+            "merge_commit",
+            "squash",
+            "fast_forward"
+          ],
+          "default_merge_strategy": "merge_commit"
+        },
+        "new": {
+          "name": "master",
+          "target": {
+            "type": "commit",
+            "hash": "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+            "date": "2022-09-07T20:19:25+00:00",
+            "author": {
+              "type": "author",
+              "raw": "Martin Herren <martin.herren@yyy.com>",
+              "user": {
+                "display_name": "Martin Herren",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
+                  },
+                  "avatar": {
+                    "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
+                  }
+                },
+                "type": "user",
+                "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+                "account_id": "5cf8e3a9678ca90f8e7cc8a8",
+                "nickname": "Martin Herren"
+              }
+            },
+            "message": "a\n",
+            "summary": {
+              "type": "rendered",
+              "raw": "a\n",
+              "markup": "markdown",
+              "html": "<p>a</p>"
+            },
+            "links": {
+              "self": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              },
+              "html": {
+                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              }
+            },
+            "parents": [
+              {
+                "type": "commit",
+                "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
+                  }
+                }
+              }
+            ],
+            "rendered": {},
+            "properties": {}
+          },
+          "links": {
+            "self": {
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/master"
+            },
+            "commits": {
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/master"
+            },
+            "html": {
+              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/master"
+            }
+          },
+          "type": "branch",
+          "merge_strategies": [
+            "merge_commit",
+            "squash",
+            "fast_forward"
+          ],
+          "default_merge_strategy": "merge_commit"
+        },
+        "truncated": false,
+        "created": false,
+        "forced": false,
+        "closed": false,
+        "links": {
+          "commits": {
+            "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits?include=c14c1bb05dfb1fdcdf06b31485fff61b0ea44277&exclude=a51241ae1f00cbe728930db48e890b18fd527f99"
+          },
+          "diff": {
+            "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/diff/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277..a51241ae1f00cbe728930db48e890b18fd527f99"
+          },
+          "html": {
+            "href": "https://bitbucket.org/martinherren1984/publictestrepo/branches/compare/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277..a51241ae1f00cbe728930db48e890b18fd527f99"
           }
-        }
+        },
+        "commits": [
+          {
+            "type": "commit",
+            "hash": "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+            "date": "2022-09-07T20:19:25+00:00",
+            "author": {
+              "type": "author",
+              "raw": "Martin Herren <martin.herren@yyy.com>",
+              "user": {
+                "display_name": "Martin Herren",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
+                  },
+                  "avatar": {
+                    "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
+                  }
+                },
+                "type": "user",
+                "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+                "account_id": "5cf8e3a9678ca90f8e7cc8a8",
+                "nickname": "Martin Herren"
+              }
+            },
+            "message": "a\n",
+            "summary": {
+              "type": "rendered",
+              "raw": "a\n",
+              "markup": "markdown",
+              "html": "<p>a</p>"
+            },
+            "links": {
+              "self": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              },
+              "html": {
+                "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              },
+              "diff": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/diff/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              },
+              "approve": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/approve"
+              },
+              "comments": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/comments"
+              },
+              "statuses": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277/statuses"
+              },
+              "patch": {
+                "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/patch/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277"
+              }
+            },
+            "parents": [
+              {
+                "type": "commit",
+                "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
+                "links": {
+                  "self": {
+                    "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commit/a51241ae1f00cbe728930db48e890b18fd527f99"
+                  },
+                  "html": {
+                    "href": "https://bitbucket.org/martinherren1984/publictestrepo/commits/a51241ae1f00cbe728930db48e890b18fd527f99"
+                  }
+                }
+              }
+            ],
+            "rendered": {},
+            "properties": {}
+          }
+        ]
       }
     ]
   }
