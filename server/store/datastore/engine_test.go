@@ -55,10 +55,16 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 	return &storage{
 			engine: engine,
 		}, func() {
+			dbType := engine.Dialect().URI().DBType
+
 			for _, bean := range tables {
 				if err := engine.DropIndexes(bean); err != nil {
 					t.Error(err)
 					t.FailNow()
+				}
+				if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+					// wait for mysql/postgres to sync ...
+					time.Sleep(10 * time.Millisecond)
 				}
 			}
 			if err := engine.DropTables(tables...); err != nil {
@@ -70,7 +76,6 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 				t.FailNow()
 			}
 
-			dbType := engine.Dialect().URI().DBType
 			if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
 				// wait for mysql/postgres to sync ...
 				time.Sleep(10 * time.Millisecond)
