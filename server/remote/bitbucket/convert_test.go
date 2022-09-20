@@ -65,19 +65,19 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team", func() {
-			from := &internal.Account{Login: "octocat"}
+			from := &internal.Workspace{Slug: "octocat"}
 			from.Links.Avatar.Href = "http://..."
-			to := convertTeam(from)
+			to := convertWorkspace(from)
 			g.Assert(to.Avatar).Equal(from.Links.Avatar.Href)
-			g.Assert(to.Login).Equal(from.Login)
+			g.Assert(to.Login).Equal(from.Slug)
 		})
 
 		g.It("should convert team list", func() {
-			from := &internal.Account{Login: "octocat"}
+			from := &internal.Workspace{Slug: "octocat"}
 			from.Links.Avatar.Href = "http://..."
-			to := convertTeamList([]*internal.Account{from})
+			to := convertWorkspaceList([]*internal.Workspace{from})
 			g.Assert(to[0].Avatar).Equal(from.Links.Avatar.Href)
-			g.Assert(to[0].Login).Equal(from.Login)
+			g.Assert(to[0].Login).Equal(from.Slug)
 		})
 
 		g.It("should convert user", func() {

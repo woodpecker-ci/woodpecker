@@ -161,7 +161,7 @@ func TestWithProxy(t *testing.T) {
 	}
 
 	// alter the default values
-	noProxy = "foo.com"
+	noProxy = "example.com"
 	httpProxy = "bar.com"
 	httpsProxy = "baz.com"
 

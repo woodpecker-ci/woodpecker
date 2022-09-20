@@ -130,15 +130,15 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListTeamOpts{
+	opts := &internal.ListWorkspacesOpts{
 		PageLen: 100,
 		Role:    "member",
 	}
-	resp, err := c.newClient(ctx, u).ListTeams(opts)
+	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
 	if err != nil {
 		return nil, err
 	}
-	return convertTeamList(resp.Values), nil
+	return convertWorkspaceList(resp.Values), nil
 }
 
 // Repo returns the named Bitbucket repository.
@@ -160,20 +160,16 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 	var all []*model.Repo
 
-	accounts := []string{u.Login}
-	resp, err := client.ListTeams(&internal.ListTeamOpts{
+	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
 		PageLen: 100,
 		Role:    "member",
 	})
 	if err != nil {
 		return all, err
 	}
-	for _, team := range resp.Values {
-		accounts = append(accounts, team.Login)
-	}
 
-	for _, account := range accounts {
-		repos, err := client.ListReposAll(account)
+	for _, workspace := range resp.Values {
+		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return all, err
 		}

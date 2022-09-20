@@ -21,6 +21,7 @@ import (
 
 	"github.com/franela/goblin"
 
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket/fixtures"
 )
 
@@ -106,8 +107,11 @@ func Test_parser(t *testing.T) {
 
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("user_name/repo_name")
-				g.Assert(b.Commit).Equal("709d658dc5b6d6afcd46049c2f332ee3f515a67d")
+				g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
+				g.Assert(r.SCMKind).Equal(model.RepoGit)
+				g.Assert(r.Clone).Equal("https://bitbucket.org/martinherren1984/publictestrepo")
+				g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
+				g.Assert(b.Message).Equal("a\n")
 			})
 		})
 	})

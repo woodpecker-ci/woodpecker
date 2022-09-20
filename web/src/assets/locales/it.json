@@ -9,6 +9,11 @@
   "repo": {
     "activity": "Attività",
     "add": "Aggiungi repository",
+    "build": {
+      "actions": {
+        "cancel": "Annulla"
+      }
+    },
     "enable": {
       "enable": "Abilita",
       "enabled": "Già abilitato",
@@ -18,11 +23,30 @@
     },
     "not_allowed": "Non è permesso accedere a questo repository",
     "settings": {
+      "actions": {
+        "actions": "Azioni"
+      },
+      "crons": {
+        "name": {
+          "name": "Nome"
+        },
+        "next_exec": "Prossima esecuzione",
+        "not_executed_yet": "Non ancora eseguito"
+      },
       "general": {
         "general": "Generale",
+        "pipeline_path": {
+          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+        },
         "project": "Impostazioni del progetto",
+        "protected": {
+          "protected": "Protetto"
+        },
         "save": "Salva le impostazioni",
         "success": "Le impostazioni del repository sono state aggiornate",
+        "timeout": {
+          "minutes": "minuti"
+        },
         "visibility": {
           "internal": {
             "desc": "Solo gli utenti dell'istanza Woodpecker che hanno effettuato l'accesso possono vedere questo progetto.",
@@ -50,6 +74,9 @@
   "repos": "Repository",
   "repositories": "Repository",
   "search": "Cerca…",
+  "time": {
+    "not_started": "non ancora avviato"
+  },
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
   "username": "Nome utente",

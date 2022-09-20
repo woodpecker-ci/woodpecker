@@ -96,6 +96,13 @@ pipeline:
 +  exclude: [ develop, feature/* ]
 ```
 
+The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped. A few examples:
+
+- `*\\/*` to match patterns with exactly 1 `/`
+- `*\\/**` to match patters with at least 1 `/`
+- `*` to match patterns without `/`
+- `**` to match everything
+
 ### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
