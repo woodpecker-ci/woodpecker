@@ -1,22 +1,26 @@
 import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
 import path from 'path';
 import fs from 'fs';
-import got from 'got';
+import axios, { AxiosError } from 'axios';
 import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 import * as markdown from './markdown';
 
 async function loadContent(): Promise<Content> {
   const file = path.join(__dirname, '..', 'plugins.json')
 
-  const pluginsIndex = JSON.parse(fs.readFileSync(file).toString()) as WoodpeckerPluginIndexEntry[];
+  const pluginsIndex = JSON.parse(fs.readFileSync(file).toString()) as { plugins: WoodpeckerPluginIndexEntry[] };
 
-  const plugins = (await Promise.all(pluginsIndex.map(async (i) => {
+  const plugins = (await Promise.all(pluginsIndex.plugins.map(async (i) => {
+    if (i['// todo']) {
+      return undefined;
+    }
+
     let docsContent: string;
     try {
-      const response = await got(i.docs);
-      docsContent = response.body;
+      const response = await axios(i.docs);
+      docsContent = response.data;
     } catch (e) {
-      console.error("Can't fetch docs file", i.docs, e);
+      console.error("Can't fetch docs file", i.docs, (e as AxiosError).message);
       return undefined;
     }
 
@@ -35,7 +39,7 @@ async function loadContent(): Promise<Content> {
       docs: docsBody,
       verified: i.verified || false,
     };
-  }))).filter(plugin => plugin);
+  }))).filter<WoodpeckerPlugin>((plugin): plugin is WoodpeckerPlugin => plugin !== undefined);
 
   return {
     plugins,

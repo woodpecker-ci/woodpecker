@@ -7,12 +7,12 @@ const regexContent = new RegExp('^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*'
 export function getHeader<T = any>(data: string): T {
   const header = getRawHeader(data);
 
-  const tmpObj = {};
+  const tmpObj: Record<string, string> = {};
   const lines = header.trim().split('\n');
 
   lines.forEach((line, i) => {
     var arr = line.trim().split(':');
-    tmpObj[arr.shift()] = arr.join(':').trim();
+    tmpObj[arr.shift() as string] = arr.join(':').trim();
   });
 
   return tmpObj as T;
@@ -21,12 +21,12 @@ export function getHeader<T = any>(data: string): T {
 export function getRawHeader(data: string): string {
   const header = regexHeader.exec(data);
   if (!header) {
-    new Error("Can't get the header");
+    throw new Error("Can't get the header");
   }
   return header[1];
 }
 
-export function getContent(data): string {
+export function getContent(data: string): string {
   const content = data.replace(regexContent, '').replace(/<!--(.*?)-->/gm, '');
   if (!content) {
     throw new Error("Can't get the content");
