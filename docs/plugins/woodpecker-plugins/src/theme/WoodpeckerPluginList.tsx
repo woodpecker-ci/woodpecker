@@ -4,7 +4,7 @@ import Layout from '@theme/Layout';
 import { WoodpeckerPlugin } from '../types';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
-  const pluginUrl = `/plugins/${plugin.repoName}`;
+  const pluginUrl = `/plugins/${plugin.name}`;
   return (
     <div className={clsx('col col--6')}>
       <div className={clsx('card margin-horiz--sm margin-vert--md ')}>

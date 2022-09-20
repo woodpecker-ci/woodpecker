@@ -1,0 +1,53 @@
+{
+  "plugins": [
+    {
+      "name": "Clone plugin",
+      "docs_url": "https://raw.githubusercontent.com/woodpecker-ci/plugin-git/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Docker Buildx",
+      "docs": "https://codeberg.org/woodpecker-plugins/plugin-docker-buildx/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Codecov",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-codecov/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Surge preview",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-surge-preview/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "S3 upload",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-s3/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Email",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Docker",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-docker/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Github release",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Chart releaser",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
+      "verified": true
+    }
+  ]
+}
