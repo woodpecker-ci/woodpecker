@@ -1,10 +1,10 @@
 package podman
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/containers/podman/v3/pkg/specgen"
+	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -26,21 +26,23 @@ func toSpecGenerator(proc *backend.Step) (*specgen.SpecGenerator, error) {
 	if len(proc.Command) > 0 {
 		specGen.Command = proc.Command
 	}
-	fmt.Printf("specgenentrypoint: %v\n", proc.Entrypoint)
+
+	log.Trace().Msgf("proc.Entrypoint: %v", proc.Entrypoint)
+
 	if len(proc.Entrypoint) > 0 {
 		specGen.Entrypoint = proc.Entrypoint
 	}
-	fmt.Printf("specgenvolumes: %v\n", proc.Volumes)
+	log.Trace().Msgf("proc.volumes: %v", proc.Volumes)
 	if len(proc.Volumes) > 0 {
 		for _, v := range proc.Volumes {
-			fmt.Printf("proc.vol: %v\n", v)
+			log.Trace().Msgf("proc.vol: %v", v)
 		}
 		_, vols, _, err := specgen.GenVolumeMounts(proc.Volumes)
 		if err != nil {
 			return nil, err
 		}
 		for _, vol := range vols {
-			fmt.Printf("specgenvol: %v\n", vol)
+			log.Trace().Msgf("specgen.volume: %v", vol)
 			specGen.Volumes = append(specGen.Volumes, vol)
 		}
 	}

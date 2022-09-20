@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/rs/zerolog/log"
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 
 	"github.com/containers/podman/v3/pkg/bindings"
@@ -29,9 +30,9 @@ var (
 
 	logsOpts = containers.LogOptions{
 		Follow: new(bool),
-		//Since:  new(string),
-		//Stderr: new(bool),
+		Stderr: new(bool),
 		Stdout: new(bool),
+		//Since:  new(string),
 		//Tail:       new(string),
 		//Timestamps: new(bool),
 		//Until:      new(string),
@@ -76,7 +77,7 @@ func (e *engine) Load() (err error) {
 
 	*logsOpts.Follow = true
 	*logsOpts.Stdout = true
-	//*logsOpts.Stderr = true
+	*logsOpts.Stderr = true
 	//*logsOpts.Timestamps = false
 
 	*killOpts.Signal = "SIGKILL"
@@ -84,25 +85,20 @@ func (e *engine) Load() (err error) {
 	*volRemoveOpts.Force = true
 
 	e.conn, err = bindings.NewConnection(context.Background(), e.socket)
-	fmt.Printf("e.socket: %s\n", e.socket)
-	fmt.Printf("e.conn: %v\n", e.conn)
-	fmt.Printf("err: %v\n", err)
+	log.Trace().Err(err).Msgf("e.socket: %s, e.conn: %v", e.socket, e.conn)
+
 	return err
 }
 
 func (e *engine) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
-		r, err := volumes.Create(e.conn, entities.VolumeCreateOptions{
+		response, err := volumes.Create(e.conn, entities.VolumeCreateOptions{
 			Name:    vol.Name,
 			Driver:  vol.Driver,
 			Options: vol.DriverOpts,
 			// Labels:     defaultLabels,
 		}, &volumes.CreateOptions{})
-		fmt.Printf("vol: %s\n", vol.Driver)
-		fmt.Printf("vol: %s\n", vol.DriverOpts)
-		fmt.Printf("vol: %s\n", vol.Name)
-		fmt.Printf("err: %v\n", err)
-		fmt.Printf("r: %v\n", r)
+		log.Trace().Msgf("volume", response.Name)
 		if err != nil {
 			return err
 		}
@@ -127,13 +123,13 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 		return err
 	}
 
-	fmt.Printf("Specgen: %v\n", specGenerator)
+	log.Trace().Msgf("specGenerator: %v", specGenerator)
 
 	// create pull options with encoded authorization credentials.
-	pullopts := &images.PullOptions{}
+	pullOpts := &images.PullOptions{}
 	if proc.AuthConfig.Username != "" && proc.AuthConfig.Password != "" {
-		pullopts.Username = &proc.AuthConfig.Username
-		pullopts.Password = &proc.AuthConfig.Password
+		pullOpts.Username = &proc.AuthConfig.Username
+		pullOpts.Password = &proc.AuthConfig.Password
 	}
 
 	pullImage := proc.Pull
@@ -153,14 +149,14 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	// automatically pull the latest version of the image if requested
 	// by the process configuration or not existing.
 	if pullImage {
-		_, perr := images.Pull(e.conn, specGenerator.Image, pullopts)
+		_, perr := images.Pull(e.conn, specGenerator.Image, pullOpts)
 		// fix for drone/drone#1917
 		if perr != nil && proc.AuthConfig.Password != "" {
 			return perr
 		}
 	}
 
-	// fix for missing workdir
+	// TODO: fix for missing work-dir => find proper long-term solution
 	_workDir := specGenerator.WorkDir
 	_entryPoint := specGenerator.Entrypoint
 	specGenerator.WorkDir = "/"
@@ -169,9 +165,15 @@ func (e *engine) Exec(ctx context.Context, proc *backend.Step) error {
 	if err != nil {
 		return err
 	}
-	containers.Start(e.conn, specGenerator.Name, &startOpts)
-	containers.Wait(e.conn, specGenerator.Name, &containers.WaitOptions{})
-	containers.Remove(e.conn, specGenerator.Name, &removeOpts)
+	if err := containers.Start(e.conn, specGenerator.Name, &startOpts); err != nil {
+		return err
+	}
+	if _, err := containers.Wait(e.conn, specGenerator.Name, &containers.WaitOptions{}); err != nil {
+		return err
+	}
+	if err := containers.Remove(e.conn, specGenerator.Name, &removeOpts); err != nil {
+		return err
+	}
 
 	// normal start here
 	specGenerator.WorkDir = _workDir
@@ -210,12 +212,16 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 	rc, wc := io.Pipe()
 	logChan := make(chan string, 10000)
 	logEnd := make(chan bool)
+
 	go func() {
 		defer func() {
 			containers.Wait(e.conn, proc.Name, nil)
 			logEnd <- true
 		}()
-		containers.Logs(e.conn, proc.Name, &logsOpts, logChan, nil)
+
+		if err := containers.Logs(e.conn, proc.Name, &logsOpts, logChan, nil); err != nil {
+			log.Error().Err(err).Msgf("could not get logs", proc.Name)
+		}
 	}()
 
 	go func() {
@@ -241,21 +247,32 @@ func (e *engine) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 			}
 		}
 	}()
+
 	return rc, nil
 }
 
 func (e *engine) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			containers.Kill(e.conn, step.Name, &killOpts)
-			containers.Remove(e.conn, step.Name, &removeOpts)
+			if err := containers.Kill(e.conn, step.Name, &killOpts); err != nil {
+				log.Error().Err(err).Msgf("could not kill container '%s'", step.Name)
+			}
+			if err := containers.Remove(e.conn, step.Name, &removeOpts); err != nil {
+				log.Error().Err(err).Msgf("could not remove container '%s'", step.Name)
+			}
 		}
 	}
+
 	for _, volume := range conf.Volumes {
-		volumes.Remove(e.conn, volume.Name, &volRemoveOpts)
+		if err := volumes.Remove(e.conn, volume.Name, &volRemoveOpts); err != nil {
+			log.Error().Err(err).Msgf("could not remove volume '%s'", volume.Name)
+		}
 	}
-	for _, netconf := range conf.Networks {
-		network.Remove(e.conn, netconf.Name, nil)
+
+	for _, netConf := range conf.Networks {
+		if _, err := network.Remove(e.conn, netConf.Name, nil); err != nil {
+			log.Error().Err(err).Msgf("could not remove volume '%s'", netConf.Name)
+		}
 	}
 	return nil
 }
