@@ -173,7 +173,7 @@
           "desc": "流水线配置文件的路径 (例子: <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>)。目录必须以 <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> 结尾.",
           "path": "流水线路径"
         },
-        "project": "运行设置",
+        "project": "项目设置",
         "protected": {
           "desc": "每个流水线都需要在执行之前获得批准。",
           "protected": "受保护"
