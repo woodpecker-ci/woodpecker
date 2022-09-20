@@ -26,7 +26,7 @@ services:
 +     - WOODPECKER_LETS_ENCRYPT=true
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://example.com` the certificate is requested for `example.com`.
 
 >Once enabled you can visit your website at both the http and the https address
 
@@ -58,12 +58,12 @@ services:
 +     - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
       - [...]
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to expose the following ports:
@@ -95,8 +95,8 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to provide the paths of your certificate and key:
@@ -113,11 +113,11 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-      - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-      - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
+      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
+      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 ### Certificate Chain
