@@ -38,21 +38,21 @@ const (
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
+func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Build, error) {
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
-		return parsePushHook(r.Body)
+		return parsePushHook(r.Body, privateMode)
 	case hookCreated:
-		return parseCreatedHook(r.Body)
+		return parseCreatedHook(r.Body, privateMode)
 	case hookPullRequest:
-		return parsePullRequestHook(r.Body)
+		return parsePullRequestHook(r.Body, privateMode)
 	}
 	return nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Build details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
 	var (
 		repo  *model.Repo
 		build *model.Build
@@ -68,14 +68,14 @@ func parsePushHook(payload io.Reader) (*model.Repo, *model.Build, error) {
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = toRepo(push.Repo, privateMode)
 	build = buildFromPush(push)
 	return repo, build, err
 }
 
 // parseCreatedHook parses a push hook and returns the Repo and Build details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
 	var (
 		repo  *model.Repo
 		build *model.Build
@@ -90,13 +90,13 @@ func parseCreatedHook(payload io.Reader) (*model.Repo, *model.Build, error) {
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
+	repo = toRepo(push.Repo, privateMode)
 	build = buildFromTag(push)
 	return repo, build, err
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.
-func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
 	var (
 		repo  *model.Repo
 		build *model.Build
@@ -115,7 +115,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPullRequest(pr)
+	repo = toRepo(pr.Repo, privateMode)
 	build = buildFromPullRequest(pr)
 	return repo, build, err
 }

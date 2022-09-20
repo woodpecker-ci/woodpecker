@@ -49,6 +49,7 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
+		RemoteID:     model.RemoteID(from.UUID),
 		Clone:        cloneLink(from),
 		Owner:        strings.Split(from.FullName, "/")[0],
 		Name:         strings.Split(from.FullName, "/")[1],
@@ -110,19 +111,19 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 
 // convertTeamList is a helper function used to convert a Bitbucket team list
 // structure to the Woodpecker Team structure.
-func convertTeamList(from []*internal.Account) []*model.Team {
+func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	var teams []*model.Team
-	for _, team := range from {
-		teams = append(teams, convertTeam(team))
+	for _, workspace := range from {
+		teams = append(teams, convertWorkspace(workspace))
 	}
 	return teams
 }
 
 // convertTeam is a helper function used to convert a Bitbucket team account
 // structure to the Woodpecker Team structure.
-func convertTeam(from *internal.Account) *model.Team {
+func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
-		Login:  from.Login,
+		Login:  from.Slug,
 		Avatar: from.Links.Avatar.Href,
 	}
 }

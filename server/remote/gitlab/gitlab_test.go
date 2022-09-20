@@ -93,7 +93,7 @@ func Test_Gitlab(t *testing.T) {
 		// Test repository method
 		g.Describe("Repo", func() {
 			g.It("Should return valid repo", func() {
-				_repo, err := client.Repo(ctx, &user, "diaspora", "diaspora-client")
+				_repo, err := client.Repo(ctx, &user, "0", "diaspora", "diaspora-client")
 				assert.NoError(t, err)
 				assert.Equal(t, "diaspora-client", _repo.Name)
 				assert.Equal(t, "diaspora", _repo.Owner)
@@ -101,7 +101,7 @@ func Test_Gitlab(t *testing.T) {
 			})
 
 			g.It("Should return error, when repo not exist", func() {
-				_, err := client.Repo(ctx, &user, "not-existed", "not-existed")
+				_, err := client.Repo(ctx, &user, "0", "not-existed", "not-existed")
 				assert.Error(t, err)
 			})
 		})

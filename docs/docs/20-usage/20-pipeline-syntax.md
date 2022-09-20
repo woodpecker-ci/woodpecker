@@ -252,6 +252,13 @@ when:
   - branch: prefix/*
 ```
 
+The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped. A few examples:
+
+- `*\\/*` to match patterns with exactly 1 `/`
+- `*\\/**` to match patters with at least 1 `/`
+- `*` to match patterns without `/`
+- `**` to match everything
+
 Execute a step using custom include and exclude logic:
 
 ```yaml

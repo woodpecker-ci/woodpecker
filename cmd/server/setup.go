@@ -376,7 +376,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
 			return nil, nil
 		}
-		log.Info().Msg("Created private key")
+		log.Debug().Msg("Created private key")
 		return privKey, privKey.Public()
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load private key")

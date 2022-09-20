@@ -43,6 +43,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -96,6 +97,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test_project",
 				FullName: "kelvin/test_project",
 				Link:     "https://coding.net/u/kelvin/p/test_project",
+				Clone:    "https://git.coding.net/kelvin/test_project.git",
 				SCMKind:  model.RepoGit,
 			}
 			actual, err := convertRepository(repository)
@@ -109,6 +111,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -144,6 +147,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test2",
 				FullName: "demo1/test2",
 				Link:     "https://coding.net/u/demo1/p/test2",
+				Clone:    "https://git.coding.net/demo1/test2.git",
 				SCMKind:  model.RepoGit,
 			}
 
@@ -173,6 +177,7 @@ func Test_hook(t *testing.T) {
 				Name:     "test1",
 				FullName: "demo1/test1",
 				Link:     "https://coding.net/u/demo1/p/test1",
+				Clone:    "https://git.coding.net/demo1/test1.git",
 				SCMKind:  model.RepoGit,
 			}
 

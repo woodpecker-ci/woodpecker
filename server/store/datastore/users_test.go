@@ -195,26 +195,29 @@ func TestUsers(t *testing.T) {
 				Name:     "test",
 				FullName: "bradrydzewski/test",
 				IsActive: true,
+				RemoteID: "1",
 			}
 			repo2 := &model.Repo{
 				Owner:    "test",
 				Name:     "test",
 				FullName: "test/test",
 				IsActive: true,
+				RemoteID: "2",
 			}
 			repo3 := &model.Repo{
 				Owner:    "octocat",
 				Name:     "hello-world",
 				FullName: "octocat/hello-world",
 				IsActive: true,
+				RemoteID: "3",
 			}
 			g.Assert(store.CreateRepo(repo1)).IsNil()
 			g.Assert(store.CreateRepo(repo2)).IsNil()
 			g.Assert(store.CreateRepo(repo3)).IsNil()
 
 			for _, perm := range []*model.Perm{
-				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
+				{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+				{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
 			} {
 				g.Assert(store.PermUpsert(perm)).IsNil()
 			}

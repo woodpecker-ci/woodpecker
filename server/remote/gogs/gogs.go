@@ -148,7 +148,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
@@ -160,7 +160,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos := []*model.Repo{}
+	var repos []*model.Repo
 
 	client := c.newClientToken(u.Token)
 	all, err := client.ListMyRepos()
@@ -300,7 +300,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 // Hook parses the incoming Gogs hook and returns the Repository and Build
 // details. If the hook is unsupported nil values are returned.
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	return parseHook(r)
+	return parseHook(r, c.PrivateMode)
 }
 
 // OrgMembership returns if user is member of organization and if user

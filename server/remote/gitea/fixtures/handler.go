@@ -27,6 +27,7 @@ func Handler() http.Handler {
 
 	e := gin.New()
 	e.GET("/api/v1/repos/:owner/:name", getRepo)
+	e.GET("/api/v1/repositories/:id", getRepoByID)
 	e.GET("/api/v1/repos/:owner/:name/raw/:commit/:file", getRepoFile)
 	e.POST("/api/v1/repos/:owner/:name/hooks", createRepoHook)
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
@@ -44,6 +45,15 @@ func listRepoHooks(c *gin.Context) {
 
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
+	case "repo_not_found":
+		c.String(404, "")
+	default:
+		c.String(200, repoPayload)
+	}
+}
+
+func getRepoByID(c *gin.Context) {
+	switch c.Param("id") {
 	case "repo_not_found":
 		c.String(404, "")
 	default:
@@ -124,6 +134,7 @@ const listRepoHookPayloads = `
 
 const repoPayload = `
 {
+	"id": 5,
   "owner": {
     "login": "test_name",
     "email": "octocat@github.com",
@@ -146,6 +157,7 @@ const repoFilePayload = `{ platform: linux/amd64 }`
 const userRepoPayload = `
 [
   {
+		"id": 5,
     "owner": {
       "login": "test_name",
       "email": "octocat@github.com",

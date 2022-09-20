@@ -37,18 +37,21 @@ func TestRepoListLatest(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 		IsActive: true,
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 		IsActive: true,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
@@ -56,8 +59,8 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2, Push: true, Admin: true},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}

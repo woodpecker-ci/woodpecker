@@ -138,24 +138,27 @@ func TestRepoList(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName},
-		{UserID: user.ID, Repo: repo2.FullName},
+		{UserID: user.ID, Repo: repo1},
+		{UserID: user.ID, Repo: repo2},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -191,21 +194,25 @@ func TestOwnedRepoList(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 	}
 	repo4 := &model.Repo{
 		Owner:    "demo",
 		Name:     "demo",
 		FullName: "demo/demo",
+		RemoteID: "4",
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
@@ -213,10 +220,10 @@ func TestOwnedRepoList(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo4))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
-		{UserID: user.ID, Repo: repo3.FullName},
-		{UserID: user.ID, Repo: repo4.FullName},
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
+		{UserID: user.ID, Repo: repo3},
+		{UserID: user.ID, Repo: repo4},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
@@ -270,10 +277,11 @@ func TestRepoCount(t *testing.T) {
 }
 
 func TestRepoBatch(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Redirection))
 	defer closer()
 
 	if !assert.NoError(t, store.CreateRepo(&model.Repo{
+		RemoteID: "5",
 		UserID:   1,
 		FullName: "foo/bar",
 		Owner:    "foo",
@@ -285,6 +293,7 @@ func TestRepoBatch(t *testing.T) {
 
 	repos := []*model.Repo{
 		{
+			RemoteID: "5",
 			UserID:   1,
 			FullName: "foo/bar",
 			Owner:    "foo",
@@ -299,6 +308,7 @@ func TestRepoBatch(t *testing.T) {
 			},
 		},
 		{
+			RemoteID: "6",
 			UserID:   1,
 			FullName: "bar/baz",
 			Owner:    "bar",
@@ -306,6 +316,7 @@ func TestRepoBatch(t *testing.T) {
 			IsActive: true,
 		},
 		{
+			RemoteID: "7",
 			UserID:   1,
 			FullName: "baz/qux",
 			Owner:    "baz",
@@ -313,6 +324,7 @@ func TestRepoBatch(t *testing.T) {
 			IsActive: true,
 		},
 		{
+			RemoteID: "8",
 			UserID:   0, // not activated repos do hot have a user id assigned
 			FullName: "baz/notes",
 			Owner:    "baz",
@@ -330,6 +342,7 @@ func TestRepoBatch(t *testing.T) {
 	assert.True(t, perm.Admin)
 
 	repo := &model.Repo{
+		RemoteID: "5",
 		FullName: "foo/bar",
 		Owner:    "foo",
 		Name:     "bar",
@@ -373,7 +386,8 @@ func TestRepoCrud(t *testing.T) {
 		new(model.File),
 		new(model.Secret),
 		new(model.Registry),
-		new(model.Config))
+		new(model.Config),
+		new(model.Redirection))
 	defer closer()
 
 	repo := model.Repo{
@@ -419,4 +433,47 @@ func TestRepoCrud(t *testing.T) {
 	buildCount, err := store.engine.Count(new(model.Build))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, buildCount)
+}
+
+func TestRepoRedirection(t *testing.T) {
+	store, closer := newTestStore(t,
+		new(model.Repo),
+		new(model.Redirection))
+	defer closer()
+
+	repo := model.Repo{
+		UserID:   1,
+		RemoteID: "1",
+		FullName: "bradrydzewski/test",
+		Owner:    "bradrydzewski",
+		Name:     "test",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+
+	repoUpdated := model.Repo{
+		RemoteID: "1",
+		FullName: "bradrydzewski/test-renamed",
+		Owner:    "bradrydzewski",
+		Name:     "test-renamed",
+	}
+
+	assert.NoError(t, store.RepoBatch([]*model.Repo{&repoUpdated}))
+
+	// test redirection from old repo name
+	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")
+	assert.NoError(t, err)
+	assert.Equal(t, repoFromStore.FullName, repoUpdated.FullName)
+
+	// test getting repo without remote ID (use name fallback)
+	repo = model.Repo{
+		UserID:   1,
+		FullName: "bradrydzewski/test-no-remote-id",
+		Owner:    "bradrydzewski",
+		Name:     "test-no-remote-id",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+
+	repoFromStore, err = store.GetRepoNameFallback("", "bradrydzewski/test-no-remote-id")
+	assert.NoError(t, err)
+	assert.Equal(t, repoFromStore.FullName, repo.FullName)
 }
