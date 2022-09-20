@@ -1,10 +1,60 @@
 {
+  "admin": {
+    "settings": {
+      "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+      "secrets": {
+        "add": "Ajouter un secret",
+        "created": "Secret global crée",
+        "deleted": "Secret global effacé",
+        "events": {
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Faites attention avec cette option car un acteur malicieux peut soumettre une pull request qui révélerait vos secrets."
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "none": "Il n'y a pas de secrets globaux.",
+        "save": "Enregistrer un secret",
+        "saved": "Secret global enregistré",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur",
+        "warning": "Ces secrets seront disponibles pour tout les comptes du serveur."
+      },
+      "settings": "Réglages"
+    }
+  },
   "docs": "Docs",
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
     "back_home": "Retour à l'accueil",
     "not_found": "Whoa 404, soit nous avons cassé quelque chose ou vous avez fait une faute de frappe :-/"
+  },
+  "org": {
+    "settings": {
+      "not_allowed": "Vous n’êtes pas autorisé à accéder aux réglages de cette organisation",
+      "secrets": {
+        "add": "Ajouter un secret",
+        "created": "Secret d'organisation crée",
+        "deleted": "Secret d'organisation effacé",
+        "events": {
+          "events": "Disponible pour les événements suivants"
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "none": "Il n'y a pas de secrets d'organisation.",
+        "save": "Enregistrer un secret",
+        "saved": "Secret d'organisation enregistré",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur"
+      },
+      "settings": "Réglages"
+    }
   },
   "password": "Mot de passe",
   "repo": {
@@ -13,9 +63,31 @@
     "branches": "Branches",
     "build": {
       "actions": {
-        "cancel": "Annuler"
+        "cancel": "Annuler",
+        "canceled": "Cette étape a été annulée.",
+        "log_auto_scroll": "Automatiquement défiler vers le bas",
+        "log_auto_scroll_off": "Désactiver le défilement automatique",
+        "log_download": "Télécharger",
+        "restart": "Redémarrer"
       },
       "config": "Configuration",
+      "created": "Crée",
+      "event": {
+        "cron": "Tache périodique",
+        "deploy": "Déploiement",
+        "tag": "Tag"
+      },
+      "execution_error": "Erreur d'execution",
+      "exit_code": "Code de retour {exitCode}",
+      "files": "Fichiers changés ({files})",
+      "loading": "Chargement…",
+      "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
+      "no_files": "Aucun fichier n'a été modifié.",
+      "protected": {
+        "approve": "Approuver",
+        "decline": "Refuser"
+      },
+      "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
     "enable": {
@@ -29,17 +101,29 @@
     "settings": {
       "actions": {
         "actions": "Actions",
+        "delete": {
+          "confirm": "Toutes les données vont être perdues aprés cette action ! ! !\n\nVoulez vous vraiment continuer ?",
+          "delete": "Effacer le dépôt",
+          "success": "Dépôt effacé"
+        },
+        "disable": {
+          "disable": "Désactiver le dépôt",
+          "success": "Dépôt désactivé"
+        },
         "repair": {
-          "repair": "Réparer un dépôt"
+          "repair": "Réparer un dépôt",
+          "success": "Dépôt réparé"
         }
       },
       "badge": {
         "badge": "Badge",
-        "markdown": "Markdown"
+        "markdown": "Markdown",
+        "url_branch": "URL pour la branche spécifique"
       },
       "crons": {
         "add": "Ajouter une tâche planifiée",
         "branch": {
+          "placeholder": "Branche (utilise la branche par défaut si non renseigné)",
           "title": "Branche"
         },
         "created": "Tâche planifiée crée",
@@ -47,10 +131,12 @@
         "deleted": "Tâche planifiée effacée",
         "desc": "Les tâches planifiées peuvent déclencher des pipelines à intervalles réguliers.",
         "name": {
-          "name": "Nom"
+          "name": "Nom",
+          "placeholder": "Nom de la tache périodique"
         },
         "next_exec": "Prochaine exécution",
         "none": "Il n'y a pas de tâche planifié pour le moment.",
+        "not_executed_yet": "Non exécuté pour le moment",
         "save": "Enregistrer la tâche planifiée",
         "saved": "Tâche planifiée enregistrée",
         "schedule": {
@@ -61,7 +147,11 @@
       },
       "general": {
         "allow_pr": {
-          "allow": "Autoriser les demandes de fusions"
+          "allow": "Autoriser les demandes de fusions",
+          "desc": "Les pipelines peuvent se déclencher sur les pull requests."
+        },
+        "cancel_prev": {
+          "cancel": "Annuler les pipelines précédents"
         },
         "general": "Générale",
         "pipeline_path": {
@@ -71,6 +161,7 @@
         },
         "project": "Paramètres du projet",
         "protected": {
+          "desc": "Chaque pipeline doit être approuvé avant d'être exécuté.",
           "protected": "Protégé"
         },
         "save": "Enregistrer les paramètres",
@@ -80,6 +171,7 @@
           "timeout": "Délai d’inactivité"
         },
         "trusted": {
+          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le fait de monter un volume.",
           "trusted": "Vérifié"
         },
         "visibility": {
@@ -151,6 +243,16 @@
   },
   "unknown_error": "Une erreur inconnue est survenue",
   "url": "URL",
+  "user": {
+    "access_denied": "Vous n'êtes pas autorisé à vous connecter",
+    "api_usage": "Exemple d'utilisation de l'API",
+    "cli_usage": "Exemple d'utilisation de la ligne de commande",
+    "dl_cli": "Télécharger l'interface en ligne de commande",
+    "internal_error": "Une erreur interne est arrivé",
+    "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
+    "shell_setup": "Utilisation avec un shell",
+    "token": "Votre jeton personnel"
+  },
   "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"
 }
