@@ -150,12 +150,12 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	agentId := int64(-1) // TODO: get agent id from some storage like file etc or use -1 if none exists
-	agentId, err = client.RegisterAgent(ctx, agentId, platform, engine.Name(), parallel)
+	agentID := int64(-1) // TODO: get agent id from some storage like file etc or use -1 if none exists
+	agentID, err = client.RegisterAgent(ctx, agentID, platform, engine.Name(), parallel)
 	if err != nil {
 		return err
 	}
-	// TODO: save returned agentId again
+	// TODO: save returned agentID again
 
 	go func() {
 		for {

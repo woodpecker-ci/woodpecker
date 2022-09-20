@@ -15,11 +15,11 @@
 package model
 
 type Agent struct {
-	ID          int64 `xorm:"pk autoincr"`
+	ID          int64 `xorm:"pk autoincr 'id'"`
 	Created     int64 `xorm:"created"`
 	Updated     int64 `xorm:"updated"`
 	Name        string
-	OwnerID     int64
+	OwnerID     int64 `xorm:"'owner_id'"`
 	Token       string
 	LastContact int64
 	Platform    string `xorm:"VARCHAR(100)"`
