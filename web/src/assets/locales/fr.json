@@ -64,17 +64,21 @@
     "build": {
       "actions": {
         "cancel": "Annuler",
+        "cancel_success": "Pipeline annulé",
         "canceled": "Cette étape a été annulée.",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
         "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
-        "restart": "Redémarrer"
+        "restart": "Redémarrer",
+        "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
       "created": "Crée",
       "event": {
         "cron": "Tache périodique",
         "deploy": "Déploiement",
+        "pr": "Pull Request",
+        "push": "Push",
         "tag": "Tag"
       },
       "execution_error": "Erreur d'execution",
@@ -83,9 +87,17 @@
       "loading": "Chargement…",
       "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
       "no_files": "Aucun fichier n'a été modifié.",
+      "no_pipeline_steps": "Aucune étape disponible !",
+      "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
+      "pipeline": "Pipeline #{buildId}",
+      "pipelines_for": "Pipelines pour la branche \"{branch}\"",
       "protected": {
         "approve": "Approuver",
-        "decline": "Refuser"
+        "approve_success": "Pipeline approuvé",
+        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
+        "decline": "Refuser",
+        "decline_success": "Pipeline refusé",
+        "declined": "Le pipeline a été refusé !"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
@@ -151,7 +163,8 @@
           "desc": "Les pipelines peuvent se déclencher sur les pull requests."
         },
         "cancel_prev": {
-          "cancel": "Annuler les pipelines précédents"
+          "cancel": "Annuler les pipelines précédents",
+          "desc": "Activer pour forcer l'annulation des pipelines en cours et en attente pour le même contexte et le même événement avant de démarrer un nouveau pipeline déclenché par un événement."
         },
         "general": "Générale",
         "pipeline_path": {
@@ -211,6 +224,7 @@
         "add": "Ajouter un secret",
         "created": "Secret crée",
         "deleted": "Secret effacé",
+        "desc": "Secrets qui peuvent être passé comme variable d'environnement à l’exécution d'une étape individuelle d'un pipeline.",
         "events": {
           "events": "Disponible pour les événements suivants"
         },
@@ -251,6 +265,7 @@
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
     "shell_setup": "Utilisation avec un shell",
+    "shell_setup_before": "faites la mise en place dans le shell avant",
     "token": "Votre jeton personnel"
   },
   "username": "Nom d'utilisateur",
