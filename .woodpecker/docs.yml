@@ -5,6 +5,11 @@ variables:
     - ".woodpecker/docs.yml"
 
 pipeline:
+  build-cli:
+    image: golang:1.18
+    commands:
+      - make docs
+
   build:
     image: *node_image
     commands:
