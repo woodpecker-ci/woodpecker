@@ -73,7 +73,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
             <h1>Woodpecker CI plugins</h1>
             <p>This list contains plugins which you can use to easily execute usual pipeline tasks.</p>
             <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="button button--primary">
-              🙏 Please add your plugin
+              🎉 Add your plugin
             </a>
           </div>
           <div className="container" style={{ display: 'flex', flexFlow: 'column', marginTop: '4rem' }}>
