@@ -3,11 +3,21 @@
   "include": ["src", "types"],
   "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*", "src/theme"],
   "compilerOptions": {
-    "rootDir": "./src",
-    "baseUrl": ".",
+    "declaration": false,
+    "declarationMap": false,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "moduleResolution": "Node16",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "noEmit": false,
+    "sourceMap": false,
+    "strict": true,
+    "module": "CommonJS",
+    "target": "ES6",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "rootDir": "src",
     "pretty": true,
-    "outDir": "./dist"
+    "noEmit": false
   }
 }

@@ -20,7 +20,6 @@ module.exports = {
       logo: {
         alt: 'Woodpecker Logo',
         src: 'img/logo.svg',
-        srcDark: 'img/logo-darkmode.svg',
       },
       items: [
         {
@@ -108,8 +107,8 @@ module.exports = {
           title: 'More',
           items: [
             {
-              label: "Translate",
-              href: 'https://translate.woodpecker-ci.org/engage/woodpecker-ci/'
+              label: 'Translate',
+              href: 'https://translate.woodpecker-ci.org/engage/woodpecker-ci/',
             },
             {
               label: 'GitHub',
@@ -169,7 +168,7 @@ module.exports = {
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
     [
-      require.resolve("@easyops-cn/docusaurus-search-local"),
+      require.resolve('@easyops-cn/docusaurus-search-local'),
       {
         hashed: true,
       },
@@ -189,7 +188,7 @@ module.exports = {
               label: 'Next',
               banner: 'unreleased',
             },
-            '0.15': {
+            0.15: {
               label: '0.15.x',
               banner: 'none',
             },
@@ -201,4 +200,13 @@ module.exports = {
       },
     ],
   ],
+  webpack: {
+    jsLoader: (isServer) => ({
+      loader: require.resolve('esbuild-loader'),
+      options: {
+        loader: 'tsx',
+        target: isServer ? 'node12' : 'es2017',
+      },
+    }),
+  },
 };
