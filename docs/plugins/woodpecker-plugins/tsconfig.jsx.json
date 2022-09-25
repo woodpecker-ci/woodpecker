@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "module": "esnext",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "strict": false
   }
 }
