@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "pnpm run style && concurrently 'tsc -w' 'tsc -w -p tsconfig.jsx.json'",
-    "build": "pnpm run style && tsc && tsc -p tsconfig.jsx.json",
+    "start": "yarn run style && concurrently 'tsc -w' 'tsc -w -p tsconfig.jsx.json'",
+    "build": "yarn run style && tsc && tsc -p tsconfig.jsx.json",
     "style": "cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
