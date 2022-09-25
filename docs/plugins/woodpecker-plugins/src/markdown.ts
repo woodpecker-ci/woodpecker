@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+import { parse as YAMLParse } from 'yaml';
 
 const tokens = ['---', '---'];
 const regexHeader = new RegExp('^' + tokens[0] + '([\\s|\\S]*?)' + tokens[1]);
@@ -6,16 +7,7 @@ const regexContent = new RegExp('^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*'
 
 export function getHeader<T = any>(data: string): T {
   const header = getRawHeader(data);
-
-  const tmpObj: Record<string, string> = {};
-  const lines = header.trim().split('\n');
-
-  lines.forEach((line, i) => {
-    var arr = line.trim().split(':');
-    tmpObj[arr.shift() as string] = arr.join(':').trim();
-  });
-
-  return tmpObj as T;
+  return YAMLParse(header) as T;
 }
 
 export function getRawHeader(data: string): string {
