@@ -7,7 +7,7 @@
   "scripts": {
     "start": "yarn run style && concurrently 'tsc -w' 'tsc -w -p tsconfig.jsx.json'",
     "build": "yarn run style && tsc && tsc -p tsconfig.jsx.json",
-    "style": "cp src/theme/style.css dist/theme/style.css"
+    "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^2.1.0",
