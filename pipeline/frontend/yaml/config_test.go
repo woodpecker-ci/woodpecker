@@ -5,6 +5,7 @@ import (
 
 	"github.com/franela/goblin"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -18,6 +19,8 @@ func TestParse(t *testing.T) {
 				if err != nil {
 					g.Fail(err)
 				}
+
+				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -61,10 +64,52 @@ func TestParse(t *testing.T) {
 				}
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_fail")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
+				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
+				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
+
 				g.Assert(len(out.Pipeline.Containers[0].When.Constraints)).Equal(0)
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
 				g.Assert(out.Pipeline.Containers[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
+			})
+
+			matchConfig, err := ParseString(sampleYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.It("Should match event tester", func() {
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "tester",
+					},
+				}, false)).Equal(true)
+			})
+
+			g.It("Should match event tester2", func() {
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "tester2",
+					},
+				}, false)).Equal(true)
+			})
+
+			g.It("Should match branch tester", func() {
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Build{
+						Commit: frontend.Commit{
+							Branch: "tester",
+						},
+					},
+				}, true)).Equal(true)
+			})
+
+			g.It("Should not match event push", func() {
+				g.Assert(matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Build{
+						Event: "push",
+					},
+				}, false)).Equal(false)
 			})
 		})
 	})
@@ -72,6 +117,12 @@ func TestParse(t *testing.T) {
 
 var sampleYaml = `
 image: hello-world
+when:
+  - event:
+    - tester
+    - tester2
+  - branch:
+    - tester
 build:
   context: .
   dockerfile: Dockerfile

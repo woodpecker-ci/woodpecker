@@ -58,9 +58,9 @@ func (when *When) IsEmpty() bool {
 }
 
 // Returns true if at least one of the internal constraints is true.
-func (when *When) Match(metadata frontend.Metadata) bool {
+func (when *When) Match(metadata frontend.Metadata, global bool) bool {
 	for _, c := range when.Constraints {
-		if c.Match(metadata) {
+		if c.Match(metadata, global) {
 			return true
 		}
 	}
@@ -68,7 +68,7 @@ func (when *When) Match(metadata frontend.Metadata) bool {
 	if when.IsEmpty() {
 		// test against default Constraints
 		empty := &Constraint{}
-		return empty.Match(metadata)
+		return empty.Match(metadata, global)
 	}
 	return false
 }
@@ -126,24 +126,21 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraint) Match(metadata frontend.Metadata) bool {
-	// if event filter is not set, set default
-	if c.Event.IsEmpty() {
-		c.Event.Include = []string{
-			frontend.EventPush,
-			frontend.EventPull,
-			frontend.EventTag,
-			frontend.EventDeploy,
-		}
+func (c *Constraint) Match(metadata frontend.Metadata, global bool) bool {
+	match := true
+	if !global {
+		c.SetDefaultEventFilter()
+
+		// apply step only filters
+		match = c.Matrix.Match(metadata.Job.Matrix)
 	}
 
-	match := c.Platform.Match(metadata.Sys.Platform) &&
+	match = match && c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
-		c.Instance.Match(metadata.Sys.Host) &&
-		c.Matrix.Match(metadata.Job.Matrix)
+		c.Instance.Match(metadata.Sys.Host)
 
 	// changed files filter apply only for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
@@ -159,6 +156,18 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 	}
 
 	return match
+}
+
+// SetDefaultEventFilter set default e event filter if not event filter is already set
+func (c *Constraint) SetDefaultEventFilter() {
+	if c.Event.IsEmpty() {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+		}
+	}
 }
 
 // IsEmpty return true if a constraint has no conditions
