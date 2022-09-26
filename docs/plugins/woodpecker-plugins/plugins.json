@@ -25,6 +25,18 @@
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-s3/master/docs.md",
       "verified": true
     },
+    
+    {
+      "name": "Block Git changes",
+      "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Regex check",
+      "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
+      "verified": true
+    }
+    
     {
       "// todo": true,
       "name": "Email",
