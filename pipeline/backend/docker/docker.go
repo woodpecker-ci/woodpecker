@@ -110,7 +110,8 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
 		}
-		// fix for drone/drone#1917
+		// Fix "Show warning when fail to auth to docker registry"
+		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
 		if perr != nil && proc.AuthConfig.Password != "" {
 			return perr
 		}
