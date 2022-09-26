@@ -62,3 +62,8 @@ func (Build) TableName() string {
 type UpdateBuildStore interface {
 	UpdateBuild(*Build) error
 }
+
+type BuildOptions struct {
+	Branch    string            `json:"branch"`
+	Variables map[string]string `json:"variables"`
+}

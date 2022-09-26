@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -42,7 +41,7 @@ func CreateBuild(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	var p woodpecker.BuildOptions
+	var p model.BuildOptions
 
 	err := json.NewDecoder(c.Request.Body).Decode(&p)
 	if err != nil {
@@ -64,9 +63,9 @@ func CreateBuild(c *gin.Context) {
 	}
 }
 
-func createTmpBuild(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *woodpecker.BuildOptions) *model.Build {
+func createTmpBuild(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.BuildOptions) *model.Build {
 	return &model.Build{
-		Event:     model.EventManual,
+		Event:     event,
 		Commit:    commitSHA,
 		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
