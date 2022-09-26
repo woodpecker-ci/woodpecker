@@ -27,7 +27,7 @@ var buildCreateCmd = &cli.Command{
 		},
 		&cli.StringSliceFlag{
 			Name:  "var",
-			Usage: "<key>=<value>",
+			Usage: "key=value",
 		},
 	),
 }
