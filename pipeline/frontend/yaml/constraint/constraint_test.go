@@ -489,7 +489,7 @@ func TestConstraints(t *testing.T) {
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
 			c := parseConstraints(t, test.conf)
-			got, want := c.Match(test.with), test.want
+			got, want := c.Match(test.with, false), test.want
 			if got != want {
 				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
 			}
