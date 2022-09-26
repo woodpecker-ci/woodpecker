@@ -326,6 +326,52 @@ pipeline:
 	}
 }
 
+func TestRootWhenFilter(t *testing.T) {
+	t.Parallel()
+
+	b := ProcBuilder{
+		Repo:  &model.Repo{},
+		Curr:  &model.Build{Event: "tester"},
+		Last:  &model.Build{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Link:  "",
+		Yamls: []*remote.FileMeta{
+			{Data: []byte(`
+when:
+  event:
+    - tester
+pipeline:
+  xxx:
+    image: scratch
+`)},
+			{Data: []byte(`
+when:
+  event:
+    - push
+pipeline:
+  xxx:
+    image: scratch
+`)},
+			{Data: []byte(`
+pipeline:
+  build:
+    image: scratch
+`)},
+		},
+	}
+
+	buildItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(buildItems) != 2 {
+		t.Fatal("Should have generated 2 buildItems")
+	}
+}
+
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
