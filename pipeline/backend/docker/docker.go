@@ -23,6 +23,7 @@ type docker struct {
 	client     client.APIClient
 	enableIPv6 bool
 	network    string
+	volumes    []string
 }
 
 // make sure docker implements Engine
@@ -58,6 +59,18 @@ func (e *docker) Load() error {
 	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
 
 	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+
+	volumes := strings.Split(os.Getenv("WOODPECKER_BACKEND_DOCKER_VOLUMES"), ",")
+	e.volumes = make([]string, 0, len(volumes))
+	// Validate provided volume definitions
+	for _, v := range volumes {
+		parts, err := splitVolumeParts(v)
+		if err != nil {
+			log.Error().Err(err).Msgf("invalid volume '%s' provided in WOODPECKER_BACKEND_DOCKER_VOLUMES", v)
+			continue
+		}
+		e.volumes = append(e.volumes, strings.Join(parts, ":"))
+	}
 
 	return nil
 }
@@ -116,6 +129,9 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 			return perr
 		}
 	}
+
+	// add default volumes to the host configuration
+	hostConfig.Binds = append(hostConfig.Binds, e.volumes...)
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
 	if client.IsErrNotFound(err) {
