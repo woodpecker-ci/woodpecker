@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="docs/static/img/logo-auto-darkmode.svg" width="220"/>
+    <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
   </a>
 </p>
 <br/>
