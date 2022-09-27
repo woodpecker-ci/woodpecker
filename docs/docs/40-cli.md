@@ -286,7 +286,7 @@ execute a local build
 
 **--build-created**="":  (default: 0)
 
-**--build-event**="": 
+**--build-event**="":  (default: manual)
 
 **--build-finished**="":  (default: 0)
 
