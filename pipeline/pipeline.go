@@ -102,12 +102,12 @@ func (r *Runtime) Run() error {
 			if err != nil {
 				shouldIgnoreFailure := false
 				for _, step := range stage.Steps {
-					if (step.IgnoreFailure) {
+					if step.IgnoreFailure {
 						shouldIgnoreFailure = true
 						break
 					}
 				}
-				if (!shouldIgnoreFailure) {
+				if !shouldIgnoreFailure {
 					r.err = err
 				}
 			}
