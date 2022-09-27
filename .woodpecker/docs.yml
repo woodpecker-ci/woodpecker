@@ -1,4 +1,5 @@
 variables:
+  - &golang_image 'golang:1.18'
   - &node_image 'node:16-alpine'
   - &when_path
     - "docs/**"
@@ -6,9 +7,11 @@ variables:
 
 pipeline:
   build-cli:
-    image: golang:1.18
+    image: *golang_image
     commands:
       - make docs
+    when:
+      path: *when_path
 
   build:
     image: *node_image
@@ -17,7 +20,6 @@ pipeline:
       - yarn install --frozen-lockfile
       - yarn build
     when:
-      event: [push, pull_request]
       path: *when_path
 
   securitycheck:
