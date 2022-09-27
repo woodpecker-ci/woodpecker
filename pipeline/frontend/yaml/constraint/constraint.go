@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
@@ -31,6 +32,7 @@ type (
 		Matrix      Map
 		Local       types.BoolTrue
 		Path        Path
+		If          string `yaml:"if,omitempty"`
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -58,10 +60,14 @@ func (when *When) IsEmpty() bool {
 }
 
 // Returns true if at least one of the internal constraints is true.
-func (when *When) Match(metadata frontend.Metadata, global bool) bool {
+func (when *When) Match(metadata frontend.Metadata, global bool) (bool, error) {
 	for _, c := range when.Constraints {
-		if c.Match(metadata, global) {
-			return true
+		match, err := c.Match(metadata, global)
+		if err != nil {
+			return false, err
+		}
+		if match {
+			return true, nil
 		}
 	}
 
@@ -70,7 +76,7 @@ func (when *When) Match(metadata frontend.Metadata, global bool) bool {
 		empty := &Constraint{}
 		return empty.Match(metadata, global)
 	}
-	return false
+	return false, nil
 }
 
 func (when *When) IncludesStatus(status string) bool {
@@ -126,7 +132,7 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraint) Match(metadata frontend.Metadata, global bool) bool {
+func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error) {
 	match := true
 	if !global {
 		c.SetDefaultEventFilter()
@@ -155,7 +161,20 @@ func (c *Constraint) Match(metadata frontend.Metadata, global bool) bool {
 		match = match && c.Cron.Match(metadata.Curr.Cron)
 	}
 
-	return match
+	if c.If != "" {
+		env := metadata.Environ()
+		out, err := expr.Compile(c.If, expr.Env(env), expr.AsBool())
+		if err != nil {
+			return false, err
+		}
+		result, err := expr.Run(out, env)
+		if err != nil {
+			return false, err
+		}
+		match = match && result.(bool)
+	}
+
+	return match, nil
 }
 
 // SetDefaultEventFilter set default e event filter if not event filter is already set

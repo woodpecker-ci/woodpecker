@@ -119,11 +119,16 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// checking if filtered.
-			if !parsed.When.Match(metadata, true) {
+			if match, err := parsed.When.Match(metadata, true); match && err == nil {
 				log.Debug().Str("pipeline", proc.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
 				proc.State = model.StatusSkipped
+			} else if err != nil {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Pipeline config could not be parsed",
+				)
+				return nil, err
 			}
 
 			// TODO: deprecated branches filter => remove after some time
@@ -134,7 +139,10 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				proc.State = model.StatusSkipped
 			}
 
-			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			if err != nil {
+				return nil, err
+			}
 
 			if len(ir.Stages) == 0 {
 				continue
@@ -229,7 +237,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
