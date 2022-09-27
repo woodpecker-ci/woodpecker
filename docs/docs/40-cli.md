@@ -220,7 +220,7 @@ Message: {{ .Message }}
 
 **--token, -t**="": server auth token
 
-**--var**="": <key>=<value>
+**--var**="": key=value
 
 ## log
 
