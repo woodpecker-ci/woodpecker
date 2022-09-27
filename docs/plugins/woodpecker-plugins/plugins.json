@@ -34,8 +34,7 @@
       "name": "Regex check",
       "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
       "verified": false
-    }
-    
+    },
     {
       "// todo": true,
       "name": "Email",
