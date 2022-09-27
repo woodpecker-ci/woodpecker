@@ -198,6 +198,30 @@ State: {{ .State }}
 
 **--token, -t**="": server auth token
 
+### create
+
+create new build
+
+**--branch**="": branch to create build from
+
+**--format**="": format output (default: [33mBuild #{{ .Number }} [0m
+Status: {{ .Status }}
+Event: {{ .Event }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Message: {{ .Message }}
+)
+
+**--log-level**="": set logging level (default: info)
+
+**--server, -s**="": server address
+
+**--token, -t**="": server auth token
+
+**--var**="": key=value
+
 ## log
 
 manage logs
@@ -262,7 +286,7 @@ execute a local build
 
 **--build-created**="":  (default: 0)
 
-**--build-event**="": 
+**--build-event**="":  (default: manual)
 
 **--build-finished**="":  (default: 0)
 

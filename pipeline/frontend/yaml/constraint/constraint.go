@@ -185,6 +185,7 @@ func (c *Constraint) SetDefaultEventFilter() {
 			frontend.EventPull,
 			frontend.EventTag,
 			frontend.EventDeploy,
+			frontend.EventManual,
 		}
 	}
 }

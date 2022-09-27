@@ -18,6 +18,11 @@ type RepoListOptions = {
   all?: boolean;
   flush?: boolean;
 };
+
+type BuildOptions = {
+  branch: string;
+  variables: Record<string, string>;
+};
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
@@ -56,6 +61,10 @@ export default class WoodpeckerClient extends ApiClient {
   getBuildList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Build[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${owner}/${repo}/builds?${query}`) as Promise<Build[]>;
+  }
+
+  createBuild(owner: string, repo: string, options: BuildOptions): Promise<Build> {
+    return this._post(`/api/repos/${owner}/${repo}/builds`, options) as Promise<Build>;
   }
 
   getBuild(owner: string, repo: string, number: number | 'latest'): Promise<Build> {

@@ -22,6 +22,7 @@ const (
 	EventTag    WebhookEvent = "tag"
 	EventDeploy WebhookEvent = "deployment"
 	EventCron   WebhookEvent = "cron"
+	EventManual WebhookEvent = "manual"
 )
 
 func ValidateWebhookEvent(s WebhookEvent) bool {

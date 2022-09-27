@@ -60,6 +60,10 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		}
 	}
 
+	for k, v := range build.AdditionalVariables {
+		envs[k] = v
+	}
+
 	b := shared.ProcBuilder{
 		Repo:  repo,
 		Curr:  build,
