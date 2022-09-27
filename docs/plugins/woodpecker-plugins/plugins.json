@@ -29,12 +29,12 @@
     {
       "name": "Block Git changes",
       "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
-      "verified": true
+      "verified": false
     },
     {
       "name": "Regex check",
       "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
-      "verified": true
+      "verified": false
     }
     
     {
