@@ -3,7 +3,7 @@ module github.com/woodpecker-ci/woodpecker
 go 1.18
 
 require (
-	code.gitea.io/sdk/gitea v0.15.1-0.20220720025709-de34275bb64e
+	code.gitea.io/sdk/gitea v0.15.1-0.20220831004139-a0127ed0e7fe
 	codeberg.org/6543/go-yaml2json v0.2.1
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/caddyserver/certmagic v0.17.1-0.20220901172127-2e22c6fa8c47

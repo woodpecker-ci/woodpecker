@@ -64,6 +64,9 @@ func (e *docker) Load() error {
 	e.volumes = make([]string, 0, len(volumes))
 	// Validate provided volume definitions
 	for _, v := range volumes {
+		if v == "" {
+			continue
+		}
 		parts, err := splitVolumeParts(v)
 		if err != nil {
 			log.Error().Err(err).Msgf("invalid volume '%s' provided in WOODPECKER_BACKEND_DOCKER_VOLUMES", v)
