@@ -157,6 +157,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_BUILD_EVENT"},
 		Name:    "build-event",
+		Value:   "manual",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_BUILD_LINK"},
