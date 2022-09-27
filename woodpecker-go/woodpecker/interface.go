@@ -70,6 +70,9 @@ type Client interface {
 	// the specified repository.
 	BuildList(string, string) ([]*Build, error)
 
+	// BuildCreate returns creates a build on specified branch.
+	BuildCreate(string, string, *BuildOptions) (*Build, error)
+
 	// BuildQueue returns a list of enqueued builds.
 	BuildQueue() ([]*Activity, error)
 

@@ -8,7 +8,7 @@ export type Build = {
 
   parent: number;
 
-  event: 'push' | 'tag' | 'pull_request' | 'deployment' | 'cron';
+  event: 'push' | 'tag' | 'pull_request' | 'deployment' | 'cron' | 'manual';
 
   //  The current status of the build.
   status: BuildStatus;
