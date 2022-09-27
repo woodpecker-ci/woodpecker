@@ -43,7 +43,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		FullName:     from.FullName,
 		Avatar:       avatar,
 		Link:         from.HTMLURL,
-		IsSCMPrivate: from.Private,
+		IsSCMPrivate: from.Private || from.Owner.Visibility != gitea.VisibleTypePublic.,
 		Clone:        from.CloneURL,
 		Branch:       from.DefaultBranch,
 	}
