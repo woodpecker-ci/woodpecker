@@ -376,9 +376,9 @@ execute a local build
 
 **--server, -s**="": server address
 
-**--system-link**="":  (default: https://github.com/cncd/pipec)
+**--system-link**="":  (default: https://github.com/woodpecker-ci/woodpecker)
 
-**--system-name**="":  (default: pipec)
+**--system-name**="":  (default: woodpecker)
 
 **--system-platform**="": 
 
