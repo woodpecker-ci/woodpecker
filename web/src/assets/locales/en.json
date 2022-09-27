@@ -24,6 +24,18 @@
         "not_started": "not started yet"
     },
     "repo": {
+        "manual_pipeline": {
+          "title": "Trigger a manual pipeline run",
+          "trigger": "Run pipeline",
+          "select_branch": "Select branch",
+          "variables": {
+            "add": "Add variable",
+            "title": "Additional pipeline variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+            "name": "Variable name",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",
@@ -207,7 +219,8 @@
                 "tag": "Tag",
                 "pr": "Pull Request",
                 "deploy": "Deploy",
-                "cron": "Cron"
+                "cron": "Cron",
+                "manual": "Manual"
             }
         }
     },
