@@ -100,7 +100,16 @@ func (r *Runtime) Run() error {
 			return ErrCancel
 		case err := <-r.execAll(stage.Steps):
 			if err != nil {
-				r.err = err
+				shouldIgnoreFailure := false
+				for _, step := range stage.Steps {
+					if (step.IgnoreFailure) {
+						shouldIgnoreFailure = true
+						break
+					}
+				}
+				if (!shouldIgnoreFailure) {
+					r.err = err
+				}
 			}
 		}
 	}
