@@ -29,7 +29,7 @@ func TestParamsToEnv(t *testing.T) {
 		"float":            1.2,
 		"bool":             true,
 		"slice":            []int{1, 2, 3},
-		"map":              map[string]string{"hello": "world"},
+		"map":              map[string]interface{}{"hello": "world"},
 		"complex":          []struct{ Name string }{{"Jack"}, {"Jill"}},
 		"complex2":         struct{ Name string }{"Jack"},
 		"from.address":     "noreply@example.com",

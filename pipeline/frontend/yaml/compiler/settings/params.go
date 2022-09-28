@@ -85,9 +85,8 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			return value, nil
 		}
 
-		ymlOut, _ := yaml.Marshal(vv.Interface())
-		out, _ := yaml2json.Convert(ymlOut)
-		return string(out), nil
+		// it's complex
+		break
 
 	case reflect.Slice, reflect.Array:
 		if vv.Len() == 0 {
@@ -119,28 +118,27 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			if !containComplex {
 				return strings.Join(in, ","), nil
 			}
+			// else it's complex
 		}
-
-		// it's complex use yml.ToJSON
-		fallthrough
-
-	default:
-		// recursive inject secrets
-		v, err := injectSecretRecursive(vv.Interface(), secrets)
-		if err != nil {
-			return "", err
-		}
-
-		out, err := yaml.Marshal(v)
-		if err != nil {
-			return "", err
-		}
-		out, err = yaml2json.Convert(out)
-		if err != nil {
-			return "", err
-		}
-		return string(out), nil
 	}
+
+	// handle complex via yml.ToJSON
+
+	// recursive inject secrets
+	v, err := injectSecretRecursive(vv.Interface(), secrets)
+	if err != nil {
+		return "", err
+	}
+
+	out, err := yaml.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	out, err = yaml2json.Convert(out)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 func injectSecret(v interface{}, secrets map[string]string) (string, bool, error) {
