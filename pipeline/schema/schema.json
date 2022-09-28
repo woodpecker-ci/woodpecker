@@ -229,6 +229,9 @@
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
           "type": "boolean"
+        },
+        "ignore_failure": {
+          "type": "boolean"
         }
       }
     },

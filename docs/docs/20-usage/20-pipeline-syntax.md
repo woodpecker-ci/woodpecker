@@ -187,6 +187,10 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 For more details check the [secrets docs](./40-secrets.md).
 
+### `ignore_failure`
+
+Some of the pipeline steps may be allowed to fail without causing the whole pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `ignore_failure: true` to your pipeline step. If Woodpecker encounters an error while executing the step, it will report it as failed but still execute the next steps of the pipeline, if any, without affecting the status of the pipeline.
+
 ### `when` - Conditional Execution
 
 Woodpecker supports defining a list of conditions for a pipeline step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
