@@ -82,6 +82,8 @@ map:
     - "a"
     - "b"
     - 3
+  secret:
+    from_secret: secret_token
 list.map:
   - registry: https://codeberg.org
     username: "6543"
@@ -99,7 +101,7 @@ list.map:
 		"PLUGIN_BOOL":      "true",
 		"PLUGIN_SLICE":     "1,2,3",
 		"PLUGIN_MY_SECRET": "FooBar",
-		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value"}`,
+		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value","secret":"FooBar"}`,
 		"PLUGIN_LIST_MAP":  `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
 	secrets := map[string]string{
