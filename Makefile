@@ -76,7 +76,7 @@ help: ## Display this help.
 .PHONY: vendor
 vendor: ## Update the vendor directory
 	go mod tidy
-# go mod vendor
+	go mod vendor
 
 format: install-tools ## Format source code
 	@gofumpt -extra -w ${GOFILES_NOVENDOR}
