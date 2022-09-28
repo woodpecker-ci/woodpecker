@@ -63,10 +63,10 @@ slice: [1, 2, 3]
 my_secret:
   from_secret: secret_token
 logins:
-- registry: https://codeberg.org
-  username: "6543"
-  password:
-    from_secret: cb_password
+  - registry: https://codeberg.org
+    username: "6543"
+    password:
+      from_secret: cb_password
 `)
 	var from map[string]interface{}
 	err := yaml.Unmarshal(fromYAML, &from)
