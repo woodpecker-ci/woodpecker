@@ -45,6 +45,20 @@ func isComplex(t reflect.Kind) bool {
 	}
 }
 
+func injectSecret(v interface{}, secrets map[string]Secret) (string, bool, error) {
+	if fromSecret, ok := v.(map[string]interface{}); ok {
+		if secretNameI, ok := fromSecret["from_secret"]; ok {
+			if secretName, ok := secretNameI.(string); ok {
+				if secret, ok := secrets[strings.ToLower(secretName)]; ok {
+					return secret.Value, true, nil
+				}
+				return "", false, fmt.Errorf("no secret found for %q", secretName)
+			}
+		}
+	}
+	return "", false, nil
+}
+
 func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
@@ -63,16 +77,14 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		return fmt.Sprintf("%v", vv.Float()), nil
 
 	case reflect.Map:
-		if fromSecret, ok := v.(map[string]interface{}); ok {
-			if secretNameI, ok := fromSecret["from_secret"]; ok {
-				if secretName, ok := secretNameI.(string); ok {
-					if secret, ok := secrets[strings.ToLower(secretName)]; ok {
-						return secret.Value, nil
-					}
-					return "", fmt.Errorf("no secret found for %q", secretName)
-				}
-			}
+		// handle secrets
+		value, isSecret, err := injectSecret(v, secrets)
+		if err != nil {
+			return "", err
+		} else if isSecret {
+			return value, nil
 		}
+
 		ymlOut, _ := yaml.Marshal(vv.Interface())
 		out, _ := yaml2json.Convert(ymlOut)
 		return string(out), nil
