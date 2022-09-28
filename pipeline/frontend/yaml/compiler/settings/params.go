@@ -26,7 +26,7 @@ import (
 
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func ParamsToEnv(from map[string]interface{}, to map[string]string, secrets map[string]string) (err error) {
+func ParamsToEnv(from map[string]interface{}, to, secrets map[string]string) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -77,7 +77,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 		return fmt.Sprintf("%v", vv.Float()), nil
 
 	case reflect.Map:
-		// check if it's a secret and return value if it's the case 
+		// check if it's a secret and return value if it's the case
 		value, isSecret, err := injectSecret(v, secrets)
 		if err != nil {
 			return "", err
