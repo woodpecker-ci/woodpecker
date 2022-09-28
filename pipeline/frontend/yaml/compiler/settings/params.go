@@ -77,12 +77,18 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 		return fmt.Sprintf("%v", vv.Float()), nil
 
 	case reflect.Map:
-		// check if it's a secret and return value if it's the case
-		value, isSecret, err := injectSecret(v, secrets)
-		if err != nil {
-			return "", err
-		} else if isSecret {
-			return value, nil
+		switch v := v.(type) {
+		// gopkg.in/yaml.v3 only emit this map interface
+		case map[string]interface{}:
+			// check if it's a secret and return value if it's the case
+			value, isSecret, err := injectSecret(v, secrets)
+			if err != nil {
+				return "", err
+			} else if isSecret {
+				return value, nil
+			}
+		default:
+			return "", fmt.Errorf("could not handle: %#v", v)
 		}
 
 		// it's complex
@@ -141,15 +147,13 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 	return string(out), nil
 }
 
-func injectSecret(v interface{}, secrets map[string]string) (string, bool, error) {
-	if fromSecret, ok := v.(map[string]interface{}); ok {
-		if secretNameI, ok := fromSecret["from_secret"]; ok {
-			if secretName, ok := secretNameI.(string); ok {
-				if secret, ok := secrets[strings.ToLower(secretName)]; ok {
-					return secret, true, nil
-				}
-				return "", false, fmt.Errorf("no secret found for %q", secretName)
+func injectSecret(v map[string]interface{}, secrets map[string]string) (string, bool, error) {
+	if secretNameI, ok := v["from_secret"]; ok {
+		if secretName, ok := secretNameI.(string); ok {
+			if secret, ok := secrets[strings.ToLower(secretName)]; ok {
+				return secret, true, nil
 			}
+			return "", false, fmt.Errorf("no secret found for %q", secretName)
 		}
 	}
 	return "", false, nil
@@ -164,17 +168,17 @@ func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{
 
 	switch t.Kind() {
 	case reflect.Map:
-		// handle secrets
-		value, isSecret, err := injectSecret(v, secrets)
-		if err != nil {
-			return nil, err
-		} else if isSecret {
-			return value, nil
-		}
-
 		switch v := v.(type) {
 		// gopkg.in/yaml.v3 only emit this map interface
 		case map[string]interface{}:
+			// handle secrets
+			value, isSecret, err := injectSecret(v, secrets)
+			if err != nil {
+				return nil, err
+			} else if isSecret {
+				return value, nil
+			}
+
 			for key, val := range v {
 				v[key], err = injectSecretRecursive(val, secrets)
 				if err != nil {
