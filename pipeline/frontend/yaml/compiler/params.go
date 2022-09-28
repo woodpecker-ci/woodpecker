@@ -63,7 +63,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		return fmt.Sprintf("%v", vv.Float()), nil
 
 	case reflect.Map:
-		// handle secrets
+		// check if it's a secret and return value if it's the case 
 		value, isSecret, err := injectSecret(v, secrets)
 		if err != nil {
 			return "", err
@@ -80,9 +80,9 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 			return "", nil
 		}
 
-		// if it's an interface unwrap and check element
+		// if it's an interface unwrap and element check happen for each iteration later
 		if t.Elem().Kind() == reflect.Interface ||
-			// else check direct handle lists witch contain non complex elements
+			// else check directly if element is not complex
 			!isComplex(t.Elem().Kind()) {
 			containComplex := false
 			in := make([]string, vv.Len())
