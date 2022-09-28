@@ -93,15 +93,33 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if vv.Len() == 0 {
 			return "", nil
 		}
-		if !isComplex(t.Elem().Kind()) || t.Elem().Kind() == reflect.Interface {
+
+		// if it's an interface unwrap and check element
+		if t.Elem().Kind() == reflect.Interface ||
+			// else check direct handle lists witch contain non complex elements
+			!isComplex(t.Elem().Kind()) {
+
+			containComplex := false
 			in := make([]string, vv.Len())
+
 			for i := 0; i < vv.Len(); i++ {
+				v := vv.Index(i).Interface()
+
+				// ensure each element is not complex
+				if isComplex(reflect.TypeOf(v).Kind()) {
+					containComplex = true
+					break
+				}
+
 				var err error
-				if in[i], err = sanitizeParamValue(vv.Index(i).Interface(), secrets); err != nil {
+				if in[i], err = sanitizeParamValue(v, secrets); err != nil {
 					return "", err
 				}
 			}
-			return strings.Join(in, ","), nil
+
+			if !containComplex {
+				return strings.Join(in, ","), nil
+			}
 		}
 
 		// it's complex use yml.ToJSON
