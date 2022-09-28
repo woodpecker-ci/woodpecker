@@ -39,6 +39,16 @@ type Secret struct {
 	Match []string
 }
 
+type secretMap map[string]Secret
+
+func (sm secretMap) toStringMap() map[string]string {
+	m := make(map[string]string, len(sm))
+	for k, v := range sm {
+		m[k] = v.Value
+	}
+	return m
+}
+
 type ResourceLimit struct {
 	MemSwapLimit int64
 	MemLimit     int64
@@ -61,7 +71,7 @@ type Compiler struct {
 	path              string
 	metadata          frontend.Metadata
 	registries        []Registry
-	secrets           map[string]Secret
+	secrets           secretMap
 	cacher            Cacher
 	reslimit          ResourceLimit
 	defaultCloneImage string

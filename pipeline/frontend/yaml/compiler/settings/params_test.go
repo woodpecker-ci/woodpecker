@@ -1,4 +1,18 @@
-package compiler
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package settings
 
 import (
 	"testing"
@@ -39,11 +53,11 @@ func TestParamsToEnv(t *testing.T) {
 		"PLUGIN_MY_SECRET":        "FooBar",
 		"PLUGIN_UPPERCASE_SECRET": "FooBar",
 	}
-	secrets := map[string]Secret{
-		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
+	secrets := map[string]string{
+		"secret_token": "FooBar",
 	}
 	got := map[string]string{}
-	assert.NoError(t, paramsToEnv(from, got, secrets))
+	assert.NoError(t, ParamsToEnv(from, got, secrets))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -81,12 +95,12 @@ logins:
 		"PLUGIN_MY_SECRET": "FooBar",
 		"PLUGIN_LOGINS":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
-	secrets := map[string]Secret{
-		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
-		"cb_password":  {Name: "cb_password", Value: "geheim", Match: nil},
+	secrets := map[string]string{
+		"secret_token": "FooBar",
+		"cb_password":  "geheim",
 	}
 	got := map[string]string{}
-	assert.NoError(t, paramsToEnv(from, got, secrets))
+	assert.NoError(t, ParamsToEnv(from, got, secrets))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -97,10 +111,10 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 	var from map[string]interface{}
 	err := yaml.Unmarshal(fromYAML, &from)
 	assert.NoError(t, err)
-	secrets := map[string]Secret{
-		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
+	secrets := map[string]string{
+		"secret_token": "FooBar",
 	}
-	assert.Error(t, paramsToEnv(from, make(map[string]string), secrets))
+	assert.Error(t, ParamsToEnv(from, make(map[string]string), secrets))
 }
 
 func stringsToInterface(val ...string) []interface{} {

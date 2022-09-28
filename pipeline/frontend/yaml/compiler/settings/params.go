@@ -1,4 +1,18 @@
-package compiler
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package settings
 
 import (
 	"fmt"
@@ -10,9 +24,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// paramsToEnv uses reflection to convert a map[string]interface to a list
+// ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func paramsToEnv(from map[string]interface{}, to map[string]string, secrets map[string]Secret) (err error) {
+func ParamsToEnv(from map[string]interface{}, to map[string]string, secrets map[string]string) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -45,7 +59,7 @@ func isComplex(t reflect.Kind) bool {
 	}
 }
 
-func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error) {
+func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
 
@@ -129,12 +143,12 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 	}
 }
 
-func injectSecret(v interface{}, secrets map[string]Secret) (string, bool, error) {
+func injectSecret(v interface{}, secrets map[string]string) (string, bool, error) {
 	if fromSecret, ok := v.(map[string]interface{}); ok {
 		if secretNameI, ok := fromSecret["from_secret"]; ok {
 			if secretName, ok := secretNameI.(string); ok {
 				if secret, ok := secrets[strings.ToLower(secretName)]; ok {
-					return secret.Value, true, nil
+					return secret, true, nil
 				}
 				return "", false, fmt.Errorf("no secret found for %q", secretName)
 			}
@@ -143,7 +157,7 @@ func injectSecret(v interface{}, secrets map[string]Secret) (string, bool, error
 	return "", false, nil
 }
 
-func injectSecretRecursive(v interface{}, secrets map[string]Secret) (interface{}, error) {
+func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{}, error) {
 	t := reflect.TypeOf(v)
 
 	if !isComplex(t.Kind()) {
