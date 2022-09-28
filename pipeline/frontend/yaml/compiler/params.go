@@ -29,10 +29,8 @@ func paramsToEnv(from map[string]interface{}, to map[string]string, secrets map[
 }
 
 func sanitizeParamKey(k string) string {
-	return "PLUGIN_" +
-		strings.ToUpper(
-			strings.ReplaceAll(k, ".", "_"),
-		)
+	return "PLUGIN_" + strings.ToUpper(
+		strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_"))
 }
 
 func isComplex(t reflect.Kind) bool {

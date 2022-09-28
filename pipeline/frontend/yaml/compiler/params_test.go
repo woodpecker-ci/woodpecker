@@ -47,6 +47,12 @@ func TestParamsToEnv(t *testing.T) {
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
+func TestSanitizeParamKey(t *testing.T) {
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("dry-run"))
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("dry_Run"))
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("dry.run"))
+}
+
 func TestYAMLToParamsToEnv(t *testing.T) {
 	fromYAML := []byte(`skip: ~
 string: stringz
