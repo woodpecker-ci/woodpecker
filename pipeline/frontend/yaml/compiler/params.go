@@ -84,7 +84,6 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		if t.Elem().Kind() == reflect.Interface ||
 			// else check direct handle lists witch contain non complex elements
 			!isComplex(t.Elem().Kind()) {
-
 			containComplex := false
 			in := make([]string, vv.Len())
 
