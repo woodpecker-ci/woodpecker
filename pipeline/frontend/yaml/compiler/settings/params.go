@@ -92,7 +92,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 		}
 
 		// it's complex
-		break
+		// break
 
 	case reflect.Slice, reflect.Array:
 		if vv.Len() == 0 {
