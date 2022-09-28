@@ -76,7 +76,13 @@ bool: true
 slice: [1, 2, 3]
 my_secret:
   from_secret: secret_token
-logins:
+map:
+  key: "value"
+  entry2:
+    - "a"
+    - "b"
+    - 3
+list.map:
   - registry: https://codeberg.org
     username: "6543"
     password:
@@ -93,7 +99,8 @@ logins:
 		"PLUGIN_BOOL":      "true",
 		"PLUGIN_SLICE":     "1,2,3",
 		"PLUGIN_MY_SECRET": "FooBar",
-		"PLUGIN_LOGINS":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
+		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value"}`,
+		"PLUGIN_LIST_MAP":  `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
 	secrets := map[string]string{
 		"secret_token": "FooBar",
