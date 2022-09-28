@@ -37,26 +37,12 @@ func isComplex(t reflect.Kind) bool {
 	switch t {
 	case reflect.Bool,
 		reflect.String,
-		reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Float32, reflect.Float64:
 		return false
 	default:
 		return true
 	}
-}
-
-func injectSecret(v interface{}, secrets map[string]Secret) (string, bool, error) {
-	if fromSecret, ok := v.(map[string]interface{}); ok {
-		if secretNameI, ok := fromSecret["from_secret"]; ok {
-			if secretName, ok := secretNameI.(string); ok {
-				if secret, ok := secrets[strings.ToLower(secretName)]; ok {
-					return secret.Value, true, nil
-				}
-				return "", false, fmt.Errorf("no secret found for %q", secretName)
-			}
-		}
-	}
-	return "", false, nil
 }
 
 func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error) {
@@ -126,7 +112,13 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 		fallthrough
 
 	default:
-		out, err := yaml.Marshal(vv.Interface())
+		// recursive inject secrets
+		v, err := injectSecretRecursive(vv.Interface(), secrets)
+		if err != nil {
+			return "", err
+		}
+
+		out, err := yaml.Marshal(v)
 		if err != nil {
 			return "", err
 		}
@@ -135,5 +127,68 @@ func sanitizeParamValue(v interface{}, secrets map[string]Secret) (string, error
 			return "", err
 		}
 		return string(out), nil
+	}
+}
+
+func injectSecret(v interface{}, secrets map[string]Secret) (string, bool, error) {
+	if fromSecret, ok := v.(map[string]interface{}); ok {
+		if secretNameI, ok := fromSecret["from_secret"]; ok {
+			if secretName, ok := secretNameI.(string); ok {
+				if secret, ok := secrets[strings.ToLower(secretName)]; ok {
+					return secret.Value, true, nil
+				}
+				return "", false, fmt.Errorf("no secret found for %q", secretName)
+			}
+		}
+	}
+	return "", false, nil
+}
+
+func injectSecretRecursive(v interface{}, secrets map[string]Secret) (interface{}, error) {
+	t := reflect.TypeOf(v)
+
+	if !isComplex(t.Kind()) {
+		return v, nil
+	}
+
+	switch t.Kind() {
+	case reflect.Map:
+		// handle secrets
+		value, isSecret, err := injectSecret(v, secrets)
+		if err != nil {
+			return nil, err
+		} else if isSecret {
+			return value, nil
+		}
+
+		switch v := v.(type) {
+		// gopkg.in/yaml.v3 only emit this map interface
+		case map[string]interface{}:
+			for key, val := range v {
+				v[key], err = injectSecretRecursive(val, secrets)
+				if err != nil {
+					return nil, err
+				}
+			}
+			return v, nil
+		default:
+			return v, fmt.Errorf("could not handle: %#v", v)
+		}
+
+	case reflect.Array, reflect.Slice:
+		vv := reflect.ValueOf(v)
+		vl := make([]interface{}, vv.Len())
+
+		for i := 0; i < vv.Len(); i++ {
+			v, err := injectSecretRecursive(vv.Index(i).Interface(), secrets)
+			if err != nil {
+				return nil, err
+			}
+			vl[i] = v
+		}
+		return vl, nil
+
+	default:
+		return v, nil
 	}
 }

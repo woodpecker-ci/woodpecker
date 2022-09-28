@@ -79,8 +79,7 @@ logins:
 		"PLUGIN_BOOL":      "true",
 		"PLUGIN_SLICE":     "1,2,3",
 		"PLUGIN_MY_SECRET": "FooBar",
-		//"PLUGIN_LOGINS":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
-		"PLUGIN_LOGINS": `[{"password":{"from_secret":"cb_password"},"registry":"https://codeberg.org","username":"6543"}]`,
+		"PLUGIN_LOGINS":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
 	secrets := map[string]Secret{
 		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
