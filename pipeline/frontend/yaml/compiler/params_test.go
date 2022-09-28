@@ -56,6 +56,11 @@ bool: true
 slice: [1, 2, 3]
 my_secret:
   from_secret: secret_token
+logins:
+- registry: https://codeberg.org
+  username: "6543"
+  password:
+    from_secret: cb_password
 `)
 	var from map[string]interface{}
 	err := yaml.Unmarshal(fromYAML, &from)
@@ -68,9 +73,11 @@ my_secret:
 		"PLUGIN_BOOL":      "true",
 		"PLUGIN_SLICE":     "1,2,3",
 		"PLUGIN_MY_SECRET": "FooBar",
+		"PLUGIN_LOGINS":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
 	secrets := map[string]Secret{
 		"secret_token": {Name: "secret_token", Value: "FooBar", Match: nil},
+		"cb_password":  {Name: "cb_password", Value: "geheim", Match: nil},
 	}
 	got := map[string]string{}
 	assert.NoError(t, paramsToEnv(from, got, secrets))
