@@ -225,9 +225,9 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	return nil, fmt.Errorf("Not implemented")
 }
 
-// Status creates a build status for the Bitbucket commit.
+// Status creates a pipeline status for the Bitbucket commit.
 func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
-	status := internal.BuildStatus{
+	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",

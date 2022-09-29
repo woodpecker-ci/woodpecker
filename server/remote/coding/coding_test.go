@@ -160,8 +160,8 @@ func Test_coding(t *testing.T) {
 		})
 
 		g.Describe("When downloading a file", func() {
-			g.It("Should return file for specified build", func() {
-				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			g.It("Should return file for specified pipeline", func() {
+				data, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 				g.Assert(err).IsNil()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
@@ -266,7 +266,7 @@ var (
 		Name:  "not_found_project",
 	}
 
-	fakeBuild = &model.Pipeline{
+	fakePipeline = &model.Pipeline{
 		Commit: "4504a072cc",
 	}
 )

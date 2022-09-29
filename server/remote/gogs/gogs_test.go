@@ -135,13 +135,13 @@ func Test_gogs(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
 		g.It("Should return a repository file from a ref", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuildWithRef, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipelineWithRef, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
@@ -195,11 +195,11 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
-	fakeBuild = &model.Pipeline{
+	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 
-	fakeBuildWithRef = &model.Pipeline{
+	fakePipelineWithRef = &model.Pipeline{
 		Ref: "refs/tags/v1.0.0",
 	}
 )

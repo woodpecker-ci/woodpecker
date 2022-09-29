@@ -90,11 +90,11 @@ func Test_helper(t *testing.T) {
 				Key: "octocat",
 			}
 			change.Repository.Slug = "hello-world"
-			build := convertPushHook(&change, "http://base.com")
-			g.Assert(build.Branch).Equal("")
+			pipeline := convertPushHook(&change, "http://base.com")
+			g.Assert(pipeline.Branch).Equal("")
 		})
 
-		g.It("should convert push hook to build", func() {
+		g.It("should convert push hook to pipeline", func() {
 			change := internal.PostHook{}
 
 			change.RefChanges = append(change.RefChanges, internal.RefChange{
@@ -112,19 +112,19 @@ func Test_helper(t *testing.T) {
 			change.Repository.Project.Key = "octocat"
 			change.Repository.Slug = "hello-world"
 
-			build := convertPushHook(&change, "http://base.com")
-			g.Assert(build.Event).Equal(model.EventPush)
+			pipeline := convertPushHook(&change, "http://base.com")
+			g.Assert(pipeline.Event).Equal(model.EventPush)
 			// Ensuring the author label is not longer then 40
-			g.Assert(build.Author).Equal("John Doe, Appleboy, Mary, Janet E. Da...")
-			g.Assert(build.Avatar).Equal(avatarLink("huh@huh.com"))
-			g.Assert(build.Commit).Equal("73f9c44d")
-			g.Assert(build.Branch).Equal("release/some-feature")
-			g.Assert(build.Link).Equal("http://base.com/projects/octocat/repos/hello-world/commits/73f9c44d")
-			g.Assert(build.Ref).Equal("refs/heads/release/some-feature")
-			g.Assert(build.Message).Equal("message")
+			g.Assert(pipeline.Author).Equal("John Doe, Appleboy, Mary, Janet E. Da...")
+			g.Assert(pipeline.Avatar).Equal(avatarLink("huh@huh.com"))
+			g.Assert(pipeline.Commit).Equal("73f9c44d")
+			g.Assert(pipeline.Branch).Equal("release/some-feature")
+			g.Assert(pipeline.Link).Equal("http://base.com/projects/octocat/repos/hello-world/commits/73f9c44d")
+			g.Assert(pipeline.Ref).Equal("refs/heads/release/some-feature")
+			g.Assert(pipeline.Message).Equal("message")
 		})
 
-		g.It("should convert tag hook to build", func() {
+		g.It("should convert tag hook to pipeline", func() {
 			change := internal.PostHook{}
 			change.RefChanges = append(change.RefChanges, internal.RefChange{
 				RefID:  "refs/tags/v1",
@@ -140,15 +140,15 @@ func Test_helper(t *testing.T) {
 			change.Repository.Project.Key = "octocat"
 			change.Repository.Slug = "hello-world"
 
-			build := convertPushHook(&change, "http://base.com")
-			g.Assert(build.Event).Equal(model.EventTag)
-			g.Assert(build.Author).Equal("John Doe")
-			g.Assert(build.Avatar).Equal(avatarLink("huh@huh.com"))
-			g.Assert(build.Commit).Equal("73f9c44d")
-			g.Assert(build.Branch).Equal("v1")
-			g.Assert(build.Link).Equal("http://base.com/projects/octocat/repos/hello-world/commits/73f9c44d")
-			g.Assert(build.Ref).Equal("refs/tags/v1")
-			g.Assert(build.Message).Equal("message")
+			pipeline := convertPushHook(&change, "http://base.com")
+			g.Assert(pipeline.Event).Equal(model.EventTag)
+			g.Assert(pipeline.Author).Equal("John Doe")
+			g.Assert(pipeline.Avatar).Equal(avatarLink("huh@huh.com"))
+			g.Assert(pipeline.Commit).Equal("73f9c44d")
+			g.Assert(pipeline.Branch).Equal("v1")
+			g.Assert(pipeline.Link).Equal("http://base.com/projects/octocat/repos/hello-world/commits/73f9c44d")
+			g.Assert(pipeline.Ref).Equal("refs/tags/v1")
+			g.Assert(pipeline.Message).Equal("message")
 		})
 	})
 }

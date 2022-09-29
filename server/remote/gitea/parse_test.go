@@ -40,7 +40,7 @@ func Test_parser(t *testing.T) {
 			g.Assert(err).IsNil()
 		})
 		g.Describe("given a push hook", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
@@ -54,7 +54,7 @@ func Test_parser(t *testing.T) {
 			})
 		})
 		g.Describe("given a push hook from an branch creation", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPushBranch)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}

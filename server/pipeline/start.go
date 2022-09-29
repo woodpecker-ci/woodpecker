@@ -46,7 +46,7 @@ func start(ctx context.Context, store store.Store, activeBuild *model.Pipeline, 
 		return nil, err
 	}
 
-	if err := updateBuildStatus(ctx, activeBuild, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, activeBuild, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 

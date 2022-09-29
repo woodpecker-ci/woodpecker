@@ -169,16 +169,16 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
-					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
-						assert.Equal(t, build.Event, model.EventPush)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+						assert.Equal(t, pipeline.Event, model.EventPush)
 						assert.Equal(t, "test", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
-						assert.Equal(t, "refs/heads/master", build.Ref)
-						assert.Equal(t, []string{"cmd/cli/main.go"}, build.ChangedFiles)
+						assert.Equal(t, "refs/heads/master", pipeline.Ref)
+						assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
 					}
 				})
 			})
@@ -192,15 +192,15 @@ func Test_Gitlab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, build, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
-					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "test", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
-						assert.Equal(t, "refs/tags/v22", build.Ref)
-						assert.Len(t, build.ChangedFiles, 0)
+						assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+						assert.Len(t, pipeline.ChangedFiles, 0)
 					}
 				})
 			})
@@ -215,15 +215,15 @@ func Test_Gitlab(t *testing.T) {
 					req.Header = testdata.ServiceHookHeaders
 
 					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-					hookRepo, build, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
-					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "main", hookRepo.Branch)
 						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
-						assert.Equal(t, "Update client.go 🎉", build.Title)
-						assert.Len(t, build.ChangedFiles, 0) // see L217
+						assert.Equal(t, "Update client.go 🎉", pipeline.Title)
+						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 					}
 				})
 			})

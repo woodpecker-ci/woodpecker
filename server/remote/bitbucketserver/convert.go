@@ -79,7 +79,7 @@ func convertRepo(from *internal.Repo) *model.Repo {
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
-// hook to the Woodpecker build struct holding commit information.
+// hook to the Woodpecker pipeline struct holding commit information.
 func convertPushHook(hook *internal.PostHook, baseURL string) *model.Pipeline {
 	branch := strings.TrimPrefix(
 		strings.TrimPrefix(
@@ -95,7 +95,7 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Pipeline {
 		authorLabel = authorLabel[0:37] + "..."
 	}
 
-	build := &model.Pipeline{
+	pipeline := &model.Pipeline{
 		Commit:    hook.RefChanges[0].ToHash, // TODO check for index value
 		Branch:    branch,
 		Message:   hook.Changesets.Values[0].ToCommit.Message, // TODO check for index Values
@@ -107,12 +107,12 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Pipeline {
 		Link:      fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, hook.Repository.Project.Key, hook.Repository.Slug, hook.RefChanges[0].ToHash),
 	}
 	if strings.HasPrefix(hook.RefChanges[0].RefID, "refs/tags/") {
-		build.Event = model.EventTag
+		pipeline.Event = model.EventTag
 	} else {
-		build.Event = model.EventPush
+		pipeline.Event = model.EventPush
 	}
 
-	return build
+	return pipeline
 }
 
 // convertUser is a helper function used to convert a Bitbucket user account

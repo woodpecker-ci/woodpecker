@@ -99,7 +99,7 @@ func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
 	ExitCode := 0
 	if eerr, ok := err.(*exec.ExitError); ok {
 		ExitCode = eerr.ExitCode()
-		// Non-zero exit code is a build failure, but not an agent error.
+		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
 	return &types.State{

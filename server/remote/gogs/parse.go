@@ -54,8 +54,8 @@ func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Pipeline,
 // If the commit type is unsupported nil values are returned.
 func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Pipeline
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	push, err := parsePush(payload)
@@ -69,16 +69,16 @@ func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pip
 	}
 
 	repo = toRepo(push.Repo, privateMode)
-	build = buildFromPush(push)
-	return repo, build, err
+	pipeline = pipelineFromPush(push)
+	return repo, pipeline, err
 }
 
 // parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
 func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Pipeline
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	push, err := parsePush(payload)
@@ -91,15 +91,15 @@ func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.
 	}
 
 	repo = toRepo(push.Repo, privateMode)
-	build = buildFromTag(push)
-	return repo, build, err
+	pipeline = pipelineFromTag(push)
+	return repo, pipeline, err
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
 func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Pipeline
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	pr, err := parsePullRequest(payload)
@@ -107,7 +107,7 @@ func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *mo
 		return nil, nil, err
 	}
 
-	// Don't trigger builds for non-code changes, or if PR is not open
+	// Don't trigger pipelines for non-code changes, or if PR is not open
 	if pr.Action != actionOpen && pr.Action != actionSync {
 		return nil, nil, nil
 	}
@@ -116,6 +116,6 @@ func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *mo
 	}
 
 	repo = toRepo(pr.Repo, privateMode)
-	build = buildFromPullRequest(pr)
-	return repo, build, err
+	pipeline = pipelineFromPullRequest(pr)
+	return repo, pipeline, err
 }

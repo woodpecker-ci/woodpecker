@@ -302,11 +302,11 @@ func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
 func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, build, err := parseHook(r)
-	if build != nil {
-		build.Avatar = c.resourceLink(build.Avatar)
+	repo, pipeline, err := parseHook(r)
+	if pipeline != nil {
+		pipeline.Avatar = c.resourceLink(pipeline.Avatar)
 	}
-	return repo, build, err
+	return repo, pipeline, err
 }
 
 // OrgMembership returns if user is member of organization and if user

@@ -93,7 +93,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	newBuild, buildItems, err := createPipelineItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
 		if errors.Is(err, &yaml.PipelineParseError{}) {
 			return newBuild, nil

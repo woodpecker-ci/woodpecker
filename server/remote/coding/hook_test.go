@@ -47,7 +47,7 @@ func Test_hook(t *testing.T) {
 				SCMKind:  model.RepoGit,
 			}
 
-			build := &model.Pipeline{
+			pipeline := &model.Pipeline{
 				Event:   model.EventPush,
 				Commit:  "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
 				Ref:     "refs/heads/master",
@@ -60,10 +60,10 @@ func Test_hook(t *testing.T) {
 				Remote:  "https://git.coding.net/demo1/test1.git",
 			}
 
-			actualRepo, actualBuild, err := parseHook(r)
+			actualRepo, actualPipeline, err := parseHook(r)
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
-			g.Assert(actualBuild).Equal(build)
+			g.Assert(actualPipeline).Equal(pipeline)
 		})
 
 		g.It("Should find last commit", func() {
@@ -115,7 +115,7 @@ func Test_hook(t *testing.T) {
 				SCMKind:  model.RepoGit,
 			}
 
-			build := &model.Pipeline{
+			pipeline := &model.Pipeline{
 				Event:   model.EventPush,
 				Commit:  "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
 				Ref:     "refs/heads/master",
@@ -128,17 +128,17 @@ func Test_hook(t *testing.T) {
 				Remote:  "https://git.coding.net/demo1/test1.git",
 			}
 
-			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.PushHook))
+			actualRepo, actualPipeline, err := parsePushHook([]byte(fixtures.PushHook))
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
-			g.Assert(actualBuild).Equal(build)
+			g.Assert(actualPipeline).Equal(pipeline)
 		})
 
 		g.It("Should parse delete branch push hook", func() {
-			actualRepo, actualBuild, err := parsePushHook([]byte(fixtures.DeleteBranchPushHook))
+			actualRepo, actualPipeline, err := parsePushHook([]byte(fixtures.DeleteBranchPushHook))
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).IsNil()
-			g.Assert(actualBuild).IsNil()
+			g.Assert(actualPipeline).IsNil()
 		})
 
 		g.It("Should parse pull request hook", func() {
@@ -151,7 +151,7 @@ func Test_hook(t *testing.T) {
 				SCMKind:  model.RepoGit,
 			}
 
-			build := &model.Pipeline{
+			pipeline := &model.Pipeline{
 				Event:   model.EventPull,
 				Commit:  "55e77b328b71d3ee4f9e70a5f67231b0acceeadc",
 				Link:    "https://coding.net/u/demo1/p/test2/git/pull/1",
@@ -165,10 +165,10 @@ func Test_hook(t *testing.T) {
 				Refspec: "master:master",
 			}
 
-			actualRepo, actualBuild, err := parsePullRequestHook([]byte(fixtures.PullRequestHook))
+			actualRepo, actualPipeline, err := parsePullRequestHook([]byte(fixtures.PullRequestHook))
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
-			g.Assert(actualBuild).Equal(build)
+			g.Assert(actualPipeline).Equal(pipeline)
 		})
 
 		g.It("Should parse merge request hook", func() {
@@ -181,7 +181,7 @@ func Test_hook(t *testing.T) {
 				SCMKind:  model.RepoGit,
 			}
 
-			build := &model.Pipeline{
+			pipeline := &model.Pipeline{
 				Event:   model.EventPull,
 				Commit:  "74e6755580c34e9fd81dbcfcbd43ee5f30259436",
 				Link:    "https://coding.net/u/demo1/p/test1/git/merge/1",
@@ -195,10 +195,10 @@ func Test_hook(t *testing.T) {
 				Refspec: "branch1:master",
 			}
 
-			actualRepo, actualBuild, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))
+			actualRepo, actualPipeline, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
-			g.Assert(actualBuild).Equal(build)
+			g.Assert(actualPipeline).Equal(pipeline)
 		})
 	})
 }

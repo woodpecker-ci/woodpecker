@@ -42,7 +42,7 @@ func Decline(ctx context.Context, store store.Store, build *model.Pipeline, user
 		log.Error().Err(err).Msg("can not build tree from proc list")
 	}
 
-	if err := updateBuildStatus(ctx, build, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, build, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 

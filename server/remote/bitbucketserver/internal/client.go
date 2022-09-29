@@ -193,7 +193,7 @@ func (c *Client) CreateHook(owner, name, callBackLink string) error {
 	return c.doPut(fmt.Sprintf(pathHookEnabled, c.base, owner, name, hookName), hookBytes)
 }
 
-func (c *Client) CreateStatus(revision string, status *BuildStatus) error {
+func (c *Client) CreateStatus(revision string, status *PipelineStatus) error {
 	uri := fmt.Sprintf(pathStatus, c.base, revision)
 	return c.doPost(uri, status)
 }
@@ -274,7 +274,7 @@ func (c *Client) doPut(url string, body []byte) error {
 }
 
 // Helper function to help create the hook
-func (c *Client) doPost(url string, status *BuildStatus) error {
+func (c *Client) doPost(url string, status *PipelineStatus) error {
 	// write it to the body of the request.
 	var buf io.ReadWriter
 	if status != nil {

@@ -53,7 +53,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Pipeline, err error) {
+func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -70,13 +70,13 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Pipeline, 
 	}
 
 	repo = toRepo(push.Repo)
-	build = buildFromPush(push)
-	return repo, build, err
+	pipeline = pipelineFromPush(push)
+	return repo, pipeline, err
 }
 
 // parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Pipeline, err error) {
+func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -87,15 +87,15 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Pipelin
 	}
 
 	repo = toRepo(push.Repo)
-	build = buildFromTag(push)
-	return repo, build, nil
+	pipeline = pipelineFromTag(push)
+	return repo, pipeline, nil
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
 func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Pipeline
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	pr, err := parsePullRequest(payload)
@@ -103,7 +103,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Don't trigger builds for non-code changes, or if PR is not open
+	// Don't trigger pipelines for non-code changes, or if PR is not open
 	if pr.Action != actionOpen && pr.Action != actionSync {
 		return nil, nil, nil
 	}
@@ -112,6 +112,6 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	}
 
 	repo = toRepo(pr.Repo)
-	build = buildFromPullRequest(pr)
-	return repo, build, err
+	pipeline = pipelineFromPullRequest(pr)
+	return repo, pipeline, err
 }

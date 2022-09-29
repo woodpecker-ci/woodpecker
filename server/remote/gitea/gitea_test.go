@@ -131,13 +131,13 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
-		g.It("Should return nil from send build status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, fakeProc)
+		g.It("Should return nil from send pipeline status", func() {
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeProc)
 			g.Assert(err).IsNil()
 		})
 
@@ -181,7 +181,7 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
-	fakeBuild = &model.Pipeline{
+	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 

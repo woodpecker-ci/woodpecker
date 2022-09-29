@@ -36,7 +36,7 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, proc *
 }
 
 // GetPipelineStatusDescription is a helper function that generates a description
-// message for the current build status.
+// message for the current pipeline status.
 func GetPipelineStatusDescription(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:

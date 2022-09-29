@@ -28,26 +28,26 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createBuildItems(ctx context.Context, store store.Store, build *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
+func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
 	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
 	}
 
-	// get the previous build so that we can send status change notifications
-	last, err := store.GetBuildLastBefore(repo, build.Branch, build.ID)
+	// get the previous pipeline so that we can send status change notifications
+	last, err := store.GetPipelineLastBefore(repo, pipeline.Branch, pipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", pipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListBuild(repo, build)
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, pipeline)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
+		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, pipeline.Number)
 	}
 
 	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
+		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, pipeline.Number)
 	}
 
 	if envs == nil {
@@ -60,13 +60,13 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Pipel
 		}
 	}
 
-	for k, v := range build.AdditionalVariables {
+	for k, v := range pipeline.AdditionalVariables {
 		envs[k] = v
 	}
 
 	b := shared.ProcBuilder{
 		Repo:  repo,
-		Curr:  build,
+		Curr:  pipeline,
 		Last:  last,
 		Netrc: netrc,
 		Secs:  secs,
@@ -75,16 +75,16 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Pipel
 		Link:  server.Config.Server.Host,
 		Yamls: yamls,
 	}
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
-		build, uerr := shared.UpdateToStatusError(store, *build, err)
+		pipeline, uerr := shared.UpdateToStatusError(store, *pipeline, err)
 		if uerr != nil {
-			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
+			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, pipeline.Number)
 		}
-		return build, nil, err
+		return pipeline, nil, err
 	}
 
-	build = shared.SetPipelineStepsOnPipeline(b.Curr, buildItems)
+	pipeline = shared.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
 
-	return build, buildItems, nil
+	return pipeline, pipelineItems, nil
 }

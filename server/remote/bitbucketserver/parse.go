@@ -29,8 +29,8 @@ func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Pipeline, e
 	if err := json.NewDecoder(r.Body).Decode(hook); err != nil {
 		return nil, nil, err
 	}
-	build := convertPushHook(hook, baseURL)
+	pipeline := convertPushHook(hook, baseURL)
 	repo := convertRepo(&hook.Repository)
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }

@@ -62,7 +62,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 
 func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Pipeline{}
+	pipeline := &model.Pipeline{}
 
 	target := hook.ObjectAttributes.Target
 	source := hook.ObjectAttributes.Source
@@ -107,35 +107,35 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.Avatar = target.AvatarURL
 	}
 
-	build.Event = model.EventPull
+	pipeline.Event = model.EventPull
 
 	lastCommit := obj.LastCommit
 
-	build.Message = lastCommit.Message
-	build.Commit = lastCommit.ID
-	build.Remote = obj.Source.HTTPURL
+	pipeline.Message = lastCommit.Message
+	pipeline.Commit = lastCommit.ID
+	pipeline.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf(mergeRefs, obj.IID)
-	build.Branch = obj.SourceBranch
+	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
+	pipeline.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
 
-	build.Author = author.Name
-	build.Email = author.Email
+	pipeline.Author = author.Name
+	pipeline.Email = author.Email
 
-	if len(build.Email) != 0 {
-		build.Avatar = getUserAvatar(build.Email)
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
-	build.Title = obj.Title
-	build.Link = obj.URL
+	pipeline.Title = obj.Title
+	pipeline.Link = obj.URL
 
-	return obj.IID, repo, build, nil
+	return obj.IID, repo, pipeline, nil
 }
 
 func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Pipeline{}
+	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
@@ -158,21 +158,21 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		repo.IsSCMPrivate = false
 	}
 
-	build.Event = model.EventPush
-	build.Commit = hook.After
-	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
-	build.Ref = hook.Ref
+	pipeline.Event = model.EventPush
+	pipeline.Commit = hook.After
+	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.Ref = hook.Ref
 
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			build.Author = cm.Author.Name
-			build.Email = cm.Author.Email
-			build.Message = cm.Message
-			build.Timestamp = cm.Timestamp.Unix()
-			if len(build.Email) != 0 {
-				build.Avatar = getUserAvatar(build.Email)
+			pipeline.Author = cm.Author.Name
+			pipeline.Email = cm.Author.Email
+			pipeline.Message = cm.Message
+			pipeline.Timestamp = cm.Timestamp.Unix()
+			if len(pipeline.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
 		}
 
@@ -180,14 +180,14 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	build.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DedupStrings(files)
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
 func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Pipeline{}
+	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
@@ -210,25 +210,25 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		repo.IsSCMPrivate = false
 	}
 
-	build.Event = model.EventTag
-	build.Commit = hook.After
-	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
-	build.Ref = hook.Ref
+	pipeline.Event = model.EventTag
+	pipeline.Commit = hook.After
+	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.Ref = hook.Ref
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			build.Author = cm.Author.Name
-			build.Email = cm.Author.Email
-			build.Message = cm.Message
-			build.Timestamp = cm.Timestamp.Unix()
-			if len(build.Email) != 0 {
-				build.Avatar = getUserAvatar(build.Email)
+			pipeline.Author = cm.Author.Name
+			pipeline.Email = cm.Author.Email
+			pipeline.Message = cm.Message
+			pipeline.Timestamp = cm.Timestamp.Unix()
+			if len(pipeline.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
 			break
 		}
 	}
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
 func getUserAvatar(email string) string {

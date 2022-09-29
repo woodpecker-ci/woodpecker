@@ -351,7 +351,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Pipeline, proc *model.Proc) error {
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
 	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
@@ -360,12 +360,12 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.CreateStatus(
 		repo.Owner,
 		repo.Name,
-		build.Commit,
+		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(proc.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, build, proc),
+			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, proc),
 			Description: common.GetPipelineStatusDescription(proc.State),
-			Context:     common.GetPipelineStatusContext(repo, build, proc),
+			Context:     common.GetPipelineStatusContext(repo, pipeline, proc),
 		},
 	)
 	return err

@@ -38,7 +38,7 @@ type SelfRefLink struct {
 	Href string `json:"href"`
 }
 
-type BuildStatus struct {
+type PipelineStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
