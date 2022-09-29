@@ -85,7 +85,7 @@ func (Secret) TableName() string {
 }
 
 // BeforeInsert will sort events before inserted into database
-func (s Secret) BeforeInsert() {
+func (s *Secret) BeforeInsert() {
 	s.Events = sortEvents(s.Events)
 }
 
