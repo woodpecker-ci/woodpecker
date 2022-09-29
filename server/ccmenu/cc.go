@@ -52,8 +52,8 @@ func New(r *model.Repo, b *model.Pipeline, link string) *CCProjects {
 		LastBuildLabel:  "Unknown",
 	}
 
-	// if the build is not currently running then
-	// we can return the latest build status.
+	// if the pipeline is not currently running then
+	// we can return the latest pipeline status.
 	if b.Status != model.StatusPending &&
 		b.Status != model.StatusRunning {
 		proj.Activity = "Sleeping"
@@ -61,7 +61,7 @@ func New(r *model.Repo, b *model.Pipeline, link string) *CCProjects {
 		proj.LastBuildLabel = strconv.FormatInt(b.Number, 10)
 	}
 
-	// ensure the last build Status accepts a valid
+	// ensure the last pipeline status accepts a valid
 	// ccmenu enumeration
 	switch b.Status {
 	case model.StatusError, model.StatusKilled:

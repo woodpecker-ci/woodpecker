@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// generateScriptPosix is a helper function that generates a build script
+// generateScriptPosix is a helper function that generates a pipeline script
 // for a linux container using the given
 func generateScriptPosix(commands []string) string {
 	var buf bytes.Buffer
@@ -27,7 +27,7 @@ func generateScriptPosix(commands []string) string {
 	return base64.StdEncoding.EncodeToString([]byte(script))
 }
 
-// setupScript is a helper script this is added to the build to ensure
+// setupScript is a helper script this is added to the pipeline to ensure
 // a minimum set of environment variables are set correctly.
 const setupScript = `
 if [ -n "$CI_NETRC_MACHINE" ]; then
@@ -44,7 +44,7 @@ unset CI_SCRIPT
 %s
 `
 
-// traceScript is a helper script that is added to the build script
+// traceScript is a helper script that is added to the pipeline script
 // to trace a command.
 const traceScript = `
 echo + %s

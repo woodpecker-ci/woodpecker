@@ -28,7 +28,7 @@ type ProcStore interface {
 	ProcClear(*Pipeline) error
 }
 
-// Proc represents a process in the build pipeline.
+// Proc represents a process in the pipeline.
 // swagger:model proc
 type Proc struct {
 	ID         int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
@@ -111,8 +111,8 @@ func Tree(procs []*Proc) ([]*Proc, error) {
 	return nodes, nil
 }
 
-// BuildStatus determine build status based on corresponding proc list
-func BuildStatus(procs []*Proc) StatusValue {
+// PipelineStatus determine pipeline status based on corresponding proc list
+func PipelineStatus(procs []*Proc) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range procs {

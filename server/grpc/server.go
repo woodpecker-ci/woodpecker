@@ -37,14 +37,14 @@ type WoodpeckerServer struct {
 }
 
 func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
-	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "build_time",
+		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
-		Name:      "build_count",
+		Name:      "pipeline_count",
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
@@ -54,8 +54,8 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 		pubsub:        pubsub,
 		logger:        logger,
 		host:          host,
-		pipelineTime:  buildTime,
-		pipelineCount: buildCount,
+		pipelineTime:  pipelineTime,
+		pipelineCount: pipelineCount,
 	}
 	return &WoodpeckerServer{peer: peer}
 }

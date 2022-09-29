@@ -33,12 +33,12 @@ func (m *mockUpdatePipelineStore) UpdatePipeline(pipeline *model.Pipeline) error
 func TestUpdateToStatusRunning(t *testing.T) {
 	t.Parallel()
 
-	build, _ := UpdateToStatusRunning(&mockUpdatePipelineStore{}, model.Pipeline{}, int64(1))
+	pipeline, _ := UpdateToStatusRunning(&mockUpdatePipelineStore{}, model.Pipeline{}, int64(1))
 
-	if model.StatusRunning != build.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusRunning, build.Status)
-	} else if int64(1) != build.Started {
-		t.Errorf("Pipeline started not equals 1 != %d", build.Started)
+	if model.StatusRunning != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusRunning, pipeline.Status)
+	} else if int64(1) != pipeline.Started {
+		t.Errorf("Pipeline started not equals 1 != %d", pipeline.Started)
 	}
 }
 
@@ -47,14 +47,14 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	build, _ := UpdateToStatusPending(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdateToStatusPending(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	if model.StatusPending != build.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusPending, build.Status)
-	} else if build.Reviewer != "Reviewer" {
-		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
-	} else if now > build.Reviewed {
-		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
+	if model.StatusPending != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusPending, pipeline.Status)
+	} else if pipeline.Reviewer != "Reviewer" {
+		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
+	} else if now > pipeline.Reviewed {
+		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
 	}
 }
 
@@ -63,26 +63,26 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	build, _ := UpdateToStatusDeclined(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdateToStatusDeclined(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	if model.StatusDeclined != build.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusDeclined, build.Status)
-	} else if build.Reviewer != "Reviewer" {
-		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", build.Reviewer)
-	} else if now > build.Reviewed {
-		t.Errorf("Reviewed not updated %d !< %d", now, build.Reviewed)
+	if model.StatusDeclined != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusDeclined, pipeline.Status)
+	} else if pipeline.Reviewer != "Reviewer" {
+		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
+	} else if now > pipeline.Reviewed {
+		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
 	}
 }
 
 func TestUpdateToStatusToDone(t *testing.T) {
 	t.Parallel()
 
-	build, _ := UpdateStatusToDone(&mockUpdatePipelineStore{}, model.Pipeline{}, "status", int64(1))
+	pipeline, _ := UpdateStatusToDone(&mockUpdatePipelineStore{}, model.Pipeline{}, "status", int64(1))
 
-	if build.Status != "status" {
-		t.Errorf("Pipeline status not equals 'status' != '%s'", build.Status)
-	} else if int64(1) != build.Finished {
-		t.Errorf("Pipeline finished not equals 1 != %d", build.Finished)
+	if pipeline.Status != "status" {
+		t.Errorf("Pipeline status not equals 'status' != '%s'", pipeline.Status)
+	} else if int64(1) != pipeline.Finished {
+		t.Errorf("Pipeline finished not equals 1 != %d", pipeline.Finished)
 	}
 }
 
@@ -91,16 +91,16 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	build, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("error"))
+	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("error"))
 
-	if build.Error != "error" {
-		t.Errorf("Pipeline error not equals 'error' != '%s'", build.Error)
-	} else if model.StatusError != build.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, build.Status)
-	} else if now > build.Started {
-		t.Errorf("Started not updated %d !< %d", now, build.Started)
-	} else if build.Started != build.Finished {
-		t.Errorf("Pipeline started and finished not equals %d != %d", build.Started, build.Finished)
+	if pipeline.Error != "error" {
+		t.Errorf("Pipeline error not equals 'error' != '%s'", pipeline.Error)
+	} else if model.StatusError != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, pipeline.Status)
+	} else if now > pipeline.Started {
+		t.Errorf("Started not updated %d !< %d", now, pipeline.Started)
+	} else if pipeline.Started != pipeline.Finished {
+		t.Errorf("Pipeline started and finished not equals %d != %d", pipeline.Started, pipeline.Finished)
 	}
 }
 
@@ -109,11 +109,11 @@ func TestUpdateToStatusKilled(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	build, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{})
+	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{})
 
-	if model.StatusKilled != build.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusKilled, build.Status)
-	} else if now > build.Finished {
-		t.Errorf("Finished not updated %d !< %d", now, build.Finished)
+	if model.StatusKilled != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusKilled, pipeline.Status)
+	} else if now > pipeline.Finished {
+		t.Errorf("Finished not updated %d !< %d", now, pipeline.Finished)
 	}
 }

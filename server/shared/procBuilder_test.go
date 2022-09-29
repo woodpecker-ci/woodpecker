@@ -375,11 +375,11 @@ pipeline:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Pipeline{Branch: "dev"}
+	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
+		Curr:  pipeline,
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},

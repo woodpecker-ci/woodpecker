@@ -24,31 +24,31 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Decline update the status to declined for blocked build because of a gated repo
-func Decline(ctx context.Context, store store.Store, build *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
-	if build.Status != model.StatusBlocked {
-		return nil, fmt.Errorf("cannot decline a build with status %s", build.Status)
+// Decline update the status to declined for blocked pipeline because of a gated repo
+func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	if pipeline.Status != model.StatusBlocked {
+		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	_, err := shared.UpdateToStatusDeclined(store, *build, user.Login)
+	_, err := shared.UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
-		return nil, fmt.Errorf("error updating build. %s", err)
+		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
-	if build.Procs, err = store.ProcList(build); err != nil {
+	if pipeline.Procs, err = store.ProcList(pipeline); err != nil {
 		log.Error().Err(err).Msg("can not get proc list from store")
 	}
-	if build.Procs, err = model.Tree(build.Procs); err != nil {
+	if pipeline.Procs, err = model.Tree(pipeline.Procs); err != nil {
 		log.Error().Err(err).Msg("can not build tree from proc list")
 	}
 
-	if err := updatePipelineStatus(ctx, build, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, pipeline, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 
-	if err := publishToTopic(ctx, build, repo); err != nil {
+	if err := publishToTopic(ctx, pipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	return build, nil
+	return pipeline, nil
 }

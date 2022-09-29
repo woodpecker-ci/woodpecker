@@ -26,9 +26,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func queueBuild(build *model.Pipeline, repo *model.Repo, buildItems []*shared.PipelineItem) error {
+func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*shared.PipelineItem) error {
 	var tasks []*queue.Task
-	for _, item := range buildItems {
+	for _, item := range pipelineItems {
 		if item.Proc.State == model.StatusSkipped {
 			continue
 		}
@@ -40,7 +40,7 @@ func queueBuild(build *model.Pipeline, repo *model.Repo, buildItems []*shared.Pi
 		}
 		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
-		task.Dependencies = taskIds(item.DependsOn, buildItems)
+		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]string)
 
@@ -58,11 +58,11 @@ func queueBuild(build *model.Pipeline, repo *model.Repo, buildItems []*shared.Pi
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*shared.PipelineItem) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*shared.PipelineItem) (taskIds []string) {
 	for _, dep := range dependsOn {
-		for _, buildItem := range buildItems {
-			if buildItem.Proc.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(buildItem.Proc.ID))
+		for _, pipelineItem := range pipelineItems {
+			if pipelineItem.Proc.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Proc.ID))
 			}
 		}
 	}

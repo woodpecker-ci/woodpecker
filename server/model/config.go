@@ -17,7 +17,7 @@ package model
 
 // ConfigStore persists pipeline configuration to storage.
 type ConfigStore interface {
-	ConfigsForPipeline(buildID int64) ([]*Config, error)
+	ConfigsForPipeline(pipelineID int64) ([]*Config, error)
 	ConfigFindIdentical(repoID int64, hash string) (*Config, error)
 	ConfigFindApproved(*Config) (bool, error)
 	ConfigCreate(*Config) error

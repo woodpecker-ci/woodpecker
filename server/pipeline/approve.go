@@ -26,15 +26,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Approve update the status to pending for blocked build because of a gated repo
+// Approve update the status to pending for blocked pipeline because of a gated repo
 // and start them afterwards
 func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if pipeline.Status != model.StatusBlocked {
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", pipeline.Status)}
 	}
 
-	// fetch the build file from the database
-	configs, err := store.ConfigsForBuild(pipeline.ID)
+	// fetch the pipeline file from the database
+	configs, err := store.ConfigsForPipeline(pipeline.ID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
@@ -50,14 +50,14 @@ func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	pipeline, buildItems, err := createPipelineItems(ctx, store, pipeline, user, repo, yamls, nil)
+	pipeline, pipelineItems, err := createPipelineItems(ctx, store, pipeline, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, store, pipeline, user, repo, buildItems)
+	pipeline, err = start(ctx, store, pipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)

@@ -14,10 +14,10 @@
 
 package model
 
-// EventType defines the possible types of build events.
+// EventType defines the possible types of pipeline events.
 type EventType string
 
-// Event represents a build event.
+// Event represents a pipeline event.
 type Event struct {
 	Repo     Repo     `json:"repo"`
 	Pipeline Pipeline `json:"build"`

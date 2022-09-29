@@ -25,21 +25,21 @@ import (
 )
 
 // publishToTopic publishes message to UI clients
-func publishToTopic(c context.Context, build *model.Pipeline, repo *model.Repo) (err error) {
+func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	buildCopy := *build
-	if buildCopy.Procs, err = model.Tree(buildCopy.Procs); err != nil {
+	pipelineCopy := *pipeline
+	if pipelineCopy.Procs, err = model.Tree(pipelineCopy.Procs); err != nil {
 		return err
 	}
 
 	message.Data, _ = json.Marshal(model.Event{
 		Repo:     *repo,
-		Pipeline: buildCopy,
+		Pipeline: pipelineCopy,
 	})
 	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }

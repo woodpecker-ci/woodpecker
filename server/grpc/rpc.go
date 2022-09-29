@@ -141,7 +141,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("can not get proc list from store")
 	}
 	if pipeline.Procs, err = model.Tree(pipeline.Procs); err != nil {
-		log.Error().Err(err).Msg("can not pipeline tree from proc list")
+		log.Error().Err(err).Msg("can not build tree from proc list")
 		return err
 	}
 	message := pubsub.Message{
@@ -174,13 +174,13 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		return err
 	}
 
-	build, err := s.store.GetPipeline(pproc.PipelineID)
+	pipeline, err := s.store.GetPipeline(pproc.PipelineID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pproc.PipelineID, err)
 		return err
 	}
 
-	proc, err := s.store.ProcChild(build, pproc.PID, file.Proc)
+	proc, err := s.store.ProcChild(pipeline, pproc.PID, file.Proc)
 	if err != nil {
 		log.Error().Msgf("error: cannot find child proc with name %s: %s", file.Proc, err)
 		return err
@@ -345,7 +345,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !model.IsThereRunningStage(procs) {
-		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.BuildStatus(procs), proc.Stopped); err != nil {
+		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(procs), proc.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", pipeline.ID)
 		}
 	}

@@ -24,12 +24,12 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func findOrPersistPipelineConfig(store store.Store, build *model.Pipeline, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(store store.Store, pipeline *model.Pipeline, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := fmt.Sprintf("%x", sha256.Sum256(remoteYamlConfig.Data))
-	conf, err := store.ConfigFindIdentical(build.RepoID, sha)
+	conf, err := store.ConfigFindIdentical(pipeline.RepoID, sha)
 	if err != nil {
 		conf = &model.Config{
-			RepoID: build.RepoID,
+			RepoID: pipeline.RepoID,
 			Data:   remoteYamlConfig.Data,
 			Hash:   sha,
 			Name:   shared.SanitizePath(remoteYamlConfig.Name),
@@ -37,18 +37,18 @@ func findOrPersistPipelineConfig(store store.Store, build *model.Pipeline, remot
 		err = store.ConfigCreate(conf)
 		if err != nil {
 			// retry in case we receive two hooks at the same time
-			conf, err = store.ConfigFindIdentical(build.RepoID, sha)
+			conf, err = store.ConfigFindIdentical(pipeline.RepoID, sha)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	buildConfig := &model.PipelineConfig{
+	pipelineConfig := &model.PipelineConfig{
 		ConfigID:   conf.ID,
-		PipelineID: build.ID,
+		PipelineID: pipeline.ID,
 	}
-	if err := store.BuildConfigCreate(buildConfig); err != nil {
+	if err := store.PipelineConfigCreate(pipelineConfig); err != nil {
 		return nil, err
 	}
 

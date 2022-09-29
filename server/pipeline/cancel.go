@@ -27,13 +27,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Cancel the build and returns the status.
-func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *model.Pipeline) error {
-	if build.Status != model.StatusRunning && build.Status != model.StatusPending && build.Status != model.StatusBlocked {
-		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked build"}
+// Cancel the pipeline and returns the status.
+func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *model.Pipeline) error {
+	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
+		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	procs, err := store.ProcList(build)
+	procs, err := store.ProcList(pipeline)
 	if err != nil {
 		return ErrNotFound{Msg: err.Error()}
 	}
@@ -85,9 +85,9 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *mod
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(store, *build)
+	killedBuild, err := shared.UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
-		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", build)
+		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
 	}
 
@@ -108,13 +108,13 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *mod
 func cancelPreviousPipelines(
 	ctx context.Context,
 	_store store.Store,
-	build *model.Pipeline,
+	pipeline *model.Pipeline,
 	repo *model.Repo,
 ) error {
 	// check this event should cancel previous pipelines
 	eventIncluded := false
 	for _, ev := range repo.CancelPreviousPipelineEvents {
-		if ev == build.Event {
+		if ev == pipeline.Event {
 			eventIncluded = true
 			break
 		}
@@ -129,33 +129,33 @@ func cancelPreviousPipelines(
 		return err
 	}
 
-	buildNeedsCancel := func(active *model.Pipeline) (bool, error) {
+	pipelineNeedsCancel := func(active *model.Pipeline) (bool, error) {
 		// always filter on same event
-		if active.Event != build.Event {
+		if active.Event != pipeline.Event {
 			return false, nil
 		}
 
 		// find events for the same context
-		switch build.Event {
+		switch pipeline.Event {
 		case model.EventPush:
-			return build.Branch == active.Branch, nil
+			return pipeline.Branch == active.Branch, nil
 		default:
-			return build.Refspec == active.Refspec, nil
+			return pipeline.Refspec == active.Refspec, nil
 		}
 	}
 
 	for _, active := range activeBuilds {
-		if active.ID == build.ID {
-			// same build. e.g. self
+		if active.ID == pipeline.ID {
+			// same pipeline. e.g. self
 			continue
 		}
 
-		cancel, err := buildNeedsCancel(active)
+		cancel, err := pipelineNeedsCancel(active)
 		if err != nil {
 			log.Error().
 				Err(err).
 				Str("Ref", active.Ref).
-				Msg("Error while trying to cancel build, skipping")
+				Msg("Error while trying to cancel pipeline, skipping")
 			continue
 		}
 
@@ -168,7 +168,7 @@ func cancelPreviousPipelines(
 				Err(err).
 				Str("Ref", active.Ref).
 				Int64("ID", active.ID).
-				Msg("Failed to cancel build")
+				Msg("Failed to cancel pipeline")
 		}
 	}
 
