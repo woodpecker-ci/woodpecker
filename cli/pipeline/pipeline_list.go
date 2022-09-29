@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildListCmd = &cli.Command{
+var pipelineListCmd = &cli.Command{
 	Name:      "ls",
-	Usage:     "show build history",
+	Usage:     "show pipeline history",
 	ArgsUsage: "<repo/name>",
-	Action:    buildList,
+	Action:    pipelineList,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildList),
+		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
@@ -37,7 +37,7 @@ var buildListCmd = &cli.Command{
 	),
 }
 
-func buildList(c *cli.Context) error {
+func pipelineList(c *cli.Context) error {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -49,7 +49,7 @@ func buildList(c *cli.Context) error {
 		return err
 	}
 
-	builds, err := client.PipelineList(owner, name)
+	pipelines, err := client.PipelineList(owner, name)
 	if err != nil {
 		return err
 	}
@@ -65,20 +65,20 @@ func buildList(c *cli.Context) error {
 	limit := c.Int("limit")
 
 	var count int
-	for _, build := range builds {
+	for _, pipeline := range pipelines {
 		if count >= limit {
 			break
 		}
-		if branch != "" && build.Branch != branch {
+		if branch != "" && pipeline.Branch != branch {
 			continue
 		}
-		if event != "" && build.Event != event {
+		if event != "" && pipeline.Event != event {
 			continue
 		}
-		if status != "" && build.Status != status {
+		if status != "" && pipeline.Status != status {
 			continue
 		}
-		if err := tmpl.Execute(os.Stdout, build); err != nil {
+		if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
 			return err
 		}
 		count++
@@ -86,8 +86,8 @@ func buildList(c *cli.Context) error {
 	return nil
 }
 
-// template for build list information
-var tmplBuildList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
+// template for pipeline list information
+var tmplPipelineList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}

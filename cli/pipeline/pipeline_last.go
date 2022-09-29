@@ -10,13 +10,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildLastCmd = &cli.Command{
+var pipelineLastCmd = &cli.Command{
 	Name:      "last",
-	Usage:     "show latest build details",
+	Usage:     "show latest pipeline details",
 	ArgsUsage: "<repo/name>",
-	Action:    buildLast,
+	Action:    pipelineLast,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildInfo),
+		common.FormatFlag(tmplPipelineInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
@@ -25,7 +25,7 @@ var buildLastCmd = &cli.Command{
 	),
 }
 
-func buildLast(c *cli.Context) error {
+func pipelineLast(c *cli.Context) error {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -37,7 +37,7 @@ func buildLast(c *cli.Context) error {
 		return err
 	}
 
-	build, err := client.PipelineLast(owner, name, c.String("branch"))
+	pipeline, err := client.PipelineLast(owner, name, c.String("branch"))
 	if err != nil {
 		return err
 	}
@@ -46,5 +46,5 @@ func buildLast(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, build)
+	return tmpl.Execute(os.Stdout, pipeline)
 }

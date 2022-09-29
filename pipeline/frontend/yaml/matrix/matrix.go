@@ -13,10 +13,10 @@ const (
 	limitAxis = 25
 )
 
-// Matrix represents the build matrix.
+// Matrix represents the pipeline matrix.
 type Matrix map[string][]string
 
-// Axis represents a single permutation of entries from the build matrix.
+// Axis represents a single permutation of entries from the pipeline matrix.
 type Axis map[string]string
 
 // String returns a string representation of an Axis as a comma-separated list
@@ -79,7 +79,7 @@ func calc(matrix Matrix) []Axis {
 			elem := p / decr % len(elems)
 			axis[tag] = elems[elem]
 
-			// enforce a maximum number of tags in the build matrix.
+			// enforce a maximum number of tags in the pipeline matrix.
 			if i > limitTags {
 				break
 			}

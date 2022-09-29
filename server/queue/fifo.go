@@ -241,7 +241,7 @@ func (q *fifo) process() {
 		}
 	}()
 
-	q.resubmitExpiredBuilds()
+	q.resubmitExpiredPipelines()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 		task := pending.Value.(*Task)
@@ -303,7 +303,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	return nil, nil
 }
 
-func (q *fifo) resubmitExpiredBuilds() {
+func (q *fifo) resubmitExpiredPipelines() {
 	for id, state := range q.running {
 		if time.Now().After(state.deadline) {
 			q.pending.PushFront(state.item)

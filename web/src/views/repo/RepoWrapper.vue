@@ -59,7 +59,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import BuildStore from '~/store/pipelines';
+import PipelineStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
@@ -77,7 +77,7 @@ const props = defineProps({
 const repoOwner = toRef(props, 'repoOwner');
 const repoName = toRef(props, 'repoName');
 const repoStore = RepoStore();
-const buildStore = BuildStore();
+const pipelineStore = PipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { isAuthenticated } = useAuthentication();
@@ -88,10 +88,10 @@ const i18n = useI18n();
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
 const repoPermissions = ref<RepoPermissions>();
-const builds = buildStore.getSortedPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getSortedPipelines(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
-provide('builds', builds);
+provide('pipelines', pipelines);
 
 const showManualPipelinePopup = ref(false);
 
@@ -116,7 +116,7 @@ async function loadRepo() {
     });
     return;
   }
-  await buildStore.loadPipelines(repoOwner.value, repoName.value);
+  await pipelineStore.loadPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {

@@ -1,8 +1,8 @@
 <template>
-  <div v-if="build" class="flex text-color w-full">
-    <BuildStatusIcon :build="build" class="flex items-center" />
+  <div v-if="pipeline" class="flex text-color w-full">
+    <PipelineStatusIcon :pipeline="pipeline" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
-      <span class="underline">{{ build.owner }} / {{ build.name }}</span>
+      <span class="underline">{{ pipeline.owner }} / {{ pipeline.name }}</span>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
@@ -28,25 +28,25 @@ import { Tooltip } from 'floating-vue';
 import { defineComponent, PropType, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
-import BuildStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
-import useBuild from '~/compositions/usePipeline';
+import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
+import usePipeline from '~/compositions/usePipeline';
 import { PipelineFeed } from '~/lib/api/types';
 
 export default defineComponent({
-  name: 'BuildFeedItem',
+  name: 'PipelineFeedItem',
 
-  components: { BuildStatusIcon, Icon, Tooltip },
+  components: { PipelineStatusIcon, Icon, Tooltip },
 
   props: {
-    build: {
+    pipeline: {
       type: Object as PropType<PipelineFeed>,
       required: true,
     },
   },
 
   setup(props) {
-    const build = toRef(props, 'build');
-    const { since, duration, message, created } = useBuild(build);
+    const pipeline = toRef(props, 'pipeline');
+    const { since, duration, message, created } = usePipeline(pipeline);
 
     return { since, duration, message, created };
   },

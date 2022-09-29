@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
-      <PipelineProcList v-model:selected-proc-id="selectedProcId" :build="pipeline" />
+      <PipelineProcList v-model:selected-proc-id="selectedProcId" :pipeline="pipeline" />
 
       <div class="flex flex-grow relative">
         <div v-if="error" class="flex flex-col p-4">
@@ -9,21 +9,21 @@
           <span class="text-red-400">{{ error }}</span>
         </div>
 
-        <div v-else-if="build.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
+        <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
           <Icon name="status-blocked" class="w-32 h-32 text-color" />
           <p class="text-xl text-color">{{ $t('repo.pipeline.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
             <Button
               color="green"
               :text="$t('repo.pipeline.protected.approve')"
-              :is-loading="isApprovingBuild"
-              @click="approveBuild"
+              :is-loading="isApprovingPipeline"
+              @click="approvePipeline"
             />
             <Button
               color="red"
               :text="$t('repo.pipeline.protected.decline')"
-              :is-loading="isDecliningBuild"
-              @click="declineBuild"
+              :is-loading="isDecliningPipeline"
+              @click="declinePipeline"
             />
           </div>
         </div>
@@ -89,7 +89,7 @@ export default defineComponent({
     const repo = inject<Ref<Repo>>('repo');
     const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
     if (!repo || !repoPermissions || !pipeline) {
-      throw new Error('Unexpected: "repo", "repoPermissions" & "build" should be provided at this place');
+      throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
     }
 
     const procId = toRef(props, 'procId');
@@ -138,7 +138,7 @@ export default defineComponent({
     const selectedProc = computed(() => findProc(pipeline.value.procs || [], selectedProcId.value || -1));
     const error = computed(() => pipeline.value?.error || selectedProc.value?.error);
 
-    const { doSubmit: approveBuild, isLoading: isApprovingBuild } = useAsyncAction(async () => {
+    const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
@@ -147,7 +147,7 @@ export default defineComponent({
       notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
     });
 
-    const { doSubmit: declineBuild, isLoading: isDecliningBuild } = useAsyncAction(async () => {
+    const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
       }
@@ -161,10 +161,10 @@ export default defineComponent({
       selectedProcId,
       pipeline,
       error,
-      isApprovingBuild,
-      isDecliningBuild,
-      approveBuild,
-      declineBuild,
+      isApprovingPipeline,
+      isDecliningPipeline,
+      approvePipeline,
+      declinePipeline,
     };
   },
 });

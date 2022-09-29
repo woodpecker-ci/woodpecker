@@ -67,8 +67,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
   }
 
-  createBuild(owner: string, repo: string, options: BuildOptions): Promise<Build> {
-    return this._post(`/api/repos/${owner}/${repo}/builds`, options) as Promise<Build>;
+  createPipeline(owner: string, repo: string, options: BuildOptions): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/pipeline`, options) as Promise<Pipeline>;
   }
 
   getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {

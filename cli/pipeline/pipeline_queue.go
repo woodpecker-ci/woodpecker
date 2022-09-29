@@ -11,29 +11,29 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildQueueCmd = &cli.Command{
+var pipelineQueueCmd = &cli.Command{
 	Name:      "queue",
-	Usage:     "show build queue",
+	Usage:     "show pipeline queue",
 	ArgsUsage: " ",
-	Action:    buildQueue,
+	Action:    pipelineQueue,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildQueue),
+		common.FormatFlag(tmplPipelineQueue),
 	),
 }
 
-func buildQueue(c *cli.Context) error {
+func pipelineQueue(c *cli.Context) error {
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	builds, err := client.PipelineQueue()
+	pipelines, err := client.PipelineQueue()
 	if err != nil {
 		return err
 	}
 
-	if len(builds) == 0 {
-		fmt.Println("there are no pending or running builds")
+	if len(pipelines) == 0 {
+		fmt.Println("there are no pending or running pipelines")
 		return nil
 	}
 
@@ -42,16 +42,16 @@ func buildQueue(c *cli.Context) error {
 		return err
 	}
 
-	for _, build := range builds {
-		if err := tmpl.Execute(os.Stdout, build); err != nil {
+	for _, pipeline := range pipelines {
+		if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// template for build list information
-var tmplBuildQueue = "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m" + `
+// template for pipeline list information
+var tmplPipelineQueue = "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}

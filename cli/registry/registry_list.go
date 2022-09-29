@@ -53,7 +53,7 @@ func registryList(c *cli.Context) error {
 	return nil
 }
 
-// template for build list information
+// template for registry list information
 var tmplRegistryList = "\x1b[33m{{ .Address }} \x1b[0m" + `
 Username: {{ .Username }}
 Email: {{ .Email }}

@@ -194,13 +194,13 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 	}
 
 	report := &model.File{
-		BuildID: proc.PipelineID,
-		ProcID:  proc.ID,
-		PID:     proc.PID,
-		Mime:    file.Mime,
-		Name:    file.Name,
-		Size:    file.Size,
-		Time:    file.Time,
+		PipelineID: proc.PipelineID,
+		ProcID:     proc.ID,
+		PID:        proc.PID,
+		Mime:       file.Mime,
+		Name:       file.Name,
+		Size:       file.Size,
+		Time:       file.Time,
 	}
 	if d, ok := file.Meta["X-Tests-Passed"]; ok {
 		report.Passed, _ = strconv.Atoi(d)

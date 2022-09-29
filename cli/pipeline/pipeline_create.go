@@ -17,9 +17,9 @@ var pipelineCreateCmd = &cli.Command{
 	Name:      "create",
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo/name>",
-	Action:    buildCreate,
+	Action:    pipelineCreate,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildList),
+		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:     "branch",
 			Usage:    "branch to create pipeline from",
@@ -32,7 +32,7 @@ var pipelineCreateCmd = &cli.Command{
 	),
 }
 
-func buildCreate(c *cli.Context) error {
+func pipelineCreate(c *cli.Context) error {
 	repo := c.Args().First()
 
 	owner, name, err := internal.ParseRepo(repo)
@@ -60,7 +60,7 @@ func buildCreate(c *cli.Context) error {
 		Variables: variables,
 	}
 
-	build, err := client.PipelineCreate(owner, name, options)
+	pipeline, err := client.PipelineCreate(owner, name, options)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func buildCreate(c *cli.Context) error {
 		return err
 	}
 
-	if err := tmpl.Execute(os.Stdout, build); err != nil {
+	if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
 		return err
 	}
 

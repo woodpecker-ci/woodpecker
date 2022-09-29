@@ -1,10 +1,10 @@
 <template>
-  <FluidContainer v-if="build" class="flex flex-col gap-y-6 text-color justify-between py-0">
+  <FluidContainer v-if="pipeline" class="flex flex-col gap-y-6 text-color justify-between py-0">
     <Panel>
-      <div v-if="build.changed_files === undefined || build.changed_files.length < 1" class="w-full">
+      <div v-if="pipeline.changed_files === undefined || pipeline.changed_files.length < 1" class="w-full">
         <span class="text-color">{{ $t('repo.pipeline.no_files') }}</span>
       </div>
-      <div v-for="file in build.changed_files" v-else :key="file" class="w-full">
+      <div v-for="file in pipeline.changed_files" v-else :key="file" class="w-full">
         <div>- {{ file }}</div>
       </div>
     </Panel>
@@ -19,7 +19,7 @@ import Panel from '~/components/layout/Panel.vue';
 import { Pipeline } from '~/lib/api/types';
 
 export default defineComponent({
-  name: 'BuildChangedFiles',
+  name: 'PipelineChangedFiles',
 
   components: {
     FluidContainer,
@@ -27,12 +27,12 @@ export default defineComponent({
   },
 
   setup() {
-    const build = inject<Ref<Pipeline>>('build');
-    if (!build) {
-      throw new Error('Unexpected: "build" should be provided at this place');
+    const pipeline = inject<Ref<Pipeline>>('pipeline');
+    if (!pipeline) {
+      throw new Error('Unexpected: "pipeline" should be provided at this place');
     }
 
-    return { build };
+    return { pipeline };
   },
 });
 </script>

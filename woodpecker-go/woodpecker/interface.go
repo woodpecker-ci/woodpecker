@@ -73,7 +73,7 @@ type Client interface {
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Activity, error)
 
-	// PipelineCreate returns creates a build on specified branch.
+	// PipelineCreate returns creates a pipeline on specified branch.
 	PipelineCreate(string, string, *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.

@@ -104,14 +104,14 @@ function deleteVar(key: string) {
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const build = await apiClient.createBuild(repo.value.owner, repo.value.name, payload.value);
+  const pipeline = await apiClient.createPipeline(repo.value.owner, repo.value.name, payload.value);
 
   emit('close');
 
   await router.push({
-    name: 'repo-build',
+    name: 'repo-pipeline',
     params: {
-      buildId: build.number,
+      pipelineId: pipeline.number,
     },
   });
 

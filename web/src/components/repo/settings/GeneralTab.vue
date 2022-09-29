@@ -62,7 +62,7 @@
       >
         <CheckboxesField
           v-model="repoSettings.cancel_previous_pipeline_events"
-          :options="cancelPreviousBuildEventsOptions"
+          :options="cancelPreviousPipelineEventsOptions"
         />
         <template #description>
           <p class="text-sm">
@@ -178,7 +178,7 @@ export default defineComponent({
       },
     ];
 
-    const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
+    const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
       { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
       { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
       {
@@ -194,7 +194,7 @@ export default defineComponent({
       isSaving,
       saveRepoSettings,
       projectVisibilityOptions,
-      cancelPreviousBuildEventsOptions,
+      cancelPreviousPipelineEventsOptions,
     };
   },
 });

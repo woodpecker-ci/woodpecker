@@ -10,7 +10,7 @@ import { PipelineProc } from '~/lib/api/types';
 import { durationAsNumber } from '~/utils/duration';
 
 export default defineComponent({
-  name: 'BuildProcDuration',
+  name: 'PipelineProcDuration',
 
   props: {
     proc: {

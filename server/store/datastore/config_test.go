@@ -53,23 +53,23 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	build := &model.Pipeline{
+	pipeline := &model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusRunning,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 	}
-	if err := store.CreatePipeline(build); err != nil {
-		t.Errorf("Unexpected error: insert build: %s", err)
+	if err := store.CreatePipeline(pipeline); err != nil {
+		t.Errorf("Unexpected error: insert pipeline: %s", err)
 		return
 	}
 
 	if err := store.PipelineConfigCreate(
 		&model.PipelineConfig{
 			ConfigID:   config.ID,
-			PipelineID: build.ID,
+			PipelineID: pipeline.ID,
 		},
 	); err != nil {
-		t.Errorf("Unexpected error: insert build config: %s", err)
+		t.Errorf("Unexpected error: insert pipeline config: %s", err)
 		return
 	}
 
@@ -94,7 +94,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Want config name %s, got %s", want, got)
 	}
 
-	loaded, err := store.ConfigsForPipeline(build.ID)
+	loaded, err := store.ConfigsForPipeline(pipeline.ID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
@@ -120,31 +120,31 @@ func TestConfigApproved(t *testing.T) {
 	}
 
 	var (
-		data         = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash         = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-		buildBlocked = &model.Pipeline{
+		data            = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
+		hash            = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+		pipelineBlocked = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusBlocked,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
-		buildPending = &model.Pipeline{
+		pipelinePending = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusPending,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
-		buildRunning = &model.Pipeline{
+		pipelineRunning = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusRunning,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
 	)
 
-	if err := store.CreatePipeline(buildBlocked); err != nil {
-		t.Errorf("Unexpected error: insert build: %s", err)
+	if err := store.CreatePipeline(pipelineBlocked); err != nil {
+		t.Errorf("Unexpected error: insert pipeline: %s", err)
 		return
 	}
-	if err := store.CreatePipeline(buildPending); err != nil {
-		t.Errorf("Unexpected error: insert build: %s", err)
+	if err := store.CreatePipeline(pipelinePending); err != nil {
+		t.Errorf("Unexpected error: insert pipeline: %s", err)
 		return
 	}
 	conf := &model.Config{
@@ -156,11 +156,11 @@ func TestConfigApproved(t *testing.T) {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	buildConfig := &model.PipelineConfig{
+	pipelineConfig := &model.PipelineConfig{
 		ConfigID:   conf.ID,
-		PipelineID: buildBlocked.ID,
+		PipelineID: pipelineBlocked.ID,
 	}
-	if err := store.PipelineConfigCreate(buildConfig); err != nil {
+	if err := store.PipelineConfigCreate(pipelineConfig); err != nil {
 		t.Errorf("Unexpected error: insert pipeline_config: %s", err)
 		return
 	}
@@ -174,7 +174,7 @@ func TestConfigApproved(t *testing.T) {
 		return
 	}
 
-	assert.NoError(t, store.CreatePipeline(buildRunning))
+	assert.NoError(t, store.CreatePipeline(pipelineRunning))
 	conf2 := &model.Config{
 		RepoID: repo.ID,
 		Data:   []byte(data),
@@ -184,11 +184,11 @@ func TestConfigApproved(t *testing.T) {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	buildConfig2 := &model.PipelineConfig{
+	pipelineConfig2 := &model.PipelineConfig{
 		ConfigID:   conf2.ID,
-		PipelineID: buildRunning.ID,
+		PipelineID: pipelineRunning.ID,
 	}
-	if err := store.PipelineConfigCreate(buildConfig2); err != nil {
+	if err := store.PipelineConfigCreate(pipelineConfig2); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}

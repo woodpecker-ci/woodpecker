@@ -2,7 +2,7 @@
   <div
     class="flex rounded-full w-8 h-8 bg-opacity-30 hover:bg-opacity-50 bg-white items-center justify-center cursor-pointer text-white"
     :class="{
-      spinner: activeBuilds.length !== 0,
+      spinner: activePipelines.length !== 0,
     }"
     @click="toggle"
   >
@@ -10,26 +10,26 @@
     <div class="spinner-ring ring2" />
     <div class="spinner-ring ring3" />
     <div class="spinner-ring ring4" />
-    {{ activeBuilds.length || 0 }}
+    {{ activePipelines.length || 0 }}
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 
-import useBuildFeed from '~/compositions/usePipelineFeed';
+import usePipelineFeed from '~/compositions/usePipelineFeed';
 
 export default defineComponent({
-  name: 'ActiveBuilds',
+  name: 'ActivePipelines',
 
   setup() {
-    const buildFeed = useBuildFeed();
+    const pipelineFeed = usePipelineFeed();
 
     onMounted(() => {
-      buildFeed.load();
+      pipelineFeed.load();
     });
 
-    return buildFeed;
+    return pipelineFeed;
   },
 });
 </script>

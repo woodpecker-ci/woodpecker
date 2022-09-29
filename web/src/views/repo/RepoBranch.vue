@@ -2,7 +2,7 @@
   <div class="flex w-full mb-4 justify-center">
     <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
   </div>
-  <PipelineList :pipelines="builds" :repo="repo" />
+  <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
 
 <script lang="ts">
@@ -33,10 +33,10 @@ export default defineComponent({
       throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
     }
 
-    const allBuilds = inject<Ref<Pipeline[]>>('builds');
-    const builds = computed(() => allBuilds?.value.filter((b) => b.branch === branch.value));
+    const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
+    const pipelines = computed(() => allPipelines?.value.filter((b) => b.branch === branch.value));
 
-    return { builds, repo };
+    return { pipelines, repo };
   },
 });
 </script>

@@ -10,15 +10,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildDeclineCmd = &cli.Command{
+var pipelineDeclineCmd = &cli.Command{
 	Name:      "decline",
-	Usage:     "decline a build",
-	ArgsUsage: "<repo/name> <build>",
-	Action:    buildDecline,
+	Usage:     "decline a pipeline",
+	ArgsUsage: "<repo/name> <pipeline>",
+	Action:    pipelineDecline,
 	Flags:     common.GlobalFlags,
 }
 
-func buildDecline(c *cli.Context) (err error) {
+func pipelineDecline(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -34,11 +34,11 @@ func buildDecline(c *cli.Context) (err error) {
 		return err
 	}
 
-	_, err = client.BuildDecline(owner, name, number)
+	_, err = client.PipelineDecline(owner, name, number)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Declining build %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Declining pipeline %s/%s#%d\n", owner, name, number)
 	return nil
 }

@@ -61,13 +61,13 @@ func repoUpdate(c *cli.Context) error {
 	}
 
 	var (
-		visibility   = c.String("visibility")
-		config       = c.String("config")
-		timeout      = c.Duration("timeout")
-		trusted      = c.Bool("trusted")
-		gated        = c.Bool("gated")
-		buildCounter = c.Int("pipeline-counter")
-		unsafe       = c.Bool("unsafe")
+		visibility      = c.String("visibility")
+		config          = c.String("config")
+		timeout         = c.Duration("timeout")
+		trusted         = c.Bool("trusted")
+		gated           = c.Bool("gated")
+		pipelineCounter = c.Int("pipeline-counter")
+		unsafe          = c.Bool("unsafe")
 	)
 
 	patch := new(woodpecker.RepoPatch)
@@ -91,10 +91,10 @@ func repoUpdate(c *cli.Context) error {
 		}
 	}
 	if c.IsSet("pipeline-counter") && !unsafe {
-		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
+		fmt.Printf("Setting the pipeline counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
 	if c.IsSet("pipeline-counter") && unsafe {
-		patch.PipelineCounter = &buildCounter
+		patch.PipelineCounter = &pipelineCounter
 	}
 
 	if _, err := client.RepoPatch(owner, name, patch); err != nil {

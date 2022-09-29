@@ -36,7 +36,7 @@
         <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
       </router-link>
       <Button v-else :text="$t('login')" @click="doLogin" />
-      <ActiveBuilds v-if="user" />
+      <ActivePipelines v-if="user" />
     </div>
   </div>
 </template>
@@ -51,12 +51,12 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
-import ActiveBuilds from './ActivePipelines.vue';
+import ActivePipelines from './ActivePipelines.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActiveBuilds, IconButton },
+  components: { Button, ActivePipelines, IconButton },
 
   setup() {
     const config = useConfig();

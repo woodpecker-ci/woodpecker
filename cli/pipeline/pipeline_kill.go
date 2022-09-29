@@ -10,16 +10,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildKillCmd = &cli.Command{
+var pipelineKillCmd = &cli.Command{
 	Name:      "kill",
-	Usage:     "force kill a build",
-	ArgsUsage: "<repo/name> <build>",
-	Action:    buildKill,
+	Usage:     "force kill a pipeline",
+	ArgsUsage: "<repo/name> <pipeline>",
+	Action:    pipelineKill,
 	Hidden:    true,
 	Flags:     common.GlobalFlags,
 }
 
-func buildKill(c *cli.Context) (err error) {
+func pipelineKill(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -35,11 +35,11 @@ func buildKill(c *cli.Context) (err error) {
 		return err
 	}
 
-	err = client.BuildKill(owner, name, number)
+	err = client.PipelineKill(owner, name, number)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Force killing build %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Force killing pipeline %s/%s#%d\n", owner, name, number)
 	return nil
 }

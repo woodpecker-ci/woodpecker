@@ -1,7 +1,7 @@
 <template>
-  <FluidContainer v-if="buildConfigs" class="flex flex-col gap-y-6 text-color justify-between !pt-0">
-    <Panel v-for="buildConfig in buildConfigs" :key="buildConfig.hash" :title="buildConfig.name">
-      <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="buildConfig.data" />
+  <FluidContainer v-if="pipelineConfigs" class="flex flex-col gap-y-6 text-color justify-between !pt-0">
+    <Panel v-for="pipelineConfig in pipelineConfigs" :key="pipelineConfig.hash" :title="pipelineConfig.name">
+      <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
     </Panel>
   </FluidContainer>
 </template>
@@ -16,7 +16,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
 
 export default defineComponent({
-  name: 'BuildConfig',
+  name: 'PipelineConfig',
 
   components: {
     FluidContainer,
@@ -25,20 +25,20 @@ export default defineComponent({
   },
 
   setup() {
-    const build = inject<Ref<Pipeline>>('build');
+    const pipeline = inject<Ref<Pipeline>>('pipeline');
     const apiClient = useApiClient();
     const repo = inject<Ref<Repo>>('repo');
-    if (!repo || !build) {
-      throw new Error('Unexpected: "repo" & "build" should be provided at this place');
+    if (!repo || !pipeline) {
+      throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
     }
 
-    const buildConfigs = ref<PipelineConfig[]>();
-    async function loadBuildConfig() {
-      if (!repo || !build) {
-        throw new Error('Unexpected: "repo" & "build" should be provided at this place');
+    const pipelineConfigs = ref<PipelineConfig[]>();
+    async function loadPipelineConfig() {
+      if (!repo || !pipeline) {
+        throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
       }
 
-      buildConfigs.value = (await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, build.value.number)).map(
+      pipelineConfigs.value = (await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, pipeline.value.number)).map(
         (i) => ({
           ...i,
           data: atob(i.data),
@@ -47,14 +47,14 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      loadBuildConfig();
+      loadPipelineConfig();
     });
 
-    watch(build, () => {
-      loadBuildConfig();
+    watch(pipeline, () => {
+      loadPipelineConfig();
     });
 
-    return { buildConfigs };
+    return { pipelineConfigs };
   },
 });
 </script>

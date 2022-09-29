@@ -47,15 +47,15 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	build, err := _store.GetBuildLast(repo, branch)
+	pipeline, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
 		log.Warn().Err(err).Msg("")
-		build = nil
+		pipeline = nil
 	}
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
-	c.String(http.StatusOK, badges.Generate(build))
+	c.String(http.StatusOK, badges.Generate(pipeline))
 }
 
 func GetCC(c *gin.Context) {
@@ -66,13 +66,13 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	builds, err := _store.GetBuildList(repo, 1)
-	if err != nil || len(builds) == 0 {
+	pipelines, err := _store.GetPipelineList(repo, 1)
+	if err != nil || len(pipelines) == 0 {
 		c.AbortWithStatus(404)
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, builds[0].Number)
-	cc := ccmenu.New(repo, builds[0], url)
+	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
+	cc := ccmenu.New(repo, pipelines[0], url)
 	c.XML(200, cc)
 }

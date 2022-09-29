@@ -10,15 +10,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildStopCmd = &cli.Command{
+var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
-	Usage:     "stop a build",
-	ArgsUsage: "<repo/name> [build] [job]",
+	Usage:     "stop a pipeline",
+	ArgsUsage: "<repo/name> [pipeline] [job]",
 	Flags:     common.GlobalFlags,
-	Action:    buildStop,
+	Action:    pipelineStop,
 }
 
-func buildStop(c *cli.Context) (err error) {
+func pipelineStop(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -38,11 +38,11 @@ func buildStop(c *cli.Context) (err error) {
 		return err
 	}
 
-	err = client.BuildStop(owner, name, number, job)
+	err = client.PipelineStop(owner, name, number, job)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Stopping build %s/%s#%d.%d\n", owner, name, number, job)
+	fmt.Printf("Stopping pipeline %s/%s#%d.%d\n", owner, name, number, job)
 	return nil
 }

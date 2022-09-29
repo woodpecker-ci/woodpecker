@@ -6,7 +6,7 @@
       :to="{ name: 'repo-pipeline', params: { repoOwner: repo.owner, repoName: repo.name, pipelineId: pipeline.number } }"
       class="flex"
     >
-      <PipelineItem :build="pipeline" />
+      <PipelineItem :pipeline="pipeline" />
     </router-link>
     <Panel v-if="pipelines.length === 0">
       <span class="text-color">{{ $t('repo.pipeline.no_pipelines') }}</span>

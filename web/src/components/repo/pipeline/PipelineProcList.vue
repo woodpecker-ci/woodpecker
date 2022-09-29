@@ -5,48 +5,48 @@
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
-          <Icon v-if="build.event === 'cron'" name="stopwatch" />
-          <img v-else class="w-6" :src="build.author_avatar" />
+          <Icon v-if="pipeline.event === 'cron'" name="stopwatch" />
+          <img v-else class="w-6" :src="pipeline.author_avatar" />
         </div>
-        <span>{{ build.author }}</span>
+        <span>{{ pipeline.author }}</span>
       </div>
       <div class="flex space-x-1 items-center min-w-0">
-        <Icon v-if="build.event === 'manual'" name="manual-pipeline" />
-        <Icon v-if="build.event === 'push'" name="push" />
-        <Icon v-if="build.event === 'deployment'" name="deployment" />
-        <Icon v-else-if="build.event === 'tag'" name="tag" />
+        <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
+        <Icon v-if="pipeline.event === 'push'" name="push" />
+        <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
+        <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
         <a
-          v-else-if="build.event === 'pull_request'"
+          v-else-if="pipeline.event === 'pull_request'"
           class="flex items-center space-x-1 text-link min-w-0"
-          :href="build.link_url"
+          :href="pipeline.link_url"
           target="_blank"
         >
           <Icon name="pull_request" />
           <span class="truncate">{{ prettyRef }}</span>
         </a>
-        <span v-if="build.event !== 'pull_request'" class="truncate">{{ build.branch }}</span>
+        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ pipeline.branch }}</span>
       </div>
       <div class="flex items-center flex-shrink-0">
-        <template v-if="build.event === 'pull_request'">
+        <template v-if="pipeline.event === 'pull_request'">
           <Icon name="commit" />
-          <span>{{ build.commit.slice(0, 10) }}</span>
+          <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="build.link_url" target="_blank">
+        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="pipeline.link_url" target="_blank">
           <Icon name="commit" />
-          <span>{{ build.commit.slice(0, 10) }}</span>
+          <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </a>
       </div>
     </div>
 
-    <div v-if="build.procs === undefined || build.procs.length === 0" class="m-auto mt-4">
+    <div v-if="pipeline.procs === undefined || pipeline.procs.length === 0" class="m-auto mt-4">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </div>
 
     <div class="flex flex-grow relative min-h-0 overflow-y-auto">
       <div class="md:absolute top-0 left-0 w-full">
-        <div v-for="proc in build.procs" :key="proc.id">
+        <div v-for="proc in pipeline.procs" :key="proc.id">
           <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <div v-if="build.procs && build.procs.length > 1" class="flex items-center">
+            <div v-if="pipeline.procs && pipeline.procs.length > 1" class="flex items-center">
               <span class="ml-2">{{ proc.name }}</span>
             </div>
             <div v-if="proc.environ" class="text-xs">
@@ -76,7 +76,7 @@
             />
             <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
             <span class="ml-2">{{ job.name }}</span>
-            <BuildProcDuration :proc="job" />
+            <PipelineProcDuration :proc="job" />
           </div>
         </div>
       </div>
@@ -87,19 +87,19 @@
 <script lang="ts">
 import { defineComponent, PropType, toRef } from 'vue';
 
-import BuildProcDuration from '~/components/repo/pipeline/PipelineProcDuration.vue';
-import useBuild from '~/compositions/usePipeline';
+import PipelineProcDuration from '~/components/repo/pipeline/PipelineProcDuration.vue';
+import usePipeline from '~/compositions/usePipeline';
 import { Pipeline } from '~/lib/api/types';
 
 export default defineComponent({
-  name: 'BuildProcList',
+  name: 'PipelineProcList',
 
   components: {
-    BuildProcDuration,
+    PipelineProcDuration,
   },
 
   props: {
-    build: {
+    pipeline: {
       type: Object as PropType<Pipeline>,
       required: true,
     },
@@ -116,8 +116,8 @@ export default defineComponent({
   },
 
   setup(props) {
-    const build = toRef(props, 'build');
-    const { prettyRef } = useBuild(build);
+    const pipeline = toRef(props, 'pipeline');
+    const { prettyRef } = usePipeline(pipeline);
 
     return { prettyRef };
   },

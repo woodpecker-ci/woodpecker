@@ -11,17 +11,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildPsCmd = &cli.Command{
+var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
-	Usage:     "show build steps",
-	ArgsUsage: "<repo/name> [build]",
-	Action:    buildPs,
+	Usage:     "show pipeline steps",
+	ArgsUsage: "<repo/name> [pipeline]",
+	Action:    pipelinePs,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildPs),
+		common.FormatFlag(tmplPipelinePs),
 	),
 }
 
-func buildPs(c *cli.Context) error {
+func pipelinePs(c *cli.Context) error {
 	repo := c.Args().First()
 
 	owner, name, err := internal.ParseRepo(repo)
@@ -38,13 +38,13 @@ func buildPs(c *cli.Context) error {
 	var number int
 
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
-		// Fetch the build number from the last build
-		build, err := client.PipelineLast(owner, name, "")
+		// Fetch the pipeline number from the last pipeline
+		pipeline, err := client.PipelineLast(owner, name, "")
 		if err != nil {
 			return err
 		}
 
-		number = build.Number
+		number = pipeline.Number
 	} else {
 		number, err = strconv.Atoi(pipelineArg)
 		if err != nil {
@@ -52,7 +52,7 @@ func buildPs(c *cli.Context) error {
 		}
 	}
 
-	build, err := client.Pipeline(owner, name, number)
+	pipeline, err := client.Pipeline(owner, name, number)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func buildPs(c *cli.Context) error {
 		return err
 	}
 
-	for _, proc := range build.Procs {
+	for _, proc := range pipeline.Procs {
 		for _, child := range proc.Children {
 			if err := tmpl.Execute(os.Stdout, child); err != nil {
 				return err
@@ -73,8 +73,8 @@ func buildPs(c *cli.Context) error {
 	return nil
 }
 
-// template for build ps information
-var tmplBuildPs = "\x1b[33mProc #{{ .PID }} \x1b[0m" + `
+// template for pipeline ps information
+var tmplPipelinePs = "\x1b[33mProc #{{ .PID }} \x1b[0m" + `
 Step: {{ .Name }}
 State: {{ .State }}
 `

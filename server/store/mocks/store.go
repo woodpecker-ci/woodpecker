@@ -100,13 +100,13 @@ func (_m *Store) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 	return r0, r1
 }
 
-// ConfigsForBuild provides a mock function with given fields: buildID
-func (_m *Store) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
-	ret := _m.Called(buildID)
+// ConfigsForBuild provides a mock function with given fields: pipelineID
+func (_m *Store) ConfigsForBuild(pipelineID int64) ([]*model.Config, error) {
+	ret := _m.Called(pipelineID)
 
 	var r0 []*model.Config
 	if rf, ok := ret.Get(0).(func(int64) []*model.Config); ok {
-		r0 = rf(buildID)
+		r0 = rf(pipelineID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Config)
@@ -115,7 +115,7 @@ func (_m *Store) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(buildID)
+		r1 = rf(pipelineID)
 	} else {
 		r1 = ret.Error(1)
 	}

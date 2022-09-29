@@ -197,12 +197,12 @@ export default defineComponent({
 
     async function download() {
       if (!repo?.value || !pipeline.value || !proc.value) {
-        throw new Error('The repository, build or proc was undefined');
+        throw new Error('The repository, pipeline or proc was undefined');
       }
       let logs;
       try {
         downloadInProgress.value = true;
-        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
+        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, proc.value.pid);
       } catch (e) {
         notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
         return;
@@ -251,7 +251,7 @@ export default defineComponent({
       }
 
       if (isProcFinished(proc.value)) {
-        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, build.value.number, proc.value.pid);
+        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, proc.value.pid);
         logs?.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
         flushLogs(false);
       }
@@ -262,7 +262,7 @@ export default defineComponent({
         stream.value = apiClient.streamLogs(
           repo.value.owner,
           repo.value.name,
-          build.value.number,
+          pipeline.value.number,
           proc.value.ppid,
           (line) => {
             if (line?.proc !== proc.value?.name) {

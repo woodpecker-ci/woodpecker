@@ -51,10 +51,10 @@ pipeline:
 		},
 	}
 
-	if buildItems, err := b.Build(); err != nil {
+	if pipelineItems, err := b.Build(); err != nil {
 		t.Fatal(err)
 	} else {
-		fmt.Println(buildItems)
+		fmt.Println(pipelineItems)
 	}
 }
 
@@ -122,10 +122,10 @@ pipeline:
 		},
 	}
 
-	if buildItems, err := b.Build(); err != nil {
+	if pipelineItems, err := b.Build(); err != nil {
 		t.Fatal(err)
 	} else {
-		fmt.Println(buildItems)
+		fmt.Println(pipelineItems)
 	}
 }
 
@@ -154,12 +154,12 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 2 {
-		t.Fatal("Should have generated 2 buildItems")
+	if len(pipelineItems) != 2 {
+		t.Fatal("Should have generated 2 pipelineItems")
 	}
 }
 
@@ -197,14 +197,14 @@ depends_on:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems[0].DependsOn) != 2 {
+	if len(pipelineItems[0].DependsOn) != 2 {
 		t.Fatal("Should have 3 dependencies")
 	}
-	if buildItems[0].DependsOn[1] != "test" {
+	if pipelineItems[0].DependsOn[1] != "test" {
 		t.Fatal("Should depend on test")
 	}
 }
@@ -233,14 +233,14 @@ runs_on:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems[0].RunsOn) != 2 {
+	if len(pipelineItems[0].RunsOn) != 2 {
 		t.Fatal("Should run on success and failure")
 	}
-	if buildItems[0].RunsOn[1] != "failure" {
+	if pipelineItems[0].RunsOn[1] != "failure" {
 		t.Fatal("Should run on failure")
 	}
 }
@@ -270,12 +270,12 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	pipelineNames := []string{buildItems[0].Proc.Name, buildItems[1].Proc.Name}
-	if !containsItemWithName("lint", buildItems) || !containsItemWithName("test", buildItems) {
+	pipelineNames := []string{pipelineItems[0].Proc.Name, pipelineItems[1].Proc.Name}
+	if !containsItemWithName("lint", pipelineItems) || !containsItemWithName("test", pipelineItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
 }
@@ -306,22 +306,22 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 2 {
-		t.Fatal("Should have generated 2 buildItems")
+	if len(pipelineItems) != 2 {
+		t.Fatal("Should have generated 2 pipeline")
 	}
-	if buildItems[0].Proc.State != model.StatusSkipped {
+	if pipelineItems[0].Proc.State != model.StatusSkipped {
 		t.Fatal("Should not run on dev branch")
 	}
-	for _, child := range buildItems[0].Proc.Children {
+	for _, child := range pipelineItems[0].Proc.Children {
 		if child.State != model.StatusSkipped {
 			t.Fatal("Children should skipped status too")
 		}
 	}
-	if buildItems[1].Proc.State != model.StatusPending {
+	if pipelineItems[1].Proc.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
@@ -362,13 +362,13 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(buildItems) != 2 {
-		t.Fatal("Should have generated 2 buildItems")
+	if len(pipelineItems) != 2 {
+		t.Fatal("Should have generated 2 pipelineItems")
 	}
 }
 
@@ -397,23 +397,23 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 0 {
-		t.Fatal("Should not generate a build item if there are no steps")
+	if len(pipelineItems) != 0 {
+		t.Fatal("Should not generate a pipeline item if there are no steps")
 	}
 }
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Pipeline{Branch: "dev"}
+	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
+		Curr:  pipeline,
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -442,14 +442,14 @@ depends_on: [ zerostep ]
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it should not generate a build item")
+	if len(pipelineItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it should not generate a pipeline item")
 	}
-	if buildItems[0].Proc.Name != "justastep" {
+	if pipelineItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -457,11 +457,11 @@ depends_on: [ zerostep ]
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Pipeline{Branch: "dev"}
+	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
+		Curr:  pipeline,
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -496,14 +496,14 @@ depends_on: [ shouldbefiltered ]
 		},
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(buildItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a build item")
+	if len(pipelineItems) != 1 {
+		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
 	}
-	if buildItems[0].Proc.Name != "justastep" {
+	if pipelineItems[0].Proc.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -511,13 +511,13 @@ depends_on: [ shouldbefiltered ]
 func TestTree(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Pipeline{
+	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 	}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
+		Curr:  pipeline,
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -532,18 +532,18 @@ pipeline:
 		},
 	}
 
-	buildItems, err := b.Build()
-	build = SetPipelineStepsOnPipeline(build, buildItems)
+	pipelineItems, err := b.Build()
+	pipeline = SetPipelineStepsOnPipeline(pipeline, pipelineItems)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(build.Procs) != 3 {
+	if len(pipeline.Procs) != 3 {
 		t.Fatal("Should generate three in total")
 	}
-	if build.Procs[1].PPID != 1 {
+	if pipeline.Procs[1].PPID != 1 {
 		t.Fatal("Clone step should be a children of the stage")
 	}
-	if build.Procs[2].PPID != 1 {
+	if pipeline.Procs[2].PPID != 1 {
 		t.Fatal("Pipeline step should be a children of the stage")
 	}
 }

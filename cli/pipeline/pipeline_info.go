@@ -11,17 +11,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildInfoCmd = &cli.Command{
+var pipelineInfoCmd = &cli.Command{
 	Name:      "info",
-	Usage:     "show build details",
-	ArgsUsage: "<repo/name> [build]",
-	Action:    buildInfo,
+	Usage:     "show pipeline details",
+	ArgsUsage: "<repo/name> [pipeline]",
+	Action:    pipelineInfo,
 	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplBuildInfo),
+		common.FormatFlag(tmplPipelineInfo),
 	),
 }
 
-func buildInfo(c *cli.Context) error {
+func pipelineInfo(c *cli.Context) error {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -36,12 +36,12 @@ func buildInfo(c *cli.Context) error {
 
 	var number int
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
-		// Fetch the build number from the last build
-		build, err := client.PipelineLast(owner, name, "")
+		// Fetch the pipeline number from the last pipeline
+		pipeline, err := client.PipelineLast(owner, name, "")
 		if err != nil {
 			return err
 		}
-		number = build.Number
+		number = pipeline.Number
 	} else {
 		number, err = strconv.Atoi(pipelineArg)
 		if err != nil {
@@ -49,7 +49,7 @@ func buildInfo(c *cli.Context) error {
 		}
 	}
 
-	build, err := client.Pipeline(owner, name, number)
+	pipeline, err := client.Pipeline(owner, name, number)
 	if err != nil {
 		return err
 	}
@@ -58,11 +58,11 @@ func buildInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, build)
+	return tmpl.Execute(os.Stdout, pipeline)
 }
 
-// template for build information
-var tmplBuildInfo = `Number: {{ .Number }}
+// template for pipeline information
+var tmplPipelineInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}

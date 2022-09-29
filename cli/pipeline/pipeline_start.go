@@ -11,11 +11,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
 )
 
-var buildStartCmd = &cli.Command{
+var pipelineStartCmd = &cli.Command{
 	Name:      "start",
-	Usage:     "start a build",
-	ArgsUsage: "<repo/name> [build]",
-	Action:    buildStart,
+	Usage:     "start a pipeline",
+	ArgsUsage: "<repo/name> [pipeline]",
+	Action:    pipelineStart,
 	Flags: append(common.GlobalFlags,
 		&cli.StringSliceFlag{
 			Name:    "param",
@@ -25,7 +25,7 @@ var buildStartCmd = &cli.Command{
 	),
 }
 
-func buildStart(c *cli.Context) (err error) {
+func pipelineStart(c *cli.Context) (err error) {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -40,12 +40,12 @@ func buildStart(c *cli.Context) (err error) {
 	pipelineArg := c.Args().Get(1)
 	var number int
 	if pipelineArg == "last" {
-		// Fetch the build number from the last build
-		build, err := client.PipelineLast(owner, name, "")
+		// Fetch the pipeline number from the last pipeline
+		pipeline, err := client.PipelineLast(owner, name, "")
 		if err != nil {
 			return err
 		}
-		number = build.Number
+		number = pipeline.Number
 	} else {
 		if len(pipelineArg) == 0 {
 			return errors.New("missing job number")
@@ -58,11 +58,11 @@ func buildStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	build, err := client.PipelineStart(owner, name, number, params)
+	pipeline, err := client.PipelineStart(owner, name, number, params)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Starting build %s/%s#%d\n", owner, name, build.Number)
+	fmt.Printf("Starting pipeline %s/%s#%d\n", owner, name, pipeline.Number)
 	return nil
 }

@@ -4,11 +4,11 @@
       :name="`status-${pipeline.status}`"
       :class="{
         'text-yellow-400': pipeline.status === 'pending',
-        'text-red-400': buildStatusColors[pipeline.status] === 'red',
-        'text-gray-400': buildStatusColors[pipeline.status] === 'gray',
-        'text-lime-400': buildStatusColors[pipeline.status] === 'green',
-        'text-blue-400': buildStatusColors[pipeline.status] === 'blue',
-        [buildStatusAnimations[pipeline.status]]: true,
+        'text-red-400': pipelineStatusColors[pipeline.status] === 'red',
+        'text-gray-400': pipelineStatusColors[pipeline.status] === 'gray',
+        'text-lime-400': pipelineStatusColors[pipeline.status] === 'green',
+        'text-blue-400': pipelineStatusColors[pipeline.status] === 'blue',
+        [pipelineStatusAnimations[pipeline.status]]: true,
       }"
     />
   </div>
@@ -37,7 +37,7 @@ export default defineComponent({
   },
 
   setup() {
-    return { buildStatusColors: pipelineStatusColors, buildStatusAnimations: pipelineStatusAnimations };
+    return { pipelineStatusColors, pipelineStatusAnimations };
   },
 });
 </script>

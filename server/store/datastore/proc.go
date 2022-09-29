@@ -25,27 +25,27 @@ func (s storage) ProcLoad(id int64) (*model.Proc, error) {
 	return proc, wrapGet(s.engine.ID(id).Get(proc))
 }
 
-func (s storage) ProcFind(build *model.Pipeline, pid int) (*model.Proc, error) {
+func (s storage) ProcFind(pipeline *model.Pipeline, pid int) (*model.Proc, error) {
 	proc := &model.Proc{
-		PipelineID: build.ID,
+		PipelineID: pipeline.ID,
 		PID:        pid,
 	}
 	return proc, wrapGet(s.engine.Get(proc))
 }
 
-func (s storage) ProcChild(build *model.Pipeline, ppid int, child string) (*model.Proc, error) {
+func (s storage) ProcChild(pipeline *model.Pipeline, ppid int, child string) (*model.Proc, error) {
 	proc := &model.Proc{
-		PipelineID: build.ID,
+		PipelineID: pipeline.ID,
 		PPID:       ppid,
 		Name:       child,
 	}
 	return proc, wrapGet(s.engine.Get(proc))
 }
 
-func (s storage) ProcList(build *model.Pipeline) ([]*model.Proc, error) {
+func (s storage) ProcList(pipeline *model.Pipeline) ([]*model.Proc, error) {
 	procList := make([]*model.Proc, 0, perPage)
 	return procList, s.engine.
-		Where("proc_build_id = ?", build.ID).
+		Where("proc_build_id = ?", pipeline.ID).
 		OrderBy("proc_pid").
 		Find(&procList)
 }
@@ -72,18 +72,18 @@ func (s storage) ProcUpdate(proc *model.Proc) error {
 	return err
 }
 
-func (s storage) ProcClear(build *model.Pipeline) error {
+func (s storage) ProcClear(pipeline *model.Pipeline) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	if _, err := sess.Where("file_build_id = ?", build.ID).Delete(new(model.File)); err != nil {
+	if _, err := sess.Where("file_build_id = ?", pipeline.ID).Delete(new(model.File)); err != nil {
 		return err
 	}
 
-	if _, err := sess.Where("proc_build_id = ?", build.ID).Delete(new(model.Proc)); err != nil {
+	if _, err := sess.Where("proc_build_id = ?", pipeline.ID).Delete(new(model.Proc)); err != nil {
 		return err
 	}
 

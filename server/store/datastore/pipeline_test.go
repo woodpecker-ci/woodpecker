@@ -50,23 +50,23 @@ func TestPipelines(t *testing.T) {
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			_, err := store.engine.Exec("DELETE FROM builds")
+			_, err := store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM procs")
 			g.Assert(err).IsNil()
 		})
 
 		g.It("Should Post a Pipeline", func() {
-			build := model.Pipeline{
+			pipeline := model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
-			err := store.CreatePipeline(&build)
+			err := store.CreatePipeline(&pipeline)
 			g.Assert(err).IsNil()
-			g.Assert(build.ID != 0).IsTrue()
-			g.Assert(build.Number).Equal(int64(1))
-			g.Assert(build.Commit).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
+			g.Assert(pipeline.ID != 0).IsTrue()
+			g.Assert(pipeline.Number).Equal(int64(1))
+			g.Assert(pipeline.Commit).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
 
 			count, err := store.GetPipelineCount()
 			g.Assert(err).IsNil()
@@ -75,214 +75,214 @@ func TestPipelines(t *testing.T) {
 		})
 
 		g.It("Should Put a Pipeline", func() {
-			build := model.Pipeline{
+			pipeline := model.Pipeline{
 				RepoID: repo.ID,
 				Number: 5,
 				Status: model.StatusSuccess,
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
-			err := store.CreatePipeline(&build)
+			err := store.CreatePipeline(&pipeline)
 			g.Assert(err).IsNil()
-			build.Status = model.StatusRunning
-			err1 := store.UpdatePipeline(&build)
-			GetPipeline, err2 := store.GetPipeline(build.ID)
+			pipeline.Status = model.StatusRunning
+			err1 := store.UpdatePipeline(&pipeline)
+			GetPipeline, err2 := store.GetPipeline(pipeline.ID)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
-			g.Assert(build.ID).Equal(GetPipeline.ID)
-			g.Assert(build.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build.Status).Equal(GetPipeline.Status)
-			g.Assert(build.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline.Status).Equal(GetPipeline.Status)
+			g.Assert(pipeline.Number).Equal(GetPipeline.Number)
 		})
 
 		g.It("Should Get a Pipeline", func() {
-			build := model.Pipeline{
+			pipeline := model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 			}
-			err := store.CreatePipeline(&build, []*model.Proc{}...)
+			err := store.CreatePipeline(&pipeline, []*model.Proc{}...)
 			g.Assert(err).IsNil()
-			GetPipeline, err := store.GetPipeline(build.ID)
+			GetPipeline, err := store.GetPipeline(pipeline.ID)
 			g.Assert(err).IsNil()
-			g.Assert(build.ID).Equal(GetPipeline.ID)
-			g.Assert(build.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build.Status).Equal(GetPipeline.Status)
+			g.Assert(pipeline.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline.Status).Equal(GetPipeline.Status)
 		})
 
 		g.It("Should Get a Pipeline by Number", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
-			GetPipeline, err3 := store.GetPipelineNumber(&model.Repo{ID: 1}, build2.Number)
+			GetPipeline, err3 := store.GetPipelineNumber(&model.Repo{ID: 1}, pipeline2.Number)
 			g.Assert(err3).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
 		})
 
 		g.It("Should Get a Pipeline by Ref", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Ref:    "refs/pull/5",
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Ref:    "refs/pull/6",
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
 			g.Assert(err3).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
-			g.Assert(build2.Ref).Equal(GetPipeline.Ref)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.Ref).Equal(GetPipeline.Ref)
 		})
 
 		g.It("Should Get a Pipeline by Ref", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Ref:    "refs/pull/5",
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Ref:    "refs/pull/6",
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
 			g.Assert(err3).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
-			g.Assert(build2.Ref).Equal(GetPipeline.Ref)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.Ref).Equal(GetPipeline.Ref)
 		})
 
 		g.It("Should Get a Pipeline by Commit", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 				Branch: "dev",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
-			GetPipeline, err3 := store.GetPipelineCommit(&model.Repo{ID: 1}, build2.Commit, build2.Branch)
+			GetPipeline, err3 := store.GetPipelineCommit(&model.Repo{ID: 1}, pipeline2.Commit, pipeline2.Branch)
 			g.Assert(err3).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
-			g.Assert(build2.Commit).Equal(GetPipeline.Commit)
-			g.Assert(build2.Branch).Equal(GetPipeline.Branch)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
+			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
 		})
 
 		g.It("Should Get the last Pipeline", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 				Event:  model.EventPush,
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 				Event:  model.EventPush,
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
-			GetPipeline, err3 := store.GetPipelineLast(&model.Repo{ID: 1}, build2.Branch)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			GetPipeline, err3 := store.GetPipelineLast(&model.Repo{ID: 1}, pipeline2.Branch)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
 			g.Assert(err3).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
-			g.Assert(build2.Status).Equal(GetPipeline.Status)
-			g.Assert(build2.Branch).Equal(GetPipeline.Branch)
-			g.Assert(build2.Commit).Equal(GetPipeline.Commit)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.Status).Equal(GetPipeline.Status)
+			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
+			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
 		})
 
 		g.It("Should Get the last Pipeline Before Pipeline N", func() {
-			build1 := &model.Pipeline{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
-			build3 := &model.Pipeline{
+			pipeline3 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusRunning,
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
-			err3 := store.CreatePipeline(build3, []*model.Proc{}...)
+			err3 := store.CreatePipeline(pipeline3, []*model.Proc{}...)
 			g.Assert(err3).IsNil()
-			GetPipeline, err4 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, build3.Branch, build3.ID)
+			GetPipeline, err4 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
 			g.Assert(err4).IsNil()
-			g.Assert(build2.ID).Equal(GetPipeline.ID)
-			g.Assert(build2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(build2.Number).Equal(GetPipeline.Number)
-			g.Assert(build2.Status).Equal(GetPipeline.Status)
-			g.Assert(build2.Branch).Equal(GetPipeline.Branch)
-			g.Assert(build2.Commit).Equal(GetPipeline.Commit)
+			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
+			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
+			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
+			g.Assert(pipeline2.Status).Equal(GetPipeline.Status)
+			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
+			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
 		})
 
-		g.It("Should get recent Builds", func() {
-			build1 := &model.Pipeline{
+		g.It("Should get recent pipelines", func() {
+			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
 			}
-			build2 := &model.Pipeline{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 			}
-			err1 := store.CreatePipeline(build1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(build2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
 			g.Assert(err2).IsNil()
-			builds, err3 := store.GetPipelineList(&model.Repo{ID: 1}, 1)
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, 1)
 			g.Assert(err3).IsNil()
-			g.Assert(len(builds)).Equal(2)
-			g.Assert(builds[0].ID).Equal(build2.ID)
-			g.Assert(builds[0].RepoID).Equal(build2.RepoID)
-			g.Assert(builds[0].Status).Equal(build2.Status)
+			g.Assert(len(pipelines)).Equal(2)
+			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
+			g.Assert(pipelines[0].RepoID).Equal(pipeline2.RepoID)
+			g.Assert(pipelines[0].Status).Equal(pipeline2.Status)
 		})
 	})
 }
@@ -291,17 +291,17 @@ func TestPipelineIncrement(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Pipeline))
 	defer closer()
 
-	buildA := &model.Pipeline{RepoID: 1}
-	if !assert.NoError(t, store.CreatePipeline(buildA)) {
+	pipelineA := &model.Pipeline{RepoID: 1}
+	if !assert.NoError(t, store.CreatePipeline(pipelineA)) {
 		return
 	}
-	assert.EqualValues(t, 1, buildA.Number)
+	assert.EqualValues(t, 1, pipelineA.Number)
 
-	buildB := &model.Pipeline{RepoID: 1}
-	assert.NoError(t, store.CreatePipeline(buildB))
-	assert.EqualValues(t, 2, buildB.Number)
+	pipelineB := &model.Pipeline{RepoID: 1}
+	assert.NoError(t, store.CreatePipeline(pipelineB))
+	assert.EqualValues(t, 2, pipelineB.Number)
 
-	buildC := &model.Pipeline{RepoID: 2}
-	assert.NoError(t, store.CreatePipeline(buildC))
-	assert.EqualValues(t, 1, buildC.Number)
+	pipelineC := &model.Pipeline{RepoID: 2}
+	assert.NoError(t, store.CreatePipeline(pipelineC))
+	assert.EqualValues(t, 1, pipelineC.Number)
 }

@@ -397,13 +397,13 @@ func TestRepoCrud(t *testing.T) {
 		Name:     "test",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
-	build := model.Pipeline{
+	pipeline := model.Pipeline{
 		RepoID: repo.ID,
 	}
 	proc := model.Proc{
 		Name: "a proc",
 	}
-	assert.NoError(t, store.CreatePipeline(&build, &proc))
+	assert.NoError(t, store.CreatePipeline(&pipeline, &proc))
 
 	// create unrelated
 	repoUnrelated := model.Repo{
@@ -413,13 +413,13 @@ func TestRepoCrud(t *testing.T) {
 		Name:     "x",
 	}
 	assert.NoError(t, store.CreateRepo(&repoUnrelated))
-	buildUnrelated := model.Pipeline{
+	pipelineUnrelated := model.Pipeline{
 		RepoID: repoUnrelated.ID,
 	}
 	procUnrelated := model.Proc{
 		Name: "a unrelated proc",
 	}
-	assert.NoError(t, store.CreatePipeline(&buildUnrelated, &procUnrelated))
+	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &procUnrelated))
 
 	_, err := store.GetRepo(repo.ID)
 	assert.NoError(t, err)
@@ -430,9 +430,9 @@ func TestRepoCrud(t *testing.T) {
 	procCount, err := store.engine.Count(new(model.Proc))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, procCount)
-	buildCount, err := store.engine.Count(new(model.Pipeline))
+	pipelineCount, err := store.engine.Count(new(model.Pipeline))
 	assert.NoError(t, err)
-	assert.EqualValues(t, 1, buildCount)
+	assert.EqualValues(t, 1, pipelineCount)
 }
 
 func TestRepoRedirection(t *testing.T) {

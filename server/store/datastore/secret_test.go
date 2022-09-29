@@ -77,7 +77,7 @@ func TestSecretList(t *testing.T) {
 	assert.Len(t, list, 2)
 }
 
-func TestSecretBuildList(t *testing.T) {
+func TestSecretPipelineList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()
 

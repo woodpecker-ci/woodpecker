@@ -10,15 +10,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var buildLogsCmd = &cli.Command{
+var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
-	Usage:     "show build logs",
-	ArgsUsage: "<repo/name> [build] [job]",
-	Action:    buildLogs,
+	Usage:     "show pipeline logs",
+	ArgsUsage: "<repo/name> [pipeline] [job]",
+	Action:    pipelineLogs,
 	Flags:     common.GlobalFlags,
 }
 
-func buildLogs(c *cli.Context) error {
+func pipelineLogs(c *cli.Context) error {
 	repo := c.Args().First()
 	owner, name, err := internal.ParseRepo(repo)
 	if err != nil {
@@ -40,7 +40,7 @@ func buildLogs(c *cli.Context) error {
 		return err
 	}
 
-	logs, err := client.BuildLogs(owner, name, number, job)
+	logs, err := client.PipelineLogs(owner, name, number, job)
 	if err != nil {
 		return err
 	}

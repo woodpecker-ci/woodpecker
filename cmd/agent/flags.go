@@ -80,7 +80,7 @@ var flags = []cli.Flag{
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
 		Name:    "max-procs",
-		Usage:   "agent parallel builds",
+		Usage:   "agent parallel pipelines",
 		Value:   1,
 	},
 	&cli.BoolFlag{

@@ -44,10 +44,10 @@ SELECT
 ,build_email
 ,build_avatar
 FROM
- builds b
+ pipelines p
 ,repos r
-WHERE b.build_repo_id = r.repo_id
-  AND b.build_status IN ('pending','running')
+WHERE p.build_repo_id = r.repo_id
+  AND p.build_status IN ('pending','running')
 `).Find(&feed)
 	return feed, err
 }
@@ -78,7 +78,7 @@ SELECT
 ,build_avatar
 FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
-INNER JOIN builds ON builds.build_repo_id = repos.repo_id
+INNER JOIN pipelines ON pipelines.build_repo_id = repos.repo_id
 WHERE perms.perm_user_id = ?
   AND (perms.perm_push = ? OR perms.perm_admin = ?)
 ORDER BY build_id DESC
@@ -110,7 +110,7 @@ SELECT
 ,build_author
 ,build_email
 ,build_avatar
-FROM repos LEFT OUTER JOIN builds ON build_id = (
+FROM repos LEFT OUTER JOIN pipelines ON build_id = (
 	SELECT build_id FROM builds
 	WHERE builds.build_repo_id = repos.repo_id
 	ORDER BY build_id DESC

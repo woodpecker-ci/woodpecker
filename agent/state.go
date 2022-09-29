@@ -29,23 +29,23 @@ type State struct {
 }
 
 type Info struct {
-	ID      string        `json:"id"`
-	Repo    string        `json:"repository"`
-	Build   string        `json:"build_number"`
-	Started time.Time     `json:"build_started"`
-	Timeout time.Duration `json:"build_timeout"`
+	ID       string        `json:"id"`
+	Repo     string        `json:"repository"`
+	Pipeline string        `json:"pipeline_number"`
+	Started  time.Time     `json:"pipeline_started"`
+	Timeout  time.Duration `json:"pipeline_timeout"`
 }
 
-func (s *State) Add(id string, timeout time.Duration, repo, build string) {
+func (s *State) Add(id string, timeout time.Duration, repo, pipeline string) {
 	s.Lock()
 	s.Polling--
 	s.Running++
 	s.Metadata[id] = Info{
-		ID:      id,
-		Repo:    repo,
-		Build:   build,
-		Timeout: timeout,
-		Started: time.Now().UTC(),
+		ID:       id,
+		Repo:     repo,
+		Pipeline: pipeline,
+		Timeout:  timeout,
+		Started:  time.Now().UTC(),
 	}
 	s.Unlock()
 }
