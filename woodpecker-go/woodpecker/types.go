@@ -40,7 +40,7 @@ type (
 		Timeout         *int64  `json:"timeout,omitempty"`
 		Visibility      *string `json:"visibility"`
 		AllowPull       *bool   `json:"allow_pr,omitempty"`
-		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
+		PipelineCounter *int    `json:"build_counter,omitempty"`
 	}
 
 	// Pipeline defines a pipeline object.

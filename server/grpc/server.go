@@ -48,14 +48,14 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		remote:     remote,
-		store:      store,
-		queue:      queue,
-		pubsub:     pubsub,
-		logger:     logger,
-		host:       host,
-		buildTime:  buildTime,
-		buildCount: buildCount,
+		remote:        remote,
+		store:         store,
+		queue:         queue,
+		pubsub:        pubsub,
+		logger:        logger,
+		host:          host,
+		pipelineTime:  buildTime,
+		pipelineCount: buildCount,
 	}
 	return &WoodpeckerServer{peer: peer}
 }

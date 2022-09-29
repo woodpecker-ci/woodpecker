@@ -55,11 +55,11 @@ func CreatePipeline(c *gin.Context) {
 
 	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
 
-	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, build)
+		c.JSON(http.StatusOK, pl)
 	}
 }
 

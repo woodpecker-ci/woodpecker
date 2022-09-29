@@ -104,9 +104,9 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Pro
 		return err
 	}
 
-	// calc build number
+	// calc pipeline number
 	var number int64
-	if _, err := sess.SQL("SELECT MAX(build_number) FROM `builds` WHERE build_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {
+	if _, err := sess.SQL("SELECT MAX(build_number) FROM `pipelines` WHERE build_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {
 		return err
 	}
 	pipeline.Number = number + 1
@@ -134,11 +134,11 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
-func deletePipeline(sess *xorm.Session, buildID int64) error {
+func deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	// delete related procs
 	for startProcs := 0; ; startProcs += perPage {
 		procIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", buildID).Find(&procIDs); err != nil {
+		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", pipelineID).Find(&procIDs); err != nil {
 			return err
 		}
 		if len(procIDs) == 0 {
@@ -151,9 +151,9 @@ func deletePipeline(sess *xorm.Session, buildID int64) error {
 			}
 		}
 	}
-	if _, err := sess.Where("build_id = ?", buildID).Delete(new(model.PipelineConfig)); err != nil {
+	if _, err := sess.Where("build_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}
-	_, err := sess.ID(buildID).Delete(new(model.Pipeline))
+	_, err := sess.ID(pipelineID).Delete(new(model.Pipeline))
 	return err
 }

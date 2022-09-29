@@ -69,7 +69,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *mod
 		}
 	}
 
-	// Then update the DB status for pending builds
+	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
 	for _, proc := range procs {
 		if proc.State == model.StatusPending {

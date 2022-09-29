@@ -14,20 +14,6 @@ type Store struct {
 	mock.Mock
 }
 
-// BuildConfigCreate provides a mock function with given fields: _a0
-func (_m *Store) BuildConfigCreate(_a0 *model.PipelineConfig) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.PipelineConfig) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // Close provides a mock function with given fields:
 func (_m *Store) Close() error {
 	ret := _m.Called()
@@ -100,8 +86,8 @@ func (_m *Store) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 	return r0, r1
 }
 
-// ConfigsForBuild provides a mock function with given fields: pipelineID
-func (_m *Store) ConfigsForBuild(pipelineID int64) ([]*model.Config, error) {
+// ConfigsForPipeline provides a mock function with given fields: pipelineID
+func (_m *Store) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 	ret := _m.Called(pipelineID)
 
 	var r0 []*model.Config
@@ -123,8 +109,8 @@ func (_m *Store) ConfigsForBuild(pipelineID int64) ([]*model.Config, error) {
 	return r0, r1
 }
 
-// CreateBuild provides a mock function with given fields: _a0, _a1
-func (_m *Store) CreateBuild(_a0 *model.Pipeline, _a1 ...*model.Proc) error {
+// CreatePipeline provides a mock function with given fields: _a0, _a1
+func (_m *Store) CreatePipeline(_a0 *model.Pipeline, _a1 ...*model.Proc) error {
 	_va := make([]interface{}, len(_a1))
 	for _i := range _a1 {
 		_va[_i] = _a1[_i]
@@ -282,7 +268,7 @@ func (_m *Store) CronList(_a0 *model.Repo) ([]*model.Cron, error) {
 }
 
 // CronListNextExecute provides a mock function with given fields: _a0, _a1
-func (_m *Store) CronListNextExecute(_a0, _a1 int64) ([]*model.Cron, error) {
+func (_m *Store) CronListNextExecute(_a0 int64, _a1 int64) ([]*model.Cron, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Cron
@@ -429,8 +415,8 @@ func (_m *Store) FileRead(_a0 *model.Proc, _a1 string) (io.ReadCloser, error) {
 	return r0, r1
 }
 
-// GetActiveBuildList provides a mock function with given fields: repo, page
-func (_m *Store) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
+// GetActivePipelineList provides a mock function with given fields: repo, page
+func (_m *Store) GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
 	ret := _m.Called(repo, page)
 
 	var r0 []*model.Pipeline
@@ -452,8 +438,8 @@ func (_m *Store) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Pipeli
 	return r0, r1
 }
 
-// GetBuild provides a mock function with given fields: _a0
-func (_m *Store) GetBuild(_a0 int64) (*model.Pipeline, error) {
+// GetPipeline provides a mock function with given fields: _a0
+func (_m *Store) GetPipeline(_a0 int64) (*model.Pipeline, error) {
 	ret := _m.Called(_a0)
 
 	var r0 *model.Pipeline
@@ -475,8 +461,8 @@ func (_m *Store) GetBuild(_a0 int64) (*model.Pipeline, error) {
 	return r0, r1
 }
 
-// GetBuildCommit provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) GetBuildCommit(_a0 *model.Repo, _a1, _a2 string) (*model.Pipeline, error) {
+// GetPipelineCommit provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) GetPipelineCommit(_a0 *model.Repo, _a1 string, _a2 string) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 *model.Pipeline
@@ -498,8 +484,8 @@ func (_m *Store) GetBuildCommit(_a0 *model.Repo, _a1, _a2 string) (*model.Pipeli
 	return r0, r1
 }
 
-// GetBuildCount provides a mock function with given fields:
-func (_m *Store) GetBuildCount() (int64, error) {
+// GetPipelineCount provides a mock function with given fields:
+func (_m *Store) GetPipelineCount() (int64, error) {
 	ret := _m.Called()
 
 	var r0 int64
@@ -519,8 +505,8 @@ func (_m *Store) GetBuildCount() (int64, error) {
 	return r0, r1
 }
 
-// GetBuildLast provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetBuildLast(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
+// GetPipelineLast provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineLast(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.Pipeline
@@ -542,8 +528,8 @@ func (_m *Store) GetBuildLast(_a0 *model.Repo, _a1 string) (*model.Pipeline, err
 	return r0, r1
 }
 
-// GetBuildLastBefore provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) GetBuildLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (*model.Pipeline, error) {
+// GetPipelineLastBefore provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 *model.Pipeline
@@ -565,8 +551,8 @@ func (_m *Store) GetBuildLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (*mo
 	return r0, r1
 }
 
-// GetBuildList provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetBuildList(_a0 *model.Repo, _a1 int) ([]*model.Pipeline, error) {
+// GetPipelineList provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 int) ([]*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Pipeline
@@ -588,8 +574,8 @@ func (_m *Store) GetBuildList(_a0 *model.Repo, _a1 int) ([]*model.Pipeline, erro
 	return r0, r1
 }
 
-// GetBuildNumber provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetBuildNumber(_a0 *model.Repo, _a1 int64) (*model.Pipeline, error) {
+// GetPipelineNumber provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineNumber(_a0 *model.Repo, _a1 int64) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.Pipeline
@@ -611,8 +597,8 @@ func (_m *Store) GetBuildNumber(_a0 *model.Repo, _a1 int64) (*model.Pipeline, er
 	return r0, r1
 }
 
-// GetBuildQueue provides a mock function with given fields:
-func (_m *Store) GetBuildQueue() ([]*model.Feed, error) {
+// GetPipelineQueue provides a mock function with given fields:
+func (_m *Store) GetPipelineQueue() ([]*model.Feed, error) {
 	ret := _m.Called()
 
 	var r0 []*model.Feed
@@ -634,8 +620,8 @@ func (_m *Store) GetBuildQueue() ([]*model.Feed, error) {
 	return r0, r1
 }
 
-// GetBuildRef provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetBuildRef(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
+// GetPipelineRef provides a mock function with given fields: _a0, _a1
+func (_m *Store) GetPipelineRef(_a0 *model.Repo, _a1 string) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.Pipeline
@@ -1002,7 +988,7 @@ func (_m *Store) Migrate() error {
 }
 
 // OrgSecretFind provides a mock function with given fields: _a0, _a1
-func (_m *Store) OrgSecretFind(_a0, _a1 string) (*model.Secret, error) {
+func (_m *Store) OrgSecretFind(_a0 string, _a1 string) (*model.Secret, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.Secret
@@ -1119,6 +1105,20 @@ func (_m *Store) Ping() error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func() error); ok {
 		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// PipelineConfigCreate provides a mock function with given fields: _a0
+func (_m *Store) PipelineConfigCreate(_a0 *model.PipelineConfig) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.PipelineConfig) error); ok {
+		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1518,7 +1518,7 @@ func (_m *Store) ServerConfigGet(_a0 string) (string, error) {
 }
 
 // ServerConfigSet provides a mock function with given fields: _a0, _a1
-func (_m *Store) ServerConfigSet(_a0, _a1 string) error {
+func (_m *Store) ServerConfigSet(_a0 string, _a1 string) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
@@ -1582,8 +1582,8 @@ func (_m *Store) TaskList() ([]*model.Task, error) {
 	return r0, r1
 }
 
-// UpdateBuild provides a mock function with given fields: _a0
-func (_m *Store) UpdateBuild(_a0 *model.Pipeline) error {
+// UpdatePipeline provides a mock function with given fields: _a0
+func (_m *Store) UpdatePipeline(_a0 *model.Pipeline) error {
 	ret := _m.Called(_a0)
 
 	var r0 error

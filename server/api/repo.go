@@ -33,7 +33,7 @@ import (
 
 // TODO: make it set system wide via environment variables
 const (
-	defaultTimeout int64 = 60 // 1 hour default build time
+	defaultTimeout int64 = 60 // 1 hour default pipeline time
 	maxTimeout     int64 = defaultTimeout * 2
 )
 

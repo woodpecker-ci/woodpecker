@@ -26,10 +26,10 @@ import (
 
 // start a build, make sure it was stored persistent in the store before
 func start(ctx context.Context, store store.Store, activeBuild *model.Pipeline, user *model.User, repo *model.Repo, buildItems []*shared.PipelineItem) (*model.Pipeline, error) {
-	// call to cancel previous builds if needed
+	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, store, activeBuild, repo); err != nil {
 		// should be not breaking
-		log.Error().Err(err).Msg("Failed to cancel previous builds")
+		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
 	}
 
 	if err := store.ProcCreate(activeBuild.Procs); err != nil {

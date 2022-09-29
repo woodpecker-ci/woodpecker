@@ -49,7 +49,7 @@ func TestCreateBuild(t *testing.T) {
 	store.On("GetUser", mock.Anything).Return(creator, nil)
 	remote.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
 
-	_, build, err := createBuild(ctx, store, remote, &model.Cron{
+	_, pipeline, err := createBuild(ctx, store, remote, &model.Cron{
 		Name: "test",
 	})
 	assert.NoError(t, err)
@@ -60,7 +60,7 @@ func TestCreateBuild(t *testing.T) {
 		Ref:     "refs/heads/default",
 		Message: "test",
 		Sender:  "test",
-	}, build)
+	}, pipeline)
 }
 
 func TestCalcNewNext(t *testing.T) {

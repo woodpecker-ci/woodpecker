@@ -38,8 +38,8 @@ func publishToTopic(c context.Context, build *model.Pipeline, repo *model.Repo) 
 	}
 
 	message.Data, _ = json.Marshal(model.Event{
-		Repo:  *repo,
-		Build: buildCopy,
+		Repo:     *repo,
+		Pipeline: buildCopy,
 	})
 	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
 }

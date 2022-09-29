@@ -41,15 +41,15 @@ func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
 	/* TODO: use builder (do not behave same as pure sql, fix that)
 	return s.engine.Table(new(model.Pipeline)).
-		Join("INNER", "pipeline_config", "builds.build_id = pipeline_config.build_id" ).
-		Where(builder.Eq{"builds.build_repo_id": config.RepoID}).
+		Join("INNER", "pipeline_config", "pipelines.build_id = pipeline_config.build_id" ).
+		Where(builder.Eq{"pipelines.build_repo_id": config.RepoID}).
 		And(builder.Eq{"pipeline_config.config_id": config.ID}).
-		And(builder.In("builds.build_status", "blocked", "pending")).
+		And(builder.In("pipelines.build_status", "blocked", "pending")).
 		Exist(new(model.Pipeline))
 	*/
 
 	c, err := s.engine.SQL(`
-SELECT build_id FROM builds
+SELECT build_id FROM pipelines
 WHERE build_repo_id = ?
 AND build_id in (
 SELECT build_id

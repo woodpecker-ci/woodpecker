@@ -111,8 +111,8 @@ SELECT
 ,build_email
 ,build_avatar
 FROM repos LEFT OUTER JOIN pipelines ON build_id = (
-	SELECT build_id FROM builds
-	WHERE builds.build_repo_id = repos.repo_id
+	SELECT build_id FROM pipelines
+	WHERE pipelines.build_repo_id = repos.repo_id
 	ORDER BY build_id DESC
 	LIMIT 1
 )

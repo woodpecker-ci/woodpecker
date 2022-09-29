@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// CCMenu displays the build status of projects on a ci server as an item in the Mac's menu bar.
+// CCMenu displays the pipeline status of projects on a ci server as an item in the Mac's menu bar.
 // It started as part of the CruiseControl project that built the first continuous integration server.
 //
 // http://ccmenu.org/

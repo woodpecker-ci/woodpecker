@@ -31,9 +31,9 @@ type State struct {
 type Info struct {
 	ID       string        `json:"id"`
 	Repo     string        `json:"repository"`
-	Pipeline string        `json:"pipeline_number"`
-	Started  time.Time     `json:"pipeline_started"`
-	Timeout  time.Duration `json:"pipeline_timeout"`
+	Pipeline string        `json:"build_number"`
+	Started  time.Time     `json:"build_started"`
+	Timeout  time.Duration `json:"build_timeout"`
 }
 
 func (s *State) Add(id string, timeout time.Duration, repo, pipeline string) {
