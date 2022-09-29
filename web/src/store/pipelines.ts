@@ -26,7 +26,7 @@ export default defineStore({
 
   actions: {
     // setters
-    setPipelines(owner: string, repo: string, pipeline: Pipeline) {
+    setPipeline(owner: string, repo: string, pipeline: Pipeline) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const _repoSlug = repoSlug(owner, repo);
       if (!this.pipelines[_repoSlug]) {
@@ -54,7 +54,7 @@ export default defineStore({
       }
 
       pipeline.procs = [...pipeline.procs.filter((p) => p.pid !== proc.pid), proc];
-      this.setPipelines(owner, repo, pipeline);
+      this.setPipeline(owner, repo, pipeline);
     },
     setPipelineFeedItem(pipeline: PipelineFeed) {
       const pipelineFeed = this.pipelineFeed.filter((b) => b.id !== pipeline.id);
@@ -83,13 +83,13 @@ export default defineStore({
     // loading
     async loadPipelines(owner: string, repo: string) {
       const pipelines = await apiClient.getPipelineList(owner, repo);
-      pipelines.forEach((pipelines) => {
-        this.setPipelines(owner, repo, pipelines);
+      pipelines.forEach((pipeline) => {
+        this.setPipeline(owner, repo, pipeline);
       });
     },
     async loadPipeline(owner: string, repo: string, pipelinesNumber: number) {
       const pipelines = await apiClient.getPipeline(owner, repo, pipelinesNumber);
-      this.setPipelines(owner, repo, pipelines);
+      this.setPipeline(owner, repo, pipelines);
     },
     async loadPipelineFeed() {
       const pipeliness = await apiClient.getPipelineFeed();

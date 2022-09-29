@@ -1,11 +1,11 @@
 import ApiClient, { encodeQueryString } from './client';
 import {
+  OrgPermissions,
   Pipeline,
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
   PipelineProc,
-  OrgPermissions,
   Registry,
   Repo,
   RepoPermissions,

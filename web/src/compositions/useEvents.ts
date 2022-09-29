@@ -29,7 +29,7 @@ export default () => {
       return;
     }
     const { pipeline } = data;
-    buildStore.setPipelines(repo.owner, repo.name, pipeline);
+    buildStore.setPipeline(repo.owner, repo.name, pipeline);
     buildStore.setPipelineFeedItem({ ...pipeline, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
     // contains proc update
