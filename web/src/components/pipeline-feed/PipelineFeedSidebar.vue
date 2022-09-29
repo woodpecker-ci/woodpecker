@@ -6,7 +6,10 @@
     <router-link
       v-for="pipeline in sortedPipelineFeed"
       :key="pipeline.id"
-      :to="{ name: 'repo-pipeline', params: { repoOwner: pipeline.owner, repoName: pipeline.name, pipelineId: pipeline.number } }"
+      :to="{
+        name: 'repo-pipeline',
+        params: { repoOwner: pipeline.owner, repoName: pipeline.name, pipelineId: pipeline.number },
+      }"
       class="flex border-b py-4 px-2 w-full hover:bg-light-300 dark:hover:bg-dark-gray-900 dark:border-dark-gray-600 hover:shadow-sm"
     >
       <PipelineFeedItem :pipeline="pipeline" />

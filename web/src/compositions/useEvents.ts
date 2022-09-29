@@ -25,18 +25,18 @@ export default () => {
     repoStore.setRepo(repo);
 
     // contains build update
-    if (!data.build) {
+    if (!data.pipeline) {
       return;
     }
-    const { build } = data;
-    buildStore.setPipelines(repo.owner, repo.name, build);
-    buildStore.setPipelineFeedItem({ ...build, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
+    const { pipeline } = data;
+    buildStore.setPipelines(repo.owner, repo.name, pipeline);
+    buildStore.setPipelineFeedItem({ ...pipeline, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
     // contains proc update
     if (!data.proc) {
       return;
     }
     const { proc } = data;
-    buildStore.setProc(repo.owner, repo.name, build.number, proc);
+    buildStore.setProc(repo.owner, repo.name, pipeline.number, proc);
   });
 };

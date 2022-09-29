@@ -3,7 +3,10 @@
     <router-link
       v-for="pipeline in pipelines"
       :key="pipeline.id"
-      :to="{ name: 'repo-pipeline', params: { repoOwner: repo.owner, repoName: repo.name, pipelineId: pipeline.number } }"
+      :to="{
+        name: 'repo-pipeline',
+        params: { repoOwner: repo.owner, repoName: repo.name, pipelineId: pipeline.number },
+      }"
       class="flex"
     >
       <PipelineItem :pipeline="pipeline" />

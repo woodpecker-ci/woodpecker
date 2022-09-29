@@ -23,7 +23,9 @@
         />
         <Button
           v-if="proc?.end_time === undefined"
-          :title="autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')"
+          :title="
+            autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
+          "
           :start-icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
           @click="autoScroll = !autoScroll"
         />
@@ -44,7 +46,9 @@
 
       <div class="m-auto text-xl text-color">
         <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
-        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">{{ $t('repo.pipeline.actions.canceled') }}</span>
+        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">{{
+          $t('repo.pipeline.actions.canceled')
+        }}</span>
         <span v-else-if="!proc?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
       </div>
@@ -115,7 +119,9 @@ export default defineComponent({
     const apiClient = useApiClient();
 
     const loadedProcSlug = ref<string>();
-    const procSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${procId.value}`);
+    const procSlug = computed(
+      () => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${procId.value}`,
+    );
     const proc = computed(() => pipeline.value && findProc(pipeline.value.procs || [], procId.value));
     const stream = ref<EventSource>();
     const log = ref<LogLine[]>();

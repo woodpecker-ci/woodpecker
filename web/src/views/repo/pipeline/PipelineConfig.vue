@@ -38,12 +38,12 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
       }
 
-      pipelineConfigs.value = (await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, pipeline.value.number)).map(
-        (i) => ({
-          ...i,
-          data: atob(i.data),
-        }),
-      );
+      pipelineConfigs.value = (
+        await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, pipeline.value.number)
+      ).map((i) => ({
+        ...i,
+        data: atob(i.data),
+      }));
     }
 
     onMounted(() => {

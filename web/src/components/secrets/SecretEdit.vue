@@ -77,18 +77,18 @@ const images = computed<string>({
 });
 const isEditingSecret = computed(() => !!innerValue.value?.id);
 
-    const secretEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
-      {
-        value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.pipeline.event.pr'),
-        description: i18n.t('repo.settings.secrets.events.pr_warning'),
-      },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
-      { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
-      { value: WebhookEvents.Manual, text: i18n.t('repo.pipeline.event.manual') },
-    ];
+const secretEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
+  {
+    value: WebhookEvents.PullRequest,
+    text: i18n.t('repo.pipeline.event.pr'),
+    description: i18n.t('repo.settings.secrets.events.pr_warning'),
+  },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: i18n.t('repo.pipeline.event.manual') },
+];
 
 function save() {
   if (!innerValue.value) {
