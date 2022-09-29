@@ -101,16 +101,7 @@ func (r *Runtime) Run() error {
 			return ErrCancel
 		case err := <-r.execAll(stage.Steps):
 			if err != nil {
-				shouldIgnoreFailure := false
-				for _, step := range stage.Steps {
-					if step.Failure == frontend.FailureIgnore {
-						shouldIgnoreFailure = true
-						break
-					}
-				}
-				if !shouldIgnoreFailure {
-					r.err = err
-				}
+				r.err = err
 			}
 		}
 	}
@@ -203,7 +194,11 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 			}
 
 			// Return the error after tracing it.
-			return r.traceStep(processState, err, step)
+			err = r.traceStep(processState, err, step)
+			if err != nil && step.Failure == frontend.FailureIgnore {
+				return nil
+			}
+			return err
 		})
 	}
 
