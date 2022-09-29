@@ -71,7 +71,7 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: "MANUAL BUILD @ " + opts.Branch,
+		Message: "MANUAL PIPELINE @ " + opts.Branch,
 
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
