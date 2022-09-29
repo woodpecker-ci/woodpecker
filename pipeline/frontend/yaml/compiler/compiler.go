@@ -25,6 +25,7 @@ const (
 	namePipeline = "pipeline"
 )
 
+// Registry represent registry credentials
 type Registry struct {
 	Hostname string
 	Username string
