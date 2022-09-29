@@ -110,7 +110,7 @@ const routes: RouteRecordRaw[] = [
         redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
       },
       {
-        path: 'build/:pipelineId',
+        path: 'build/:pipelineId+',
         redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
       },
     ],
