@@ -72,7 +72,7 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
 		// ignore if the pipeline was filtered by matched constraints
-		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true); match && err == nil {
+		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true); !match && err == nil {
 			continue
 		} else if err != nil {
 			return false, err

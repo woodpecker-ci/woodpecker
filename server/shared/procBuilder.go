@@ -119,7 +119,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 			}
 
 			// checking if filtered.
-			if match, err := parsed.When.Match(metadata, true); match && err == nil {
+			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
 				log.Debug().Str("pipeline", proc.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)

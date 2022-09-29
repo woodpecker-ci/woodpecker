@@ -85,7 +85,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 	config := new(backend.Config)
 
-	if match, err := conf.When.Match(c.metadata, true); match && err == nil {
+	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -157,7 +157,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
-			if match, err := container.When.Match(c.metadata, false); match && err == nil {
+			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -187,7 +187,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
-			if match, err := container.When.Match(c.metadata, false); match && err == nil {
+			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -209,7 +209,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false); match && err == nil {
+		if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err
