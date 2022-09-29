@@ -42,7 +42,7 @@ func ParamsToEnv(from map[string]interface{}, to, secrets map[string]string) (er
 	return nil
 }
 
-// format hey environment variable key
+// format the environment variable key
 func sanitizeParamKey(k string) string {
 	return "PLUGIN_" + strings.ToUpper(
 		strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_"))
@@ -168,7 +168,7 @@ func injectSecret(v map[string]interface{}, secrets map[string]string) (string, 
 }
 
 // injectSecretRecursive iterates over all types and if they contain elements
-// do so recursive over them too, it use injectSecret internally
+// iterate recursively over them too, it uses injectSecret internally
 func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{}, error) {
 	t := reflect.TypeOf(v)
 
