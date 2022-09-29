@@ -155,6 +155,7 @@ func injectSecret(v map[string]interface{}, secrets map[string]string) (string, 
 			}
 			return "", false, fmt.Errorf("no secret found for %q", secretName)
 		}
+		return "", false, fmt.Errorf("from_secret has to be a string")
 	}
 	return "", false, nil
 }
