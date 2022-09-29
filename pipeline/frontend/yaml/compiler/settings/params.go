@@ -91,8 +91,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			return "", fmt.Errorf("could not handle: %#v", v)
 		}
 
-		// it's complex
-		// break
+		return handleComplex(vv.Interface(), secrets)
 
 	case reflect.Slice, reflect.Array:
 		if vv.Len() == 0 {
@@ -124,14 +123,16 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			if !containComplex {
 				return strings.Join(in, ","), nil
 			}
-			// else it's complex
+			return handleComplex(vv.Interface(), secrets)
 		}
 	}
 
-	// handle complex via yml.ToJSON
+	return handleComplex(vv.Interface(), secrets)
+}
 
-	// recursive inject secrets
-	v, err := injectSecretRecursive(vv.Interface(), secrets)
+// handle complex via yml.ToJSON
+func handleComplex(v interface{}, secrets map[string]string) (string, error) {
+	v, err := injectSecretRecursive(v, secrets)
 	if err != nil {
 		return "", err
 	}
@@ -147,6 +148,9 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 	return string(out), nil
 }
 
+// injectSecret probe if map is actualy a secret and so a string.
+// if it's a string it returns either the value or an error if secret was not found
+// else it just indicate to progress normaly
 func injectSecret(v map[string]interface{}, secrets map[string]string) (string, bool, error) {
 	if secretNameI, ok := v["from_secret"]; ok {
 		if secretName, ok := secretNameI.(string); ok {
@@ -160,6 +164,8 @@ func injectSecret(v map[string]interface{}, secrets map[string]string) (string, 
 	return "", false, nil
 }
 
+// injectSecretRecursive itterates over all types and if they countain elements do so recursive over them too
+// it use injectSecret internaly
 func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{}, error) {
 	t := reflect.TypeOf(v)
 
