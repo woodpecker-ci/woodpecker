@@ -76,6 +76,7 @@ func apiRoutes(e *gin.Engine) {
 			repo.GET("/branches", api.GetRepoBranches)
 
 			repo.GET("/pipelines", api.GetPipelines)
+			repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
 			repo.GET("/pipelines/:number", api.GetPipeline)
 			repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
 
@@ -88,6 +89,7 @@ func apiRoutes(e *gin.Engine) {
 
 			// DEPRECATED - use /pipelines/
 			repo.GET("/builds", api.GetPipelines)
+			repo.POST("/builds", session.MustPush, api.CreatePipeline)
 			repo.GET("/builds/:number", api.GetPipeline)
 			repo.GET("/builds/:number/config", api.GetPipelineConfig)
 			// requires push permissions

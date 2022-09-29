@@ -51,13 +51,19 @@ type Pipeline struct {
 	Procs        []*Proc      `json:"procs,omitempty"         xorm:"-"`
 	Files        []*File      `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
+	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 }
 
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {
-	return "piprlines"
+	return "pipelines"
 }
 
 type UpdatePipelineStore interface {
 	UpdatePipeline(*Pipeline) error
+}
+
+type PipelineOptions struct {
+	Branch    string            `json:"branch"`
+	Variables map[string]string `json:"variables"`
 }

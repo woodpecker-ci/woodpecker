@@ -24,5 +24,6 @@ var Command = &cli.Command{
 		buildQueueCmd,
 		buildKillCmd,
 		buildPsCmd,
+		pipelineCreateCmd,
 	},
 }

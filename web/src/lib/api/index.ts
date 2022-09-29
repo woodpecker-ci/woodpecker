@@ -18,6 +18,11 @@ type RepoListOptions = {
   all?: boolean;
   flush?: boolean;
 };
+
+type BuildOptions = {
+  branch: string;
+  variables: Record<string, string>;
+};
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
@@ -60,6 +65,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   getPipeline(owner: string, repo: string, number: number | 'latest'): Promise<Pipeline> {
     return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
+  }
+
+  createBuild(owner: string, repo: string, options: BuildOptions): Promise<Build> {
+    return this._post(`/api/repos/${owner}/${repo}/builds`, options) as Promise<Build>;
   }
 
   getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {

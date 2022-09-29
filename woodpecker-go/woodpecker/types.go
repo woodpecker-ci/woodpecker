@@ -175,4 +175,10 @@ type (
 		Created   int64  `json:"created_at"`
 		Branch    string `json:"branch"`
 	}
+
+	// PipelineOptions is the JSON data for forging a new build
+	PipelineOptions struct {
+		Branch    string            `json:"branch"`
+		Variables map[string]string `json:"variables"`
+	}
 )

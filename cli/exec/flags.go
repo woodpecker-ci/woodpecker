@@ -107,12 +107,12 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_NAME"},
 		Name:    "system-name",
-		Value:   "pipec",
+		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_LINK"},
 		Name:    "system-link",
-		Value:   "https://github.com/cncd/pipec",
+		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_NAME"},
@@ -157,6 +157,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_EVENT"},
 		Name:    "pipeline-event",
+		Value:   "manual",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_LINK"},

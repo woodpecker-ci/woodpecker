@@ -214,6 +214,13 @@ func (c *client) PipelineList(owner, name string) ([]*Pipeline, error) {
 	return out, err
 }
 
+func (c *client) PipelineCreate(owner, name string, options *PipelineOptions) (*Pipeline, error) {
+	var out *Pipeline
+	uri := fmt.Sprintf(pathPipelines, c.addr, owner, name)
+	err := c.post(uri, options, &out)
+	return out, err
+}
+
 // PipelineQueue returns a list of enqueued pipelines.
 func (c *client) PipelineQueue() ([]*Activity, error) {
 	var out []*Activity
