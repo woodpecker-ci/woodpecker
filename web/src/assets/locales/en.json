@@ -194,7 +194,7 @@
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "exit_code": "exit code {exitCode}",
             "loading": "Loading…",
-            "pipeline": "Pipeline #{buildId}",
+            "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",
             "actions": {
                 "cancel": "Cancel",
