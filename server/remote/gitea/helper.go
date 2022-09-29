@@ -66,8 +66,8 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 	}
 }
 
-// helper function that extracts the Build data from a Gitea push hook
-func buildFromPush(hook *pushHook) *model.Build {
+// helper function that extracts the Pipeline data from a Gitea push hook
+func buildFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarURL),
@@ -85,7 +85,7 @@ func buildFromPush(hook *pushHook) *model.Build {
 		link = hook.Commits[0].URL
 	}
 
-	return &model.Build{
+	return &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
@@ -117,14 +117,14 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 	return utils.DedupStrings(files)
 }
 
-// helper function that extracts the Build data from a Gitea tag hook
-func buildFromTag(hook *pushHook) *model.Build {
+// helper function that extracts the Pipeline data from a Gitea tag hook
+func buildFromTag(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	return &model.Build{
+	return &model.Pipeline{
 		Event:     model.EventTag,
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
@@ -138,13 +138,13 @@ func buildFromTag(hook *pushHook) *model.Build {
 	}
 }
 
-// helper function that extracts the Build data from a Gitea pull_request hook
-func buildFromPullRequest(hook *pullRequestHook) *model.Build {
+// helper function that extracts the Pipeline data from a Gitea pull_request hook
+func buildFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
-	build := &model.Build{
+	build := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.PullRequest.Head.Sha,
 		Link:    hook.PullRequest.URL,

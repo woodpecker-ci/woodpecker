@@ -25,7 +25,7 @@ import (
 )
 
 // start a build, make sure it was stored persistent in the store before
-func start(ctx context.Context, store store.Store, activeBuild *model.Build, user *model.User, repo *model.Repo, buildItems []*shared.BuildItem) (*model.Build, error) {
+func start(ctx context.Context, store store.Store, activeBuild *model.Pipeline, user *model.User, repo *model.Repo, buildItems []*shared.PipelineItem) (*model.Pipeline, error) {
 	// call to cancel previous builds if needed
 	if err := cancelPreviousPipelines(ctx, store, activeBuild, repo); err != nil {
 		// should be not breaking

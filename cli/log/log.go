@@ -6,7 +6,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 )
 
-// Command exports the build command set.
+// Command exports the pipeline command set.
 var Command = &cli.Command{
 	Name:  "log",
 	Usage: "manage logs",

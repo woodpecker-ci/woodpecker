@@ -34,17 +34,17 @@ type (
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config       *string `json:"config_file,omitempty"`
-		IsTrusted    *bool   `json:"trusted,omitempty"`
-		IsGated      *bool   `json:"gated,omitempty"`
-		Timeout      *int64  `json:"timeout,omitempty"`
-		Visibility   *string `json:"visibility"`
-		AllowPull    *bool   `json:"allow_pr,omitempty"`
-		BuildCounter *int    `json:"build_counter,omitempty"`
+		Config          *string `json:"config_file,omitempty"`
+		IsTrusted       *bool   `json:"trusted,omitempty"`
+		IsGated         *bool   `json:"gated,omitempty"`
+		Timeout         *int64  `json:"timeout,omitempty"`
+		Visibility      *string `json:"visibility"`
+		AllowPull       *bool   `json:"allow_pr,omitempty"`
+		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
 	}
 
-	// Build defines a build object.
-	Build struct {
+	// Pipeline defines a pipeline object.
+	Pipeline struct {
 		ID        int64   `json:"id"`
 		Number    int     `json:"number"`
 		Parent    int     `json:"parent"`
@@ -74,7 +74,7 @@ type (
 		Procs     []*Proc `json:"procs,omitempty"`
 	}
 
-	// Proc represents a process in the build pipeline.
+	// Proc represents a process in the pipeline.
 	Proc struct {
 		ID       int64             `json:"id"`
 		PID      int               `json:"pid"`

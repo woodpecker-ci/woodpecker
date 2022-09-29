@@ -38,12 +38,12 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository configuration path (e.g. .woodpecker.yml)",
 		},
 		&cli.IntFlag{
-			Name:  "build-counter",
-			Usage: "repository starting build number",
+			Name:  "pipeline-counter",
+			Usage: "repository starting pipeline number",
 		},
 		&cli.BoolFlag{
 			Name:  "unsafe",
-			Usage: "validate updating the build-counter is unsafe",
+			Usage: "validate updating the pipeline-counter is unsafe",
 		},
 	),
 }
@@ -66,7 +66,7 @@ func repoUpdate(c *cli.Context) error {
 		timeout      = c.Duration("timeout")
 		trusted      = c.Bool("trusted")
 		gated        = c.Bool("gated")
-		buildCounter = c.Int("build-counter")
+		buildCounter = c.Int("pipeline-counter")
 		unsafe       = c.Bool("unsafe")
 	)
 
@@ -90,11 +90,11 @@ func repoUpdate(c *cli.Context) error {
 			patch.Visibility = &visibility
 		}
 	}
-	if c.IsSet("build-counter") && !unsafe {
+	if c.IsSet("pipeline-counter") && !unsafe {
 		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
-	if c.IsSet("build-counter") && unsafe {
-		patch.BuildCounter = &buildCounter
+	if c.IsSet("pipeline-counter") && unsafe {
+		patch.PipelineCounter = &buildCounter
 	}
 
 	if _, err := client.RepoPatch(owner, name, patch); err != nil {

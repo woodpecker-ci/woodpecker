@@ -26,7 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) error {
+func queueBuild(build *model.Pipeline, repo *model.Repo, buildItems []*shared.PipelineItem) error {
 	var tasks []*queue.Task
 	for _, item := range buildItems {
 		if item.Proc.State == model.StatusSkipped {
@@ -58,7 +58,7 @@ func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.Build
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {
+func taskIds(dependsOn []string, buildItems []*shared.PipelineItem) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, buildItem := range buildItems {
 			if buildItem.Proc.Name == dep {

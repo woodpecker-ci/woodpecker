@@ -40,12 +40,12 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "build_time",
-		Help:      "Build time.",
+		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "build_count",
-		Help:      "Build count.",
+		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
 		remote:     remote,

@@ -306,7 +306,7 @@ func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
-func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
@@ -316,7 +316,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return cfg, err
 }
 
-func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	var configs []*remote.FileMeta
 
 	client, err := c.newClientToken(ctx, u.Token)
@@ -351,7 +351,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Pipeline, proc *model.Proc) error {
 	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
@@ -363,9 +363,9 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		build.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(proc.State),
-			TargetURL:   common.GetBuildStatusLink(repo, build, proc),
-			Description: common.GetBuildStatusDescription(proc.State),
-			Context:     common.GetBuildStatusContext(repo, build, proc),
+			TargetURL:   common.GetPipelineStatusLink(repo, build, proc),
+			Description: common.GetPipelineStatusDescription(proc.State),
+			Context:     common.GetPipelineStatusContext(repo, build, proc),
 		},
 	)
 	return err
@@ -493,9 +493,9 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	return b.Commit.ID, nil
 }
 
-// Hook parses the incoming Gitea hook and returns the Repository and Build
+// Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r)
 }
 

@@ -53,7 +53,7 @@ func TestCreateBuild(t *testing.T) {
 		Name: "test",
 	})
 	assert.NoError(t, err)
-	assert.EqualValues(t, &model.Build{
+	assert.EqualValues(t, &model.Pipeline{
 		Event:   "cron",
 		Commit:  "sha1",
 		Branch:  "default",

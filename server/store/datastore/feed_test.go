@@ -23,7 +23,7 @@ import (
 )
 
 func TestRepoListLatest(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Build))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
 	defer closer()
 
 	user := &model.User{
@@ -65,26 +65,26 @@ func TestRepoListLatest(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	build1 := &model.Build{
+	build1 := &model.Pipeline{
 		RepoID: repo1.ID,
 		Status: model.StatusFailure,
 	}
-	build2 := &model.Build{
+	build2 := &model.Pipeline{
 		RepoID: repo1.ID,
 		Status: model.StatusRunning,
 	}
-	build3 := &model.Build{
+	build3 := &model.Pipeline{
 		RepoID: repo2.ID,
 		Status: model.StatusKilled,
 	}
-	build4 := &model.Build{
+	build4 := &model.Pipeline{
 		RepoID: repo3.ID,
 		Status: model.StatusError,
 	}
-	assert.NoError(t, store.CreateBuild(build1))
-	assert.NoError(t, store.CreateBuild(build2))
-	assert.NoError(t, store.CreateBuild(build3))
-	assert.NoError(t, store.CreateBuild(build4))
+	assert.NoError(t, store.CreatePipeline(build1))
+	assert.NoError(t, store.CreatePipeline(build2))
+	assert.NoError(t, store.CreatePipeline(build3))
+	assert.NoError(t, store.CreatePipeline(build4))
 
 	builds, err := store.RepoListLatest(user)
 	if err != nil {

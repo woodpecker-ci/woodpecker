@@ -195,11 +195,11 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
-	fakeBuild = &model.Build{
+	fakeBuild = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 
-	fakeBuildWithRef = &model.Build{
+	fakeBuildWithRef = &model.Pipeline{
 		Ref: "refs/tags/v1.0.0",
 	}
 )

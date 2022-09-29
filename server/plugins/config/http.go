@@ -22,9 +22,9 @@ type config struct {
 }
 
 type requestStructure struct {
-	Repo          *model.Repo  `json:"repo"`
-	Build         *model.Build `json:"build"`
-	Configuration []*config    `json:"configs"`
+	Repo          *model.Repo     `json:"repo"`
+	Build         *model.Pipeline `json:"build"`
+	Configuration []*config       `json:"configs"`
 }
 
 type responseStructure struct {
@@ -39,7 +39,7 @@ func (cp *http) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
+func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, build *model.Pipeline, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error) {
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {
 		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}

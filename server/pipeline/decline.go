@@ -25,7 +25,7 @@ import (
 )
 
 // Decline update the status to declined for blocked build because of a gated repo
-func Decline(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
+func Decline(ctx context.Context, store store.Store, build *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if build.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a build with status %s", build.Status)
 	}

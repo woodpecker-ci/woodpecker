@@ -21,7 +21,7 @@ import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
+import BuildFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.vue';
 import Navbar from '~/components/layout/header/Navbar.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';

@@ -24,7 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(store store.Store, build *model.Pipeline, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
 	sha := fmt.Sprintf("%x", sha256.Sum256(remoteYamlConfig.Data))
 	conf, err := store.ConfigFindIdentical(build.RepoID, sha)
 	if err != nil {
@@ -44,9 +44,9 @@ func findOrPersistPipelineConfig(store store.Store, build *model.Build, remoteYa
 		}
 	}
 
-	buildConfig := &model.BuildConfig{
-		ConfigID: conf.ID,
-		BuildID:  build.ID,
+	buildConfig := &model.PipelineConfig{
+		ConfigID:   conf.ID,
+		PipelineID: build.ID,
 	}
 	if err := store.BuildConfigCreate(buildConfig); err != nil {
 		return nil, err

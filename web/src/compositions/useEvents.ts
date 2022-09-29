@@ -1,4 +1,4 @@
-import BuildStore from '~/store/builds';
+import BuildStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 import { repoSlug } from '~/utils/helpers';
 
@@ -29,8 +29,8 @@ export default () => {
       return;
     }
     const { build } = data;
-    buildStore.setBuild(repo.owner, repo.name, build);
-    buildStore.setBuildFeedItem({ ...build, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
+    buildStore.setPipelines(repo.owner, repo.name, build);
+    buildStore.setPipelineFeedItem({ ...build, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
     // contains proc update
     if (!data.proc) {

@@ -23,8 +23,8 @@ import (
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
-// Repo and Build detail. TODO: find a way to support PR hooks
-func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Build, error) {
+// Repo and Pipeline detail. TODO: find a way to support PR hooks
+func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Pipeline, error) {
 	hook := new(internal.PostHook)
 	if err := json.NewDecoder(r.Body).Decode(hook); err != nil {
 		return nil, nil, err

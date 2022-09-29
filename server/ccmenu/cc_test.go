@@ -32,7 +32,7 @@ func TestCC(t *testing.T) {
 			r := &model.Repo{
 				FullName: "foo/bar",
 			}
-			b := &model.Build{
+			b := &model.Pipeline{
 				Status:  model.StatusSuccess,
 				Number:  1,
 				Started: now,
@@ -49,7 +49,7 @@ func TestCC(t *testing.T) {
 
 		g.It("Should properly label exceptions", func() {
 			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Build{
+			b := &model.Pipeline{
 				Status:  model.StatusError,
 				Number:  1,
 				Started: 1257894000,
@@ -61,7 +61,7 @@ func TestCC(t *testing.T) {
 
 		g.It("Should properly label success", func() {
 			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Build{
+			b := &model.Pipeline{
 				Status:  model.StatusSuccess,
 				Number:  1,
 				Started: 1257894000,
@@ -73,7 +73,7 @@ func TestCC(t *testing.T) {
 
 		g.It("Should properly label failure", func() {
 			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Build{
+			b := &model.Pipeline{
 				Status:  model.StatusFailure,
 				Number:  1,
 				Started: 1257894000,
@@ -85,7 +85,7 @@ func TestCC(t *testing.T) {
 
 		g.It("Should properly label running", func() {
 			r := &model.Repo{FullName: "foo/bar"}
-			b := &model.Build{
+			b := &model.Pipeline{
 				Status:  model.StatusRunning,
 				Number:  1,
 				Started: 1257894000,

@@ -17,7 +17,7 @@ import (
 var Command = &cli.Command{
 	Name:      "deploy",
 	Usage:     "deploy code",
-	ArgsUsage: "<repo/name> <build> <environment>",
+	ArgsUsage: "<repo/name> <pipeline> <environment>",
 	Action:    deploy,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplDeployInfo),
@@ -60,33 +60,33 @@ func deploy(c *cli.Context) error {
 	event := c.String("event")
 	status := c.String("status")
 
-	buildArg := c.Args().Get(1)
+	pipelineArg := c.Args().Get(1)
 	var number int
-	if buildArg == "last" {
-		// Fetch the build number from the last build
-		builds, berr := client.BuildList(owner, name)
+	if pipelineArg == "last" {
+		// Fetch the pipeline number from the last pipeline
+		pipelines, berr := client.PipelineList(owner, name)
 		if berr != nil {
 			return berr
 		}
-		for _, build := range builds {
-			if branch != "" && build.Branch != branch {
+		for _, pipeline := range pipelines {
+			if branch != "" && pipeline.Branch != branch {
 				continue
 			}
-			if event != "" && build.Event != event {
+			if event != "" && pipeline.Event != event {
 				continue
 			}
-			if status != "" && build.Status != status {
+			if status != "" && pipeline.Status != status {
 				continue
 			}
-			if build.Number > number {
-				number = build.Number
+			if pipeline.Number > number {
+				number = pipeline.Number
 			}
 		}
 		if number == 0 {
-			return fmt.Errorf("Cannot deploy failure build")
+			return fmt.Errorf("Cannot deploy failure pipeline")
 		}
 	} else {
-		number, err = strconv.Atoi(buildArg)
+		number, err = strconv.Atoi(pipelineArg)
 		if err != nil {
 			return err
 		}

@@ -107,9 +107,9 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	build, err := s.store.GetBuild(pproc.BuildID)
+	build, err := s.store.GetPipeline(pproc.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.PipelineID, err)
 		return err
 	}
 
@@ -174,9 +174,9 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		return err
 	}
 
-	build, err := s.store.GetBuild(pproc.BuildID)
+	build, err := s.store.GetPipeline(pproc.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.PipelineID, err)
 		return err
 	}
 
@@ -194,7 +194,7 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 	}
 
 	report := &model.File{
-		BuildID: proc.BuildID,
+		BuildID: proc.PipelineID,
 		ProcID:  proc.ID,
 		PID:     proc.PID,
 		Mime:    file.Mime,
@@ -254,9 +254,9 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	build, err := s.store.GetBuild(proc.BuildID)
+	build, err := s.store.GetPipeline(proc.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", proc.PipelineID, err)
 		return err
 	}
 
@@ -306,9 +306,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	build, err := s.store.GetBuild(proc.BuildID)
+	build, err := s.store.GetPipeline(proc.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
+		log.Error().Msgf("error: cannot find build with id %d: %s", proc.PipelineID, err)
 		return err
 	}
 
@@ -391,7 +391,7 @@ func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedPr
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
+func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Pipeline, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
@@ -418,7 +418,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *m
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) (err error) {
+func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Pipeline, procs []*model.Proc) (err error) {
 	if build.Procs, err = model.Tree(procs); err != nil {
 		return err
 	}

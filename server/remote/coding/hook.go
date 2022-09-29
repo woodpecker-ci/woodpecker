@@ -93,7 +93,7 @@ type MergeRequestHook struct {
 	MergeRequest *MergeRequest `json:"merge_request"`
 }
 
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	raw, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -147,7 +147,7 @@ func convertRepository(repo *Repository) (*model.Repo, error) {
 	}, nil
 }
 
-func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parsePushHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &PushHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
@@ -165,7 +165,7 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 	}
 
 	lastCommit := findLastCommit(hook.Commits, hook.After)
-	build := &model.Build{
+	build := &model.Pipeline{
 		Event:   model.EventPush,
 		Commit:  hook.After,
 		Ref:     hook.Ref,
@@ -180,7 +180,7 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 	return repo, build, nil
 }
 
-func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parsePullRequestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &PullRequestHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
@@ -195,7 +195,7 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	build := &model.Build{
+	build := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.PullRequest.CommitSHA,
 		Link:    hook.PullRequest.WebURL,
@@ -212,7 +212,7 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
 	return repo, build, nil
 }
 
-func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &MergeRequestHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
@@ -228,7 +228,7 @@ func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	build := &model.Build{
+	build := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.MergeRequest.CommitSHA,
 		Link:    hook.MergeRequest.WebURL,

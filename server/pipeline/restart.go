@@ -31,7 +31,7 @@ import (
 )
 
 // Restart a build by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string) (*model.Build, error) {
+func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
@@ -73,7 +73,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 	newBuild := createNewBuildOutOfOld(lastBuild)
 	newBuild.Parent = lastBuild.ID
 
-	err = store.CreateBuild(newBuild)
+	err = store.CreatePipeline(newBuild)
 	if err != nil {
 		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -116,9 +116,9 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 // TODO: reuse at create.go too
 func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
 	for _, conf := range configs {
-		buildConfig := &model.BuildConfig{
-			ConfigID: conf.ID,
-			BuildID:  buildID,
+		buildConfig := &model.PipelineConfig{
+			ConfigID:   conf.ID,
+			PipelineID: buildID,
 		}
 		err := store.BuildConfigCreate(buildConfig)
 		if err != nil {
@@ -128,7 +128,7 @@ func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int
 	return nil
 }
 
-func createNewBuildOutOfOld(old *model.Build) *model.Build {
+func createNewBuildOutOfOld(old *model.Pipeline) *model.Pipeline {
 	new := *old
 	new.ID = 0
 	new.Number = 0

@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Build, []*shared.BuildItem, error) {
+func createBuildItems(ctx context.Context, store store.Store, build *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
 	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
@@ -80,7 +80,7 @@ func createBuildItems(ctx context.Context, store store.Store, build *model.Build
 		return build, nil, err
 	}
 
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
+	build = shared.SetPipelineStepsOnPipeline(b.Curr, buildItems)
 
 	return build, buildItems, nil
 }

@@ -41,8 +41,8 @@ import (
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo  *model.Repo
-	Curr  *model.Build
-	Last  *model.Build
+	Curr  *model.Pipeline
+	Last  *model.Pipeline
 	Netrc *model.Netrc
 	Secs  []*model.Secret
 	Regs  []*model.Registry
@@ -51,7 +51,7 @@ type ProcBuilder struct {
 	Envs  map[string]string
 }
 
-type BuildItem struct {
+type PipelineItem struct {
 	Proc      *model.Proc
 	Platform  string
 	Labels    map[string]string
@@ -60,8 +60,8 @@ type BuildItem struct {
 	Config    *backend.Config
 }
 
-func (b *ProcBuilder) Build() ([]*BuildItem, error) {
-	var items []*BuildItem
+func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
+	var items []*PipelineItem
 
 	sort.Sort(remote.ByName(b.Yamls))
 
@@ -79,12 +79,12 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 		for _, axis := range axes {
 			proc := &model.Proc{
-				BuildID: b.Curr.ID,
-				PID:     pidSequence,
-				PGID:    pidSequence,
-				State:   model.StatusPending,
-				Environ: axis,
-				Name:    SanitizePath(y.Name),
+				PipelineID: b.Curr.ID,
+				PID:        pidSequence,
+				PGID:       pidSequence,
+				State:      model.StatusPending,
+				Environ:    axis,
+				Name:       SanitizePath(y.Name),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -140,7 +140,7 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				continue
 			}
 
-			item := &BuildItem{
+			item := &PipelineItem{
 				Proc:      proc,
 				Config:    ir,
 				Labels:    parsed.Labels,
@@ -160,15 +160,14 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one proc can start, if list is not empty
-	procListContainsItemsToRun(items)
 	if len(items) > 0 && !procListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("build has no startpoint")
+		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
 
 	return items, nil
 }
 
-func procListContainsItemsToRun(items []*BuildItem) bool {
+func procListContainsItemsToRun(items []*PipelineItem) bool {
 	for i := range items {
 		if items[i].Proc.State == model.StatusPending {
 			return true
@@ -177,8 +176,8 @@ func procListContainsItemsToRun(items []*BuildItem) bool {
 	return false
 }
 
-func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
-	itemsToRemove := make([]*BuildItem, 0)
+func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
+	itemsToRemove := make([]*PipelineItem, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
@@ -189,7 +188,7 @@ func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
 	}
 
 	if len(itemsToRemove) > 0 {
-		filtered := make([]*BuildItem, 0)
+		filtered := make([]*PipelineItem, 0)
 		for _, item := range items {
 			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
 				filtered = append(filtered, item)
@@ -202,7 +201,7 @@ func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
 	return items
 }
 
-func containsItemWithName(name string, items []*BuildItem) bool {
+func containsItemWithName(name string, items []*PipelineItem) bool {
 	for _, item := range items {
 		if name == item.Proc.Name {
 			return true
@@ -284,16 +283,16 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func SetBuildStepsOnBuild(build *model.Build, buildItems []*BuildItem) *model.Build {
+func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*PipelineItem) *model.Pipeline {
 	var pidSequence int
-	for _, item := range buildItems {
-		build.Procs = append(build.Procs, item.Proc)
+	for _, item := range pipelineItems {
+		pipeline.Procs = append(pipeline.Procs, item.Proc)
 		if pidSequence < item.Proc.PID {
 			pidSequence = item.Proc.PID
 		}
 	}
 
-	for _, item := range buildItems {
+	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
 			var gid int
 			for _, step := range stage.Steps {
@@ -302,26 +301,26 @@ func SetBuildStepsOnBuild(build *model.Build, buildItems []*BuildItem) *model.Bu
 					gid = pidSequence
 				}
 				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pidSequence,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
+					PipelineID: pipeline.ID,
+					Name:       step.Alias,
+					PID:        pidSequence,
+					PPID:       item.Proc.PID,
+					PGID:       gid,
+					State:      model.StatusPending,
 				}
 				if item.Proc.State == model.StatusSkipped {
 					proc.State = model.StatusSkipped
 				}
-				build.Procs = append(build.Procs, proc)
+				pipeline.Procs = append(pipeline.Procs, proc)
 			}
 		}
 	}
 
-	return build
+	return pipeline
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.Proc, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, proc *model.Proc, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -335,8 +334,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
-		Curr: metadataBuildFromModelBuild(build, true),
-		Prev: metadataBuildFromModelBuild(last, false),
+		Curr: metadataPipelineFromModelPipeline(pipeline, true),
+		Prev: metadataPipelineFromModelPipeline(last, false),
 		Job: frontend.Job{
 			Number: proc.PID,
 			Matrix: proc.Environ,
@@ -350,39 +349,39 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 	}
 }
 
-func metadataBuildFromModelBuild(build *model.Build, includeParent bool) frontend.Build {
+func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) frontend.Pipeline {
 	cron := ""
-	if build.Event == model.EventCron {
-		cron = build.Sender
+	if pipeline.Event == model.EventCron {
+		cron = pipeline.Sender
 	}
 
 	parent := int64(0)
 	if includeParent {
-		parent = build.Parent
+		parent = pipeline.Parent
 	}
 
-	return frontend.Build{
-		Number:   build.Number,
+	return frontend.Pipeline{
+		Number:   pipeline.Number,
 		Parent:   parent,
-		Created:  build.Created,
-		Started:  build.Started,
-		Finished: build.Finished,
-		Status:   string(build.Status),
-		Event:    string(build.Event),
-		Link:     build.Link,
-		Target:   build.Deploy,
+		Created:  pipeline.Created,
+		Started:  pipeline.Started,
+		Finished: pipeline.Finished,
+		Status:   string(pipeline.Status),
+		Event:    string(pipeline.Event),
+		Link:     pipeline.Link,
+		Target:   pipeline.Deploy,
 		Commit: frontend.Commit{
-			Sha:     build.Commit,
-			Ref:     build.Ref,
-			Refspec: build.Refspec,
-			Branch:  build.Branch,
-			Message: build.Message,
+			Sha:     pipeline.Commit,
+			Ref:     pipeline.Ref,
+			Refspec: pipeline.Refspec,
+			Branch:  pipeline.Branch,
+			Message: pipeline.Message,
 			Author: frontend.Author{
-				Name:   build.Author,
-				Email:  build.Email,
-				Avatar: build.Avatar,
+				Name:   pipeline.Author,
+				Email:  pipeline.Email,
+				Avatar: pipeline.Avatar,
 			},
-			ChangedFiles: build.ChangedFiles,
+			ChangedFiles: pipeline.ChangedFiles,
 		},
 		Cron: cron,
 	}

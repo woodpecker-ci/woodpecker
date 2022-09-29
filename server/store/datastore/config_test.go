@@ -23,7 +23,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
 	defer closer()
 
 	var (
@@ -53,20 +53,20 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	build := &model.Build{
+	build := &model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusRunning,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 	}
-	if err := store.CreateBuild(build); err != nil {
+	if err := store.CreatePipeline(build); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
 
-	if err := store.BuildConfigCreate(
-		&model.BuildConfig{
-			ConfigID: config.ID,
-			BuildID:  build.ID,
+	if err := store.PipelineConfigCreate(
+		&model.PipelineConfig{
+			ConfigID:   config.ID,
+			PipelineID: build.ID,
 		},
 	); err != nil {
 		t.Errorf("Unexpected error: insert build config: %s", err)
@@ -94,7 +94,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Want config name %s, got %s", want, got)
 	}
 
-	loaded, err := store.ConfigsForBuild(build.ID)
+	loaded, err := store.ConfigsForPipeline(build.ID)
 	if err != nil {
 		t.Errorf("Want config by id, got error %q", err)
 		return
@@ -105,7 +105,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigApproved(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.BuildConfig), new(model.Build), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
 	defer closer()
 
 	repo := &model.Repo{
@@ -122,28 +122,28 @@ func TestConfigApproved(t *testing.T) {
 	var (
 		data         = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
 		hash         = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-		buildBlocked = &model.Build{
+		buildBlocked = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusBlocked,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
-		buildPending = &model.Build{
+		buildPending = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusPending,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
-		buildRunning = &model.Build{
+		buildRunning = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusRunning,
 			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 		}
 	)
 
-	if err := store.CreateBuild(buildBlocked); err != nil {
+	if err := store.CreatePipeline(buildBlocked); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
-	if err := store.CreateBuild(buildPending); err != nil {
+	if err := store.CreatePipeline(buildPending); err != nil {
 		t.Errorf("Unexpected error: insert build: %s", err)
 		return
 	}
@@ -156,12 +156,12 @@ func TestConfigApproved(t *testing.T) {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	buildConfig := &model.BuildConfig{
-		ConfigID: conf.ID,
-		BuildID:  buildBlocked.ID,
+	buildConfig := &model.PipelineConfig{
+		ConfigID:   conf.ID,
+		PipelineID: buildBlocked.ID,
 	}
-	if err := store.BuildConfigCreate(buildConfig); err != nil {
-		t.Errorf("Unexpected error: insert build_config: %s", err)
+	if err := store.PipelineConfigCreate(buildConfig); err != nil {
+		t.Errorf("Unexpected error: insert pipeline_config: %s", err)
 		return
 	}
 
@@ -174,7 +174,7 @@ func TestConfigApproved(t *testing.T) {
 		return
 	}
 
-	assert.NoError(t, store.CreateBuild(buildRunning))
+	assert.NoError(t, store.CreatePipeline(buildRunning))
 	conf2 := &model.Config{
 		RepoID: repo.ID,
 		Data:   []byte(data),
@@ -184,11 +184,11 @@ func TestConfigApproved(t *testing.T) {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
-	buildConfig2 := &model.BuildConfig{
-		ConfigID: conf2.ID,
-		BuildID:  buildRunning.ID,
+	buildConfig2 := &model.PipelineConfig{
+		ConfigID:   conf2.ID,
+		PipelineID: buildRunning.ID,
 	}
-	if err := store.BuildConfigCreate(buildConfig2); err != nil {
+	if err := store.PipelineConfigCreate(buildConfig2); err != nil {
 		t.Errorf("Unexpected error: insert config: %s", err)
 		return
 	}
@@ -200,7 +200,7 @@ func TestConfigApproved(t *testing.T) {
 }
 
 func TestConfigIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.Proc), new(model.Build), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Config), new(model.Proc), new(model.Pipeline), new(model.Repo))
 	defer closer()
 
 	var (

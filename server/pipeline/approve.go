@@ -28,21 +28,21 @@ import (
 
 // Approve update the status to pending for blocked build because of a gated repo
 // and start them afterwards
-func Approve(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
-	if build.Status != model.StatusBlocked {
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a build with status %s", build.Status)}
+func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	if pipeline.Status != model.StatusBlocked {
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", pipeline.Status)}
 	}
 
 	// fetch the build file from the database
-	configs, err := store.ConfigsForBuild(build.ID)
+	configs, err := store.ConfigsForBuild(pipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get build config for %s. %s", repo.FullName, err)
+		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
 		return nil, ErrNotFound{Msg: msg}
 	}
 
-	if build, err = shared.UpdateToStatusPending(store, *build, user.Login); err != nil {
-		return nil, fmt.Errorf("error updating build. %s", err)
+	if pipeline, err = shared.UpdateToStatusPending(store, *pipeline, user.Login); err != nil {
+		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
 	var yamls []*remote.FileMeta
@@ -50,19 +50,19 @@ func Approve(ctx context.Context, store store.Store, build *model.Build, user *m
 		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := createBuildItems(ctx, store, build, user, repo, yamls, nil)
+	pipeline, buildItems, err := createBuildItems(ctx, store, pipeline, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
 	}
 
-	build, err = start(ctx, store, build, user, repo, buildItems)
+	pipeline, err = start(ctx, store, pipeline, user, repo, buildItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s: %v", repo.FullName, err)
+		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return build, nil
+	return pipeline, nil
 }

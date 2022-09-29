@@ -30,7 +30,7 @@ import (
 // Command exports the exec command.
 var Command = &cli.Command{
 	Name:      "exec",
-	Usage:     "execute a local build",
+	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
@@ -228,16 +228,16 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Remote:  c.String("repo-remote-url"),
 			Private: c.Bool("repo-private"),
 		},
-		Curr: frontend.Build{
-			Number:   c.Int64("build-number"),
-			Parent:   c.Int64("parent-build-number"),
-			Created:  c.Int64("build-created"),
-			Started:  c.Int64("build-started"),
-			Finished: c.Int64("build-finished"),
-			Status:   c.String("build-status"),
-			Event:    c.String("build-event"),
-			Link:     c.String("build-link"),
-			Target:   c.String("build-target"),
+		Curr: frontend.Pipeline{
+			Number:   c.Int64("pipeline-number"),
+			Parent:   c.Int64("pipeline-parent"),
+			Created:  c.Int64("pipeline-created"),
+			Started:  c.Int64("pipeline-started"),
+			Finished: c.Int64("pipeline-finished"),
+			Status:   c.String("pipeline-status"),
+			Event:    c.String("pipeline-event"),
+			Link:     c.String("pipeline-link"),
+			Target:   c.String("pipeline-target"),
 			Commit: frontend.Commit{
 				Sha:     c.String("commit-sha"),
 				Ref:     c.String("commit-ref"),
@@ -251,14 +251,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Prev: frontend.Build{
-			Number:   c.Int64("prev-build-number"),
-			Created:  c.Int64("prev-build-created"),
-			Started:  c.Int64("prev-build-started"),
-			Finished: c.Int64("prev-build-finished"),
-			Status:   c.String("prev-build-status"),
-			Event:    c.String("prev-build-event"),
-			Link:     c.String("prev-build-link"),
+		Prev: frontend.Pipeline{
+			Number:   c.Int64("prev-pipeline-number"),
+			Created:  c.Int64("prev-pipeline-created"),
+			Started:  c.Int64("prev-pipeline-started"),
+			Finished: c.Int64("prev-pipeline-finished"),
+			Status:   c.String("prev-pipeline-status"),
+			Event:    c.String("prev-pipeline-event"),
+			Link:     c.String("prev-pipeline-link"),
 			Commit: frontend.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),

@@ -19,7 +19,7 @@ import (
 )
 
 // TODO: need tests before converting to builder statement
-func (s storage) GetBuildQueue() ([]*model.Feed, error) {
+func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	// TODO: use builder (do not behave same as pure sql, fix that)
 	err := s.engine.SQL(`

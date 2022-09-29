@@ -142,12 +142,12 @@ func LogStreamSSE(c *gin.Context) {
 
 	// // parse the build number and job sequence number from
 	// // the repquest parameter.
-	buildn, _ := strconv.ParseInt(c.Param("build"), 10, 64)
+	buildn, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
 	build, err := _store.GetBuildNumber(repo, buildn)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get build number: %v", err)
+		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: build not found\n\n"))
 		return
 	}

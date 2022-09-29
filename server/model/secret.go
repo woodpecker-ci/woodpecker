@@ -30,7 +30,7 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretListBuild(*Repo, *Build) ([]*Secret, error)
+	SecretListBuild(*Repo, *Pipeline) ([]*Secret, error)
 	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
 	SecretList(*Repo) ([]*Secret, error)

@@ -33,10 +33,10 @@ func TestGlobalEnvsubst(t *testing.T) {
 			"IMAGE": "scratch",
 		},
 		Repo: &model.Repo{},
-		Curr: &model.Build{
+		Curr: &model.Pipeline{
 			Message: "aaa",
 		},
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -67,10 +67,10 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			"NO_IMAGE": "scratch",
 		},
 		Repo: &model.Repo{},
-		Curr: &model.Build{
+		Curr: &model.Pipeline{
 			Message: "aaa",
 		},
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -97,11 +97,11 @@ func TestMultilineEnvsubst(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo: &model.Repo{},
-		Curr: &model.Build{
+		Curr: &model.Pipeline{
 			Message: `aaa
 bbb`,
 		},
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -134,8 +134,8 @@ func TestMultiPipeline(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &model.Build{},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -168,8 +168,8 @@ func TestDependsOn(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &model.Build{},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -214,8 +214,8 @@ func TestRunsOn(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &model.Build{},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -250,8 +250,8 @@ func TestPipelineName(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{Config: ".woodpecker"},
-		Curr:  &model.Build{},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -285,8 +285,8 @@ func TestBranchFilter(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &model.Build{Branch: "dev"},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{Branch: "dev"},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -331,8 +331,8 @@ func TestRootWhenFilter(t *testing.T) {
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  &model.Build{Event: "tester"},
-		Last:  &model.Build{},
+		Curr:  &model.Pipeline{Event: "tester"},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -375,12 +375,12 @@ pipeline:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{Branch: "dev"}
+	build := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -409,12 +409,12 @@ pipeline:
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{Branch: "dev"}
+	build := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -457,12 +457,12 @@ depends_on: [ zerostep ]
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{Branch: "dev"}
+	build := &model.Pipeline{Branch: "dev"}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -511,14 +511,14 @@ depends_on: [ shouldbefiltered ]
 func TestTree(t *testing.T) {
 	t.Parallel()
 
-	build := &model.Build{
+	build := &model.Pipeline{
 		Event: model.EventPush,
 	}
 
 	b := ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -533,7 +533,7 @@ pipeline:
 	}
 
 	buildItems, err := b.Build()
-	build = SetBuildStepsOnBuild(build, buildItems)
+	build = SetPipelineStepsOnPipeline(build, buildItems)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -544,7 +544,7 @@ pipeline:
 		t.Fatal("Clone step should be a children of the stage")
 	}
 	if build.Procs[2].PPID != 1 {
-		t.Fatal("Build step should be a children of the stage")
+		t.Fatal("Pipeline step should be a children of the stage")
 	}
 }
 

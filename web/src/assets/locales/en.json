@@ -169,7 +169,7 @@
                 }
             }
         },
-        "build": {
+        "pipeline": {
             "created": "Created",
             "tasks": "Tasks",
             "config": "Config",

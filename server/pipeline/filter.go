@@ -26,11 +26,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+func zeroSteps(build *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
 	b := shared.ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  build,
-		Last:  &model.Build{},
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -51,11 +51,11 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 
 // TODO: parse yaml once and not for each filter function
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+func checkIfFiltered(build *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
 
 	matchMetadata := frontend.Metadata{
-		Curr: frontend.Build{
+		Curr: frontend.Pipeline{
 			Event: string(build.Event),
 			Commit: frontend.Commit{
 				Branch: build.Branch,

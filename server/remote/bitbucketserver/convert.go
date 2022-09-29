@@ -80,7 +80,7 @@ func convertRepo(from *internal.Repo) *model.Repo {
 
 // convertPushHook is a helper function used to convert a Bitbucket push
 // hook to the Woodpecker build struct holding commit information.
-func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
+func convertPushHook(hook *internal.PostHook, baseURL string) *model.Pipeline {
 	branch := strings.TrimPrefix(
 		strings.TrimPrefix(
 			hook.RefChanges[0].RefID,
@@ -95,7 +95,7 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Build {
 		authorLabel = authorLabel[0:37] + "..."
 	}
 
-	build := &model.Build{
+	build := &model.Pipeline{
 		Commit:    hook.RefChanges[0].ToHash, // TODO check for index value
 		Branch:    branch,
 		Message:   hook.Changesets.Values[0].ToCommit.Message, // TODO check for index Values

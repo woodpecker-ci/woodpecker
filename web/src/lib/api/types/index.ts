@@ -1,5 +1,5 @@
-export * from './build';
-export * from './buildConfig';
+export * from './pipeline';
+export * from './pipelineConfig';
 export * from './cron';
 export * from './org';
 export * from './registry';

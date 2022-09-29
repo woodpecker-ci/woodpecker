@@ -130,8 +130,8 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker build struct holding commit information.
-func convertPullHook(from *internal.PullRequestHook) *model.Build {
-	return &model.Build{
+func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	return &model.Pipeline{
 		Event:  model.EventPull,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
@@ -152,8 +152,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 
 // convertPushHook is a helper function used to convert a Bitbucket push
 // hook to the Woodpecker build struct holding commit information.
-func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
-	build := &model.Build{
+func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
+	build := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
 		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,

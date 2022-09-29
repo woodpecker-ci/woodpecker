@@ -250,7 +250,7 @@ func TestFetch(t *testing.T) {
 				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
-				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
 			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
@@ -376,9 +376,9 @@ func TestFetchFromConfigService(t *testing.T) {
 		}
 
 		type incoming struct {
-			Repo          *model.Repo  `json:"repo"`
-			Build         *model.Build `json:"build"`
-			Configuration []*config    `json:"config"`
+			Repo          *model.Repo     `json:"repo"`
+			Build         *model.Pipeline `json:"build"`
+			Configuration []*config       `json:"config"`
 		}
 
 		var req incoming
@@ -455,7 +455,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				configAPI,
 				&model.User{Token: "xxx"},
 				repo,
-				&model.Build{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
 			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {

@@ -28,7 +28,7 @@ import (
 )
 
 // Cancel the build and returns the status.
-func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *model.Build) error {
+func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *model.Pipeline) error {
 	if build.Status != model.StatusRunning && build.Status != model.StatusPending && build.Status != model.StatusBlocked {
 		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked build"}
 	}
@@ -108,7 +108,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, build *mod
 func cancelPreviousPipelines(
 	ctx context.Context,
 	_store store.Store,
-	build *model.Build,
+	build *model.Pipeline,
 	repo *model.Repo,
 ) error {
 	// check this event should cancel previous pipelines
@@ -124,12 +124,12 @@ func cancelPreviousPipelines(
 	}
 
 	// get all active activeBuilds
-	activeBuilds, err := _store.GetActiveBuildList(repo, -1)
+	activeBuilds, err := _store.GetActivePipelineList(repo, -1)
 	if err != nil {
 		return err
 	}
 
-	buildNeedsCancel := func(active *model.Build) (bool, error) {
+	buildNeedsCancel := func(active *model.Pipeline) (bool, error) {
 		// always filter on same event
 		if active.Event != build.Event {
 			return false, nil

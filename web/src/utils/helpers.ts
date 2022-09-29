@@ -1,6 +1,6 @@
-import { Build, BuildProc, Repo } from '~/lib/api/types';
+import { Pipeline, PipelineProc, Repo } from '~/lib/api/types';
 
-export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined {
+export function findProc(procs: PipelineProc[], pid: number): PipelineProc | undefined {
   return procs.reduce((prev, proc) => {
     if (proc.pid === pid) {
       return proc;
@@ -14,7 +14,7 @@ export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined
     }
 
     return prev;
-  }, undefined as BuildProc | undefined);
+  }, undefined as PipelineProc | undefined);
 }
 
 /**
@@ -23,7 +23,7 @@ export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined
  * @param {Object} proc - The process object.
  * @returns {boolean}
  */
-export function isProcFinished(proc: BuildProc): boolean {
+export function isProcFinished(proc: PipelineProc): boolean {
   return proc.state !== 'running' && proc.state !== 'pending';
 }
 
@@ -33,22 +33,22 @@ export function isProcFinished(proc: BuildProc): boolean {
  * @param {Object} proc - The process object.
  * @returns {boolean}
  */
-export function isProcRunning(proc: BuildProc): boolean {
+export function isProcRunning(proc: PipelineProc): boolean {
   return proc.state === 'running';
 }
 
 /**
- * Compare two builds by name.
- * @param {Object} a - A build.
- * @param {Object} b - A build.
+ * Compare two pipelines by name.
+ * @param {Object} a - A pipeline.
+ * @param {Object} b - A pipeline.
  * @returns {number}
  */
-export function compareBuilds(a: Build, b: Build): number {
+export function comparePipelines(a: Pipeline, b: Pipeline): number {
   return (b.created_at || -1) - (a.created_at || -1);
 }
 
-export function isBuildActive(build: Build): boolean {
-  return ['pending', 'running', 'started'].includes(build.status);
+export function isPipelineActive(pipeline: Pipeline): boolean {
+  return ['pending', 'running', 'started'].includes(pipeline.status);
 }
 
 export function repoSlug(ownerOrRepo: Repo): string;

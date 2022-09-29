@@ -38,8 +38,8 @@ const (
 )
 
 // parseHook parses a Gitea hook from an http.Request request and returns
-// Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
+// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
 		return parsePushHook(r.Body)
@@ -51,9 +51,9 @@ func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return nil, nil, nil
 }
 
-// parsePushHook parses a push hook and returns the Repo and Build details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
+func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -74,9 +74,9 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err
 	return repo, build, err
 }
 
-// parseCreatedHook parses a push hook and returns the Repo and Build details.
+// parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
+func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -91,11 +91,11 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, 
 	return repo, build, nil
 }
 
-// parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.
-func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+// parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
+func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo  *model.Repo
-		build *model.Build
+		build *model.Pipeline
 	)
 
 	pr, err := parsePullRequest(payload)

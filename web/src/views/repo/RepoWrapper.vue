@@ -49,7 +49,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import BuildStore from '~/store/builds';
+import BuildStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
@@ -82,7 +82,7 @@ const i18n = useI18n();
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
 const repoPermissions = ref<RepoPermissions>();
-const builds = buildStore.getSortedBuilds(repoOwner, repoName);
+const builds = buildStore.getSortedPipelines(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('builds', builds);
@@ -108,7 +108,7 @@ async function loadRepo() {
     });
     return;
   }
-  await buildStore.loadBuilds(repoOwner.value, repoName.value);
+  await buildStore.loadPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {

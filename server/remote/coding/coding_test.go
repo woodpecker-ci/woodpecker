@@ -266,7 +266,7 @@ var (
 		Name:  "not_found_project",
 	}
 
-	fakeBuild = &model.Build{
+	fakeBuild = &model.Pipeline{
 		Commit: "4504a072cc",
 	}
 )

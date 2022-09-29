@@ -19,6 +19,6 @@ type EventType string
 
 // Event represents a build event.
 type Event struct {
-	Repo  Repo  `json:"repo"`
-	Build Build `json:"build"`
+	Repo  Repo     `json:"repo"`
+	Build Pipeline `json:"build"`
 }

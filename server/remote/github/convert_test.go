@@ -204,20 +204,20 @@ func Test_helper(t *testing.T) {
 					Login: github.String("octocat"),
 				},
 			}
-			pull, _, build, err := parsePullHook(from, true)
+			pull, _, pipeline, err := parsePullHook(from, true)
 			g.Assert(err).IsNil()
 			g.Assert(pull).IsNotNil()
-			g.Assert(build.Event).Equal(model.EventPull)
-			g.Assert(build.Branch).Equal(*from.PullRequest.Base.Ref)
-			g.Assert(build.Ref).Equal("refs/pull/42/merge")
-			g.Assert(build.Refspec).Equal("changes:master")
-			g.Assert(build.Remote).Equal("https://github.com/octocat/hello-world-fork")
-			g.Assert(build.Commit).Equal(*from.PullRequest.Head.SHA)
-			g.Assert(build.Message).Equal(*from.PullRequest.Title)
-			g.Assert(build.Title).Equal(*from.PullRequest.Title)
-			g.Assert(build.Author).Equal(*from.PullRequest.User.Login)
-			g.Assert(build.Avatar).Equal(*from.PullRequest.User.AvatarURL)
-			g.Assert(build.Sender).Equal(*from.Sender.Login)
+			g.Assert(pipeline.Event).Equal(model.EventPull)
+			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Base.Ref)
+			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
+			g.Assert(pipeline.Refspec).Equal("changes:master")
+			g.Assert(pipeline.Remote).Equal("https://github.com/octocat/hello-world-fork")
+			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
+			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
+			g.Assert(pipeline.Title).Equal(*from.PullRequest.Title)
+			g.Assert(pipeline.Author).Equal(*from.PullRequest.User.Login)
+			g.Assert(pipeline.Avatar).Equal(*from.PullRequest.User.AvatarURL)
+			g.Assert(pipeline.Sender).Equal(*from.Sender.Login)
 		})
 
 		g.It("should convert a deployment from webhook", func() {
@@ -231,16 +231,16 @@ func Test_helper(t *testing.T) {
 			from.Sender.Login = github.String("octocat")
 			from.Sender.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
 
-			_, build, err := parseDeployHook(from)
+			_, pipeline, err := parseDeployHook(from)
 			g.Assert(err).IsNil()
-			g.Assert(build.Event).Equal(model.EventDeploy)
-			g.Assert(build.Branch).Equal("master")
-			g.Assert(build.Ref).Equal("refs/heads/master")
-			g.Assert(build.Commit).Equal(*from.Deployment.SHA)
-			g.Assert(build.Message).Equal(*from.Deployment.Description)
-			g.Assert(build.Link).Equal(*from.Deployment.URL)
-			g.Assert(build.Author).Equal(*from.Sender.Login)
-			g.Assert(build.Avatar).Equal(*from.Sender.AvatarURL)
+			g.Assert(pipeline.Event).Equal(model.EventDeploy)
+			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Commit).Equal(*from.Deployment.SHA)
+			g.Assert(pipeline.Message).Equal(*from.Deployment.Description)
+			g.Assert(pipeline.Link).Equal(*from.Deployment.URL)
+			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
+			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
 		})
 
 		g.It("should convert a push from webhook", func() {
@@ -254,39 +254,39 @@ func Test_helper(t *testing.T) {
 			from.HeadCommit.ID = github.String("f72fc19")
 			from.Ref = github.String("refs/heads/master")
 
-			_, build, err := parsePushHook(from)
+			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
-			g.Assert(build.Event).Equal(model.EventPush)
-			g.Assert(build.Branch).Equal("master")
-			g.Assert(build.Ref).Equal("refs/heads/master")
-			g.Assert(build.Commit).Equal(*from.HeadCommit.ID)
-			g.Assert(build.Message).Equal(*from.HeadCommit.Message)
-			g.Assert(build.Link).Equal(*from.HeadCommit.URL)
-			g.Assert(build.Author).Equal(*from.Sender.Login)
-			g.Assert(build.Avatar).Equal(*from.Sender.AvatarURL)
-			g.Assert(build.Email).Equal(*from.HeadCommit.Author.Email)
-			g.Assert(build.Remote).Equal(*from.Repo.CloneURL)
+			g.Assert(pipeline.Event).Equal(model.EventPush)
+			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Commit).Equal(*from.HeadCommit.ID)
+			g.Assert(pipeline.Message).Equal(*from.HeadCommit.Message)
+			g.Assert(pipeline.Link).Equal(*from.HeadCommit.URL)
+			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
+			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
+			g.Assert(pipeline.Email).Equal(*from.HeadCommit.Author.Email)
+			g.Assert(pipeline.Remote).Equal(*from.Repo.CloneURL)
 		})
 
 		g.It("should convert a tag from webhook", func() {
 			from := &github.PushEvent{}
 			from.Ref = github.String("refs/tags/v1.0.0")
 
-			_, build, err := parsePushHook(from)
+			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
-			g.Assert(build.Event).Equal(model.EventTag)
-			g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
+			g.Assert(pipeline.Event).Equal(model.EventTag)
+			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 		})
 
-		g.It("should convert tag's base branch from webhook to build's branch ", func() {
+		g.It("should convert tag's base branch from webhook to pipeline's branch ", func() {
 			from := &github.PushEvent{}
 			from.Ref = github.String("refs/tags/v1.0.0")
 			from.BaseRef = github.String("refs/heads/master")
 
-			_, build, err := parsePushHook(from)
+			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
-			g.Assert(build.Event).Equal(model.EventTag)
-			g.Assert(build.Branch).Equal("master")
+			g.Assert(pipeline.Event).Equal(model.EventTag)
+			g.Assert(pipeline.Branch).Equal("master")
 		})
 
 		g.It("should not convert tag's base_ref from webhook if not prefixed with 'ref/heads/'", func() {
@@ -294,10 +294,10 @@ func Test_helper(t *testing.T) {
 			from.Ref = github.String("refs/tags/v1.0.0")
 			from.BaseRef = github.String("refs/refs/master")
 
-			_, build, err := parsePushHook(from)
+			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
-			g.Assert(build.Event).Equal(model.EventTag)
-			g.Assert(build.Branch).Equal("refs/tags/v1.0.0")
+			g.Assert(pipeline.Event).Equal(model.EventTag)
+			g.Assert(pipeline.Branch).Equal("refs/tags/v1.0.0")
 		})
 	})
 }

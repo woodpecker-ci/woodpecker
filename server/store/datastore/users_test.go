@@ -23,7 +23,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Proc), new(model.Perm))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -182,7 +182,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err3).IsNotNil()
 		})
 
-		g.It("Should get the Build feed for a User", func() {
+		g.It("Should get the Pipeline feed for a User", func() {
 			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
@@ -222,26 +222,26 @@ func TestUsers(t *testing.T) {
 				g.Assert(store.PermUpsert(perm)).IsNil()
 			}
 
-			build1 := &model.Build{
+			build1 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusFailure,
 			}
-			build2 := &model.Build{
+			build2 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusSuccess,
 			}
-			build3 := &model.Build{
+			build3 := &model.Pipeline{
 				RepoID: repo2.ID,
 				Status: model.StatusSuccess,
 			}
-			build4 := &model.Build{
+			build4 := &model.Pipeline{
 				RepoID: repo3.ID,
 				Status: model.StatusSuccess,
 			}
-			g.Assert(store.CreateBuild(build1)).IsNil()
-			g.Assert(store.CreateBuild(build2)).IsNil()
-			g.Assert(store.CreateBuild(build3)).IsNil()
-			g.Assert(store.CreateBuild(build4)).IsNil()
+			g.Assert(store.CreatePipeline(build1)).IsNil()
+			g.Assert(store.CreatePipeline(build2)).IsNil()
+			g.Assert(store.CreatePipeline(build3)).IsNil()
+			g.Assert(store.CreatePipeline(build4)).IsNil()
 
 			builds, err := store.UserFeed(user)
 			g.Assert(err).IsNil()

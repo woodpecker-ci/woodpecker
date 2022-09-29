@@ -29,7 +29,7 @@ import (
 )
 
 // Create a new build and start it
-func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Build) (*model.Build, error) {
+func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Pipeline) (*model.Pipeline, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
@@ -101,7 +101,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		build.Status = model.StatusBlocked
 	}
 
-	err = _store.CreateBuild(build, build.Procs...)
+	err = _store.CreatePipeline(build, build.Procs...)
 	if err != nil {
 		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

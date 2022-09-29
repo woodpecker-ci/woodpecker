@@ -80,20 +80,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config) // hack
-	buildNumber := extractBuildNumber(work.Config) // hack
+	repoName := extractRepositoryName(work.Config)             // hack
+	pipelineNumber := extractPipelineNumberNumber(work.Config) // hack
 
 	r.counter.Add(
 		work.ID,
 		timeout,
 		repoName,
-		buildNumber,
+		pipelineNumber,
 	)
 	defer r.counter.Done(work.ID)
 
 	logger := log.With().
 		Str("repo", repoName).
-		Str("build", buildNumber).
+		Str("pipeline", pipelineNumber).
 		Str("id", work.ID).
 		Logger()
 
@@ -288,6 +288,10 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
+		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		// DEPRECATED
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
@@ -299,6 +303,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
+			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
@@ -311,9 +316,9 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
 		pipeline.WithDescription(map[string]string{
-			"ID":    work.ID,
-			"Repo":  repoName,
-			"Build": buildNumber,
+			"ID":       work.ID,
+			"Repo":     repoName,
+			"Pipeline": pipelineNumber,
 		}),
 	).Run()
 
@@ -363,7 +368,7 @@ func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract build number from the configuration
-func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_BUILD_NUMBER"]
+// extract pipeline number from the configuration
+func extractPipelineNumberNumber(config *backend.Config) string {
+	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

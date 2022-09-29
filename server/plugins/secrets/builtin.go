@@ -24,7 +24,7 @@ func (b *builtin) SecretList(repo *model.Repo) ([]*model.Secret, error) {
 	return b.store.SecretList(repo, false)
 }
 
-func (b *builtin) SecretListBuild(repo *model.Repo, build *model.Build) ([]*model.Secret, error) {
+func (b *builtin) SecretListBuild(repo *model.Repo, build *model.Pipeline) ([]*model.Secret, error) {
 	s, err := b.store.SecretList(repo, true)
 	if err != nil {
 		return nil, err

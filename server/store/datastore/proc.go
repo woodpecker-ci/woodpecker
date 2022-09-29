@@ -25,24 +25,24 @@ func (s storage) ProcLoad(id int64) (*model.Proc, error) {
 	return proc, wrapGet(s.engine.ID(id).Get(proc))
 }
 
-func (s storage) ProcFind(build *model.Build, pid int) (*model.Proc, error) {
+func (s storage) ProcFind(build *model.Pipeline, pid int) (*model.Proc, error) {
 	proc := &model.Proc{
-		BuildID: build.ID,
-		PID:     pid,
+		PipelineID: build.ID,
+		PID:        pid,
 	}
 	return proc, wrapGet(s.engine.Get(proc))
 }
 
-func (s storage) ProcChild(build *model.Build, ppid int, child string) (*model.Proc, error) {
+func (s storage) ProcChild(build *model.Pipeline, ppid int, child string) (*model.Proc, error) {
 	proc := &model.Proc{
-		BuildID: build.ID,
-		PPID:    ppid,
-		Name:    child,
+		PipelineID: build.ID,
+		PPID:       ppid,
+		Name:       child,
 	}
 	return proc, wrapGet(s.engine.Get(proc))
 }
 
-func (s storage) ProcList(build *model.Build) ([]*model.Proc, error) {
+func (s storage) ProcList(build *model.Pipeline) ([]*model.Proc, error) {
 	procList := make([]*model.Proc, 0, perPage)
 	return procList, s.engine.
 		Where("proc_build_id = ?", build.ID).
@@ -72,7 +72,7 @@ func (s storage) ProcUpdate(proc *model.Proc) error {
 	return err
 }
 
-func (s storage) ProcClear(build *model.Build) error {
+func (s storage) ProcClear(build *model.Pipeline) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {

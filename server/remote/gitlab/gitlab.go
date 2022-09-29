@@ -324,7 +324,7 @@ func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*mo
 }
 
 // File fetches a file from the remote repository and returns in string format.
-func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, fileName string) ([]byte, error) {
+func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, build *model.Pipeline, fileName string) ([]byte, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -338,7 +338,7 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, b
 }
 
 // Dir fetches a folder from the remote repository
-func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, path string) ([]*remote.FileMeta, error) {
+func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, build *model.Pipeline, path string) ([]*remote.FileMeta, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -386,7 +386,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 }
 
 // Status sends the commit status back to gitlab.
-func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Pipeline, proc *model.Proc) error {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -399,9 +399,9 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(proc.State),
-		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
-		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
-		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		Description: gitlab.String(common.GetPipelineStatusDescription(proc.State)),
+		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, build, proc)),
+		Context:     gitlab.String(common.GetPipelineStatusContext(repo, build, proc)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -584,7 +584,7 @@ func (g *Gitlab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
+func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -673,7 +673,7 @@ func (g *Gitlab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{}, nil
 }
 
-func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Pipeline, mergeIID int) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")

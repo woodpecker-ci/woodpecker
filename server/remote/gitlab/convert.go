@@ -60,9 +60,9 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	return repo, nil
 }
 
-func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Build, error) {
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	build := &model.Pipeline{}
 
 	target := hook.ObjectAttributes.Target
 	source := hook.ObjectAttributes.Source
@@ -133,9 +133,9 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	return obj.IID, repo, build, nil
 }
 
-func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
+func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	build := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
@@ -185,9 +185,9 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 	return repo, build, nil
 }
 
-func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	build := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {

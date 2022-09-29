@@ -9,5 +9,5 @@ import (
 
 type Extension interface {
 	IsConfigured() bool
-	FetchConfig(ctx context.Context, repo *model.Repo, build *model.Build, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error)
+	FetchConfig(ctx context.Context, repo *model.Repo, build *model.Pipeline, currentFileMeta []*remote.FileMeta) (configData []*remote.FileMeta, useOld bool, err error)
 }

@@ -43,7 +43,7 @@ type CCProject struct {
 	WebURL          string   `xml:"webUrl,attr"`
 }
 
-func New(r *model.Repo, b *model.Build, link string) *CCProjects {
+func New(r *model.Repo, b *model.Pipeline, link string) *CCProjects {
 	proj := &CCProject{
 		Name:            r.FullName,
 		WebURL:          link,

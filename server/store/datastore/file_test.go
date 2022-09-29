@@ -78,7 +78,7 @@ func TestFileFind(t *testing.T) {
 }
 
 func TestFileList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Pipeline))
 	defer closer()
 
 	assert.NoError(t, store.FileCreate(
@@ -102,7 +102,7 @@ func TestFileList(t *testing.T) {
 		bytes.NewBufferString("hola mundo"),
 	))
 
-	files, err := store.FileList(&model.Build{ID: 1})
+	files, err := store.FileList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Errorf("Unexpected error: select files: %s", err)
 		return
@@ -114,7 +114,7 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Pipeline))
 	defer closer()
 
 	if err := store.FileCreate(
@@ -147,15 +147,15 @@ func TestFileIndexes(t *testing.T) {
 }
 
 func TestFileCascade(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	procOne := &model.Proc{
-		BuildID: 1,
-		PID:     1,
-		PGID:    1,
-		Name:    "build",
-		State:   "success",
+		PipelineID: 1,
+		PID:        1,
+		PGID:       1,
+		Name:       "build",
+		State:      "success",
 	}
 	err1 := store.ProcCreate([]*model.Proc{procOne})
 	assert.EqualValues(t, int64(1), procOne.ID)
@@ -177,11 +177,11 @@ func TestFileCascade(t *testing.T) {
 		t.Errorf("Unexpected error: cannot insert file: %s", err2)
 	}
 
-	if _, err3 := store.ProcFind(&model.Build{ID: 1}, 1); err3 != nil {
+	if _, err3 := store.ProcFind(&model.Pipeline{ID: 1}, 1); err3 != nil {
 		t.Errorf("Unexpected error: cannot get inserted proc: %s", err3)
 	}
 
-	err := store.ProcClear(&model.Build{ID: 1, Procs: []*model.Proc{procOne}})
+	err := store.ProcClear(&model.Pipeline{ID: 1, Procs: []*model.Proc{procOne}})
 	assert.NoError(t, err)
 
 	file, err4 := store.FileFind(&model.Proc{ID: 1}, "hello.txt")

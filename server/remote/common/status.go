@@ -9,9 +9,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Proc) string {
-	event := string(build.Event)
-	switch build.Event {
+func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) string {
+	event := string(pipeline.Event)
+	switch pipeline.Event {
 	case model.EventPull:
 		event = "pr"
 	}
@@ -35,9 +35,9 @@ func GetBuildStatusContext(repo *model.Repo, build *model.Build, proc *model.Pro
 	return ctx.String()
 }
 
-// GetBuildStatusDescription is a helper function that generates a description
+// GetPipelineStatusDescription is a helper function that generates a description
 // message for the current build status.
-func GetBuildStatusDescription(status model.StatusValue) string {
+func GetPipelineStatusDescription(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:
 		return "Pipeline is pending"
@@ -58,10 +58,10 @@ func GetBuildStatusDescription(status model.StatusValue) string {
 	}
 }
 
-func GetBuildStatusLink(repo *model.Repo, build *model.Build, proc *model.Proc) string {
+func GetPipelineStatusLink(repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) string {
 	if proc == nil {
-		return fmt.Sprintf("%s/%s/build/%d", server.Config.Server.Host, repo.FullName, build.Number)
+		return fmt.Sprintf("%s/%s/pipeline/%d", server.Config.Server.Host, repo.FullName, pipeline.Number)
 	}
 
-	return fmt.Sprintf("%s/%s/build/%d/%d", server.Config.Server.Host, repo.FullName, build.Number, proc.PID)
+	return fmt.Sprintf("%s/%s/pipeline/%d/%d", server.Config.Server.Host, repo.FullName, pipeline.Number, proc.PID)
 }

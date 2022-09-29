@@ -25,7 +25,7 @@ import (
 )
 
 // publishToTopic publishes message to UI clients
-func publishToTopic(c context.Context, build *model.Build, repo *model.Repo) (err error) {
+func publishToTopic(c context.Context, build *model.Pipeline, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,

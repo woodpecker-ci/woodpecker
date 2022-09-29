@@ -179,13 +179,13 @@ export default defineComponent({
     ];
 
     const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+      { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+      { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
       {
         value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.build.event.pr'),
+        text: i18n.t('repo.pipeline.event.pr'),
       },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+      { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
     ];
 
     return {

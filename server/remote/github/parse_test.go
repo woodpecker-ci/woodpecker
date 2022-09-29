@@ -62,7 +62,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(p).IsNil()
 			})
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				req := testHookRequest([]byte(fixtures.HookPush), hookPush)
 				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
@@ -92,7 +92,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(p).IsNil()
 			})
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
 				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
@@ -104,7 +104,7 @@ func Test_parser(t *testing.T) {
 		})
 
 		g.Describe("given a deployment hook", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				req := testHookRequest([]byte(fixtures.HookDeploy), hookDeploy)
 				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()

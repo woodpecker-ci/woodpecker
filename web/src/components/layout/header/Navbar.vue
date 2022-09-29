@@ -51,7 +51,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
-import ActiveBuilds from './ActiveBuilds.vue';
+import ActiveBuilds from './ActivePipelines.vue';
 
 export default defineComponent({
   name: 'Navbar',

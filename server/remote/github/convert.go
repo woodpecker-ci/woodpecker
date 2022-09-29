@@ -32,11 +32,11 @@ const (
 )
 
 const (
-	descPending  = "this build is pending"
-	descSuccess  = "the build was successful"
-	descFailure  = "the build failed"
-	descBlocked  = "the build requires approval"
-	descDeclined = "the build was rejected"
+	descPending  = "this pipeline is pending"
+	descSuccess  = "the pipeline was successful"
+	descFailure  = "the pipeline failed"
+	descBlocked  = "the pipeline requires approval"
+	descDeclined = "the pipeline was rejected"
 	descError    = "oops, something went wrong"
 )
 

@@ -103,15 +103,15 @@ export default defineComponent({
     const isEditingSecret = computed(() => !!innerValue.value?.id);
 
     const secretEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+      { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+      { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
       {
         value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.build.event.pr'),
+        text: i18n.t('repo.pipeline.event.pr'),
         description: i18n.t('repo.settings.secrets.events.pr_warning'),
       },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
-      { value: WebhookEvents.Cron, text: i18n.t('repo.build.event.cron') },
+      { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+      { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
     ];
 
     function save() {

@@ -49,7 +49,7 @@ func WithSecret(secrets ...Secret) Option {
 	}
 }
 
-// WithMetadata configures the compiler with the repository, build
+// WithMetadata configures the compiler with the repository, pipeline
 // and system metadata. The metadata is used to remove steps from
 // the compiled pipeline configuration that should be skipped. The
 // metadata is also added to each container as environment variables.
@@ -76,7 +76,7 @@ func WithNetrc(username, password, machine string) Option {
 // WithWorkspace configures the compiler with the workspace base
 // and path. The workspace base is a volume created at runtime and
 // mounted into all containers in the pipeline. The base and path
-// are joined to provide the working directory for all build and
+// are joined to provide the working directory for all pipeline and
 // plugin steps in the pipeline.
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
@@ -177,7 +177,7 @@ func WithProxy() Option {
 }
 
 // WithNetworks configures the compiler with additional networks
-// to be connected to build containers
+// to be connected to pipeline containers
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
 		compiler.networks = networks

@@ -4,7 +4,7 @@ FROM node:16-alpine
 
 RUN apk add make gcc musl-dev
 
-# Build packages.
+# Pipeline packages.
 COPY --from=golang_image /usr/local/go /usr/local/go
 ENV PATH=$PATH:/usr/local/go/bin
 

@@ -13,7 +13,7 @@ import (
 var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo/name> <build>",
+	ArgsUsage: "<repo/name> <pipeline>",
 	Action:    logPurge,
 	Flags:     common.GlobalFlags,
 }
@@ -39,6 +39,6 @@ func logPurge(c *cli.Context) (err error) {
 		return err
 	}
 
-	fmt.Printf("Purging logs for build %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Purging logs for pipeline %s/%s#%d\n", owner, name, number)
 	return nil
 }
