@@ -20,6 +20,7 @@ pipeline:
 ```
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
+
 Another way to name a step is by using the name keyword:
 
 ```yaml
