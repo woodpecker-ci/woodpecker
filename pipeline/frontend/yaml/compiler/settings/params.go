@@ -42,11 +42,13 @@ func ParamsToEnv(from map[string]interface{}, to, secrets map[string]string) (er
 	return nil
 }
 
+// format hey environment variable key
 func sanitizeParamKey(k string) string {
 	return "PLUGIN_" + strings.ToUpper(
 		strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_"))
 }
 
+// indicate if a data type can be turned into string without encoding as json
 func isComplex(t reflect.Kind) bool {
 	switch t {
 	case reflect.Bool,
@@ -59,6 +61,7 @@ func isComplex(t reflect.Kind) bool {
 	}
 }
 
+// sanitizeParamValue return the value of a setting as string prepared to be injected as environment variable
 func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
@@ -130,7 +133,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 	return handleComplex(vv.Interface(), secrets)
 }
 
-// handle complex via yml.ToJSON
+// handleComplex use yml.ToJSON to store configuration in environment variables
 func handleComplex(v interface{}, secrets map[string]string) (string, error) {
 	v, err := injectSecretRecursive(v, secrets)
 	if err != nil {
@@ -148,9 +151,9 @@ func handleComplex(v interface{}, secrets map[string]string) (string, error) {
 	return string(out), nil
 }
 
-// injectSecret probe if map is actualy a secret and so a string.
+// injectSecret probe if map is actually a secret and so a string.
 // if it's a string it returns either the value or an error if secret was not found
-// else it just indicate to progress normaly
+// else it just indicate to progress normally
 func injectSecret(v map[string]interface{}, secrets map[string]string) (string, bool, error) {
 	if secretNameI, ok := v["from_secret"]; ok {
 		if secretName, ok := secretNameI.(string); ok {
@@ -164,8 +167,8 @@ func injectSecret(v map[string]interface{}, secrets map[string]string) (string, 
 	return "", false, nil
 }
 
-// injectSecretRecursive itterates over all types and if they countain elements do so recursive over them too
-// it use injectSecret internaly
+// injectSecretRecursive iterates over all types and if they contain elements
+// do so recursive over them too, it use injectSecret internally
 func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{}, error) {
 	t := reflect.TypeOf(v)
 
