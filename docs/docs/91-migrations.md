@@ -9,7 +9,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`)
-- Updated Prometheus gauge `build_total_count` to `pipeline_total_count`
+- Updated Prometheus gauge `build_*` to `pipeline_*`
 
 ## 0.15.0
 
