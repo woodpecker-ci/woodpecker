@@ -70,7 +70,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 	case reflect.String:
 		return vv.String(), nil
 
-	case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return fmt.Sprintf("%v", vv.Int()), nil
 
 	case reflect.Float32, reflect.Float64:
