@@ -32,7 +32,7 @@ type (
 		Matrix      Map
 		Local       types.BoolTrue
 		Path        Path
-		If          string `yaml:"if,omitempty"`
+		Eval        string `yaml:"eval,omitempty"`
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -161,9 +161,9 @@ func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error
 		match = match && c.Cron.Match(metadata.Curr.Cron)
 	}
 
-	if c.If != "" {
+	if c.Eval != "" {
 		env := metadata.Environ()
-		out, err := expr.Compile(c.If, expr.Env(env), expr.AsBool())
+		out, err := expr.Compile(c.Eval, expr.Env(env), expr.AsBool())
 		if err != nil {
 			return false, err
 		}

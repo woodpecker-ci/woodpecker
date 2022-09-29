@@ -485,14 +485,14 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "filter if by event",
-			conf: `{ if: 'CI_BUILD_EVENT == "push"' }`,
+			desc: "filter by eval based on event",
+			conf: `{ eval: 'CI_BUILD_EVENT == "push"' }`,
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}},
 			want: true,
 		},
 		{
-			desc: "filter if by event and repo",
-			conf: `{ if: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"' }`,
+			desc: "filter by eval based on event and repo",
+			conf: `{ eval: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"' }`,
 			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
 			want: true,
 		},
