@@ -33,7 +33,7 @@ func (wel WebhookEventList) Less(i, j int) bool { return wel[i] < wel[j] }
 
 func ValidateWebhookEvent(s WebhookEvent) bool {
 	switch s {
-	case EventPush, EventPull, EventTag, EventDeploy, EventCron:
+	case EventPush, EventPull, EventTag, EventDeploy, EventCron, EventManual:
 		return true
 	default:
 		return false
