@@ -80,8 +80,8 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config)             // hack
-	pipelineNumber := extractPipelineNumberNumber(work.Config) // hack
+	repoName := extractRepositoryName(work.Config)       // hack
+	pipelineNumber := extractPipelineNumber(work.Config) // hack
 
 	r.counter.Add(
 		work.ID,
@@ -369,6 +369,6 @@ func extractRepositoryName(config *backend.Config) string {
 }
 
 // extract pipeline number from the configuration
-func extractPipelineNumberNumber(config *backend.Config) string {
+func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }
