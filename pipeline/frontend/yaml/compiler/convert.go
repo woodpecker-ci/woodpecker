@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
@@ -150,6 +151,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	// at least one constraint must include the status failure.
 	onFailure := container.When.IncludesStatus("failure")
 
+	failure := container.Failure
+	if container.Failure == "" {
+		failure = frontend.FailureFail
+	}
+
 	return &backend.Step{
 		Name:          name,
 		Alias:         container.Name,
@@ -179,7 +185,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		AuthConfig:    authConfig,
 		OnSuccess:     onSuccess,
 		OnFailure:     onFailure,
-		IgnoreFailure: container.IgnoreFailure,
+		Failure:       failure,
 		NetworkMode:   networkMode,
 		IpcMode:       ipcMode,
 	}

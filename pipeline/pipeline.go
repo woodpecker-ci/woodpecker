@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
@@ -102,7 +103,7 @@ func (r *Runtime) Run() error {
 			if err != nil {
 				shouldIgnoreFailure := false
 				for _, step := range stage.Steps {
-					if step.IgnoreFailure {
+					if step.Failure == frontend.FailureIgnore {
 						shouldIgnoreFailure = true
 						break
 					}

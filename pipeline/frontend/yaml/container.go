@@ -42,7 +42,7 @@ type (
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
 		Group         string                 `yaml:"group,omitempty"`
 		Image         string                 `yaml:"image,omitempty"`
-		IgnoreFailure bool                   `yaml:"ignore_failure,omitempty"`
+		Failure       string                 `yaml:"failure,omitempty"`
 		Isolation     string                 `yaml:"isolation,omitempty"`
 		Labels        types.SliceorMap       `yaml:"labels,omitempty"`
 		MemLimit      types.MemStringorInt   `yaml:"mem_limit,omitempty"`
