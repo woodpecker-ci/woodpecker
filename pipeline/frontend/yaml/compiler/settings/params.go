@@ -61,7 +61,7 @@ func isComplex(t reflect.Kind) bool {
 	}
 }
 
-// sanitizeParamValue return the value of a setting as string prepared to be injected as environment variable
+// sanitizeParamValue returns the value of a setting as string prepared to be injected as environment variable
 func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
@@ -81,7 +81,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 
 	case reflect.Map:
 		switch v := v.(type) {
-		// gopkg.in/yaml.v3 only emit this map interface
+		// gopkg.in/yaml.v3 only emits this map interface
 		case map[string]interface{}:
 			// check if it's a secret and return value if it's the case
 			value, isSecret, err := injectSecret(v, secrets)
@@ -105,7 +105,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 		if t.Elem().Kind() == reflect.Interface ||
 			// else check directly if element is not complex
 			!isComplex(t.Elem().Kind()) {
-			containComplex := false
+			containsComplex := false
 			in := make([]string, vv.Len())
 
 			for i := 0; i < vv.Len(); i++ {
@@ -126,14 +126,14 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			if !containComplex {
 				return strings.Join(in, ","), nil
 			}
-			return handleComplex(vv.Interface(), secrets)
 		}
 	}
 
+  // handle all elements which are not primitives, string-maps containing secrets or arrays
 	return handleComplex(vv.Interface(), secrets)
 }
 
-// handleComplex use yml.ToJSON to store configuration in environment variables
+// handleComplex uses yaml2json to get json strings as values for environment variables
 func handleComplex(v interface{}, secrets map[string]string) (string, error) {
 	v, err := injectSecretRecursive(v, secrets)
 	if err != nil {
@@ -151,9 +151,9 @@ func handleComplex(v interface{}, secrets map[string]string) (string, error) {
 	return string(out), nil
 }
 
-// injectSecret probe if map is actually a secret and so a string.
-// if it's a string it returns either the value or an error if secret was not found
-// else it just indicate to progress normally
+// injectSecret probes if a map is a from_secret request.
+// If it's a from_secret request it either  returns the secret value or an error if the secret was not found
+// else it just indicates to progress normally using the provided map as is
 func injectSecret(v map[string]interface{}, secrets map[string]string) (string, bool, error) {
 	if secretNameI, ok := v["from_secret"]; ok {
 		if secretName, ok := secretNameI.(string); ok {
@@ -168,7 +168,7 @@ func injectSecret(v map[string]interface{}, secrets map[string]string) (string, 
 }
 
 // injectSecretRecursive iterates over all types and if they contain elements
-// iterate recursively over them too, it uses injectSecret internally
+// it iterates recursively over them too, using injectSecret internally
 func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{}, error) {
 	t := reflect.TypeOf(v)
 
@@ -179,7 +179,7 @@ func injectSecretRecursive(v interface{}, secrets map[string]string) (interface{
 	switch t.Kind() {
 	case reflect.Map:
 		switch v := v.(type) {
-		// gopkg.in/yaml.v3 only emit this map interface
+		// gopkg.in/yaml.v3 only emits this map interface
 		case map[string]interface{}:
 			// handle secrets
 			value, isSecret, err := injectSecret(v, secrets)
