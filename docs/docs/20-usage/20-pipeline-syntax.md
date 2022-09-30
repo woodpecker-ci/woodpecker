@@ -21,6 +21,25 @@ pipeline:
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
+Another way to name a step is by using the name keyword:
+
+```yaml
+pipeline:
+  - name: backend
+    image: golang
+    commands:
+      - go build
+      - go test
+  - name: frontend
+    image: node
+    commands:
+      - npm install
+      - npm run test
+      - npm run build
+```
+
+Keep in mind the name is optional, if not added the steps will be numerated.
+
 ### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
