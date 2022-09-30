@@ -5,6 +5,7 @@ go 1.18
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20220831004139-a0127ed0e7fe
 	codeberg.org/6543/go-yaml2json v0.2.1
+	github.com/antonmedv/expr v1.9.0
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/caddyserver/certmagic v0.17.1-0.20220901172127-2e22c6fa8c47
 	github.com/docker/cli v20.10.17+incompatible
@@ -56,7 +57,6 @@ require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
-	github.com/antonmedv/expr v1.9.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
