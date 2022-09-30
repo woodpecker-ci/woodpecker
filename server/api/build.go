@@ -19,11 +19,14 @@ package api
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/woodpecker-ci/woodpecker/server"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -33,6 +36,53 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
+
+func CreateBuild(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+
+	var p model.BuildOptions
+
+	err := json.NewDecoder(c.Request.Body).Decode(&p)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	user := session.User(c)
+
+	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+
+	tmpBuild := createTmpBuild(model.EventManual, lastCommit, repo, user, &p)
+
+	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(http.StatusOK, build)
+	}
+}
+
+func createTmpBuild(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.BuildOptions) *model.Build {
+	return &model.Build{
+		Event:     event,
+		Commit:    commitSHA,
+		Branch:    opts.Branch,
+		Timestamp: time.Now().UTC().Unix(),
+
+		Avatar:  user.Avatar,
+		Message: "MANUAL BUILD @ " + opts.Branch,
+
+		Ref:                 opts.Branch,
+		AdditionalVariables: opts.Variables,
+
+		Author: user.Login,
+		Email:  user.Email,
+
+		// TODO: Generate proper link to commit
+		Link: repo.Link,
+	}
+}
 
 func GetBuilds(c *gin.Context) {
 	repo := session.Repo(c)

@@ -21,87 +21,24 @@ pipeline:
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
-## Global Pipeline Conditionals
+Another way to name a step is by using the name keyword:
 
-Woodpecker gives the ability to skip whole pipelines (not just steps) based on certain conditions.
-
-### `branches`
-
-Woodpecker can skip commits based on the target branch. If the branch matches the `branches:` block the pipeline is executed, otherwise it is skipped.
-
-Example skipping a commit when the target branch is not master:
-
-```diff
+```yaml
 pipeline:
-  build:
+  - name: backend
     image: golang
     commands:
       - go build
       - go test
-
-+branches: master
-```
-
-Example matching multiple target branches:
-
-```diff
-pipeline:
-  build:
-    image: golang
+  - name: frontend
+    image: node
     commands:
-      - go build
-      - go test
-
-+branches: [ master, develop ]
+      - npm install
+      - npm run test
+      - npm run build
 ```
 
-Example uses glob matching:
-
-```diff
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-
-+branches: [ master, feature/* ]
-```
-
-Example includes branches:
-
-```diff
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-
-+branches:
-+  include: [ master, feature/* ]
-```
-
-Example excludes branches:
-
-```diff
-pipeline:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-
-+branches:
-+  exclude: [ develop, feature/* ]
-```
-
-The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped. A few examples:
-
-- `*\\/*` to match patterns with exactly 1 `/`
-- `*\\/**` to match patters with at least 1 `/`
-- `*` to match patterns without `/`
-- `**` to match everything
+Keep in mind the name is optional, if not added the steps will be numerated.
 
 ### Skip Commits
 
@@ -334,6 +271,13 @@ when:
   - branch: prefix/*
 ```
 
+The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped. A few examples:
+
+- `*\\/*` to match patterns with exactly 1 `/`
+- `*\\/**` to match patters with at least 1 `/`
+- `*` to match patterns without `/`
+- `**` to match everything
+
 Execute a step using custom include and exclude logic:
 
 ```yaml
@@ -348,10 +292,10 @@ when:
 :::info
 **By default steps are filtered by following event types:**
 
-`push`, `pull_request`, `tag`, `deployment`.
+`push`, `pull_request`, `tag`, `deployment`, `manual`.
 :::
 
-Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`
+Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 
@@ -469,7 +413,7 @@ when:
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
 It is currently **only available** for GitHub, GitLab.
-Gitea only support **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -730,6 +674,155 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 pipeline:
   ...
 ```
+
+## `when` - Global pipeline conditions
+
+Woodpecker gives the ability to skip whole pipelines (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the pipeline is executed, otherwise it is skipped, but treated as successful and other pipelines depending on it will still continue.
+
+### `repo`
+
+Example conditional execution by repository:
+
+```diff
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      repo: test/test
+```
+
+### `branch`
+
+:::note
+Branch conditions are not applied to tags.
+:::
+
+Example conditional execution by branch:
+
+```diff
+pipeline:
+  slack:
+    image: plugins/slack
+    settings:
+      channel: dev
++   when:
++     branch: master
+```
+
+> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+
+Execute a step if the branch is `master` or `develop`:
+
+```diff
+when:
+  branch: [master, develop]
+```
+
+Execute a step if the branch starts with `prefix/*`:
+
+```diff
+when:
+  branch: prefix/*
+```
+
+Execute a step using custom include and exclude logic:
+
+```diff
+when:
+  branch:
+    include: [ master, release/* ]
+    exclude: [ release/1.0.0, release/1.1.* ]
+```
+
+### `event`
+
+Execute a step if the build event is a `tag`:
+
+```diff
+when:
+  event: tag
+```
+
+Execute a step if the pipeline event is a `push` to a specified branch:
+
+```diff
+when:
+  event: push
++ branch: main
+```
+
+Execute a step for all non-pull request events:
+
+```diff
+when:
+  event: [push, tag, deployment]
+```
+
+Execute a step for all build events:
+
+```diff
+when:
+  event: [push, pull_request, tag, deployment]
+```
+
+### `tag`
+
+This filter only applies to tag events.
+Use glob expression to execute a step if the tag name starts with `v`:
+
+```diff
+when:
+  event: tag
+  tag: v*
+```
+
+### `environment`
+
+Execute a step for deployment events matching the target deployment environment:
+
+```diff
+when:
+  environment: production
+  event: deployment
+```
+
+### `instance`
+
+Execute a step only on a certain Woodpecker instance matching the specified hostname:
+
+```diff
+when:
+  instance: stage.woodpecker.company.com
+```
+
+### `path`
+
+:::info
+Path conditions are applied only to **push** and **pull_request** events.
+It is currently **only available** for GitHub, GitLab.
+Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+:::
+
+Execute a step only on a pipeline with certain files being changed:
+
+```diff
+when:
+  path: "src/*"
+```
+
+You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
+
+```diff
+when:
+  path:
+    include: [ '.woodpecker/*.yml', '*.ini' ]
+    exclude: [ '*.md', 'docs/**' ]
+    ignore_message: "[ALL]"
+```
+
+**Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
 ## `depends_on`
 

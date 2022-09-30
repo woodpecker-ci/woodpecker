@@ -98,6 +98,100 @@
         { "type": "array", "items": { "$ref": "#/definitions/step" }, "minLength": 1 }
       ]
     },
+    "pipeline_when": {
+      "description": "Whole pipelines can be skipped based on conditions. Read more: TODO",
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": { "$ref": "#/definitions/pipeline_when_condition" }
+        },
+        {
+          "$ref": "#/definitions/pipeline_when_condition"
+        }
+      ]
+    },
+    "pipeline_when_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repo": {
+          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#repo",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "branch": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "event": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
+          "default": [],
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": { "$ref": "#/definitions/event_enum" }
+            },
+            {
+              "$ref": "#/definitions/event_enum"
+            }
+          ]
+        },
+        "tag": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+          "type": "string"
+        },
+        "cron": {
+          "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#cron",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "platform": {
+          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#platform",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "environment": {
+          "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "instance": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#instance",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "path": {
+          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#path",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ignore_message": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
     "step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
       "type": "object",
@@ -165,6 +259,7 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
+          "default": ["push", "pull_request", "tag", "deployment"],
           "oneOf": [
             {
               "type": "array",
@@ -253,8 +348,7 @@
       }
     },
     "event_enum": {
-      "default": ["push", "pull_request", "tag", "deployment"],
-      "enum": ["push", "pull_request", "tag", "deployment", "cron"]
+      "enum": ["push", "pull_request", "tag", "deployment", "cron", "manual"]
     },
     "constraint_list": {
       "oneOf": [

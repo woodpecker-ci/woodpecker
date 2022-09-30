@@ -1,64 +1,53 @@
 import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
-import { Octokit } from '@octokit/rest';
-import { components as OctokitComponents } from '@octokit/openapi-types';
 import path from 'path';
-import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader } from './types';
+import fs from 'fs';
+import axios, { AxiosError } from 'axios';
+import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 import * as markdown from './markdown';
 
-const octokit = new Octokit();
-
-async function getDocs(repoName: string): Promise<string | undefined> {
-  try {
-    const docsResult = (
-      await octokit.repos.getContent({
-        owner: 'woodpecker-ci',
-        repo: repoName,
-        path: '/docs.md',
-      })
-    ).data as OctokitComponents['schemas']['content-file'];
-
-    return Buffer.from(docsResult.content, 'base64').toString('ascii');
-  } catch (e) {
-    console.error("Can't fetch docs file for repository", repoName, e);
-  }
-
-  return undefined;
-}
-
 async function loadContent(): Promise<Content> {
-  const repositories = (
-    await octokit.rest.search.repos({
-      // search for repos in woodpecker-ci org with the topic: woodpecker-plugin including forks
-      q: 'org:woodpecker-ci topic:woodpecker-plugin fork:true',
-    })
-  ).data.items;
+  const file = path.join(__dirname, '..', 'plugins.json');
 
-  console.log(repositories.map((r) => r.name));
+  const pluginsIndex = JSON.parse(fs.readFileSync(file).toString()) as { plugins: WoodpeckerPluginIndexEntry[] };
 
   const plugins = (
     await Promise.all(
-      repositories.map(async (repo) => {
-        const docs = await getDocs(repo.name);
-        if (!docs) {
+      pluginsIndex.plugins.map(async (i) => {
+        if (i['// todo']) {
           return undefined;
         }
 
-        const header = markdown.getHeader<WoodpeckerPluginHeader>(docs);
-        const body = markdown.getContent(docs);
+        let docsContent: string;
+        try {
+          const response = await axios(i.docs);
+          docsContent = response.data;
+        } catch (e) {
+          console.error("Can't fetch docs file", i.docs, (e as AxiosError).message);
+          return undefined;
+        }
 
-        const plugin: WoodpeckerPlugin = {
-          name: header?.name || repo.name,
-          repoName: repo.name,
-          url: repo.html_url,
-          icon: header?.icon,
-          description: header?.description,
-          docs: body,
+        const docsHeader = markdown.getHeader<WoodpeckerPluginHeader>(docsContent);
+        const docsBody = markdown.getContent(docsContent);
+
+        if (!docsHeader.name) {
+          return undefined;
+        }
+
+        return <WoodpeckerPlugin>{
+          name: docsHeader.name || i.name,
+          url: docsHeader.url,
+          icon: docsHeader.icon,
+          description: docsHeader.description,
+          docs: docsBody,
+          tags: docsHeader.tags || [],
+          author: docsHeader.author,
+          containerImage: docsHeader.containerImage,
+          containerImageUrl: docsHeader.containerImageUrl,
+          verified: i.verified || false,
         };
-
-        return plugin;
       }),
     )
-  ).filter((plugin) => plugin);
+  ).filter<WoodpeckerPlugin>((plugin): plugin is WoodpeckerPlugin => plugin !== undefined);
 
   return {
     plugins,
@@ -77,11 +66,11 @@ async function contentLoaded({
   const pluginsJsonPath = await createData('plugins.json', JSON.stringify(plugins));
 
   await Promise.all(
-    plugins.map(async (plugin) => {
-      const pluginJsonPath = await createData(`plugin-${plugin.repoName}.json`, JSON.stringify(plugin));
+    plugins.map(async (plugin, i) => {
+      const pluginJsonPath = await createData(`plugin-${i}.json`, JSON.stringify(plugin));
 
       addRoute({
-        path: `/plugins/${plugin.repoName}`,
+        path: `/plugins/${plugin.name}`,
         component: '@theme/WoodpeckerPlugin',
         modules: {
           plugin: pluginJsonPath,
@@ -113,7 +102,7 @@ export default function pluginWoodpeckerPluginsIndex(context: LoadContext, optio
       return path.join(__dirname, '..', 'src', 'theme');
     },
     getPathsToWatch() {
-      return [path.join(__dirname, '..', 'dist', '**', '*.{js,jsx}')];
+      return [path.join(__dirname, '..', 'dist', '**', '*.{js,jsx,css}')];
     },
   };
 }
