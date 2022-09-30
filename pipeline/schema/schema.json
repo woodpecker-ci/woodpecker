@@ -348,6 +348,10 @@
               "additionalProperties": false
             }
           ]
+        },
+        "evaluate": {
+          "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#evaluate",
+          "type": "string"
         }
       }
     },
