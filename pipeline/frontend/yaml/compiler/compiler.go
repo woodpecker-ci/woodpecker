@@ -85,6 +85,12 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 	config := new(backend.Config)
 
+	if !conf.When.Match(c.metadata, true) {
+		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
+		// An empty pipeline will just be skipped completely.
+		return config
+	}
+
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend.Volume{
 		Name:   fmt.Sprintf("%s_default", c.prefix),
@@ -149,7 +155,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
-			if !container.When.Match(c.metadata) {
+			if !container.When.Match(c.metadata, false) {
 				continue
 			}
 			stage := new(backend.Stage)
@@ -176,7 +182,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
-			if !container.When.Match(c.metadata) {
+			if !container.When.Match(c.metadata, false) {
 				continue
 			}
 
@@ -196,7 +202,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			continue
 		}
 
-		if !container.When.Match(c.metadata) {
+		if !container.When.Match(c.metadata, false) {
 			continue
 		}
 

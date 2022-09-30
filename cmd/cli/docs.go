@@ -19,24 +19,14 @@ package main
 
 import (
 	"os"
-	"reflect"
-	"strings"
-
-	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	app := newApp()
-	for _, cmd := range app.Commands {
-		fixHiddenFlags(cmd)
-	}
 	md, err := app.ToMarkdown()
 	if err != nil {
 		panic(err)
 	}
-	// Still a bug in our version of urfave/cli/v2
-	// https://github.com/urfave/cli/pull/1311
-	md = md[strings.Index(md, "#"):]
 
 	fi, err := os.Create("../../docs/docs/40-cli.md")
 	if err != nil {
@@ -45,20 +35,5 @@ func main() {
 	defer fi.Close()
 	if _, err := fi.WriteString("# CLI\n\n" + md); err != nil {
 		panic(err)
-	}
-}
-
-// Until https://github.com/urfave/cli/pull/1346 is merged and tagged
-func fixHiddenFlags(cmd *cli.Command) {
-	var flags []cli.Flag
-	for _, f := range cmd.Flags {
-		val := reflect.Indirect(reflect.ValueOf(f)).FieldByName("Hidden")
-		if !val.IsValid() || !val.Bool() {
-			flags = append(flags, f)
-		}
-	}
-	cmd.Flags = flags
-	for _, sub := range cmd.Subcommands {
-		fixHiddenFlags(sub)
 	}
 }

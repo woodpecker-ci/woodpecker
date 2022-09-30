@@ -215,6 +215,13 @@ func (c *client) BuildList(owner, name string) ([]*Build, error) {
 	return out, err
 }
 
+func (c *client) BuildCreate(owner, name string, options *BuildOptions) (*Build, error) {
+	var out *Build
+	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+	err := c.post(uri, options, &out)
+	return out, err
+}
+
 // BuildQueue returns a list of enqueued builds.
 func (c *client) BuildQueue() ([]*Activity, error) {
 	var out []*Activity
