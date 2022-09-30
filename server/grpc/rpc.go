@@ -393,7 +393,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 	var agent *model.Agent
 	if token == server.Config.Server.AgentToken {
 		// this is a system agent, check if we can find it based on its id or register it
-		agent, err = s.store.GetAgent(id)
+		agent, err = s.store.AgentFind(id)
 		if err == datastore.RecordNotExist {
 			agent := new(model.Agent)
 			agent.Name = ""
@@ -402,13 +402,13 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 			agent.Backend = backend
 			agent.Platform = platform
 			agent.Capacity = capacity
-			err := s.store.CreateAgent(agent)
+			err := s.store.AgentCreate(agent)
 			return agent.ID, err // TODO: check if the agent id will be set this way
 		} else if err != nil {
 			return -1, err
 		}
 	} else {
-		agent, err = s.store.GetAgentFromToken(token)
+		agent, err = s.store.AgentFindByToken(token)
 		if err != nil {
 			return -1, err
 		}
@@ -418,7 +418,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 	agent.Platform = platform
 	agent.Capacity = capacity
 
-	return agent.ID, s.store.UpdateAgent(agent)
+	return agent.ID, s.store.AgentUpdate(agent)
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {
@@ -433,7 +433,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 
 	agent.LastContact = time.Now().Unix()
 
-	return s.store.UpdateAgent(agent)
+	return s.store.AgentUpdate(agent)
 }
 
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
@@ -517,5 +517,5 @@ func (s *RPC) getAgentFromToken(ctx context.Context) (*model.Agent, error) {
 		return nil, fmt.Errorf("Nice try :)")
 	}
 
-	return s.store.GetAgentFromToken(token)
+	return s.store.AgentFindByToken(token)
 }

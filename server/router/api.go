@@ -181,6 +181,16 @@ func apiRoutes(e *gin.Engine) {
 		logLevel.POST("", api.SetLogLevel)
 	}
 
+	agentBase := e.Group("/api/agents")
+	{
+		agentBase.Use(session.MustAdmin())
+		agentBase.GET("", api.GetAgents)
+		agentBase.POST("", api.PostAgent)
+		agentBase.GET("/:agent", api.GetAgent)
+		agentBase.PATCH("/:agent", api.PatchAgent)
+		agentBase.DELETE("/:agent", api.DeleteAgent)
+	}
+
 	e.GET("/api/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
 
 	// TODO: remove /hook in favor of /api/hook

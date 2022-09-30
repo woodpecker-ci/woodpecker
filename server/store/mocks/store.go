@@ -14,6 +14,117 @@ type Store struct {
 	mock.Mock
 }
 
+// AgentCreate provides a mock function with given fields: _a0
+func (_m *Store) AgentCreate(_a0 *model.Agent) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// AgentDelete provides a mock function with given fields: _a0
+func (_m *Store) AgentDelete(_a0 *model.Agent) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// AgentFind provides a mock function with given fields: _a0
+func (_m *Store) AgentFind(_a0 int64) (*model.Agent, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Agent
+	if rf, ok := ret.Get(0).(func(int64) *model.Agent); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Agent)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentFindByToken provides a mock function with given fields: _a0
+func (_m *Store) AgentFindByToken(_a0 string) (*model.Agent, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Agent
+	if rf, ok := ret.Get(0).(func(string) *model.Agent); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Agent)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentList provides a mock function with given fields:
+func (_m *Store) AgentList() ([]*model.Agent, error) {
+	ret := _m.Called()
+
+	var r0 []*model.Agent
+	if rf, ok := ret.Get(0).(func() []*model.Agent); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Agent)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AgentUpdate provides a mock function with given fields: _a0
+func (_m *Store) AgentUpdate(_a0 *model.Agent) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // BuildConfigCreate provides a mock function with given fields: _a0
 func (_m *Store) BuildConfigCreate(_a0 *model.BuildConfig) error {
 	ret := _m.Called(_a0)
@@ -121,20 +232,6 @@ func (_m *Store) ConfigsForBuild(buildID int64) ([]*model.Config, error) {
 	}
 
 	return r0, r1
-}
-
-// CreateAgent provides a mock function with given fields: _a0
-func (_m *Store) CreateAgent(_a0 *model.Agent) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // CreateBuild provides a mock function with given fields: _a0, _a1
@@ -332,20 +429,6 @@ func (_m *Store) CronUpdate(_a0 *model.Repo, _a1 *model.Cron) error {
 	return r0
 }
 
-// DeleteAgent provides a mock function with given fields: _a0
-func (_m *Store) DeleteAgent(_a0 *model.Agent) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeleteRepo provides a mock function with given fields: _a0
 func (_m *Store) DeleteRepo(_a0 *model.Repo) error {
 	ret := _m.Called(_a0)
@@ -473,52 +556,6 @@ func (_m *Store) GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build,
 	var r1 error
 	if rf, ok := ret.Get(1).(func(*model.Repo, int) error); ok {
 		r1 = rf(repo, page)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetAgent provides a mock function with given fields: _a0
-func (_m *Store) GetAgent(_a0 int64) (*model.Agent, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Agent
-	if rf, ok := ret.Get(0).(func(int64) *model.Agent); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Agent)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetAgentFromToken provides a mock function with given fields: _a0
-func (_m *Store) GetAgentFromToken(_a0 string) (*model.Agent, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Agent
-	if rf, ok := ret.Get(0).(func(string) *model.Agent); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Agent)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1654,20 +1691,6 @@ func (_m *Store) TaskList() ([]*model.Task, error) {
 	}
 
 	return r0, r1
-}
-
-// UpdateAgent provides a mock function with given fields: _a0
-func (_m *Store) UpdateAgent(_a0 *model.Agent) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Agent) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // UpdateBuild provides a mock function with given fields: _a0

@@ -178,11 +178,12 @@ type Store interface {
 	CronGetLock(*model.Cron, int64) (bool, error)
 
 	// Agent
-	GetAgent(int64) (*model.Agent, error)
-	GetAgentFromToken(string) (*model.Agent, error)
-	CreateAgent(*model.Agent) error
-	UpdateAgent(*model.Agent) error
-	DeleteAgent(*model.Agent) error
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList() ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
 
 	// Store operations
 	Ping() error

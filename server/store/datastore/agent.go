@@ -18,30 +18,35 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) GetAgent(id int64) (*model.Agent, error) {
+func (s storage) AgentList() ([]*model.Agent, error) {
+	agents := make([]*model.Agent, 0, 10)
+	return agents, s.engine.Find(&agents)
+}
+
+func (s storage) AgentFind(id int64) (*model.Agent, error) {
 	agent := new(model.Agent)
 	return agent, wrapGet(s.engine.ID(id).Get(agent))
 }
 
-func (s storage) GetAgentFromToken(token string) (*model.Agent, error) {
+func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
 	agent := &model.Agent{
 		Token: token,
 	}
 	return agent, wrapGet(s.engine.Get(agent))
 }
 
-func (s storage) CreateAgent(agent *model.Agent) error {
+func (s storage) AgentCreate(agent *model.Agent) error {
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(agent)
 	return err
 }
 
-func (s storage) UpdateAgent(agent *model.Agent) error {
+func (s storage) AgentUpdate(agent *model.Agent) error {
 	_, err := s.engine.ID(agent.ID).AllCols().Update(agent)
 	return err
 }
 
-func (s storage) DeleteAgent(agent *model.Agent) error {
+func (s storage) AgentDelete(agent *model.Agent) error {
 	_, err := s.engine.ID(agent.ID).Delete(new(model.User))
 	return err
 }
