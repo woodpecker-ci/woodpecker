@@ -295,7 +295,8 @@
                 "platform": "Platform",
                 "backend": "Backend",
                 "capacity": "Capacity",
-                "last_contact": "Last contact"
+                "last_contact": "Last contact",
+                "never": "Never"
             }
         }
     },

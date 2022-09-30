@@ -215,8 +215,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/agents/${agentId}`) as Promise<Agent>;
   }
 
-  createAgent(agent: Partial<Agent>): Promise<unknown> {
-    return this._post('/api/agents', agent);
+  createAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._post('/api/agents', agent) as Promise<Agent>;
   }
 
   updateAgent(agent: Partial<Agent>): Promise<unknown> {

@@ -35,36 +35,42 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveAgent">
-        <InputField :label="$t('admin.settings.agents.name')">
-          <TextField v-model="selectedAgent.name" :placeholder="$t('admin.settings.agents.name')" required />
-        </InputField>
-
-        <InputField :label="$t('admin.settings.agents.token')">
-          <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
-        </InputField>
-
-        <InputField :label="$t('admin.settings.agents.backend')">
-          <TextField v-model="selectedAgent.backend" disabled />
-        </InputField>
-
-        <InputField :label="$t('admin.settings.agents.platform')">
-          <TextField v-model="selectedAgent.platform" disabled />
-        </InputField>
-
-        <InputField :label="$t('admin.settings.agents.capacity')">
-          <TextField v-model="selectedAgent.capacity" disabled />
-        </InputField>
-
-        <InputField :label="$t('admin.settings.agents.last_contact')">
+        <InputField :label="$t('admin.settings.agents.name.name')">
           <TextField
-            :model-value="
-              selectedAgent.last_contact
-                ? timeAgo.format(selectedAgent.last_contact * 1000)
-                : $t('admin.settings.agents.never')
-            "
-            disabled
+            v-model="selectedAgent.name"
+            :placeholder="$t('admin.settings.agents.name.placeholder')"
+            required
           />
         </InputField>
+
+        <template v-if="isEditingAgent">
+          <InputField :label="$t('admin.settings.agents.token')">
+            <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+          </InputField>
+
+          <InputField :label="$t('admin.settings.agents.backend')">
+            <TextField v-model="selectedAgent.backend" disabled />
+          </InputField>
+
+          <InputField :label="$t('admin.settings.agents.platform')">
+            <TextField v-model="selectedAgent.platform" disabled />
+          </InputField>
+
+          <InputField :label="$t('admin.settings.agents.capacity')">
+            <TextField v-model="selectedAgent.capacity" disabled />
+          </InputField>
+
+          <InputField :label="$t('admin.settings.agents.last_contact')">
+            <TextField
+              :model-value="
+                selectedAgent.last_contact
+                  ? timeAgo.format(selectedAgent.last_contact * 1000)
+                  : $t('admin.settings.agents.never')
+              "
+              disabled
+            />
+          </InputField>
+        </template>
 
         <Button
           :is-loading="isSaving"
@@ -109,14 +115,14 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
 
   if (isEditingAgent.value) {
     await apiClient.updateAgent(selectedAgent.value);
+    selectedAgent.value = undefined;
   } else {
-    await apiClient.createAgent(selectedAgent.value);
+    selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
     title: i18n.t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
-  selectedAgent.value = undefined;
   await loadAgents();
 });
 

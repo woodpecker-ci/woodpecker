@@ -105,7 +105,7 @@ func PostAgent(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, agent)
 }
 
 func DeleteAgent(c *gin.Context) {
