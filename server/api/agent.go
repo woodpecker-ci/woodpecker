@@ -33,7 +33,7 @@ func GetAgents(c *gin.Context) {
 		c.String(500, "Error getting agent list. %s", err)
 		return
 	}
-	c.JSON(200, agents)
+	c.JSON(http.StatusOK, agents)
 }
 
 func GetAgent(c *gin.Context) {
@@ -45,10 +45,10 @@ func GetAgent(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		c.String(404, "Cannot find agent. %s", err)
+		c.String(http.StatusNotFound, "Cannot find agent. %s", err)
 		return
 	}
-	c.JSON(200, agent)
+	c.JSON(http.StatusOK, agent)
 }
 
 func PatchAgent(c *gin.Context) {
@@ -120,12 +120,12 @@ func DeleteAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		c.String(404, "Cannot find user. %s", err)
+		c.String(http.StatusNotFound, "Cannot find user. %s", err)
 		return
 	}
 	if err = _store.AgentDelete(agent); err != nil {
-		c.String(500, "Error deleting user. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
 	}
-	c.String(200, "")
+	c.String(http.StatusOK, "")
 }

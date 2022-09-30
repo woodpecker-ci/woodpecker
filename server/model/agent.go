@@ -15,16 +15,16 @@
 package model
 
 type Agent struct {
-	ID          int64 `xorm:"pk autoincr 'id'"`
-	Created     int64 `xorm:"created"`
-	Updated     int64 `xorm:"updated"`
-	Name        string
-	OwnerID     int64 `xorm:"'owner_id'"`
-	Token       string
-	LastContact int64
-	Platform    string `xorm:"VARCHAR(100)"`
-	Backend     string `xorm:"VARCHAR(100)"`
-	Capacity    int32
+	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
+	Created     int64  `json:"created"       xorm:"created"`
+	Updated     int64  `json:"updated"       xorm:"updated"`
+	Name        string `json:"name"`
+	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
+	Token       string `json:"token"`
+	LastContact int64  `json:"last_contact"`
+	Platform    string `json:"platform"      xorm:"VARCHAR(100)"`
+	Backend     string `json:"backend"       xorm:"VARCHAR(100)"`
+	Capacity    int32  `json:"capacity"`
 }
 
 // TableName return database table name for xorm

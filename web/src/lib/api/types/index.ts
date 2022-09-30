@@ -1,3 +1,4 @@
+export * from './agent';
 export * from './build';
 export * from './buildConfig';
 export * from './cron';
