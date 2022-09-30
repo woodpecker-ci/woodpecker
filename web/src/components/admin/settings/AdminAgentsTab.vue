@@ -21,12 +21,7 @@
     <div v-if="!selectedAgent" class="space-y-4 text-color">
       <ListItem v-for="agent in agents" :key="agent.id" class="items-center">
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
-        <div class="flex flex-col ml-auto gap-2">
-          <span>{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
-          <span>Backend: {{ agent.backend }}</span>
-          <span>Platform: {{ agent.platform }}</span>
-          <span>Capacity: {{ agent.capacity }}</span>
-        </div>
+        <span class="ml-auto">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
         <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editAgent(agent)" />
         <IconButton
           icon="trash"
@@ -37,6 +32,46 @@
       </ListItem>
 
       <div v-if="agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
+    </div>
+    <div v-else>
+      <form @submit.prevent="saveAgent">
+        <InputField :label="$t('admin.settings.agents.name')">
+          <TextField v-model="selectedAgent.name" :placeholder="$t('admin.settings.agents.name')" required />
+        </InputField>
+
+        <InputField :label="$t('admin.settings.agents.token')">
+          <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+        </InputField>
+
+        <InputField :label="$t('admin.settings.agents.backend')">
+          <TextField v-model="selectedAgent.backend" disabled />
+        </InputField>
+
+        <InputField :label="$t('admin.settings.agents.platform')">
+          <TextField v-model="selectedAgent.platform" disabled />
+        </InputField>
+
+        <InputField :label="$t('admin.settings.agents.capacity')">
+          <TextField v-model="selectedAgent.capacity" disabled />
+        </InputField>
+
+        <InputField :label="$t('admin.settings.agents.last_contact')">
+          <TextField
+            :model-value="
+              selectedAgent.last_contact
+                ? timeAgo.format(selectedAgent.last_contact * 1000)
+                : $t('admin.settings.agents.never')
+            "
+            disabled
+          />
+        </InputField>
+
+        <Button
+          :is-loading="isSaving"
+          type="submit"
+          :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
+        />
+      </form>
     </div>
   </Panel>
 </template>
@@ -67,7 +102,7 @@ async function loadAgents() {
   agents.value = await apiClient.getAgents();
 }
 
-const { doSubmit: createAgent, isLoading: isSaving } = useAsyncAction(async () => {
+const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {
     throw new Error("Unexpected: Can't get agent");
   }

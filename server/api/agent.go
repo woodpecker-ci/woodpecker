@@ -72,8 +72,7 @@ func PatchAgent(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	agent.OwnerID = in.OwnerID // don't allow changing owner
-	agent.Token = in.Token     // don't allow changing token
+	agent.Name = in.Name
 
 	err = _store.AgentUpdate(agent)
 	if err != nil {
