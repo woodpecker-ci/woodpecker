@@ -384,10 +384,10 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int32) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int32) error {
 	token, err := s.getAgentToken(ctx)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	var agent *model.Agent
@@ -403,14 +403,14 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 			agent.Platform = platform
 			agent.Capacity = capacity
 			err := s.store.AgentCreate(agent)
-			return agent.ID, err // TODO: check if the agent id will be set this way
+			return err
 		} else if err != nil {
-			return -1, err
+			return err
 		}
 	} else {
 		agent, err = s.store.AgentFindByToken(token)
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 
@@ -418,7 +418,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend str
 	agent.Platform = platform
 	agent.Capacity = capacity
 
-	return agent.ID, s.store.AgentUpdate(agent)
+	return s.store.AgentUpdate(agent)
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {

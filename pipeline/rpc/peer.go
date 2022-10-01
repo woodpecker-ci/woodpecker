@@ -68,7 +68,7 @@ type Peer interface {
 	Log(c context.Context, id string, line *Line) error
 
 	// RegisterAgent register our agent to the server
-	RegisterAgent(ctx context.Context, agentId int64, platform, backend string, capacity int) (int64, error)
+	RegisterAgent(ctx context.Context, platform, backend string, capacity int) error
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error

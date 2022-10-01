@@ -103,12 +103,10 @@ message ReportHealthRequest {
 }
 
 message RegisterAgentRequest {
-  int64  agentId  = 1;
-  string platform = 2;
-  int32  capacity = 3;
-  string backend  = 4;
+  string platform = 1;
+  int32  capacity = 2;
+  string backend  = 3;
 }
 
 message RegisterAgentResponse {
-  int64 agentId = 1;
 }
