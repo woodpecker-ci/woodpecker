@@ -40,7 +40,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 )
 
 type RPC struct {
@@ -384,34 +383,27 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, id int64, platform, backend string, capacity int32) error {
+func (s *RPC) RegisterAgent(ctx context.Context, platform, backend string, capacity int32) error {
 	token, err := s.getAgentToken(ctx)
 	if err != nil {
 		return err
 	}
 
-	var agent *model.Agent
 	if token == server.Config.Server.AgentToken {
-		// this is a system agent, check if we can find it based on its id or register it
-		agent, err = s.store.AgentFind(id)
-		if err == datastore.RecordNotExist {
-			agent := new(model.Agent)
-			agent.Name = ""
-			agent.OwnerID = -1 // system agent
-			agent.Token = server.Config.Server.AgentToken
-			agent.Backend = backend
-			agent.Platform = platform
-			agent.Capacity = capacity
-			err := s.store.AgentCreate(agent)
-			return err
-		} else if err != nil {
-			return err
-		}
-	} else {
-		agent, err = s.store.AgentFindByToken(token)
-		if err != nil {
-			return err
-		}
+		agent := new(model.Agent)
+		agent.Name = ""
+		agent.OwnerID = -1 // system agent
+		agent.Token = server.Config.Server.AgentToken
+		agent.Backend = backend
+		agent.Platform = platform
+		agent.Capacity = capacity
+		err := s.store.AgentCreate(agent)
+		return err
+	}
+
+	agent, err := s.store.AgentFindByToken(token)
+	if err != nil {
+		return err
 	}
 
 	agent.Backend = backend

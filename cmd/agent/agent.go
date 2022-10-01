@@ -20,10 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
-	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -154,21 +151,12 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	agentID, err := getAgentIDFromStorage()
+	err = client.RegisterAgent(ctx, platform, engine.Name(), parallel)
 	if err != nil {
 		return err
 	}
 
-	agentID, err = client.RegisterAgent(ctx, agentID, platform, engine.Name(), parallel)
-	if err != nil {
-		return err
-	}
-
-	if err := saveAgentIDToStorage(agentID); err != nil {
-		return err
-	}
-
-	log.Debug().Msgf("agent registered with id %d", agentID)
+	log.Debug().Msgf("agent registered")
 
 	go func() {
 		for {
@@ -235,33 +223,4 @@ func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string
 
 func (c *credentials) RequireTransportSecurity() bool {
 	return false
-}
-
-func getStoragePath() string {
-	// TODO: support XDG, Windows, etc.
-	// return "/var/lib/woodpecker"
-	return filepath.Join(os.Getenv("HOME"), ".woodpecker")
-}
-
-func getAgentIDFromStorage() (int64, error) {
-	file := path.Join(getStoragePath(), "agent_id")
-	dat, err := os.ReadFile(file)
-	if err != nil && os.IsNotExist(err) {
-		return -1, nil
-	} else if err != nil {
-		return -1, err
-	}
-
-	return strconv.ParseInt(string(dat), 10, 64)
-}
-
-func saveAgentIDToStorage(id int64) error {
-	file := path.Join(getStoragePath(), "agent_id")
-
-	err := os.MkdirAll(getStoragePath(), 0o755)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(file, []uint8(strconv.FormatInt(id, 10)), 0o644)
 }
