@@ -113,7 +113,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 
 				// ensure each element is not complex
 				if isComplex(reflect.TypeOf(v).Kind()) {
-					containComplex = true
+					containsComplex = true
 					break
 				}
 
@@ -123,7 +123,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 				}
 			}
 
-			if !containComplex {
+			if !containsComplex {
 				return strings.Join(in, ","), nil
 			}
 		}
