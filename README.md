@@ -87,7 +87,7 @@ https://woodpecker-ci.org/
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#gitpod)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
 
 ## 📣 Translate
 
