@@ -129,7 +129,7 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 		}
 	}
 
-  // handle all elements which are not primitives, string-maps containing secrets or arrays
+	// handle all elements which are not primitives, string-maps containing secrets or arrays
 	return handleComplex(vv.Interface(), secrets)
 }
 
