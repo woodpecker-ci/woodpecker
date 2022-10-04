@@ -466,11 +466,12 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 
 	page := 1
 
-	for page > 0 {
+	for {
 		giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{
-			gitea.ListOptions{
+			ListOptions: gitea.ListOptions{
 				Page: page,
-			}})
+			},
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -480,7 +481,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 			}
 			page++
 		} else {
-			page = -1
+			break
 		}
 	}
 
