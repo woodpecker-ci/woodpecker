@@ -273,7 +273,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
-				"%d_%d",
+				"wp_%d_%d",
 				procID,
 				rand.Int(),
 			),
