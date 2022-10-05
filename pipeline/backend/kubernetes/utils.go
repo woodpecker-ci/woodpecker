@@ -11,7 +11,7 @@ import (
 )
 
 func dnsName(i string) string {
-	return "wp-" + strings.Replace(i, "_", "-", -1)
+	return strings.Replace(i, "_", "-", -1)
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {
