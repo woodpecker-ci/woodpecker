@@ -109,6 +109,7 @@ pipeline:
       files:
         - agent-coverage.out
         - cli-coverage.out
+        - coverage.out
         - server-coverage.out
         - datastore-coverage.out
       token:
