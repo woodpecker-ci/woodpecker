@@ -32,7 +32,7 @@ type OomError struct {
 	Code int
 }
 
-// Error reteurns the error message in string format.
+// Error returns the error message in string format.
 func (e *OomError) Error() string {
 	return fmt.Sprintf("%s : received oom kill", e.Name)
 }
