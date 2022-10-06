@@ -75,6 +75,7 @@ type Remote interface {
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
 	// Branches returns the names of all branches for the named repository.
+	// TODO: Add proper pagination handling and remove workaround in gitea remote
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
 
 	// BranchHead returns the sha of the head (lastest commit) of the specified branch
