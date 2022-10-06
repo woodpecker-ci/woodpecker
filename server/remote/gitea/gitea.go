@@ -462,27 +462,17 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		return nil, err
 	}
 
-	branches := make([]string, 0)
-
-	page := 1
-
-	for {
-		giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{
-			ListOptions: gitea.ListOptions{
-				Page: page,
-			},
-		})
-		if err != nil {
-			return nil, err
+	branches, err := common.Paginate(func(page int) ([]string, error) {
+		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
+			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
+		result := make([]string, len(branches))
+		for i := range branches {
+			result[i] = branches[i].Name
 		}
-		if len(giteaBranches) > 0 {
-			for _, branch := range giteaBranches {
-				branches = append(branches, branch.Name)
-			}
-			page++
-		} else {
-			break
-		}
+		return result, err
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return branches, nil
