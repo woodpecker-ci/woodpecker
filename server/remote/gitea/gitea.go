@@ -192,10 +192,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 		return nil, err
 	}
 
-	teams := make([]*model.Team, 0, perPage)
-
-	page := 1
-	for {
+	return common.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
@@ -204,21 +201,12 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 				},
 			},
 		)
-		if err != nil {
-			return nil, err
-		}
-
+		teams := make([]*model.Team, 0, len(orgs))
 		for _, org := range orgs {
 			teams = append(teams, toTeam(org, c.URL))
 		}
-
-		if len(orgs) < perPage {
-			break
-		}
-		page++
-	}
-
-	return teams, nil
+		return teams, err
+	})
 }
 
 // TeamPerm is not supported by the Gitea driver.
