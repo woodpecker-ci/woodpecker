@@ -435,6 +435,33 @@ when:
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
+#### `evaluate`
+
+Execute a step only if the provided evaluate expression is equal to true. Each [`CI_` variable](./50-environment.md#built-in-environment-variables) can be used inside the expression.
+
+The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+
+Run on pushes to the default branch for the repository `owner/repo`:
+
+```yaml
+when:
+  - evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
+```
+
+Run on commits created by user `woodpecker-ci`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
+```
+
+Skip all commits containing `please ignore me` in the commit message:
+
+```yaml
+when:
+  - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
+```
+
 ### `group` - Parallel execution
 
 Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
