@@ -304,6 +304,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
+			// DEPRECATED
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
