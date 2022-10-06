@@ -79,13 +79,8 @@ func TestParse(t *testing.T) {
 			}
 
 			g.It("Should match event tester", func() {
-<<<<<<< HEAD
-				g.Assert(matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
-=======
 				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Build{
->>>>>>> upstream/master
+					Curr: frontend.Pipeline{
 						Event: "tester",
 					},
 				}, false)
@@ -94,13 +89,8 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match event tester2", func() {
-<<<<<<< HEAD
-				g.Assert(matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
-=======
 				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Build{
->>>>>>> upstream/master
+					Curr: frontend.Pipeline{
 						Event: "tester2",
 					},
 				}, false)
@@ -109,13 +99,8 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match branch tester", func() {
-<<<<<<< HEAD
-				g.Assert(matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
-=======
 				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Build{
->>>>>>> upstream/master
+					Curr: frontend.Pipeline{
 						Commit: frontend.Commit{
 							Branch: "tester",
 						},
@@ -126,13 +111,8 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should not match event push", func() {
-<<<<<<< HEAD
-				g.Assert(matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
-=======
 				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Build{
->>>>>>> upstream/master
+					Curr: frontend.Pipeline{
 						Event: "push",
 					},
 				}, false)
