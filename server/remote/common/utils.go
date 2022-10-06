@@ -28,6 +28,7 @@ func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 func Paginate[T any](get func(page int) ([]T, error)) ([]T, error) {
 	items := make([]T, 0, 10)
 	page := 1
+	lenFirstBatch := -1
 
 	for {
 		batch, err := get(page)
@@ -35,12 +36,17 @@ func Paginate[T any](get func(page int) ([]T, error)) ([]T, error) {
 			return nil, err
 		}
 
-		if len(batch) > 0 {
+		if page == 1 {
+			lenFirstBatch = len(batch)
+		} else if len(batch) < lenFirstBatch {
 			items = append(items, batch...)
-			page++
-		} else {
+			break
+		} else if len(batch) == 0 {
 			break
 		}
+
+		items = append(items, batch...)
+		page++
 	}
 
 	return items, nil
