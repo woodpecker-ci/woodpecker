@@ -35,17 +35,14 @@ func Paginate[T any](get func(page int) ([]T, error)) ([]T, error) {
 		if err != nil {
 			return nil, err
 		}
+		items = append(items, batch...)
 
 		if page == 1 {
 			lenFirstBatch = len(batch)
-		} else if len(batch) < lenFirstBatch {
-			items = append(items, batch...)
-			break
-		} else if len(batch) == 0 {
+		} else if len(batch) < lenFirstBatch || len(batch) == 0 {
 			break
 		}
 
-		items = append(items, batch...)
 		page++
 	}
 
