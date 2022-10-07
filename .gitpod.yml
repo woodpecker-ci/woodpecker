@@ -16,8 +16,8 @@ tasks:
       echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       gp sync-await gitea
-      go run github.com/woodpecker-ci/woodpecker/cmd/server
       gp sync-done woodpecker-server
+      go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
