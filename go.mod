@@ -3,8 +3,9 @@ module github.com/woodpecker-ci/woodpecker
 go 1.18
 
 require (
-	code.gitea.io/sdk/gitea v0.15.1-0.20220720025709-de34275bb64e
+	code.gitea.io/sdk/gitea v0.15.1-0.20220831004139-a0127ed0e7fe
 	codeberg.org/6543/go-yaml2json v0.2.1
+	github.com/antonmedv/expr v1.9.0
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/caddyserver/certmagic v0.17.1-0.20220901172127-2e22c6fa8c47
 	github.com/docker/cli v20.10.17+incompatible
@@ -37,7 +38,7 @@ require (
 	github.com/urfave/cli/v2 v2.11.2
 	github.com/xanzy/go-gitlab v0.73.1
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 	google.golang.org/grpc v1.49.0

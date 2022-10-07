@@ -75,14 +75,18 @@ func ParseRepo(str string) (user, repo string, err error) {
 
 // Update updates the repository with values from the given Repo.
 func (r *Repo) Update(from *Repo) {
-	r.RemoteID = from.RemoteID
+	if from.RemoteID.IsValid() {
+		r.RemoteID = from.RemoteID
+	}
 	r.Owner = from.Owner
 	r.Name = from.Name
 	r.FullName = from.FullName
 	r.Avatar = from.Avatar
 	r.Link = from.Link
 	r.SCMKind = from.SCMKind
-	r.Clone = from.Clone
+	if len(from.Clone) > 0 {
+		r.Clone = from.Clone
+	}
 	r.Branch = from.Branch
 	if from.IsSCMPrivate != r.IsSCMPrivate {
 		if from.IsSCMPrivate {

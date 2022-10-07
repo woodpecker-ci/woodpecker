@@ -1,1 +1,84 @@
-{}
+{
+  "docs": "Documentazione",
+  "login": "Accedi",
+  "logout": "Esci",
+  "not_found": {
+    "back_home": "Torna alla pagina principale"
+  },
+  "password": "Password",
+  "repo": {
+    "activity": "Attività",
+    "add": "Aggiungi repository",
+    "build": {
+      "actions": {
+        "cancel": "Annulla"
+      }
+    },
+    "enable": {
+      "enable": "Abilita",
+      "enabled": "Già abilitato",
+      "list_reloaded": "Elenco dei repository ricaricato",
+      "reload": "Ricarica i repository",
+      "success": "Repository abilitato"
+    },
+    "not_allowed": "Non è permesso accedere a questo repository",
+    "settings": {
+      "actions": {
+        "actions": "Azioni"
+      },
+      "crons": {
+        "name": {
+          "name": "Nome"
+        },
+        "next_exec": "Prossima esecuzione",
+        "not_executed_yet": "Non ancora eseguito"
+      },
+      "general": {
+        "general": "Generale",
+        "pipeline_path": {
+          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+        },
+        "project": "Impostazioni del progetto",
+        "protected": {
+          "protected": "Protetto"
+        },
+        "save": "Salva le impostazioni",
+        "success": "Le impostazioni del repository sono state aggiornate",
+        "timeout": {
+          "minutes": "minuti"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Solo gli utenti dell'istanza Woodpecker che hanno effettuato l'accesso possono vedere questo progetto.",
+            "internal": "Interno"
+          },
+          "private": {
+            "desc": "Soltanto tu e gli altri proprietari del repository possono vedere questo progetto.",
+            "private": "Privato"
+          },
+          "public": {
+            "desc": "Qualunque utente può vedere il tuo progetto senza la necessità di accedere.",
+            "public": "Pubblico"
+          }
+        }
+      },
+      "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
+      "secrets": {
+        "name": "Nome",
+        "value": "Valore"
+      },
+      "settings": "Impostazioni"
+    },
+    "user_none": "L'organizzazione/utente non ha ancora alcun progetto."
+  },
+  "repos": "Repository",
+  "repositories": "Repository",
+  "search": "Cerca…",
+  "time": {
+    "not_started": "non ancora avviato"
+  },
+  "unknown_error": "Si è verificato un errore sconosciuto",
+  "url": "URL",
+  "username": "Nome utente",
+  "welcome": "Benvenuti in Woodpecker"
+}

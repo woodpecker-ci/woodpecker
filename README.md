@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="docs/static/img/logo-auto-darkmode.svg" width="220"/>
+    <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
   </a>
 </p>
 <br/>
@@ -87,11 +87,11 @@ https://woodpecker-ci.org/
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/development/getting-started#gitpod)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
 
 ## 📣 Translate
 
-We use a own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
 
 <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
   <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />

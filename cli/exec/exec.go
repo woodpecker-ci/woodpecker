@@ -157,7 +157,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// compiles the yaml file
-	compiled := compiler.New(
+	compiled, err := compiler.New(
 		compiler.WithEscalated(
 			c.StringSlice("privileged")...,
 		),
@@ -185,6 +185,9 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
 	).Compile(conf)
+	if err != nil {
+		return err
+	}
 
 	backend.Init(context.WithValue(c.Context, types.CliContext, c))
 

@@ -63,7 +63,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, build)
 	remoteYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
-		filtered, parseErr = branchFiltered(build, remoteYamlConfigs)
+		filtered, parseErr = checkIfFiltered(build, remoteYamlConfigs)
 		if parseErr == nil {
 			if filtered {
 				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}

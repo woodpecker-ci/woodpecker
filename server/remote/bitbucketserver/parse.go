@@ -16,7 +16,6 @@ package bitbucketserver
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -31,14 +30,7 @@ func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Build, erro
 		return nil, nil, err
 	}
 	build := convertPushHook(hook, baseURL)
-	repo := &model.Repo{
-		RemoteID: model.RemoteID(fmt.Sprint(hook.Repository.ID)),
-		Name:     hook.Repository.Slug,
-		Owner:    hook.Repository.Project.Key,
-		FullName: fmt.Sprintf("%s/%s", hook.Repository.Project.Key, hook.Repository.Slug),
-		Branch:   "master",
-		SCMKind:  model.RepoGit,
-	}
+	repo := convertRepo(&hook.Repository)
 
 	return repo, build, nil
 }

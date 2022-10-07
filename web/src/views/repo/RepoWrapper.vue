@@ -23,12 +23,21 @@
       </a>
       <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
     </div>
+    <div class="flex flex-wrap gap-y-2 items-center justify-between">
+      <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
+        <Tab id="activity" :title="$t('repo.activity')" />
+        <Tab id="branches" :title="$t('repo.branches')" />
+      </Tabs>
 
-    <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab id="activity" :title="$t('repo.activity')" />
-      <Tab id="branches" :title="$t('repo.branches')" />
-    </Tabs>
-
+      <Button
+        v-if="repoPermissions.push"
+        type="submit"
+        :text="$t('repo.manual_pipeline.trigger')"
+        class="ml-auto"
+        @click="showManualPipelinePopup = true"
+      />
+      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
+    </div>
     <router-view />
   </FluidContainer>
   <router-view v-else-if="repo && repoPermissions" />
@@ -42,6 +51,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -53,15 +63,11 @@ import BuildStore from '~/store/builds';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoOwner: {
     type: String,
     required: true,
   },
 
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoName: {
     type: String,
     required: true,
@@ -86,6 +92,8 @@ const builds = buildStore.getSortedBuilds(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('builds', builds);
+
+const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);

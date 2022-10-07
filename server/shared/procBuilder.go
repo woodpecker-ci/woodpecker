@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -117,11 +118,31 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
+			// checking if filtered.
+			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Marked as skipped, dose not match metadata",
+				)
+				proc.State = model.StatusSkipped
+			} else if err != nil {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Pipeline config could not be parsed",
+				)
+				return nil, err
+			}
+
+			// TODO: deprecated branches filter => remove after some time
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Marked as skipped, dose not match branch",
+				)
 				proc.State = model.StatusSkipped
 			}
 
-			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			if err != nil {
+				return nil, err
+			}
 
 			if len(ir.Stages) == 0 {
 				continue
@@ -216,7 +237,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -260,7 +281,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
-				"%d_%d",
+				"wp_%d_%d",
 				procID,
 				rand.Int(),
 			),

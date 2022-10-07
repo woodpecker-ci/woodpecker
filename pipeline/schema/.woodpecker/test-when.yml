@@ -134,9 +134,16 @@ pipeline:
     image: alpine
     commands: echo "test"
     when:
-      event: cron
-      cron:
-        include:
-          - test
-          - hello
-        exclude: hi
+      - event: cron
+        cron:
+          include:
+            - test
+            - hello
+          exclude: hi
+
+  when-evaluate:
+    image: alpine
+    commands: echo "test"
+    when:
+      - event: push
+        evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"'

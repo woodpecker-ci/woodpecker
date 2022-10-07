@@ -484,14 +484,29 @@ func TestConstraints(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			desc: "filter by eval based on event",
+			conf: `{ evaluate: 'CI_BUILD_EVENT == "push"' }`,
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}},
+			want: true,
+		},
+		{
+			desc: "filter by eval based on event and repo",
+			conf: `{ evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"' }`,
+			with: frontend.Metadata{Curr: frontend.Build{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			want: true,
+		},
 	}
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
 			c := parseConstraints(t, test.conf)
-			got, want := c.Match(test.with), test.want
-			if got != want {
-				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, want)
+			got, err := c.Match(test.with, false)
+			if err != nil {
+				t.Errorf("Match returned error: %v", err)
+			}
+			if got != test.want {
+				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, test.want)
 			}
 		})
 	}

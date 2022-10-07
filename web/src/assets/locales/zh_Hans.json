@@ -1,0 +1,273 @@
+{
+  "admin": {
+    "settings": {
+      "not_allowed": "你没有访问服务器设置的权限",
+      "secrets": {
+        "add": "添加密钥",
+        "created": "全局密钥已创建",
+        "deleted": "全局密钥已删除",
+        "desc": "全局密钥可以当做环境变量传给任意仓库的各个流水线步骤。",
+        "events": {
+          "events": "对以下事件可用",
+          "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
+        },
+        "images": {
+          "desc": "此密钥可用于此处填写的镜像列表，用逗号分隔，留空以允许所有镜像",
+          "images": "可用于以下镜像"
+        },
+        "name": "名称",
+        "none": "现在没有全局密钥。",
+        "save": "保存密钥",
+        "saved": "全局密钥已保存",
+        "secrets": "密钥",
+        "show": "显示所有密钥",
+        "value": "值",
+        "warning": "该密钥对所有服务器用户可用。"
+      },
+      "settings": "设置"
+    }
+  },
+  "docs": "文档",
+  "login": "登录",
+  "logout": "退出登录",
+  "not_found": {
+    "back_home": "回到主页",
+    "not_found": "啊，404，我们搞砸了什么，或者您拼错了什么词 :-/"
+  },
+  "org": {
+    "settings": {
+      "not_allowed": "你没有访问组织设置的权限",
+      "secrets": {
+        "add": "添加密钥",
+        "created": "组织密钥已创建",
+        "deleted": "组织密钥已删除",
+        "desc": "组织密钥可以被当做环境变量传递给该组织的所有仓库的各个流水线步骤。",
+        "events": {
+          "events": "对以下事件可用",
+          "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
+        },
+        "images": {
+          "desc": "此密钥可用于此处填写的镜像列表，用逗号分隔，留空以允许所有镜像",
+          "images": "可用于以下镜像"
+        },
+        "name": "名称",
+        "none": "没有组织密钥。",
+        "save": "保存密钥",
+        "saved": "组织密钥已保存",
+        "secrets": "密钥",
+        "show": "显示所有密钥",
+        "value": "值"
+      },
+      "settings": "设置"
+    }
+  },
+  "password": "密码",
+  "repo": {
+    "activity": "活动",
+    "add": "添加仓库",
+    "branches": "分支",
+    "build": {
+      "actions": {
+        "cancel": "取消",
+        "cancel_success": "流水线已被取消",
+        "canceled": "该步骤已被取消。",
+        "log_auto_scroll": "自动滚动",
+        "log_auto_scroll_off": "关闭自动滚动",
+        "log_download": "下载",
+        "restart": "重启",
+        "restart_success": "流水线已重启"
+      },
+      "config": "配置",
+      "created": "已创建",
+      "event": {
+        "cron": "计划任务",
+        "deploy": "部署",
+        "push": "推送",
+        "tag": "标签"
+      },
+      "execution_error": "执行错误",
+      "exit_code": "退出代码 {exitCode}",
+      "files": "修改的文件（{files}）",
+      "loading": "载入中…",
+      "log_download_error": "下载日志文件中发生了错误",
+      "no_files": "没有文件修改。",
+      "no_pipeline_steps": "没有流水线步骤可用！",
+      "no_pipelines": "没有流水线曾启动。",
+      "pipeline": "流水线 #{buildId}",
+      "pipelines_for": "{branch} 分支的流水线",
+      "protected": {
+        "approve": "同意",
+        "approve_success": "流水线已被许可",
+        "awaits": "该流水线正在等待维护者许可！",
+        "decline": "拒绝",
+        "decline_success": "流水线已被拒绝",
+        "declined": "该流水线已被拒绝！"
+      },
+      "step_not_started": "该步骤还不曾启动过。",
+      "tasks": "任务"
+    },
+    "enable": {
+      "enable": "启用",
+      "enabled": "已经启用了",
+      "list_reloaded": "仓库列表已刷新",
+      "reload": "刷新项目列表",
+      "success": "此仓库已成功启用"
+    },
+    "not_allowed": "你没有权限访问这个仓库",
+    "settings": {
+      "actions": {
+        "delete": {
+          "confirm": "该操作将会删除所有数据！！！\n\n你确定真的要继续吗？",
+          "delete": "删除仓库",
+          "success": "仓库已删除"
+        },
+        "disable": {
+          "disable": "禁用仓库",
+          "success": "仓库已禁用"
+        },
+        "repair": {
+          "repair": "修复仓库",
+          "success": "仓库已修复"
+        }
+      },
+      "badge": {
+        "badge": "徽标",
+        "url_branch": "特定分支的 URL"
+      },
+      "crons": {
+        "add": "创建计划",
+        "branch": {
+          "placeholder": "分支（若为空，将使用默认分支）",
+          "title": "分支"
+        },
+        "created": "计划已创建",
+        "crons": "计划",
+        "deleted": "计划已删除",
+        "desc": "计划作业可用于定期触发流水线。",
+        "name": {
+          "name": "名称",
+          "placeholder": "此计划的名称"
+        },
+        "next_exec": "下次执行",
+        "none": "还未添加任何计划。",
+        "not_executed_yet": "还没有执行过",
+        "save": "保存计划",
+        "saved": "计划已保存",
+        "schedule": {
+          "title": "计划任务（基于 UTC）"
+        },
+        "show": "显示所有计划"
+      },
+      "general": {
+        "allow_pr": {
+          "allow": "允许拉取请求",
+          "desc": "运行拉取请求中的流水线。"
+        },
+        "cancel_prev": {
+          "cancel": "取消之前的流水线",
+          "desc": "启用后，启动新触发的管道之前会取消相同事件和上下文的挂起和正在运行的管道。"
+        },
+        "general": "基本设置",
+        "pipeline_path": {
+          "default": "默认: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "desc": "流水线配置文件的路径 (例子: <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>)。目录必须以 <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> 结尾.",
+          "path": "流水线路径"
+        },
+        "project": "项目设置",
+        "protected": {
+          "desc": "每个流水线都需要在执行之前获得批准。",
+          "protected": "受保护"
+        },
+        "save": "保存设置",
+        "success": "仓库设置已更新",
+        "timeout": {
+          "minutes": "分钟",
+          "timeout": "流水线最大执行时长"
+        },
+        "trusted": {
+          "desc": "流水线容器可以使用高级功能，比如挂载卷。",
+          "trusted": "受信任"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "只有经过身份验证的 Woodpecker 用户才能看到此项目。",
+            "internal": "内部"
+          },
+          "private": {
+            "desc": "只有你和此仓库的所有者可以看到此项目。",
+            "private": "私有"
+          },
+          "public": {
+            "desc": "用户无需登录即可看到你的项目。",
+            "public": "公开"
+          },
+          "visibility": "项目可见性"
+        }
+      },
+      "not_allowed": "你没有权限访问此仓库的设置",
+      "registries": {
+        "add": "添加 Registry",
+        "address": {
+          "address": "地址",
+          "placeholder": "Registry 地址（如 docker.io）"
+        },
+        "created": "Registry 密码已创建",
+        "deleted": "Registry 密码已删除",
+        "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
+        "none": "现在没有 Registry 密码。",
+        "save": "保存 Registry",
+        "saved": "Registry 密码已保存",
+        "show": "显示 Registry"
+      },
+      "secrets": {
+        "add": "添加秘密",
+        "created": "秘密已创建",
+        "deleted": "秘密已删除",
+        "desc": "密钥可以在运行时作为环境变量传递给各个流水线步骤。",
+        "events": {
+          "events": "对以下事件可用",
+          "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
+        },
+        "images": {
+          "desc": "此秘密可用于此处填写的镜像列表，用逗号分隔，留空以允许所有镜像",
+          "images": "可用于以下镜像"
+        },
+        "name": "名称",
+        "none": "还未添加任何秘密。",
+        "save": "保存秘密",
+        "saved": "秘密已保存",
+        "secrets": "密钥",
+        "show": "显示所有秘密",
+        "value": "值"
+      },
+      "settings": "设置"
+    },
+    "user_none": "此组织/用户还没有任何仓库。"
+  },
+  "repos": "仓库",
+  "repositories": "仓库",
+  "search": "查找仓库…",
+  "time": {
+    "days_short": "天",
+    "hours_short": "小时",
+    "min_short": "分钟",
+    "not_started": "还没有运行过",
+    "sec_short": "秒",
+    "tmpl": "YYYY 年 MM 月 D 日 HH:mm z",
+    "weeks_short": "周"
+  },
+  "unknown_error": "发生了未知错误",
+  "url": "URL",
+  "user": {
+    "access_denied": "你没有登陆的权限",
+    "api_usage": "API 用例",
+    "cli_usage": "CLI 用例",
+    "dl_cli": "下载 CLI",
+    "internal_error": "发生了一些内部错误",
+    "oauth_error": "Oauth 认证错误",
+    "shell_setup": "Shell 设置",
+    "token": "你的私人 Token"
+  },
+  "username": "用户名",
+  "welcome": "欢迎来到 Woodpecker"
+}
