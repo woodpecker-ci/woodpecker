@@ -3,7 +3,6 @@
 </template>
 
 <script lang="ts" setup>
-// eslint-disable-next-line import/no-relative-parent-imports
 import WoodpeckerIcon from '../../../assets/woodpecker.svg?component';
 </script>
 

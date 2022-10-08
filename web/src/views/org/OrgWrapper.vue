@@ -26,8 +26,6 @@ export default defineComponent({
   components: { FluidContainer, IconButton },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     repoOwner: {
       type: String,
       required: true,

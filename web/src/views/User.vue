@@ -60,11 +60,9 @@ export default defineComponent({
       return usage;
     });
 
-    const usageWithCurl =
-      // eslint-disable-next-line no-template-curly-in-string
-      `# ${useI18n().t(
-        'user.shell_setup_before',
-      )}\ncurl -i \${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer \${WOODPECKER_TOKEN}"`;
+    const usageWithCurl = `# ${useI18n().t(
+      'user.shell_setup_before',
+    )}\ncurl -i \${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer \${WOODPECKER_TOKEN}"`;
 
     const usageWithCli = `# ${useI18n().t('user.shell_setup_before')}\nwoodpecker info`;
 

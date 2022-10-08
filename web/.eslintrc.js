@@ -6,6 +6,7 @@ module.exports = {
   env: {
     browser: true,
   },
+  reportUnusedDisableDirectives: true,
 
   parser: 'vue-eslint-parser',
   parserOptions: {

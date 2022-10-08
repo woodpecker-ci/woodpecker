@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, toRef } from 'vue';
+import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 
