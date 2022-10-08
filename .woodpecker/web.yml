@@ -21,6 +21,7 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
+      - corepack enable
       - pnpm lint
     when:
       path: *when_path
@@ -30,6 +31,7 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
+      - corepack enable
       - pnpm formatcheck
     when:
       path: *when_path
@@ -39,6 +41,7 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
+      - corepack enable
       - pnpm typecheck
     when:
       path: *when_path
@@ -57,6 +60,7 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
+      - corepack enable
       - pnpm test
     when:
       path: *when_path
