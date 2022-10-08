@@ -8,13 +8,7 @@
     @click="doClick"
   >
     <Icon :name="icon" />
-    <div
-      class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
-      :class="{
-        'opacity-100': isLoading,
-        'opacity-0': !isLoading,
-      }"
-    >
+    <div v-if="isLoading" class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center">
       <Icon name="loading" class="animate-spin" />
     </div>
   </button>

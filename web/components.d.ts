@@ -74,6 +74,7 @@ declare module '@vue/runtime-core' {
     ListItem: typeof import('./src/components/atomic/ListItem.vue')['default']
     ManualPipelinePopup: typeof import('./src/components/layout/popups/ManualPipelinePopup.vue')['default']
     Navbar: typeof import('./src/components/layout/header/Navbar.vue')['default']
+    NavbarIcon: typeof import('./src/components/layout/header/NavbarIcon.vue')['default']
     NumberField: typeof import('./src/components/form/NumberField.vue')['default']
     OrgSecretsTab: typeof import('./src/components/org/settings/OrgSecretsTab.vue')['default']
     Panel: typeof import('./src/components/layout/Panel.vue')['default']
