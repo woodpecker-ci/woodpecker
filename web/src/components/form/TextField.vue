@@ -29,8 +29,6 @@ export default defineComponent({
   name: 'TextField',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       default: '',

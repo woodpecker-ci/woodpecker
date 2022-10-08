@@ -42,7 +42,7 @@
       "name": "Woodpecker UI",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "start",
       ],
