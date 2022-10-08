@@ -22,6 +22,7 @@
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"
         class="!text-white !dark:text-gray-500 navbar-icon"
+        :title="darkMode ? $t('color_scheme_dark') : $t('color_scheme_light')"
         @click="darkMode = !darkMode"
       />
       <!-- Admin Settings -->
@@ -29,6 +30,7 @@
         v-if="user?.admin"
         icon="settings"
         class="!text-white !dark:text-gray-500 navbar-icon"
+        :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
       />
       <!-- Active Builds Indicator -->

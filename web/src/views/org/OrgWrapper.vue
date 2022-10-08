@@ -4,7 +4,13 @@
       <h1 class="text-xl text-color w-full md:w-auto text-center mb-4 md:mb-0">
         {{ org.name }}
       </h1>
-      <IconButton v-if="orgPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton
+        v-if="orgPermissions.admin"
+        class="ml-2"
+        :to="{ name: 'repo-settings' }"
+        :title="$t('org.settings.settings')"
+        icon="settings"
+      />
     </div>
 
     <router-view />
