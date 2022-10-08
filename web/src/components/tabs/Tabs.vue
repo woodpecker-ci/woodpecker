@@ -36,14 +36,10 @@ export default defineComponent({
   name: 'Tabs',
   components: { Icon },
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     disableHashMode: {
       type: Boolean,
     },
 
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       default: '',

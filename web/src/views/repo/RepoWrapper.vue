@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
