@@ -1,7 +1,7 @@
 <template>
   <FluidContainer class="flex flex-col">
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
-      <IconButton :to="{ name: 'repos' }" icon="back" />
+      <IconButton :to="{ name: 'repos' }" :title="$t('back')" icon="back" />
       <h1 class="text-xl ml-2 text-color">{{ $t('repo.add') }}</h1>
       <TextField v-model="search" class="w-auto ml-auto" :placeholder="$t('search')" />
       <Button
