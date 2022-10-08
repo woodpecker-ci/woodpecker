@@ -17,8 +17,6 @@ export default defineComponent({
   components: { BuildList },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     branch: {
       type: String,
       required: true,

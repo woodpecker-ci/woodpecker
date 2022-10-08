@@ -21,8 +21,6 @@ export default defineComponent({
   name: 'Checkbox',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: Boolean,
       required: true,

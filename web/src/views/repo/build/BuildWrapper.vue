@@ -67,18 +67,7 @@
 
 <script lang="ts">
 import { Tooltip } from 'floating-vue';
-import {
-  computed,
-  defineComponent,
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  PropType,
-  provide,
-  Ref,
-  toRef,
-  watch,
-} from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -111,15 +100,11 @@ export default defineComponent({
   },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     repoOwner: {
       type: String,
       required: true,
     },
 
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     repoName: {
       type: String,
       required: true,
@@ -128,13 +113,6 @@ export default defineComponent({
     buildId: {
       type: String,
       required: true,
-    },
-
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    procId: {
-      type: String as PropType<string | null>,
-      default: null,
     },
   },
 
