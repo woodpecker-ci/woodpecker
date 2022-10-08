@@ -192,10 +192,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 		return nil, err
 	}
 
-	teams := make([]*model.Team, 0, perPage)
-
-	page := 1
-	for {
+	return common.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
@@ -204,21 +201,12 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 				},
 			},
 		)
-		if err != nil {
-			return nil, err
-		}
-
+		teams := make([]*model.Team, 0, len(orgs))
 		for _, org := range orgs {
 			teams = append(teams, toTeam(org, c.URL))
 		}
-
-		if len(orgs) < perPage {
-			break
-		}
-		page++
-	}
-
-	return teams, nil
+		return teams, err
+	})
 }
 
 // TeamPerm is not supported by the Gitea driver.
@@ -255,17 +243,13 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.RemoteID, owne
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
 func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos := make([]*model.Repo, 0, perPage)
-
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	// Gitea SDK forces us to read repo list paginated.
-	page := 1
-	for {
-		all, _, err := client.ListMyRepos(
+	return common.Paginate(func(page int) ([]*model.Repo, error) {
+		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
@@ -273,22 +257,12 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
-		if err != nil {
-			return nil, err
+		result := make([]*model.Repo, 0, len(repos))
+		for _, repo := range repos {
+			result = append(result, toRepo(repo))
 		}
-
-		for _, repo := range all {
-			repos = append(repos, toRepo(repo))
-		}
-
-		if len(all) < perPage {
-			break
-		}
-		// Last page was not empty so more repos may be available - continue loop.
-		page++
-	}
-
-	return repos, nil
+		return result, err
+	})
 }
 
 // Perm returns the user permissions for the named Gitea repository.
@@ -462,27 +436,17 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		return nil, err
 	}
 
-	branches := make([]string, 0)
-
-	page := 1
-
-	for {
-		giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{
-			ListOptions: gitea.ListOptions{
-				Page: page,
-			},
-		})
-		if err != nil {
-			return nil, err
+	branches, err := common.Paginate(func(page int) ([]string, error) {
+		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
+			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
+		result := make([]string, 0, len(branches))
+		for i := range branches {
+			result[i] = branches[i].Name
 		}
-		if len(giteaBranches) > 0 {
-			for _, branch := range giteaBranches {
-				branches = append(branches, branch.Name)
-			}
-			page++
-		} else {
-			break
-		}
+		return result, err
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return branches, nil
