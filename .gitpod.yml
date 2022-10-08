@@ -46,17 +46,17 @@ tasks:
     before: |
       cd web/
     init: |
-      yarn install
+      pnpm install
     command: |
-      yarn start
+      pnpm start
   - name: Docs
     before: |
       cd docs/
     init: |
-      yarn install
-      yarn build:woodpecker-plugins
+      pnpm install
+      pnpm build:woodpecker-plugins
     command: |
-      yarn start --port 4000
+      pnpm start --port 4000
 
 ports:
   - port: 3000

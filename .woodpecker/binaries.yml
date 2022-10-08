@@ -21,8 +21,9 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
     when:
       path: *when_path
 
