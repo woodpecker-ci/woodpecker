@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col">
     <div class="flex w-full md:pt-4 flex-wrap">
-      <div
+      <button
         v-for="tab in tabs"
         :key="tab.id"
         class="w-full py-2 md:w-auto md:pt-0 md:pb-2 md:px-8 flex cursor-pointer md:border-b-2 text-color hover:text-gray-700 dark:hover:text-gray-400 items-center"
@@ -9,12 +9,13 @@
           'border-gray-400 dark:border-gray-600': activeTab === tab.id,
           'border-transparent': activeTab !== tab.id,
         }"
+        type="button"
         @click="selectTab(tab)"
       >
         <Icon v-if="activeTab === tab.id" name="chevron-right" class="md:hidden" />
         <Icon v-else name="blank" class="md:hidden" />
         <span>{{ tab.title }}</span>
-      </div>
+      </button>
     </div>
 
     <div>
