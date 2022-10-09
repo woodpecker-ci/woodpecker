@@ -19,28 +19,32 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn install --frozen-lockfile
+      - corepack enable
+      - pnpm install --frozen-lockfile
 
   lint:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn lint
+      - corepack enable
+      - pnpm lint
 
   formatcheck:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn formatcheck
+      - corepack enable
+      - pnpm formatcheck
 
   typecheck:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn typecheck
+      - corepack enable
+      - pnpm typecheck
 
   securitycheck:
     group: test
@@ -54,4 +58,5 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn test
+      - corepack enable
+      - pnpm test

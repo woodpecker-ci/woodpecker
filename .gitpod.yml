@@ -12,20 +12,21 @@ tasks:
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
+    command: |
       echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
-    command: go run github.com/woodpecker-ci/woodpecker/cmd/server
+      go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
       WOODPECKER_MAX_PROCS: 1
       WOODPECKER_HEALTHCHECK: false
-    init: |
+    command: |
       gp sync-await woodpecker-server
-    command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
+      go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
     command: |
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
@@ -42,16 +43,20 @@ tasks:
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
-    init: |
+    before: |
       cd web/
-      yarn install
-    command: yarn start
-  - name: Docs
     init: |
+      pnpm install
+    command: |
+      pnpm start
+  - name: Docs
+    before: |
       cd docs/
-      yarn install
-      yarn build:woodpecker-plugins
-    command: yarn start --port 4000
+    init: |
+      pnpm install
+      pnpm build:woodpecker-plugins
+    command: |
+      pnpm start --port 4000
 
 ports:
   - port: 3000

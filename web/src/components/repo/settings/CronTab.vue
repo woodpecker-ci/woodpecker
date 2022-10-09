@@ -31,11 +31,17 @@
           {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span
         >
         <span v-else class="ml-auto">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
-        <IconButton icon="edit" class="ml-auto w-8 h-8" @click="selectedCron = cron" />
+        <IconButton
+          icon="edit"
+          class="ml-auto w-8 h-8"
+          :title="$t('repo.settings.crons.edit')"
+          @click="selectedCron = cron"
+        />
         <IconButton
           icon="trash"
           class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
+          :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"
         />
       </ListItem>

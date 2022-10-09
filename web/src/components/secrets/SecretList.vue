@@ -11,11 +11,17 @@
           {{ event }}
         </span>
       </div>
-      <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editSecret(secret)" />
+      <IconButton
+        icon="edit"
+        class="ml-2 w-8 h-8"
+        :title="$t('repo.settings.secrets.edit')"
+        @click="editSecret(secret)"
+      />
       <IconButton
         icon="trash"
         class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
         :is-loading="isDeleting"
+        :title="$t('repo.settings.secrets.delete')"
         @click="deleteSecret(secret)"
       />
     </ListItem>

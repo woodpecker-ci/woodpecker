@@ -23,8 +23,6 @@ export default defineComponent({
   name: 'SelectField',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       default: null,

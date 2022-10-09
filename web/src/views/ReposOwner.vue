@@ -3,7 +3,13 @@
     <div class="flex flex-row flex-wrap md:grid md:grid-cols-3 border-b pb-4 mb-4 dark:border-dark-200">
       <h1 class="text-xl text-color">{{ repoOwner }}</h1>
       <TextField v-model="search" class="w-auto md:ml-auto md:mr-auto" :placeholder="$t('search')" />
-      <IconButton v-if="orgPermissions.admin" icon="settings" :to="{ name: 'org-settings' }" class="ml-auto" />
+      <IconButton
+        v-if="orgPermissions.admin"
+        icon="settings"
+        :to="{ name: 'org-settings' }"
+        :title="$t('org.settings.settings')"
+        class="ml-auto"
+      />
     </div>
 
     <div class="space-y-4">
