@@ -40,6 +40,19 @@ tasks:
         -d "{ \"name\": \"Woodpecker CI\", \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
       echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
       echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
+      curl -X 'POST' \
+        'http://localhost:3000/api/v1/user/repos' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -H "Authorization: token ${GITEA_TOKEN}" \
+        -d '{ "auto_init": false, "name": "woodpecker-test", "private": true, "template": false, "trust_model": "default" }'
+      cd contrib/woodpecker-test-repo
+      git init
+      git checkout -b main
+      git remote add origin http://woodpecker:${GITEA_TOKEN}@localhost:3000/woodpecker/woodpecker-test.git
+      git add .
+      git commit -m ":tada: Initial commit"
+      git push -u origin main
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
