@@ -439,7 +439,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 	branches, err := common.Paginate(func(page int) ([]string, error) {
 		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
 			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
-		result := make([]string, 0, len(branches))
+		result := make([]string, len(branches))
 		for i := range branches {
 			result[i] = branches[i].Name
 		}
