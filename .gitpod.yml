@@ -45,7 +45,14 @@ tasks:
         -H 'accept: application/json' \
         -H 'Content-Type: application/json' \
         -H "Authorization: token ${GITEA_TOKEN}" \
-        -d '{ "auto_init": true, "default_branch": "main", "name": "woodpecker-test", "private": true, "template": false, "trust_model": "default" }'
+        -d '{ "auto_init": false, "name": "woodpecker-test", "private": true, "template": false, "trust_model": "default" }'
+      cd contrib/woodpecker-test-repo
+      git init
+      git checkout -b main
+      git remote add origin http://woodpecker:${GITEA_TOKEN}@localhost:3000/woodpecker/woodpecker-test.git
+      git add .
+      git commit -m "Initial commit"
+      git push -u origin main
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
