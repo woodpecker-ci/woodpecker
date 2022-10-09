@@ -38,6 +38,12 @@ tasks:
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
         -d "{ \"name\": \"Woodpecker CI\", \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
+      curl -X 'POST' \
+        'http://localhost:3000/api/v1/user/repos' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -H 'Authorization: token ${GITEA_TOKEN}' \
+        -d '{ "auto_init": true, "default_branch": "main", "name": "Woodpecker CI Test Repo", "private": true, "template": false, "trust_model": "default" }'
       echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
       echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
       gp sync-done gitea
