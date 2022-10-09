@@ -25,7 +25,7 @@ services:
       USER_UID: 1000
       USER_GID: 1000
       # GITEA__server__DOMAIN: gitea.local.self
-      GITEA__server__ROOT_URL: http://gitea:3000
+      GITEA__server__ROOT_URL: https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}
       GITEA__database__DB_TYPE: postgres
       GITEA__database__HOST: gitea-database:5432
       GITEA__database__NAME: gitea
