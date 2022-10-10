@@ -12,6 +12,12 @@ variables:
   - &platforms_preview 'linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
 
+when:
+  - event: push
+    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
+  - event: tag
+  - event: pull_request
+
 pipeline:
   vendor:
     image: *golang_image
