@@ -21,7 +21,13 @@
         <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
-      <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton
+        v-if="repoPermissions.admin"
+        class="ml-2"
+        :to="{ name: 'repo-settings' }"
+        :title="$t('repo.settings.settings')"
+        icon="settings"
+      />
     </div>
     <div class="flex flex-wrap gap-y-2 items-center justify-between">
       <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
@@ -44,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 

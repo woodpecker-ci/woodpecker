@@ -1,9 +1,10 @@
 <template>
-  <div
-    class="flex rounded-full w-8 h-8 bg-opacity-30 hover:bg-opacity-50 bg-white items-center justify-center cursor-pointer text-white"
+  <button
+    class="flex rounded-full w-8 h-8 bg-opacity-30 hover:bg-opacity-50 bg-white items-center justify-center cursor-pointer text-white select-none"
     :class="{
       spinner: activePipelines.length !== 0,
     }"
+    type="button"
     @click="toggle"
   >
     <div class="spinner-ring ring1" />
@@ -11,7 +12,7 @@
     <div class="spinner-ring ring3" />
     <div class="spinner-ring ring4" />
     {{ activePipelines.length || 0 }}
-  </div>
+  </button>
 </template>
 
 <script lang="ts">

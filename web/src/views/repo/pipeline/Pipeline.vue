@@ -70,8 +70,6 @@ export default defineComponent({
   },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     procId: {
       type: String as PropType<string | null>,
       default: null,

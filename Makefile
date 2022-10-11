@@ -104,7 +104,7 @@ install-tools: ## Install development tools
 	fi
 
 ui-dependencies: ## Install UI dependencies
-	(cd web/; yarn install --frozen-lockfile)
+	(cd web/; pnpm install --frozen-lockfile)
 
 ##@ Test
 
@@ -118,9 +118,9 @@ lint: install-tools ## Lint code
 	lint github.com/woodpecker-ci/woodpecker/cmd/server
 
 lint-ui: ## Lint UI code
-	(cd web/; yarn)
-	(cd web/; yarn lesshint)
-	(cd web/; yarn lint --quiet)
+	(cd web/; pnpm install)
+	(cd web/; pnpm lesshint)
+	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
 	go test -race -cover -coverprofile agent-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
@@ -138,10 +138,10 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
-	(cd web/; yarn run lint)
-	(cd web/; yarn run formatcheck)
-	(cd web/; yarn run typecheck)
-	(cd web/; yarn run test)
+	(cd web/; pnpm run lint)
+	(cd web/; pnpm run formatcheck)
+	(cd web/; pnpm run typecheck)
+	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
@@ -151,7 +151,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## 
 ##@ Build
 
 build-ui: ## Build UI
-	(cd web/; yarn install --frozen-lockfile; yarn build)
+	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
 build-server: build-ui ## Build server
 	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
@@ -246,7 +246,7 @@ release-tarball: ## Create tarball for release
 		web/package.json \
 		web/tsconfig.* \
 		web/*.ts \
-		web/yarn.lock \
+		web/pnpm-lock.yaml \
 		web/web.go
 
 release-checksums: ## Create checksums for all release files

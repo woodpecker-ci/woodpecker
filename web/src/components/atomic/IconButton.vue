@@ -1,7 +1,10 @@
 <template>
-  <div
+  <button
     :disabled="disabled"
     class="relative flex items-center justify-center text-color px-1 py-1 rounded-full bg-transparent hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-700 cursor-pointer transition-all duration-150 focus:outline-none overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+    type="button"
+    :title="title"
+    :aria-label="title"
     @click="doClick"
   >
     <Icon :name="icon" />
@@ -14,7 +17,7 @@
     >
       <Icon name="loading" class="animate-spin" />
     </div>
-  </div>
+  </button>
 </template>
 
 <script lang="ts">
@@ -46,6 +49,11 @@ export default defineComponent({
 
     isLoading: {
       type: Boolean,
+    },
+
+    title: {
+      type: String,
+      required: true,
     },
   },
 

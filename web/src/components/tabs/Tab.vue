@@ -13,8 +13,6 @@ export default defineComponent({
   name: 'Tab',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     id: {
       type: String,
       default: undefined,

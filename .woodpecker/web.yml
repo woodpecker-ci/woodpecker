@@ -6,41 +6,45 @@ variables:
       # web source code
       - "web/**"
 
+when:
+  - event: push
+    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
+    path: *when_path
+  - event: tag
+  - event: pull_request
+    path: *when_path
+
 pipeline:
   deps:
     image: *node_image
     commands:
       - cd web/
-      - yarn install --frozen-lockfile
-    when:
-      path: *when_path
+      - corepack enable
+      - pnpm install --frozen-lockfile
 
   lint:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn lint
-    when:
-      path: *when_path
+      - corepack enable
+      - pnpm lint
 
   formatcheck:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn formatcheck
-    when:
-      path: *when_path
+      - corepack enable
+      - pnpm formatcheck
 
   typecheck:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn typecheck
-    when:
-      path: *when_path
+      - corepack enable
+      - pnpm typecheck
 
   securitycheck:
     group: test
@@ -48,15 +52,11 @@ pipeline:
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
       - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
-    when:
-      path: *when_path
 
   test:
     group: test
     image: *node_image
     commands:
       - cd web/
-      - yarn test
-    when:
-      path: *when_path
-
+      - corepack enable
+      - pnpm test

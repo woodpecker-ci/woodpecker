@@ -3,7 +3,7 @@ import Fuse from 'fuse.js';
 import Layout from '@theme/Layout';
 import './style.css';
 import { WoodpeckerPlugin } from '../types';
-import { IconVerified } from './Icons';
+import { IconPlugin, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   const pluginUrl = `/plugins/${plugin.name}`;
@@ -11,9 +11,7 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   return (
     <a href={pluginUrl} className="card shadow--md wp-plugin-card">
       <div className="card__header row">
-        <div className="col col--2 text--left">
-          <img src={plugin.icon} width="50" height="50" />
-        </div>
+        <div className="col col--2 text--left">{plugin.icon ? <img src={plugin.icon} width="50" /> : IconPlugin()}</div>
         <div className="col col--10">
           <h3>{plugin.name}</h3>
           <p>{plugin.description}</p>

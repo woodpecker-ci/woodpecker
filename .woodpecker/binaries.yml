@@ -15,71 +15,64 @@ variables:
       # web source code
       - "web/**"
 
+when:
+  - event: push
+    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
+    path: *when_path
+  - event: tag
+  - event: pull_request # TODO: Do we need this :thinking:?
+    path: *when_path
+
 pipeline:
   build-web:
     group: prepare
     image: *node_image
     commands:
       - cd web/
-      - yarn install --frozen-lockfile
-      - yarn build
-    when:
-      path: *when_path
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
 
   vendor:
     group: prepare
     image: *golang_image
     commands:
       - go mod vendor
-    when:
-      path: *when_path
 
   build-server:
     group: build
     image: *golang_image
     commands:
       - make release-server
-    when:
-      path: *when_path
 
   build-agent:
     group: build
     image: *golang_image
     commands:
       - make release-agent
-    when:
-      path: *when_path
 
   build-cli:
     group: build
     image: *golang_image
     commands:
       - make release-cli
-    when:
-      path: *when_path
 
   build-deb-rpm:
     group: bundle
     image: *golang_image
     commands:
       - make bundle
-    when:
-      path: *when_path
 
   build-tarball:
     group: bundle
     image: *golang_image
     commands:
       - make release-tarball
-    when:
-      path: *when_path
 
   checksums:
     image: *golang_image
     commands:
       - make release-checksums
-    when:
-      path: *when_path
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
@@ -88,8 +81,6 @@ pipeline:
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt
-    when:
-      path: *when_path
 
   release:
     image: plugins/github-release
@@ -105,4 +96,3 @@ pipeline:
       title: ${CI_COMMIT_TAG##v}
     when:
       event: tag
-      # path conditions are ignored for tag events
