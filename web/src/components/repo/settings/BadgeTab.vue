@@ -7,55 +7,104 @@
       </a>
     </div>
 
-    <div class="flex flex-col space-y-4">
-      <div>
-        <h2 class="text-lg text-color ml-2">{{ $t('url') }}</h2>
-        <pre class="box">{{ baseUrl }}{{ badgeUrl }}</pre>
-      </div>
+    <InputField :label="$t('repo.settings.badge.type')">
+      <SelectField
+        v-model="badgeType"
+        :options="[
+          {
+            value: 'url',
+            text: $t('repo.settings.badge.type_url'),
+          },
+          {
+            value: 'markdown',
+            text: $t('repo.settings.badge.type_markdown'),
+          },
+          {
+            value: 'html',
+            text: $t('repo.settings.badge.type_html'),
+          },
+        ]"
+        required
+        class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
+      />
+    </InputField>
+    <InputField :label="$t('repo.settings.badge.branch')">
+      <TextField
+        v-model="branch"
+        :placeholder="defaultBranch"
+        class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
+      />
+    </InputField>
 
+    <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
-        <h2 class="text-lg text-color ml-2">{{ $t('repo.settings.badge.url_branch') }}</h2>
-        <pre class="box">{{ baseUrl }}{{ badgeUrl }}?branch=<span class="font-bold">&lt;branch&gt;</span></pre>
-      </div>
-
-      <div>
-        <h2 class="text-lg text-color ml-2">{{ $t('repo.settings.badge.markdown') }}</h2>
-        <pre class="box">[![status-badge]({{ baseUrl }}{{ badgeUrl }})]({{ baseUrl }}{{ repoUrl }})</pre>
+        <pre class="box">{{ badgeContent }}</pre>
       </div>
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, Ref } from 'vue';
+import { useStorage } from '@vueuse/core';
+import { computed, defineComponent, inject, Ref, ref } from 'vue';
 
+import InputField from '~/components/form/InputField.vue';
+import SelectField from '~/components/form/SelectField.vue';
+import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'BadgeTab',
 
-  components: { Panel },
+  components: { Panel, InputField, SelectField, TextField },
 
   setup() {
     const repo = inject<Ref<Repo>>('repo');
-    const baseUrl = `${window.location.protocol}//${window.location.hostname}`;
-    const badgeUrl = computed(() => {
+
+    const badgeType = useStorage('last-badge-type', 'markdown');
+
+    if (!repo) {
+      throw new Error('Unexpected: "repo" should be provided at this place');
+    }
+
+    const defaultBranch = computed(() => repo.value.default_branch);
+    const branch = ref<string>('');
+
+    const baseUrl = `${window.location.protocol}//${window.location.hostname}${
+      window.location.port ? `:${window.location.port}` : ''
+    }`;
+    const badgeUrl = computed(
+      () =>
+        `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg${
+          branch.value !== '' ? `?branch=${branch.value}` : ''
+        }`,
+    );
+    const repoUrl = computed(
+      () => `/${repo.value.owner}/${repo.value.name}${branch.value !== '' ? `/branches/${branch.value}` : ''}`,
+    );
+
+    const badgeContent = computed(() => {
       if (!repo) {
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      return `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`;
-    });
-    const repoUrl = computed(() => {
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
+      if (badgeType.value === 'url') {
+        return `${baseUrl}${badgeUrl.value}`;
       }
 
-      return `/${repo.value.owner}/${repo.value.name}`;
+      if (badgeType.value === 'markdown') {
+        return `[![status-badge](${baseUrl}${badgeUrl.value})](${baseUrl}${repoUrl.value})`;
+      }
+
+      if (badgeType.value === 'html') {
+        return `<a href="${baseUrl}${repoUrl.value}" target="_blank">\n  <img src="${baseUrl}${badgeUrl.value}" alt="status-badge" />\n</a>`;
+      }
+
+      return '';
     });
 
-    return { baseUrl, badgeUrl, repoUrl };
+    return { badgeType, defaultBranch, branch, badgeContent, badgeUrl };
   },
 });
 </script>
