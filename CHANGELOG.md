@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
+
+* BUGFIXES
+  * Change build message column type to text (#1252) (#1253)
+* ENHANCEMENTS
+  * Bump DefaultCloneImage version to v1.6.0 (#1254)
+  * On Repo update, keep old "Clone" if update would empty it (#1170) (#1195)
+
 ## [0.15.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.4) - 2022-09-06
 
 * BUGFIXES
