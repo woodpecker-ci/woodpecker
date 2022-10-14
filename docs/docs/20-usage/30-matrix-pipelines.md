@@ -30,7 +30,7 @@ matrix:
 
 ## Interpolation
 
-Matrix variables are interpolated in the yaml using the `${VARIABLE}` syntax, before the yaml is parsed. This is an example yaml file before interpolating matrix parameters:
+Matrix variables are interpolated in the YAML using the `${VARIABLE}` syntax, before the YAML is parsed. This is an example YAML file before interpolating matrix parameters:
 
 ```yaml
 matrix:
