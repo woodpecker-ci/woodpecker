@@ -38,7 +38,7 @@ export function isProcRunning(proc: PipelineProc): boolean {
 }
 
 /**
- * Compare two pipelines by name.
+ * Compare two pipelines by creation timestamp.
  * @param {Object} a - A pipeline.
  * @param {Object} b - A pipeline.
  * @returns {number}
