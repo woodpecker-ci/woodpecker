@@ -60,9 +60,7 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
 
                 <p style={{ marginTop: '2rem', marginBottom: '1rem' }}>{plugin.description}</p>
               </div>
-              <div className="col col--2">
-                <img src={plugin.icon} width="150" height="150" />
-              </div>
+              { plugin.icon ? <div className="col col--2"> <img src={plugin.icon} width="150" height="150"/> </div> : '' }
             </div>
             <hr style={{ margin: '1rem 0' }} />
             <div dangerouslySetInnerHTML={{ __html: plugin.docs }} />
