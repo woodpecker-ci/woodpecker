@@ -26,7 +26,7 @@ require (
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/melbahja/goph v1.3.0
-	github.com/moby/moby v20.10.17+incompatible
+	github.com/moby/moby v20.10.19+incompatible
 	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/pkg/errors v0.9.1
