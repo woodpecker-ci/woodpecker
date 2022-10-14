@@ -70,7 +70,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 		}
 	}
 
-	newBuild := createNewBuildOutOfOld(lastBuild)
+	newBuild := createNewOutOfOld(lastBuild)
 	newBuild.Parent = lastBuild.ID
 
 	err = store.CreatePipeline(newBuild)
@@ -128,7 +128,7 @@ func persistPipelineConfigs(store store.Store, configs []*model.Config, pipeline
 	return nil
 }
 
-func createNewBuildOutOfOld(old *model.Pipeline) *model.Pipeline {
+func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	new := *old
 	new.ID = 0
 	new.Number = 0

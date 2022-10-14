@@ -75,7 +75,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_AUTHOR_AVATAR`        | commit author avatar                                                                         |
 |                                  | **Current pipeline**                                                                         |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
-| `CI_PIPELINE_PARENT`             | pipeline number of parent pipeline                                                           |
+| `CI_PIPELINE_PARENT`             | number of parent pipeline                                                           |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
 | `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
@@ -152,7 +152,7 @@ pipeline:
 
 ## String Substitution
 
-Woodpecker provides the ability to substitute environment variables at runtime. This gives us the ability to use dynamic pipeline or commit details in our pipeline configuration.
+Woodpecker provides the ability to substitute environment variables at runtime. This gives us the ability to use dynamic settings, commands and filters in our pipeline configuration.
 
 Example commit substitution:
 

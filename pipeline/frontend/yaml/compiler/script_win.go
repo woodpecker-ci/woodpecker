@@ -39,7 +39,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 %s
 `
 
-// traceScript is a helper script that is added to the pipeline script
+// traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
