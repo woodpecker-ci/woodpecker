@@ -6,11 +6,13 @@
         "add": "Ajouter un secret",
         "created": "Secret global crée",
         "deleted": "Secret global effacé",
+        "desc": "",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Faites attention avec cette option car un acteur malicieux peut soumettre une pull request qui révélerait vos secrets."
         },
         "images": {
+          "desc": "",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -25,6 +27,9 @@
       "settings": "Réglages"
     }
   },
+  "back": "",
+  "color_scheme_dark": "",
+  "color_scheme_light": "",
   "docs": "Docs",
   "login": "Connexion",
   "logout": "Déconnexion",
@@ -39,10 +44,13 @@
         "add": "Ajouter un secret",
         "created": "Secret d'organisation crée",
         "deleted": "Secret d'organisation effacé",
+        "desc": "",
         "events": {
-          "events": "Disponible pour les événements suivants"
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": ""
         },
         "images": {
+          "desc": "",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -77,6 +85,7 @@
       "event": {
         "cron": "Tache périodique",
         "deploy": "Déploiement",
+        "manual": "",
         "pr": "Pull Request",
         "push": "Push",
         "tag": "Tag"
@@ -109,6 +118,18 @@
       "reload": "Actualiser les dépôts",
       "success": "Dépôt activé"
     },
+    "manual_pipeline": {
+      "select_branch": "",
+      "title": "",
+      "trigger": "",
+      "variables": {
+        "add": "",
+        "desc": "",
+        "name": "",
+        "title": "",
+        "value": ""
+      }
+    },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
     "settings": {
       "actions": {
@@ -140,8 +161,10 @@
         },
         "created": "Tâche planifiée crée",
         "crons": "Tâches planifiées",
+        "delete": "",
         "deleted": "Tâche planifiée effacée",
         "desc": "Les tâches planifiées peuvent déclencher des pipelines à intervalles réguliers.",
+        "edit": "",
         "name": {
           "name": "Nom",
           "placeholder": "Nom de la tache périodique"
@@ -212,8 +235,10 @@
         },
         "created": "Authentifiant de registre crée",
         "creds": "Authentifiants de connexion pour le registre",
+        "delete": "",
         "deleted": "Authentifiant de registre effacé",
         "desc": "Des authentifiant de connexion pour les registres peuvent être ajouter pour permettre d'utiliser des images privés pour vos pipelines.",
+        "edit": "",
         "none": "Il n'y a pas d’authentifiant de connexion de registre pour le moment.",
         "registries": "Registres",
         "save": "Enregistrer le registre",
@@ -223,12 +248,16 @@
       "secrets": {
         "add": "Ajouter un secret",
         "created": "Secret crée",
+        "delete": "",
         "deleted": "Secret effacé",
         "desc": "Secrets qui peuvent être passé comme variable d'environnement à l’exécution d'une étape individuelle d'un pipeline.",
+        "edit": "",
         "events": {
-          "events": "Disponible pour les événements suivants"
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": ""
         },
         "images": {
+          "desc": "",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
