@@ -30,13 +30,13 @@ pipeline:
     when:
       path: *when_path
 
-  lint:
-    image: *golang_image
-    group: test
-    commands:
-      - make lint
-    when:
-      path: *when_path
+# lint:
+#   image: *golang_image
+#   group: test
+#   commands:
+#     - make lint
+#   when:
+#     path: *when_path
 
   test:
     image: *golang_image
