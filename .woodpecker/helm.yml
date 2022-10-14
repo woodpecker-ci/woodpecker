@@ -3,14 +3,6 @@ variables:
     - "charts/**"
     - ".woodpecker/helm.yml"
 
-when:
-  - event: push
-    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
-    path: *when_path
-  - event: tag
-  - event: pull_request
-    path: *when_path
-
 pipeline:
   set-version:
     image: alpine/helm:3.5.3
@@ -23,12 +15,16 @@ pipeline:
       - sed -i "s/<version>/$CHART_VERSION/g" charts/woodpecker-server/Chart.yaml
       - cat charts/woodpecker-agent/Chart.yaml
       - cat charts/woodpecker-server/Chart.yaml
+    when:
+      path: *when_path
 
   lint:
     image: alpine/helm:3.5.3
     commands:
       - helm lint charts/woodpecker-agent/
       - helm lint charts/woodpecker-server/
+    when:
+      path: *when_path
 
   release:
     image: quay.io/helmpack/chart-releaser:v1.4.0
@@ -46,3 +42,4 @@ pipeline:
       - cd woodpecker-ci.github.io/ && cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch master --package-path ../.cr-release-packages --index-path ../.cr-index/index.yaml --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
+      path: *when_path
