@@ -225,6 +225,7 @@ release-cli: ## Create cli binaries for release
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
 
 release-tarball: ## Create tarball for release
+	mkdir -p dist/
 	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
 		agent \
 		cli \
