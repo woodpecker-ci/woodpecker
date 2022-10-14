@@ -38,7 +38,7 @@ type Build struct {
 	Refspec             string            `json:"refspec"                 xorm:"build_refspec"`
 	Remote              string            `json:"remote"                  xorm:"build_remote"`
 	Title               string            `json:"title"                   xorm:"build_title"`
-	Message             string            `json:"message"                 xorm:"build_message"`
+	Message             string            `json:"message"                 xorm:"TEXT 'build_message'"`
 	Timestamp           int64             `json:"timestamp"               xorm:"build_timestamp"`
 	Sender              string            `json:"sender"                  xorm:"build_sender"` // uses reported user for webhooks and name of cron for cron pipelines
 	Avatar              string            `json:"author_avatar"           xorm:"build_avatar"`
