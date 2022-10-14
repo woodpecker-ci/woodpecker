@@ -8,19 +8,13 @@ variables:
     - "cli/**"
     - "cmd/cli/**"
 
-when:
-  - event: push
-    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
-    path: *when_path
-  - event: tag
-  - event: pull_request
-    path: *when_path
-
 pipeline:
   build-cli:
     image: *golang_image
     commands:
       - make docs
+    when:
+      path: *when_path
 
   build:
     image: *node_image
@@ -29,6 +23,8 @@ pipeline:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
+    when:
+      path: *when_path
 
   securitycheck:
     image: aquasec/trivy:latest
@@ -36,6 +32,8 @@ pipeline:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
       # TODO currently it is not fixable so just do not block currently
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+    when:
+      path: *when_path
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
@@ -49,6 +47,7 @@ pipeline:
         from_secret: GITHUB_TOKEN_SURGE
     when:
       event: pull_request
+      path: *when_path
 
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
@@ -76,3 +75,4 @@ pipeline:
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
+      path: *when_path
