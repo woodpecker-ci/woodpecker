@@ -90,7 +90,7 @@ The pipelines run in parallel on separate agents and share nothing.
 
 Dependencies between pipelines can be set with the `depends_on` element. A pipeline doesn't execute until all of its dependencies finished successfully.
 
-The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml`. If the project config for example uses `.woodpecker/` as path for ci files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
+The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
 pipeline:
