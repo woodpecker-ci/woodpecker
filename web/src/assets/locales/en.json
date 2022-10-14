@@ -170,8 +170,11 @@
             },
             "badge": {
                 "badge": "Badge",
-                "url_branch": "URL for specific branch",
-                "markdown": "Markdown"
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
             },
             "actions": {
                 "actions": "Actions",
