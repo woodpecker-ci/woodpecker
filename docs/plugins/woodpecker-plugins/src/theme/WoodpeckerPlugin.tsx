@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
-import { IconContainer, IconVerified, IconWebsite } from './Icons';
+import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
 
 export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
   return (
@@ -61,7 +61,7 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
                 <p style={{ marginTop: '2rem', marginBottom: '1rem' }}>{plugin.description}</p>
               </div>
               <div className="col col--2">
-                <img src={plugin.icon} width="150" height="150" />
+                {plugin.icon ? <img src={plugin.icon} width="150" /> : IconPlugin(150)}
               </div>
             </div>
             <hr style={{ margin: '1rem 0' }} />

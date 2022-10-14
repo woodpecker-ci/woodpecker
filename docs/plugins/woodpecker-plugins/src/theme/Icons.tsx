@@ -44,8 +44,8 @@ export const IconWebsite = (size = 32) => (
   </svg>
 );
 
-export const IconPlugin = () => (
-  <svg style={{ width: '100%', maxWidth: '50px' }} viewBox="0 0 24 24">
+export const IconPlugin = (maxWidth = 50) => (
+  <svg style={{ width: '100%', maxWidth: `${maxWidth}px` }} viewBox="0 0 24 24">
     <g fill="none">
       <path d="M0 0h24v24H0z" />
       <path
