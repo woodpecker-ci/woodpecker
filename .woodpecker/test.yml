@@ -11,12 +11,6 @@ variables:
       # schema changes
       - "pipeline/schema/**"
 
-when:
-  - event: push
-    branch: ["${CI_REPO_DEFAULT_BRANCH}", "release/*" ]
-  - event: tag
-  - event: pull_request
-
 pipeline:
   vendor:
     image: *golang_image
@@ -130,6 +124,8 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+    when:
+      path: *when_path
 
   service-mysql:
     image: mysql:5.6.27
@@ -137,3 +133,5 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when:
+      path: *when_path

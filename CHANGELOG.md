@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
+
+* BUGFIXES
+  * Change build message column type to text (#1252) (#1253)
+* ENHANCEMENTS
+  * Bump DefaultCloneImage version to v1.6.0 (#1254)
+  * On Repo update, keep old "Clone" if update would empty it (#1170) (#1195)
+
+## [0.15.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.4) - 2022-09-06
+
+* BUGFIXES
+  * Extract commit message from branch creation (#1150) (#1153)
+  * Respect WOODPECKER_GITEA_SKIP_VERIFY (#1152) (#1151)
+  * update golang.org/x/crypto (#1124)
+  * Implement Refresher for GitLab (#1031) (#1120)
+  * Make returned proc list to be returned always in correct order (#1060) (#1065)
+  * Update type of 'log_data' from blob to longblob (#1050) (#1052)
+  * Make ListItem component more accessible by using a button tag when clickable (#1044) (#1046)
+* MISC
+  * Update base images (#1024) (#1025)
+
+## [0.15.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.3) - 2022-06-16
+
+* SECURITY
+  * Update github.com/containerd/containerd (#978) (#980)
+* BUGFIXES
+  * Return to page after clikcing login at navbar (#975) (#976)
+
 ## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
 
 * BUGFIXES

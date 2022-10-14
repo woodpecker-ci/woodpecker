@@ -27,6 +27,9 @@
       "settings": "Iestatījumi"
     }
   },
+  "back": "",
+  "color_scheme_dark": "",
+  "color_scheme_light": "",
   "docs": "Dokumentācija",
   "login": "Autorizēties",
   "logout": "Iziet",
@@ -82,6 +85,7 @@
       "event": {
         "cron": "Plānotais darbs",
         "deploy": "Uzstādīšana",
+        "manual": "",
         "pr": "Izmaiņu pieprasījums",
         "push": "Iesūtīšana",
         "tag": "Tags"
@@ -114,6 +118,18 @@
       "reload": "Pārlādēt repozitorijus",
       "success": "Repozitorijs iespējots"
     },
+    "manual_pipeline": {
+      "select_branch": "",
+      "title": "",
+      "trigger": "",
+      "variables": {
+        "add": "",
+        "desc": "",
+        "name": "",
+        "title": "",
+        "value": ""
+      }
+    },
     "not_allowed": "Nav piekļuves šim repozitorijam",
     "settings": {
       "actions": {
@@ -145,8 +161,10 @@
         },
         "created": "Izveidots plānotais darbs",
         "crons": "Darbu plānotājs",
+        "delete": "",
         "deleted": "Plānotais darbs izdzēsts",
         "desc": "Darbu plānotājs var tikt izmantots, lai izpildītu konvejerdarbus pēc noteikta grafika.",
+        "edit": "",
         "name": {
           "name": "Nosaukums",
           "placeholder": "Plānotā darba nosaukums"
@@ -217,8 +235,10 @@
         },
         "created": "Reģistra autorizācijas dati pievienoti",
         "creds": "Reģistru autorizācijas dati",
+        "delete": "",
         "deleted": "Reģistra autorizācijas dati dzēsti",
         "desc": "Reģistru autorizācijas dati var tikt izmantoti, lai izmantotu attēlos no privātiem reģistriem, konvjerdarbu soļos.",
+        "edit": "",
         "none": "Pašlaik nav pievienots neviens reģistrs.",
         "registries": "Reģistri",
         "save": "Saglabāt reģistru",
@@ -228,8 +248,10 @@
       "secrets": {
         "add": "Pievienot noslēpumu",
         "created": "Noslēpums izveidots",
+        "delete": "",
         "deleted": "Noslēpums dzēsts",
         "desc": "Noslēpumus var padot individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+        "edit": "",
         "events": {
           "events": "Pieejams šādiem notikumiem",
           "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."

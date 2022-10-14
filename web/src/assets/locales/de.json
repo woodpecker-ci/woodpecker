@@ -27,6 +27,9 @@
       "settings": "Einstellungen"
     }
   },
+  "back": "Zurück",
+  "color_scheme_dark": "Wechsle zwischen dunkel und hellem Modus (aktuell dunkel)",
+  "color_scheme_light": "Wechsle zwischen dunkel und hellem Modus (aktuell hell)",
   "docs": "Docs",
   "login": "Anmelden",
   "logout": "Abmelden",
@@ -82,6 +85,7 @@
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
+        "manual": "Manuell",
         "pr": "Pull-Request",
         "push": "Push",
         "tag": "Tag"
@@ -114,6 +118,18 @@
       "reload": "Repositories neu laden",
       "success": "Repository aktiviert"
     },
+    "manual_pipeline": {
+      "select_branch": "Branch Auswählen",
+      "title": "Erzeuge eine manuelle Pipeline",
+      "trigger": "Führe Pipeline aus",
+      "variables": {
+        "add": "Variabel hinzufügen",
+        "desc": "Spezifiziere weitere Variabeln für deine Pipeline. Vordefinirte Variabeln mit dem selben Namen werden überschrieben.",
+        "name": "Variabel Name",
+        "title": "Weitere Pipeline Variabeln",
+        "value": "Variabel Wert"
+      }
+    },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
     "settings": {
       "actions": {
@@ -145,8 +161,10 @@
         },
         "created": "Cron erstellt",
         "crons": "Crons",
+        "delete": "Cron Löschen",
         "deleted": "Cron gelöscht",
         "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
+        "edit": "Cron Editieren",
         "name": {
           "name": "Name",
           "placeholder": "Name des Cron"
@@ -217,8 +235,10 @@
         },
         "created": "Registry-Zugangsdaten erstellt",
         "creds": "Zugangsdaten für die Registry",
+        "delete": "Registry Löschen",
         "deleted": "Registry-Zugangsdaten gelöscht",
         "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
+        "edit": "Registry Editieren",
         "none": "Es gibt noch keine Zugangsdaten für die Registry.",
         "registries": "Registries",
         "save": "Registry speichern",
@@ -228,8 +248,10 @@
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Geheimnis erstellt",
+        "delete": "Geheimnis Löschen",
         "deleted": "Geheimnis gelöscht",
         "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "edit": "Geheimnis Editieren",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
           "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
