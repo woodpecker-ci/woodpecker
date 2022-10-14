@@ -78,8 +78,6 @@ github.com/chavacava/garif
 # github.com/containerd/containerd v1.6.6
 ## explicit; go 1.17
 github.com/containerd/containerd/errdefs
-github.com/containerd/containerd/log
-github.com/containerd/containerd/platforms
 # github.com/cpuguy83/go-md2man/v2 v2.0.1
 ## explicit; go 1.11
 github.com/cpuguy83/go-md2man/v2/md2man
@@ -495,7 +493,7 @@ github.com/mitchellh/go-homedir
 # github.com/mitchellh/mapstructure v1.4.3
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
-# github.com/moby/moby v20.10.12+incompatible
+# github.com/moby/moby v20.10.19+incompatible
 ## explicit
 github.com/moby/moby/client
 github.com/moby/moby/pkg/jsonmessage
