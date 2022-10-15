@@ -232,7 +232,7 @@ func (m *Metadata) Environ() map[string]string {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
 
-	setDroneEnviron(params)
+	m.setDroneEnviron(params)
 
 	return params
 }
