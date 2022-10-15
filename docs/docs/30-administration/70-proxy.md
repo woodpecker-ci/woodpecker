@@ -2,7 +2,7 @@
 
 ## Apache
 
-This guide provides a brief overview for installing Woodpecker server behind the Apache2 webserver. This is an example configuration:
+This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
 
 ```nohighlight
 ProxyPreserveHost On
@@ -33,7 +33,7 @@ ProxyPassReverse / http://127.0.0.1:8000/
 
 ## Nginx
 
-This guide provides a basic overview for installing Woodpecker server behind the nginx webserver. For more advanced configuration options please consult the official nginx [documentation](https://www.nginx.com/resources/admin-guide/).
+This guide provides a basic overview for installing Woodpecker server behind the nginx web-server. For more advanced configuration options please consult the official nginx [documentation](https://www.nginx.com/resources/admin-guide/).
 
 Example configuration:
 
@@ -80,7 +80,7 @@ server {
 
 ## Caddy
 
-This guide provides a brief overview for installing Woodpecker server behind the [Caddy webserver](https://caddyserver.com/). This is an example caddyfile proxy configuration:
+This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
 
 ```nohighlight
 woodpecker.example.com {
