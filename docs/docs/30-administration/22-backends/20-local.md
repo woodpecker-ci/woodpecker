@@ -63,7 +63,7 @@ WOODPECKER_SERVER=replace_with_your_server_address:9000
 
 ## Running the agent
 
-Start the agent from the directory with the `.env` file: 
+Start the agent from the directory with the `.env` file:
 
 `woodpecker-agent`
 

@@ -42,7 +42,7 @@ Woodpecker uses the official Go acme library which will handle certificate upgra
 
 ## SSL with own certificates
 
-Woodpecker supports ssl configuration by mounting certificates into your container.
+Woodpecker supports SSL configuration by mounting certificates into your container.
 
 ```diff
 # docker-compose.yml
