@@ -58,6 +58,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/repair`);
   }
 
+  createPipeline(owner: string, repo: string, options: BuildOptions): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/pipeline`, options) as Promise<Pipeline>;
+  }
+
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${owner}/${repo}/pipelines?${query}`) as Promise<Pipeline[]>;
@@ -65,10 +69,6 @@ export default class WoodpeckerClient extends ApiClient {
 
   getPipeline(owner: string, repo: string, number: number | 'latest'): Promise<Pipeline> {
     return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
-  }
-
-  createPipeline(owner: string, repo: string, options: BuildOptions): Promise<Pipeline> {
-    return this._post(`/api/repos/${owner}/${repo}/pipeline`, options) as Promise<Pipeline>;
   }
 
   getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {
