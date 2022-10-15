@@ -100,7 +100,7 @@ export type PipelineStatus =
 
 export type PipelineProc = {
   id: number;
-  pipeline_id: number;
+  build_id: number;
   pid: number;
   ppid: number;
   pgid: number;
