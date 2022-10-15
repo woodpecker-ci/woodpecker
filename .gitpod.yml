@@ -95,3 +95,4 @@ vscode:
     - "johnsoncodehk.volar"
     - "redhat.vscode-yaml"
     - "davidanson.vscode-markdownlint"
+    - "streetsidesoftware.code-spell-checker"
