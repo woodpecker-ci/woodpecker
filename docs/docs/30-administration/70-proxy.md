@@ -33,7 +33,7 @@ ProxyPassReverse / http://127.0.0.1:8000/
 
 ## Nginx
 
-This guide provides a basic overview for installing Woodpecker server behind the nginx web-server. For more advanced configuration options please consult the official nginx [documentation](https://www.nginx.com/resources/admin-guide/).
+This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://www.nginx.com/resources/admin-guide/).
 
 Example configuration:
 
@@ -104,12 +104,12 @@ After installing [ngrok](https://ngrok.com/), open a new console and run:
 ngrok http 8000
 ```
 
-Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok url (usually xxx.ngrok.io) and start the server.
+Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (usually xxx.ngrok.io) and start the server.
 
 
 ## Traefik
 
-To install the Woodpecker server behind a [traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
+To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
 
 ```yml
 version: '3.8'
@@ -121,7 +121,7 @@ services:
       - WOODPECKER_OPEN=true
       - WOODPECKER_ADMIN=your_admin_user
       # other settings ...
-      
+
     networks:
       - dmz # externally defined network, so that traefik can connect to the server
     volumes:
@@ -130,7 +130,7 @@ services:
     deploy:
       labels:
         - traefik.enable=true
-        
+
         # web server
         - traefik.http.services.woodpecker-service.loadbalancer.server.port=8000
 
@@ -147,8 +147,8 @@ services:
         - traefik.http.middlewares.woodpecker-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.woodpecker-redirect.redirectscheme.permanent=true
         - traefik.http.routers.woodpecker.middlewares=woodpecker-redirect@docker
-    
-        #  gRPC service 
+
+        #  gRPC service
         - traefik.http.services.woodpecker-grpc.loadbalancer.server.port=9000
         - traefik.http.services.woodpecker-grpc.loadbalancer.server.scheme=h2c
 
@@ -165,14 +165,14 @@ services:
         - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true
         - traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker
-    
-  
+
+
 volumes:
   woodpecker-server-data:
     driver: local
 
 networks:
-  dmz: 
+  dmz:
     external: true
 ```
 
