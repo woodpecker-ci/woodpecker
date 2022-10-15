@@ -19,7 +19,8 @@ import (
 )
 
 var renameBuildsToPipeline = task{
-	name: "rename-builds-to-pipeline",
+	name:     "rename-builds-to-pipeline",
+	required: true,
 	fn: func(sess *xorm.Session) error {
 		err := renameTable(sess, "builds", "pipelines")
 		if err != nil {
