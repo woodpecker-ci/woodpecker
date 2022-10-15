@@ -8,7 +8,7 @@ const FeatureList = [
     Svg: require('../../static/img/feat-opensource.svg').default,
     description: (
       <>
-        Woodpecker is and always be totally free. As Woodpecker's <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">source code</a> is
+        Woodpecker is and always will be totally free. As Woodpecker's <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">source code</a> is
         open-source you can contribute to help evolving the project.
       </>
     ),
