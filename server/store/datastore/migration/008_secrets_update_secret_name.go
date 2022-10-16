@@ -16,7 +16,6 @@ package migration
 
 import (
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 )
 
 var lowercaseSecretNames = task{
