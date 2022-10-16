@@ -28,8 +28,8 @@
     }
   },
   "back": "Zurück",
-  "color_scheme_dark": "Wechsle zwischen dunkel und hellem Modus (aktuell dunkel)",
-  "color_scheme_light": "Wechsle zwischen dunkel und hellem Modus (aktuell hell)",
+  "color_scheme_dark": "Wechsle zwischen dunklem und hellem Modus (aktuell dunkel)",
+  "color_scheme_light": "Wechsle zwischen dunklem und hellem Modus (aktuell hell)",
   "docs": "Docs",
   "login": "Anmelden",
   "logout": "Abmelden",
@@ -119,15 +119,15 @@
       "success": "Repository aktiviert"
     },
     "manual_pipeline": {
-      "select_branch": "Branch Auswählen",
-      "title": "Erzeuge eine manuelle Pipeline",
-      "trigger": "Führe Pipeline aus",
+      "select_branch": "Branch auswählen",
+      "title": "Eine manuelle Pipeline ausführen",
+      "trigger": "Pipeline ausführen",
       "variables": {
-        "add": "Variabel hinzufügen",
-        "desc": "Spezifiziere weitere Variabeln für deine Pipeline. Vordefinirte Variabeln mit dem selben Namen werden überschrieben.",
-        "name": "Variabel Name",
-        "title": "Weitere Pipeline Variabeln",
-        "value": "Variabel Wert"
+        "add": "Variable hinzufügen",
+        "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+        "name": "Variablenname",
+        "title": "Zusätzliche Pipeline-Variablen",
+        "value": "Variablenwert"
       }
     },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
@@ -150,7 +150,12 @@
       },
       "badge": {
         "badge": "Abzeichen",
+        "branch": "Branch",
         "markdown": "Markdown",
+        "type": "Syntax",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL",
         "url_branch": "URL für bestimmten Branch"
       },
       "crons": {
@@ -161,10 +166,10 @@
         },
         "created": "Cron erstellt",
         "crons": "Crons",
-        "delete": "Cron Löschen",
+        "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
         "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
-        "edit": "Cron Editieren",
+        "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
           "placeholder": "Name des Cron"
@@ -235,10 +240,10 @@
         },
         "created": "Registry-Zugangsdaten erstellt",
         "creds": "Zugangsdaten für die Registry",
-        "delete": "Registry Löschen",
+        "delete": "Registry löschen",
         "deleted": "Registry-Zugangsdaten gelöscht",
         "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
-        "edit": "Registry Editieren",
+        "edit": "Registry bearbeiten",
         "none": "Es gibt noch keine Zugangsdaten für die Registry.",
         "registries": "Registries",
         "save": "Registry speichern",
@@ -248,10 +253,10 @@
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Geheimnis erstellt",
-        "delete": "Geheimnis Löschen",
+        "delete": "Geheimnis löschen",
         "deleted": "Geheimnis gelöscht",
         "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
-        "edit": "Geheimnis Editieren",
+        "edit": "Geheimnis bearbeiten",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
           "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
