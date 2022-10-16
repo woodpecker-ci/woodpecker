@@ -96,7 +96,6 @@ func PatchSecret(c *gin.Context) {
 		secret.Images = in.Images
 	}
 
-	secret.Name = strings.ToLower(in.Name)
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error updating secret. %s", err)
 		return
