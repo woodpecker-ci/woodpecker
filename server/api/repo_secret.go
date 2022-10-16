@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -50,7 +51,7 @@ func PostSecret(c *gin.Context) {
 	}
 	secret := &model.Secret{
 		RepoID: repo.ID,
-		Name:   in.Name,
+		Name:   strings.ToLower(in.Name),
 		Value:  in.Value,
 		Events: in.Events,
 		Images: in.Images,
@@ -95,6 +96,7 @@ func PatchSecret(c *gin.Context) {
 		secret.Images = in.Images
 	}
 
+	secret.Name = strings.ToLower(in.Name)
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error updating secret. %s", err)
 		return

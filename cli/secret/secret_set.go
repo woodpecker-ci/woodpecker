@@ -51,10 +51,9 @@ func secretUpdate(c *cli.Context) error {
 		return err
 	}
 
-	secretVal := strings.ToLower(c.String("value"))
 	secret := &woodpecker.Secret{
-		Name:   c.String("name"),
-		Value:  secretVal,
+		Name:   strings.ToLower(c.String("name")),
+		Value:  c.String("value"),
 		Images: c.StringSlice("image"),
 		Events: c.StringSlice("event"),
 	}
