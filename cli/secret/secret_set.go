@@ -50,6 +50,7 @@ func secretUpdate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	secretVal := strings.ToLower(c.String("value"))
 	secret := &woodpecker.Secret{
 		Name:   c.String("name"),
