@@ -16,31 +16,25 @@ package migration
 
 import (
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
-type SecretV008 struct {
-	Owner  string `json:"-"    xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
-	RepoID int64  `json:"-"    xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name   string `json:"name" xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-}
-
-// TableName return database table name for xorm
-func (SecretV008) TableName() string {
-	return "secrets"
-}
-
 var updateTableSecretsUpdateSecretName = task{
-	name: "update-table-secrets-secret-name",
-	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync2(new(SecretV007)); err != nil {
-			return err
+	name: "update-table-secret-table-secret-name-lowercase",
+	fn: func(sess *xorm.Session) (err error) {
+		dialect := sess.Engine().Dialect().URI().DBType
+		switch dialect {
+		case schemas.POSTGRES:
+			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		case schemas.MYSQL:
+			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		case schemas.MSSQL:
+			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		default:
+			// sqlite does only know BLOB in all cases
+			return nil
 		}
-		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {
-			return err
-		}
-		if err := alterColumnNull(sess, "secrets", "secret_repo_id", false); err != nil {
-			return err
-		}
-		return updateColumnSecretName(sess)
+
+		return err
 	},
 }
