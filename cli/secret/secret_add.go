@@ -50,8 +50,9 @@ func secretCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	secret := &woodpecker.Secret{
-		Name:   c.String("name"),
+		Name:   strings.ToLower(c.String("name")),
 		Value:  c.String("value"),
 		Images: c.StringSlice("image"),
 		Events: c.StringSlice("event"),

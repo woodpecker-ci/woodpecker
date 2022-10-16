@@ -16,7 +16,7 @@ scrape_configs:
 
 ## Authorization
 
-An administrator will need to generate a user api token and configure in the prometheus configuration file as a bearer token. Please see the following example:
+An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
 global:
@@ -32,7 +32,7 @@ scrape_configs:
 
 ## Metric Reference
 
-List of prometheus metrics specific to Woodpecker:
+List of Prometheus metrics specific to Woodpecker:
 
 ```
 # HELP woodpecker_pipeline_count Build count.
