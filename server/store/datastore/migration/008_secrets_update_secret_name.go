@@ -22,19 +22,7 @@ import (
 var lowercaseSecretNames = task{
 	name: "lowercase-secret-names",
 	fn: func(sess *xorm.Session) (err error) {
-		dialect := sess.Engine().Dialect().URI().DBType
-		switch dialect {
-		case schemas.POSTGRES:
-			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
-		case schemas.MYSQL:
-			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
-		case schemas.MSSQL:
-			_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
-		default:
-			// sqlite does only know BLOB in all cases
-			return nil
-		}
-
+		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
 		return err
 	},
 }
