@@ -27,6 +27,9 @@
       "settings": "设置"
     }
   },
+  "back": "",
+  "color_scheme_dark": "",
+  "color_scheme_light": "",
   "docs": "文档",
   "login": "登录",
   "logout": "退出登录",
@@ -82,6 +85,8 @@
       "event": {
         "cron": "计划任务",
         "deploy": "部署",
+        "manual": "",
+        "pr": "",
         "push": "推送",
         "tag": "标签"
       },
@@ -113,9 +118,22 @@
       "reload": "刷新项目列表",
       "success": "此仓库已成功启用"
     },
+    "manual_pipeline": {
+      "select_branch": "",
+      "title": "",
+      "trigger": "",
+      "variables": {
+        "add": "",
+        "desc": "",
+        "name": "",
+        "title": "",
+        "value": ""
+      }
+    },
     "not_allowed": "你没有权限访问这个仓库",
     "settings": {
       "actions": {
+        "actions": "",
         "delete": {
           "confirm": "该操作将会删除所有数据！！！\n\n你确定真的要继续吗？",
           "delete": "删除仓库",
@@ -132,6 +150,7 @@
       },
       "badge": {
         "badge": "徽标",
+        "markdown": "",
         "url_branch": "特定分支的 URL"
       },
       "crons": {
@@ -142,8 +161,10 @@
         },
         "created": "计划已创建",
         "crons": "计划",
+        "delete": "",
         "deleted": "计划已删除",
         "desc": "计划作业可用于定期触发流水线。",
+        "edit": "",
         "name": {
           "name": "名称",
           "placeholder": "此计划的名称"
@@ -154,6 +175,7 @@
         "save": "保存计划",
         "saved": "计划已保存",
         "schedule": {
+          "placeholder": "",
           "title": "计划任务（基于 UTC）"
         },
         "show": "显示所有计划"
@@ -212,9 +234,13 @@
           "placeholder": "Registry 地址（如 docker.io）"
         },
         "created": "Registry 密码已创建",
+        "creds": "",
+        "delete": "",
         "deleted": "Registry 密码已删除",
         "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
+        "edit": "",
         "none": "现在没有 Registry 密码。",
+        "registries": "",
         "save": "保存 Registry",
         "saved": "Registry 密码已保存",
         "show": "显示 Registry"
@@ -222,8 +248,10 @@
       "secrets": {
         "add": "添加秘密",
         "created": "秘密已创建",
+        "delete": "",
         "deleted": "秘密已删除",
         "desc": "密钥可以在运行时作为环境变量传递给各个流水线步骤。",
+        "edit": "",
         "events": {
           "events": "对以下事件可用",
           "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
@@ -266,6 +294,7 @@
     "internal_error": "发生了一些内部错误",
     "oauth_error": "Oauth 认证错误",
     "shell_setup": "Shell 设置",
+    "shell_setup_before": "",
     "token": "你的私人 Token"
   },
   "username": "用户名",

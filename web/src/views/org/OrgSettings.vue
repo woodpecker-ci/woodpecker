@@ -1,7 +1,7 @@
 <template>
   <FluidContainer>
     <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" @click="goBack" />
+      <IconButton icon="back" :title="$t('back')" @click="goBack" />
       <h1 class="text-xl ml-2 text-color">{{ $t('org.settings.settings') }}</h1>
     </div>
 

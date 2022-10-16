@@ -139,7 +139,7 @@ Example configuration using a private image:
        - go test
 ```
 
-Woodpecker matches the registry hostname to each image in your yaml. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
+Woodpecker matches the registry hostname to each image in your YAML. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
 
 Example registry hostnames:
 
@@ -510,7 +510,7 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
+The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository URL.
 
 ```txt
 /woodpecker/src/github.com/octocat/hello-world

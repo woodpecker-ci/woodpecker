@@ -88,7 +88,7 @@ services:
 
 ## Service Account
 
-Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with oauth token. To work around this limitation, you must create a service account and provide the username and password to Woodpecker. This service account will be used to authenticate and clone private repositories.
+Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with OAuth token. To work around this limitation, you must create a service account and provide the username and password to Woodpecker. This service account will be used to authenticate and clone private repositories.
 
 ## Registration
 

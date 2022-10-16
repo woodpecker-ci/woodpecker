@@ -9,6 +9,9 @@
     "username": "Username",
     "password": "Password",
     "url": "URL",
+    "back": "Back",
+    "color_scheme_light": "Switch between dark and light mode (currently light mode)",
+    "color_scheme_dark": "Switch between dark and light mode (currently dark mode)",
     "unknown_error": "An unknown error occurred",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
@@ -116,7 +119,9 @@
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                }
+                },
+                "edit": "Edit secret",
+                "delete":"Delete secret"
             },
             "registries": {
                 "registries": "Registries",
@@ -132,7 +137,9 @@
                 "address": {
                     "address": "Address",
                     "placeholder": "Registry Address (e.g. docker.io)"
-                }
+                },
+                "edit": "Edit registry",
+                "delete":"Delete registry"
             },
             "crons": {
                 "crons": "Crons",
@@ -157,12 +164,17 @@
                 "schedule": {
                     "title": "Schedule (based on UTC)",
                     "placeholder": "Schedule"
-                }
+                },
+                "edit": "Edit cron",
+                "delete": "Delete cron"
             },
             "badge": {
                 "badge": "Badge",
-                "url_branch": "URL for specific branch",
-                "markdown": "Markdown"
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
             },
             "actions": {
                 "actions": "Actions",
