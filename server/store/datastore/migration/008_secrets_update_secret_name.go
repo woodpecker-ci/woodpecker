@@ -19,8 +19,8 @@ import (
 	"xorm.io/xorm/schemas"
 )
 
-var updateTableSecretsUpdateSecretName = task{
-	name: "update-table-secret-table-secret-name-lowercase",
+var lowercaseSecretNames = task{
+	name: "lowercase-secret-names",
 	fn: func(sess *xorm.Session) (err error) {
 		dialect := sess.Engine().Dialect().URI().DBType
 		switch dialect {
