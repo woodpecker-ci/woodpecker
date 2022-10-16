@@ -248,6 +248,22 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 	}
 }
 
+func updateColumnSecretName(sess *xorm.Session) error {
+	dialect := sess.Engine().Dialect().URI().DBType
+	switch dialect {
+	case schemas.MYSQL:
+		_, err := sess.Exec(fmt.Sprintf("UPDATE secrets SET secret_name = LOWER(secret_name);"))
+		return err
+	case schemas.POSTGRES:
+		_, err := sess.Exec(fmt.Sprintf("UPDATE secrets SET secret_name = LOWER(secret_name);"))
+		return err
+	case schemas.SQLITE:
+		return nil
+	default:
+		return fmt.Errorf("dialect '%s' not supported", dialect)
+	}
+}
+
 var (
 	whitespaces     = regexp.MustCompile(`\s+`)
 	columnSeparator = regexp.MustCompile(`\s?,\s?`)
