@@ -134,7 +134,7 @@ func DeleteRegistry(c *gin.Context) {
 		name = c.Param("registry")
 	)
 	if err := server.Config.Services.Registries.RegistryDelete(repo, name); err != nil {
-		c.String(500, "Error deleting registry %q. %s", name, err)
+		c.String(404, "Error deleting registry %q. %s", name, err)
 		return
 	}
 	c.String(204, "")
