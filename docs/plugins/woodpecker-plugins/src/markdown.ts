@@ -1,16 +1,21 @@
 import { marked } from 'marked';
 import { parse as YAMLParse } from 'yaml';
 
-const regexHeader = new RegExp('^---([\\s|\\S]*?)---', 'm');
-const regexContent = new RegExp('^ *?\\---[^]*?---*', 'm');
+const tokens = ['---', '---'];
+const regexHeader = new RegExp('^' + tokens[0] + '([\\s|\\S]*?)' + tokens[1]);
+const regexContent = new RegExp('^ *?\\' + tokens[0] + '[^]*?' + tokens[1] + '*');
 
 export function getHeader<T = any>(data: string): T {
+  const header = getRawHeader(data);
+  return YAMLParse(header) as T;
+}
+
+export function getRawHeader(data: string): string {
   const header = regexHeader.exec(data);
-  if (!header || header.length != 2) {
+  if (!header) {
     throw new Error("Can't get the header");
   }
-
-  return YAMLParse(header[1]) as T;
+  return header[1];
 }
 
 export function getContent(data: string): string {
