@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 // GetRegistry gets the name registry from the database and writes
@@ -137,7 +137,7 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		if errors.Is(err, datastore.RecordNotExist) {
+		if errors.Is(err, types.RecordNotExist) {
 			c.String(404, "no records found, cannot delete registry")
 			return
 		}

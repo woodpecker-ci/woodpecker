@@ -15,12 +15,12 @@
 package datastore
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func TestRegistryFind(t *testing.T) {
@@ -161,9 +161,5 @@ func TestRegistryDelete(t *testing.T) {
 	}
 
 	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
-
-	err := store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io")
-	if assert.Error(t, err) {
-		assert.True(t, errors.Is(err, RecordNotExist))
-	}
+	assert.ErrorIs(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"), types.RecordNotExist)
 }

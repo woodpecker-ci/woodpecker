@@ -20,6 +20,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -49,6 +50,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -365,7 +367,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
-	if err != nil && err == datastore.RecordNotExist {
+	if errors.Is(err, types.RecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed to generate private key")
