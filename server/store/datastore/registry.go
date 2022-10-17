@@ -15,7 +15,7 @@
 package datastore
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -47,7 +47,8 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
 	registry, err := s.RegistryFind(repo, addr)
 	if err != nil {
-		return fmt.Errorf("registry not found")
+		return errors.New("registry not found")
+
 	}
 	_, err = s.engine.ID(registry.ID).Delete(new(model.Registry))
 	return err
