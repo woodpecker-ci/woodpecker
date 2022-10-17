@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -133,9 +134,12 @@ func DeleteRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	if err := server.Config.Services.Registries.RegistryDelete(repo, name); err != nil {
-		c.String(404, "Error deleting registry %q. %s", name, err)
-		return
+	err := server.Config.Services.Registries.RegistryDelete(repo, name)
+	if strings.EqualFold(err.Error(), "registry not found") {
+		c.String(404, "no records found, cannot delete registry")
+	}
+	if err != nil {
+		c.String(500, "Error deleting registry %q. %s", name, err)
 	}
 	c.String(204, "")
 }
