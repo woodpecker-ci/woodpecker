@@ -36,6 +36,11 @@
       "verified": false
     },
     {
+      "name": "Gitea Pull comment",
+      "docs": "https://raw.githubusercontent.com/markopolo123/gitea-comment-plugin/main/docs.md",
+      "verified": false
+    },
+    {
       "// todo": true,
       "name": "Email",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
