@@ -10,8 +10,8 @@
     "password": "Password",
     "url": "URL",
     "back": "Back",
-    "color_scheme_light": "Switch to Dark Mode",
-    "color_scheme_dark": "Switch to Light Mode",
+    "color_scheme_light": "Switch to dark mode",
+    "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
