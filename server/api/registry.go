@@ -15,14 +15,15 @@
 package api
 
 import (
+	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 )
 
 // GetRegistry gets the name registry from the database and writes
@@ -135,11 +136,11 @@ func DeleteRegistry(c *gin.Context) {
 		name = c.Param("registry")
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
-	if strings.EqualFold(err.Error(), "registry not found") {
-		c.String(404, "no records found, cannot delete registry")
-		return
-	}
 	if err != nil {
+		if errors.Is(err, datastore.RecordNotExist) {
+			c.String(404, "no records found, cannot delete registry")
+			return
+		}
 		c.String(500, "Error deleting registry %q. %s", name, err)
 		return
 	}

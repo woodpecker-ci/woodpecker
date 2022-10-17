@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -142,5 +143,27 @@ func TestRegistryIndexes(t *testing.T) {
 		Password: "qux",
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate address")
+	}
+}
+
+func TestRegistryDelete(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry), new(model.Repo))
+	defer closer()
+
+	reg1 := &model.Registry{
+		RepoID:   1,
+		Address:  "index.docker.io",
+		Username: "foo",
+		Password: "bar",
+	}
+	if !assert.NoError(t, store.RegistryCreate(reg1)) {
+		t.FailNow()
+	}
+
+	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
+
+	err := store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io")
+	if assert.Error(t, err) {
+		assert.True(t, errors.Is(err, RecordNotExist))
 	}
 }
