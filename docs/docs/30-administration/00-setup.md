@@ -2,7 +2,7 @@
 
 A Woodpecker deployment consists of two parts:
 
-- A server which is the heart of Woodpecker and ships the webinterface.
+- A server which is the heart of Woodpecker and ships the web interface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
 > Each agent is able to process one pipeline step by default.
@@ -128,11 +128,11 @@ See the complete reference for all supported forges [here](./11-forges/10-overvi
 
 ## Database
 
-By default Woodpecker uses a sqlite database which requires zero installation or configuration. See the [database settings](./30-database.md) page to further configure it or use MySQL or Postgres.
+By default Woodpecker uses a SQLite database which requires zero installation or configuration. See the [database settings](./30-database.md) page to further configure it or use MySQL or Postgres.
 
 ## SSL
 
-Woodpecker supports ssl configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md).
+Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md).
 
 ## Metrics
 
