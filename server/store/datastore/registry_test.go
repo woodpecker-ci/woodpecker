@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func TestRegistryFind(t *testing.T) {
@@ -143,4 +144,22 @@ func TestRegistryIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate address")
 	}
+}
+
+func TestRegistryDelete(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry), new(model.Repo))
+	defer closer()
+
+	reg1 := &model.Registry{
+		RepoID:   1,
+		Address:  "index.docker.io",
+		Username: "foo",
+		Password: "bar",
+	}
+	if !assert.NoError(t, store.RegistryCreate(reg1)) {
+		t.FailNow()
+	}
+
+	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
+	assert.ErrorIs(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"), types.RecordNotExist)
 }
