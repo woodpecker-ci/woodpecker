@@ -4,9 +4,13 @@
 This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
 :::
 
+A pipeline has at least one workflow. A workflow is a set of steps that are executed in sequence using the same workspace which is a shared folder containing the repository and all the generated data from previous steps.
+
 Incase there is a single configuration in `.woodpecker.yml` Woodpecker will create a pipeline with a single workflow.
 
-By placing the configurations in a folder which is by default named `.woodpecker/` Woodpecker will create a pipeline with multiple workflows each named by the file they are defined in. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored. You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./71-project-settings.md).
+By placing the configurations in a folder which is by default named `.woodpecker/` Woodpecker will create a pipeline with multiple workflows each named by the file they are defined in. Only `.yml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored.
+
+You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./71-project-settings.md).
 
 ## Rational
 
