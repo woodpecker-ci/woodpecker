@@ -87,18 +87,6 @@ func apiRoutes(e *gin.Engine) {
 			repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 			repo.DELETE("/pipelines/:number/:job", session.MustPush, api.DeletePipeline)
 
-			// DEPRECATED - use /pipelines/
-			repo.GET("/builds", api.GetPipelines)
-			repo.POST("/builds", session.MustPush, api.CreatePipeline)
-			repo.GET("/builds/:number", api.GetPipeline)
-			repo.GET("/builds/:number/config", api.GetPipelineConfig)
-			// requires push permissions
-			repo.POST("/builds/:number", session.MustPush, api.PostPipeline)
-			repo.DELETE("/builds/:number", session.MustPush, api.DeletePipeline)
-			repo.POST("/builds/:number/approve", session.MustPush, api.PostApproval)
-			repo.POST("/builds/:number/decline", session.MustPush, api.PostDecline)
-			repo.DELETE("/builds/:number/:job", session.MustPush, api.DeletePipeline)
-
 			repo.GET("/logs/:number/:pid", api.GetProcLogs)
 			repo.GET("/logs/:number/:pid/:proc", api.GetPipelineLogs)
 
@@ -150,13 +138,6 @@ func apiRoutes(e *gin.Engine) {
 		pipelines.GET("", api.GetPipelineQueue)
 	}
 
-	// DEPRECATED - use /api/pipelines
-	builds := e.Group("/api/builds")
-	{
-		builds.Use(session.MustAdmin())
-		builds.GET("", api.GetPipelineQueue)
-	}
-
 	queue := e.Group("/api/queue")
 	{
 		queue.Use(session.MustAdmin())
@@ -164,8 +145,6 @@ func apiRoutes(e *gin.Engine) {
 		queue.GET("/pause", api.PauseQueue)
 		queue.GET("/resume", api.ResumeQueue)
 		queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
-		// DEPRECATED - use /norunningpipelines
-		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
 	}
 
 	secrets := e.Group("/api/secrets")
