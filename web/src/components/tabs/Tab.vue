@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$slots.default" v-show="isActive" :aria-hidden="!isActive" class="mt-4">
+  <div v-if="$slots.default" v-show="isActive" :aria-hidden="!isActive">
     <slot />
   </div>
 </template>
