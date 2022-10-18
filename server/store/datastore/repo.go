@@ -15,11 +15,14 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -46,7 +49,7 @@ func (s storage) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (
 
 func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.RemoteID, fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoRemoteID(e, remoteID)
-	if err == RecordNotExist {
+	if errors.Is(err, types.RecordNotExist) {
 		return s.getRepoName(e, fullName)
 	}
 	return repo, err
@@ -56,7 +59,7 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	repo, err := s.getRepoName(sess, fullName)
-	if err == RecordNotExist {
+	if errors.Is(err, types.RecordNotExist) {
 		// the repository does not exist, so look for a redirection
 		redirect, err := s.getRedirection(sess, fullName)
 		if err != nil {
@@ -111,18 +114,18 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	// delete related builds
-	for startBuilds := 0; ; startBuilds += batchSize {
-		buildIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startBuilds).Table("builds").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&buildIDs); err != nil {
+	// delete related pipelines
+	for startPipelines := 0; ; startPipelines += batchSize {
+		pipelineIDs := make([]int64, 0, batchSize)
+		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
-		if len(buildIDs) == 0 {
+		if len(pipelineIDs) == 0 {
 			break
 		}
 
-		for i := range buildIDs {
-			if err := deleteBuild(sess, buildIDs[i]); err != nil {
+		for i := range pipelineIDs {
+			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}
@@ -165,11 +168,15 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			continue
 		}
 
+		exist := true
 		repo, err := s.getRepoNameFallback(sess, repos[i].RemoteID, repos[i].FullName)
-		if err != nil && err != RecordNotExist {
-			return err
+		if err != nil {
+			if errors.Is(err, types.RecordNotExist) {
+				exist = false
+			} else {
+				return err
+			}
 		}
-		exist := err == nil // if there's an error, it must be a RecordNotExist
 
 		if exist {
 			if repos[i].FullName != repo.FullName {

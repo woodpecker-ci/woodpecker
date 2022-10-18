@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,9 +130,9 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 }
 
 // convertPullHook is a helper function used to convert a Bitbucket pull request
-// hook to the Woodpecker build struct holding commit information.
-func convertPullHook(from *internal.PullRequestHook) *model.Build {
-	return &model.Build{
+// hook to the Woodpecker pipeline struct holding commit information.
+func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	return &model.Pipeline{
 		Event:  model.EventPull,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
@@ -151,9 +152,9 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
-// hook to the Woodpecker build struct holding commit information.
-func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
-	build := &model.Build{
+// hook to the Woodpecker pipeline struct holding commit information.
+func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
+	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
 		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
@@ -165,16 +166,16 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Bu
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
-		build.Event = model.EventTag
-		build.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		pipeline.Event = model.EventTag
+		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
 	default:
-		build.Event = model.EventPush
-		build.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
+		pipeline.Event = model.EventPush
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
 	if len(change.New.Target.Author.Raw) != 0 {
-		build.Email = extractEmail(change.New.Target.Author.Raw)
+		pipeline.Email = extractEmail(change.New.Target.Author.Raw)
 	}
-	return build
+	return pipeline
 }
 
 // regex for git author fields ("name <name@mail.tld>")

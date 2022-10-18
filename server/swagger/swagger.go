@@ -46,7 +46,7 @@ func userList(w http.ResponseWriter, r *http.Request) {}
 
 // swagger:route GET /user/feed user getUserFeed
 //
-// Get the currently authenticated user's build feed.
+// Get the currently authenticated user's pipeline feed.
 //
 //	Responses:
 //	  200: feed

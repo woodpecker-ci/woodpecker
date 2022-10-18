@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +34,7 @@ import (
 
 // TODO: make it set system wide via environment variables
 const (
-	defaultTimeout int64 = 60 // 1 hour default build time
+	defaultTimeout int64 = 60 // 1 hour default pipeline time
 	maxTimeout     int64 = defaultTimeout * 2
 )
 

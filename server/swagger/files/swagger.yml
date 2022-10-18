@@ -302,7 +302,7 @@ paths:
         - accessToken: []
       responses:
         200:
-          description: Successfully restarted the Build.
+          description: Successfully restarted the Pipeline.
           schema:
             $ref: "#/definitions/Build"
         404:

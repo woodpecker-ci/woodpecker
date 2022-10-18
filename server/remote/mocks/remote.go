@@ -112,11 +112,11 @@ func (_m *Remote) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 }
 
 // Dir provides a mock function with given fields: ctx, u, r, b, f
-func (_m *Remote) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (_m *Remote) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	ret := _m.Called(ctx, u, r, b, f)
 
 	var r0 []*remote.FileMeta
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, string) []*remote.FileMeta); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, string) []*remote.FileMeta); ok {
 		r0 = rf(ctx, u, r, b, f)
 	} else {
 		if ret.Get(0) != nil {
@@ -125,7 +125,7 @@ func (_m *Remote) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.Build, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, string) error); ok {
 		r1 = rf(ctx, u, r, b, f)
 	} else {
 		r1 = ret.Error(1)
@@ -135,11 +135,11 @@ func (_m *Remote) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 }
 
 // File provides a mock function with given fields: ctx, u, r, b, f
-func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	ret := _m.Called(ctx, u, r, b, f)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, string) []byte); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, string) []byte); ok {
 		r0 = rf(ctx, u, r, b, f)
 	} else {
 		if ret.Get(0) != nil {
@@ -148,7 +148,7 @@ func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.Build, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, string) error); ok {
 		r1 = rf(ctx, u, r, b, f)
 	} else {
 		r1 = ret.Error(1)
@@ -158,7 +158,7 @@ func (_m *Remote) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 }
 
 // Hook provides a mock function with given fields: ctx, r
-func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	ret := _m.Called(ctx, r)
 
 	var r0 *model.Repo
@@ -170,12 +170,12 @@ func (_m *Remote) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 		}
 	}
 
-	var r1 *model.Build
-	if rf, ok := ret.Get(1).(func(context.Context, *http.Request) *model.Build); ok {
+	var r1 *model.Pipeline
+	if rf, ok := ret.Get(1).(func(context.Context, *http.Request) *model.Pipeline); ok {
 		r1 = rf(ctx, r)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*model.Build)
+			r1 = ret.Get(1).(*model.Pipeline)
 		}
 	}
 
@@ -342,11 +342,11 @@ func (_m *Remote) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 }
 
 // Status provides a mock function with given fields: ctx, u, r, b, p
-func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error {
+func (_m *Remote) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Proc) error {
 	ret := _m.Called(ctx, u, r, b, p)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Build, *model.Proc) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, *model.Proc) error); ok {
 		r0 = rf(ctx, u, r, b, p)
 	} else {
 		r0 = ret.Error(0)

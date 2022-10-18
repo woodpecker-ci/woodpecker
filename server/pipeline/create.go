@@ -28,8 +28,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Create a new build and start it
-func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *model.Build) (*model.Build, error) {
+// Create a new pipeline and start it
+func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
@@ -39,7 +39,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 
 	// if the remote has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
-	// the build.
+	// the pipeline.
 	if refresher, ok := server.Config.Services.Remote.(remote.Refresher); ok {
 		refreshed, err := refresher.Refresh(ctx, repoUser)
 		if err != nil {
@@ -59,11 +59,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		parseErr          error
 	)
 
-	// fetch the build file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, build)
+	// fetch the pipeline file from the remote
+	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	remoteYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
-		filtered, parseErr = checkIfFiltered(build, remoteYamlConfigs)
+		filtered, parseErr = checkIfFiltered(pipeline, remoteYamlConfigs)
 		if parseErr == nil {
 			if filtered {
 				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
@@ -71,7 +71,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 				return nil, err
 			}
 
-			if zeroSteps(build, remoteYamlConfigs) {
+			if zeroSteps(pipeline, remoteYamlConfigs) {
 				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
@@ -79,38 +79,38 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		}
 	}
 
-	// update some build fields
-	build.RepoID = repo.ID
-	build.Verified = true
-	build.Status = model.StatusPending
+	// update some pipeline fields
+	pipeline.RepoID = repo.ID
+	pipeline.Verified = true
+	pipeline.Status = model.StatusPending
 
 	if configFetchErr != nil {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, build.Ref, repoUser.Login)
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Status = model.StatusError
-		build.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		pipeline.Started = time.Now().Unix()
+		pipeline.Finished = pipeline.Started
+		pipeline.Status = model.StatusError
+		pipeline.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
 	} else if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		build.Started = time.Now().Unix()
-		build.Finished = build.Started
-		build.Status = model.StatusError
-		build.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
+		pipeline.Started = time.Now().Unix()
+		pipeline.Finished = pipeline.Started
+		pipeline.Status = model.StatusError
+		pipeline.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
 	} else if repo.IsGated {
 		// TODO(336) extend gated feature with an allow/block List
-		build.Status = model.StatusBlocked
+		pipeline.Status = model.StatusBlocked
 	}
 
-	err = _store.CreateBuild(build, build.Procs...)
+	err = _store.CreatePipeline(pipeline, pipeline.Procs...)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	// persist the build config for historical correctness, restarts, etc
+	// persist the pipeline config for historical correctness, restarts, etc
 	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(_store, build, remoteYamlConfig)
+		_, err := findOrPersistPipelineConfig(_store, pipeline, remoteYamlConfig)
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
@@ -118,43 +118,43 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, build *mo
 		}
 	}
 
-	if build.Status == model.StatusError {
-		if err := publishToTopic(ctx, build, repo); err != nil {
+	if pipeline.Status == model.StatusError {
+		if err := publishToTopic(ctx, pipeline, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updateBuildStatus(ctx, build, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updateBuildStatus")
+		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updatePipelineStatus")
 		}
 
-		return build, nil
+		return pipeline, nil
 	}
 
-	build, buildItems, err := createBuildItems(ctx, _store, build, repoUser, repo, remoteYamlConfigs, nil)
+	pipeline, pipelineItems, err := createPipelineItems(ctx, _store, pipeline, repoUser, repo, remoteYamlConfigs, nil)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	if build.Status == model.StatusBlocked {
-		if err := publishToTopic(ctx, build, repo); err != nil {
+	if pipeline.Status == model.StatusBlocked {
+		if err := publishToTopic(ctx, pipeline, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updateBuildStatus(ctx, build, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updateBuildStatus")
+		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
+			log.Error().Err(err).Msg("updatePipelineStatus")
 		}
 
-		return build, nil
+		return pipeline, nil
 	}
 
-	build, err = start(ctx, _store, build, repoUser, repo, buildItems)
+	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return build, nil
+	return pipeline, nil
 }

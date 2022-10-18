@@ -37,9 +37,8 @@
         <i-clarity-settings-solid />
       </NavbarIcon>
 
-      <!-- Active Builds Indicator -->
-      <ActiveBuilds v-if="user" class="navbar-icon navbar-clickable" />
-
+      <!-- Active Pipelines Indicator -->
+      <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
       <!-- User Avatar -->
       <NavbarIcon
         v-if="user"
@@ -64,13 +63,13 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
-import ActiveBuilds from './ActiveBuilds.vue';
+import ActivePipelines from './ActivePipelines.vue';
 import NavbarIcon from './NavbarIcon.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActiveBuilds, NavbarIcon },
+  components: { Button, ActivePipelines, NavbarIcon },
 
   setup() {
     const config = useConfig();
