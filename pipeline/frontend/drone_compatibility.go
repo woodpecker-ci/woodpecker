@@ -14,46 +14,61 @@
 
 package frontend
 
+import (
+	"strconv"
+	"strings"
+)
+
 // setDroneEnviron set dedicated to DroneCI environment vars as compatibility layer
-func (m *Metadata) setDroneEnviron(env map[string]string) {
+func (m *Metadata) setDroneEnviron(env map[string]string,
+	scmType, repoOwner, repoName, sourceBranch, targetBranch string,
+) {
 	// webhook
-	env["DRONE_BRANCH"] = env["CI_COMMIT_BRANCH"]
-	env["DRONE_PULL_REQUEST"] = env["CI_COMMIT_PULL_REQUEST"]
-	env["DRONE_TAG"] = env["CI_COMMIT_TAG"]
-	env["DRONE_SOURCE_BRANCH"] = env["CI_COMMIT_SOURCE_BRANCH"]
-	env["DRONE_TARGET_BRANCH"] = env["CI_COMMIT_TARGET_BRANCH"]
+	env["DRONE_BRANCH"] = m.Curr.Commit.Branch
+	env["DRONE_PULL_REQUEST"] = ""
+	if m.Curr.Event == EventPull {
+		env["DRONE_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+	}
+	env["DRONE_TAG"] = ""
+	if m.Curr.Event == EventTag {
+		env["DRONE_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+	}
+	env["DRONE_SOURCE_BRANCH"] = sourceBranch
+	env["DRONE_TARGET_BRANCH"] = targetBranch
 	// pipeline
-	env["DRONE_BUILD_NUMBER"] = env["CI_PIPELINE_NUMBER"]
-	env["DRONE_BUILD_PARENT"] = env["CI_PIPELINE_PARENT"]
-	env["DRONE_BUILD_EVENT"] = env["CI_PIPELINE_EVENT"]
-	env["DRONE_BUILD_STATUS"] = env["CI_PIPELINE_STATUS"]
-	env["DRONE_BUILD_LINK"] = env["CI_PIPELINE_LINK"]
-	env["DRONE_BUILD_CREATED"] = env["CI_PIPELINE_CREATED"]
-	env["DRONE_BUILD_STARTED"] = env["CI_PIPELINE_STARTED"]
-	env["DRONE_BUILD_FINISHED"] = env["CI_PIPELINE_FINISHED"]
+	env["DRONE_BUILD_NUMBER"] = strconv.FormatInt(m.Curr.Number, 10)
+	env["DRONE_BUILD_PARENT"] = strconv.FormatInt(m.Curr.Parent, 10)
+	env["DRONE_BUILD_EVENT"] = m.Curr.Event
+	env["DRONE_BUILD_STATUS"] = m.Curr.Status
+	env["DRONE_BUILD_LINK"] = m.Curr.Link
+	env["DRONE_BUILD_CREATED"] = strconv.FormatInt(m.Curr.Created, 10)
+	env["DRONE_BUILD_STARTED"] = strconv.FormatInt(m.Curr.Started, 10)
+	env["DRONE_BUILD_FINISHED"] = strconv.FormatInt(m.Curr.Finished, 10)
 	// commit
-	env["DRONE_COMMIT"] = env["CI_COMMIT_SHA"]
-	env["DRONE_COMMIT_BEFORE"] = env["CI_PREV_COMMIT_SHA"]
-	env["DRONE_COMMIT_REF"] = env["CI_COMMIT_REF"]
-	env["DRONE_COMMIT_BRANCH"] = env["CI_COMMIT_BRANCH"]
-	env["DRONE_COMMIT_LINK"] = env["CI_COMMIT_LINK"]
-	env["DRONE_COMMIT_MESSAGE"] = env["CI_COMMIT_MESSAGE"]
-	env["DRONE_COMMIT_AUTHOR"] = env["CI_COMMIT_AUTHOR"]
-	env["DRONE_COMMIT_AUTHOR_NAME"] = env["CI_COMMIT_AUTHOR"]
-	env["DRONE_COMMIT_AUTHOR_EMAIL"] = env["CI_COMMIT_AUTHOR_EMAIL"]
-	env["DRONE_COMMIT_AUTHOR_AVATAR"] = env["CI_COMMIT_AUTHOR_AVATAR"]
+	env["DRONE_COMMIT"] = m.Curr.Commit.Sha
+	env["DRONE_COMMIT_BEFORE"] = m.Prev.Commit.Sha
+	env["DRONE_COMMIT_REF"] = m.Curr.Commit.Ref
+	env["DRONE_COMMIT_BRANCH"] = m.Curr.Commit.Branch
+	env["DRONE_COMMIT_LINK"] = m.Curr.Link
+	env["DRONE_COMMIT_MESSAGE"] = m.Curr.Commit.Message
+	env["DRONE_COMMIT_AUTHOR"] = m.Curr.Commit.Author.Name
+	env["DRONE_COMMIT_AUTHOR_NAME"] = m.Curr.Commit.Author.Name
+	env["DRONE_COMMIT_AUTHOR_EMAIL"] = m.Curr.Commit.Author.Email
+	env["DRONE_COMMIT_AUTHOR_AVATAR"] = m.Curr.Commit.Author.Avatar
 	// repo
-	env["DRONE_REPO"] = env["CI_REPO"]
-	env["DRONE_REPO_SCM"] = env["CI_REPO_SCM"]
-	env["DRONE_REPO_OWNER"] = env["CI_REPO_OWNER"]
-	env["DRONE_REPO_NAME"] = env["CI_REPO_NAME"]
-	env["DRONE_REPO_LINK"] = env["CI_REPO_LINK"]
-	env["DRONE_REPO_BRANCH"] = env["CI_REPO_DEFAULT_BRANCH"]
-	env["DRONE_REPO_PRIVATE"] = env["CI_REPO_PRIVATE"]
+	env["DRONE_REPO"] = m.Repo.Name
+	env["DRONE_REPO_SCM"] = scmType
+	env["DRONE_REPO_OWNER"] = repoOwner
+	env["DRONE_REPO_NAME"] = repoName
+	env["DRONE_REPO_LINK"] = m.Repo.Link
+	env["DRONE_REPO_BRANCH"] = m.Repo.Branch
+	env["DRONE_REPO_PRIVATE"] = strconv.FormatBool(m.Repo.Private)
 	// clone
-	env["DRONE_REMOTE_URL"] = env["CI_REPO_REMOTE"]
-	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_REMOTE"]
+	env["DRONE_REMOTE_URL"] = m.Repo.Remote
+	if scmType == "git" {
+		env["DRONE_GIT_HTTP_URL"] = m.Repo.Remote
+	}
 	// misc
-	env["DRONE_SYSTEM_HOST"] = env["CI_SYSTEM_HOST"]
-	env["DRONE_STEP_NUMBER"] = env["CI_JOB_NUMBER"]
+	env["DRONE_SYSTEM_HOST"] = m.Sys.Host
+	env["DRONE_STEP_NUMBER"] = strconv.Itoa(m.Job.Number)
 }

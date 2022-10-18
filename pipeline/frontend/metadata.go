@@ -135,12 +135,15 @@ func (m *Metadata) Environ() map[string]string {
 		targetBranch = branchParts[1]
 	}
 
+	// TODO: this can change
+	scmType := "git"
+
 	params := map[string]string{
 		"CI":                     m.Sys.Name,
 		"CI_REPO":                m.Repo.Name,
 		"CI_REPO_OWNER":          repoOwner,
 		"CI_REPO_NAME":           repoName,
-		"CI_REPO_SCM":            "git",
+		"CI_REPO_SCM":            scmType,
 		"CI_REPO_LINK":           m.Repo.Link,
 		"CI_REPO_REMOTE":         m.Repo.Remote,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
@@ -225,6 +228,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 	}
+
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
@@ -232,7 +236,7 @@ func (m *Metadata) Environ() map[string]string {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
 
-	m.setDroneEnviron(params)
+	m.setDroneEnviron(params, scmType, repoOwner, repoName, sourceBranch, targetBranch)
 
 	return params
 }
