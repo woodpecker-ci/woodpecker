@@ -27,9 +27,9 @@
       "settings": "Iestatījumi"
     }
   },
-  "back": "",
-  "color_scheme_dark": "",
-  "color_scheme_light": "",
+  "back": "Atpakaļ",
+  "color_scheme_dark": "Pārslēgties starp tumšo un gaišo režīmu (pašlaik tumšais režīms)",
+  "color_scheme_light": "Pārslēgties starp tumšo un gaišo režīmu (pašlaik gaišais režīms)",
   "docs": "Dokumentācija",
   "login": "Autorizēties",
   "logout": "Iziet",
@@ -119,15 +119,15 @@
       "success": "Repozitorijs iespējots"
     },
     "manual_pipeline": {
-      "select_branch": "",
-      "title": "",
-      "trigger": "",
+      "select_branch": "Norādiet atzaru",
+      "title": "Iniciēt manuālu konvejerdarba izpildi",
+      "trigger": "Izpildīt konvejerdarbu",
       "variables": {
-        "add": "",
-        "desc": "",
-        "name": "",
-        "title": "",
-        "value": ""
+        "add": "Pievienot mainīgo",
+        "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar tādu pašu nosaukumu tiks pārrakstīti.",
+        "name": "Mainīgā nosaukums",
+        "title": "Papildus konvejerdarba mainīgie",
+        "value": "Mainīgā vērtība"
       }
     },
     "not_allowed": "Nav piekļuves šim repozitorijam",
@@ -147,6 +147,7 @@
       "event": {
         "cron": "Plānotais darbs",
         "deploy": "Uzstādīšana",
+        "manual": "Manuāls",
         "pr": "Izmaiņu pieprasījums",
         "push": "Iesūtīšana",
         "tag": "Tags"
@@ -191,7 +192,12 @@
       },
       "badge": {
         "badge": "Nozīmīte",
+        "branch": "Atzars",
         "markdown": "Markdown",
+        "type": "Pieraksta veids",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL",
         "url_branch": "URL konkrētam atzaram"
       },
       "crons": {
@@ -202,10 +208,10 @@
         },
         "created": "Izveidots plānotais darbs",
         "crons": "Darbu plānotājs",
-        "delete": "",
+        "delete": "Dzēst darbu plānotāju",
         "deleted": "Plānotais darbs izdzēsts",
         "desc": "Darbu plānotājs var tikt izmantots, lai izpildītu konvejerdarbus pēc noteikta grafika.",
-        "edit": "",
+        "edit": "Labot darbu plānotāju",
         "name": {
           "name": "Nosaukums",
           "placeholder": "Plānotā darba nosaukums"
@@ -276,10 +282,10 @@
         },
         "created": "Reģistra autorizācijas dati pievienoti",
         "creds": "Reģistru autorizācijas dati",
-        "delete": "",
+        "delete": "Dzēst reģistra autorizācijas datus",
         "deleted": "Reģistra autorizācijas dati dzēsti",
         "desc": "Reģistru autorizācijas dati var tikt izmantoti, lai izmantotu attēlos no privātiem reģistriem, konvjerdarbu soļos.",
-        "edit": "",
+        "edit": "Labot reģistra autorizācijas datus",
         "none": "Pašlaik nav pievienots neviens reģistrs.",
         "registries": "Reģistri",
         "save": "Saglabāt reģistru",
@@ -289,10 +295,10 @@
       "secrets": {
         "add": "Pievienot noslēpumu",
         "created": "Noslēpums izveidots",
-        "delete": "",
+        "delete": "Dzēst noslēpumu",
         "deleted": "Noslēpums dzēsts",
         "desc": "Noslēpumus var padot individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
-        "edit": "",
+        "edit": "Labot noslēpumu",
         "events": {
           "events": "Pieejams šādiem notikumiem",
           "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
