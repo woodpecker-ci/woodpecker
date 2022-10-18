@@ -30,20 +30,20 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Restart a build by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string) (*model.Build, error) {
+// Restart a pipeline by creating a new one out of the old and start it
+func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a build with status %s", lastBuild.Status)}
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
 	}
 
 	var pipelineFiles []*remote.FileMeta
 
 	// fetch the old pipeline config from database
-	configs, err := store.ConfigsForBuild(lastBuild.ID)
+	configs, err := store.ConfigsForPipeline(lastBuild.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get build config for %s. %s", repo.FullName, err)
+		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msgf(msg)
 		return nil, ErrNotFound{Msg: msg}
 	}
@@ -62,7 +62,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastBuild, currentFileMeta)
 		if err != nil {
 			return nil, ErrBadRequest{
-				Msg: fmt.Sprintf("On fetching external build config: %s", err),
+				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 			}
 		}
 		if !useOld {
@@ -70,12 +70,12 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		}
 	}
 
-	newBuild := createNewBuildOutOfOld(lastBuild)
+	newBuild := createNewOutOfOld(lastBuild)
 	newBuild.Parent = lastBuild.ID
 
-	err = store.CreateBuild(newBuild)
+	err = store.CreatePipeline(newBuild)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -87,13 +87,13 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		}
 		return newBuild, nil
 	}
-	if err := persistBuildConfigs(store, configs, newBuild.ID); err != nil {
-		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
+	if err := persistPipelineConfigs(store, configs, newBuild.ID); err != nil {
+		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	newBuild, pipelineItems, err := createPipelineItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
 		if errors.Is(err, &yaml.PipelineParseError{}) {
 			return newBuild, nil
@@ -103,9 +103,9 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, err = start(ctx, store, newBuild, user, repo, buildItems)
+	newBuild, err = start(ctx, store, newBuild, user, repo, pipelineItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -114,13 +114,13 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, use
 }
 
 // TODO: reuse at create.go too
-func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
+func persistPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {
 	for _, conf := range configs {
-		buildConfig := &model.BuildConfig{
-			ConfigID: conf.ID,
-			BuildID:  buildID,
+		pipelineConfig := &model.PipelineConfig{
+			ConfigID:   conf.ID,
+			PipelineID: pipelineID,
 		}
-		err := store.BuildConfigCreate(buildConfig)
+		err := store.PipelineConfigCreate(pipelineConfig)
 		if err != nil {
 			return err
 		}
@@ -128,7 +128,7 @@ func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int
 	return nil
 }
 
-func createNewBuildOutOfOld(old *model.Build) *model.Build {
+func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	new := *old
 	new.ID = 0
 	new.Number = 0

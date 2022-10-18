@@ -49,18 +49,18 @@ func TestCreateBuild(t *testing.T) {
 	store.On("GetUser", mock.Anything).Return(creator, nil)
 	remote.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
 
-	_, build, err := createBuild(ctx, store, remote, &model.Cron{
+	_, pipeline, err := createBuild(ctx, store, remote, &model.Cron{
 		Name: "test",
 	})
 	assert.NoError(t, err)
-	assert.EqualValues(t, &model.Build{
+	assert.EqualValues(t, &model.Pipeline{
 		Event:   "cron",
 		Commit:  "sha1",
 		Branch:  "default",
 		Ref:     "refs/heads/default",
 		Message: "test",
 		Sender:  "test",
-	}, build)
+	}, pipeline)
 }
 
 func TestCalcNewNext(t *testing.T) {

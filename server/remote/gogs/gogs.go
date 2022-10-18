@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -185,7 +186,7 @@ func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 }
 
 // File fetches the file from the Gogs repository and returns its contents.
-func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)
 	ref := b.Commit
 
@@ -208,12 +209,12 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return cfg, err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, proc *model.Proc) error {
 	return nil
 }
 
@@ -297,9 +298,9 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return b.Commit.ID, nil
 }
 
-// Hook parses the incoming Gogs hook and returns the Repository and Build
+// Hook parses the incoming Gogs hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r, c.PrivateMode)
 }
 

@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +62,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		if datastore.SupportedDriver("sqlite3") {
 			log.Debug().Msgf("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was build with no sqlite3 support!")
+			log.Debug().Msgf("server was built without sqlite3 support!")
 		}
 	}
 
@@ -306,27 +307,27 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_jobs",
-		Help:      "Total number of pending build processes.",
+		Help:      "Total number of pending pipeline processes.",
 	})
 	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "waiting_jobs",
-		Help:      "Total number of builds waiting on deps.",
+		Help:      "Total number of pipeline waiting on deps.",
 	})
 	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "running_jobs",
-		Help:      "Total number of running build processes.",
+		Help:      "Total number of running pipeline processes.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
-	builds := promauto.NewGauge(prometheus.GaugeOpts{
+	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "build_total_count",
-		Help:      "Total number of builds.",
+		Name:      "pipeline_total_count",
+		Help:      "Total number of pipelines.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
@@ -353,8 +354,8 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 		for {
 			repoCount, _ := _store.GetRepoCount()
 			userCount, _ := _store.GetUserCount()
-			buildCount, _ := _store.GetBuildCount()
-			builds.Set(float64(buildCount))
+			pipelineCount, _ := _store.GetPipelineCount()
+			pipelines.Set(float64(pipelineCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
 			time.Sleep(10 * time.Second)

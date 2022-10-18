@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +26,7 @@ import (
 )
 
 func TestRepos(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Build))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Pipeline))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -33,7 +34,7 @@ func TestRepos(t *testing.T) {
 		// before each test be sure to purge the package
 		// table data from the database.
 		g.BeforeEach(func() {
-			_, err := store.engine.Exec("DELETE FROM builds")
+			_, err := store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM repos")
 			g.Assert(err).IsNil()
@@ -379,8 +380,8 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Repo),
 		new(model.User),
 		new(model.Perm),
-		new(model.Build),
-		new(model.BuildConfig),
+		new(model.Pipeline),
+		new(model.PipelineConfig),
 		new(model.Logs),
 		new(model.Proc),
 		new(model.File),
@@ -397,13 +398,13 @@ func TestRepoCrud(t *testing.T) {
 		Name:     "test",
 	}
 	assert.NoError(t, store.CreateRepo(&repo))
-	build := model.Build{
+	pipeline := model.Pipeline{
 		RepoID: repo.ID,
 	}
 	proc := model.Proc{
 		Name: "a proc",
 	}
-	assert.NoError(t, store.CreateBuild(&build, &proc))
+	assert.NoError(t, store.CreatePipeline(&pipeline, &proc))
 
 	// create unrelated
 	repoUnrelated := model.Repo{
@@ -413,13 +414,13 @@ func TestRepoCrud(t *testing.T) {
 		Name:     "x",
 	}
 	assert.NoError(t, store.CreateRepo(&repoUnrelated))
-	buildUnrelated := model.Build{
+	pipelineUnrelated := model.Pipeline{
 		RepoID: repoUnrelated.ID,
 	}
 	procUnrelated := model.Proc{
 		Name: "a unrelated proc",
 	}
-	assert.NoError(t, store.CreateBuild(&buildUnrelated, &procUnrelated))
+	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &procUnrelated))
 
 	_, err := store.GetRepo(repo.ID)
 	assert.NoError(t, err)
@@ -430,9 +431,9 @@ func TestRepoCrud(t *testing.T) {
 	procCount, err := store.engine.Count(new(model.Proc))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, procCount)
-	buildCount, err := store.engine.Count(new(model.Build))
+	pipelineCount, err := store.engine.Count(new(model.Pipeline))
 	assert.NoError(t, err)
-	assert.EqualValues(t, 1, buildCount)
+	assert.EqualValues(t, 1, pipelineCount)
 }
 
 func TestRepoRedirection(t *testing.T) {

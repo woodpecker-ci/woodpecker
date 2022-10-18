@@ -22,32 +22,32 @@ import (
 
 func TestTree(t *testing.T) {
 	procs := []*Proc{{
-		ID:      25,
-		PID:     2,
-		BuildID: 6,
-		PPID:    1,
-		PGID:    2,
-		Name:    "clone",
-		State:   StatusSuccess,
-		Error:   "0",
+		ID:         25,
+		PID:        2,
+		PipelineID: 6,
+		PPID:       1,
+		PGID:       2,
+		Name:       "clone",
+		State:      StatusSuccess,
+		Error:      "0",
 	}, {
-		ID:      24,
-		BuildID: 6,
-		PID:     1,
-		PPID:    0,
-		PGID:    1,
-		Name:    "lint",
-		State:   StatusFailure,
-		Error:   "1",
+		ID:         24,
+		PipelineID: 6,
+		PID:        1,
+		PPID:       0,
+		PGID:       1,
+		Name:       "lint",
+		State:      StatusFailure,
+		Error:      "1",
 	}, {
-		ID:      26,
-		BuildID: 6,
-		PID:     3,
-		PPID:    1,
-		PGID:    3,
-		Name:    "lint",
-		State:   StatusFailure,
-		Error:   "1",
+		ID:         26,
+		PipelineID: 6,
+		PID:        3,
+		PPID:       1,
+		PGID:       3,
+		Name:       "lint",
+		State:      StatusFailure,
+		Error:      "1",
 	}}
 	procs, err := Tree(procs)
 	assert.NoError(t, err)
@@ -55,14 +55,14 @@ func TestTree(t *testing.T) {
 	assert.Len(t, procs[0].Children, 2)
 
 	procs = []*Proc{{
-		ID:      25,
-		PID:     2,
-		BuildID: 6,
-		PPID:    1,
-		PGID:    2,
-		Name:    "clone",
-		State:   StatusSuccess,
-		Error:   "0",
+		ID:         25,
+		PID:        2,
+		PipelineID: 6,
+		PPID:       1,
+		PGID:       2,
+		Name:       "clone",
+		State:      StatusSuccess,
+		Error:      "0",
 	}}
 	_, err = Tree(procs)
 	assert.Error(t, err)

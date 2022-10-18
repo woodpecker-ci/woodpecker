@@ -51,7 +51,7 @@ export type Repo = {
 
   visibility: RepoVisibility;
 
-  last_build: number;
+  last_pipeline: number;
 
   gated: boolean;
 

@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,8 +66,8 @@ func toTeam(from *gogs.Organization, link string) *model.Team {
 	}
 }
 
-// helper function that extracts the Build data from a Gogs push hook
-func buildFromPush(hook *pushHook) *model.Build {
+// helper function that extracts the Pipeline data from a Gogs push hook
+func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarUrl),
@@ -80,7 +81,7 @@ func buildFromPush(hook *pushHook) *model.Build {
 		sender = hook.Sender.Login
 	}
 
-	return &model.Build{
+	return &model.Pipeline{
 		Event:     model.EventPush,
 		Commit:    hook.After,
 		Ref:       hook.Ref,
@@ -95,8 +96,8 @@ func buildFromPush(hook *pushHook) *model.Build {
 	}
 }
 
-// helper function that extracts the Build data from a Gogs tag hook
-func buildFromTag(hook *pushHook) *model.Build {
+// helper function that extracts the pipeline data from a Gogs tag hook
+func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarUrl),
@@ -110,7 +111,7 @@ func buildFromTag(hook *pushHook) *model.Build {
 		sender = hook.Sender.Login
 	}
 
-	return &model.Build{
+	return &model.Pipeline{
 		Event:     model.EventTag,
 		Commit:    hook.After,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
@@ -124,8 +125,8 @@ func buildFromTag(hook *pushHook) *model.Build {
 	}
 }
 
-// helper function that extracts the Build data from a Gogs pull_request hook
-func buildFromPullRequest(hook *pullRequestHook) *model.Build {
+// helper function that extracts the Pipeline data from a Gogs pull_request hook
+func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.User.AvatarUrl),
@@ -134,7 +135,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 	if sender == "" {
 		sender = hook.Sender.Login
 	}
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.PullRequest.Head.Sha,
 		Link:    hook.PullRequest.URL,
@@ -150,7 +151,7 @@ func buildFromPullRequest(hook *pullRequestHook) *model.Build {
 			hook.PullRequest.BaseBranch,
 		),
 	}
-	return build
+	return pipeline
 }
 
 // helper function that parses a push hook from a read closer.

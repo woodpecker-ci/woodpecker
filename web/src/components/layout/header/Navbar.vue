@@ -34,7 +34,7 @@
         :to="{ name: 'admin-settings' }"
       />
       <!-- Active Builds Indicator -->
-      <ActiveBuilds v-if="user" />
+      <ActivePipelines v-if="user" />
       <!-- User Avatar -->
       <router-link v-if="user" :to="{ name: 'user' }" class="rounded-full overflow-hidden">
         <img v-if="user && user.avatar_url" class="navbar-icon" :src="`${user.avatar_url}`" />
@@ -55,12 +55,12 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
-import ActiveBuilds from './ActiveBuilds.vue';
+import ActivePipelines from './ActivePipelines.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActiveBuilds, IconButton },
+  components: { Button, ActivePipelines, IconButton },
 
   setup() {
     const config = useConfig();

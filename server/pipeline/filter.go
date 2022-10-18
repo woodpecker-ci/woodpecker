@@ -26,11 +26,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
 	b := shared.ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
-		Last:  &model.Build{},
+		Curr:  pipeline,
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -38,11 +38,11 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 		Yamls: remoteYamlConfigs,
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		return false
 	}
-	if len(buildItems) == 0 {
+	if len(pipelineItems) == 0 {
 		return true
 	}
 
@@ -51,14 +51,14 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 
 // TODO: parse yaml once and not for each filter function
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
-	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
+func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(remoteYamlConfigs))
 
 	matchMetadata := frontend.Metadata{
-		Curr: frontend.Build{
-			Event: string(build.Event),
+		Curr: frontend.Pipeline{
+			Event: string(pipeline.Event),
 			Commit: frontend.Commit{
-				Branch: build.Branch,
+				Branch: pipeline.Branch,
 			},
 		},
 	}
@@ -79,7 +79,7 @@ func checkIfFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (
 		}
 
 		// ignore if the pipeline was filtered by the branch (legacy)
-		if !parsedPipelineConfig.Branches.Match(build.Branch) {
+		if !parsedPipelineConfig.Branches.Match(pipeline.Branch) {
 			continue
 		}
 

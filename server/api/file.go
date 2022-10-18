@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// FileList gets a list file by build.
+// FileList gets a list file by pipeline.
 func FileList(c *gin.Context) {
 	_store := store.FromContext(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
@@ -37,13 +38,13 @@ func FileList(c *gin.Context) {
 	}
 
 	repo := session.Repo(c)
-	build, err := _store.GetBuildNumber(repo, num)
+	pipeline, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	files, err := _store.FileList(build)
+	files, err := _store.FileList(pipeline)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -76,13 +77,13 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	build, err := _store.GetBuildNumber(repo, num)
+	pipeline, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	proc, err := _store.ProcFind(build, pid)
+	proc, err := _store.ProcFind(pipeline, pid)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
