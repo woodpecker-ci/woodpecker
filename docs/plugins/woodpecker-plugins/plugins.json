@@ -41,6 +41,11 @@
       "verified": false
     },
     {
+      "name": "Git Push",
+      "docs": "https://raw.githubusercontent.com/6543-forks/drone-git-push/woodpecker-support-and-more/DOCS.md",
+      "verified": false
+    },
+    {
       "// todo": true,
       "name": "Email",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
