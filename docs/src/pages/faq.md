@@ -3,7 +3,7 @@
 ## What are the differences to Drone?
 
 Apart from Woodpecker staying free and OpenSource forever, the growing community already introduced some nifty features like:
-- [Multiple workflows](/docs/usage/workflows)
+- [Multiple workflows](/docs/next/usage/workflows)
 - [Conditional step execution on file changes](/docs/usage/pipeline-syntax#path)
 - [More features are already in the pipeline :wink:](https://github.com/woodpecker-ci/woodpecker/pulls) ...
 
