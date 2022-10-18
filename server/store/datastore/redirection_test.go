@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func TestGetRedirection(t *testing.T) {
@@ -39,7 +40,7 @@ func TestGetRedirection(t *testing.T) {
 	assert.NotNil(t, redirectionFromStore)
 	assert.Equal(t, redirection.RepoID, redirectionFromStore.RepoID)
 	_, err = store.GetRedirection("foo/baz")
-	assert.ErrorIs(t, err, RecordNotExist)
+	assert.ErrorIs(t, err, types.RecordNotExist)
 }
 
 func TestCreateRedirection(t *testing.T) {

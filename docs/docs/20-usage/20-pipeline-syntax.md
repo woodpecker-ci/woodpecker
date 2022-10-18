@@ -21,6 +21,25 @@ pipeline:
 
 In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
+Another way to name a step is by using the name keyword:
+
+```yaml
+pipeline:
+  - name: backend
+    image: golang
+    commands:
+      - go build
+      - go test
+  - name: frontend
+    image: node
+    commands:
+      - npm install
+      - npm run test
+      - npm run build
+```
+
+Keep in mind the name is optional, if not added the steps will be numerated.
+
 ### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
@@ -120,7 +139,7 @@ Example configuration using a private image:
        - go test
 ```
 
-Woodpecker matches the registry hostname to each image in your yaml. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
+Woodpecker matches the registry hostname to each image in your YAML. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
 
 Example registry hostnames:
 
@@ -430,6 +449,33 @@ when:
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
 
+#### `evaluate`
+
+Execute a step only if the provided evaluate expression is equal to true. Each [`CI_` variable](./50-environment.md#built-in-environment-variables) can be used inside the expression.
+
+The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+
+Run on pushes to the default branch for the repository `owner/repo`:
+
+```yaml
+when:
+  - evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
+```
+
+Run on commits created by user `woodpecker-ci`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
+```
+
+Skip all commits containing `please ignore me` in the commit message:
+
+```yaml
+when:
+  - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
+```
+
 ### `group` - Parallel execution
 
 Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
@@ -478,7 +524,7 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
+The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository URL.
 
 ```txt
 /woodpecker/src/github.com/octocat/hello-world

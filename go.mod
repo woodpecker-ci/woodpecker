@@ -5,6 +5,7 @@ go 1.18
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20220831004139-a0127ed0e7fe
 	codeberg.org/6543/go-yaml2json v0.2.1
+	github.com/antonmedv/expr v1.9.0
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/caddyserver/certmagic v0.17.1-0.20220901172127-2e22c6fa8c47
 	github.com/docker/cli v20.10.17+incompatible
@@ -25,7 +26,7 @@ require (
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/melbahja/goph v1.3.0
-	github.com/moby/moby v20.10.17+incompatible
+	github.com/moby/moby v20.10.19+incompatible
 	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/pkg/errors v0.9.1
@@ -130,7 +131,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

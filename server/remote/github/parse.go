@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +38,8 @@ const (
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
-// Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
+// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
 	var reader io.Reader = r.Body
 
 	if payload := r.FormValue(hookField); payload != "" {
@@ -57,25 +58,25 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 
 	switch hook := payload.(type) {
 	case *github.PushEvent:
-		repo, build, err := parsePushHook(hook)
-		return nil, repo, build, err
+		repo, pipeline, err := parsePushHook(hook)
+		return nil, repo, pipeline, err
 	case *github.DeploymentEvent:
-		repo, build, err := parseDeployHook(hook)
-		return nil, repo, build, err
+		repo, pipeline, err := parseDeployHook(hook)
+		return nil, repo, pipeline, err
 	case *github.PullRequestEvent:
 		return parsePullHook(hook, merge)
 	}
 	return nil, nil, nil, nil
 }
 
-// parsePushHook parses a push hook and returns the Repo and Build details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Build, error) {
+func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error) {
 	if hook.Deleted != nil && *hook.Deleted {
 		return nil, nil, nil
 	}
 
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
@@ -90,31 +91,31 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Build, error) {
 		ChangedFiles: getChangedFilesFromCommits(hook.Commits),
 	}
 
-	if len(build.Author) == 0 {
-		build.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
+	if len(pipeline.Author) == 0 {
+		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
 	}
-	// if len(build.Email) == 0 {
+	// if len(pipeline.Email) == 0 {
 	// TODO: default to gravatar?
 	// }
-	if strings.HasPrefix(build.Ref, "refs/tags/") {
+	if strings.HasPrefix(pipeline.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
-		build.Event = model.EventTag
-		build.ChangedFiles = nil
+		pipeline.Event = model.EventTag
+		pipeline.ChangedFiles = nil
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
-		// as build's branch so that we can filter events base on it
+		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			build.Branch = strings.Replace(hook.GetBaseRef(), "refs/heads/", "", -1)
+			pipeline.Branch = strings.Replace(hook.GetBaseRef(), "refs/heads/", "", -1)
 		}
 	}
 
-	return convertRepoHook(hook.GetRepo()), build, nil
+	return convertRepoHook(hook.GetRepo()), pipeline, nil
 }
 
-// parseDeployHook parses a deployment and returns the Repo and Build details.
+// parseDeployHook parses a deployment and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Build, error) {
-	build := &model.Build{
+func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline, error) {
+	pipeline := &model.Pipeline{
 		Event:   model.EventDeploy,
 		Commit:  hook.GetDeployment().GetSHA(),
 		Link:    hook.GetDeployment().GetURL(),
@@ -127,24 +128,24 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Build, e
 		Sender:  hook.GetSender().GetLogin(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
-	if strings.HasPrefix(build.Commit, build.Ref) || build.Commit == build.Ref {
-		build.Branch = hook.GetRepo().GetDefaultBranch()
-		if build.Branch == "" {
-			build.Branch = defaultBranch
+	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
+		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
+		if pipeline.Branch == "" {
+			pipeline.Branch = defaultBranch
 		}
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
 	// if the ref is a branch we should make sure it has refs/heads prefix
-	if !strings.HasPrefix(build.Ref, "refs/") { // branch or tag
-		build.Ref = fmt.Sprintf("refs/heads/%s", build.Branch)
+	if !strings.HasPrefix(pipeline.Ref, "refs/") { // branch or tag
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
 
-	return convertRepo(hook.GetRepo()), build, nil
+	return convertRepo(hook.GetRepo()), pipeline, nil
 }
 
-// parsePullHook parses a pull request hook and returns the Repo and Build
+// parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details. If the pull request is closed nil values are returned.
-func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Build, error) {
+func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
 	// only listen to new merge-requests and pushes to open ones
 	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync {
 		return nil, nil, nil, nil
@@ -153,7 +154,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		return nil, nil, nil, nil
 	}
 
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.GetPullRequest().GetHead().GetSHA(),
 		Link:    hook.GetPullRequest().GetHTMLURL(),
@@ -171,10 +172,10 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		),
 	}
 	if merge {
-		build.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
+		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())
 	}
 
-	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), build, nil
+	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil
 }
 
 func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {

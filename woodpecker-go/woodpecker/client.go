@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package woodpecker
 
 import (
@@ -18,12 +32,12 @@ const (
 	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
 	pathChown          = "%s/api/repos/%s/%s/chown"
 	pathRepair         = "%s/api/repos/%s/%s/repair"
-	pathBuilds         = "%s/api/repos/%s/%s/builds"
-	pathBuild          = "%s/api/repos/%s/%s/builds/%v"
+	pathPipelines      = "%s/api/repos/%s/%s/pipelines"
+	pathPipeline       = "%s/api/repos/%s/%s/pipelines/%v"
 	pathLogs           = "%s/api/repos/%s/%s/logs/%d/%d"
-	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
-	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
-	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
+	pathApprove        = "%s/api/repos/%s/%s/pipelines/%d/approve"
+	pathDecline        = "%s/api/repos/%s/%s/pipelines/%d/decline"
+	pathJob            = "%s/api/repos/%s/%s/pipelines/%d/%d"
 	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
@@ -37,11 +51,10 @@ const (
 	pathGlobalSecret   = "%s/api/secrets/%s"
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
-	pathBuildQueue     = "%s/api/builds"
+	pathPipelineQueue  = "%s/api/pipelines"
 	pathQueue          = "%s/api/queue"
 	pathLogLevel       = "%s/api/log-level"
 	// TODO: implement endpoints
-	// pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
 	// pathFeed           = "%s/api/user/feed"
 	// pathVersion        = "%s/version"
 )
@@ -187,18 +200,18 @@ func (c *client) RepoMove(owner, name, newFullName string) error {
 	return c.post(uri, nil, nil)
 }
 
-// Build returns a repository build by number.
-func (c *client) Build(owner, name string, num int) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+// Pipeline returns a repository pipeline by number.
+func (c *client) Pipeline(owner, name string, num int) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.get(uri, out)
 	return out, err
 }
 
-// Build returns the latest repository build by branch.
-func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, "latest")
+// Pipeline returns the latest repository pipeline by branch.
+func (c *client) PipelineLast(owner, name, branch string) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, "latest")
 	if len(branch) != 0 {
 		uri += "?branch=" + branch
 	}
@@ -206,90 +219,90 @@ func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
 	return out, err
 }
 
-// BuildList returns a list of recent builds for the
+// PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) BuildList(owner, name string) ([]*Build, error) {
-	var out []*Build
-	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+func (c *client) PipelineList(owner, name string) ([]*Pipeline, error) {
+	var out []*Pipeline
+	uri := fmt.Sprintf(pathPipelines, c.addr, owner, name)
 	err := c.get(uri, &out)
 	return out, err
 }
 
-func (c *client) BuildCreate(owner, name string, options *BuildOptions) (*Build, error) {
-	var out *Build
-	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+func (c *client) PipelineCreate(owner, name string, options *PipelineOptions) (*Pipeline, error) {
+	var out *Pipeline
+	uri := fmt.Sprintf(pathPipelines, c.addr, owner, name)
 	err := c.post(uri, options, &out)
 	return out, err
 }
 
-// BuildQueue returns a list of enqueued builds.
-func (c *client) BuildQueue() ([]*Activity, error) {
+// PipelineQueue returns a list of enqueued pipelines.
+func (c *client) PipelineQueue() ([]*Activity, error) {
 	var out []*Activity
-	uri := fmt.Sprintf(pathBuildQueue, c.addr)
+	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
 }
 
-// BuildStart re-starts a stopped build.
-func (c *client) BuildStart(owner, name string, num int, params map[string]string) (*Build, error) {
-	out := new(Build)
+// PipelineStart re-starts a stopped pipeline.
+func (c *client) PipelineStart(owner, name string, num int, params map[string]string) (*Pipeline, error) {
+	out := new(Pipeline)
 	val := mapValues(params)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
 	return out, err
 }
 
-// BuildStop cancels the running job.
-func (c *client) BuildStop(owner, name string, num, job int) error {
+// PipelineStop cancels the running job.
+func (c *client) PipelineStop(owner, name string, num, job int) error {
 	uri := fmt.Sprintf(pathJob, c.addr, owner, name, num, job)
 	err := c.delete(uri)
 	return err
 }
 
-// BuildApprove approves a blocked build.
-func (c *client) BuildApprove(owner, name string, num int) (*Build, error) {
-	out := new(Build)
+// PipelineApprove approves a blocked pipeline.
+func (c *client) PipelineApprove(owner, name string, num int) (*Pipeline, error) {
+	out := new(Pipeline)
 	uri := fmt.Sprintf(pathApprove, c.addr, owner, name, num)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildDecline declines a blocked build.
-func (c *client) BuildDecline(owner, name string, num int) (*Build, error) {
-	out := new(Build)
+// PipelineDecline declines a blocked pipeline.
+func (c *client) PipelineDecline(owner, name string, num int) (*Pipeline, error) {
+	out := new(Pipeline)
 	uri := fmt.Sprintf(pathDecline, c.addr, owner, name, num)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildKill force kills the running build.
-func (c *client) BuildKill(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+// PipelineKill force kills the running pipeline.
+func (c *client) PipelineKill(owner, name string, num int) error {
+	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.delete(uri)
 	return err
 }
 
-// BuildLogs returns the build logs for the specified job.
-func (c *client) BuildLogs(owner, name string, num, job int) ([]*Logs, error) {
+// PipelineLogs returns the pipeline logs for the specified job.
+func (c *client) PipelineLogs(owner, name string, num, job int) ([]*Logs, error) {
 	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, job)
 	var out []*Logs
 	err := c.get(uri, &out)
 	return out, err
 }
 
-// Deploy triggers a deployment for an existing build using the
+// Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Build, error) {
-	out := new(Build)
+func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Pipeline, error) {
+	out := new(Pipeline)
 	val := mapValues(params)
 	val.Set("event", "deployment")
 	val.Set("deploy_to", env)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
 	return out, err
 }
 
-// LogsPurge purges the build logs for the specified build.
+// LogsPurge purges the pipeline logs for the specified pipeline.
 func (c *client) LogsPurge(owner, name string, num int) error {
 	uri := fmt.Sprintf(pathLogPurge, c.addr, owner, name, num)
 	err := c.delete(uri)

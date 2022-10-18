@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -50,7 +51,7 @@ func PostSecret(c *gin.Context) {
 	}
 	secret := &model.Secret{
 		RepoID: repo.ID,
-		Name:   in.Name,
+		Name:   strings.ToLower(in.Name),
 		Value:  in.Value,
 		Events: in.Events,
 		Images: in.Images,

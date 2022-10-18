@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -235,7 +236,7 @@ func (c *Coding) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*mo
 
 // File fetches a file from the remote repository and returns in string
 // format.
-func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	data, err := c.newClient(ctx, u).GetFile(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
@@ -243,12 +244,12 @@ func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return data, nil
 }
 
-func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status sends the commit status to the remote system.
-func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, proc *model.Proc) error {
+func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, proc *model.Proc) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }
@@ -301,12 +302,12 @@ func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
-func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	repo, build, err := parseHook(r)
-	if build != nil {
-		build.Avatar = c.resourceLink(build.Avatar)
+func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+	repo, pipeline, err := parseHook(r)
+	if pipeline != nil {
+		pipeline.Avatar = c.resourceLink(pipeline.Avatar)
 	}
-	return repo, build, err
+	return repo, pipeline, err
 }
 
 // OrgMembership returns if user is member of organization and if user

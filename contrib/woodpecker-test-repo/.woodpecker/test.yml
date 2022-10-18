@@ -1,0 +1,15 @@
+pipeline:
+  test_1:
+    image: 'alpine'
+    commands:
+      - echo 'Test 1'
+
+  test_2:
+    image: 'alpine'
+    commands:
+      - echo 'Test 2'
+
+  test_3:
+    image: 'alpine'
+    commands:
+      - echo 'Test 3'

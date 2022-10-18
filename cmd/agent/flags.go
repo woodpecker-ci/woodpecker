@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2019 Laszlo Fogas
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,7 +81,7 @@ var flags = []cli.Flag{
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
 		Name:    "max-procs",
-		Usage:   "agent parallel builds",
+		Usage:   "agent parallel workflows",
 		Value:   1,
 	},
 	&cli.BoolFlag{

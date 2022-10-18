@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,9 +26,15 @@ const (
 	EventManual WebhookEvent = "manual"
 )
 
+type WebhookEventList []WebhookEvent
+
+func (wel WebhookEventList) Len() int           { return len(wel) }
+func (wel WebhookEventList) Swap(i, j int)      { wel[i], wel[j] = wel[j], wel[i] }
+func (wel WebhookEventList) Less(i, j int) bool { return wel[i] < wel[j] }
+
 func ValidateWebhookEvent(s WebhookEvent) bool {
 	switch s {
-	case EventPush, EventPull, EventTag, EventDeploy, EventCron:
+	case EventPush, EventPull, EventTag, EventDeploy, EventCron, EventManual:
 		return true
 	default:
 		return false

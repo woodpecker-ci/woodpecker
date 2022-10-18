@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package shared
 
 import (
@@ -24,16 +38,16 @@ type configFetcher struct {
 	remote          remote.Remote
 	user            *model.User
 	repo            *model.Repo
-	build           *model.Build
+	pipeline        *model.Pipeline
 	configExtension config.Extension
 }
 
-func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, build *model.Build) ConfigFetcher {
+func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
 	return &configFetcher{
 		remote:          remote,
 		user:            user,
 		repo:            repo,
-		build:           build,
+		pipeline:        pipeline,
 		configExtension: configExtension,
 	}
 }
@@ -60,7 +74,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
-			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.build, files)
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files)
 			if err != nil {
 				log.Error().Msg("Got error " + err.Error())
 				return nil, fmt.Errorf("On Fetching config via http : %s", err)
@@ -86,7 +100,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
 		// either a file
 		if !strings.HasSuffix(config, "/") {
-			file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
+			file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.pipeline, config)
 			if err == nil && len(file) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 				return []*remote.FileMeta{{
@@ -97,7 +111,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		}
 
 		// or a folder
-		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, strings.TrimSuffix(config, "/"))
+		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(config, "/"))
 		if err == nil && len(files) != 0 {
 			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
 			return filterPipelineFiles(files), nil
@@ -112,7 +126,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	// test .woodpecker/ folder
 	// if folder is not supported we will get a "Not implemented" error and continue
 	config = ".woodpecker"
-	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.build, config)
+	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.pipeline, config)
 	files = filterPipelineFiles(files)
 	if err == nil && len(files) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
@@ -120,7 +134,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".woodpecker.yml"
-	file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err := cf.remote.File(ctx, cf.user, cf.repo, cf.pipeline, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{
@@ -130,7 +144,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	}
 
 	config = ".drone.yml"
-	file, err = cf.remote.File(ctx, cf.user, cf.repo, cf.build, config)
+	file, err = cf.remote.File(ctx, cf.user, cf.repo, cf.pipeline, config)
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 		return []*remote.FileMeta{{

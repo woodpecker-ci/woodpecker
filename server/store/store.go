@@ -69,32 +69,32 @@ type Store interface {
 	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
 	HasRedirectionForRepo(int64, string) (bool, error)
 
-	// Builds
-	// GetBuild gets a build by unique ID.
-	GetBuild(int64) (*model.Build, error)
-	// GetBuildNumber gets a build by number.
-	GetBuildNumber(*model.Repo, int64) (*model.Build, error)
-	// GetBuildRef gets a build by its ref.
-	GetBuildRef(*model.Repo, string) (*model.Build, error)
-	// GetBuildCommit gets a build by its commit sha.
-	GetBuildCommit(*model.Repo, string, string) (*model.Build, error)
-	// GetBuildLast gets the last build for the branch.
-	GetBuildLast(*model.Repo, string) (*model.Build, error)
-	// GetBuildLastBefore gets the last build before build number N.
-	GetBuildLastBefore(*model.Repo, string, int64) (*model.Build, error)
-	// GetBuildList gets a list of builds for the repository
+	// Pipelines
+	// GetPipeline gets a pipeline by unique ID.
+	GetPipeline(int64) (*model.Pipeline, error)
+	// GetPipelineNumber gets a pipeline by number.
+	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
+	// GetPipelineRef gets a pipeline by its ref.
+	GetPipelineRef(*model.Repo, string) (*model.Pipeline, error)
+	// GetPipelineCommit gets a pipeline by its commit sha.
+	GetPipelineCommit(*model.Repo, string, string) (*model.Pipeline, error)
+	// GetPipelineLast gets the last pipeline for the branch.
+	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
+	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
+	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
+	// GetPipelineList gets a list of pipelines for the repository
 	// TODO: paginate
-	GetBuildList(*model.Repo, int) ([]*model.Build, error)
-	// GetBuildList gets a list of the active builds for the repository
-	GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error)
-	// GetBuildQueue gets a list of build in queue.
-	GetBuildQueue() ([]*model.Feed, error)
-	// GetBuildCount gets a count of all builds in the system.
-	GetBuildCount() (int64, error)
-	// CreateBuild creates a new build and jobs.
-	CreateBuild(*model.Build, ...*model.Proc) error
-	// UpdateBuild updates a build.
-	UpdateBuild(*model.Build) error
+	GetPipelineList(*model.Repo, int) ([]*model.Pipeline, error)
+	// GetPipelineList gets a list of the active pipelines for the repository
+	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
+	// GetPipelineQueue gets a list of pipelines in queue.
+	GetPipelineQueue() ([]*model.Feed, error)
+	// GetPipelineCount gets a count of all pipelines in the system.
+	GetPipelineCount() (int64, error)
+	// CreatePipeline creates a new pipeline and jobs.
+	CreatePipeline(*model.Pipeline, ...*model.Proc) error
+	// UpdatePipeline updates a pipeline.
+	UpdatePipeline(*model.Pipeline) error
 
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
@@ -113,11 +113,11 @@ type Store interface {
 	PermFlush(user *model.User, before int64) error
 
 	// Configs
-	ConfigsForBuild(buildID int64) ([]*model.Config, error)
+	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
 	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
-	BuildConfigCreate(*model.BuildConfig) error
+	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
@@ -139,12 +139,12 @@ type Store interface {
 
 	// Procs
 	ProcLoad(int64) (*model.Proc, error)
-	ProcFind(*model.Build, int) (*model.Proc, error)
-	ProcChild(*model.Build, int, string) (*model.Proc, error)
-	ProcList(*model.Build) ([]*model.Proc, error)
+	ProcFind(*model.Pipeline, int) (*model.Proc, error)
+	ProcChild(*model.Pipeline, int, string) (*model.Proc, error)
+	ProcList(*model.Pipeline) ([]*model.Proc, error)
 	ProcCreate([]*model.Proc) error
 	ProcUpdate(*model.Proc) error
-	ProcClear(*model.Build) error
+	ProcClear(*model.Pipeline) error
 
 	// Logs
 	LogFind(*model.Proc) (io.ReadCloser, error)
@@ -153,7 +153,7 @@ type Store interface {
 	LogSave(*model.Proc, io.Reader) error
 
 	// Files
-	FileList(*model.Build) ([]*model.File, error)
+	FileList(*model.Pipeline) ([]*model.File, error)
 	FileFind(*model.Proc, string) (*model.File, error)
 	FileRead(*model.Proc, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error

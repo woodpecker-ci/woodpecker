@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,12 +196,12 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("When downloading a file", func() {
 			g.It("Should return the bytes", func() {
-				raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, "file")
+				raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file")
 				g.Assert(err).IsNil()
 				g.Assert(len(raw) != 0).IsTrue()
 			})
 			g.It("Should handle not found error", func() {
-				_, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, "file_not_found")
+				_, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file_not_found")
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -254,7 +255,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, fakeProc)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeProc)
 			g.Assert(err).IsNil()
 		})
 
@@ -350,7 +351,7 @@ var (
 		FullName: "test_name/permission_admin",
 	}
 
-	fakeBuild = &model.Build{
+	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 

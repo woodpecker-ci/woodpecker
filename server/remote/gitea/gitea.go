@@ -1,5 +1,6 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 // Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
+// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -192,10 +193,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 		return nil, err
 	}
 
-	teams := make([]*model.Team, 0, perPage)
-
-	page := 1
-	for {
+	return common.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
@@ -204,21 +202,12 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 				},
 			},
 		)
-		if err != nil {
-			return nil, err
-		}
-
+		teams := make([]*model.Team, 0, len(orgs))
 		for _, org := range orgs {
 			teams = append(teams, toTeam(org, c.URL))
 		}
-
-		if len(orgs) < perPage {
-			break
-		}
-		page++
-	}
-
-	return teams, nil
+		return teams, err
+	})
 }
 
 // TeamPerm is not supported by the Gitea driver.
@@ -255,17 +244,13 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.RemoteID, owne
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
 func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos := make([]*model.Repo, 0, perPage)
-
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	// Gitea SDK forces us to read repo list paginated.
-	page := 1
-	for {
-		all, _, err := client.ListMyRepos(
+	return common.Paginate(func(page int) ([]*model.Repo, error) {
+		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
@@ -273,22 +258,12 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
-		if err != nil {
-			return nil, err
+		result := make([]*model.Repo, 0, len(repos))
+		for _, repo := range repos {
+			result = append(result, toRepo(repo))
 		}
-
-		for _, repo := range all {
-			repos = append(repos, toRepo(repo))
-		}
-
-		if len(all) < perPage {
-			break
-		}
-		// Last page was not empty so more repos may be available - continue loop.
-		page++
-	}
-
-	return repos, nil
+		return result, err
+	})
 }
 
 // Perm returns the user permissions for the named Gitea repository.
@@ -306,7 +281,7 @@ func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
-func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
@@ -316,7 +291,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return cfg, err
 }
 
-func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	var configs []*remote.FileMeta
 
 	client, err := c.newClientToken(ctx, u.Token)
@@ -351,7 +326,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
 	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
@@ -360,12 +335,12 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.CreateStatus(
 		repo.Owner,
 		repo.Name,
-		build.Commit,
+		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(proc.State),
-			TargetURL:   common.GetBuildStatusLink(repo, build, proc),
-			Description: common.GetBuildStatusDescription(proc.State),
-			Context:     common.GetBuildStatusContext(repo, build, proc),
+			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, proc),
+			Description: common.GetPipelineStatusDescription(proc.State),
+			Context:     common.GetPipelineStatusContext(repo, pipeline, proc),
 		},
 	)
 	return err
@@ -462,15 +437,19 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		return nil, err
 	}
 
-	giteaBranches, _, err := client.ListRepoBranches(r.Owner, r.Name, gitea.ListRepoBranchesOptions{})
+	branches, err := common.Paginate(func(page int) ([]string, error) {
+		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
+			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
+		result := make([]string, len(branches))
+		for i := range branches {
+			result[i] = branches[i].Name
+		}
+		return result, err
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	branches := make([]string, 0)
-	for _, branch := range giteaBranches {
-		branches = append(branches, branch.Name)
-	}
 	return branches, nil
 }
 
@@ -493,9 +472,9 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	return b.Commit.ID, nil
 }
 
-// Hook parses the incoming Gitea hook and returns the Repository and Build
+// Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r)
 }
 

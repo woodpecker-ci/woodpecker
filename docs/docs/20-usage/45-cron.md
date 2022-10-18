@@ -33,7 +33,7 @@ Read more at: [pipeline-syntax#event](./20-pipeline-syntax.md#event)
     Examples: `@every 5m`, `@daily`, `0 30 * * * *` ...
 
     :::info
-    Woodpeckers cron syntax starts with seconds instead of minutes as used by most linux cron schedulers.  
+    Woodpeckers cron syntax starts with seconds instead of minutes as used by most linux cron schedulers.
 
     Example: "At minute 30 every hour" would be `0 30 * * * *` instead of `30 * * * *`
     :::

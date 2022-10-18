@@ -15,14 +15,15 @@
       "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-yaml-syntax"
     },
     "clone": { "$ref": "#/definitions/clone" },
+    "skip_clone": { "type": "boolean" },
     "branches": { "$ref": "#/definitions/branches" },
+    "when": { "$ref": "#/definitions/pipeline_when" },
     "pipeline": { "$ref": "#/definitions/pipeline" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
     "platform": { "$ref": "#/definitions/platform" },
     "labels": { "$ref": "#/definitions/labels" },
-    "skip_clone": { "type": "boolean" },
     "depends_on": {
       "type": "array",
       "minLength": 1,
@@ -99,7 +100,7 @@
       ]
     },
     "pipeline_when": {
-      "description": "Whole pipelines can be skipped based on conditions. Read more: TODO",
+      "description": "Whole pipelines can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/next/usage/pipeline-syntax#when---global-pipeline-conditions",
       "oneOf": [
         {
           "type": "array",
@@ -189,6 +190,10 @@
               "additionalProperties": false
             }
           ]
+        },
+        "evaluate": {
+          "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#evaluate",
+          "type": "string"
         }
       }
     },
@@ -350,11 +355,15 @@
               "additionalProperties": false
             }
           ]
+        },
+        "evaluate": {
+          "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#evaluate",
+          "type": "string"
         }
       }
     },
     "event_enum": {
-      "enum": ["push", "pull_request", "tag", "deployment", "cron"]
+      "enum": ["push", "pull_request", "tag", "deployment", "cron", "manual"]
     },
     "constraint_list": {
       "oneOf": [
@@ -505,10 +514,7 @@
           "description": "expose ports to which other steps can connect to",
           "type": "array",
           "items": {
-            "oneOf": [
-              { "type": "number" },
-              { "type": "string" }
-            ]
+            "oneOf": [{ "type": "number" }, { "type": "string" }]
           },
           "minLength": 1
         }

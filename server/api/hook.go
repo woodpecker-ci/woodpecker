@@ -1,5 +1,6 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 // Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
+// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -79,7 +80,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 	if tmpBuild == nil {
-		msg := "ignoring hook: hook parsing resulted in empty build"
+		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
@@ -174,10 +175,10 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	build, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, build)
+		c.JSON(200, pl)
 	}
 }

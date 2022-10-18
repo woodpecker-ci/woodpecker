@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"sort"
 )
 
 var (
@@ -30,7 +31,7 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretListBuild(*Repo, *Build) ([]*Secret, error)
+	SecretListPipeline(*Repo, *Pipeline) ([]*Secret, error)
 	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
 	SecretList(*Repo) ([]*Secret, error)
@@ -81,6 +82,11 @@ type Secret struct {
 // TableName return database table name for xorm
 func (Secret) TableName() string {
 	return "secrets"
+}
+
+// BeforeInsert will sort events before inserted into database
+func (s *Secret) BeforeInsert() {
+	s.Events = sortEvents(s.Events)
 }
 
 // Global secret.
@@ -151,6 +157,11 @@ func (s *Secret) Copy() *Secret {
 		RepoID: s.RepoID,
 		Name:   s.Name,
 		Images: s.Images,
-		Events: s.Events,
+		Events: sortEvents(s.Events),
 	}
+}
+
+func sortEvents(wel WebhookEventList) WebhookEventList {
+	sort.Sort(wel)
+	return wel
 }

@@ -10,6 +10,7 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
@@ -72,7 +73,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached {
-		if err := paramsToEnv(container.Settings, environment, c.secrets); err != nil {
+		if err := settings.ParamsToEnv(container.Settings, environment, c.secrets.toStringMap()); err != nil {
 			log.Error().Err(err).Msg("paramsToEnv")
 		}
 	}

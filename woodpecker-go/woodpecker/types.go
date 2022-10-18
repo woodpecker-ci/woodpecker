@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package woodpecker
 
 type (
@@ -34,17 +48,17 @@ type (
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config       *string `json:"config_file,omitempty"`
-		IsTrusted    *bool   `json:"trusted,omitempty"`
-		IsGated      *bool   `json:"gated,omitempty"`
-		Timeout      *int64  `json:"timeout,omitempty"`
-		Visibility   *string `json:"visibility"`
-		AllowPull    *bool   `json:"allow_pr,omitempty"`
-		BuildCounter *int    `json:"build_counter,omitempty"`
+		Config          *string `json:"config_file,omitempty"`
+		IsTrusted       *bool   `json:"trusted,omitempty"`
+		IsGated         *bool   `json:"gated,omitempty"`
+		Timeout         *int64  `json:"timeout,omitempty"`
+		Visibility      *string `json:"visibility"`
+		AllowPull       *bool   `json:"allow_pr,omitempty"`
+		PipelineCounter *int    `json:"build_counter,omitempty"`
 	}
 
-	// Build defines a build object.
-	Build struct {
+	// Pipeline defines a pipeline object.
+	Pipeline struct {
 		ID        int64   `json:"id"`
 		Number    int     `json:"number"`
 		Parent    int     `json:"parent"`
@@ -74,7 +88,7 @@ type (
 		Procs     []*Proc `json:"procs,omitempty"`
 	}
 
-	// Proc represents a process in the build pipeline.
+	// Proc represents a process in the pipeline.
 	Proc struct {
 		ID       int64             `json:"id"`
 		PID      int               `json:"pid"`
@@ -176,8 +190,8 @@ type (
 		Branch    string `json:"branch"`
 	}
 
-	// BuildOptions is the JSON data for forging a new build
-	BuildOptions struct {
+	// PipelineOptions is the JSON data for creating a new pipeline
+	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
 	}

@@ -21,7 +21,13 @@
         <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
-      <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton
+        v-if="repoPermissions.admin"
+        class="ml-2"
+        :to="{ name: 'repo-settings' }"
+        :title="$t('repo.settings.settings')"
+        icon="settings"
+      />
     </div>
     <div class="flex flex-wrap gap-y-2 items-center justify-between">
       <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
@@ -44,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -59,7 +65,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import BuildStore from '~/store/builds';
+import PipelineStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
@@ -77,7 +83,7 @@ const props = defineProps({
 const repoOwner = toRef(props, 'repoOwner');
 const repoName = toRef(props, 'repoName');
 const repoStore = RepoStore();
-const buildStore = BuildStore();
+const pipelineStore = PipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { isAuthenticated } = useAuthentication();
@@ -88,10 +94,10 @@ const i18n = useI18n();
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
 const repoPermissions = ref<RepoPermissions>();
-const builds = buildStore.getSortedBuilds(repoOwner, repoName);
+const pipelines = pipelineStore.getSortedPipelines(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
-provide('builds', builds);
+provide('pipelines', pipelines);
 
 const showManualPipelinePopup = ref(false);
 
@@ -116,7 +122,7 @@ async function loadRepo() {
     });
     return;
   }
-  await buildStore.loadBuilds(repoOwner.value, repoName.value);
+  await pipelineStore.loadPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {

@@ -127,7 +127,7 @@ Disable colored debug output.
 ### `WOODPECKER_HOST`
 > Default: empty
 
-Server fully qualified url of the user-facing hostname.
+Server fully qualified URL of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
@@ -272,7 +272,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 ### `WOODPECKER_DATABASE_DATASOURCE`
 > Default: `woodpecker.sqlite`
 
-The database connection string. The default value is the path of the embedded sqlite database file.
+The database connection string. The default value is the path of the embedded SQLite database file.
 
 Example:
 ```bash
