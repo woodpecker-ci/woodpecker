@@ -88,7 +88,8 @@ services:
 +     - WOODPECKER_GRPC_ADDR=${WOODPECKER_GRPC_ADDR}
 +     - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
-Reverse proxying can also be [configured for gRPC](docs/administration/proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
+
+Reverse proxying can also be [configured for gRPC](./proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
 
 ```diff
 # docker-compose.yml
