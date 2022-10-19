@@ -9,7 +9,7 @@
         "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten"
+          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -47,7 +47,7 @@
         "desc": "Organisation-Geheimnisse können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig"
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Secrets erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -131,6 +131,48 @@
       }
     },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
+    "pipeline": {
+      "actions": {
+        "cancel": "Abbrechen",
+        "cancel_success": "Pipeline abgebrochen",
+        "canceled": "Dieser Schritt wurde abgebrochen.",
+        "log_auto_scroll": "Automatisches folgen",
+        "log_auto_scroll_off": "Schalte automatisches folgen aus",
+        "log_download": "Herunterladen",
+        "restart": "Neustarten",
+        "restart_success": "Pipeline neu gestartet"
+      },
+      "config": "Konfiguration",
+      "created": "Erstellt",
+      "event": {
+        "cron": "Cron",
+        "deploy": "Deploy",
+        "manual": "Manuell",
+        "pr": "Pull-Request",
+        "push": "Push",
+        "tag": "Tag"
+      },
+      "execution_error": "Ausführungsfehler",
+      "exit_code": "Exit-Code {exitCode}",
+      "files": "Geänderte Dateien ({files})",
+      "loading": "Laden…",
+      "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten.",
+      "no_files": "Es wurden keine Dateien geändert.",
+      "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
+      "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
+      "pipeline": "Pipeline #{pipelineId}",
+      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
+      "protected": {
+        "approve": "Genehmigen",
+        "approve_success": "Pipeline genehmigt",
+        "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
+        "decline": "Ablehnen",
+        "decline_success": "Pipeline abgelehnt",
+        "declined": "Diese Pipeline ist abgelehnt worden!"
+      },
+      "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
+      "tasks": "Vorgänge"
+    },
     "settings": {
       "actions": {
         "actions": "Aktionen",
@@ -168,7 +210,7 @@
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
