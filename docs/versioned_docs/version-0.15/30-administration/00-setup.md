@@ -71,20 +71,7 @@ services:
       - [...]
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
-Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port. They can be configured with ADDR variables:
 
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_GRPC_ADDR=${WOODPECKER_GRPC_ADDR}
-+     - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
-```
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
 ```diff
@@ -99,7 +86,7 @@ services:
 +     - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
+Agents require the server address for agent-to-server communication:
 
 ```diff
 # docker-compose.yml
