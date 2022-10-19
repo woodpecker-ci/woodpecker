@@ -71,8 +71,7 @@ services:
       - [...]
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
-Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
-They can be configured with ADDR variables:
+Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port. They can be configured with ADDR variables:
 
 ```diff
 # docker-compose.yml
@@ -86,22 +85,6 @@ services:
 +     - WOODPECKER_GRPC_ADDR=${WOODPECKER_GRPC_ADDR}
 +     - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
-Reverse proxying can also be [configured for gRPC](docs/administration/proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
-
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_GRPC_SECURE=true # defaults to false
-+     - WOODPECKER_GRPC_VERIFY=true # default
-
-```
-
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
 ```diff
