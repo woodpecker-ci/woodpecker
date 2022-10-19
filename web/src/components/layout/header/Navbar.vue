@@ -9,36 +9,45 @@
         <span class="text-xs">{{ version }}</span>
       </router-link>
       <!-- Repo Link -->
-      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link">
+      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
         <span class="flex md:hidden">{{ $t('repos') }}</span>
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
       <!-- Docs Link -->
-      <a :href="docsUrl" target="_blank" class="navbar-link hidden md:flex">{{ $t('docs') }}</a>
+      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
     </div>
     <!-- Right Icons Box -->
-    <div class="flex ml-auto items-center space-x-3 text-white dark:text-gray-400">
+    <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
       <!-- Dark Mode Toggle -->
-      <IconButton
-        :icon="darkMode ? 'dark' : 'light'"
-        class="!text-white !dark:text-gray-500 navbar-icon"
-        :title="darkMode ? $t('color_scheme_dark') : $t('color_scheme_light')"
+      <NavbarIcon
+        :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
+        class="navbar-icon navbar-clickable"
         @click="darkMode = !darkMode"
-      />
+      >
+        <i-ic-baseline-dark-mode v-if="darkMode" />
+        <i-ic-round-light-mode v-else />
+      </NavbarIcon>
       <!-- Admin Settings -->
-      <IconButton
+      <NavbarIcon
         v-if="user?.admin"
-        icon="settings"
-        class="!text-white !dark:text-gray-500 navbar-icon"
+        class="navbar-icon navbar-clickable"
         :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
-      />
+      >
+        <i-clarity-settings-solid />
+      </NavbarIcon>
+
       <!-- Active Pipelines Indicator -->
-      <ActivePipelines v-if="user" />
+      <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
       <!-- User Avatar -->
-      <router-link v-if="user" :to="{ name: 'user' }" class="rounded-full overflow-hidden">
-        <img v-if="user && user.avatar_url" class="navbar-icon" :src="`${user.avatar_url}`" />
-      </router-link>
+      <NavbarIcon
+        v-if="user"
+        :to="{ name: 'user' }"
+        :title="$t('user.settings')"
+        class="navbar-icon navbar-clickable !p-1.5"
+      >
+        <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
+      </NavbarIcon>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
     </div>
@@ -50,17 +59,17 @@ import { defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
 import ActivePipelines from './ActivePipelines.vue';
+import NavbarIcon from './NavbarIcon.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActivePipelines, IconButton },
+  components: { Button, ActivePipelines, NavbarIcon },
 
   setup() {
     const config = useConfig();
@@ -82,10 +91,10 @@ export default defineComponent({
 
 <style scoped>
 .navbar-link {
-  @apply hover:bg-black hover:bg-opacity-10 transition-colors duration-100 px-3 py-2 -my-1 rounded-md;
+  @apply px-3 py-2 -my-1 rounded-md;
 }
 
-.navbar-icon {
-  @apply w-8 h-8;
+.navbar-clickable {
+  @apply hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100;
 }
 </style>
