@@ -169,6 +169,18 @@ module.exports = {
         };
       },
     }),
+    () => ({
+      name: 'webpack-config',
+      configureWebpack() {
+        return {
+          devServer: {
+            client: {
+              webSocketURL: 'auto://0.0.0.0:0/ws',
+            },
+          },
+        };
+      },
+    }),
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
