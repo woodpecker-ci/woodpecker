@@ -32,7 +32,7 @@ type ProcStore interface {
 // swagger:model proc
 type Proc struct {
 	ID         int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
-	PipelineID int64             `json:"build_id"             xorm:"UNIQUE(s) INDEX 'proc_build_id'"`
+	PipelineID int64             `json:"pipeline_id"             xorm:"UNIQUE(s) INDEX 'proc_build_id'"`
 	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'proc_pid'"`
 	PPID       int               `json:"ppid"                 xorm:"proc_ppid"`
 	PGID       int               `json:"pgid"                 xorm:"proc_pgid"`
