@@ -58,7 +58,7 @@ func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeli
 		Branch: branch,
 		Event:  model.EventPush,
 	}
-	return pipeline, wrapGet(s.engine.Desc("build_number").Get(pipeline))
+	return pipeline, wrapGet(s.engine.Desc("pipeline_number").Get(pipeline))
 }
 
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
@@ -67,15 +67,15 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Branch: branch,
 	}
 	return pipeline, wrapGet(s.engine.
-		Desc("build_number").
-		Where("build_id < ?", num).
+		Desc("pipeline_number").
+		Where("pipeline_id < ?", num).
 		Get(pipeline))
 }
 
 func (s storage) GetPipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, perPage)
-	return pipelines, s.engine.Where("build_repo_id = ?", repo.ID).
-		Desc("build_number").
+	return pipelines, s.engine.Where("pipeline_repo_id = ?", repo.ID).
+		Desc("pipeline_number").
 		Limit(perPage, perPage*(page-1)).
 		Find(&pipelines)
 }
@@ -84,9 +84,9 @@ func (s storage) GetPipelineList(repo *model.Repo, page int) ([]*model.Pipeline,
 func (s storage) GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, perPage)
 	query := s.engine.
-		Where("build_repo_id = ?", repo.ID).
-		In("build_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
-		Desc("build_number")
+		Where("pipeline_repo_id = ?", repo.ID).
+		In("pipeline_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
+		Desc("pipeline_number")
 	if page > 0 {
 		query = query.Limit(perPage, perPage*(page-1))
 	}
@@ -106,7 +106,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Pro
 
 	// calc pipeline number
 	var number int64
-	if _, err := sess.SQL("SELECT MAX(build_number) FROM `pipelines` WHERE build_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {
+	if _, err := sess.SQL("SELECT MAX(pipeline_number) FROM `pipelines` WHERE pipeline_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {
 		return err
 	}
 	pipeline.Number = number + 1
@@ -138,7 +138,7 @@ func deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	// delete related procs
 	for startProcs := 0; ; startProcs += perPage {
 		procIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_build_id = ?", pipelineID).Find(&procIDs); err != nil {
+		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_pipeline_id = ?", pipelineID).Find(&procIDs); err != nil {
 			return err
 		}
 		if len(procIDs) == 0 {
@@ -151,7 +151,7 @@ func deletePipeline(sess *xorm.Session, pipelineID int64) error {
 			}
 		}
 	}
-	if _, err := sess.Where("build_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
+	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}
 	_, err := sess.ID(pipelineID).Delete(new(model.Pipeline))

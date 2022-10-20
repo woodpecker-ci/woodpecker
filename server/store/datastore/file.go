@@ -23,7 +23,7 @@ import (
 
 func (s storage) FileList(pipeline *model.Pipeline) ([]*model.File, error) {
 	files := make([]*model.File, 0, perPage)
-	return files, s.engine.Where("file_build_id = ?", pipeline.ID).Find(&files)
+	return files, s.engine.Where("file_pipeline_id = ?", pipeline.ID).Find(&files)
 }
 
 func (s storage) FileFind(proc *model.Proc, name string) (*model.File, error) {
