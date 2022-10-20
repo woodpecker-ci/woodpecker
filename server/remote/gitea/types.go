@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,8 @@
 
 package gitea
 
+import "code.gitea.io/sdk/gitea"
+
 type pushHook struct {
 	Sha     string `json:"sha"`
 	Ref     string `json:"ref"`
@@ -22,122 +25,21 @@ type pushHook struct {
 	Compare string `json:"compare_url"`
 	RefType string `json:"ref_type"`
 
-	Pusher struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-	} `json:"pusher"`
+	Pusher *gitea.User `json:"pusher"`
 
-	Repo struct {
-		ID       int64  `json:"id"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		URL      string `json:"html_url"`
-		Private  bool   `json:"private"`
-		Owner    struct {
-			Name     string `json:"name"`
-			Email    string `json:"email"`
-			Username string `json:"username"`
-		} `json:"owner"`
-	} `json:"repository"`
+	Repo *gitea.Repository `json:"repository"`
 
-	Commits []struct {
-		ID       string   `json:"id"`
-		Message  string   `json:"message"`
-		URL      string   `json:"url"`
-		Added    []string `json:"added"`
-		Removed  []string `json:"removed"`
-		Modified []string `json:"modified"`
-	} `json:"commits"`
+	Commits []gitea.PayloadCommit `json:"commits"`
 
-	Sender struct {
-		ID       int64  `json:"id"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Avatar   string `json:"avatar_url"`
-	} `json:"sender"`
+	HeadCommit gitea.PayloadCommit `json:"head_commit"`
+
+	Sender *gitea.User `json:"sender"`
 }
 
 type pullRequestHook struct {
-	Action      string `json:"action"`
-	Number      int64  `json:"number"`
-	PullRequest struct {
-		ID   int64 `json:"id"`
-		User struct {
-			ID       int64  `json:"id"`
-			Username string `json:"username"`
-			Name     string `json:"full_name"`
-			Email    string `json:"email"`
-			Avatar   string `json:"avatar_url"`
-		} `json:"user"`
-		Title     string `json:"title"`
-		Body      string `json:"body"`
-		State     string `json:"state"`
-		URL       string `json:"html_url"`
-		Mergeable bool   `json:"mergeable"`
-		Merged    bool   `json:"merged"`
-		MergeBase string `json:"merge_base"`
-		Base      struct {
-			Label string `json:"label"`
-			Ref   string `json:"ref"`
-			Sha   string `json:"sha"`
-			Repo  struct {
-				ID       int64  `json:"id"`
-				Name     string `json:"name"`
-				FullName string `json:"full_name"`
-				URL      string `json:"html_url"`
-				Private  bool   `json:"private"`
-				Owner    struct {
-					ID       int64  `json:"id"`
-					Username string `json:"username"`
-					Name     string `json:"full_name"`
-					Email    string `json:"email"`
-					Avatar   string `json:"avatar_url"`
-				} `json:"owner"`
-			} `json:"repo"`
-		} `json:"base"`
-		Head struct {
-			Label string `json:"label"`
-			Ref   string `json:"ref"`
-			Sha   string `json:"sha"`
-			Repo  struct {
-				ID       int64  `json:"id"`
-				Name     string `json:"name"`
-				FullName string `json:"full_name"`
-				URL      string `json:"html_url"`
-				Private  bool   `json:"private"`
-				Owner    struct {
-					ID       int64  `json:"id"`
-					Username string `json:"username"`
-					Name     string `json:"full_name"`
-					Email    string `json:"email"`
-					Avatar   string `json:"avatar_url"`
-				} `json:"owner"`
-			} `json:"repo"`
-		} `json:"head"`
-	} `json:"pull_request"`
-	Repo struct {
-		ID       int64  `json:"id"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		URL      string `json:"html_url"`
-		Private  bool   `json:"private"`
-		Owner    struct {
-			ID       int64  `json:"id"`
-			Username string `json:"username"`
-			Name     string `json:"full_name"`
-			Email    string `json:"email"`
-			Avatar   string `json:"avatar_url"`
-		} `json:"owner"`
-	} `json:"repository"`
-	Sender struct {
-		ID       int64  `json:"id"`
-		Login    string `json:"login"`
-		Username string `json:"username"`
-		Name     string `json:"full_name"`
-		Email    string `json:"email"`
-		Avatar   string `json:"avatar_url"`
-	} `json:"sender"`
+	Action      string             `json:"action"`
+	Number      int64              `json:"number"`
+	PullRequest *gitea.PullRequest `json:"pull_request"`
+	Repo        *gitea.Repository  `json:"repository"`
+	Sender      *gitea.User        `json:"sender"`
 }

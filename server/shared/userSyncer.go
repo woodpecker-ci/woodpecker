@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +75,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 			repo.Perm = &model.Perm{
 				UserID: user.ID,
 				RepoID: repo.ID,
-				Repo:   repo.FullName,
+				Repo:   repo,
 				Synced: unix,
 			}
 

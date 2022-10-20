@@ -17,14 +17,13 @@ package datastore
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) FileList(build *model.Build) ([]*model.File, error) {
+func (s storage) FileList(pipeline *model.Pipeline) ([]*model.File, error) {
 	files := make([]*model.File, 0, perPage)
-	return files, s.engine.Where("file_build_id = ?", build.ID).Find(&files)
+	return files, s.engine.Where("file_build_id = ?", pipeline.ID).Find(&files)
 }
 
 func (s storage) FileFind(proc *model.Proc, name string) (*model.File, error) {
@@ -41,11 +40,11 @@ func (s storage) FileRead(proc *model.Proc, name string) (io.ReadCloser, error) 
 		return nil, err
 	}
 	buf := bytes.NewBuffer(file.Data)
-	return ioutil.NopCloser(buf), err
+	return io.NopCloser(buf), err
 }
 
 func (s storage) FileCreate(file *model.File, reader io.Reader) error {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}

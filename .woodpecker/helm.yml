@@ -1,3 +1,8 @@
+variables:
+  - &when_path
+    - "charts/**"
+    - ".woodpecker/helm.yml"
+
 pipeline:
   set-version:
     image: alpine/helm:3.5.3
@@ -11,10 +16,7 @@ pipeline:
       - cat charts/woodpecker-agent/Chart.yaml
       - cat charts/woodpecker-server/Chart.yaml
     when:
-      path:
-        include:
-          - "charts/**"
-          - ".woodpecker/helm.yml"
+      path: *when_path
 
   lint:
     image: alpine/helm:3.5.3
@@ -22,10 +24,7 @@ pipeline:
       - helm lint charts/woodpecker-agent/
       - helm lint charts/woodpecker-server/
     when:
-      path:
-        include:
-          - "charts/**"
-          - ".woodpecker/helm.yml"
+      path: *when_path
 
   release:
     image: quay.io/helmpack/chart-releaser:v1.4.0
@@ -43,7 +42,4 @@ pipeline:
       - cd woodpecker-ci.github.io/ && cr index --owner woodpecker-ci --git-repo woodpecker-ci.github.io --pages-branch master --package-path ../.cr-release-packages --index-path ../.cr-index/index.yaml --charts-repo https://woodpecker-ci.org --push --release-name-template "helm-{{ .Name }}-{{ .Version }}"
     when:
       event: tag
-      path:
-        include:
-          - "charts/**"
-          - ".woodpecker/helm.yml"
+      path: *when_path

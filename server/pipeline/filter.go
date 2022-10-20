@@ -19,17 +19,18 @@ package pipeline
 import (
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
+func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
 	b := shared.ProcBuilder{
 		Repo:  &model.Repo{},
-		Curr:  build,
-		Last:  &model.Build{},
+		Curr:  pipeline,
+		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -37,11 +38,11 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 		Yamls: remoteYamlConfigs,
 	}
 
-	buildItems, err := b.Build()
+	pipelineItems, err := b.Build()
 	if err != nil {
 		return false
 	}
-	if len(buildItems) == 0 {
+	if len(pipelineItems) == 0 {
 		return true
 	}
 
@@ -49,11 +50,17 @@ func zeroSteps(build *model.Build, remoteYamlConfigs []*remote.FileMeta) bool {
 }
 
 // TODO: parse yaml once and not for each filter function
-func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
-	log.Trace().Msgf("hook.branchFiltered(): build branch: '%s' build event: '%s' config count: %d", build.Branch, build.Event, len(remoteYamlConfigs))
+// Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
+func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(remoteYamlConfigs))
 
-	if build.Event == model.EventTag || build.Event == model.EventDeploy {
-		return false, nil
+	matchMetadata := frontend.Metadata{
+		Curr: frontend.Pipeline{
+			Event: string(pipeline.Event),
+			Commit: frontend.Commit{
+				Branch: pipeline.Branch,
+			},
+		},
 	}
 
 	for _, remoteYamlConfig := range remoteYamlConfigs {
@@ -64,10 +71,22 @@ func branchFiltered(build *model.Build, remoteYamlConfigs []*remote.FileMeta) (b
 		}
 		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
 
-		if parsedPipelineConfig.Branches.Match(build.Branch) {
-			return false, nil
+		// ignore if the pipeline was filtered by matched constraints
+		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true); !match && err == nil {
+			continue
+		} else if err != nil {
+			return false, err
 		}
+
+		// ignore if the pipeline was filtered by the branch (legacy)
+		if !parsedPipelineConfig.Branches.Match(pipeline.Branch) {
+			continue
+		}
+
+		// at least one config yielded in a valid run.
+		return false, nil
 	}
 
+	// no configs yielded a valid run.
 	return true, nil
 }

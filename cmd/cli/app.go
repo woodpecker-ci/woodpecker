@@ -21,14 +21,15 @@ import (
 	zlog "github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/build"
 	"github.com/woodpecker-ci/woodpecker/cli/common"
+	"github.com/woodpecker-ci/woodpecker/cli/cron"
 	"github.com/woodpecker-ci/woodpecker/cli/deploy"
 	"github.com/woodpecker-ci/woodpecker/cli/exec"
 	"github.com/woodpecker-ci/woodpecker/cli/info"
 	"github.com/woodpecker-ci/woodpecker/cli/lint"
 	"github.com/woodpecker-ci/woodpecker/cli/log"
 	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
+	"github.com/woodpecker-ci/woodpecker/cli/pipeline"
 	"github.com/woodpecker-ci/woodpecker/cli/registry"
 	"github.com/woodpecker-ci/woodpecker/cli/repo"
 	"github.com/woodpecker-ci/woodpecker/cli/secret"
@@ -45,7 +46,7 @@ func newApp() *cli.App {
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
 	app.Commands = []*cli.Command{
-		build.Command,
+		pipeline.Command,
 		log.Command,
 		deploy.Command,
 		exec.Command,
@@ -56,6 +57,7 @@ func newApp() *cli.App {
 		user.Command,
 		lint.Command,
 		loglevel.Command,
+		cron.Command,
 	}
 
 	zlog.Logger = zlog.Output(

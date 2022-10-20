@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +25,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/mrjones/oauth"
 
@@ -86,7 +87,7 @@ func New(opts Opts) (remote.Remote, error) {
 	var keyFileBytes []byte
 	if opts.ConsumerRSA != "" {
 		var err error
-		keyFileBytes, err = ioutil.ReadFile(opts.ConsumerRSA)
+		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
 		if err != nil {
 			return nil, err
 		}
@@ -151,7 +152,7 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-func (c *Config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *Config) Repo(ctx context.Context, u *model.User, _ model.RemoteID, owner, name string) (*model.Repo, error) {
 	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -178,29 +179,29 @@ func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*mo
 	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
-func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
-	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
+	return client.FindFileForRepo(r.Owner, r.Name, f, p.Ref)
 }
 
-func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
-	status := internal.BuildStatus{
-		State: convertStatus(build.Status),
-		Desc:  common.GetBuildStatusDescription(build.Status),
-		Name:  fmt.Sprintf("Woodpecker #%d - %s", build.Number, build.Branch),
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
+	status := internal.PipelineStatus{
+		State: convertStatus(pipeline.Status),
+		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", pipeline.Number, pipeline.Branch),
 		Key:   "Woodpecker",
-		URL:   common.GetBuildStatusLink(repo, build, nil),
+		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
 	}
 
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, user.Token)
 
-	return client.CreateStatus(build.Commit, &status)
+	return client.CreateStatus(pipeline.Commit, &status)
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
@@ -236,12 +237,18 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
+// BranchHead returns the sha of the head (lastest commit) of the specified branch
+func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	// TODO(1138): missing implementation
+	return "", fmt.Errorf("missing implementation")
+}
+
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r, c.URL)
 }
 

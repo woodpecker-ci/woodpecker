@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,8 @@
 
 package remote
 
-//go:generate mockery -name Remote -output mocks -case=underscore
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Remote --output mocks --case underscore
 
 import (
 	"context"
@@ -41,8 +43,8 @@ type Remote interface {
 	// Teams fetches a list of team memberships from the remote system.
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
-	// Repo fetches the named repository from the remote system.
-	Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error)
+	// Repo fetches the repository from the remote system, preferred is using the ID, fallback is owner/name.
+	Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the remote system.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
@@ -53,14 +55,14 @@ type Remote interface {
 
 	// File fetches a file from the remote repository and returns in string
 	// format.
-	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error)
+	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
 
 	// Dir fetches a folder from the remote repository
-	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*FileMeta, error)
+	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*FileMeta, error)
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.
@@ -74,11 +76,15 @@ type Remote interface {
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
 	// Branches returns the names of all branches for the named repository.
+	// TODO: Add proper pagination handling and remove workaround in gitea remote
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
+
+	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
+	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.

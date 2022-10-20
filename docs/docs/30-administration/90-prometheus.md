@@ -16,7 +16,7 @@ scrape_configs:
 
 ## Authorization
 
-An administrator will need to generate a user api token and configure in the prometheus configuration file as a bearer token. Please see the following example:
+An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
 global:
@@ -32,19 +32,19 @@ scrape_configs:
 
 ## Metric Reference
 
-List of prometheus metrics specific to Woodpecker:
+List of Prometheus metrics specific to Woodpecker:
 
 ```
-# HELP woodpecker_build_count Build count.
-# TYPE woodpecker_build_count counter
+# HELP woodpecker_pipeline_count Build count.
+# TYPE woodpecker_pipeline_count counter
 woodpecker_build_count{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
 woodpecker_build_count{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
-# HELP woodpecker_build_time Build time.
-# TYPE woodpecker_build_time gauge
+# HELP woodpecker_pipeline_time Build time.
+# TYPE woodpecker_pipeline_time gauge
 woodpecker_build_time{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
 woodpecker_build_time{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 155
-# HELP woodpecker_build_total_count Total number of builds.
-# TYPE woodpecker_build_total_count gauge
+# HELP woodpecker_pipeline_total_count Total number of builds.
+# TYPE woodpecker_pipeline_total_count gauge
 woodpecker_build_total_count 1025
 # HELP woodpecker_pending_jobs Total number of pending build processes.
 # TYPE woodpecker_pending_jobs gauge

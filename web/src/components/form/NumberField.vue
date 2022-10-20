@@ -13,8 +13,6 @@ export default defineComponent({
   components: { TextField },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: Number,
       required: true,

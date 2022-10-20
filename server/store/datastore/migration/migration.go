@@ -35,12 +35,14 @@ var migrationTasks = []*task{
 	&dropSenders,
 	&alterTableLogUpdateColumnLogDataType,
 	&alterTableSecretsAddUserCol,
+	&lowercaseSecretNames,
+	&renameBuildsToPipeline,
 }
 
 var allBeans = []interface{}{
 	new(model.Agent),
-	new(model.Build),
-	new(model.BuildConfig),
+	new(model.Pipeline),
+	new(model.PipelineConfig),
 	new(model.Config),
 	new(model.File),
 	new(model.Logs),
@@ -52,6 +54,8 @@ var allBeans = []interface{}{
 	new(model.Task),
 	new(model.User),
 	new(model.ServerConfig),
+	new(model.Cron),
+	new(model.Redirection),
 }
 
 type migrations struct {
@@ -142,7 +146,7 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
 				continue
 			}
-			log.Info().Msgf("migration task '%s' done", task.name)
+			log.Debug().Msgf("migration task '%s' done", task.name)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
 		}

@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue';
 
 import { useDarkMode } from '~/compositions/useDarkMode';
-import { BuildStatus } from '~/lib/api/types';
+import { PipelineStatus } from '~/lib/api/types';
 
 const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'));
 
@@ -24,7 +24,7 @@ watch(
   { immediate: true },
 );
 
-function convertStatus(status: BuildStatus): Status {
+function convertStatus(status: PipelineStatus): Status {
   if (['blocked', 'declined', 'error', 'failure', 'killed'].includes(status)) {
     return 'error';
   }
@@ -43,7 +43,7 @@ function convertStatus(status: BuildStatus): Status {
 
 export function useFavicon() {
   return {
-    updateStatus(status?: BuildStatus | 'default') {
+    updateStatus(status?: PipelineStatus | 'default') {
       if (status === undefined || status === 'default') {
         faviconStatus.value = 'default';
       } else {

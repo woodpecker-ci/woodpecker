@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +41,7 @@ func Test_parser(t *testing.T) {
 			g.Assert(err).IsNil()
 		})
 		g.Describe("given a push hook", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
@@ -51,6 +52,21 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
 				g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
+			})
+		})
+		g.Describe("given a push hook from an branch creation", func() {
+			g.It("should extract repository and pipeline details", func() {
+				buf := bytes.NewBufferString(fixtures.HookPushBranch)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPush)
+				r, b, err := parseHook(req)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventPush)
+				g.Assert(b.Message).Equal("Delete '.woodpecker/.check.yml'\n")
+				g.Assert(b.ChangedFiles).Equal([]string{".woodpecker/.check.yml"})
 			})
 		})
 	})

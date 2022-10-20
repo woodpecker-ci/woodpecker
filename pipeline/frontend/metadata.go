@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package frontend
 
 import (
@@ -14,17 +28,19 @@ const (
 	EventPull   = "pull_request"
 	EventTag    = "tag"
 	EventDeploy = "deployment"
+	EventCron   = "cron"
+	EventManual = "manual"
 )
 
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		ID   string `json:"id,omitempty"`
-		Repo Repo   `json:"repo,omitempty"`
-		Curr Build  `json:"curr,omitempty"`
-		Prev Build  `json:"prev,omitempty"`
-		Job  Job    `json:"job,omitempty"`
-		Sys  System `json:"sys,omitempty"`
+		ID   string   `json:"id,omitempty"`
+		Repo Repo     `json:"repo,omitempty"`
+		Curr Pipeline `json:"curr,omitempty"`
+		Prev Pipeline `json:"prev,omitempty"`
+		Job  Job      `json:"job,omitempty"`
+		Sys  System   `json:"sys,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -37,8 +53,8 @@ type (
 		Branch  string   `json:"default_branch,omitempty"`
 	}
 
-	// Build defines runtime metadata for a build.
-	Build struct {
+	// Pipeline defines runtime metadata for a pipeline.
+	Pipeline struct {
 		Number   int64  `json:"number,omitempty"`
 		Created  int64  `json:"created,omitempty"`
 		Started  int64  `json:"started,omitempty"`
@@ -51,6 +67,7 @@ type (
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
 		Parent   int64  `json:"parent,omitempty"`
+		Cron     string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -144,15 +161,15 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_TAG":           "", // will be set if event is tag
 		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
 
-		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
-		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
-		"CI_BUILD_EVENT":         m.Curr.Event,
-		"CI_BUILD_LINK":          m.Curr.Link,
-		"CI_BUILD_DEPLOY_TARGET": m.Curr.Target,
-		"CI_BUILD_STATUS":        m.Curr.Status,
-		"CI_BUILD_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
-		"CI_BUILD_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-		"CI_BUILD_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
+		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
+		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
+		"CI_PIPELINE_EVENT":         m.Curr.Event,
+		"CI_PIPELINE_LINK":          m.Curr.Link,
+		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
+		"CI_PIPELINE_STATUS":        m.Curr.Status,
+		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
+		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
+		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
 		"CI_JOB_NUMBER":   strconv.Itoa(m.Job.Number),
 		"CI_JOB_STATUS":   "", // will be set by agent
@@ -169,6 +186,35 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
 		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
 
+		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
+		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
+		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
+		"CI_PREV_PIPELINE_LINK":          m.Prev.Link,
+		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
+		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
+		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
+		"CI_PREV_PIPELINE_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
+		"CI_PREV_PIPELINE_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
+
+		"CI_SYSTEM_NAME":     m.Sys.Name,
+		"CI_SYSTEM_LINK":     m.Sys.Link,
+		"CI_SYSTEM_HOST":     m.Sys.Host,
+		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
+		"CI_SYSTEM_VERSION":  version.Version,
+
+		// DEPRECATED
+		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
+		// use CI_PIPELINE_*
+		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
+		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
+		"CI_BUILD_EVENT":         m.Curr.Event,
+		"CI_BUILD_LINK":          m.Curr.Link,
+		"CI_BUILD_DEPLOY_TARGET": m.Curr.Target,
+		"CI_BUILD_STATUS":        m.Curr.Status,
+		"CI_BUILD_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
+		"CI_BUILD_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
+		"CI_BUILD_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
+		// use CI_PREV_PIPELINE_*
 		"CI_PREV_BUILD_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
 		"CI_PREV_BUILD_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_BUILD_EVENT":         m.Prev.Event,
@@ -178,14 +224,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
-
-		"CI_SYSTEM_NAME":     m.Sys.Name,
-		"CI_SYSTEM_LINK":     m.Sys.Link,
-		"CI_SYSTEM_HOST":     m.Sys.Host,
-		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
-		"CI_SYSTEM_VERSION":  version.Version,
-
-		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after next version
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
@@ -193,6 +231,8 @@ func (m *Metadata) Environ() map[string]string {
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
+
+	m.setDroneEnviron(params)
 
 	return params
 }

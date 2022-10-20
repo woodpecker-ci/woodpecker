@@ -11,11 +11,17 @@
           {{ event }}
         </span>
       </div>
-      <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editSecret(secret)" />
+      <IconButton
+        icon="edit"
+        class="ml-2 w-8 h-8"
+        :title="$t('repo.settings.secrets.edit')"
+        @click="editSecret(secret)"
+      />
       <IconButton
         icon="trash"
         class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
         :is-loading="isDeleting"
+        :title="$t('repo.settings.secrets.delete')"
         @click="deleteSecret(secret)"
       />
     </ListItem>
@@ -24,59 +30,31 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { toRef } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import { Secret } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'SecretList',
+const props = defineProps<{
+  modelValue: Secret[];
+  isDeleting: boolean;
+  i18nPrefix: string;
+}>();
 
-  components: {
-    ListItem,
-    IconButton,
-  },
+const emit = defineEmits<{
+  (event: 'edit', secret: Secret): void;
+  (event: 'delete', secret: Secret): void;
+}>();
 
-  props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    modelValue: {
-      type: Array as PropType<Secret[]>,
-      required: true,
-    },
+const secrets = toRef(props, 'modelValue');
 
-    isDeleting: {
-      type: Boolean,
-      required: true,
-    },
+function editSecret(secret: Secret) {
+  emit('edit', secret);
+}
 
-    i18nPrefix: {
-      type: String,
-      required: true,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    edit: (secret: Secret): boolean => true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    delete: (secret: Secret): boolean => true,
-  },
-
-  setup(props, ctx) {
-    const secrets = toRef(props, 'modelValue');
-
-    function editSecret(secret: Secret) {
-      ctx.emit('edit', secret);
-    }
-
-    function deleteSecret(secret: Secret) {
-      ctx.emit('delete', secret);
-    }
-
-    return { secrets, editSecret, deleteSecret };
-  },
-});
+function deleteSecret(secret: Secret) {
+  emit('delete', secret);
+}
 </script>

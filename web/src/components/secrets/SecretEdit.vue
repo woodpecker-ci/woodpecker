@@ -31,8 +31,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -42,91 +42,58 @@ import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import { Secret, WebhookEvents } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'SecretEdit',
+const props = defineProps<{
+  modelValue: Partial<Secret>;
+  isSaving: boolean;
+  i18nPrefix: string;
+}>();
 
-  components: {
-    Button,
-    InputField,
-    TextField,
-    CheckboxesField,
-  },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: Partial<Secret> | undefined): void;
+  (event: 'save', value: Partial<Secret>): void;
+}>();
 
-  props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    modelValue: {
-      type: Object as PropType<Partial<Secret>>,
-      default: undefined,
-    },
+const i18n = useI18n();
 
-    isSaving: {
-      type: Boolean,
-    },
-
-    i18nPrefix: {
-      type: String,
-      required: true,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: Partial<Secret> | undefined): boolean => true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    save: (_value: Partial<Secret>): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const i18n = useI18n();
-
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-    const images = computed<string>({
-      get() {
-        return innerValue.value?.image?.join(',') || '';
-      },
-      set(value) {
-        if (innerValue.value) {
-          innerValue.value.image = value
-            .split(',')
-            .map((s) => s.trim())
-            .filter((s) => s !== '');
-        }
-      },
-    });
-    const isEditingSecret = computed(() => !!innerValue.value?.id);
-
-    const secretEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
-      {
-        value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.build.event.pr'),
-        description: i18n.t('repo.settings.secrets.events.pr_warning'),
-      },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
-    ];
-
-    function save() {
-      if (!innerValue.value) {
-        return;
-      }
-      ctx.emit('save', innerValue.value);
-    }
-
-    return {
-      innerValue,
-      isEditingSecret,
-      secretEventsOptions,
-      images,
-      save,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
+const images = computed<string>({
+  get() {
+    return innerValue.value?.image?.join(',') || '';
+  },
+  set(value) {
+    if (innerValue.value) {
+      innerValue.value.image = value
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s !== '');
+    }
+  },
+});
+const isEditingSecret = computed(() => !!innerValue.value?.id);
+
+const secretEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
+  {
+    value: WebhookEvents.PullRequest,
+    text: i18n.t('repo.pipeline.event.pr'),
+    description: i18n.t('repo.settings.secrets.events.pr_warning'),
+  },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: i18n.t('repo.pipeline.event.manual') },
+];
+
+function save() {
+  if (!innerValue.value) {
+    return;
+  }
+  emit('save', innerValue.value);
+}
 </script>

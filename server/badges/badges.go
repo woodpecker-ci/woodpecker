@@ -25,7 +25,7 @@ var (
 )
 
 // Generate an SVG badge based on a pipeline
-func Generate(pipeline *model.Build) string {
+func Generate(pipeline *model.Pipeline) string {
 	if pipeline == nil {
 		return badgeNone
 	}

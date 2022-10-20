@@ -1,10 +1,10 @@
 # Databases
 
-The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL or Postgres database.
+The default database engine of Woodpecker is an embedded SQLite database which requires zero installation or configuration. But you can replace it with a MySQL/MariaDB or Postgres database.
 
-## Configure sqlite
+## Configure SQLite
 
-By default Woodpecker uses a sqlite database stored under `/var/lib/woodpecker/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the sqlite database.
+By default Woodpecker uses a SQLite database stored under `/var/lib/woodpecker/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the SQLite database.
 
 ```diff
 # docker-compose.yml
@@ -17,9 +17,9 @@ services:
 +     - woodpecker-server-data:/var/lib/woodpecker/
 ```
 
-## Configure MySQL
+## Configure MySQL/MariaDB
 
-The below example demonstrates mysql database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
+The below example demonstrates MySQL database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
 
 ```diff
 # docker-compose.yml
@@ -35,8 +35,8 @@ services:
 
 ## Configure Postgres
 
-The below example demonstrates postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
-Please use postgres versions equal or higher than **11**.
+The below example demonstrates Postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
+Please use Postgres versions equal or higher than **11**.
 
 ```diff
 # docker-compose.yml
@@ -52,7 +52,7 @@ services:
 
 ## Database Creation
 
-Woodpecker does not create your database automatically. If you are using the mysql or postgres driver you will need to manually create your database using `CREATE DATABASE`
+Woodpecker does not create your database automatically. If you are using the MySQL or Postgres driver you will need to manually create your database using `CREATE DATABASE`
 
 ## Database Migration
 

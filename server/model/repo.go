@@ -26,6 +26,7 @@ import (
 type Repo struct {
 	ID                           int64          `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID                       int64          `json:"-"                               xorm:"repo_user_id"`
+	RemoteID                     RemoteID       `json:"-"                               xorm:"'remote_id'"`
 	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
@@ -74,10 +75,18 @@ func ParseRepo(str string) (user, repo string, err error) {
 
 // Update updates the repository with values from the given Repo.
 func (r *Repo) Update(from *Repo) {
+	if from.RemoteID.IsValid() {
+		r.RemoteID = from.RemoteID
+	}
+	r.Owner = from.Owner
+	r.Name = from.Name
+	r.FullName = from.FullName
 	r.Avatar = from.Avatar
 	r.Link = from.Link
 	r.SCMKind = from.SCMKind
-	r.Clone = from.Clone
+	if len(from.Clone) > 0 {
+		r.Clone = from.Clone
+	}
 	r.Branch = from.Branch
 	if from.IsSCMPrivate != r.IsSCMPrivate {
 		if from.IsSCMPrivate {
@@ -98,4 +107,10 @@ type RepoPatch struct {
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
+}
+
+type RemoteID string
+
+func (r RemoteID) IsValid() bool {
+	return r != "" && r != "0"
 }

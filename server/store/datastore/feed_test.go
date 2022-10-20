@@ -23,7 +23,7 @@ import (
 )
 
 func TestRepoListLatest(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Build))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
 	defer closer()
 
 	user := &model.User{
@@ -37,18 +37,21 @@ func TestRepoListLatest(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
+		RemoteID: "1",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
+		RemoteID: "2",
 		IsActive: true,
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
+		RemoteID: "3",
 		IsActive: true,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
@@ -56,51 +59,51 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo3))
 
 	for _, perm := range []*model.Perm{
-		{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-		{UserID: user.ID, Repo: repo2.FullName, Push: true, Admin: true},
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+		{UserID: user.ID, Repo: repo2, Push: true, Admin: true},
 	} {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	build1 := &model.Build{
+	pipeline1 := &model.Pipeline{
 		RepoID: repo1.ID,
 		Status: model.StatusFailure,
 	}
-	build2 := &model.Build{
+	pipeline2 := &model.Pipeline{
 		RepoID: repo1.ID,
 		Status: model.StatusRunning,
 	}
-	build3 := &model.Build{
+	pipeline3 := &model.Pipeline{
 		RepoID: repo2.ID,
 		Status: model.StatusKilled,
 	}
-	build4 := &model.Build{
+	pipeline4 := &model.Pipeline{
 		RepoID: repo3.ID,
 		Status: model.StatusError,
 	}
-	assert.NoError(t, store.CreateBuild(build1))
-	assert.NoError(t, store.CreateBuild(build2))
-	assert.NoError(t, store.CreateBuild(build3))
-	assert.NoError(t, store.CreateBuild(build4))
+	assert.NoError(t, store.CreatePipeline(pipeline1))
+	assert.NoError(t, store.CreatePipeline(pipeline2))
+	assert.NoError(t, store.CreatePipeline(pipeline3))
+	assert.NoError(t, store.CreatePipeline(pipeline4))
 
-	builds, err := store.RepoListLatest(user)
+	pipelines, err := store.RepoListLatest(user)
 	if err != nil {
-		t.Errorf("Unexpected error: repository list with latest build: %s", err)
+		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
 		return
 	}
-	if got, want := len(builds), 2; got != want {
+	if got, want := len(pipelines), 2; got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
-	if got, want := builds[0].Status, string(model.StatusRunning); want != got {
+	if got, want := pipelines[0].Status, string(model.StatusRunning); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
-	if got, want := builds[0].FullName, repo1.FullName; want != got {
+	if got, want := pipelines[0].FullName, repo1.FullName; want != got {
 		t.Errorf("Want repository name %s, got %s", want, got)
 	}
-	if got, want := builds[1].Status, string(model.StatusKilled); want != got {
+	if got, want := pipelines[1].Status, string(model.StatusKilled); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
-	if got, want := builds[1].FullName, repo2.FullName; want != got {
+	if got, want := pipelines[1].FullName, repo2.FullName; want != got {
 		t.Errorf("Want repository name %s, got %s", want, got)
 	}
 }

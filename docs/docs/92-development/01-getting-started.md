@@ -31,11 +31,11 @@ Install make on:
   - [Windows](https://stackoverflow.com/a/32127632/8461267)
   - Mac OS: `brew install make`
 
-### Install Node.js & Yarn
+### Install Node.js & pnpm
 
 Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build Woodpeckers UI or documentation.
 
-For dependencies installation (node_modules) for the UI and documentation of Woodpecker the package-manager Yarn is used. The installation of Yarn is described by [this guide](https://yarnpkg.com/getting-started/install).
+For dependencies installation (node_modules) for the UI and documentation of Woodpecker the package-manager pnpm is used. The installation of pnpm is described by [this guide](https://pnpm.io/installation).
 
 ### Create a `.env` file with your development configuration
 
@@ -61,7 +61,7 @@ WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-syst
 WOODPECKER_MAX_PROCS=1
 
 # enable if you want to develop the UI
-# WOODPECKER_DEV_WWW_PROXY=http://localhost:3000
+# WOODPECKER_DEV_WWW_PROXY=http://localhost:8010
 
 # used so you can login without using a public address
 WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000
@@ -75,7 +75,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup O-Auth
 
-Create an O-Auth app for your forge as describe in the [forges documentation](/docs/administration/forges/overview). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an O-Auth app for your forge as describe in the [forges documentation](../30-administration/11-forges/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
 
 ## Developing with VS-Code
 

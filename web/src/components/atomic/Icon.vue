@@ -3,6 +3,7 @@
   <i-mdi-clock-time-eight-outline v-else-if="name === 'since'" class="h-6 w-6" />
   <i-mdi-source-branch v-else-if="name === 'push'" class="h-6 w-6" />
   <i-mdi-source-pull v-else-if="name === 'pull_request'" class="h-6 w-6" />
+  <i-mdi-gesture-tap v-else-if="name === 'manual-pipeline'" class="h-6 w-6" />
   <i-mdi-tag-outline v-else-if="name === 'tag'" class="h-6 w-6" />
   <i-clarity-deploy-line v-else-if="name === 'deployment'" class="h-6 w-6" />
   <i-mdisource-commit v-else-if="name === 'commit'" class="h-6 w-6" />
@@ -36,7 +37,10 @@
   <i-mdi-chevron-right v-else-if="name === 'chevron-right'" class="h-6 w-6" />
   <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
   <i-ic-baseline-edit v-else-if="name === 'edit'" class="h-6 w-6" />
-  <i-ic-baseline-download v-else-if="name === 'download'" class="h-6 w-6" />
+  <i-ic-baseline-download-for-offline v-else-if="name === 'download'" class="h-6 w-6" />
+  <i-icon-park-outline-alarm-clock v-else-if="name === 'stopwatch'" class="h-6 w-6" />
+  <i-ic-baseline-file-download v-else-if="name === 'auto-scroll'" class="h-6 w-6" />
+  <i-ic-baseline-file-download-off v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -48,6 +52,7 @@ export type IconNames =
   | 'since'
   | 'push'
   | 'pull_request'
+  | 'manual-pipeline'
   | 'tag'
   | 'deployment'
   | 'commit'
@@ -82,7 +87,10 @@ export type IconNames =
   | 'turn-off'
   | 'close'
   | 'edit'
-  | 'download';
+  | 'stopwatch'
+  | 'download'
+  | 'auto-scroll'
+  | 'auto-scroll-off';
 
 export default defineComponent({
   name: 'Icon',

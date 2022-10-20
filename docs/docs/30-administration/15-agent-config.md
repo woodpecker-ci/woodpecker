@@ -21,7 +21,7 @@ The following are automatically set and can be overridden:
 
 ## Processes per agent
 
-By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parellel processing on a per-agent basis.
+By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parallel processing on a per-agent basis.
 
 ```yaml
 # docker-compose.yml
@@ -88,7 +88,7 @@ Configures the number of parallel builds.
 ### `WOODPECKER_FILTER_LABELS`
 > Default: empty
 
-Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](/docs/usage/pipeline-syntax#labels).
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](../20-usage/20-pipeline-syntax.md#labels).
 
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`

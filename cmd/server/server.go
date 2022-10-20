@@ -23,15 +23,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -39,6 +38,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cron"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -49,6 +49,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 func run(c *cli.Context) error {
@@ -62,7 +63,7 @@ func run(c *cli.Context) error {
 	}
 
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if c.IsSet("log-level") {
 		logLevelFlag := c.String("log-level")
 		lvl, err := zerolog.ParseLevel(logLevelFlag)
@@ -117,36 +118,13 @@ func run(c *cli.Context) error {
 
 	setupEvilGlobals(c, _store, _remote)
 
-	proxyWebUI := c.String("www-proxy")
-
-	var webUIServe func(w http.ResponseWriter, r *http.Request)
-
-	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
-	} else {
-		origin, _ := url.Parse(proxyWebUI)
-
-		director := func(req *http.Request) {
-			req.Header.Add("X-Forwarded-Host", req.Host)
-			req.Header.Add("X-Origin-Host", origin.Host)
-			req.URL.Scheme = origin.Scheme
-			req.URL.Host = origin.Host
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
-		webUIServe = proxy.ServeHTTP
-	}
-
-	// setup the server and start the listener
-	handler := router.Load(
-		webUIServe,
-		middleware.Logger(time.RFC3339, true),
-		middleware.Version,
-		middleware.Config(c),
-		middleware.Store(c, _store),
-	)
-
 	var g errgroup.Group
+
+	setupMetrics(&g, _store)
+
+	g.Go(func() error {
+		return cron.Start(c.Context, _store, _remote)
+	})
 
 	// start the grpc server
 	g.Go(func() error {
@@ -183,13 +161,36 @@ func run(c *cli.Context) error {
 		return nil
 	})
 
-	setupMetrics(&g, _store)
+	proxyWebUI := c.String("www-proxy")
+	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
-	// start the server with tls enabled
+	if proxyWebUI == "" {
+		webUIServe = web.New().ServeHTTP
+	} else {
+		origin, _ := url.Parse(proxyWebUI)
+
+		director := func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", origin.Host)
+			req.URL.Scheme = origin.Scheme
+			req.URL.Host = origin.Host
+		}
+
+		proxy := &httputil.ReverseProxy{Director: director}
+		webUIServe = proxy.ServeHTTP
+	}
+
+	// setup the server and start the listener
+	handler := router.Load(
+		webUIServe,
+		middleware.Logger(time.RFC3339, true),
+		middleware.Version,
+		middleware.Config(c),
+		middleware.Store(c, _store),
+	)
+
 	if c.String("server-cert") != "" {
-		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
-		})
+		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
 				Addr:    ":https",
@@ -203,48 +204,51 @@ func run(c *cli.Context) error {
 				c.String("server-key"),
 			)
 		})
-		return g.Wait()
-	}
 
-	// start the server without tls enabled
-	if !c.Bool("lets-encrypt") {
-		return http.ListenAndServe(
-			c.String("server-addr"),
-			handler,
-		)
-	}
+		// http to https redirect
+		redirect := func(w http.ResponseWriter, req *http.Request) {
+			serverHost := server.Config.Server.Host
+			serverHost = strings.TrimPrefix(serverHost, "http://")
+			serverHost = strings.TrimPrefix(serverHost, "https://")
+			req.URL.Scheme = "https"
+			req.URL.Host = serverHost
 
-	// start the server with lets encrypt enabled
-	// listen on ports 443 and 80
-	address, err := url.Parse(c.String("server-host"))
-	if err != nil {
-		return err
-	}
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 
-	dir := cacheDir()
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-
-	manager := &autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(address.Host),
-		Cache:      autocert.DirCache(dir),
-	}
-	g.Go(func() error {
-		return http.ListenAndServe(":http", manager.HTTPHandler(http.HandlerFunc(redirect)))
-	})
-	g.Go(func() error {
-		serve := &http.Server{
-			Addr:    ":https",
-			Handler: handler,
-			TLSConfig: &tls.Config{
-				GetCertificate: manager.GetCertificate,
-				NextProtos:     []string{"h2", "http/1.1"},
-			},
+			http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
 		}
-		return serve.ListenAndServeTLS("", "")
-	})
+
+		g.Go(func() error {
+			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+		})
+	} else if c.Bool("lets-encrypt") {
+		// start the server with lets-encrypt
+		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
+		certmagic.DefaultACME.Agreed = true
+
+		address, err := url.Parse(c.String("server-host"))
+		if err != nil {
+			return err
+		}
+
+		g.Go(func() error {
+			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
+				log.Err(err).Msg("certmagic does not work")
+				os.Exit(1)
+			}
+			return nil
+		})
+	} else {
+		// start the server without tls
+		g.Go(func() error {
+			return http.ListenAndServe(
+				c.String("server-addr"),
+				handler,
+			)
+		})
+	}
+
+	log.Info().Msgf("Starting Woodpecker server with version '%s'", version.String())
 
 	return g.Wait()
 }
@@ -348,24 +352,4 @@ func (a *authorizer) authorize(ctx context.Context) error {
 		return errors.New("invalid agent token")
 	}
 	return errors.New("missing agent token")
-}
-
-func redirect(w http.ResponseWriter, req *http.Request) {
-	serverHost := server.Config.Server.Host
-	serverHost = strings.TrimPrefix(serverHost, "http://")
-	serverHost = strings.TrimPrefix(serverHost, "https://")
-	req.URL.Scheme = "https"
-	req.URL.Host = serverHost
-
-	w.Header().Set("Strict-Transport-Security", "max-age=31536000")
-
-	http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
-}
-
-func cacheDir() string {
-	const base = "golang-autocert"
-	if xdg := os.Getenv("XDG_CACHE_HOME"); xdg != "" {
-		return filepath.Join(xdg, base)
-	}
-	return filepath.Join(os.Getenv("HOME"), ".cache", base)
 }

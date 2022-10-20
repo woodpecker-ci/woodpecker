@@ -1,6 +1,7 @@
 <template>
   <div
     class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white hover:border-gray-300 dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:border-dark-800"
+    :class="{ 'bg-gray-200 dark:bg-gray-600': disabled }"
   >
     <input
       v-if="lines === 1"
@@ -28,8 +29,6 @@ export default defineComponent({
   name: 'TextField',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       default: '',

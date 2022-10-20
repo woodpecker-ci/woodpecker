@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
@@ -26,10 +27,12 @@ type (
 		Environment List
 		Event       List
 		Branch      List
+		Cron        List
 		Status      List
 		Matrix      Map
 		Local       types.BoolTrue
 		Path        Path
+		Evaluate    string `yaml:"evaluate,omitempty"`
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -57,13 +60,23 @@ func (when *When) IsEmpty() bool {
 }
 
 // Returns true if at least one of the internal constraints is true.
-func (when *When) Match(metadata frontend.Metadata) bool {
+func (when *When) Match(metadata frontend.Metadata, global bool) (bool, error) {
 	for _, c := range when.Constraints {
-		if c.Match(metadata) {
-			return true
+		match, err := c.Match(metadata, global)
+		if err != nil {
+			return false, err
+		}
+		if match {
+			return true, nil
 		}
 	}
-	return when.IsEmpty()
+
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata, global)
+	}
+	return false, nil
 }
 
 func (when *When) IncludesStatus(status string) bool {
@@ -119,14 +132,21 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraint) Match(metadata frontend.Metadata) bool {
-	match := c.Platform.Match(metadata.Sys.Platform) &&
+func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error) {
+	match := true
+	if !global {
+		c.SetDefaultEventFilter()
+
+		// apply step only filters
+		match = c.Matrix.Match(metadata.Job.Matrix)
+	}
+
+	match = match && c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
-		c.Instance.Match(metadata.Sys.Host) &&
-		c.Matrix.Match(metadata.Job.Matrix)
+		c.Instance.Match(metadata.Sys.Host)
 
 	// changed files filter apply only for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
@@ -137,7 +157,42 @@ func (c *Constraint) Match(metadata frontend.Metadata) bool {
 		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
 	}
 
-	return match
+	if metadata.Curr.Event == frontend.EventCron {
+		match = match && c.Cron.Match(metadata.Curr.Cron)
+	}
+
+	if c.Evaluate != "" {
+		env := metadata.Environ()
+		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AsBool())
+		if err != nil {
+			return false, err
+		}
+		result, err := expr.Run(out, env)
+		if err != nil {
+			return false, err
+		}
+		match = match && result.(bool)
+	}
+
+	return match, nil
+}
+
+// SetDefaultEventFilter set default e event filter if not event filter is already set
+func (c *Constraint) SetDefaultEventFilter() {
+	if c.Event.IsEmpty() {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+			frontend.EventManual,
+		}
+	}
+}
+
+// IsEmpty return true if a constraint has no conditions
+func (c List) IsEmpty() bool {
+	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
 
 // Match returns true if the string matches the include patterns and does not

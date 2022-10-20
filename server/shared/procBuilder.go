@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -40,8 +42,8 @@ import (
 // ProcBuilder Takes the hook data and the yaml and returns in internal data model
 type ProcBuilder struct {
 	Repo  *model.Repo
-	Curr  *model.Build
-	Last  *model.Build
+	Curr  *model.Pipeline
+	Last  *model.Pipeline
 	Netrc *model.Netrc
 	Secs  []*model.Secret
 	Regs  []*model.Registry
@@ -50,7 +52,7 @@ type ProcBuilder struct {
 	Envs  map[string]string
 }
 
-type BuildItem struct {
+type PipelineItem struct {
 	Proc      *model.Proc
 	Platform  string
 	Labels    map[string]string
@@ -59,8 +61,8 @@ type BuildItem struct {
 	Config    *backend.Config
 }
 
-func (b *ProcBuilder) Build() ([]*BuildItem, error) {
-	var items []*BuildItem
+func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
+	var items []*PipelineItem
 
 	sort.Sort(remote.ByName(b.Yamls))
 
@@ -78,12 +80,12 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 
 		for _, axis := range axes {
 			proc := &model.Proc{
-				BuildID: b.Curr.ID,
-				PID:     pidSequence,
-				PGID:    pidSequence,
-				State:   model.StatusPending,
-				Environ: axis,
-				Name:    SanitizePath(y.Name),
+				PipelineID: b.Curr.ID,
+				PID:        pidSequence,
+				PGID:       pidSequence,
+				State:      model.StatusPending,
+				Environ:    axis,
+				Name:       SanitizePath(y.Name),
 			}
 
 			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
@@ -117,17 +119,37 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
+			// checking if filtered.
+			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Marked as skipped, dose not match metadata",
+				)
+				proc.State = model.StatusSkipped
+			} else if err != nil {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Pipeline config could not be parsed",
+				)
+				return nil, err
+			}
+
+			// TODO: deprecated branches filter => remove after some time
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
+				log.Debug().Str("pipeline", proc.Name).Msg(
+					"Marked as skipped, dose not match branch",
+				)
 				proc.State = model.StatusSkipped
 			}
 
-			ir := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			if err != nil {
+				return nil, err
+			}
 
 			if len(ir.Stages) == 0 {
 				continue
 			}
 
-			item := &BuildItem{
+			item := &PipelineItem{
 				Proc:      proc,
 				Config:    ir,
 				Labels:    parsed.Labels,
@@ -147,15 +169,14 @@ func (b *ProcBuilder) Build() ([]*BuildItem, error) {
 	items = filterItemsWithMissingDependencies(items)
 
 	// check if at least one proc can start, if list is not empty
-	procListContainsItemsToRun(items)
 	if len(items) > 0 && !procListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("build has no startpoint")
+		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
 
 	return items, nil
 }
 
-func procListContainsItemsToRun(items []*BuildItem) bool {
+func procListContainsItemsToRun(items []*PipelineItem) bool {
 	for i := range items {
 		if items[i].Proc.State == model.StatusPending {
 			return true
@@ -164,8 +185,8 @@ func procListContainsItemsToRun(items []*BuildItem) bool {
 	return false
 }
 
-func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
-	itemsToRemove := make([]*BuildItem, 0)
+func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
+	itemsToRemove := make([]*PipelineItem, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
@@ -176,7 +197,7 @@ func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
 	}
 
 	if len(itemsToRemove) > 0 {
-		filtered := make([]*BuildItem, 0)
+		filtered := make([]*PipelineItem, 0)
 		for _, item := range items {
 			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
 				filtered = append(filtered, item)
@@ -189,7 +210,7 @@ func filterItemsWithMissingDependencies(items []*BuildItem) []*BuildItem {
 	return items
 }
 
-func containsItemWithName(name string, items []*BuildItem) bool {
+func containsItemWithName(name string, items []*PipelineItem) bool {
 	for _, item := range items {
 		if name == item.Proc.Name {
 			return true
@@ -216,7 +237,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) *backend.Config {
+func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -260,7 +281,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
-				"%d_%d",
+				"wp_%d_%d",
 				procID,
 				rand.Int(),
 			),
@@ -271,16 +292,16 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func SetBuildStepsOnBuild(build *model.Build, buildItems []*BuildItem) *model.Build {
+func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*PipelineItem) *model.Pipeline {
 	var pidSequence int
-	for _, item := range buildItems {
-		build.Procs = append(build.Procs, item.Proc)
+	for _, item := range pipelineItems {
+		pipeline.Procs = append(pipeline.Procs, item.Proc)
 		if pidSequence < item.Proc.PID {
 			pidSequence = item.Proc.PID
 		}
 	}
 
-	for _, item := range buildItems {
+	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
 			var gid int
 			for _, step := range stage.Steps {
@@ -289,26 +310,26 @@ func SetBuildStepsOnBuild(build *model.Build, buildItems []*BuildItem) *model.Bu
 					gid = pidSequence
 				}
 				proc := &model.Proc{
-					BuildID: build.ID,
-					Name:    step.Alias,
-					PID:     pidSequence,
-					PPID:    item.Proc.PID,
-					PGID:    gid,
-					State:   model.StatusPending,
+					PipelineID: pipeline.ID,
+					Name:       step.Alias,
+					PID:        pidSequence,
+					PPID:       item.Proc.PID,
+					PGID:       gid,
+					State:      model.StatusPending,
 				}
 				if item.Proc.State == model.StatusSkipped {
 					proc.State = model.StatusSkipped
 				}
-				build.Procs = append(build.Procs, proc)
+				pipeline.Procs = append(pipeline.Procs, proc)
 			}
 		}
 	}
 
-	return build
+	return pipeline
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.Proc, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, proc *model.Proc, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -322,53 +343,8 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Private: repo.IsSCMPrivate,
 			Branch:  repo.Branch,
 		},
-		Curr: frontend.Build{
-			Number:   build.Number,
-			Parent:   build.Parent,
-			Created:  build.Created,
-			Started:  build.Started,
-			Finished: build.Finished,
-			Status:   string(build.Status),
-			Event:    string(build.Event),
-			Link:     build.Link,
-			Target:   build.Deploy,
-			Commit: frontend.Commit{
-				Sha:     build.Commit,
-				Ref:     build.Ref,
-				Refspec: build.Refspec,
-				Branch:  build.Branch,
-				Message: build.Message,
-				Author: frontend.Author{
-					Name:   build.Author,
-					Email:  build.Email,
-					Avatar: build.Avatar,
-				},
-				ChangedFiles: build.ChangedFiles,
-			},
-		},
-		Prev: frontend.Build{
-			Number:   last.Number,
-			Created:  last.Created,
-			Started:  last.Started,
-			Finished: last.Finished,
-			Status:   string(last.Status),
-			Event:    string(last.Event),
-			Link:     last.Link,
-			Target:   last.Deploy,
-			Commit: frontend.Commit{
-				Sha:     last.Commit,
-				Ref:     last.Ref,
-				Refspec: last.Refspec,
-				Branch:  last.Branch,
-				Message: last.Message,
-				Author: frontend.Author{
-					Name:   last.Author,
-					Email:  last.Email,
-					Avatar: last.Avatar,
-				},
-				ChangedFiles: last.ChangedFiles,
-			},
-		},
+		Curr: metadataPipelineFromModelPipeline(pipeline, true),
+		Prev: metadataPipelineFromModelPipeline(last, false),
 		Job: frontend.Job{
 			Number: proc.PID,
 			Matrix: proc.Environ,
@@ -379,6 +355,44 @@ func metadataFromStruct(repo *model.Repo, build, last *model.Build, proc *model.
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 		},
+	}
+}
+
+func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) frontend.Pipeline {
+	cron := ""
+	if pipeline.Event == model.EventCron {
+		cron = pipeline.Sender
+	}
+
+	parent := int64(0)
+	if includeParent {
+		parent = pipeline.Parent
+	}
+
+	return frontend.Pipeline{
+		Number:   pipeline.Number,
+		Parent:   parent,
+		Created:  pipeline.Created,
+		Started:  pipeline.Started,
+		Finished: pipeline.Finished,
+		Status:   string(pipeline.Status),
+		Event:    string(pipeline.Event),
+		Link:     pipeline.Link,
+		Target:   pipeline.Deploy,
+		Commit: frontend.Commit{
+			Sha:     pipeline.Commit,
+			Ref:     pipeline.Ref,
+			Refspec: pipeline.Refspec,
+			Branch:  pipeline.Branch,
+			Message: pipeline.Message,
+			Author: frontend.Author{
+				Name:   pipeline.Author,
+				Email:  pipeline.Email,
+				Avatar: pipeline.Avatar,
+			},
+			ChangedFiles: pipeline.ChangedFiles,
+		},
+		Cron: cron,
 	}
 }
 

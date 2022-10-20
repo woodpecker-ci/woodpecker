@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,8 @@
 package github
 
 import (
+	"fmt"
+
 	"github.com/google/go-github/v39/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -30,11 +33,11 @@ const (
 )
 
 const (
-	descPending  = "this build is pending"
-	descSuccess  = "the build was successful"
-	descFailure  = "the build failed"
-	descBlocked  = "the build requires approval"
-	descDeclined = "the build was rejected"
+	descPending  = "this pipeline is pending"
+	descSuccess  = "the pipeline was successful"
+	descFailure  = "the pipeline failed"
+	descBlocked  = "the pipeline requires approval"
+	descDeclined = "the pipeline was rejected"
 	descError    = "oops, something went wrong"
 )
 
@@ -82,6 +85,7 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(from.GetID())),
 		Name:         from.GetName(),
 		FullName:     from.GetFullName(),
 		Link:         from.GetHTMLURL(),
@@ -142,6 +146,7 @@ func convertTeam(from *github.Organization) *model.Team {
 // from a webhook and convert to the common Woodpecker repository structure.
 func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	repo := &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(eventRepo.GetID())),
 		Owner:        eventRepo.GetOwner().GetLogin(),
 		Name:         eventRepo.GetName(),
 		FullName:     eventRepo.GetFullName(),

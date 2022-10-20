@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +50,7 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
+		RemoteID:     model.RemoteID(from.UUID),
 		Clone:        cloneLink(from),
 		Owner:        strings.Split(from.FullName, "/")[0],
 		Name:         strings.Split(from.FullName, "/")[1],
@@ -110,27 +112,27 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 
 // convertTeamList is a helper function used to convert a Bitbucket team list
 // structure to the Woodpecker Team structure.
-func convertTeamList(from []*internal.Account) []*model.Team {
+func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	var teams []*model.Team
-	for _, team := range from {
-		teams = append(teams, convertTeam(team))
+	for _, workspace := range from {
+		teams = append(teams, convertWorkspace(workspace))
 	}
 	return teams
 }
 
 // convertTeam is a helper function used to convert a Bitbucket team account
 // structure to the Woodpecker Team structure.
-func convertTeam(from *internal.Account) *model.Team {
+func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
-		Login:  from.Login,
+		Login:  from.Slug,
 		Avatar: from.Links.Avatar.Href,
 	}
 }
 
 // convertPullHook is a helper function used to convert a Bitbucket pull request
-// hook to the Woodpecker build struct holding commit information.
-func convertPullHook(from *internal.PullRequestHook) *model.Build {
-	return &model.Build{
+// hook to the Woodpecker pipeline struct holding commit information.
+func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	return &model.Pipeline{
 		Event:  model.EventPull,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
@@ -150,9 +152,9 @@ func convertPullHook(from *internal.PullRequestHook) *model.Build {
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
-// hook to the Woodpecker build struct holding commit information.
-func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Build {
-	build := &model.Build{
+// hook to the Woodpecker pipeline struct holding commit information.
+func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
+	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
 		Link:      change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
@@ -164,16 +166,16 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Bu
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
-		build.Event = model.EventTag
-		build.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		pipeline.Event = model.EventTag
+		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
 	default:
-		build.Event = model.EventPush
-		build.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
+		pipeline.Event = model.EventPush
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
 	if len(change.New.Target.Author.Raw) != 0 {
-		build.Email = extractEmail(change.New.Target.Author.Raw)
+		pipeline.Email = extractEmail(change.New.Target.Author.Raw)
 	}
-	return build
+	return pipeline
 }
 
 // regex for git author fields ("name <name@mail.tld>")

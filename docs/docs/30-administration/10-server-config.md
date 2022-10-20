@@ -4,7 +4,7 @@
 
 Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-If registration is open every user with an account at the configured [forges](/docs/administration/forges/overview) can login to Woodpecker.
+If registration is open every user with an account at the configured [forges](./11-forges/10-overview.md) can login to Woodpecker.
 This example enables open registration for users that are members of approved organizations:
 
 ```diff
@@ -127,7 +127,7 @@ Disable colored debug output.
 ### `WOODPECKER_HOST`
 > Default: empty
 
-Server fully qualified url of the user-facing hostname.
+Server fully qualified URL of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
@@ -272,7 +272,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 ### `WOODPECKER_DATABASE_DATASOURCE`
 > Default: `woodpecker.sqlite`
 
-The database connection string. The default value is the path of the embedded sqlite database file.
+The database connection string. The default value is the path of the embedded SQLite database file.
 
 Example:
 ```bash
@@ -354,7 +354,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 > Default: ``
 
-Specify a configuration service endpoint, see [Configuration Extension](/docs/administration/external-configuration-api)
+Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
 
 ---
 

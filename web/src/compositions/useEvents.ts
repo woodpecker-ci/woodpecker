@@ -1,4 +1,4 @@
-import BuildStore from '~/store/builds';
+import BuildStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 import { repoSlug } from '~/utils/helpers';
 
@@ -25,18 +25,18 @@ export default () => {
     repoStore.setRepo(repo);
 
     // contains build update
-    if (!data.build) {
+    if (!data.pipeline) {
       return;
     }
-    const { build } = data;
-    buildStore.setBuild(repo.owner, repo.name, build);
-    buildStore.setBuildFeedItem({ ...build, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
+    const { pipeline } = data;
+    buildStore.setPipeline(repo.owner, repo.name, pipeline);
+    buildStore.setPipelineFeedItem({ ...pipeline, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
     // contains proc update
     if (!data.proc) {
       return;
     }
     const { proc } = data;
-    buildStore.setProc(repo.owner, repo.name, build.number, proc);
+    buildStore.setProc(repo.owner, repo.name, pipeline.number, proc);
   });
 };

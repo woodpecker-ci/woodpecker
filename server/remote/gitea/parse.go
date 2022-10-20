@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,8 +39,8 @@ const (
 )
 
 // parseHook parses a Gitea hook from an http.Request request and returns
-// Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
+// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
 		return parsePushHook(r.Body)
@@ -51,9 +52,9 @@ func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return nil, nil, nil
 }
 
-// parsePushHook parses a push hook and returns the Repo and Build details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
+func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -69,14 +70,14 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, build *model.Build, err
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
-	build = buildFromPush(push)
-	return repo, build, err
+	repo = toRepo(push.Repo)
+	pipeline = pipelineFromPush(push)
+	return repo, pipeline, err
 }
 
-// parseCreatedHook parses a push hook and returns the Repo and Build details.
+// parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, err error) {
+func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -86,16 +87,16 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, build *model.Build, 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPush(push)
-	build = buildFromTag(push)
-	return repo, build, nil
+	repo = toRepo(push.Repo)
+	pipeline = pipelineFromTag(push)
+	return repo, pipeline, nil
 }
 
-// parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.
-func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) {
+// parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
+func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Build
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	pr, err := parsePullRequest(payload)
@@ -103,7 +104,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) 
 		return nil, nil, err
 	}
 
-	// Don't trigger builds for non-code changes, or if PR is not open
+	// Don't trigger pipelines for non-code changes, or if PR is not open
 	if pr.Action != actionOpen && pr.Action != actionSync {
 		return nil, nil, nil
 	}
@@ -111,7 +112,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Build, error) 
 		return nil, nil, nil
 	}
 
-	repo = repoFromPullRequest(pr)
-	build = buildFromPullRequest(pr)
-	return repo, build, err
+	repo = toRepo(pr.Repo)
+	pipeline = pipelineFromPullRequest(pr)
+	return repo, pipeline, err
 }

@@ -1,6 +1,8 @@
 variables:
   - &node_image 'node:16-alpine'
   - &when_path
+      # related config files
+      - ".woodpecker/web.yml"
       # web source code
       - "web/**"
 
@@ -9,7 +11,8 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn install --frozen-lockfile
+      - corepack enable
+      - pnpm install --frozen-lockfile
     when:
       path: *when_path
 
@@ -18,7 +21,8 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn lint
+      - corepack enable
+      - pnpm lint
     when:
       path: *when_path
 
@@ -27,7 +31,8 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn formatcheck
+      - corepack enable
+      - pnpm formatcheck
     when:
       path: *when_path
 
@@ -36,7 +41,17 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn typecheck
+      - corepack enable
+      - pnpm typecheck
+    when:
+      path: *when_path
+
+  securitycheck:
+    group: test
+    image: aquasec/trivy:latest
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
+      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
     when:
       path: *when_path
 
@@ -45,7 +60,7 @@ pipeline:
     image: *node_image
     commands:
       - cd web/
-      - yarn test
+      - corepack enable
+      - pnpm test
     when:
       path: *when_path
-

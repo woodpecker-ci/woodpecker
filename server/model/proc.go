@@ -20,32 +20,32 @@ import "fmt"
 // ProcStore persists process information to storage.
 type ProcStore interface {
 	ProcLoad(int64) (*Proc, error)
-	ProcFind(*Build, int) (*Proc, error)
-	ProcChild(*Build, int, string) (*Proc, error)
-	ProcList(*Build) ([]*Proc, error)
+	ProcFind(*Pipeline, int) (*Proc, error)
+	ProcChild(*Pipeline, int, string) (*Proc, error)
+	ProcList(*Pipeline) ([]*Proc, error)
 	ProcCreate([]*Proc) error
 	ProcUpdate(*Proc) error
-	ProcClear(*Build) error
+	ProcClear(*Pipeline) error
 }
 
-// Proc represents a process in the build pipeline.
+// Proc represents a process in the pipeline.
 // swagger:model proc
 type Proc struct {
-	ID       int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
-	BuildID  int64             `json:"build_id"             xorm:"UNIQUE(s) INDEX 'proc_build_id'"`
-	PID      int               `json:"pid"                  xorm:"UNIQUE(s) 'proc_pid'"`
-	PPID     int               `json:"ppid"                 xorm:"proc_ppid"`
-	PGID     int               `json:"pgid"                 xorm:"proc_pgid"`
-	Name     string            `json:"name"                 xorm:"proc_name"`
-	State    StatusValue       `json:"state"                xorm:"proc_state"`
-	Error    string            `json:"error,omitempty"      xorm:"VARCHAR(500) proc_error"`
-	ExitCode int               `json:"exit_code"            xorm:"proc_exit_code"`
-	Started  int64             `json:"start_time,omitempty" xorm:"proc_started"`
-	Stopped  int64             `json:"end_time,omitempty"   xorm:"proc_stopped"`
-	Machine  string            `json:"machine,omitempty"    xorm:"proc_machine"`
-	Platform string            `json:"platform,omitempty"   xorm:"proc_platform"`
-	Environ  map[string]string `json:"environ,omitempty"    xorm:"json 'proc_environ'"`
-	Children []*Proc           `json:"children,omitempty"   xorm:"-"`
+	ID         int64             `json:"id"                   xorm:"pk autoincr 'proc_id'"`
+	PipelineID int64             `json:"build_id"             xorm:"UNIQUE(s) INDEX 'proc_build_id'"`
+	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'proc_pid'"`
+	PPID       int               `json:"ppid"                 xorm:"proc_ppid"`
+	PGID       int               `json:"pgid"                 xorm:"proc_pgid"`
+	Name       string            `json:"name"                 xorm:"proc_name"`
+	State      StatusValue       `json:"state"                xorm:"proc_state"`
+	Error      string            `json:"error,omitempty"      xorm:"VARCHAR(500) proc_error"`
+	ExitCode   int               `json:"exit_code"            xorm:"proc_exit_code"`
+	Started    int64             `json:"start_time,omitempty" xorm:"proc_started"`
+	Stopped    int64             `json:"end_time,omitempty"   xorm:"proc_stopped"`
+	Machine    string            `json:"machine,omitempty"    xorm:"proc_machine"`
+	Platform   string            `json:"platform,omitempty"   xorm:"proc_platform"`
+	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'proc_environ'"`
+	Children   []*Proc           `json:"children,omitempty"   xorm:"-"`
 }
 
 type UpdateProcStore interface {
@@ -111,8 +111,8 @@ func Tree(procs []*Proc) ([]*Proc, error) {
 	return nodes, nil
 }
 
-// BuildStatus determine build status based on corresponding proc list
-func BuildStatus(procs []*Proc) StatusValue {
+// PipelineStatus determine pipeline status based on corresponding proc list
+func PipelineStatus(procs []*Proc) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range procs {

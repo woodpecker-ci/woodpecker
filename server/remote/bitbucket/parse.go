@@ -16,7 +16,7 @@ package bitbucket
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -32,9 +32,9 @@ const (
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
-// Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
-	payload, _ := ioutil.ReadAll(r.Body)
+// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
+	payload, _ := io.ReadAll(r.Body)
 
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
@@ -45,9 +45,9 @@ func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
 	return nil, nil, nil
 }
 
-// parsePushHook parses a push hook and returns the Repo and Build details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload []byte) (*model.Repo, *model.Build, error) {
+func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := internal.PushHook{}
 
 	err := json.Unmarshal(payload, &hook)
@@ -64,9 +64,9 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Build, error) {
 	return nil, nil, nil
 }
 
-// parsePullHook parses a pull request hook and returns the Repo and Build
+// parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details. If the pull request is closed nil values are returned.
-func parsePullHook(payload []byte) (*model.Repo, *model.Build, error) {
+func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {

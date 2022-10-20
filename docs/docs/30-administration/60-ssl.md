@@ -3,7 +3,6 @@
 Woodpecker supports two ways of enabling SSL communication. You can either use Let's Encrypt to get automated SSL support with
 renewal or provide your own SSL certificates.
 
-
 ## Let's Encrypt
 
 Woodpecker supports automated SSL configuration and updates using Let's Encrypt.
@@ -24,19 +23,18 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_LETS_ENCRYPT=true
++     - WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld
 ```
 
-Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://foo.com` the certificate is requested for `foo.com`.
+Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment variable when requesting certificates. For example, if `WOODPECKER_HOST=https://example.com` is set the certificate is requested for `example.com`. To receive emails before certificates expire Let's Encrypt requires an email address. You can set it with `WOODPECKER_LETS_ENCRYPT_EMAIL=ssl-admin@example.tld`.
 
->Once enabled you can visit your website at both the http and the https address
+The SSL certificates are stored in `$HOME/.local/share/certmagic` for binary versions of Woodpecker and in `/var/lib/woodpecker` for the Container versions of it. You can set a custom path by setting `XDG_DATA_HOME` if required.
+
+> Once enabled you can visit the Woodpecker UI with http and the HTTPS address. HTTP will be redirected to HTTPS.
 
 ### Certificate Cache
 
-Woodpecker writes the certificates to the below directory:
-
-```
-/var/lib/woodpecker/golang-autocert
-```
+Woodpecker writes the certificates to `/var/lib/woodpecker/certmagic/`.
 
 ### Certificate Updates
 
@@ -44,7 +42,7 @@ Woodpecker uses the official Go acme library which will handle certificate upgra
 
 ## SSL with own certificates
 
-Woodpecker supports ssl configuration by mounting certificates into your container.
+Woodpecker supports SSL configuration by mounting certificates into your container.
 
 ```diff
 # docker-compose.yml
@@ -58,12 +56,12 @@ services:
 +     - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
       - [...]
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to expose the following ports:
@@ -95,8 +93,8 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-+     - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-+     - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
++     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to provide the paths of your certificate and key:
@@ -113,11 +111,11 @@ services:
       - 443:443
       - 9000:9000
     volumes:
-      - /etc/certs/woodpecker.foo.com/server.crt:/etc/certs/woodpecker.foo.com/server.crt
-      - /etc/certs/woodpecker.foo.com/server.key:/etc/certs/woodpecker.foo.com/server.key
+      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
+      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
     environment:
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.foo.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.foo.com/server.key
++     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
 ### Certificate Chain

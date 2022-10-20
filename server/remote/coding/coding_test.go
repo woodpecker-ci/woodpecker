@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,7 +109,7 @@ func Test_coding(t *testing.T) {
 
 		g.Describe("When requesting a repository", func() {
 			g.It("Should return the details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.Avatar).Equal(s.URL + fakeRepo.Avatar)
@@ -119,7 +120,7 @@ func Test_coding(t *testing.T) {
 				g.Assert(repo.IsSCMPrivate).Equal(fakeRepo.IsSCMPrivate)
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -160,8 +161,8 @@ func Test_coding(t *testing.T) {
 		})
 
 		g.Describe("When downloading a file", func() {
-			g.It("Should return file for specified build", func() {
-				data, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			g.It("Should return file for specified pipeline", func() {
+				data, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 				g.Assert(err).IsNil()
 				g.Assert(string(data)).Equal("pipeline:\n  test:\n    image: golang:1.6\n    commands:\n      - go test\n")
 			})
@@ -266,7 +267,7 @@ var (
 		Name:  "not_found_project",
 	}
 
-	fakeBuild = &model.Build{
+	fakePipeline = &model.Pipeline{
 		Commit: "4504a072cc",
 	}
 )

@@ -37,6 +37,7 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
+		RemoteID:     model.RemoteID(fmt.Sprint(_repo.ID)),
 		Owner:        owner,
 		Name:         name,
 		FullName:     _repo.PathWithNamespace,
@@ -59,9 +60,9 @@ func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	return repo, nil
 }
 
-func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Build, error) {
+func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	pipeline := &model.Pipeline{}
 
 	target := hook.ObjectAttributes.Target
 	source := hook.ObjectAttributes.Source
@@ -87,6 +88,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.FullName = fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(obj.TargetProjectID))
 	repo.Link = target.WebURL
 
 	if target.GitHTTPURL != "" {
@@ -105,41 +107,42 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.Avatar = target.AvatarURL
 	}
 
-	build.Event = model.EventPull
+	pipeline.Event = model.EventPull
 
 	lastCommit := obj.LastCommit
 
-	build.Message = lastCommit.Message
-	build.Commit = lastCommit.ID
-	build.Remote = obj.Source.HTTPURL
+	pipeline.Message = lastCommit.Message
+	pipeline.Commit = lastCommit.ID
+	pipeline.Remote = obj.Source.HTTPURL
 
-	build.Ref = fmt.Sprintf(mergeRefs, obj.IID)
-	build.Branch = obj.SourceBranch
+	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
+	pipeline.Branch = obj.SourceBranch
 
 	author := lastCommit.Author
 
-	build.Author = author.Name
-	build.Email = author.Email
+	pipeline.Author = author.Name
+	pipeline.Email = author.Email
 
-	if len(build.Email) != 0 {
-		build.Avatar = getUserAvatar(build.Email)
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
-	build.Title = obj.Title
-	build.Link = obj.URL
+	pipeline.Title = obj.Title
+	pipeline.Link = obj.URL
 
-	return obj.IID, repo, build, nil
+	return obj.IID, repo, pipeline, nil
 }
 
-func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) {
+func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
 		return nil, nil, err
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
@@ -155,21 +158,21 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 		repo.IsSCMPrivate = false
 	}
 
-	build.Event = model.EventPush
-	build.Commit = hook.After
-	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
-	build.Ref = hook.Ref
+	pipeline.Event = model.EventPush
+	pipeline.Commit = hook.After
+	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.Ref = hook.Ref
 
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			build.Author = cm.Author.Name
-			build.Email = cm.Author.Email
-			build.Message = cm.Message
-			build.Timestamp = cm.Timestamp.Unix()
-			if len(build.Email) != 0 {
-				build.Avatar = getUserAvatar(build.Email)
+			pipeline.Author = cm.Author.Name
+			pipeline.Email = cm.Author.Email
+			pipeline.Message = cm.Message
+			pipeline.Timestamp = cm.Timestamp.Unix()
+			if len(pipeline.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
 		}
 
@@ -177,20 +180,21 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Build, error) 
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	build.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DedupStrings(files)
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
-func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
+func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error) {
 	repo := &model.Repo{}
-	build := &model.Build{}
+	pipeline := &model.Pipeline{}
 
 	var err error
 	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
 		return nil, nil, err
 	}
 
+	repo.RemoteID = model.RemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
@@ -206,25 +210,25 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Build, error) {
 		repo.IsSCMPrivate = false
 	}
 
-	build.Event = model.EventTag
-	build.Commit = hook.After
-	build.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
-	build.Ref = hook.Ref
+	pipeline.Event = model.EventTag
+	pipeline.Commit = hook.After
+	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.Ref = hook.Ref
 
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			build.Author = cm.Author.Name
-			build.Email = cm.Author.Email
-			build.Message = cm.Message
-			build.Timestamp = cm.Timestamp.Unix()
-			if len(build.Email) != 0 {
-				build.Avatar = getUserAvatar(build.Email)
+			pipeline.Author = cm.Author.Name
+			pipeline.Email = cm.Author.Email
+			pipeline.Message = cm.Message
+			pipeline.Timestamp = cm.Timestamp.Unix()
+			if len(pipeline.Email) != 0 {
+				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
 			break
 		}
 	}
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
 func getUserAvatar(email string) string {
