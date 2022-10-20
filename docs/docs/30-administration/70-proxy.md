@@ -82,11 +82,13 @@ server {
 
 This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
 
-```nohighlight
+```caddy
+# expose WebUI and API
 woodpecker.example.com {
   reverse_proxy woodpecker-server:8000
 }
 
+# expose gRPC
 woodpeckeragent.example.com {
   reverse_proxy h2c://woodpecker-server:9000
 }
