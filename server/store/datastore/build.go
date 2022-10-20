@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"xorm.io/xorm"
@@ -102,6 +104,17 @@ func (s storage) CreateBuild(build *model.Build, procList ...*model.Proc) error 
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
+	}
+
+	// check if repo exists first
+	var repo model.Repo
+
+	if _, err := sess.SQL("SELECT * FROM `repos` WHERE repo_id = ?", build.RepoID).Get(&repo); err != nil {
+		return err
+	}
+
+	if build.RepoID != repo.ID {
+		return errors.New(fmt.Sprintf("Repo with %d is not existing", build.RepoID))
 	}
 
 	// calc build number

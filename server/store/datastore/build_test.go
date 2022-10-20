@@ -56,6 +56,21 @@ func TestBuilds(t *testing.T) {
 			g.Assert(err).IsNil()
 		})
 
+		g.It("Should Fail early when the repo is not existing", func() {
+			build := model.Build{
+				RepoID: 100,
+				Status: model.StatusSuccess,
+			}
+			err := store.CreateBuild(&build)
+			g.Assert(err).IsNotNil()
+
+			count, err := store.GetBuildCount()
+			g.Assert(err).IsNil()
+			g.Assert(count == 0).IsTrue()
+			fmt.Println("GOT COUNT", count)
+
+		})
+
 		g.It("Should Post a Build", func() {
 			build := model.Build{
 				RepoID: repo.ID,
