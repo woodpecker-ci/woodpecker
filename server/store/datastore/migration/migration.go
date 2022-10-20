@@ -37,6 +37,7 @@ var migrationTasks = []*task{
 	&alterTableSecretsAddUserCol,
 	&lowercaseSecretNames,
 	&renameBuildsToPipeline,
+	&renameColumnsBuildsToPipeline,
 }
 
 var allBeans = []interface{}{
