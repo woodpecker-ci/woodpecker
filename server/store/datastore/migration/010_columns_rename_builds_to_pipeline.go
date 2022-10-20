@@ -32,7 +32,7 @@ var renameColumnsBuildsToPipeline = task{
 		var oldColumns []*oldBuildColumn
 
 		oldColumns = append(oldColumns, &oldBuildColumn{
-			table: "pipeline",
+			table: "pipelines",
 			columns: []string{
 				"build_id",
 				"build_repo_id",
