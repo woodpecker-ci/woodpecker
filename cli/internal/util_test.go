@@ -1,6 +1,29 @@
 package internal
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestParseRepo(t *testing.T) {
+	owner, repo, err := ParseRepo("")
+	assert.Error(t, err)
+	assert.EqualValues(t, "", owner)
+	assert.EqualValues(t, "", repo)
+	owner, repo, err = ParseRepo("A")
+	assert.Error(t, err)
+	assert.EqualValues(t, "", owner)
+	assert.EqualValues(t, "", repo)
+	owner, repo, err = ParseRepo("A/B/C")
+	assert.Error(t, err)
+	assert.EqualValues(t, "", owner)
+	assert.EqualValues(t, "", repo)
+	owner, repo, err = ParseRepo("A/B")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "A", owner)
+	assert.EqualValues(t, "B", repo)
+}
 
 func TestParseKeyPair(t *testing.T) {
 	s := []string{"FOO=bar", "BAR=", "BAZ=qux=quux", "INVALID"}
