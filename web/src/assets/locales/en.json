@@ -13,6 +13,7 @@
     "color_scheme_light": "Switch to dark mode",
     "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
