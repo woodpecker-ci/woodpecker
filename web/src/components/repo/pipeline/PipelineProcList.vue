@@ -112,8 +112,7 @@ import { Pipeline, PipelineProc } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
-
-  selectedProcId?: number;
+  selectedProcId?: number | null;
 }>();
 
 defineEmits<{
