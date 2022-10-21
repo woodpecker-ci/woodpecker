@@ -303,8 +303,11 @@ func TestPipelines(t *testing.T) {
 }
 
 func TestPipelineIncrement(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
 	defer closer()
+
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1"}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 2, Owner: "2", Name: "2", FullName: "2/2"}))
 
 	pipelineA := &model.Pipeline{RepoID: 1}
 	if !assert.NoError(t, store.CreatePipeline(pipelineA)) {
