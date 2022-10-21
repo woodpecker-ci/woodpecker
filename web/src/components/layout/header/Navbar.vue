@@ -26,26 +26,26 @@
         @click="darkMode = !darkMode"
       />
       <!-- Admin Settings -->
-      <router-link
+      <IconButton
         v-if="user?.admin"
         class="navbar-icon navbar-clickable"
         :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
       >
         <i-clarity-settings-solid />
-      </router-link>
+      </IconButton>
 
       <!-- Active Pipelines Indicator -->
       <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
       <!-- User Avatar -->
-      <router-link
+      <IconButton
         v-if="user"
         :to="{ name: 'user' }"
         :title="$t('user.settings')"
         class="navbar-icon navbar-clickable !p-1.5"
       >
         <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
-      </router-link>
+      </IconButton>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
     </div>
