@@ -62,7 +62,6 @@
             </div>
           </div>
           <button
-            v-if="pipeline.procs && pipeline.procs.length > 1"
             type="button"
             class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
             @click="procsCollapsed[proc.id] = !!!procsCollapsed[proc.id]"
