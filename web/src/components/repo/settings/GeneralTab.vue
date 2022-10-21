@@ -4,7 +4,7 @@
       <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
-    <div v-if="repoSettings" class="flex flex-col">
+    <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#pipeline-path"
         :label="$t('repo.settings.general.pipeline_path.path')"
@@ -72,13 +72,13 @@
       </InputField>
 
       <Button
+        type="submit"
         class="mr-auto"
         color="green"
         :is-loading="isSaving"
         :text="$t('repo.settings.general.save')"
-        @click="saveRepoSettings"
       />
-    </div>
+    </form>
   </Panel>
 </template>
 

@@ -80,6 +80,7 @@
 
         <Button
           type="submit"
+          color="green"
           :is-loading="isSaving"
           :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
         />
