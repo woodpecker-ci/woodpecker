@@ -19,7 +19,7 @@
 
     <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
       <div class="<md:hidden flex items-center flex-shrink-0">
-        <span class="text-color px-2">#{{ pipeline.number }}</span>
+        <span class="text-color px-2">#{{ pipeline.number }} - </span>
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-color" />
         <img v-else class="w-8" :src="pipeline.author_avatar" />
       </div>
