@@ -1,15 +1,22 @@
 <template>
-  <FluidContainer v-if="repo && repoPermissions && $route.meta.repoHeader">
-    <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
-      <h1 class="text-xl text-color w-full md:w-auto text-center mb-4 md:mb-0">
+  <Scaffold
+    v-if="repo && repoPermissions && $route.meta.repoHeader"
+    v-model:activeTab="activeTab"
+    enable-tabs
+    disable-hash-mode
+  >
+    <template #headerTitle>
+      <span class="flex">
         <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
           repoOwner
         }}</router-link>
-        {{ ` / ${repo.name}` }}
-      </h1>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="md:ml-auto">
+        {{ `&nbsp;/&nbsp;${repo.name}` }}
+      </span>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
+    </template>
+    <template #headerActions>
       <a
         :href="repo.link_url"
         target="_blank"
@@ -28,24 +35,24 @@
         :title="$t('repo.settings.settings')"
         icon="settings"
       />
-    </div>
-    <div class="flex flex-wrap gap-y-2 items-center justify-between">
-      <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-        <Tab id="activity" :title="$t('repo.activity')" />
-        <Tab id="branches" :title="$t('repo.branches')" />
-      </Tabs>
+    </template>
 
+    <template #tabActions>
       <Button
         v-if="repoPermissions.push"
         type="submit"
         :text="$t('repo.manual_pipeline.trigger')"
-        class="ml-auto"
+        class="mb-2"
         @click="showManualPipelinePopup = true"
       />
       <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
-    </div>
+    </template>
+
+    <Tab id="activity" :title="$t('repo.activity')" />
+    <Tab id="branches" :title="$t('repo.branches')" />
+
     <router-view />
-  </FluidContainer>
+  </Scaffold>
   <router-view v-else-if="repo && repoPermissions" />
 </template>
 
@@ -56,10 +63,9 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';

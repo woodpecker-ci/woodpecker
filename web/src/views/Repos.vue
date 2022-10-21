@@ -1,10 +1,16 @@
 <template>
-  <FluidContainer class="flex flex-col">
-    <div class="flex flex-row flex-wrap md:grid md:grid-cols-3 border-b pb-4 mb-4 dark:border-dark-200">
-      <h1 class="text-xl text-color">{{ $t('repositories') }}</h1>
-      <TextField v-model="search" class="w-auto md:ml-auto md:mr-auto" :placeholder="$t('search')" />
-      <Button class="md:ml-auto" :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
-    </div>
+  <Scaffold three-column-header>
+    <template #headerTitle>
+      {{ $t('repositories') }}
+    </template>
+
+    <template #headerCenterBox>
+      <TextField v-model="search" class="w-auto !bg-gray-100 !dark:bg-dark-gray-600" :placeholder="$t('search')" />
+    </template>
+
+    <template #headerActions>
+      <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
+    </template>
 
     <div class="space-y-4">
       <ListItem
@@ -16,7 +22,7 @@
         <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
     </div>
-  </FluidContainer>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -25,7 +31,7 @@ import { computed, defineComponent, onMounted, ref } from 'vue';
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import TextField from '~/components/form/TextField.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import RepoStore from '~/store/repos';
 
@@ -34,9 +40,9 @@ export default defineComponent({
 
   components: {
     Button,
-    FluidContainer,
     ListItem,
     TextField,
+    Scaffold,
   },
 
   setup() {

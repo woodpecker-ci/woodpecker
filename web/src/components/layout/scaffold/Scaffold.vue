@@ -1,14 +1,18 @@
 <template>
   <div class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
     <FluidContainer class="!py-0">
-      <!-- Header -->
-      <div class="flex items-center pt-4">
-        <IconButton v-if="goBack" icon="back" :title="$t('back')" @click="goBack" />
-        <h1 class="text-xl ml-2 text-color">{{ title }}</h1>
-      </div>
+      <Header :go-back="goBack" :three-column="threeColumnHeader">
+        <template #title><slot name="headerTitle" /></template>
+        <template #centerBox><slot name="headerCenterBox" /></template>
+        <template #actions><slot name="headerActions" /></template>
+      </Header>
 
-      <!-- Tabs -->
-      <ScaffoldTabs v-if="enableTabs" />
+      <div v-if="enableTabs" class="flex flex-wrap justify-between">
+        <Tabs />
+        <div class="flex items-center justify-end space-x-2">
+          <slot name="tabActions" />
+        </div>
+      </div>
     </FluidContainer>
   </div>
   <FluidContainer>
@@ -16,73 +20,44 @@
   </FluidContainer>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, provide, ref, toRef } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup lang="ts">
+import { toRef } from 'vue';
 
 import FluidContainer from '~/components/layout/FluidContainer.vue';
-import { Tab } from '~/components/tabs/types';
+import { useTabsProvider } from '~/compositions/useTabs';
 
-import ScaffoldTabs from './ScaffoldTabs.vue';
+import Header from './Header.vue';
+import Tabs from './Tabs.vue';
 
-export default defineComponent({
-  name: 'Scaffold',
-  components: { FluidContainer, ScaffoldTabs },
-  props: {
-    // Header Props
+export interface Props {
+  // Header
+  goBack?: () => void;
+  threeColumnHeader?: boolean;
 
-    title: {
-      type: String,
-      default: '',
-    },
+  // Tabs
+  enableTabs?: boolean;
+  disableHashMode?: boolean;
+  activeTab?: string;
+}
 
-    goBack: {
-      type: Function,
-      default: null,
-    },
-
-    // Tab Props
-
-    enableTabs: {
-      type: Boolean,
-    },
-
-    disableHashMode: {
-      type: Boolean,
-    },
-
-    modelValue: {
-      type: String,
-      default: '',
-    },
-  },
-
-  setup(props) {
-    if (!props.enableTabs) {
-      return {};
-    }
-
-    const route = useRoute();
-    const disableHashMode = toRef(props, 'disableHashMode');
-    const modelValue = toRef(props, 'modelValue');
-    const tabs = ref<Tab[]>([]);
-    const activeTab = ref();
-    provide('tabs', tabs);
-    provide('active-tab', activeTab);
-    provide('disableHashMode', disableHashMode);
-    onMounted(() => {
-      if (modelValue.value) {
-        activeTab.value = modelValue.value;
-        return;
-      }
-      const hashTab = route.hash.replace(/^#/, '');
-      if (hashTab) {
-        activeTab.value = hashTab;
-        return;
-      }
-      activeTab.value = tabs.value[0].id;
-    });
-    return {};
-  },
+const props = withDefaults(defineProps<Props>(), {
+  goBack: undefined,
+  // eslint-disable-next-line vue/no-boolean-default
+  threeColumnHeader: false,
+  // eslint-disable-next-line vue/no-boolean-default
+  disableHashMode: false,
+  // eslint-disable-next-line vue/no-boolean-default
+  enableTabs: false,
+  activeTab: '',
 });
+
+const emit = defineEmits(['update:activeTab']);
+
+if (props.enableTabs) {
+  useTabsProvider({
+    activeTabProp: toRef(props, 'activeTab'),
+    disableHashMode: toRef(props, 'disableHashMode'),
+    updateActiveTabProp: (value) => emit('update:activeTab', value),
+  });
+}
 </script>

@@ -1,5 +1,8 @@
 <template>
-  <Scaffold :title="$t('admin.settings.settings')" :go-back="goBack" enable-tabs>
+  <Scaffold enable-tabs :go-back="goBack">
+    <template #headerTitle>
+      {{ $t('repo.settings.settings') }}
+    </template>
     <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
       <AdminSecretsTab />
     </Tab>
@@ -12,7 +15,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
-import Tab from '~/components/tabs/Tab.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
@@ -23,6 +27,7 @@ export default defineComponent({
   components: {
     Tab,
     AdminSecretsTab,
+    Scaffold,
   },
 
   setup() {

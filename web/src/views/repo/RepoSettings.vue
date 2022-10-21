@@ -1,5 +1,9 @@
 <template>
-  <Scaffold :title="$t('repo.settings.settings')" :go-back="goBack" enable-tabs>
+  <Scaffold enable-tabs :go-back="goBack">
+    <template #headerTitle>
+      {{ $t('repo.settings.settings') }}
+    </template>
+
     <Tab id="general" :title="$t('repo.settings.general.general')">
       <GeneralTab />
     </Tab>
@@ -27,13 +31,13 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
 import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
 import CronTab from '~/components/repo/settings/CronTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
-import Tab from '~/components/tabs/Tab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { RepoPermissions } from '~/lib/api/types';

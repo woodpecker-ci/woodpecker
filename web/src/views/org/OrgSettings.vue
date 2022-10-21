@@ -1,16 +1,13 @@
 <template>
-  <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" :title="$t('back')" @click="goBack" />
+  <Scaffold enable-tabs :go-back="goBack">
+    <template #headerTitle>
       <h1 class="text-xl ml-2 text-color">{{ $t('org.settings.settings') }}</h1>
-    </div>
+    </template>
 
-    <Tabs>
-      <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
-        <OrgSecretsTab />
-      </Tab>
-    </Tabs>
-  </FluidContainer>
+    <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
+      <OrgSecretsTab />
+    </Tab>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -18,11 +15,8 @@ import { defineComponent, inject, onMounted, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { OrgPermissions } from '~/lib/api/types';
@@ -31,9 +25,6 @@ export default defineComponent({
   name: 'OrgSettings',
 
   components: {
-    FluidContainer,
-    IconButton,
-    Tabs,
     Tab,
     OrgSecretsTab,
   },

@@ -1,16 +1,21 @@
 <template>
-  <FluidContainer class="flex flex-col">
-    <div class="flex flex-row flex-wrap md:grid md:grid-cols-3 border-b pb-4 mb-4 dark:border-dark-200">
-      <h1 class="text-xl text-color">{{ repoOwner }}</h1>
-      <TextField v-model="search" class="w-auto md:ml-auto md:mr-auto" :placeholder="$t('search')" />
+  <Scaffold three-column-header>
+    <template #headerTitle>
+      {{ repoOwner }}
+    </template>
+
+    <template #headerCenterBox>
+      <TextField v-model="search" class="w-auto !bg-gray-100 !dark:bg-dark-gray-600" :placeholder="$t('search')" />
+    </template>
+
+    <template #headerActions>
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"
         :to="{ name: 'org-settings' }"
         :title="$t('org.settings.settings')"
-        class="ml-auto"
       />
-    </div>
+    </template>
 
     <div class="space-y-4">
       <ListItem
@@ -25,7 +30,7 @@
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
       <span class="text-color m-auto">{{ $t('repo.user_none') }}</span>
     </div>
-  </FluidContainer>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -34,7 +39,7 @@ import { computed, defineComponent, onMounted, ref } from 'vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import TextField from '~/components/form/TextField.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { OrgPermissions } from '~/lib/api/types';
@@ -44,10 +49,10 @@ export default defineComponent({
   name: 'ReposOwner',
 
   components: {
-    FluidContainer,
     ListItem,
     TextField,
     IconButton,
+    Scaffold,
   },
 
   props: {

@@ -1,30 +1,32 @@
 <template>
-  <FluidContainer class="space-y-4 flex flex-col my-0">
-    <Button class="ml-auto" :text="$t('logout')" :to="`${address}/logout`" />
-
-    <div>
-      <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
-      <pre class="cli-box">{{ token }}</pre>
-    </div>
-
-    <div>
-      <h2 class="text-lg text-color">{{ $t('user.shell_setup') }}</h2>
-      <pre class="cli-box">{{ usageWithShell }}</pre>
-    </div>
-
-    <div>
-      <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
-      <pre class="cli-box">{{ usageWithCurl }}</pre>
-    </div>
-
-    <div>
-      <div class="flex items-center">
-        <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
-        <a :href="cliDownload" target="_blank" class="ml-4 text-link">{{ $t('user.dl_cli') }}</a>
+  <Scaffold>
+    <template #headerTitle>{{ $t('user.settings') }}</template>
+    <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
+    <div class="space-y-4 flex flex-col">
+      <div>
+        <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+        <pre class="cli-box">{{ token }}</pre>
       </div>
-      <pre class="cli-box">{{ usageWithCli }}</pre>
+
+      <div>
+        <h2 class="text-lg text-color">{{ $t('user.shell_setup') }}</h2>
+        <pre class="cli-box">{{ usageWithShell }}</pre>
+      </div>
+
+      <div>
+        <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
+        <pre class="cli-box">{{ usageWithCurl }}</pre>
+      </div>
+
+      <div>
+        <div class="flex items-center">
+          <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
+          <a :href="cliDownload" target="_blank" class="ml-4 text-link">{{ $t('user.dl_cli') }}</a>
+        </div>
+        <pre class="cli-box">{{ usageWithCli }}</pre>
+      </div>
     </div>
-  </FluidContainer>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -32,15 +34,15 @@ import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 
 export default defineComponent({
   name: 'User',
 
   components: {
-    FluidContainer,
     Button,
+    Scaffold,
   },
 
   setup() {
