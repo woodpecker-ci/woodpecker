@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +38,8 @@ const (
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
-// Repo and Build detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Build, error) {
+// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
 		return parsePushHook(r.Body, privateMode)
@@ -50,12 +51,12 @@ func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Build, er
 	return nil, nil, nil
 }
 
-// parsePushHook parses a push hook and returns the Repo and Build details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
+func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Build
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	push, err := parsePush(payload)
@@ -69,16 +70,16 @@ func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Bui
 	}
 
 	repo = toRepo(push.Repo, privateMode)
-	build = buildFromPush(push)
-	return repo, build, err
+	pipeline = pipelineFromPush(push)
+	return repo, pipeline, err
 }
 
-// parseCreatedHook parses a push hook and returns the Repo and Build details.
+// parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
+func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Build
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	push, err := parsePush(payload)
@@ -91,15 +92,15 @@ func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.
 	}
 
 	repo = toRepo(push.Repo, privateMode)
-	build = buildFromTag(push)
-	return repo, build, err
+	pipeline = pipelineFromTag(push)
+	return repo, pipeline, err
 }
 
-// parsePullRequestHook parses a pull_request hook and returns the Repo and Build details.
-func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Build, error) {
+// parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
+func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
 	var (
-		repo  *model.Repo
-		build *model.Build
+		repo     *model.Repo
+		pipeline *model.Pipeline
 	)
 
 	pr, err := parsePullRequest(payload)
@@ -107,7 +108,7 @@ func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *mo
 		return nil, nil, err
 	}
 
-	// Don't trigger builds for non-code changes, or if PR is not open
+	// Don't trigger pipelines for non-code changes, or if PR is not open
 	if pr.Action != actionOpen && pr.Action != actionSync {
 		return nil, nil, nil
 	}
@@ -116,6 +117,6 @@ func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *mo
 	}
 
 	repo = toRepo(pr.Repo, privateMode)
-	build = buildFromPullRequest(pr)
-	return repo, build, err
+	pipeline = pipelineFromPullRequest(pr)
+	return repo, pipeline, err
 }

@@ -43,7 +43,7 @@ type WorkspacesResp struct {
 	Values []*Workspace `json:"values"`
 }
 
-type BuildStatus struct {
+type PipelineStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`

@@ -10,9 +10,10 @@
     "password": "Password",
     "url": "URL",
     "back": "Back",
-    "color_scheme_light": "Switch between dark and light mode (currently light mode)",
-    "color_scheme_dark": "Switch between dark and light mode (currently dark mode)",
+    "color_scheme_light": "Switch to dark mode",
+    "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -170,8 +171,11 @@
             },
             "badge": {
                 "badge": "Badge",
-                "url_branch": "URL for specific branch",
-                "markdown": "Markdown"
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
             },
             "actions": {
                 "actions": "Actions",
@@ -190,7 +194,7 @@
                 }
             }
         },
-        "build": {
+        "pipeline": {
             "created": "Created",
             "tasks": "Tasks",
             "config": "Config",
@@ -203,7 +207,7 @@
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "exit_code": "exit code {exitCode}",
             "loading": "Loading…",
-            "pipeline": "Pipeline #{buildId}",
+            "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",
             "actions": {
                 "cancel": "Cancel",
@@ -289,6 +293,7 @@
         }
     },
     "user": {
+        "settings": "User Settings",
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",

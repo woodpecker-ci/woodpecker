@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Proc), new(model.Perm))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -35,7 +36,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM repos")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM builds")
+			_, err = store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM procs")
 			g.Assert(err).IsNil()
@@ -182,7 +183,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err3).IsNotNil()
 		})
 
-		g.It("Should get the Build feed for a User", func() {
+		g.It("Should get the Pipeline feed for a User", func() {
 			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
@@ -222,33 +223,33 @@ func TestUsers(t *testing.T) {
 				g.Assert(store.PermUpsert(perm)).IsNil()
 			}
 
-			build1 := &model.Build{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusFailure,
 			}
-			build2 := &model.Build{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusSuccess,
 			}
-			build3 := &model.Build{
+			pipeline3 := &model.Pipeline{
 				RepoID: repo2.ID,
 				Status: model.StatusSuccess,
 			}
-			build4 := &model.Build{
+			pipeline4 := &model.Pipeline{
 				RepoID: repo3.ID,
 				Status: model.StatusSuccess,
 			}
-			g.Assert(store.CreateBuild(build1)).IsNil()
-			g.Assert(store.CreateBuild(build2)).IsNil()
-			g.Assert(store.CreateBuild(build3)).IsNil()
-			g.Assert(store.CreateBuild(build4)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline1)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline2)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline3)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline4)).IsNil()
 
-			builds, err := store.UserFeed(user)
+			pipelines, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
-			g.Assert(len(builds)).Equal(3)
-			g.Assert(builds[0].FullName).Equal(repo2.FullName)
-			g.Assert(builds[1].FullName).Equal(repo1.FullName)
-			g.Assert(builds[2].FullName).Equal(repo1.FullName)
+			g.Assert(len(pipelines)).Equal(3)
+			g.Assert(pipelines[0].FullName).Equal(repo2.FullName)
+			g.Assert(pipelines[1].FullName).Equal(repo1.FullName)
+			g.Assert(pipelines[2].FullName).Equal(repo1.FullName)
 		})
 	})
 }

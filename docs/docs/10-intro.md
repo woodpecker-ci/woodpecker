@@ -23,7 +23,7 @@ pipeline:
       - echo "Testing.."
 ```
 
-### Build steps are containers
+### Pipeline steps are containers
 
 - Define any container image as context
   - either use your own and install the needed tools in custom image or

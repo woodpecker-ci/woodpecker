@@ -2,7 +2,7 @@
 
 A Woodpecker deployment consists of two parts:
 
-- A server which is the heart of Woodpecker and ships the webinterface.
+- A server which is the heart of Woodpecker and ships the web interface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
 > Each agent is able to process one pipeline step by default.
@@ -72,8 +72,36 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
++     - WOODPECKER_HOST=${WOODPECKER_HOST}
+```
+Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
+They can be configured with ADDR variables:
+
+```diff
+# docker-compose.yml
+version: '3'
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_GRPC_ADDR=${WOODPECKER_GRPC_ADDR}
++     - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
 
+Reverse proxying can also be [configured for gRPC](./proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
+
+```diff
+# docker-compose.yml
+version: '3'
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_GRPC_SECURE=true # defaults to false
++     - WOODPECKER_GRPC_VERIFY=true # default
+```
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
 ```diff
@@ -88,8 +116,7 @@ services:
 +     - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-Agents require the server address for agent-to-server communication:
-
+Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
 ```diff
 # docker-compose.yml
 version: '3'
@@ -128,11 +155,11 @@ See the complete reference for all supported forges [here](./11-forges/10-overvi
 
 ## Database
 
-By default Woodpecker uses a sqlite database which requires zero installation or configuration. See the [database settings](./30-database.md) page to further configure it or use MySQL or Postgres.
+By default Woodpecker uses a SQLite database which requires zero installation or configuration. See the [database settings](./30-database.md) page to further configure it or use MySQL or Postgres.
 
 ## SSL
 
-Woodpecker supports ssl configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md).
+Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md).
 
 ## Metrics
 

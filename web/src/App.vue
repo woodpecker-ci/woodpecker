@@ -8,7 +8,7 @@
           <router-view />
         </div>
         <transition name="slide-right">
-          <BuildFeedSidebar class="shadow-md border-l w-full absolute top-0 right-0 bottom-0 max-w-80 xl:max-w-96" />
+          <PipelineFeedSidebar class="shadow-md border-l w-full absolute top-0 right-0 bottom-0 max-w-80 xl:max-w-96" />
         </transition>
       </div>
     </template>
@@ -21,8 +21,8 @@ import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
 import Navbar from '~/components/layout/header/Navbar.vue';
+import PipelineFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 
@@ -31,7 +31,7 @@ export default defineComponent({
 
   components: {
     Navbar,
-    BuildFeedSidebar,
+    PipelineFeedSidebar,
   },
 
   setup() {

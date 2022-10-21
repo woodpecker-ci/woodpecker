@@ -155,7 +155,7 @@ func (c *Client) FindSource(owner, name, revision, path string) (*string, error)
 	return c.do(uri, get, nil, nil)
 }
 
-func (c *Client) CreateStatus(owner, name, revision string, status *BuildStatus) error {
+func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStatus) error {
 	uri := fmt.Sprintf(pathStatus, c.base, owner, name, revision)
 	_, err := c.do(uri, post, status, nil)
 	return err

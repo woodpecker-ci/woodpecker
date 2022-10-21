@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,14 +55,14 @@ type Remote interface {
 
 	// File fetches a file from the remote repository and returns in string
 	// format.
-	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error)
+	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
 
 	// Dir fetches a folder from the remote repository
-	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*FileMeta, error)
+	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*FileMeta, error)
 
 	// Status sends the commit status to the remote system.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, p *model.Proc) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Proc) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a remote system.
@@ -83,7 +84,7 @@ type Remote interface {
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error)
+	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
