@@ -3,12 +3,7 @@
     <Panel v-if="!loading">
       <span class="text-xl text-color">{{ $t('repo.manual_pipeline.title') }}</span>
       <InputField :label="$t('repo.manual_pipeline.select_branch')">
-        <SelectField
-          v-model="payload.branch"
-          :options="branches"
-          required
-          class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
-        />
+        <SelectField v-model="payload.branch" :options="branches" required />
       </InputField>
       <InputField :label="$t('repo.manual_pipeline.variables.title')">
         <span class="text-sm text-color-alt mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
