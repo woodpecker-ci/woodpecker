@@ -19,35 +19,33 @@
     <!-- Right Icons Box -->
     <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
       <!-- Dark Mode Toggle -->
-      <NavbarIcon
+      <IconButton
+        :icon="darkMode ? 'dark' : 'light'"
         :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
         class="navbar-icon navbar-clickable"
         @click="darkMode = !darkMode"
-      >
-        <i-ic-baseline-dark-mode v-if="darkMode" />
-        <i-ic-round-light-mode v-else />
-      </NavbarIcon>
+      />
       <!-- Admin Settings -->
-      <NavbarIcon
+      <router-link
         v-if="user?.admin"
         class="navbar-icon navbar-clickable"
         :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
       >
         <i-clarity-settings-solid />
-      </NavbarIcon>
+      </router-link>
 
       <!-- Active Pipelines Indicator -->
       <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
       <!-- User Avatar -->
-      <NavbarIcon
+      <router-link
         v-if="user"
         :to="{ name: 'user' }"
         :title="$t('user.settings')"
         class="navbar-icon navbar-clickable !p-1.5"
       >
         <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
-      </NavbarIcon>
+      </router-link>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
     </div>
@@ -59,17 +57,17 @@ import { defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
 import ActivePipelines from './ActivePipelines.vue';
-import NavbarIcon from './NavbarIcon.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActivePipelines, NavbarIcon },
+  components: { Button, ActivePipelines, IconButton },
 
   setup() {
     const config = useConfig();
@@ -90,6 +88,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.navbar-icon {
+  @apply w-11 h-11 rounded-full p-2.5;
+}
+
+.navbar-icon :deep(svg) {
+  @apply w-full h-full;
+}
+
 .navbar-link {
   @apply px-3 py-2 -my-1 rounded-md;
 }
