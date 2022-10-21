@@ -5,7 +5,7 @@
         <h1 class="text-xl text-color">{{ $t('repo.settings.crons.crons') }}</h1>
         <p class="text-sm text-color-alt">
           {{ $t('repo.settings.crons.desc') }}
-          <DocsLink url="docs/usage/crons" />
+          <DocsLink :topic="$t('repo.settings.crons.crons')" url="docs/usage/crons" />
         </p>
       </div>
       <Button

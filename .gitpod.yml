@@ -12,6 +12,7 @@ tasks:
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
+      make build-server
     command: |
       echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
