@@ -17,6 +17,9 @@ export default defineConfig({
           900: '#2e323e',
         },
       },
+      transitionProperty: {
+        height: 'max-height',
+      },
       stroke: (theme) => theme('colors'),
       fill: (theme) => theme('colors'),
     },
