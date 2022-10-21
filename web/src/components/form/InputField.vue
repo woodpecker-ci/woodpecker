@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col mt-2 mb-4">
     <div class="flex items-center text-color font-bold mb-2">
-      <label v-if="label" v-bind="$attrs">{{ label }}</label>
+      <label v-bind="$attrs">{{ label }}</label>
       <DocsLink v-if="docsUrl" :topic="label" :url="docsUrl" class="ml-2" />
     </div>
     <slot />
