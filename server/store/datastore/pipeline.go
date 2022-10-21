@@ -104,15 +104,13 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Pro
 		return err
 	}
 
-	// check if repo exists first
-	var repo model.Repo
-
-	if _, err := sess.SQL("SELECT * FROM `repos` WHERE repo_id = ?", build.RepoID).Get(&repo); err != nil {
+	repoExist, err := sess.Where("repo_id = ?", pipeline.RepoID).Exist(&model.Repo{})
+	if err != nil {
 		return err
 	}
 
-	if build.RepoID != repo.ID {
-		return errors.New(fmt.Sprintf("Repo with %d is not existing", build.RepoID))
+	if !repoExist {
+		return ErrorRepoNotExist{RepoID: pipeline.RepoID}
 	}
 
 	// calc pipeline number

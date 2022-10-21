@@ -62,10 +62,10 @@ func TestPipelines(t *testing.T) {
 				RepoID: 100,
 				Status: model.StatusSuccess,
 			}
-			err := store.CreateBuild(&pipeline)
+			err := store.CreatePipeline(&pipeline)
 			g.Assert(err).IsNotNil()
 
-			count, err := store.GetBuildCount()
+			count, err := store.GetPipelineCount()
 			g.Assert(err).IsNil()
 			g.Assert(count == 0).IsTrue()
 			fmt.Println("GOT COUNT", count)
