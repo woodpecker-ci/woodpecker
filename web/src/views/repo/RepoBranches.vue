@@ -1,15 +1,14 @@
 <template>
   <div v-if="branches" class="space-y-4">
-    <router-link
+    <ListItem
       v-for="branch in branches"
       :key="branch"
+      clickable
+      class="text-color"
       :to="{ name: 'repo-branch', params: { branch } }"
-      class="flex"
     >
-      <ListItem clickable class="text-color">
-        {{ branch }}
-      </ListItem>
-    </router-link>
+      {{ branch }}
+    </ListItem>
   </div>
 </template>
 
