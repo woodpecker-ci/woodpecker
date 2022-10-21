@@ -5,7 +5,7 @@
         <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
         <p class="text-sm text-color-alt">
           {{ $t('repo.settings.registries.desc') }}
-          <DocsLink url="docs/usage/registries" />
+          <DocsLink :topic="$t('repo.settings.registries.creds')" url="docs/usage/registries" />
         </p>
       </div>
       <Button
