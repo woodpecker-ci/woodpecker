@@ -28,8 +28,8 @@
     }
   },
   "back": "Zurück",
-  "color_scheme_dark": "Wechsle zwischen dunklem und hellem Modus (aktuell dunkel)",
-  "color_scheme_light": "Wechsle zwischen dunklem und hellem Modus (aktuell hell)",
+  "color_scheme_dark": "Wechsle zu hellem Modus",
+  "color_scheme_light": "Wechsle zu dunklem Modus",
   "docs": "Docs",
   "login": "Anmelden",
   "logout": "Abmelden",
@@ -340,6 +340,7 @@
     "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
+    "settings": "Nutzer Einstellungen",
     "shell_setup": "Kommandozeilen-Einrichtung",
     "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
     "token": "Dein persönlicher Token"

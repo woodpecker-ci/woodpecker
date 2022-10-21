@@ -28,8 +28,8 @@
     }
   },
   "back": "Atpakaļ",
-  "color_scheme_dark": "Pārslēgties starp tumšo un gaišo režīmu (pašlaik tumšais režīms)",
-  "color_scheme_light": "Pārslēgties starp tumšo un gaišo režīmu (pašlaik gaišais režīms)",
+  "color_scheme_dark": "Pārslēgties uz gaišo režīmu",
+  "color_scheme_light": "Pārslēgties uz tumšo režīmu",
   "docs": "Dokumentācija",
   "login": "Autorizēties",
   "logout": "Iziet",
@@ -123,7 +123,7 @@
       "title": "Iniciēt manuālu konvejerdarba izpildi",
       "trigger": "Izpildīt konvejerdarbu",
       "variables": {
-        "add": "Pievienot mainīgo",
+        "add": "Pievienot",
         "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar tādu pašu nosaukumu tiks pārrakstīti.",
         "name": "Mainīgā nosaukums",
         "title": "Papildus konvejerdarba mainīgie",
@@ -340,6 +340,7 @@
     "dl_cli": "Lejupielādēt komandrindas rīku",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
+    "settings": "Lietotāja iestatījumi",
     "shell_setup": "Komandrindas iestatīšana",
     "shell_setup_before": "izpildiet komandrindā sekojošas darbības",
     "token": "Personīgais talons"
