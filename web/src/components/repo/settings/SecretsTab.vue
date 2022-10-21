@@ -5,7 +5,7 @@
         <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-color-alt">
           {{ $t('repo.settings.secrets.desc') }}
-          <DocsLink url="docs/usage/secrets" />
+          <DocsLink :topic="$t('repo.settings.secrets.secrets')" url="docs/usage/secrets" />
         </p>
       </div>
       <Button
