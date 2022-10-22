@@ -28,7 +28,7 @@ type FileStore interface {
 // File represents a pipeline artifact.
 type File struct {
 	ID         int64  `json:"id"      xorm:"pk autoincr 'file_id'"`
-	PipelineID int64  `json:"-"       xorm:"INDEX 'file_build_id'"`
+	PipelineID int64  `json:"-"       xorm:"INDEX 'file_pipeline_id'"`
 	ProcID     int64  `json:"proc_id" xorm:"UNIQUE(s) INDEX 'file_proc_id'"`
 	PID        int    `json:"pid"     xorm:"file_pid"`
 	Name       string `json:"name"    xorm:"UNIQUE(s) file_name"`

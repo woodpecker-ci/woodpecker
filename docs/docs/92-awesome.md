@@ -26,6 +26,10 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 ## Templates
 
+## Pipelines
+
+- [Collection of pipeline examples](https://codeberg.org/Codeberg-CI/examples)
+
 ## Posts & tutorials
 
 - [Setup Gitea with Woodpecker CI](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
