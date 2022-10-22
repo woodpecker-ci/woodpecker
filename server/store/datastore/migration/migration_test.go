@@ -143,8 +143,9 @@ func TestMigrate(t *testing.T) {
 	dbType := engine.Dialect().URI().DBType
 	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
 		// wait for mysql/postgres to sync ...
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
+	assert.NoError(t, engine.ClearCache(allBeans...))
 
 	// migrate old db
 	engine, close = testDB(t, false)
