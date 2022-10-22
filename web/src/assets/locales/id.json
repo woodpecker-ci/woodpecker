@@ -1,1 +1,307 @@
-{}
+{
+  "admin": {
+    "settings": {
+      "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "secrets": {
+        "add": "Tambahkan rahasia",
+        "created": "Rahasia global dibuat",
+        "deleted": "Rahasia global dihapus",
+        "desc": "Rahasia global dapat diberikan untuk semua langkah jalur pipa repositori individu saat berjalan sebagai variabel lingkungan.",
+        "events": {
+          "events": "Tersedia pada peristiwa berikut",
+          "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
+        },
+        "images": {
+          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "images": "Tersedia untuk citra berikut"
+        },
+        "name": "Nama",
+        "none": "Belum ada rahasia global.",
+        "save": "Simpan rahasia",
+        "saved": "Rahasia global disimpan",
+        "secrets": "Rahasia",
+        "show": "Tampilkan rahasia",
+        "value": "Nilai",
+        "warning": "Rahasia ini akan tersedia untuk pengguna peladen."
+      },
+      "settings": "Pengaturan"
+    }
+  },
+  "back": "Kembali",
+  "color_scheme_dark": "Ubah ke mode terang",
+  "color_scheme_light": "Ubah ke mode gelap",
+  "docs": "Dokumentasi",
+  "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "login": "Masuk",
+  "logout": "Keluar",
+  "not_found": {
+    "back_home": "Kembali ke beranda",
+    "not_found": "Aduh 404, mungkin kami membuat sesuatu rusak atau Anda salah ketik :-/"
+  },
+  "org": {
+    "settings": {
+      "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan organisasi ini",
+      "secrets": {
+        "add": "Tambahkan rahasia",
+        "created": "Rahasia organisasi dibuat",
+        "deleted": "Rahasia organisasi dihapus",
+        "desc": "Rahasia organisasi dapat diberikan ke semua langkah jalur pipa repositori organisasi individu saat berjalan sebagai variabel lingkungan.",
+        "events": {
+          "events": "Tersedia pada peristiwa berikut",
+          "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
+        },
+        "images": {
+          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "images": "Tersedia untuk citra berikut"
+        },
+        "name": "Nama",
+        "none": "Belum ada rahasia organisasi.",
+        "save": "Simpan rahasia",
+        "saved": "Rahasia organisasi disimpan",
+        "secrets": "Rahasia",
+        "show": "Tampilkan rahasia",
+        "value": "Nilai"
+      },
+      "settings": "Pengaturan"
+    }
+  },
+  "password": "Kata sandi",
+  "repo": {
+    "activity": "Aktivitas",
+    "add": "Tambahkan repositori",
+    "branches": "Cabang",
+    "enable": {
+      "enable": "Aktifkan",
+      "enabled": "Sudah diaktifkan",
+      "list_reloaded": "Daftar repositori dimuat ulang",
+      "reload": "Muat ulang repositori",
+      "success": "Repositori diaktifkan"
+    },
+    "manual_pipeline": {
+      "select_branch": "Pilih cabang",
+      "title": "Picu sebuah jalur pipa",
+      "trigger": "Jalankan jalur pipa",
+      "variables": {
+        "add": "Tambahkan variabel",
+        "desc": "Tetapkan variabel tambahan untuk digunakan dalam jalur pipa Anda. Variabel dengan nama yang sama akan ditimpa.",
+        "name": "Nama variabel",
+        "title": "Variabel jalur pipa tambahan",
+        "value": "Nilai variabel"
+      }
+    },
+    "not_allowed": "Anda tidak diperbolehkan untuk mengakses repositori ini",
+    "pipeline": {
+      "actions": {
+        "cancel": "Batalkan",
+        "cancel_success": "Jalur pipa dibatalkan",
+        "canceled": "Langkah ini telah dibatalkan.",
+        "log_auto_scroll": "Gulir ke bawah secara otomatis",
+        "log_auto_scroll_off": "Matikan pengguliran otomatis",
+        "log_download": "Unduh",
+        "restart": "Mulai ulang",
+        "restart_success": "Jalur pipa dimulai ulang"
+      },
+      "config": "Konfigurasi",
+      "created": "Dibuat",
+      "event": {
+        "cron": "Cron",
+        "deploy": "Luncur",
+        "manual": "Manual",
+        "pr": "Permintaan Penarikan",
+        "push": "Dorongan",
+        "tag": "Tag"
+      },
+      "execution_error": "Kesalahan eksekusi",
+      "exit_code": "kode keluar {exitCode}",
+      "files": "Berkas yang diubah ({files})",
+      "loading": "Memuat…",
+      "log_download_error": "Terjadi sebuah kesalahan saat mengunduh berkas catatan",
+      "no_files": "Tidak ada berkas yang telah diubah.",
+      "no_pipeline_steps": "Tidak ada langkah jalur pipa yang tersedia!",
+      "no_pipelines": "Belum ada jalur pipa yang dimulai.",
+      "pipeline": "Jalur pipa #{pipelineId}",
+      "pipelines_for": "Jalur pipa untuk cabang \"{branch}\"",
+      "protected": {
+        "approve": "Setujui",
+        "approve_success": "Jalur pipa disetujui",
+        "awaits": "Jalur pipa ini menunggu untuk disetujui oleh seorang pemelihara!",
+        "decline": "Tolak",
+        "decline_success": "Jalur pipa ditolak",
+        "declined": "Jalur pipa ini telah ditolak!"
+      },
+      "step_not_started": "Langkah ini belum dijalankan.",
+      "tasks": "Tugas"
+    },
+    "settings": {
+      "actions": {
+        "actions": "Tindakan",
+        "delete": {
+          "confirm": "Semua data akan hilang setelah tindakan ini!!!\n\nApakah Anda benar-benar ingin melakukan ini?",
+          "delete": "Hapus repositori",
+          "success": "Repositori dihapus"
+        },
+        "disable": {
+          "disable": "Nonaktifkan repositori",
+          "success": "Repositori dinonaktifkan"
+        },
+        "repair": {
+          "repair": "Perbaiki repositori",
+          "success": "Repositori diperbaiki"
+        }
+      },
+      "badge": {
+        "badge": "Lencana",
+        "branch": "Cabang",
+        "type": "Sintaks",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL"
+      },
+      "crons": {
+        "add": "Tambahkan cron",
+        "branch": {
+          "placeholder": "Cabang (menggunakan cabang bawaan jika kosong)",
+          "title": "Cabang"
+        },
+        "created": "Kron dibuat",
+        "crons": "Cron",
+        "delete": "Hapus cron",
+        "deleted": "Kron dihapus",
+        "desc": "Pekerja cron dapat digunakan untuk memicu jalur pipa pada waktu yang ditentukan.",
+        "edit": "Sunting cron",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama pekerja cron"
+        },
+        "next_exec": "Eksekusi berikutnya",
+        "none": "Belum ada cron.",
+        "not_executed_yet": "Belum dieksekusi",
+        "save": "Simpan cron",
+        "saved": "Kron disimpan",
+        "schedule": {
+          "placeholder": "Jadwal",
+          "title": "Jadwal (berdasarkan UTC)"
+        },
+        "show": "Tampilkan cron"
+      },
+      "general": {
+        "allow_pr": {
+          "allow": "Perbolehkan Permintaan Penarikan",
+          "desc": "Jalur pipa dapat berjalan pada permintaan penarikan."
+        },
+        "cancel_prev": {
+          "cancel": "Batalkan jalur pipa sebelumnya",
+          "desc": "Aktifkan untuk membatalkan jalur pipa yang menunggu dan yang berjalan dari peristiwa dan konteks yang sama sebelum memulai picuan yang baru."
+        },
+        "general": "Umum",
+        "pipeline_path": {
+          "default": "Secara bawaan: .woodpecker/*.yml → .woodpecker.yml → .drone.yml",
+          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">jalur/saya/</span>). Folder seharusnya berakhir dengan sebuah <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "path": "Jalur pipa"
+        },
+        "project": "Pengaturan proyek",
+        "protected": {
+          "desc": "Setiap jalur pipa harus disetujui sebelum dijalankan.",
+          "protected": "Dilindungi"
+        },
+        "save": "Simpan pengaturan",
+        "success": "Pengaturan repositori diperbarui",
+        "timeout": {
+          "minutes": "menit",
+          "timeout": "Waktu habis"
+        },
+        "trusted": {
+          "desc": "Kontainer jalur pipa dasar mendapatkan akses ke kemampuan yang ditingkatkan seperti memasang volume.",
+          "trusted": "Dipercayai"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Hanya pengguna yang terotentikasi dengan instansi Woodpecker dapat melihat proyek ini.",
+            "internal": "Internal"
+          },
+          "private": {
+            "desc": "Hanya Anda dan pemilik repositori lainnya dapat melihat proyek ini.",
+            "private": "Pribadi"
+          },
+          "public": {
+            "desc": "Setiap pengguna dapat melihat proyek Anda tanpa harus masuk.",
+            "public": "Publik"
+          },
+          "visibility": "Keterlihatan proyek"
+        }
+      },
+      "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan repositori ini",
+      "registries": {
+        "add": "Tambahkan registri",
+        "address": {
+          "address": "Alamat",
+          "placeholder": "Alamat registri (mis. docker.io)"
+        },
+        "created": "Kredensial registri dibuat",
+        "creds": "Kredensial registri",
+        "delete": "Hapus registri",
+        "deleted": "Kredensial registri dihapus",
+        "desc": "Kredensial registri dapat ditambahkan untuk menggunakan citra pribadi untuk jalur pipa Anda.",
+        "edit": "Sunting registri",
+        "none": "Belum ada kredensial registri.",
+        "registries": "Registri",
+        "save": "Simpan registri",
+        "saved": "Kredensial registri disimpan",
+        "show": "Tampilkan registri"
+      },
+      "secrets": {
+        "add": "Tambahkan rahasia",
+        "created": "Rahasia dibuat",
+        "delete": "Hapus rahasia",
+        "deleted": "Rahasia dihapus",
+        "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
+        "edit": "Sunting rahasia",
+        "events": {
+          "events": "Tersedia pada peristiwa berikut",
+          "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
+        },
+        "images": {
+          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "images": "Tersedia untuk citra berikut"
+        },
+        "name": "Nama",
+        "none": "Belum ada rahasia.",
+        "save": "Simpan rahasia",
+        "saved": "Rahasia disimpan",
+        "secrets": "Rahasia",
+        "show": "Tampilkan rahasia",
+        "value": "Nilai"
+      },
+      "settings": "Pengaturan"
+    },
+    "user_none": "Organisasi/pengguna belum memiliki proyek apa pun."
+  },
+  "repos": "Repo",
+  "repositories": "Repositori",
+  "search": "Cari…",
+  "time": {
+    "days_short": "h",
+    "hours_short": "j",
+    "min_short": "mnt",
+    "not_started": "belum dimulai",
+    "sec_short": "dtk",
+    "tmpl": "BBB H, TTTT, JJ:mm z",
+    "weeks_short": "m"
+  },
+  "unknown_error": "Terjadi sebuah kesalahan yang tidak diketahui",
+  "url": "URL",
+  "user": {
+    "access_denied": "Anda tidak diperbolehkan untuk masuk",
+    "api_usage": "Contoh Penggunaan API",
+    "cli_usage": "Contoh Penggunaan CLI",
+    "dl_cli": "Unduh CLI",
+    "internal_error": "Terjadi beberapa kesalahan internal",
+    "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
+    "settings": "Pengaturan Pengguna",
+    "shell_setup": "Pengaturan shell",
+    "shell_setup_before": "sebelumnya lakukan penyiapan shell",
+    "token": "Token Pribadi Anda"
+  },
+  "username": "Nama pengguna",
+  "welcome": "Selamat datang di Woodpecker"
+}

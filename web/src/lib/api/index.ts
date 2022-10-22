@@ -19,7 +19,7 @@ type RepoListOptions = {
   flush?: boolean;
 };
 
-type BuildOptions = {
+type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
 };
@@ -58,7 +58,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/repair`);
   }
 
-  createPipeline(owner: string, repo: string, options: BuildOptions): Promise<Pipeline> {
+  createPipeline(owner: string, repo: string, options: PipelineOptions): Promise<Pipeline> {
     return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
   }
 

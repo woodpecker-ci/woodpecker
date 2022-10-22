@@ -62,6 +62,7 @@
             </div>
           </div>
           <button
+            v-if="pipeline.procs && pipeline.procs.length > 1"
             type="button"
             class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
             @click="procsCollapsed[proc.id] = !!!procsCollapsed[proc.id]"
@@ -75,16 +76,22 @@
           </button>
         </div>
         <div
-          class="transition-height duration-150 overflow-hidden ml-6"
-          :class="{ 'max-h-screen': !procsCollapsed[proc.id], 'max-h-0': procsCollapsed[proc.id] }"
+          class="transition-height duration-150 overflow-hidden"
+          :class="{
+            'max-h-screen': !procsCollapsed[proc.id],
+            'max-h-0': procsCollapsed[proc.id],
+            'ml-6': pipeline.procs && pipeline.procs.length > 1,
+          }"
         >
           <button
             v-for="job in proc.children"
             :key="job.pid"
             type="button"
-            class="flex mt-1 p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+            class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
               'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedProcId && selectedProcId === job.pid,
+              'mt-1':
+                (pipeline.procs && pipeline.procs.length > 1) || (proc.children && job.pid !== proc.children[0].pid),
             }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
