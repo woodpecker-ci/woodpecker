@@ -104,6 +104,15 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Pro
 		return err
 	}
 
+	repoExist, err := sess.Where("repo_id = ?", pipeline.RepoID).Exist(&model.Repo{})
+	if err != nil {
+		return err
+	}
+
+	if !repoExist {
+		return ErrorRepoNotExist{RepoID: pipeline.RepoID}
+	}
+
 	// calc pipeline number
 	var number int64
 	if _, err := sess.SQL("SELECT MAX(pipeline_number) FROM `pipelines` WHERE pipeline_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {

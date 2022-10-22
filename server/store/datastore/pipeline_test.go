@@ -57,6 +57,20 @@ func TestPipelines(t *testing.T) {
 			g.Assert(err).IsNil()
 		})
 
+		g.It("Should Fail early when the repo is not existing", func() {
+			pipeline := model.Pipeline{
+				RepoID: 100,
+				Status: model.StatusSuccess,
+			}
+			err := store.CreatePipeline(&pipeline)
+			g.Assert(err).IsNotNil()
+
+			count, err := store.GetPipelineCount()
+			g.Assert(err).IsNil()
+			g.Assert(count == 0).IsTrue()
+			fmt.Println("GOT COUNT", count)
+		})
+
 		g.It("Should Post a Pipeline", func() {
 			pipeline := model.Pipeline{
 				RepoID: repo.ID,
@@ -289,8 +303,11 @@ func TestPipelines(t *testing.T) {
 }
 
 func TestPipelineIncrement(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
 	defer closer()
+
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1"}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 2, Owner: "2", Name: "2", FullName: "2/2"}))
 
 	pipelineA := &model.Pipeline{RepoID: 1}
 	if !assert.NoError(t, store.CreatePipeline(pipelineA)) {
