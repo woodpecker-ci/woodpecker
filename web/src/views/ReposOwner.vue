@@ -1,14 +1,10 @@
 <template>
-  <Scaffold>
-    <template #headerTitle>
+  <Scaffold v-model:search="search">
+    <template #title>
       {{ repoOwner }}
     </template>
 
-    <template #headerCenterBox>
-      <TextField v-model="search" class="w-auto !bg-gray-100 !dark:bg-dark-gray-600" :placeholder="$t('search')" />
-    </template>
-
-    <template #headerActions>
+    <template #titleActions>
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"
@@ -38,7 +34,6 @@ import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import TextField from '~/components/form/TextField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
@@ -50,7 +45,6 @@ export default defineComponent({
 
   components: {
     ListItem,
-    TextField,
     IconButton,
     Scaffold,
   },

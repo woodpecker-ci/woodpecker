@@ -5,7 +5,7 @@
     enable-tabs
     disable-hash-mode
   >
-    <template #headerTitle>
+    <template #title>
       <span class="flex">
         <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
           repoOwner
@@ -16,7 +16,7 @@
         <img :src="badgeUrl" />
       </a>
     </template>
-    <template #headerActions>
+    <template #titleActions>
       <a
         :href="repo.link_url"
         target="_blank"

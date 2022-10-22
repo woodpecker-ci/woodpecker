@@ -1,13 +1,13 @@
 <template>
   <template v-if="pipeline && repo">
     <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
-      <template #headerTitle>
+      <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
         <span class="<md:hidden mx-2">-</span>
         <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
       </template>
 
-      <template #headerActions>
+      <template #titleActions>
         <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0 ml-auto" />
 
         <template v-if="repoPermissions.push">

@@ -1,6 +1,6 @@
 <template>
   <Scaffold enable-tabs :go-back="goBack">
-    <template #headerTitle>
+    <template #title>
       <span>
         <router-link :to="{ name: 'repos-owner', params: { repoOwner: repo.owner } }" class="hover:underline">
           {{ repo.owner }}

@@ -1,7 +1,7 @@
 <template>
   <Scaffold>
-    <template #headerTitle>{{ $t('user.settings') }}</template>
-    <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
+    <template #title>{{ $t('user.settings') }}</template>
+    <template #titleActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
     <div class="space-y-4 flex flex-col">
       <div>
         <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>

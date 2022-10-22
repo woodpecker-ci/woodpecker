@@ -1,14 +1,10 @@
 <template>
-  <Scaffold>
-    <template #headerTitle>
+  <Scaffold v-model:search="search">
+    <template #title>
       {{ $t('repositories') }}
     </template>
 
-    <template #headerCenterBox>
-      <TextField v-model="search" class="w-auto !bg-gray-100 !dark:bg-dark-gray-600" :placeholder="$t('search')" />
-    </template>
-
-    <template #headerActions>
+    <template #titleActions>
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 
@@ -30,7 +26,6 @@ import { computed, defineComponent, onMounted, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import TextField from '~/components/form/TextField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import RepoStore from '~/store/repos';
@@ -41,7 +36,6 @@ export default defineComponent({
   components: {
     Button,
     ListItem,
-    TextField,
     Scaffold,
   },
 

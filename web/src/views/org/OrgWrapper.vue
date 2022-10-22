@@ -1,10 +1,10 @@
 <template>
   <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader">
-    <template #headerTitle>
+    <template #title>
       {{ org.name }}
     </template>
 
-    <template #headerActions>
+    <template #titleActions>
       <IconButton
         v-if="orgPermissions.admin"
         :to="{ name: 'repo-settings' }"

@@ -1,6 +1,6 @@
 <template>
   <Scaffold enable-tabs>
-    <template #headerTitle>
+    <template #title>
       {{ $t('repo.settings.settings') }}
     </template>
     <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
