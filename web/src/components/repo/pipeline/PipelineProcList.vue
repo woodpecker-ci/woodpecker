@@ -87,9 +87,10 @@
             v-for="job in proc.children"
             :key="job.pid"
             type="button"
-            class="flex mt-1 p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+            class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
               'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedProcId && selectedProcId === job.pid,
+              'mt-1': (pipeline.procs && pipeline.procs.length > 1) || job.pid !== proc.children[0].pid,
             }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
