@@ -106,15 +106,6 @@ func restorePostgresDump(t *testing.T, config string) {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("DROP DATABASE woodpeckerci")
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
-	_, err = db.Exec("CREATE DATABASE woodpeckerci")
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
-
 	_, err = db.Exec(string(dump))
 	if !assert.NoError(t, err) {
 		t.FailNow()
