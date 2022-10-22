@@ -37,7 +37,6 @@
 
       <Button
         v-if="repoPermissions.push"
-        type="submit"
         :text="$t('repo.manual_pipeline.trigger')"
         class="ml-auto"
         @click="showManualPipelinePopup = true"

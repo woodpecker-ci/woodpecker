@@ -67,6 +67,7 @@
 
         <Button
           type="submit"
+          color="green"
           :is-loading="isSaving"
           :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
         />
