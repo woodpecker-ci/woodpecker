@@ -15,6 +15,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 // GetRegistry gets the name registry from the database and writes
@@ -133,7 +135,12 @@ func DeleteRegistry(c *gin.Context) {
 		repo = session.Repo(c)
 		name = c.Param("registry")
 	)
-	if err := server.Config.Services.Registries.RegistryDelete(repo, name); err != nil {
+	err := server.Config.Services.Registries.RegistryDelete(repo, name)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.String(404, "no records found, cannot delete registry")
+			return
+		}
 		c.String(500, "Error deleting registry %q. %s", name, err)
 		return
 	}

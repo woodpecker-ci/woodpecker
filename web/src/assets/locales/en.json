@@ -9,7 +9,11 @@
     "username": "Username",
     "password": "Password",
     "url": "URL",
+    "back": "Back",
+    "color_scheme_light": "Switch to dark mode",
+    "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -24,6 +28,18 @@
         "not_started": "not started yet"
     },
     "repo": {
+        "manual_pipeline": {
+          "title": "Trigger a manual pipeline run",
+          "trigger": "Run pipeline",
+          "select_branch": "Select branch",
+          "variables": {
+            "add": "Add variable",
+            "title": "Additional pipeline variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+            "name": "Variable name",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",
@@ -104,7 +120,9 @@
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                }
+                },
+                "edit": "Edit secret",
+                "delete":"Delete secret"
             },
             "registries": {
                 "registries": "Registries",
@@ -120,7 +138,9 @@
                 "address": {
                     "address": "Address",
                     "placeholder": "Registry Address (e.g. docker.io)"
-                }
+                },
+                "edit": "Edit registry",
+                "delete":"Delete registry"
             },
             "crons": {
                 "crons": "Crons",
@@ -145,12 +165,17 @@
                 "schedule": {
                     "title": "Schedule (based on UTC)",
                     "placeholder": "Schedule"
-                }
+                },
+                "edit": "Edit cron",
+                "delete": "Delete cron"
             },
             "badge": {
                 "badge": "Badge",
-                "url_branch": "URL for specific branch",
-                "markdown": "Markdown"
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
             },
             "actions": {
                 "actions": "Actions",
@@ -169,7 +194,7 @@
                 }
             }
         },
-        "build": {
+        "pipeline": {
             "created": "Created",
             "tasks": "Tasks",
             "config": "Config",
@@ -182,7 +207,7 @@
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "exit_code": "exit code {exitCode}",
             "loading": "Loading…",
-            "pipeline": "Pipeline #{buildId}",
+            "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",
             "actions": {
                 "cancel": "Cancel",
@@ -207,7 +232,8 @@
                 "tag": "Tag",
                 "pr": "Pull Request",
                 "deploy": "Deploy",
-                "cron": "Cron"
+                "cron": "Cron",
+                "manual": "Manual"
             }
         }
     },
@@ -267,6 +293,7 @@
         }
     },
     "user": {
+        "settings": "User Settings",
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",

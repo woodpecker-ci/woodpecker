@@ -1,42 +1,55 @@
 <template>
-  <div class="flex shadow-lg dark:shadow-sm bg-lime-600 text-neutral-content px-2 md:px-8 py-2 dark:bg-dark-gray-900">
-    <div class="flex text-white dark:text-gray-400 items-center">
-      <router-link :to="{ name: 'home' }" class="relative">
-        <img class="-mt-3 w-8" src="../../../assets/logo.svg?url" />
-        <span class="absolute -bottom-4 text-xs">{{ version }}</span>
+  <!-- Navbar -->
+  <div class="flex shadow-lg dark:shadow-sm bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-900">
+    <!-- Left Links Box -->
+    <div class="flex text-white dark:text-gray-400 items-center space-x-2">
+      <!-- Logo -->
+      <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
+        <img class="w-8 h-8" src="../../../assets/logo.svg?url" />
+        <span class="text-xs">{{ version }}</span>
       </router-link>
-      <router-link
-        v-if="user"
-        :to="{ name: 'repos' }"
-        class="mx-4 hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md"
-      >
+      <!-- Repo Link -->
+      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
         <span class="flex md:hidden">{{ $t('repos') }}</span>
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
+      <!-- Docs Link -->
+      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
     </div>
-    <div class="flex ml-auto items-center space-x-4 text-white dark:text-gray-400">
-      <a
-        :href="docsUrl"
-        target="_blank"
-        class="hover:bg-lime-700 dark:hover:bg-gray-600 px-4 py-1 rounded-md hidden md:flex"
-        >{{ $t('docs') }}</a
-      >
-      <IconButton
-        :icon="darkMode ? 'dark' : 'light'"
-        class="!text-white !dark:text-gray-500"
+    <!-- Right Icons Box -->
+    <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
+      <!-- Dark Mode Toggle -->
+      <NavbarIcon
+        :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
+        class="navbar-icon navbar-clickable"
         @click="darkMode = !darkMode"
-      />
-      <IconButton
+      >
+        <i-ic-baseline-dark-mode v-if="darkMode" />
+        <i-ic-round-light-mode v-else />
+      </NavbarIcon>
+      <!-- Admin Settings -->
+      <NavbarIcon
         v-if="user?.admin"
-        icon="settings"
-        class="!text-white !dark:text-gray-500"
+        class="navbar-icon navbar-clickable"
+        :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
-      />
-      <router-link v-if="user" :to="{ name: 'user' }">
-        <img v-if="user && user.avatar_url" class="w-8" :src="`${user.avatar_url}`" />
-      </router-link>
+      >
+        <i-clarity-settings-solid />
+      </NavbarIcon>
+
+      <!-- Active Pipelines Indicator -->
+      <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
+      <!-- User Avatar -->
+      <NavbarIcon
+        v-if="user"
+        :to="{ name: 'user' }"
+        :title="$t('user.settings')"
+        class="navbar-icon navbar-clickable !p-1.5"
+      >
+        <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
+      </NavbarIcon>
+      <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
-      <ActiveBuilds v-if="user" />
     </div>
   </div>
 </template>
@@ -46,17 +59,17 @@ import { defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 
-import ActiveBuilds from './ActiveBuilds.vue';
+import ActivePipelines from './ActivePipelines.vue';
+import NavbarIcon from './NavbarIcon.vue';
 
 export default defineComponent({
   name: 'Navbar',
 
-  components: { Button, ActiveBuilds, IconButton },
+  components: { Button, ActivePipelines, NavbarIcon },
 
   setup() {
     const config = useConfig();
@@ -75,3 +88,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.navbar-link {
+  @apply px-3 py-2 -my-1 rounded-md;
+}
+
+.navbar-clickable {
+  @apply hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100;
+}
+</style>

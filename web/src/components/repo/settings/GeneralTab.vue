@@ -4,7 +4,7 @@
       <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
-    <div v-if="repoSettings" class="flex flex-col">
+    <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#pipeline-path"
         :label="$t('repo.settings.general.pipeline_path.path')"
@@ -62,7 +62,7 @@
       >
         <CheckboxesField
           v-model="repoSettings.cancel_previous_pipeline_events"
-          :options="cancelPreviousBuildEventsOptions"
+          :options="cancelPreviousPipelineEventsOptions"
         />
         <template #description>
           <p class="text-sm">
@@ -72,13 +72,13 @@
       </InputField>
 
       <Button
+        type="submit"
         class="mr-auto"
         color="green"
         :is-loading="isSaving"
         :text="$t('repo.settings.general.save')"
-        @click="saveRepoSettings"
       />
-    </div>
+    </form>
   </Panel>
 </template>
 
@@ -178,14 +178,14 @@ export default defineComponent({
       },
     ];
 
-    const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+    const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
+      { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+      { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
       {
         value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.build.event.pr'),
+        text: i18n.t('repo.pipeline.event.pr'),
       },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+      { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
     ];
 
     return {
@@ -194,7 +194,7 @@ export default defineComponent({
       isSaving,
       saveRepoSettings,
       projectVisibilityOptions,
-      cancelPreviousBuildEventsOptions,
+      cancelPreviousPipelineEventsOptions,
     };
   },
 });

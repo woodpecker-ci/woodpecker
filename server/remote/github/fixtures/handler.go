@@ -27,6 +27,7 @@ func Handler() http.Handler {
 
 	e := gin.New()
 	e.GET("/api/v3/repos/:owner/:name", getRepo)
+	e.GET("/api/v3/repositories/:id", getRepoByID)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
 
@@ -35,6 +36,15 @@ func Handler() http.Handler {
 
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
+	case "repo_not_found":
+		c.String(404, "")
+	default:
+		c.String(200, repoPayload)
+	}
+}
+
+func getRepoByID(c *gin.Context) {
+	switch c.Param("id") {
 	case "repo_not_found":
 		c.String(404, "")
 	default:
@@ -55,6 +65,7 @@ func getMembership(c *gin.Context) {
 
 var repoPayload = `
 {
+	"id": 5,
   "owner": {
     "login": "octocat",
     "avatar_url": "https://github.com/images/error/octocat_happy.gif"

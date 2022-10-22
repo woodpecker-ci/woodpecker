@@ -27,15 +27,23 @@ type Account struct {
 	Links Links  `json:"links"`
 }
 
-type AccountResp struct {
-	Page   int        `json:"page"`
-	Pages  int        `json:"pagelen"`
-	Size   int        `json:"size"`
-	Next   string     `json:"next"`
-	Values []*Account `json:"values"`
+type Workspace struct {
+	UUID  string `json:"uuid"`
+	Slug  string `json:"slug"`
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Links Links  `json:"links"`
 }
 
-type BuildStatus struct {
+type WorkspacesResp struct {
+	Page   int          `json:"page"`
+	Pages  int          `json:"pagelen"`
+	Size   int          `json:"size"`
+	Next   string       `json:"next"`
+	Values []*Workspace `json:"values"`
+}
+
+type PipelineStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
@@ -74,6 +82,7 @@ type HookResp struct {
 }
 
 type Links struct {
+	Self   Link   `json:"self"`
 	Avatar Link   `json:"avatar"`
 	HTML   Link   `json:"html"`
 	Clone  []Link `json:"clone"`
@@ -89,6 +98,7 @@ type LinkClone struct {
 }
 
 type Repo struct {
+	UUID      string  `json:"uuid"`
 	Owner     Account `json:"owner"`
 	Name      string  `json:"name"`
 	FullName  string  `json:"full_name"`
@@ -200,13 +210,13 @@ func (o *ListOpts) Encode() string {
 	return params.Encode()
 }
 
-type ListTeamOpts struct {
+type ListWorkspacesOpts struct {
 	Page    int
 	PageLen int
 	Role    string
 }
 
-func (o *ListTeamOpts) Encode() string {
+func (o *ListWorkspacesOpts) Encode() string {
 	params := url.Values{}
 	if o.Page != 0 {
 		params.Set("page", strconv.Itoa(o.Page))

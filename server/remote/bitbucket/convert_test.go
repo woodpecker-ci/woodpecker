@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,19 +66,19 @@ func Test_helper(t *testing.T) {
 		})
 
 		g.It("should convert team", func() {
-			from := &internal.Account{Login: "octocat"}
+			from := &internal.Workspace{Slug: "octocat"}
 			from.Links.Avatar.Href = "http://..."
-			to := convertTeam(from)
+			to := convertWorkspace(from)
 			g.Assert(to.Avatar).Equal(from.Links.Avatar.Href)
-			g.Assert(to.Login).Equal(from.Login)
+			g.Assert(to.Login).Equal(from.Slug)
 		})
 
 		g.It("should convert team list", func() {
-			from := &internal.Account{Login: "octocat"}
+			from := &internal.Workspace{Slug: "octocat"}
 			from.Links.Avatar.Href = "http://..."
-			to := convertTeamList([]*internal.Account{from})
+			to := convertWorkspaceList([]*internal.Workspace{from})
 			g.Assert(to[0].Avatar).Equal(from.Links.Avatar.Href)
-			g.Assert(to[0].Login).Equal(from.Login)
+			g.Assert(to[0].Login).Equal(from.Slug)
 		})
 
 		g.It("should convert user", func() {
@@ -114,7 +115,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(link).Equal("https://bitbucket.org/foo/bar.git")
 		})
 
-		g.It("should convert pull hook to build", func() {
+		g.It("should convert pull hook to pipeline", func() {
 			hook := &internal.PullRequestHook{}
 			hook.Actor.Login = "octocat"
 			hook.Actor.Links.Avatar.Href = "https://..."
@@ -127,21 +128,21 @@ func Test_helper(t *testing.T) {
 			hook.PullRequest.Desc = "updated README"
 			hook.PullRequest.Updated = time.Now()
 
-			build := convertPullHook(hook)
-			g.Assert(build.Event).Equal(model.EventPull)
-			g.Assert(build.Author).Equal(hook.Actor.Login)
-			g.Assert(build.Avatar).Equal(hook.Actor.Links.Avatar.Href)
-			g.Assert(build.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
-			g.Assert(build.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
-			g.Assert(build.Link).Equal(hook.PullRequest.Links.HTML.Href)
-			g.Assert(build.Ref).Equal("refs/heads/master")
-			g.Assert(build.Refspec).Equal("change:master")
-			g.Assert(build.Remote).Equal("https://bitbucket.org/baz/bar")
-			g.Assert(build.Message).Equal(hook.PullRequest.Desc)
-			g.Assert(build.Timestamp).Equal(hook.PullRequest.Updated.Unix())
+			pipeline := convertPullHook(hook)
+			g.Assert(pipeline.Event).Equal(model.EventPull)
+			g.Assert(pipeline.Author).Equal(hook.Actor.Login)
+			g.Assert(pipeline.Avatar).Equal(hook.Actor.Links.Avatar.Href)
+			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
+			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
+			g.Assert(pipeline.Link).Equal(hook.PullRequest.Links.HTML.Href)
+			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Refspec).Equal("change:master")
+			g.Assert(pipeline.Remote).Equal("https://bitbucket.org/baz/bar")
+			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
+			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})
 
-		g.It("should convert push hook to build", func() {
+		g.It("should convert push hook to pipeline", func() {
 			change := internal.Change{}
 			change.New.Target.Hash = "73f9c44d"
 			change.New.Name = "master"
@@ -154,29 +155,29 @@ func Test_helper(t *testing.T) {
 			hook.Actor.Login = "octocat"
 			hook.Actor.Links.Avatar.Href = "https://..."
 
-			build := convertPushHook(&hook, &change)
-			g.Assert(build.Event).Equal(model.EventPush)
-			g.Assert(build.Email).Equal("test@domain.tld")
-			g.Assert(build.Author).Equal(hook.Actor.Login)
-			g.Assert(build.Avatar).Equal(hook.Actor.Links.Avatar.Href)
-			g.Assert(build.Commit).Equal(change.New.Target.Hash)
-			g.Assert(build.Branch).Equal(change.New.Name)
-			g.Assert(build.Link).Equal(change.New.Target.Links.HTML.Href)
-			g.Assert(build.Ref).Equal("refs/heads/master")
-			g.Assert(build.Message).Equal(change.New.Target.Message)
-			g.Assert(build.Timestamp).Equal(change.New.Target.Date.Unix())
+			pipeline := convertPushHook(&hook, &change)
+			g.Assert(pipeline.Event).Equal(model.EventPush)
+			g.Assert(pipeline.Email).Equal("test@domain.tld")
+			g.Assert(pipeline.Author).Equal(hook.Actor.Login)
+			g.Assert(pipeline.Avatar).Equal(hook.Actor.Links.Avatar.Href)
+			g.Assert(pipeline.Commit).Equal(change.New.Target.Hash)
+			g.Assert(pipeline.Branch).Equal(change.New.Name)
+			g.Assert(pipeline.Link).Equal(change.New.Target.Links.HTML.Href)
+			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Message).Equal(change.New.Target.Message)
+			g.Assert(pipeline.Timestamp).Equal(change.New.Target.Date.Unix())
 		})
 
-		g.It("should convert tag hook to build", func() {
+		g.It("should convert tag hook to pipeline", func() {
 			change := internal.Change{}
 			change.New.Name = "v1.0.0"
 			change.New.Type = "tag"
 
 			hook := internal.PushHook{}
 
-			build := convertPushHook(&hook, &change)
-			g.Assert(build.Event).Equal(model.EventTag)
-			g.Assert(build.Ref).Equal("refs/tags/v1.0.0")
+			pipeline := convertPushHook(&hook, &change)
+			g.Assert(pipeline.Event).Equal(model.EventTag)
+			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 		})
 	})
 }

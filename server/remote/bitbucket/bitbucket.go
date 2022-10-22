@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,19 +131,22 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListTeamOpts{
+	opts := &internal.ListWorkspacesOpts{
 		PageLen: 100,
 		Role:    "member",
 	}
-	resp, err := c.newClient(ctx, u).ListTeams(opts)
+	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
 	if err != nil {
 		return nil, err
 	}
-	return convertTeamList(resp.Values), nil
+	return convertWorkspaceList(resp.Values), nil
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+func (c *config) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
+	if id.IsValid() {
+		name = string(id)
+	}
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -157,20 +161,16 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 	var all []*model.Repo
 
-	accounts := []string{u.Login}
-	resp, err := client.ListTeams(&internal.ListTeamOpts{
+	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
 		PageLen: 100,
 		Role:    "member",
 	})
 	if err != nil {
 		return all, err
 	}
-	for _, team := range resp.Values {
-		accounts = append(accounts, team.Login)
-	}
 
-	for _, account := range accounts {
-		repos, err := client.ListReposAll(account)
+	for _, workspace := range resp.Values {
+		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return all, err
 		}
@@ -214,27 +214,27 @@ func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 }
 
 // File fetches the file from the Bitbucket repository and returns its contents.
-func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, b.Commit, f)
+func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
+	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(*config), err
 }
 
-func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
-// Status creates a build status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
-	status := internal.BuildStatus{
-		State: convertStatus(build.Status),
-		Desc:  common.GetBuildStatusDescription(build.Status),
+// Status creates a pipeline status for the Bitbucket commit.
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
+	status := internal.PipelineStatus{
+		State: convertStatus(pipeline.Status),
+		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetBuildStatusLink(repo, build, nil),
+		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
 	}
-	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, build.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
@@ -302,8 +302,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
-// Build details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
+// Pipeline details. If the hook is unsupported nil values are returned.
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(req)
 }
 

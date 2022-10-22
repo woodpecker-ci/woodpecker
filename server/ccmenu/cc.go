@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// CCMenu displays the build status of projects on a ci server as an item in the Mac's menu bar.
+// CCMenu displays the pipeline status of projects on a ci server as an item in the Mac's menu bar.
 // It started as part of the CruiseControl project that built the first continuous integration server.
 //
 // http://ccmenu.org/
@@ -43,7 +43,7 @@ type CCProject struct {
 	WebURL          string   `xml:"webUrl,attr"`
 }
 
-func New(r *model.Repo, b *model.Build, link string) *CCProjects {
+func New(r *model.Repo, b *model.Pipeline, link string) *CCProjects {
 	proj := &CCProject{
 		Name:            r.FullName,
 		WebURL:          link,
@@ -52,8 +52,8 @@ func New(r *model.Repo, b *model.Build, link string) *CCProjects {
 		LastBuildLabel:  "Unknown",
 	}
 
-	// if the build is not currently running then
-	// we can return the latest build status.
+	// if the pipeline is not currently running then
+	// we can return the latest pipeline status.
 	if b.Status != model.StatusPending &&
 		b.Status != model.StatusRunning {
 		proj.Activity = "Sleeping"
@@ -61,7 +61,7 @@ func New(r *model.Repo, b *model.Build, link string) *CCProjects {
 		proj.LastBuildLabel = strconv.FormatInt(b.Number, 10)
 	}
 
-	// ensure the last build Status accepts a valid
+	// ensure the last pipeline status accepts a valid
 	// ccmenu enumeration
 	switch b.Status {
 	case model.StatusError, model.StatusKilled:

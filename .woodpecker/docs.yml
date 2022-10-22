@@ -1,18 +1,29 @@
 variables:
+  - &golang_image 'golang:1.18'
   - &node_image 'node:16-alpine'
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
+    # since we genereate docs for cli tool we have to watch this too
+    - "cli/**"
+    - "cmd/cli/**"
 
 pipeline:
+  build-cli:
+    image: *golang_image
+    commands:
+      - make docs
+    when:
+      path: *when_path
+
   build:
     image: *node_image
     commands:
       - cd docs/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
     when:
-      event: [push, pull_request]
       path: *when_path
 
   securitycheck:

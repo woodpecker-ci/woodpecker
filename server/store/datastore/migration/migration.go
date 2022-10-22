@@ -35,12 +35,14 @@ var migrationTasks = []*task{
 	&dropSenders,
 	&alterTableLogUpdateColumnLogDataType,
 	&alterTableSecretsAddUserCol,
+	&lowercaseSecretNames,
+	&renameBuildsToPipeline,
 }
 
 var allBeans = []interface{}{
 	new(model.Agent),
-	new(model.Build),
-	new(model.BuildConfig),
+	new(model.Pipeline),
+	new(model.PipelineConfig),
 	new(model.Config),
 	new(model.File),
 	new(model.Logs),
@@ -53,6 +55,7 @@ var allBeans = []interface{}{
 	new(model.User),
 	new(model.ServerConfig),
 	new(model.Cron),
+	new(model.Redirection),
 }
 
 type migrations struct {

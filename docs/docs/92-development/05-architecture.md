@@ -6,11 +6,11 @@
 
 ## System architecture
 
-### main package hirarchie
+### main package hierarchy
 
 | package    | meaning                                                      | imports
 |------------|--------------------------------------------------------------|----------
-| `cmd/**`   | parse commanline args & environment to stat server/cli/agent | all other
+| `cmd/**`   | parse command-line args & environment to stat server/cli/agent | all other
 | `agent/**` | code only agent (remote worker) will need                    | `pipeline`, `shared`
 | `cli/**`   | code only cli tool does need                                 | `pipeline`, `shared`, `woodpecker-go`
 | `server/**`| code only server will need                                   | `pipeline`, `shared`
@@ -28,7 +28,7 @@
 | `server/logging/**` | logging lib for gPRC server to stream logs while running | std
 | `server/model/**`   | structs for store (db) and api (json)           | std
 | `server/plugins/**` | plugins for server                              | `../model`, `../remote`
-| `server/pipeline/**`| orchistrate pipelines                          | `pipeline`, `../model`, `../pubsub`, `../queue`, `../remote`, `../store`, `../plugins`
+| `server/pipeline/**`| orchestrate pipelines                          | `pipeline`, `../model`, `../pubsub`, `../queue`, `../remote`, `../store`, `../plugins`
 | `server/pubsub/**`  | pubsub lib for server to push changes to the WebUI | std
 | `server/queue/**`   | queue lib for server where agents pull new pipelines from via gRPC | `server/model`
 | `server/remote/**`  | remote lib for server to connect and handle forge specific stuff | `shared`, `server/model`
@@ -38,7 +38,6 @@
 | `server/web/**`     | server SPA                                      |
 
 * `../` = `server/`
-
 
 ### Agent
 

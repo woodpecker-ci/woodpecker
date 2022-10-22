@@ -75,22 +75,23 @@ func apiRoutes(e *gin.Engine) {
 
 			repo.GET("/branches", api.GetRepoBranches)
 
-			repo.GET("/builds", api.GetBuilds)
-			repo.GET("/builds/:number", api.GetBuild)
-			repo.GET("/builds/:number/config", api.GetBuildConfig)
+			repo.GET("/pipelines", api.GetPipelines)
+			repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+			repo.GET("/pipelines/:number", api.GetPipeline)
+			repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
 
 			// requires push permissions
-			repo.POST("/builds/:number", session.MustPush, api.PostBuild)
-			repo.DELETE("/builds/:number", session.MustPush, api.DeleteBuild)
-			repo.POST("/builds/:number/approve", session.MustPush, api.PostApproval)
-			repo.POST("/builds/:number/decline", session.MustPush, api.PostDecline)
-			repo.DELETE("/builds/:number/:job", session.MustPush, api.DeleteBuild)
+			repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
+			repo.DELETE("/pipelines/:number", session.MustPush, api.DeletePipeline)
+			repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
+			repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
+			repo.DELETE("/pipelines/:number/:job", session.MustPush, api.DeletePipeline)
 
 			repo.GET("/logs/:number/:pid", api.GetProcLogs)
-			repo.GET("/logs/:number/:pid/:proc", api.GetBuildLogs)
+			repo.GET("/logs/:number/:pid/:proc", api.GetPipelineLogs)
 
 			// requires push permissions
-			repo.DELETE("/logs/:number", session.MustPush, api.DeleteBuildLogs)
+			repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
 
 			repo.GET("/files/:number", api.FileList)
 			repo.GET("/files/:number/:proc/*file", api.FileGet)
@@ -131,10 +132,10 @@ func apiRoutes(e *gin.Engine) {
 		badges.GET("/cc.xml", api.GetCC)
 	}
 
-	builds := e.Group("/api/builds")
+	pipelines := e.Group("/api/pipelines")
 	{
-		builds.Use(session.MustAdmin())
-		builds.GET("", api.GetBuildQueue)
+		pipelines.Use(session.MustAdmin())
+		pipelines.GET("", api.GetPipelineQueue)
 	}
 
 	queue := e.Group("/api/queue")
@@ -143,7 +144,7 @@ func apiRoutes(e *gin.Engine) {
 		queue.GET("/info", api.GetQueueInfo)
 		queue.GET("/pause", api.PauseQueue)
 		queue.GET("/resume", api.ResumeQueue)
-		queue.GET("/norunningbuilds", api.BlockTilQueueHasRunningItem)
+		queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 	}
 
 	secrets := e.Group("/api/secrets")
@@ -190,7 +191,7 @@ func apiRoutes(e *gin.Engine) {
 	sse := e.Group("/stream")
 	{
 		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:build/:number",
+		sse.GET("/logs/:owner/:name/:pipeline/:number",
 			session.SetRepo(),
 			session.SetPerm(),
 			session.MustPull,

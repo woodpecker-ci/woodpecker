@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,7 +86,7 @@ func Test_gogs(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.RemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
@@ -95,7 +96,7 @@ func Test_gogs(t *testing.T) {
 				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -118,6 +119,7 @@ func Test_gogs(t *testing.T) {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)
 				g.Assert(err).IsNil()
+				g.Assert(repos[0].RemoteID).Equal(fakeRepo.RemoteID)
 				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
 				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
 				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
@@ -134,13 +136,13 @@ func Test_gogs(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
 		g.It("Should return a repository file from a ref", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuildWithRef, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipelineWithRef, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
@@ -181,6 +183,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
+		RemoteID: "5",
 		Clone:    "http://gogs.com/test_name/repo_name.git",
 		Owner:    "test_name",
 		Name:     "repo_name",
@@ -193,11 +196,11 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
-	fakeBuild = &model.Build{
+	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 
-	fakeBuildWithRef = &model.Build{
+	fakePipelineWithRef = &model.Pipeline{
 		Ref: "refs/tags/v1.0.0",
 	}
 )

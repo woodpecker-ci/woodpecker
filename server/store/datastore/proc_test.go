@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,29 +24,29 @@ import (
 )
 
 func TestProcFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	procs := []*model.Proc{
 		{
-			BuildID:  1000,
-			PID:      1,
-			PPID:     2,
-			PGID:     3,
-			Name:     "build",
-			State:    model.StatusSuccess,
-			Error:    "pc load letter",
-			ExitCode: 255,
-			Machine:  "localhost",
-			Platform: "linux/amd64",
-			Environ:  map[string]string{"GOLANG": "tip"},
+			PipelineID: 1000,
+			PID:        1,
+			PPID:       2,
+			PGID:       3,
+			Name:       "build",
+			State:      model.StatusSuccess,
+			Error:      "pc load letter",
+			ExitCode:   255,
+			Machine:    "localhost",
+			Platform:   "linux/amd64",
+			Environ:    map[string]string{"GOLANG": "tip"},
 		},
 	}
 	assert.NoError(t, store.ProcCreate(procs))
 	assert.EqualValues(t, 1, procs[0].ID)
 	assert.Error(t, store.ProcCreate(procs))
 
-	proc, err := store.ProcFind(&model.Build{ID: 1000}, 1)
+	proc, err := store.ProcFind(&model.Pipeline{ID: 1000}, 1)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -53,31 +54,31 @@ func TestProcFind(t *testing.T) {
 }
 
 func TestProcChild(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	err := store.ProcCreate([]*model.Proc{
 		{
-			BuildID: 1,
-			PID:     1,
-			PPID:    1,
-			PGID:    1,
-			State:   "success",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "success",
 		},
 		{
-			BuildID: 1,
-			PID:     2,
-			PGID:    2,
-			PPID:    1,
-			Name:    "build",
-			State:   "success",
+			PipelineID: 1,
+			PID:        2,
+			PGID:       2,
+			PPID:       1,
+			Name:       "build",
+			State:      "success",
 		},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: insert procs: %s", err)
 		return
 	}
-	proc, err := store.ProcChild(&model.Build{ID: 1}, 1, "build")
+	proc, err := store.ProcChild(&model.Pipeline{ID: 1}, 1, "build")
 	if err != nil {
 		t.Error(err)
 		return
@@ -92,38 +93,38 @@ func TestProcChild(t *testing.T) {
 }
 
 func TestProcList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	err := store.ProcCreate([]*model.Proc{
 		{
-			BuildID: 2,
-			PID:     1,
-			PPID:    1,
-			PGID:    1,
-			State:   "success",
+			PipelineID: 2,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "success",
 		},
 		{
-			BuildID: 1,
-			PID:     1,
-			PPID:    1,
-			PGID:    1,
-			State:   "success",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "success",
 		},
 		{
-			BuildID: 1,
-			PID:     2,
-			PGID:    2,
-			PPID:    1,
-			Name:    "build",
-			State:   "success",
+			PipelineID: 1,
+			PID:        2,
+			PGID:       2,
+			PPID:       1,
+			Name:       "build",
+			State:      "success",
 		},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: insert procs: %s", err)
 		return
 	}
-	procs, err := store.ProcList(&model.Build{ID: 1})
+	procs, err := store.ProcList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
@@ -134,21 +135,21 @@ func TestProcList(t *testing.T) {
 }
 
 func TestProcUpdate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	proc := &model.Proc{
-		BuildID:  1,
-		PID:      1,
-		PPID:     2,
-		PGID:     3,
-		Name:     "build",
-		State:    "pending",
-		Error:    "pc load letter",
-		ExitCode: 255,
-		Machine:  "localhost",
-		Platform: "linux/amd64",
-		Environ:  map[string]string{"GOLANG": "tip"},
+		PipelineID: 1,
+		PID:        1,
+		PPID:       2,
+		PGID:       3,
+		Name:       "build",
+		State:      "pending",
+		Error:      "pc load letter",
+		ExitCode:   255,
+		Machine:    "localhost",
+		Platform:   "linux/amd64",
+		Environ:    map[string]string{"GOLANG": "tip"},
 	}
 	if err := store.ProcCreate([]*model.Proc{proc}); err != nil {
 		t.Errorf("Unexpected error: insert proc: %s", err)
@@ -159,7 +160,7 @@ func TestProcUpdate(t *testing.T) {
 		t.Errorf("Unexpected error: update proc: %s", err)
 		return
 	}
-	updated, err := store.ProcFind(&model.Build{ID: 1}, 1)
+	updated, err := store.ProcFind(&model.Pipeline{ID: 1}, 1)
 	if err != nil {
 		t.Error(err)
 		return
@@ -170,17 +171,17 @@ func TestProcUpdate(t *testing.T) {
 }
 
 func TestProcIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
 	defer closer()
 
 	if err := store.ProcCreate([]*model.Proc{
 		{
-			BuildID: 1,
-			PID:     1,
-			PPID:    1,
-			PGID:    1,
-			State:   "running",
-			Name:    "build",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "running",
+			Name:       "build",
 		},
 	}); err != nil {
 		t.Errorf("Unexpected error: insert procs: %s", err)
@@ -190,12 +191,12 @@ func TestProcIndexes(t *testing.T) {
 	// fail due to duplicate pid
 	if err := store.ProcCreate([]*model.Proc{
 		{
-			BuildID: 1,
-			PID:     1,
-			PPID:    1,
-			PGID:    1,
-			State:   "success",
-			Name:    "clone",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "success",
+			Name:       "clone",
 		},
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")

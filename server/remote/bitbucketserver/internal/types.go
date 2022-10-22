@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +39,7 @@ type SelfRefLink struct {
 	Href string `json:"href"`
 }
 
-type BuildStatus struct {
+type PipelineStatus struct {
 	State string `json:"state"`
 	Key   string `json:"key"`
 	Name  string `json:"name,omitempty"`
@@ -55,23 +56,25 @@ type Repo struct {
 			Href string `json:"href"`
 		} `json:"self"`
 	} `json:"links"`
-	Name    string `json:"name"`
-	Project struct {
-		Description string `json:"description"`
-		ID          int    `json:"id"`
-		Key         string `json:"key"`
-		Links       struct {
-			Self []SelfRefLink `json:"self"`
-		} `json:"links"`
-		Name   string `json:"name"`
-		Public bool   `json:"public"`
-		Type   string `json:"type"`
-	} `json:"project"`
-	Public        bool   `json:"public"`
-	ScmID         string `json:"scmId"`
-	Slug          string `json:"slug"`
-	State         string `json:"state"`
-	StatusMessage string `json:"statusMessage"`
+	Name          string  `json:"name"`
+	Project       Project `json:"project"`
+	Public        bool    `json:"public"`
+	ScmID         string  `json:"scmId"`
+	Slug          string  `json:"slug"`
+	State         string  `json:"state"`
+	StatusMessage string  `json:"statusMessage"`
+}
+
+type Project struct {
+	Description string `json:"description"`
+	ID          int    `json:"id"`
+	Key         string `json:"key"`
+	Links       struct {
+		Self []SelfRefLink `json:"self"`
+	} `json:"links"`
+	Name   string `json:"name"`
+	Public bool   `json:"public"`
+	Type   string `json:"type"`
 }
 
 type Repos struct {
@@ -157,24 +160,7 @@ type PostHook struct {
 		Values     []Value     `json:"values"`
 	} `json:"changesets"`
 	RefChanges []RefChange `json:"refChanges"`
-	Repository struct {
-		Forkable bool   `json:"forkable"`
-		ID       int    `json:"id"`
-		Name     string `json:"name"`
-		Project  struct {
-			ID         int    `json:"id"`
-			IsPersonal bool   `json:"isPersonal"`
-			Key        string `json:"key"`
-			Name       string `json:"name"`
-			Public     bool   `json:"public"`
-			Type       string `json:"type"`
-		} `json:"project"`
-		Public        bool   `json:"public"`
-		ScmID         string `json:"scmId"`
-		Slug          string `json:"slug"`
-		State         string `json:"state"`
-		StatusMessage string `json:"statusMessage"`
-	} `json:"repository"`
+	Repository Repo        `json:"repository"`
 }
 
 type RefChange struct {

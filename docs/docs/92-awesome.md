@@ -22,12 +22,19 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 - [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
 - [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker-CI and Gitea
+- [picus](https://github.com/windsource/picus) - Picus connects to a Woodpecker CI server and creates an agent in the cloud when there are pending jobs.
 
 ## Templates
 
-## Blogs, guides, videos
+## Posts & tutorials
 
-- [Tutorial about setup of Woodpecker-CI and Gitea](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
+- [Setup Gitea with Woodpecker CI](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
+- [Step-by-step guide to modern, secure and Open-source CI setup](https://devforth.io/blog/step-by-step-guide-to-modern-secure-ci-setup/)
+- [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
+- [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
+- [Deploy Docker/Compose using Woodpecker CI](https://hinty.io/vverenko/deploy-docker-compose-using-woodpecker-ci/)
+
+## Videos
 
 ## Plugins
 

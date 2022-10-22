@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,9 +164,22 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	return teams, nil
 }
 
-// Repo returns the named GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, owner, name string) (*model.Repo, error) {
+// Repo returns the GitHub repository.
+func (c *client) Repo(ctx context.Context, u *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err := client.Repositories.GetByID(ctx, intID)
+		if err != nil {
+			return nil, err
+		}
+		return convertRepo(repo), nil
+	}
+
 	repo, _, err := client.Repositories.Get(ctx, owner, name)
 	if err != nil {
 		return nil, err
@@ -205,7 +219,7 @@ func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 }
 
 // File fetches the file from the GitHub repository and returns its contents.
-func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
@@ -221,7 +235,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
@@ -423,29 +437,29 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
 	client := c.newClientToken(ctx, user.Token)
 
-	if build.Event == model.EventDeploy {
-		matches := reDeploy.FindStringSubmatch(build.Link)
+	if pipeline.Event == model.EventDeploy {
+		matches := reDeploy.FindStringSubmatch(pipeline.Link)
 		if len(matches) != 2 {
 			return nil
 		}
 		id, _ := strconv.Atoi(matches[1])
 
 		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
-			State:       github.String(convertStatus(build.Status)),
-			Description: github.String(common.GetBuildStatusDescription(build.Status)),
-			LogURL:      github.String(common.GetBuildStatusLink(repo, build, nil)),
+			State:       github.String(convertStatus(pipeline.Status)),
+			Description: github.String(common.GetPipelineStatusDescription(pipeline.Status)),
+			LogURL:      github.String(common.GetPipelineStatusLink(repo, pipeline, nil)),
 		})
 		return err
 	}
 
-	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, build.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetBuildStatusContext(repo, build, proc)),
+	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
+		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, proc)),
 		State:       github.String(convertStatus(proc.State)),
-		Description: github.String(common.GetBuildStatusDescription(proc.State)),
-		TargetURL:   github.String(common.GetBuildStatusLink(repo, build, proc)),
+		Description: github.String(common.GetPipelineStatusDescription(proc.State)),
+		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, proc)),
 	})
 	return err
 }
@@ -508,30 +522,30 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
-	pull, repo, build, err := parseHook(r, c.MergeRef)
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+	pull, repo, pipeline, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if pull != nil && len(build.ChangedFiles) == 0 {
-		build, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, build)
+	if pull != nil && len(pipeline.ChangedFiles) == 0 {
+		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
-func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, build *model.Build) (*model.Build, error) {
+func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return build, nil
+		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -555,7 +569,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 
 		opts.Page = resp.NextPage
 	}
-	build.ChangedFiles = utils.DedupStrings(fileList)
+	pipeline.ChangedFiles = utils.DedupStrings(fileList)
 
-	return build, nil
+	return pipeline, nil
 }

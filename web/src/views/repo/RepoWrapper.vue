@@ -21,27 +21,42 @@
         <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
       </a>
-      <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
+      <IconButton
+        v-if="repoPermissions.admin"
+        class="ml-2"
+        :to="{ name: 'repo-settings' }"
+        :title="$t('repo.settings.settings')"
+        icon="settings"
+      />
     </div>
+    <div class="flex flex-wrap gap-y-2 items-center justify-between">
+      <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
+        <Tab id="activity" :title="$t('repo.activity')" />
+        <Tab id="branches" :title="$t('repo.branches')" />
+      </Tabs>
 
-    <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab id="activity" :title="$t('repo.activity')" />
-      <Tab id="branches" :title="$t('repo.branches')" />
-    </Tabs>
-
+      <Button
+        v-if="repoPermissions.push"
+        :text="$t('repo.manual_pipeline.trigger')"
+        class="ml-auto"
+        @click="showManualPipelinePopup = true"
+      />
+      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
+    </div>
     <router-view />
   </FluidContainer>
   <router-view v-else-if="repo && repoPermissions" />
 </template>
 
 <script lang="ts" setup>
-import { computed, defineProps, onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
+import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Tab from '~/components/tabs/Tab.vue';
 import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -49,19 +64,15 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import BuildStore from '~/store/builds';
+import PipelineStore from '~/store/pipelines';
 import RepoStore from '~/store/repos';
 
 const props = defineProps({
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoOwner: {
     type: String,
     required: true,
   },
 
-  // used by toRef
-  // eslint-disable-next-line vue/no-unused-properties
   repoName: {
     type: String,
     required: true,
@@ -71,7 +82,7 @@ const props = defineProps({
 const repoOwner = toRef(props, 'repoOwner');
 const repoName = toRef(props, 'repoName');
 const repoStore = RepoStore();
-const buildStore = BuildStore();
+const pipelineStore = PipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { isAuthenticated } = useAuthentication();
@@ -82,10 +93,12 @@ const i18n = useI18n();
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
 const repoPermissions = ref<RepoPermissions>();
-const builds = buildStore.getSortedBuilds(repoOwner, repoName);
+const pipelines = pipelineStore.getSortedPipelines(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
-provide('builds', builds);
+provide('pipelines', pipelines);
+
+const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
@@ -100,8 +113,15 @@ async function loadRepo() {
     return;
   }
 
-  await repoStore.loadRepo(repoOwner.value, repoName.value);
-  await buildStore.loadBuilds(repoOwner.value, repoName.value);
+  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
+  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
+    await router.replace({
+      name: route.name ? route.name : 'repo',
+      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
+    });
+    return;
+  }
+  await pipelineStore.loadPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {

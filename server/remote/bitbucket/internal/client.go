@@ -37,7 +37,7 @@ const (
 	pathUser        = "%s/2.0/user/"
 	pathEmails      = "%s/2.0/user/emails"
 	pathPermissions = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathTeams       = "%s/2.0/teams/?%s"
+	pathWorkspace   = "%s/2.0/workspaces/?%s"
 	pathRepo        = "%s/2.0/repositories/%s/%s"
 	pathRepos       = "%s/2.0/repositories/%s?%s"
 	pathHook        = "%s/2.0/repositories/%s/%s/hooks/%s"
@@ -85,9 +85,9 @@ func (c *Client) ListEmail() (*EmailResp, error) {
 	return out, err
 }
 
-func (c *Client) ListTeams(opts *ListTeamOpts) (*AccountResp, error) {
-	out := new(AccountResp)
-	uri := fmt.Sprintf(pathTeams, c.base, opts.Encode())
+func (c *Client) ListWorkspaces(opts *ListWorkspacesOpts) (*WorkspacesResp, error) {
+	out := new(WorkspacesResp)
+	uri := fmt.Sprintf(pathWorkspace, c.base, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }
@@ -99,19 +99,19 @@ func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	return out, err
 }
 
-func (c *Client) ListRepos(account string, opts *ListOpts) (*RepoResp, error) {
+func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) {
 	out := new(RepoResp)
-	uri := fmt.Sprintf(pathRepos, c.base, account, opts.Encode())
+	uri := fmt.Sprintf(pathRepos, c.base, workspace, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }
 
-func (c *Client) ListReposAll(account string) ([]*Repo, error) {
+func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
 	page := 1
 	var repos []*Repo
 
 	for {
-		resp, err := c.ListRepos(account, &ListOpts{Page: page, PageLen: 100})
+		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
 		if err != nil {
 			return repos, err
 		}
@@ -155,7 +155,7 @@ func (c *Client) FindSource(owner, name, revision, path string) (*string, error)
 	return c.do(uri, get, nil, nil)
 }
 
-func (c *Client) CreateStatus(owner, name, revision string, status *BuildStatus) error {
+func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStatus) error {
 	uri := fmt.Sprintf(pathStatus, c.base, owner, name, revision)
 	_, err := c.do(uri, post, status, nil)
 	return err

@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,7 +94,7 @@ type MergeRequestHook struct {
 	MergeRequest *MergeRequest `json:"merge_request"`
 }
 
-func parseHook(r *http.Request) (*model.Repo, *model.Build, error) {
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	raw, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -137,22 +138,24 @@ func convertRepository(repo *Repository) (*model.Repo, error) {
 	}
 
 	return &model.Repo{
+		// TODO RemoteID: repo.ID,
 		Owner:    matches[1],
 		Name:     repo.Name,
 		FullName: projectFullName(repo.Owner.GlobalKey, repo.Name),
 		Link:     repo.WebURL,
+		Clone:    repo.HTTPSURL,
 		SCMKind:  model.RepoGit,
 	}, nil
 }
 
-func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parsePushHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &PushHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// no build triggered when removing ref
+	// no pipeline triggered when removing ref
 	if hook.After == "0000000000000000000000000000000000000000" {
 		return nil, nil, nil
 	}
@@ -163,7 +166,7 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 	}
 
 	lastCommit := findLastCommit(hook.Commits, hook.After)
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:   model.EventPush,
 		Commit:  hook.After,
 		Ref:     hook.Ref,
@@ -175,10 +178,10 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Author:  hook.User.GlobalKey,
 		Remote:  hook.Repository.HTTPSURL,
 	}
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
-func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parsePullRequestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &PullRequestHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
@@ -193,7 +196,7 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.PullRequest.CommitSHA,
 		Link:    hook.PullRequest.WebURL,
@@ -207,10 +210,10 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Refspec: fmt.Sprintf("%s:%s", hook.PullRequest.SourceBranch, hook.PullRequest.TargetBranch),
 	}
 
-	return repo, build, nil
+	return repo, pipeline, nil
 }
 
-func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
+func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &MergeRequestHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
@@ -226,7 +229,7 @@ func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		return nil, nil, err
 	}
 
-	build := &model.Build{
+	pipeline := &model.Pipeline{
 		Event:   model.EventPull,
 		Commit:  hook.MergeRequest.CommitSHA,
 		Link:    hook.MergeRequest.WebURL,
@@ -239,5 +242,5 @@ func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Build, error) {
 		Remote:  hook.Repository.HTTPSURL,
 		Refspec: fmt.Sprintf("%s:%s", hook.MergeRequest.SourceBranch, hook.MergeRequest.TargetBranch),
 	}
-	return repo, build, nil
+	return repo, pipeline, nil
 }

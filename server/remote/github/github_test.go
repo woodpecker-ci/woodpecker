@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,8 +78,9 @@ func Test_github(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.RemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
+				g.Assert(repo.RemoteID).Equal(fakeRepo.RemoteID)
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
@@ -87,7 +89,7 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.Link).Equal(fakeRepo.Link)
 			})
 			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -131,6 +133,7 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
+		RemoteID:     "5",
 		Owner:        "octocat",
 		Name:         "Hello-World",
 		FullName:     "octocat/Hello-World",

@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,18 +141,18 @@ func LogStreamSSE(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// // parse the build number and job sequence number from
+	// // parse the pipeline number and job sequence number from
 	// // the repquest parameter.
-	buildn, _ := strconv.ParseInt(c.Param("build"), 10, 64)
+	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
 	jobn, _ := strconv.Atoi(c.Param("number"))
 
-	build, err := _store.GetBuildNumber(repo, buildn)
+	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get build number: %v", err)
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: build not found\n\n"))
+		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
-	proc, err := _store.ProcFind(build, jobn)
+	proc, err := _store.ProcFind(pipeline, jobn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get proc number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))

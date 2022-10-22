@@ -45,7 +45,7 @@ WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-syst
 WOODPECKER_MAX_PROCS=1
 
 # enable if you want to develop the UI
-# WOODPECKER_DEV_WWW_PROXY=http://localhost:3000
+# WOODPECKER_DEV_WWW_PROXY=http://localhost:8010
 
 # used so you can login without using a public address
 WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000

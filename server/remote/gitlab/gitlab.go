@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,11 +227,23 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 	return repo, nil
 }
 
-// Repo fetches the named repository from the remote system.
-func (g *Gitlab) Repo(ctx context.Context, user *model.User, owner, name string) (*model.Repo, error) {
+// Repo fetches the repository from the remote system.
+func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.RemoteID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
+	}
+
+	if id.IsValid() {
+		intID, err := strconv.ParseInt(string(id), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		return g.convertGitlabRepo(_repo)
 	}
 
 	_repo, err := g.getProject(ctx, client, owner, name)
@@ -311,7 +325,7 @@ func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*mo
 }
 
 // File fetches a file from the remote repository and returns in string format.
-func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, fileName string) ([]byte, error) {
+func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, fileName string) ([]byte, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -320,12 +334,12 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &build.Commit}, gitlab.WithContext(ctx))
+	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
 	return file, err
 }
 
 // Dir fetches a folder from the remote repository
-func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, path string) ([]*remote.FileMeta, error) {
+func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*remote.FileMeta, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -339,7 +353,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: perPage},
 		Path:        &path,
-		Ref:         &build.Commit,
+		Ref:         &pipeline.Commit,
 		Recursive:   gitlab.Bool(false),
 	}
 
@@ -354,7 +368,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 			if batch[i].Type != "blob" { // no file
 				continue
 			}
-			data, err := g.File(ctx, user, repo, build, batch[i].Path)
+			data, err := g.File(ctx, user, repo, pipeline, batch[i].Path)
 			if err != nil {
 				return nil, err
 			}
@@ -373,7 +387,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, bu
 }
 
 // Status sends the commit status back to gitlab.
-func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
+func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -384,11 +398,11 @@ func (g *Gitlab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(_repo.ID, build.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(proc.State),
-		Description: gitlab.String(common.GetBuildStatusDescription(proc.State)),
-		TargetURL:   gitlab.String(common.GetBuildStatusLink(repo, build, proc)),
-		Context:     gitlab.String(common.GetBuildStatusContext(repo, build, proc)),
+		Description: gitlab.String(common.GetPipelineStatusDescription(proc.State)),
+		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, pipeline, proc)),
+		Context:     gitlab.String(common.GetPipelineStatusContext(repo, pipeline, proc)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -571,7 +585,7 @@ func (g *Gitlab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
+func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -585,16 +599,16 @@ func (g *Gitlab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
-		mergeIID, repo, build, err := convertMergeRequestHook(event, req)
+		mergeIID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		if build, err = g.loadChangedFilesFromMergeRequest(ctx, repo, build, mergeIID); err != nil {
+		if pipeline, err = g.loadChangedFilesFromMergeRequest(ctx, repo, pipeline, mergeIID); err != nil {
 			return nil, nil, err
 		}
 
-		return repo, build, nil
+		return repo, pipeline, nil
 	case *gitlab.PushEvent:
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
@@ -660,14 +674,14 @@ func (g *Gitlab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{}, nil
 }
 
-func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, build *model.Build, mergeIID int) (*model.Build, error) {
+func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeIID int) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return build, nil
+		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoName(tmpRepo.Owner + "/" + tmpRepo.Name)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}
@@ -696,7 +710,7 @@ func (g *Gitlab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 	for _, file := range changes.Changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
-	build.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DedupStrings(files)
 
-	return build, nil
+	return pipeline, nil
 }
