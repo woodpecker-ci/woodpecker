@@ -23,7 +23,7 @@ func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 	return configs, s.engine.
 		Table("config").
 		Join("LEFT", "pipeline_config", "config.config_id = pipeline_config.config_id").
-		Where("pipeline_config.build_id = ?", pipelineID).
+		Where("pipeline_config.pipeline_id = ?", pipelineID).
 		Find(&configs)
 }
 
@@ -41,22 +41,22 @@ func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
 	/* TODO: use builder (do not behave same as pure sql, fix that)
 	return s.engine.Table(new(model.Pipeline)).
-		Join("INNER", "pipeline_config", "pipelines.build_id = pipeline_config.build_id" ).
-		Where(builder.Eq{"pipelines.build_repo_id": config.RepoID}).
+		Join("INNER", "pipeline_config", "pipelines.pipeline_id = pipeline_config.pipeline_id" ).
+		Where(builder.Eq{"pipelines.pipeline_repo_id": config.RepoID}).
 		And(builder.Eq{"pipeline_config.config_id": config.ID}).
-		And(builder.In("pipelines.build_status", "blocked", "pending")).
+		And(builder.In("pipelines.pipeline_status", "blocked", "pending")).
 		Exist(new(model.Pipeline))
 	*/
 
 	c, err := s.engine.SQL(`
-SELECT build_id FROM pipelines
-WHERE build_repo_id = ?
-AND build_id in (
-SELECT build_id
+SELECT pipeline_id FROM pipelines
+WHERE pipeline_repo_id = ?
+AND pipeline_id in (
+SELECT pipeline_id
 FROM pipeline_config
 WHERE pipeline_config.config_id = ?
 )
-AND build_status NOT IN ('blocked', 'pending')
+AND pipeline_status NOT IN ('blocked', 'pending')
 LIMIT 1
 `, config.RepoID, config.ID).Count()
 	return c > 0, err
