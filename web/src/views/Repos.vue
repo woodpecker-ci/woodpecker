@@ -1,5 +1,5 @@
 <template>
-  <Scaffold three-column-header>
+  <Scaffold>
     <template #headerTitle>
       {{ $t('repositories') }}
     </template>

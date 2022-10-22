@@ -1,5 +1,5 @@
 <template>
-  <Scaffold :go-back="goBack" three-column-header>
+  <Scaffold :go-back="goBack">
     <template #headerTitle>
       {{ $t('repo.add') }}
     </template>

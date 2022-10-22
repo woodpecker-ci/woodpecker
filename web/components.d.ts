@@ -85,7 +85,6 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Scaffold: typeof import('./src/components/layout/scaffold/Scaffold.vue')['default']
-    ScaffoldTabs: typeof import('./src/components/layout/scaffold/ScaffoldTabs.vue')['default']
     SecretEdit: typeof import('./src/components/secrets/SecretEdit.vue')['default']
     SecretList: typeof import('./src/components/secrets/SecretList.vue')['default']
     SecretsTab: typeof import('./src/components/repo/settings/SecretsTab.vue')['default']

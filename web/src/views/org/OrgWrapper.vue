@@ -1,5 +1,5 @@
 <template>
-  <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader" three-column-header>
+  <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader">
     <template #headerTitle>
       {{ org.name }}
     </template>

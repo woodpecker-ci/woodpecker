@@ -1,15 +1,15 @@
 <template>
   <div class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
     <FluidContainer class="!py-0">
-      <Header :go-back="goBack" :three-column="threeColumnHeader">
+      <Header :go-back="goBack">
         <template #title><slot name="headerTitle" /></template>
-        <template #centerBox><slot name="headerCenterBox" /></template>
+        <template v-if="!!$slots.headerCenterBox" #centerBox><slot name="headerCenterBox" /></template>
         <template #actions><slot name="headerActions" /></template>
       </Header>
 
       <div v-if="enableTabs" class="flex flex-wrap justify-between">
         <Tabs />
-        <div class="flex items-center justify-end space-x-2">
+        <div class="flex items-center justify-end gap-x-2 mb-2">
           <slot name="tabActions" />
         </div>
       </div>
@@ -32,7 +32,6 @@ import Tabs from './Tabs.vue';
 export interface Props {
   // Header
   goBack?: () => void;
-  threeColumnHeader?: boolean;
 
   // Tabs
   enableTabs?: boolean;
@@ -42,8 +41,6 @@ export interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   goBack: undefined,
-  // eslint-disable-next-line vue/no-boolean-default
-  threeColumnHeader: false,
   // eslint-disable-next-line vue/no-boolean-default
   disableHashMode: false,
   // eslint-disable-next-line vue/no-boolean-default

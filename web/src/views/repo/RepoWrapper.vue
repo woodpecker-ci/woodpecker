@@ -20,7 +20,7 @@
       <a
         :href="repo.link_url"
         target="_blank"
-        class="flex ml-4 p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
+        class="flex p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
       >
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
@@ -30,7 +30,6 @@
       </a>
       <IconButton
         v-if="repoPermissions.admin"
-        class="ml-2"
         :to="{ name: 'repo-settings' }"
         :title="$t('repo.settings.settings')"
         icon="settings"
@@ -42,7 +41,6 @@
         v-if="repoPermissions.push"
         type="submit"
         :text="$t('repo.manual_pipeline.trigger')"
-        class="mb-2"
         @click="showManualPipelinePopup = true"
       />
       <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />

@@ -2,33 +2,35 @@
   <div
     class="items-center justify-between py-4"
     :class="{
-      'grid grid-cols-[1fr,auto,1fr]': threeColumn,
-      'flex flex-wrap': !threeColumn,
+      'grid grid-cols-[1fr,auto,1fr]': threeColumns,
+      'flex flex-wrap': !threeColumns,
     }"
   >
     <div class="flex flex-wrap items-center justify-start">
       <IconButton v-if="goBack" icon="back" :title="$t('back')" class="mr-2" @click="goBack" />
-      <h1 class="flex text-xl text-color items-center gap-x-2">
+      <h1 class="flex flex-wrap text-xl text-color items-center gap-x-2">
         <slot name="title" />
       </h1>
     </div>
-    <div v-if="threeColumn" class="flex items-center justify-center gap-x-2">
+    <div v-if="threeColumns" class="flex flex-wrap items-center justify-center gap-x-2">
       <slot name="centerBox" />
     </div>
-    <div class="flex items-center justify-end gap-x-2">
+    <div class="flex flex-wrap items-center justify-end gap-x-2">
       <slot name="actions" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  goBack: {
-    type: Function,
-    default: null,
-  },
-  threeColumn: {
-    type: Boolean,
-  },
-});
+import { useSlots } from 'vue';
+
+export interface Props {
+  goBack?: () => void;
+}
+
+defineProps<Props>();
+
+const slots = useSlots();
+
+const threeColumns = !!slots.centerBox;
 </script>

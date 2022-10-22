@@ -46,15 +46,13 @@
         </div>
       </template>
 
-      <div class="flex flex-wrap gap-y-2 items-center justify-between">
-        <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
-        <Tab id="config" :title="$t('repo.pipeline.config')" />
-        <Tab
-          v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
-          id="changed-files"
-          :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
-        />
-      </div>
+      <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
+      <Tab id="config" :title="$t('repo.pipeline.config')" />
+      <Tab
+        v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
+        id="changed-files"
+        :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
+      />
     </Scaffold>
 
     <router-view />

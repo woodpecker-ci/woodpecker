@@ -1,7 +1,20 @@
 <template>
   <Scaffold enable-tabs :go-back="goBack">
     <template #headerTitle>
-      {{ $t('repo.settings.settings') }}
+      <span>
+        <router-link :to="{ name: 'repos-owner', params: { repoOwner: repo.owner } }" class="hover:underline">
+          {{ repo.owner }}
+        </router-link>
+        /
+        <router-link
+          :to="{ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } }"
+          class="hover:underline"
+        >
+          {{ repo.name }}
+        </router-link>
+        /
+        {{ $t('repo.settings.settings') }}
+      </span>
     </template>
 
     <Tab id="general" :title="$t('repo.settings.general.general')">
@@ -40,7 +53,7 @@ import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
-import { RepoPermissions } from '~/lib/api/types';
+import { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
 const router = useRouter();
@@ -49,6 +62,11 @@ const i18n = useI18n();
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repoPermissions) {
   throw new Error('Unexpected: "repoPermissions" should be provided at this place');
+}
+
+const repo = inject<Ref<Repo>>('repo');
+if (!repo) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
 }
 
 onMounted(async () => {
