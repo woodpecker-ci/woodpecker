@@ -4,11 +4,9 @@ import (
 	"database/sql"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 
 	// blank imports to register the sql drivers
 	_ "github.com/go-sql-driver/mysql"
@@ -126,20 +124,20 @@ func TestMigrate(t *testing.T) {
 		task.required = true
 	}
 
-	// init new db
-	engine, close := testDB(t, true)
-	assert.NoError(t, Migrate(engine))
-	close()
-
-	dbType := engine.Dialect().URI().DBType
-	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
-		// wait for mysql/postgres to sync ...
-		time.Sleep(10 * time.Millisecond)
-	}
-	assert.NoError(t, engine.ClearCache(allBeans...))
+	//	// init new db
+	//	engine, close := testDB(t, true)
+	//	assert.NoError(t, Migrate(engine))
+	//	close()
+	//
+	//	dbType := engine.Dialect().URI().DBType
+	//	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+	//		// wait for mysql/postgres to sync ...
+	//		time.Sleep(10 * time.Millisecond)
+	//	}
+	//	assert.NoError(t, engine.ClearCache(allBeans...))
 
 	// migrate old db
-	engine, close = testDB(t, false)
+	engine, close := testDB(t, false)
 	assert.NoError(t, Migrate(engine))
 	close()
 }
