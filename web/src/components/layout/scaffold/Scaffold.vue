@@ -6,8 +6,8 @@
     @update:search="(value) => $emit('update:search', value)"
   >
     <template #title><slot name="title" /></template>
-    <template #titleActions><slot name="titleActions" /></template>
-    <template #tabActions><slot name="tabActions" /></template>
+    <template v-if="$slots.titleActions" #titleActions><slot name="titleActions" /></template>
+    <template v-if="$slots.tabActions" #tabActions><slot name="tabActions" /></template>
   </Header>
 
   <FluidContainer>
