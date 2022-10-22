@@ -31,6 +31,7 @@
   "color_scheme_dark": "Pārslēgties uz gaišo režīmu",
   "color_scheme_light": "Pārslēgties uz tumšo režīmu",
   "docs": "Dokumentācija",
+  "documentation_for": "Dokumentācija par \"{topic}\"",
   "login": "Autorizēties",
   "logout": "Iziet",
   "not_found": {
