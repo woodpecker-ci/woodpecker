@@ -2,8 +2,8 @@
   <div class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineProcList
-        :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         v-model:selected-proc-id="selectedProcId"
+        :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
       />
 
