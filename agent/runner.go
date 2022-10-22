@@ -18,6 +18,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"runtime"
 	"strconv"
@@ -327,10 +328,10 @@ func (r *Runner) Run(ctx context.Context) error {
 	state.Finished = time.Now().Unix()
 	state.Exited = true
 	if err != nil {
-		switch xerr := err.(type) {
-		case *pipeline.ExitError:
-			state.ExitCode = xerr.Code
-		default:
+		pExitError := &pipeline.ExitError{}
+		if errors.As(err, &pExitError) {
+			state.ExitCode = pExitError.Code
+		} else {
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}
