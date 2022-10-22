@@ -39,7 +39,6 @@
     <template #tabActions>
       <Button
         v-if="repoPermissions.push"
-        type="submit"
         :text="$t('repo.manual_pipeline.trigger')"
         @click="showManualPipelinePopup = true"
       />

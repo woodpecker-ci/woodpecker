@@ -1,48 +1,50 @@
 <template>
   <Popup :open="open" @close="$emit('close')">
     <Panel v-if="!loading">
-      <span class="text-xl text-color">{{ $t('repo.manual_pipeline.title') }}</span>
-      <InputField :label="$t('repo.manual_pipeline.select_branch')">
-        <SelectField
-          v-model="payload.branch"
-          :options="branches"
-          required
-          class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
-        />
-      </InputField>
-      <InputField :label="$t('repo.manual_pipeline.variables.title')">
-        <span class="text-sm text-color-alt mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
-        <div class="flex flex-col gap-2">
-          <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-            <TextField :model-value="name" disabled />
-            <TextField :model-value="value" disabled />
-            <div class="w-34 flex-shrink-0">
-              <Button type="submit" class="ml-auto" @click="deleteVar(name)">
-                <i-la-times />
-              </Button>
+      <form @submit.prevent="triggerManualPipeline">
+        <span class="text-xl text-color">{{ $t('repo.manual_pipeline.title') }}</span>
+        <InputField :label="$t('repo.manual_pipeline.select_branch')">
+          <SelectField
+            v-model="payload.branch"
+            :options="branches"
+            required
+            class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
+          />
+        </InputField>
+        <InputField :label="$t('repo.manual_pipeline.variables.title')">
+          <span class="text-sm text-color-alt mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
+              <TextField :model-value="name" disabled />
+              <TextField :model-value="value" disabled />
+              <div class="w-34 flex-shrink-0">
+                <Button color="red" class="ml-auto" @click="deleteVar(name)">
+                  <i-la-times />
+                </Button>
+              </div>
             </div>
+            <form class="flex gap-4" @submit.prevent="addPipelineVariable">
+              <TextField
+                v-model="newPipelineVariable.name"
+                :placeholder="$t('repo.manual_pipeline.variables.name')"
+                required
+              />
+              <TextField
+                v-model="newPipelineVariable.value"
+                :placeholder="$t('repo.manual_pipeline.variables.value')"
+                required
+              />
+              <Button
+                class="w-34 flex-shrink-0"
+                start-icon="plus"
+                type="submit"
+                :text="$t('repo.manual_pipeline.variables.add')"
+              />
+            </form>
           </div>
-          <form class="flex gap-4" @submit.prevent="addPipelineVariable">
-            <TextField
-              v-model="newPipelineVariable.name"
-              :placeholder="$t('repo.manual_pipeline.variables.name')"
-              required
-            />
-            <TextField
-              v-model="newPipelineVariable.value"
-              :placeholder="$t('repo.manual_pipeline.variables.value')"
-              required
-            />
-            <Button
-              class="w-34 flex-shrink-0"
-              start-icon="plus"
-              type="submit"
-              :text="$t('repo.manual_pipeline.variables.add')"
-            />
-          </form>
-        </div>
-      </InputField>
-      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" @click="triggerManualPipeline" />
+        </InputField>
+        <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" />
+      </form>
     </Panel>
   </Popup>
 </template>
@@ -51,6 +53,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';

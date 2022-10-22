@@ -117,7 +117,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 	// delete related pipelines
 	for startPipelines := 0; ; startPipelines += batchSize {
 		pipelineIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
+		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("pipeline_id").Where("pipeline_repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
 		if len(pipelineIDs) == 0 {

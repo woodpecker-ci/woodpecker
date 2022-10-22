@@ -5,7 +5,7 @@
         <h1 class="text-xl text-color">{{ $t('admin.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-color-alt">
           {{ $t('admin.settings.secrets.desc') }}
-          <DocsLink url="docs/usage/secrets" />
+          <DocsLink :topic="$t('admin.settings.secrets.secrets')" url="docs/usage/secrets" />
         </p>
         <Warning :text="$t('admin.settings.secrets.warning')" />
       </div>

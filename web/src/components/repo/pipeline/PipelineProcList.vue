@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 text-gray-600 dark:text-gray-400">
+  <div class="flex flex-col w-full md:w-3/12 md:ml-2 text-gray-600 dark:text-gray-400 gap-2 pb-2">
     <div
-      class="flex md:ml-2 p-4 space-x-1 justify-between flex-shrink-0 border-b-1 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
+      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 border-b-1 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
@@ -42,30 +42,57 @@
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </div>
 
-    <div class="flex flex-grow relative min-h-0 overflow-y-auto">
-      <div class="md:absolute top-0 left-0 w-full">
-        <div v-for="proc in pipeline.procs" :key="proc.id">
-          <div class="p-4 pb-1 flex flex-wrap items-center justify-between">
-            <div v-if="pipeline.procs && pipeline.procs.length > 1" class="flex items-center">
-              <span class="ml-2">{{ proc.name }}</span>
-            </div>
-            <div v-if="proc.environ" class="text-xs">
-              <div v-for="(value, key) in proc.environ" :key="key">
-                <span
-                  class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
-                  >{{ key }}</span
-                >
-                <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">{{
-                  value
-                }}</span>
-              </div>
+    <div class="flex flex-grow flex-col relative min-h-0 overflow-y-auto gap-2">
+      <div
+        v-for="proc in pipeline.procs"
+        :key="proc.id"
+        class="p-2 md:rounded-md bg-gray-300 dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
+      >
+        <div class="flex flex-col gap-2">
+          <div v-if="proc.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
+            <div v-for="(value, key) in proc.environ" :key="key">
+              <span
+                class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
+              >
+                {{ key }}
+              </span>
+              <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">
+                {{ value }}
+              </span>
             </div>
           </div>
-          <div
+          <button
+            v-if="pipeline.procs && pipeline.procs.length > 1"
+            type="button"
+            class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+            @click="procsCollapsed[proc.id] = !!!procsCollapsed[proc.id]"
+          >
+            <Icon
+              name="chevron-right"
+              class="transition-transform duration-150 mr-2"
+              :class="{ 'transform rotate-90': !procsCollapsed[proc.id] }"
+            />
+            {{ proc.name }}
+          </button>
+        </div>
+        <div
+          class="transition-height duration-150 overflow-hidden"
+          :class="{
+            'max-h-screen': !procsCollapsed[proc.id],
+            'max-h-0': procsCollapsed[proc.id],
+            'ml-6': pipeline.procs && pipeline.procs.length > 1,
+          }"
+        >
+          <button
             v-for="job in proc.children"
             :key="job.pid"
-            class="flex mx-2 mb-1 p-2 pl-6 cursor-pointer rounded-md items-center hover:bg-gray-300 hover:dark:bg-dark-gray-700"
-            :class="{ 'bg-gray-300 !dark:bg-dark-gray-700': selectedProcId && selectedProcId === job.pid }"
+            type="button"
+            class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+            :class="{
+              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedProcId && selectedProcId === job.pid,
+              'mt-1':
+                (pipeline.procs && pipeline.procs.length > 1) || (proc.children && job.pid !== proc.children[0].pid),
+            }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
             <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
@@ -77,49 +104,32 @@
             <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
             <span class="ml-2">{{ job.name }}</span>
             <PipelineProcDuration :proc="job" />
-          </div>
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { ref, toRef } from 'vue';
 
+import Icon from '~/components/atomic/Icon.vue';
 import PipelineProcDuration from '~/components/repo/pipeline/PipelineProcDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline } from '~/lib/api/types';
+import { Pipeline, PipelineProc } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'PipelineProcList',
+const props = defineProps<{
+  pipeline: Pipeline;
+  selectedProcId?: number | null;
+}>();
 
-  components: {
-    PipelineProcDuration,
-  },
+defineEmits<{
+  (event: 'update:selected-proc-id', selectedProcId: number): void;
+}>();
 
-  props: {
-    pipeline: {
-      type: Object as PropType<Pipeline>,
-      required: true,
-    },
+const pipeline = toRef(props, 'pipeline');
+const { prettyRef } = usePipeline(pipeline);
 
-    selectedProcId: {
-      type: Number as PropType<number | null>,
-      default: null,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:selected-proc-id': (selectedProcId: number) => true,
-  },
-
-  setup(props) {
-    const pipeline = toRef(props, 'pipeline');
-    const { prettyRef } = usePipeline(pipeline);
-
-    return { prettyRef };
-  },
-});
+const procsCollapsed = ref<Record<PipelineProc['id'], boolean>>({});
 </script>

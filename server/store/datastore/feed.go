@@ -27,27 +27,27 @@ SELECT
  repo_owner
 ,repo_name
 ,repo_full_name
-,build_number
-,build_event
-,build_status
-,build_created
-,build_started
-,build_finished
-,build_commit
-,build_branch
-,build_ref
-,build_refspec
-,build_remote
-,build_title
-,build_message
-,build_author
-,build_email
-,build_avatar
+,pipeline_number
+,pipeline_event
+,pipeline_status
+,pipeline_created
+,pipeline_started
+,pipeline_finished
+,pipeline_commit
+,pipeline_branch
+,pipeline_ref
+,pipeline_refspec
+,pipeline_remote
+,pipeline_title
+,pipeline_message
+,pipeline_author
+,pipeline_email
+,pipeline_avatar
 FROM
  pipelines p
 ,repos r
-WHERE p.build_repo_id = r.repo_id
-  AND p.build_status IN ('pending','running')
+WHERE p.pipeline_repo_id = r.repo_id
+  AND p.pipeline_status IN ('pending','running')
 `).Find(&feed)
 	return feed, err
 }
@@ -60,28 +60,28 @@ SELECT
  repo_owner
 ,repo_name
 ,repo_full_name
-,build_number
-,build_event
-,build_status
-,build_created
-,build_started
-,build_finished
-,build_commit
-,build_branch
-,build_ref
-,build_refspec
-,build_remote
-,build_title
-,build_message
-,build_author
-,build_email
-,build_avatar
+,pipeline_number
+,pipeline_event
+,pipeline_status
+,pipeline_created
+,pipeline_started
+,pipeline_finished
+,pipeline_commit
+,pipeline_branch
+,pipeline_ref
+,pipeline_refspec
+,pipeline_remote
+,pipeline_title
+,pipeline_message
+,pipeline_author
+,pipeline_email
+,pipeline_avatar
 FROM repos
 INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
-INNER JOIN pipelines ON pipelines.build_repo_id = repos.repo_id
+INNER JOIN pipelines ON pipelines.pipeline_repo_id = repos.repo_id
 WHERE perms.perm_user_id = ?
   AND (perms.perm_push = ? OR perms.perm_admin = ?)
-ORDER BY build_id DESC
+ORDER BY pipeline_id DESC
 LIMIT 50
 `, user.ID, true, true).Find(&feed)
 }
@@ -94,26 +94,26 @@ SELECT
  repo_owner
 ,repo_name
 ,repo_full_name
-,build_number
-,build_event
-,build_status
-,build_created
-,build_started
-,build_finished
-,build_commit
-,build_branch
-,build_ref
-,build_refspec
-,build_remote
-,build_title
-,build_message
-,build_author
-,build_email
-,build_avatar
-FROM repos LEFT OUTER JOIN pipelines ON build_id = (
-	SELECT build_id FROM pipelines
-	WHERE pipelines.build_repo_id = repos.repo_id
-	ORDER BY build_id DESC
+,pipeline_number
+,pipeline_event
+,pipeline_status
+,pipeline_created
+,pipeline_started
+,pipeline_finished
+,pipeline_commit
+,pipeline_branch
+,pipeline_ref
+,pipeline_refspec
+,pipeline_remote
+,pipeline_title
+,pipeline_message
+,pipeline_author
+,pipeline_email
+,pipeline_avatar
+FROM repos LEFT OUTER JOIN pipelines ON pipeline_id = (
+	SELECT pipeline_id FROM pipelines
+	WHERE pipelines.pipeline_repo_id = repos.repo_id
+	ORDER BY pipeline_id DESC
 	LIMIT 1
 )
 INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
