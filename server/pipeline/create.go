@@ -66,13 +66,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		filtered, parseErr = checkIfFiltered(pipeline, remoteYamlConfigs)
 		if parseErr == nil {
 			if filtered {
-				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+				err := &ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
 			}
 
 			if zeroSteps(pipeline, remoteYamlConfigs) {
-				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
+				err := &ErrFiltered{Msg: "step conditions yield zero runnable steps"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
 			}

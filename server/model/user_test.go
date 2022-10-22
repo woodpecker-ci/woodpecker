@@ -14,7 +14,10 @@
 
 package model
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestUserValidate(t *testing.T) {
 	tests := []struct {
@@ -57,8 +60,8 @@ func TestUserValidate(t *testing.T) {
 
 	for _, test := range tests {
 		err := test.user.Validate()
-		if want, got := test.err, err; want != got {
-			t.Errorf("Want user validation error %s, got %s", want, got)
+		if !errors.Is(err, test.err) {
+			t.Errorf("Want user validation error %s, got %s", test.err, err)
 		}
 	}
 }

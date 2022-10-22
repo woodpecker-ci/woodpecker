@@ -24,9 +24,10 @@ import (
 )
 
 var (
-	errSecretNameInvalid  = errors.New("Invalid Secret Name")
-	errSecretValueInvalid = errors.New("Invalid Secret Value")
-	errSecretEventInvalid = errors.New("Invalid Secret Event")
+	ErrSecretNameInvalid  = errors.New("Invalid Secret Name")
+	ErrSecretImageInvalid = errors.New("Invalid Secret Image")
+	ErrSecretValueInvalid = errors.New("Invalid Secret Value")
+	ErrSecretEventInvalid = errors.New("Invalid Secret Event")
 )
 
 // SecretService defines a service for managing secrets.
@@ -123,27 +124,27 @@ var validDockerImageString = regexp.MustCompile(
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
 		if !ValidateWebhookEvent(event) {
-			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
+			return fmt.Errorf("%w: '%s'", ErrSecretEventInvalid, event)
 		}
 	}
 	if len(s.Events) == 0 {
-		return fmt.Errorf("%s: no event specified", errSecretEventInvalid)
+		return fmt.Errorf("%w: no event specified", ErrSecretEventInvalid)
 	}
 
 	for _, image := range s.Images {
 		if len(image) == 0 {
-			return fmt.Errorf("empty image in images")
+			return fmt.Errorf("%w: empty image in images", ErrSecretImageInvalid)
 		}
 		if !validDockerImageString.MatchString(image) {
-			return fmt.Errorf("image '%s' do not match regexp '%s'", image, validDockerImageString.String())
+			return fmt.Errorf("%w: image '%s' do not match regexp '%s'", ErrSecretImageInvalid, image, validDockerImageString.String())
 		}
 	}
 
 	switch {
 	case len(s.Name) == 0:
-		return errSecretNameInvalid
+		return fmt.Errorf("%w: empty name", ErrSecretNameInvalid)
 	case len(s.Value) == 0:
-		return errSecretValueInvalid
+		return fmt.Errorf("%w: empty value", ErrSecretValueInvalid)
 	default:
 		return nil
 	}

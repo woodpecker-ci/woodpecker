@@ -47,8 +47,3 @@ type ErrFiltered struct {
 func (e ErrFiltered) Error() string {
 	return "ignoring hook: " + e.Msg
 }
-
-func IsErrFiltered(err error) bool {
-	_, ok := err.(ErrFiltered)
-	return ok
-}
