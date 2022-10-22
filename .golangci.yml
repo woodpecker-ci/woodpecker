@@ -27,6 +27,7 @@ linters:
     - varcheck
     - whitespace
     - gofumpt
+    - errorlint
 
 run:
   timeout: 5m
