@@ -30,12 +30,12 @@ import (
 // Cancel the pipeline and returns the status.
 func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *model.Pipeline) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
-		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
+		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
 	procs, err := store.ProcList(pipeline)
 	if err != nil {
-		return ErrNotFound{Msg: err.Error()}
+		return &ErrNotFound{Msg: err.Error()}
 	}
 
 	// First cancel/evict procs in the queue in one go
@@ -93,7 +93,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 
 	procs, err = store.ProcList(killedBuild)
 	if err != nil {
-		return ErrNotFound{Msg: err.Error()}
+		return &ErrNotFound{Msg: err.Error()}
 	}
 	if killedBuild.Procs, err = model.Tree(procs); err != nil {
 		return err

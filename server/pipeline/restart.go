@@ -35,7 +35,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
+		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
 	}
 
 	var pipelineFiles []*remote.FileMeta
@@ -45,7 +45,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msgf(msg)
-		return nil, ErrNotFound{Msg: msg}
+		return nil, &ErrNotFound{Msg: msg}
 	}
 
 	for _, y := range configs {
@@ -61,7 +61,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 
 		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastBuild, currentFileMeta)
 		if err != nil {
-			return nil, ErrBadRequest{
+			return nil, &ErrBadRequest{
 				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 			}
 		}

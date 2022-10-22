@@ -171,7 +171,7 @@ type syncEngine interface {
 func syncAll(sess syncEngine) error {
 	for _, bean := range allBeans {
 		if err := sess.Sync2(bean); err != nil {
-			return fmt.Errorf("sync2 error '%s': %v", reflect.TypeOf(bean), err)
+			return fmt.Errorf("sync2 error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil

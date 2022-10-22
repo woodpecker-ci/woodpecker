@@ -89,7 +89,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 			} else {
 				remotePerm, err := s.Remote.Perm(ctx, user, repo)
 				if err != nil {
-					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+					return fmt.Errorf("could not fetch permission of repo '%s': %w", repo.FullName, err)
 				}
 				repo.Perm.Pull = remotePerm.Pull
 				repo.Perm.Push = remotePerm.Push

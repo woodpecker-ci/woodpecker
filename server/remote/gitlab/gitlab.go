@@ -118,7 +118,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %s", err)
+		return nil, fmt.Errorf("Error exchanging token. %w", err)
 	}
 
 	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)

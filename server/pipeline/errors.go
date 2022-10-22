@@ -22,22 +22,12 @@ func (e ErrNotFound) Error() string {
 	return e.Msg
 }
 
-func IsErrNotFound(err error) bool {
-	_, ok := err.(ErrNotFound)
-	return ok
-}
-
 type ErrBadRequest struct {
 	Msg string
 }
 
 func (e ErrBadRequest) Error() string {
 	return e.Msg
-}
-
-func IsErrBadRequest(err error) bool {
-	_, ok := err.(ErrBadRequest)
-	return ok
 }
 
 type ErrFiltered struct {

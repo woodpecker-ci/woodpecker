@@ -32,7 +32,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 
 	_, err := shared.UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
-		return nil, fmt.Errorf("error updating pipeline. %s", err)
+		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
 	if pipeline.Procs, err = store.ProcList(pipeline); err != nil {

@@ -30,19 +30,19 @@ import (
 // and start them afterwards
 func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if pipeline.Status != model.StatusBlocked {
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", pipeline.Status)}
+		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", pipeline.Status)}
 	}
 
 	// fetch the pipeline file from the database
 	configs, err := store.ConfigsForPipeline(pipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
+		msg := fmt.Sprintf("failure to get pipeline config for %s: %s", repo.FullName, err)
 		log.Error().Msg(msg)
-		return nil, ErrNotFound{Msg: msg}
+		return nil, &ErrNotFound{Msg: msg}
 	}
 
 	if pipeline, err = shared.UpdateToStatusPending(store, *pipeline, user.Login); err != nil {
-		return nil, fmt.Errorf("error updating pipeline. %s", err)
+		return nil, fmt.Errorf("error updating pipeline: %w", err)
 	}
 
 	var yamls []*remote.FileMeta
