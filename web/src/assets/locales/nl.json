@@ -1,1 +1,15 @@
-{}
+{
+  "repo": {
+    "enable": {
+      "enable": "Activeer",
+      "enabled": "Al ingeschakeld",
+      "list_reloaded": "Repository lijst herladen",
+      "reload": "Opslagplaatsen herladen",
+      "success": "Repository ingeschakeld"
+    },
+    "not_allowed": "Je hebt geen toegang tot dit archief.",
+    "settings": {
+      "settings": "Instellingen"
+    }
+  }
+}
