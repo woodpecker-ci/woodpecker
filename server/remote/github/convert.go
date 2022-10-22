@@ -164,3 +164,13 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	}
 	return repo
 }
+
+// covertLabels is a helper function used to convert a GitHub label list to
+// the common Woodpecker label structure.
+func convertLabels(from []*github.Label) []string {
+	var labels []string
+	for _, label := range from {
+		labels = append(labels, *label.Name)
+	}
+	return labels
+}

@@ -55,19 +55,20 @@ type (
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number   int64  `json:"number,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Timeout  int64  `json:"timeout,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Event    string `json:"event,omitempty"`
-		Link     string `json:"link,omitempty"`
-		Target   string `json:"target,omitempty"`
-		Trusted  bool   `json:"trusted,omitempty"`
-		Commit   Commit `json:"commit,omitempty"`
-		Parent   int64  `json:"parent,omitempty"`
-		Cron     string `json:"cron,omitempty"`
+		Number   int64    `json:"number,omitempty"`
+		Created  int64    `json:"created,omitempty"`
+		Started  int64    `json:"started,omitempty"`
+		Finished int64    `json:"finished,omitempty"`
+		Timeout  int64    `json:"timeout,omitempty"`
+		Status   string   `json:"status,omitempty"`
+		Event    string   `json:"event,omitempty"`
+		Link     string   `json:"link,omitempty"`
+		Target   string   `json:"target,omitempty"`
+		Trusted  bool     `json:"trusted,omitempty"`
+		Commit   Commit   `json:"commit,omitempty"`
+		Parent   int64    `json:"parent,omitempty"`
+		Cron     string   `json:"cron,omitempty"`
+		Labels   []string `json:"labels,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -147,19 +148,20 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
 
-		"CI_COMMIT_SHA":           m.Curr.Commit.Sha,
-		"CI_COMMIT_REF":           m.Curr.Commit.Ref,
-		"CI_COMMIT_REFSPEC":       m.Curr.Commit.Refspec,
-		"CI_COMMIT_BRANCH":        m.Curr.Commit.Branch,
-		"CI_COMMIT_SOURCE_BRANCH": sourceBranch,
-		"CI_COMMIT_TARGET_BRANCH": targetBranch,
-		"CI_COMMIT_LINK":          m.Curr.Link,
-		"CI_COMMIT_MESSAGE":       m.Curr.Commit.Message,
-		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
-		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
-		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_COMMIT_TAG":           "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
+		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
+		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,
+		"CI_COMMIT_REFSPEC":             m.Curr.Commit.Refspec,
+		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
+		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
+		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
+		"CI_COMMIT_LINK":                m.Curr.Link,
+		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
+		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
+		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
+		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
+		"CI_COMMIT_TAG":                 "", // will be set if event is tag
+		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
+		"CI_COMMIT_PULL_REQUEST_LABELS": "",
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -230,6 +232,7 @@ func (m *Metadata) Environ() map[string]string {
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Labels, ",")
 	}
 
 	m.setDroneEnviron(params)
