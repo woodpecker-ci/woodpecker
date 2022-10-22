@@ -1,5 +1,5 @@
 <template>
-  <Scaffold enable-tabs :go-back="goBack">
+  <Scaffold enable-tabs>
     <template #headerTitle>
       {{ $t('repo.settings.settings') }}
     </template>
@@ -19,7 +19,6 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 
 export default defineComponent({
   name: 'AdminSettings',
@@ -42,10 +41,6 @@ export default defineComponent({
         await router.replace({ name: 'home' });
       }
     });
-
-    return {
-      goBack: useRouteBackOrDefault({ name: 'home' }),
-    };
   },
 });
 </script>
