@@ -77,7 +77,11 @@
         </div>
         <div
           class="transition-height duration-150 overflow-hidden"
-          :class="{ 'max-h-screen': !procsCollapsed[proc.id], 'max-h-0': procsCollapsed[proc.id], 'ml-6': pipeline.procs && pipeline.procs.length > 1 }"
+          :class="{
+            'max-h-screen': !procsCollapsed[proc.id],
+            'max-h-0': procsCollapsed[proc.id],
+            'ml-6': pipeline.procs && pipeline.procs.length > 1,
+          }"
         >
           <button
             v-for="job in proc.children"
