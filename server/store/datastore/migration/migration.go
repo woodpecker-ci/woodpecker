@@ -117,6 +117,10 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
+	if err := e.ClearCache(); err != nil {
+		return err
+	}
+
 	return syncAll(e)
 }
 
