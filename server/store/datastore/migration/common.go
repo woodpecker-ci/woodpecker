@@ -252,14 +252,13 @@ func renameColumn(sess *xorm.Session, table, column, newName string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL,
-	schemas.POSTGRES,
-	schemas.SQLITE:
+		schemas.POSTGRES,
+		schemas.SQLITE:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` RENAME COLUMN `%s` TO `%s`;", table, column, newName))
 		return err
 	default:
 		return fmt.Errorf("dialect '%s' not supported", dialect)
 	}
-	return nil
 }
 
 var (
