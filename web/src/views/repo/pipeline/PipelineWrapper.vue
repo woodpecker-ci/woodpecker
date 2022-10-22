@@ -3,24 +3,24 @@
     <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
       <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
-        <span class="<md:hidden mx-2">-</span>
+        <span class="<md:hidden">-</span>
         <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
       </template>
 
       <template #titleActions>
-        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0 ml-auto" />
+        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0" />
 
         <template v-if="repoPermissions.push">
           <Button
             v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
-            class="ml-4 flex-shrink-0"
+            class="flex-shrink-0"
             :text="$t('repo.pipeline.actions.cancel')"
             :is-loading="isCancelingPipeline"
             @click="cancelPipeline"
           />
           <Button
             v-else-if="pipeline.status !== 'blocked' && pipeline.status !== 'declined'"
-            class="ml-4 flex-shrink-0"
+            class="flex-shrink-0"
             :text="$t('repo.pipeline.actions.restart')"
             :is-loading="isRestartingPipeline"
             @click="restartPipeline"

@@ -12,11 +12,11 @@
         }}</router-link>
         {{ `&nbsp;/&nbsp;${repo.name}` }}
       </span>
+    </template>
+    <template #titleActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
-    </template>
-    <template #titleActions>
       <a
         :href="repo.link_url"
         target="_blank"

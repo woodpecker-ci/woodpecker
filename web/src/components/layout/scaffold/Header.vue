@@ -1,14 +1,13 @@
 <template>
   <div class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
     <FluidContainer class="!py-0">
-      <div
-        class="items-center justify-between py-4"
-        :class="{
-          'grid grid-cols-[1fr,auto,1fr]': searchBoxPresent,
-          'flex flex-wrap': !searchBoxPresent,
-        }"
-      >
-        <div class="flex flex-wrap items-center justify-start">
+      <div class="flex flex-wrap items-center justify-between py-4">
+        <div
+          class="flex flex-wrap items-center justify-start"
+          :class="{
+            'md:flex-1': searchBoxPresent,
+          }"
+        >
           <IconButton v-if="goBack" icon="back" :title="$t('back')" class="mr-2" @click="goBack" />
           <h1 class="flex flex-wrap text-xl text-color items-center gap-x-2">
             <slot name="title" />
@@ -21,7 +20,12 @@
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"
         />
-        <div class="flex flex-wrap items-center justify-end gap-x-2">
+        <div
+          class="flex flex-wrap items-center justify-end gap-x-2"
+          :class="{
+            'md:flex-1': searchBoxPresent,
+          }"
+        >
           <slot name="titleActions" />
         </div>
       </div>
