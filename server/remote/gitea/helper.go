@@ -160,6 +160,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
+		Labels: convertLabels(hook.PullRequest.Labels),
 	}
 	return pipeline
 }
@@ -228,4 +229,12 @@ func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
 		}
 	}
 	return nil
+}
+
+func convertLabels(from []*gitea.Label) []string {
+	var labels []string
+	for _, label := range from {
+		labels = append(labels, label.Name)
+	}
+	return labels
 }
