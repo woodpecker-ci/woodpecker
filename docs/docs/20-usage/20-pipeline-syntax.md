@@ -502,6 +502,10 @@ Woodpecker gives the ability to detach steps to run them in background until the
 
 For more details check the [service docs](./60-services.md#detachment).
 
+### `directory`
+
+Using `directory`, you can set a subdirectory of your repository in which your commands will run.
+
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
