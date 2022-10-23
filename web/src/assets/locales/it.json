@@ -1,23 +1,9 @@
 {
-  "admin": {
-    "settings": {
-      "secrets": {
-        "value": ""
-      }
-    }
-  },
   "docs": "Documentazione",
   "login": "Accedi",
   "logout": "Esci",
   "not_found": {
     "back_home": "Torna alla pagina principale"
-  },
-  "org": {
-    "settings": {
-      "secrets": {
-        "show": ""
-      }
-    }
   },
   "password": "Password",
   "repo": {
@@ -27,7 +13,6 @@
       "actions": {
         "cancel": "Annulla"
       },
-      "execution_error": "",
       "step_not_started": ""
     },
     "enable": {
@@ -48,7 +33,6 @@
         "actions": "Azioni"
       },
       "crons": {
-        "delete": "",
         "name": {
           "name": "Nome"
         },
@@ -86,7 +70,6 @@
       },
       "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
       "secrets": {
-        "created": "",
         "name": "Nome",
         "value": "Valore"
       },

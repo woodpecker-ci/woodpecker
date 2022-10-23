@@ -1,11 +1,4 @@
 {
-  "admin": {
-    "settings": {
-      "secrets": {
-        "value": ""
-      }
-    }
-  },
   "org": {
     "settings": {
       "secrets": {
@@ -17,33 +10,18 @@
   },
   "repo": {
     "build": {
-      "actions": {
-        "cancel": ""
-      },
-      "execution_error": "",
-      "step_not_started": ""
+      "execution_error": ""
     },
     "settings": {
       "actions": {
         "actions": ""
       },
-      "crons": {
-        "delete": ""
-      },
       "general": {
         "cancel_prev": {
           "cancel": ""
-        },
-        "visibility": {
-          "internal": {
-            "internal": ""
-          }
         }
       },
       "registries": {
-        "none": ""
-      },
-      "secrets": {
         "none": ""
       }
     }
