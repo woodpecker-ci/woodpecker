@@ -9,7 +9,7 @@
     </div>
 
     <div
-      class="flex flex-grow flex-col bg-gray-300 dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col bg-white shadow-sm dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
