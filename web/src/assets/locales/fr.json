@@ -25,7 +25,6 @@
       "settings": "Réglages"
     }
   },
-  "color_scheme_dark": "",
   "docs": "Docs",
   "login": "Connexion",
   "logout": "Déconnexion",
@@ -44,7 +43,6 @@
           "events": "Disponible pour les événements suivants"
         },
         "images": {
-          "desc": "",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -112,10 +110,8 @@
       "success": "Dépôt activé"
     },
     "manual_pipeline": {
-      "title": "",
       "variables": {
         "add": "",
-        "name": "",
         "value": ""
       }
     },
@@ -280,7 +276,6 @@
           "events": "Disponible pour les événements suivants"
         },
         "images": {
-          "desc": "",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",

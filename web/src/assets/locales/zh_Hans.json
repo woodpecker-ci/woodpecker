@@ -27,7 +27,6 @@
       "settings": "设置"
     }
   },
-  "color_scheme_dark": "",
   "docs": "文档",
   "login": "登录",
   "logout": "退出登录",
@@ -83,7 +82,6 @@
       "event": {
         "cron": "计划任务",
         "deploy": "部署",
-        "pr": "",
         "push": "推送",
         "tag": "标签"
       },
@@ -116,10 +114,8 @@
       "success": "此仓库已成功启用"
     },
     "manual_pipeline": {
-      "title": "",
       "variables": {
         "add": "",
-        "name": "",
         "value": ""
       }
     },
@@ -262,7 +258,6 @@
           "placeholder": "Registry 地址（如 docker.io）"
         },
         "created": "Registry 密码已创建",
-        "delete": "",
         "deleted": "Registry 密码已删除",
         "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
         "none": "现在没有 Registry 密码。",

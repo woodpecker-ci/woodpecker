@@ -2,20 +2,13 @@
   "admin": {
     "settings": {
       "secrets": {
-        "add": "",
         "deleted": "",
-        "events": {
-          "events": ""
-        },
         "images": {
           "desc": ""
         },
-        "name": "",
         "save": "",
-        "secrets": "",
         "value": ""
-      },
-      "settings": ""
+      }
     }
   },
   "color_scheme_dark": "",
@@ -27,21 +20,14 @@
   },
   "org": {
     "settings": {
-      "not_allowed": "",
       "secrets": {
         "created": "",
-        "desc": "",
         "events": {
           "pr_warning": ""
         },
-        "images": {
-          "images": ""
-        },
         "none": "",
-        "saved": "",
         "show": ""
-      },
-      "settings": ""
+      }
     }
   },
   "password": "Password",
@@ -51,25 +37,17 @@
     "build": {
       "actions": {
         "cancel": "Annulla",
-        "canceled": "",
-        "log_auto_scroll_off": "",
-        "restart": ""
+        "log_auto_scroll_off": ""
       },
       "config": "",
       "event": {
-        "cron": "",
-        "manual": "",
-        "push": ""
+        "manual": ""
       },
       "execution_error": "",
-      "files": "",
       "log_download_error": "",
-      "no_pipeline_steps": "",
       "pipeline": "",
       "protected": {
-        "approve": "",
-        "awaits": "",
-        "decline_success": ""
+        "awaits": ""
       },
       "step_not_started": ""
     },
@@ -81,10 +59,8 @@
       "success": "Repository abilitato"
     },
     "manual_pipeline": {
-      "title": "",
       "variables": {
         "add": "",
-        "name": "",
         "value": ""
       }
     },
@@ -97,48 +73,34 @@
     "settings": {
       "actions": {
         "actions": "Azioni",
-        "delete": {
-          "delete": ""
-        },
         "disable": {
           "disable": ""
-        },
-        "repair": {
-          "repair": ""
         }
       },
       "badge": {
-        "badge": "",
-        "url_branch": ""
+        "badge": ""
       },
       "crons": {
         "branch": {
           "placeholder": ""
         },
-        "created": "",
         "delete": "",
-        "desc": "",
         "name": {
           "name": "Nome"
         },
         "next_exec": "Prossima esecuzione",
         "not_executed_yet": "Non ancora eseguito",
-        "saved": "",
         "schedule": {
           "title": ""
         }
       },
       "general": {
-        "allow_pr": {
-          "allow": ""
-        },
         "cancel_prev": {
           "cancel": ""
         },
         "general": "Generale",
         "pipeline_path": {
-          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "path": ""
+          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
         },
         "project": "Impostazioni del progetto",
         "protected": {
@@ -148,9 +110,6 @@
         "success": "Le impostazioni del repository sono state aggiornate",
         "timeout": {
           "minutes": "minuti"
-        },
-        "trusted": {
-          "desc": ""
         },
         "visibility": {
           "internal": {
@@ -169,28 +128,17 @@
       },
       "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
       "registries": {
-        "address": {
-          "address": ""
-        },
         "created": "",
-        "delete": "",
         "desc": "",
-        "none": "",
-        "save": "",
-        "show": ""
+        "save": ""
       },
       "secrets": {
         "created": "",
-        "deleted": "",
         "edit": "",
-        "events": {
-          "pr_warning": ""
-        },
         "images": {
           "images": ""
         },
         "name": "Nome",
-        "save": "",
         "secrets": "",
         "value": "Valore"
       },
@@ -202,16 +150,12 @@
   "repositories": "Repository",
   "search": "Cerca…",
   "time": {
-    "hours_short": "",
-    "not_started": "non ancora avviato",
-    "tmpl": ""
+    "not_started": "non ancora avviato"
   },
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
   "user": {
-    "api_usage": "",
     "dl_cli": "",
-    "oauth_error": "",
     "shell_setup_before": ""
   },
   "username": "Nome utente",
