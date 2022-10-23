@@ -31,7 +31,7 @@
   "color_scheme_dark": "Wechsle zu hellem Modus",
   "color_scheme_light": "Wechsle zu dunklem Modus",
   "docs": "Docs",
-  "documentation_for": "Dokumentation für \"{topic}\"",
+  "documentation_for": "Dokumentation für „{topic}“",
   "login": "Anmelden",
   "logout": "Abmelden",
   "not_found": {
@@ -162,7 +162,7 @@
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
       "pipeline": "Pipeline #{pipelineId}",
-      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
+      "pipelines_for": "Pipelines für den Branch „{branch}“",
       "protected": {
         "approve": "Genehmigen",
         "approve_success": "Pipeline genehmigt",
@@ -202,7 +202,7 @@
         "url_branch": "URL für bestimmten Branch"
       },
       "crons": {
-        "add": "Füge einen Cron hinzu",
+        "add": "Cron hinzufügen",
         "branch": {
           "placeholder": "Branch (Verwendet Standard-Branch wenn leer)",
           "title": "Branch"
@@ -226,7 +226,7 @@
           "placeholder": "Zeitplan",
           "title": "Zeitplan (basierend auf UTC)"
         },
-        "show": "Zeige Crons"
+        "show": "Crons anzeigen"
       },
       "general": {
         "allow_pr": {
