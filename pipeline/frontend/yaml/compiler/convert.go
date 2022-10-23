@@ -68,7 +68,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingdir = path.Join(c.base, c.path, container.Directory)
 	}
 
 	if !detached {
