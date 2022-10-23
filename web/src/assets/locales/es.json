@@ -1,28 +1,13 @@
 {
-  "org": {
-    "settings": {
-      "secrets": {
-        "events": {
-          "events": ""
-        }
-      }
-    }
-  },
   "repo": {
     "build": {
       "execution_error": ""
     },
     "settings": {
-      "actions": {
-        "actions": ""
-      },
       "general": {
         "cancel_prev": {
           "cancel": ""
         }
-      },
-      "registries": {
-        "none": ""
       }
     }
   },
