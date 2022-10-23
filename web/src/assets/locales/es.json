@@ -1,8 +1,5 @@
 {
   "repo": {
-    "build": {
-      "execution_error": ""
-    },
     "settings": {
       "general": {
         "cancel_prev": {
@@ -10,8 +7,5 @@
         }
       }
     }
-  },
-  "time": {
-    "tmpl": ""
   }
 }
