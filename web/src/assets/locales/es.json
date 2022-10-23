@@ -1,302 +1,199 @@
 {
   "admin": {
     "settings": {
-      "not_allowed": "",
       "secrets": {
         "add": "",
-        "created": "",
         "deleted": "",
-        "desc": "",
         "events": {
-          "events": "",
-          "pr_warning": ""
+          "events": ""
         },
         "images": {
-          "desc": "",
-          "images": ""
+          "desc": ""
         },
         "name": "",
-        "none": "",
         "save": "",
-        "saved": "",
         "secrets": "",
-        "show": "",
-        "value": "",
-        "warning": ""
+        "value": ""
       },
       "settings": ""
     }
   },
-  "back": "",
   "color_scheme_dark": "",
-  "color_scheme_light": "",
   "docs": "",
-  "login": "",
   "logout": "",
   "not_found": {
-    "back_home": "",
     "not_found": ""
   },
   "org": {
     "settings": {
-      "not_allowed": "",
       "secrets": {
         "add": "",
-        "created": "",
         "deleted": "",
-        "desc": "",
         "events": {
-          "events": "",
-          "pr_warning": ""
+          "events": ""
         },
         "images": {
-          "desc": "",
-          "images": ""
+          "desc": ""
         },
         "name": "",
-        "none": "",
         "save": "",
-        "saved": "",
         "secrets": "",
-        "show": "",
         "value": ""
-      },
-      "settings": ""
+      }
     }
   },
   "password": "",
   "repo": {
-    "activity": "",
     "add": "",
-    "branches": "",
     "build": {
       "actions": {
         "cancel": "",
-        "cancel_success": "",
         "canceled": "",
-        "log_auto_scroll": "",
         "log_auto_scroll_off": "",
-        "log_download": "",
-        "restart": "",
-        "restart_success": ""
+        "restart": ""
       },
       "config": "",
-      "created": "",
       "event": {
         "cron": "",
-        "deploy": "",
         "manual": "",
-        "pr": "",
-        "push": "",
-        "tag": ""
+        "push": ""
       },
       "execution_error": "",
-      "exit_code": "",
       "files": "",
-      "loading": "",
       "log_download_error": "",
-      "no_files": "",
       "no_pipeline_steps": "",
-      "no_pipelines": "",
       "pipeline": "",
-      "pipelines_for": "",
       "protected": {
         "approve": "",
-        "approve_success": "",
         "awaits": "",
-        "decline": "",
-        "decline_success": "",
-        "declined": ""
+        "decline_success": ""
       },
-      "step_not_started": "",
-      "tasks": ""
+      "step_not_started": ""
     },
     "enable": {
       "enable": "",
-      "enabled": "",
       "list_reloaded": "",
-      "reload": "",
       "success": ""
     },
     "manual_pipeline": {
-      "select_branch": "",
       "title": "",
-      "trigger": "",
       "variables": {
         "add": "",
-        "desc": "",
         "name": "",
-        "title": "",
         "value": ""
       }
     },
-    "not_allowed": "",
     "settings": {
       "actions": {
         "actions": "",
         "delete": {
-          "confirm": "",
-          "delete": "",
-          "success": ""
+          "delete": ""
         },
         "disable": {
-          "disable": "",
-          "success": ""
+          "disable": ""
         },
         "repair": {
-          "repair": "",
-          "success": ""
+          "repair": ""
         }
       },
       "badge": {
         "badge": "",
-        "markdown": "",
         "url_branch": ""
       },
       "crons": {
-        "add": "",
         "branch": {
-          "placeholder": "",
-          "title": ""
-        },
-        "created": "",
-        "crons": "",
-        "delete": "",
-        "deleted": "",
-        "desc": "",
-        "edit": "",
-        "name": {
-          "name": "",
           "placeholder": ""
         },
+        "created": "",
+        "delete": "",
+        "desc": "",
+        "name": {
+          "name": ""
+        },
         "next_exec": "",
-        "none": "",
         "not_executed_yet": "",
-        "save": "",
         "saved": "",
         "schedule": {
-          "placeholder": "",
           "title": ""
-        },
-        "show": ""
+        }
       },
       "general": {
         "allow_pr": {
-          "allow": "",
-          "desc": ""
+          "allow": ""
         },
         "cancel_prev": {
-          "cancel": "",
-          "desc": ""
+          "cancel": ""
         },
         "general": "",
         "pipeline_path": {
-          "default": "",
-          "desc": "",
-          "path": ""
+          "desc": ""
         },
         "project": "",
         "protected": {
-          "desc": "",
           "protected": ""
         },
-        "save": "",
         "success": "",
         "timeout": {
-          "minutes": "",
           "timeout": ""
         },
         "trusted": {
-          "desc": "",
           "trusted": ""
         },
         "visibility": {
           "internal": {
-            "desc": "",
             "internal": ""
           },
           "private": {
-            "desc": "",
             "private": ""
           },
           "public": {
-            "desc": "",
             "public": ""
-          },
-          "visibility": ""
+          }
         }
       },
       "not_allowed": "",
       "registries": {
-        "add": "",
         "address": {
-          "address": "",
-          "placeholder": ""
+          "address": ""
         },
         "created": "",
-        "creds": "",
         "delete": "",
-        "deleted": "",
         "desc": "",
-        "edit": "",
         "none": "",
-        "registries": "",
         "save": "",
-        "saved": "",
         "show": ""
       },
       "secrets": {
-        "add": "",
         "created": "",
-        "delete": "",
         "deleted": "",
-        "desc": "",
         "edit": "",
         "events": {
-          "events": "",
           "pr_warning": ""
         },
         "images": {
-          "desc": "",
           "images": ""
         },
-        "name": "",
         "none": "",
-        "save": "",
         "saved": "",
-        "secrets": "",
-        "show": "",
-        "value": ""
+        "show": ""
       },
       "settings": ""
-    },
-    "user_none": ""
+    }
   },
   "repos": "",
-  "repositories": "",
   "search": "",
   "time": {
-    "days_short": "",
     "hours_short": "",
-    "min_short": "",
     "not_started": "",
-    "sec_short": "",
-    "tmpl": "",
-    "weeks_short": ""
+    "tmpl": ""
   },
   "unknown_error": "",
-  "url": "",
   "user": {
     "access_denied": "",
-    "api_usage": "",
     "cli_usage": "",
-    "dl_cli": "",
     "internal_error": "",
-    "oauth_error": "",
     "shell_setup": "",
-    "shell_setup_before": "",
     "token": ""
   },
-  "username": "",
   "welcome": ""
 }

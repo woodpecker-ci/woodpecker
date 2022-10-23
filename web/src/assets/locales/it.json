@@ -1,65 +1,45 @@
 {
   "admin": {
     "settings": {
-      "not_allowed": "",
       "secrets": {
         "add": "",
-        "created": "",
         "deleted": "",
-        "desc": "",
         "events": {
-          "events": "",
-          "pr_warning": ""
+          "events": ""
         },
         "images": {
-          "desc": "",
-          "images": ""
+          "desc": ""
         },
         "name": "",
-        "none": "",
         "save": "",
-        "saved": "",
         "secrets": "",
-        "show": "",
-        "value": "",
-        "warning": ""
+        "value": ""
       },
       "settings": ""
     }
   },
-  "back": "",
   "color_scheme_dark": "",
-  "color_scheme_light": "",
   "docs": "Documentazione",
   "login": "Accedi",
   "logout": "Esci",
   "not_found": {
-    "back_home": "Torna alla pagina principale",
-    "not_found": ""
+    "back_home": "Torna alla pagina principale"
   },
   "org": {
     "settings": {
       "not_allowed": "",
       "secrets": {
-        "add": "",
         "created": "",
-        "deleted": "",
         "desc": "",
         "events": {
-          "events": "",
           "pr_warning": ""
         },
         "images": {
-          "desc": "",
           "images": ""
         },
-        "name": "",
         "none": "",
-        "save": "",
         "saved": "",
-        "secrets": "",
-        "show": "",
-        "value": ""
+        "show": ""
       },
       "settings": ""
     }
@@ -68,48 +48,30 @@
   "repo": {
     "activity": "Attività",
     "add": "Aggiungi repository",
-    "branches": "",
     "build": {
       "actions": {
         "cancel": "Annulla",
-        "cancel_success": "",
         "canceled": "",
-        "log_auto_scroll": "",
         "log_auto_scroll_off": "",
-        "log_download": "",
-        "restart": "",
-        "restart_success": ""
+        "restart": ""
       },
       "config": "",
-      "created": "",
       "event": {
         "cron": "",
-        "deploy": "",
         "manual": "",
-        "pr": "",
-        "push": "",
-        "tag": ""
+        "push": ""
       },
       "execution_error": "",
-      "exit_code": "",
       "files": "",
-      "loading": "",
       "log_download_error": "",
-      "no_files": "",
       "no_pipeline_steps": "",
-      "no_pipelines": "",
       "pipeline": "",
-      "pipelines_for": "",
       "protected": {
         "approve": "",
-        "approve_success": "",
         "awaits": "",
-        "decline": "",
-        "decline_success": "",
-        "declined": ""
+        "decline_success": ""
       },
-      "step_not_started": "",
-      "tasks": ""
+      "step_not_started": ""
     },
     "enable": {
       "enable": "Abilita",
@@ -119,14 +81,10 @@
       "success": "Repository abilitato"
     },
     "manual_pipeline": {
-      "select_branch": "",
       "title": "",
-      "trigger": "",
       "variables": {
         "add": "",
-        "desc": "",
         "name": "",
-        "title": "",
         "value": ""
       }
     },
@@ -140,80 +98,59 @@
       "actions": {
         "actions": "Azioni",
         "delete": {
-          "confirm": "",
-          "delete": "",
-          "success": ""
+          "delete": ""
         },
         "disable": {
-          "disable": "",
-          "success": ""
+          "disable": ""
         },
         "repair": {
-          "repair": "",
-          "success": ""
+          "repair": ""
         }
       },
       "badge": {
         "badge": "",
-        "markdown": "",
         "url_branch": ""
       },
       "crons": {
-        "add": "",
         "branch": {
-          "placeholder": "",
-          "title": ""
-        },
-        "created": "",
-        "crons": "",
-        "delete": "",
-        "deleted": "",
-        "desc": "",
-        "edit": "",
-        "name": {
-          "name": "Nome",
           "placeholder": ""
         },
+        "created": "",
+        "delete": "",
+        "desc": "",
+        "name": {
+          "name": "Nome"
+        },
         "next_exec": "Prossima esecuzione",
-        "none": "",
         "not_executed_yet": "Non ancora eseguito",
-        "save": "",
         "saved": "",
         "schedule": {
-          "placeholder": "",
           "title": ""
-        },
-        "show": ""
+        }
       },
       "general": {
         "allow_pr": {
-          "allow": "",
-          "desc": ""
+          "allow": ""
         },
         "cancel_prev": {
-          "cancel": "",
-          "desc": ""
+          "cancel": ""
         },
         "general": "Generale",
         "pipeline_path": {
           "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "",
           "path": ""
         },
         "project": "Impostazioni del progetto",
         "protected": {
-          "desc": "",
           "protected": "Protetto"
         },
         "save": "Salva le impostazioni",
         "success": "Le impostazioni del repository sono state aggiornate",
         "timeout": {
-          "minutes": "minuti",
-          "timeout": ""
+          "minutes": "minuti"
         },
         "trusted": {
-          "desc": "",
-          "trusted": ""
+          "desc": ""
         },
         "visibility": {
           "internal": {
@@ -227,50 +164,34 @@
           "public": {
             "desc": "Qualunque utente può vedere il tuo progetto senza la necessità di accedere.",
             "public": "Pubblico"
-          },
-          "visibility": ""
+          }
         }
       },
       "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
       "registries": {
-        "add": "",
         "address": {
-          "address": "",
-          "placeholder": ""
+          "address": ""
         },
         "created": "",
-        "creds": "",
         "delete": "",
-        "deleted": "",
         "desc": "",
-        "edit": "",
         "none": "",
-        "registries": "",
         "save": "",
-        "saved": "",
         "show": ""
       },
       "secrets": {
-        "add": "",
         "created": "",
-        "delete": "",
         "deleted": "",
-        "desc": "",
         "edit": "",
         "events": {
-          "events": "",
           "pr_warning": ""
         },
         "images": {
-          "desc": "",
           "images": ""
         },
         "name": "Nome",
-        "none": "",
         "save": "",
-        "saved": "",
         "secrets": "",
-        "show": "",
         "value": "Valore"
       },
       "settings": "Impostazioni"
@@ -281,26 +202,17 @@
   "repositories": "Repository",
   "search": "Cerca…",
   "time": {
-    "days_short": "",
     "hours_short": "",
-    "min_short": "",
     "not_started": "non ancora avviato",
-    "sec_short": "",
-    "tmpl": "",
-    "weeks_short": ""
+    "tmpl": ""
   },
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
   "user": {
-    "access_denied": "",
     "api_usage": "",
-    "cli_usage": "",
     "dl_cli": "",
-    "internal_error": "",
     "oauth_error": "",
-    "shell_setup": "",
-    "shell_setup_before": "",
-    "token": ""
+    "shell_setup_before": ""
   },
   "username": "Nome utente",
   "welcome": "Benvenuti in Woodpecker"

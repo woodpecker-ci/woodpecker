@@ -85,7 +85,6 @@
       "event": {
         "cron": "Plānotais darbs",
         "deploy": "Uzstādīšana",
-        "manual": "",
         "pr": "Izmaiņu pieprasījums",
         "push": "Iesūtīšana",
         "tag": "Tags"
