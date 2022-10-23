@@ -2,99 +2,58 @@
   "admin": {
     "settings": {
       "secrets": {
-        "deleted": "",
         "images": {
           "desc": ""
         },
-        "save": "",
         "value": ""
       }
     }
   },
-  "color_scheme_dark": "",
   "logout": "",
   "org": {
     "settings": {
       "secrets": {
-        "add": "",
         "events": {
           "events": ""
         },
-        "name": "",
         "secrets": ""
       }
     }
   },
-  "password": "",
   "repo": {
     "build": {
       "actions": {
-        "cancel": "",
-        "log_auto_scroll_off": ""
+        "cancel": ""
       },
       "config": "",
-      "event": {
-        "manual": ""
-      },
       "execution_error": "",
-      "log_download_error": "",
       "pipeline": "",
-      "protected": {
-        "awaits": ""
-      },
       "step_not_started": ""
     },
-    "enable": {
-      "list_reloaded": ""
-    },
     "manual_pipeline": {
-      "title": "",
-      "variables": {
-        "name": ""
-      }
+      "title": ""
     },
     "settings": {
       "actions": {
-        "actions": "",
-        "disable": {
-          "disable": ""
-        }
+        "actions": ""
       },
       "badge": {
         "badge": ""
       },
       "crons": {
-        "branch": {
-          "placeholder": ""
-        },
         "delete": "",
-        "name": {
-          "name": ""
-        },
-        "not_executed_yet": "",
-        "schedule": {
-          "title": ""
-        }
+        "not_executed_yet": ""
       },
       "general": {
         "cancel_prev": {
           "cancel": ""
         },
-        "pipeline_path": {
-          "desc": ""
-        },
         "protected": {
           "protected": ""
-        },
-        "timeout": {
-          "timeout": ""
         },
         "visibility": {
           "internal": {
             "internal": ""
-          },
-          "public": {
-            "public": ""
           }
         }
       },
@@ -102,28 +61,19 @@
         "address": {
           "address": ""
         },
-        "delete": "",
-        "none": "",
-        "show": ""
+        "none": ""
       },
       "secrets": {
         "deleted": "",
-        "events": {
-          "pr_warning": ""
-        },
-        "none": "",
-        "show": ""
+        "none": ""
       }
     }
   },
   "repos": "",
   "time": {
-    "hours_short": "",
     "tmpl": ""
   },
   "user": {
-    "access_denied": "",
-    "internal_error": "",
-    "token": ""
+    "internal_error": ""
   }
 }

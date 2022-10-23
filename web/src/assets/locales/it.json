@@ -2,16 +2,13 @@
   "admin": {
     "settings": {
       "secrets": {
-        "deleted": "",
         "images": {
           "desc": ""
         },
-        "save": "",
         "value": ""
       }
     }
   },
-  "color_scheme_dark": "",
   "docs": "Documentazione",
   "login": "Accedi",
   "logout": "Esci",
@@ -21,11 +18,9 @@
   "org": {
     "settings": {
       "secrets": {
-        "created": "",
         "events": {
           "pr_warning": ""
         },
-        "none": "",
         "show": ""
       }
     }
@@ -36,19 +31,11 @@
     "add": "Aggiungi repository",
     "build": {
       "actions": {
-        "cancel": "Annulla",
-        "log_auto_scroll_off": ""
+        "cancel": "Annulla"
       },
       "config": "",
-      "event": {
-        "manual": ""
-      },
       "execution_error": "",
-      "log_download_error": "",
       "pipeline": "",
-      "protected": {
-        "awaits": ""
-      },
       "step_not_started": ""
     },
     "enable": {
@@ -60,7 +47,6 @@
     },
     "manual_pipeline": {
       "variables": {
-        "add": "",
         "value": ""
       }
     },
@@ -72,27 +58,18 @@
     },
     "settings": {
       "actions": {
-        "actions": "Azioni",
-        "disable": {
-          "disable": ""
-        }
+        "actions": "Azioni"
       },
       "badge": {
         "badge": ""
       },
       "crons": {
-        "branch": {
-          "placeholder": ""
-        },
         "delete": "",
         "name": {
           "name": "Nome"
         },
         "next_exec": "Prossima esecuzione",
-        "not_executed_yet": "Non ancora eseguito",
-        "schedule": {
-          "title": ""
-        }
+        "not_executed_yet": "Non ancora eseguito"
       },
       "general": {
         "cancel_prev": {
@@ -128,18 +105,14 @@
       },
       "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
       "registries": {
-        "created": "",
-        "desc": "",
-        "save": ""
+        "desc": ""
       },
       "secrets": {
         "created": "",
-        "edit": "",
         "images": {
           "images": ""
         },
         "name": "Nome",
-        "secrets": "",
         "value": "Valore"
       },
       "settings": "Impostazioni"
@@ -155,7 +128,6 @@
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
   "user": {
-    "dl_cli": "",
     "shell_setup_before": ""
   },
   "username": "Nome utente",

@@ -115,7 +115,6 @@
     },
     "manual_pipeline": {
       "variables": {
-        "add": "",
         "value": ""
       }
     },
