@@ -109,11 +109,6 @@
       "reload": "Actualiser les dépôts",
       "success": "Dépôt activé"
     },
-    "manual_pipeline": {
-      "variables": {
-        "value": ""
-      }
-    },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
     "pipeline": {
       "actions": {

@@ -2,9 +2,6 @@
   "admin": {
     "settings": {
       "secrets": {
-        "images": {
-          "desc": ""
-        },
         "value": ""
       }
     }
@@ -18,9 +15,6 @@
   "org": {
     "settings": {
       "secrets": {
-        "events": {
-          "pr_warning": ""
-        },
         "show": ""
       }
     }
@@ -33,9 +27,7 @@
       "actions": {
         "cancel": "Annulla"
       },
-      "config": "",
       "execution_error": "",
-      "pipeline": "",
       "step_not_started": ""
     },
     "enable": {
@@ -44,11 +36,6 @@
       "list_reloaded": "Elenco dei repository ricaricato",
       "reload": "Ricarica i repository",
       "success": "Repository abilitato"
-    },
-    "manual_pipeline": {
-      "variables": {
-        "value": ""
-      }
     },
     "not_allowed": "Non è permesso accedere a questo repository",
     "pipeline": {
@@ -60,9 +47,6 @@
       "actions": {
         "actions": "Azioni"
       },
-      "badge": {
-        "badge": ""
-      },
       "crons": {
         "delete": "",
         "name": {
@@ -72,9 +56,6 @@
         "not_executed_yet": "Non ancora eseguito"
       },
       "general": {
-        "cancel_prev": {
-          "cancel": ""
-        },
         "general": "Generale",
         "pipeline_path": {
           "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
@@ -104,14 +85,8 @@
         }
       },
       "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
-      "registries": {
-        "desc": ""
-      },
       "secrets": {
         "created": "",
-        "images": {
-          "images": ""
-        },
         "name": "Nome",
         "value": "Valore"
       },
@@ -127,9 +102,6 @@
   },
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
-  "user": {
-    "shell_setup_before": ""
-  },
   "username": "Nome utente",
   "welcome": "Benvenuti in Woodpecker"
 }

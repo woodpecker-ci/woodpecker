@@ -2,21 +2,16 @@
   "admin": {
     "settings": {
       "secrets": {
-        "images": {
-          "desc": ""
-        },
         "value": ""
       }
     }
   },
-  "logout": "",
   "org": {
     "settings": {
       "secrets": {
         "events": {
           "events": ""
-        },
-        "secrets": ""
+        }
       }
     }
   },
@@ -25,31 +20,19 @@
       "actions": {
         "cancel": ""
       },
-      "config": "",
       "execution_error": "",
-      "pipeline": "",
       "step_not_started": ""
-    },
-    "manual_pipeline": {
-      "title": ""
     },
     "settings": {
       "actions": {
         "actions": ""
       },
-      "badge": {
-        "badge": ""
-      },
       "crons": {
-        "delete": "",
-        "not_executed_yet": ""
+        "delete": ""
       },
       "general": {
         "cancel_prev": {
           "cancel": ""
-        },
-        "protected": {
-          "protected": ""
         },
         "visibility": {
           "internal": {
@@ -58,22 +41,14 @@
         }
       },
       "registries": {
-        "address": {
-          "address": ""
-        },
         "none": ""
       },
       "secrets": {
-        "deleted": "",
         "none": ""
       }
     }
   },
-  "repos": "",
   "time": {
     "tmpl": ""
-  },
-  "user": {
-    "internal_error": ""
   }
 }

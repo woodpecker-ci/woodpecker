@@ -113,11 +113,6 @@
       "reload": "刷新项目列表",
       "success": "此仓库已成功启用"
     },
-    "manual_pipeline": {
-      "variables": {
-        "value": ""
-      }
-    },
     "not_allowed": "你没有权限访问这个仓库",
     "pipeline": {
       "actions": {
