@@ -391,7 +391,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 		type incoming struct {
 			Repo          *model.Repo     `json:"repo"`
-			Build         *model.Pipeline `json:"build"`
+			Build         *model.Pipeline `json:"pipeline"`
 			Configuration []*config       `json:"config"`
 		}
 

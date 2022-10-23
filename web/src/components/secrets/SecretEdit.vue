@@ -23,8 +23,9 @@
       </InputField>
 
       <Button
-        :is-loading="isSaving"
         type="submit"
+        color="green"
+        :is-loading="isSaving"
         :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
       />
     </form>
