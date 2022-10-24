@@ -16,6 +16,7 @@
         <TextField
           v-if="searchBoxPresent"
           class="w-auto !bg-gray-100 !dark:bg-dark-gray-600 <md:w-full <md:order-3"
+          input-class="!placeholder-gray-500"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"
@@ -45,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import TextField from '~/components/form/TextField.vue';
 import FluidContainer from '~/components/layout/FluidContainer.vue';
 
 import Tabs from './Tabs.vue';
