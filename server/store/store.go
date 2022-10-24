@@ -92,7 +92,7 @@ type Store interface {
 	// GetPipelineCount gets a count of all pipelines in the system.
 	GetPipelineCount() (int64, error)
 	// CreatePipeline creates a new pipeline and jobs.
-	CreatePipeline(*model.Pipeline, ...*model.Proc) error
+	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
 
@@ -137,25 +137,25 @@ type Store interface {
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
 
-	// Procs
-	ProcLoad(int64) (*model.Proc, error)
-	ProcFind(*model.Pipeline, int) (*model.Proc, error)
-	ProcChild(*model.Pipeline, int, string) (*model.Proc, error)
-	ProcList(*model.Pipeline) ([]*model.Proc, error)
-	ProcCreate([]*model.Proc) error
-	ProcUpdate(*model.Proc) error
-	ProcClear(*model.Pipeline) error
+	// Steps
+	StepLoad(int64) (*model.Step, error)
+	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepChild(*model.Pipeline, int, string) (*model.Step, error)
+	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepCreate([]*model.Step) error
+	StepUpdate(*model.Step) error
+	StepClear(*model.Pipeline) error
 
 	// Logs
-	LogFind(*model.Proc) (io.ReadCloser, error)
+	LogFind(*model.Step) (io.ReadCloser, error)
 	// TODO: since we do ReadAll in any case a ioReader is not the best idear
 	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Proc, io.Reader) error
+	LogSave(*model.Step, io.Reader) error
 
 	// Files
 	FileList(*model.Pipeline) ([]*model.File, error)
-	FileFind(*model.Proc, string) (*model.File, error)
-	FileRead(*model.Proc, string) (io.ReadCloser, error)
+	FileFind(*model.Step, string) (*model.File, error)
+	FileRead(*model.Step, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
 	// Tasks

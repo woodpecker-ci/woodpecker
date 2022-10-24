@@ -5,7 +5,7 @@ import {
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineProc,
+  PipelineStep,
   Registry,
   Repo,
   RepoPermissions,
@@ -102,12 +102,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`);
   }
 
-  getLogs(owner: string, repo: string, pipeline: number, proc: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${proc}`) as Promise<PipelineLog[]>;
+  getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
-  getArtifact(owner: string, repo: string, pipeline: string, proc: string, file: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${proc}/${file}?raw=true`);
+  getArtifact(owner: string, repo: string, pipeline: string, step: string, file: string): Promise<unknown> {
+    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${step}/${file}?raw=true`);
   }
 
   getArtifactList(owner: string, repo: string, pipeline: string): Promise<unknown> {
@@ -207,7 +207,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; proc?: PipelineProc }) => void): EventSource {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
     });
@@ -217,11 +217,11 @@ export default class WoodpeckerClient extends ApiClient {
     owner: string,
     repo: string,
     pipeline: number,
-    proc: number,
+    step: number,
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
-    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${proc}`, callback, {
+    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
       reconnect: true,
     });
   }

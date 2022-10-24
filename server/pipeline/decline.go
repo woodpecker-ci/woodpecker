@@ -35,11 +35,11 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
-	if pipeline.Procs, err = store.ProcList(pipeline); err != nil {
-		log.Error().Err(err).Msg("can not get proc list from store")
+	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+		log.Error().Err(err).Msg("can not get step list from store")
 	}
-	if pipeline.Procs, err = model.Tree(pipeline.Procs); err != nil {
-		log.Error().Err(err).Msg("can not build tree from proc list")
+	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
+		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
 	if err := updatePipelineStatus(ctx, pipeline, repo, user); err != nil {

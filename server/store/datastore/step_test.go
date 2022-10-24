@@ -23,11 +23,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func TestProcFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
+func TestStepFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	procs := []*model.Proc{
+	steps := []*model.Step{
 		{
 			PipelineID: 1000,
 			PID:        1,
@@ -42,22 +42,22 @@ func TestProcFind(t *testing.T) {
 			Environ:    map[string]string{"GOLANG": "tip"},
 		},
 	}
-	assert.NoError(t, store.ProcCreate(procs))
-	assert.EqualValues(t, 1, procs[0].ID)
-	assert.Error(t, store.ProcCreate(procs))
+	assert.NoError(t, store.StepCreate(steps))
+	assert.EqualValues(t, 1, steps[0].ID)
+	assert.Error(t, store.StepCreate(steps))
 
-	proc, err := store.ProcFind(&model.Pipeline{ID: 1000}, 1)
+	step, err := store.StepFind(&model.Pipeline{ID: 1000}, 1)
 	if !assert.NoError(t, err) {
 		return
 	}
-	assert.Equal(t, procs[0], proc)
+	assert.Equal(t, steps[0], step)
 }
 
-func TestProcChild(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
+func TestStepChild(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	err := store.ProcCreate([]*model.Proc{
+	err := store.StepCreate([]*model.Step{
 		{
 			PipelineID: 1,
 			PID:        1,
@@ -75,28 +75,28 @@ func TestProcChild(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Errorf("Unexpected error: insert procs: %s", err)
+		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
-	proc, err := store.ProcChild(&model.Pipeline{ID: 1}, 1, "build")
+	step, err := store.StepChild(&model.Pipeline{ID: 1}, 1, "build")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if got, want := proc.PID, 2; got != want {
-		t.Errorf("Want proc pid %d, got %d", want, got)
+	if got, want := step.PID, 2; got != want {
+		t.Errorf("Want step pid %d, got %d", want, got)
 	}
-	if got, want := proc.Name, "build"; got != want {
-		t.Errorf("Want proc name %s, got %s", want, got)
+	if got, want := step.Name, "build"; got != want {
+		t.Errorf("Want step name %s, got %s", want, got)
 	}
 }
 
-func TestProcList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
+func TestStepList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	err := store.ProcCreate([]*model.Proc{
+	err := store.StepCreate([]*model.Step{
 		{
 			PipelineID: 2,
 			PID:        1,
@@ -121,24 +121,24 @@ func TestProcList(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Errorf("Unexpected error: insert procs: %s", err)
+		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
-	procs, err := store.ProcList(&model.Pipeline{ID: 1})
+	steps, err := store.StepList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if got, want := len(procs), 2; got != want {
-		t.Errorf("Want %d procs, got %d", want, got)
+	if got, want := len(steps), 2; got != want {
+		t.Errorf("Want %d steps, got %d", want, got)
 	}
 }
 
-func TestProcUpdate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
+func TestStepUpdate(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	proc := &model.Proc{
+	step := &model.Step{
 		PipelineID: 1,
 		PID:        1,
 		PPID:       2,
@@ -151,30 +151,30 @@ func TestProcUpdate(t *testing.T) {
 		Platform:   "linux/amd64",
 		Environ:    map[string]string{"GOLANG": "tip"},
 	}
-	if err := store.ProcCreate([]*model.Proc{proc}); err != nil {
-		t.Errorf("Unexpected error: insert proc: %s", err)
+	if err := store.StepCreate([]*model.Step{step}); err != nil {
+		t.Errorf("Unexpected error: insert step: %s", err)
 		return
 	}
-	proc.State = "running"
-	if err := store.ProcUpdate(proc); err != nil {
-		t.Errorf("Unexpected error: update proc: %s", err)
+	step.State = "running"
+	if err := store.StepUpdate(step); err != nil {
+		t.Errorf("Unexpected error: update step: %s", err)
 		return
 	}
-	updated, err := store.ProcFind(&model.Pipeline{ID: 1}, 1)
+	updated, err := store.StepFind(&model.Pipeline{ID: 1}, 1)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	if got, want := updated.State, model.StatusRunning; got != want {
-		t.Errorf("Want proc name %s, got %s", want, got)
+		t.Errorf("Want step name %s, got %s", want, got)
 	}
 }
 
-func TestProcIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Pipeline))
+func TestStepIndexes(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	if err := store.ProcCreate([]*model.Proc{
+	if err := store.StepCreate([]*model.Step{
 		{
 			PipelineID: 1,
 			PID:        1,
@@ -184,12 +184,12 @@ func TestProcIndexes(t *testing.T) {
 			Name:       "build",
 		},
 	}); err != nil {
-		t.Errorf("Unexpected error: insert procs: %s", err)
+		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
 
 	// fail due to duplicate pid
-	if err := store.ProcCreate([]*model.Proc{
+	if err := store.StepCreate([]*model.Step{
 		{
 			PipelineID: 1,
 			PID:        1,
@@ -203,4 +203,4 @@ func TestProcIndexes(t *testing.T) {
 	}
 }
 
-// TODO: func TestProcCascade(t *testing.T) {}
+// TODO: func TestStepCascade(t *testing.T) {}

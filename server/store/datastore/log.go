@@ -21,9 +21,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) LogFind(proc *model.Proc) (io.ReadCloser, error) {
+func (s storage) LogFind(step *model.Step) (io.ReadCloser, error) {
 	logs := &model.Logs{
-		ProcID: proc.ID,
+		StepID: step.ID,
 	}
 	if err := wrapGet(s.engine.Get(logs)); err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (s storage) LogFind(proc *model.Proc) (io.ReadCloser, error) {
 	return io.NopCloser(buf), nil
 }
 
-func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
+func (s storage) LogSave(step *model.Step, reader io.Reader) error {
 	data, _ := io.ReadAll(reader)
 
 	sess := s.engine.NewSession()
@@ -42,7 +42,7 @@ func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
 	}
 
 	logs := new(model.Logs)
-	exist, err := sess.Where("log_job_id = ?", proc.ID).Get(logs)
+	exist, err := sess.Where("log_job_id = ?", step.ID).Get(logs)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
 		}
 	} else {
 		if _, err := sess.Insert(&model.Logs{
-			ProcID: proc.ID,
+			StepID: step.ID,
 			Data:   data,
 		}); err != nil {
 			return err

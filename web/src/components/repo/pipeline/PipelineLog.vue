@@ -2,9 +2,9 @@
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
       class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
-      @click="$emit('update:proc-id', null)"
+      @click="$emit('update:step-id', null)"
     >
-      <span>{{ proc?.name }}</span>
+      <span>{{ step?.name }}</span>
       <Icon name="close" class="ml-auto" />
     </div>
 
@@ -15,14 +15,14 @@
     >
       <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-2 mr-4 hidden md:flex">
         <Button
-          v-if="proc?.end_time !== undefined"
+          v-if="step?.end_time !== undefined"
           :is-loading="downloadInProgress"
           :title="$t('repo.pipeline.actions.log_download')"
           start-icon="download"
           @click="download"
         />
         <Button
-          v-if="proc?.end_time === undefined"
+          v-if="step?.end_time === undefined"
           :title="
             autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
           "
@@ -45,20 +45,20 @@
       </div>
 
       <div class="m-auto text-xl text-color">
-        <span v-if="proc?.error" class="text-red-400">{{ proc.error }}</span>
-        <span v-else-if="proc?.state === 'skipped'" class="text-red-400">{{
+        <span v-if="step?.error" class="text-red-400">{{ step.error }}</span>
+        <span v-else-if="step?.state === 'skipped'" class="text-red-400">{{
           $t('repo.pipeline.actions.canceled')
         }}</span>
-        <span v-else-if="!proc?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
+        <span v-else-if="!step?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
       </div>
 
       <div
-        v-if="proc?.end_time !== undefined"
-        :class="proc.exit_code == 0 ? 'dark:text-lime-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
+        v-if="step?.end_time !== undefined"
+        :class="step.exit_code == 0 ? 'dark:text-lime-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
         class="w-full bg-gray-200 dark:bg-dark-gray-800 text-md p-4"
       >
-        {{ $t('repo.pipeline.exit_code', { exitCode: proc.exit_code }) }}
+        {{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}
       </div>
     </div>
   </div>
@@ -78,7 +78,7 @@ import Icon from '~/components/atomic/Icon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { Pipeline, Repo } from '~/lib/api/types';
-import { findProc, isProcFinished, isProcRunning } from '~/utils/helpers';
+import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
 type LogLine = {
   index: number;
@@ -97,7 +97,7 @@ export default defineComponent({
       required: true,
     },
 
-    procId: {
+    stepId: {
       type: Number,
       required: true,
     },
@@ -105,22 +105,22 @@ export default defineComponent({
 
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:proc-id': (procId: number | null) => true,
+    'update:step-id': (stepId: number | null) => true,
   },
 
   setup(props) {
     const notifications = useNotifications();
     const i18n = useI18n();
     const pipeline = toRef(props, 'pipeline');
-    const procId = toRef(props, 'procId');
+    const stepId = toRef(props, 'stepId');
     const repo = inject<Ref<Repo>>('repo');
     const apiClient = useApiClient();
 
-    const loadedProcSlug = ref<string>();
-    const procSlug = computed(
-      () => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${procId.value}`,
+    const loadedStepSlug = ref<string>();
+    const stepSlug = computed(
+      () => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`,
     );
-    const proc = computed(() => pipeline.value && findProc(pipeline.value.procs || [], procId.value));
+    const step = computed(() => pipeline.value && findStep(pipeline.value.steps || [], stepId.value));
     const stream = ref<EventSource>();
     const log = ref<LogLine[]>();
     const consoleElement = ref<Element>();
@@ -129,7 +129,7 @@ export default defineComponent({
     const hasLogs = computed(
       () =>
         // we do not have logs for skipped jobs
-        repo?.value && pipeline.value && proc.value && proc.value.state !== 'skipped' && proc.value.state !== 'killed',
+        repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'killed',
     );
     const autoScroll = useStorage('log-auto-scroll', false);
     const showActions = ref(false);
@@ -200,13 +200,13 @@ export default defineComponent({
     }, 500);
 
     async function download() {
-      if (!repo?.value || !pipeline.value || !proc.value) {
-        throw new Error('The repository, pipeline or proc was undefined');
+      if (!repo?.value || !pipeline.value || !step.value) {
+        throw new Error('The repository, pipeline or step was undefined');
       }
       let logs;
       try {
         downloadInProgress.value = true;
-        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, proc.value.pid);
+        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
       } catch (e) {
         notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
         return;
@@ -223,7 +223,7 @@ export default defineComponent({
       fileLink.href = fileURL;
       fileLink.setAttribute(
         'download',
-        `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${proc.value.name}.log`,
+        `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
       );
       document.body.appendChild(fileLink);
 
@@ -233,10 +233,10 @@ export default defineComponent({
     }
 
     async function loadLogs() {
-      if (loadedProcSlug.value === procSlug.value) {
+      if (loadedStepSlug.value === stepSlug.value) {
         return;
       }
-      loadedProcSlug.value = procSlug.value;
+      loadedStepSlug.value = stepSlug.value;
       log.value = undefined;
       logBuffer.value = [];
       ansiUp.value = new AnsiUp();
@@ -250,26 +250,26 @@ export default defineComponent({
         stream.value.close();
       }
 
-      if (!hasLogs.value || !proc.value) {
+      if (!hasLogs.value || !step.value) {
         return;
       }
 
-      if (isProcFinished(proc.value)) {
-        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, proc.value.pid);
+      if (isStepFinished(step.value)) {
+        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
         logs?.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
         flushLogs(false);
       }
 
-      if (isProcRunning(proc.value)) {
+      if (isStepRunning(step.value)) {
         // load stream of parent process (which receives all child processes logs)
         // TODO: change stream to only send data of single child process
         stream.value = apiClient.streamLogs(
           repo.value.owner,
           repo.value.name,
           pipeline.value.number,
-          proc.value.ppid,
+          step.value.ppid,
           (line) => {
-            if (line?.proc !== proc.value?.name) {
+            if (line?.step !== step.value?.name) {
               return;
             }
             writeLog({ index: line.pos, text: line.out, time: line.time });
@@ -283,12 +283,12 @@ export default defineComponent({
       loadLogs();
     });
 
-    watch(procSlug, () => {
+    watch(stepSlug, () => {
       loadLogs();
     });
 
-    watch(proc, (oldProc, newProc) => {
-      if (oldProc && oldProc.name === newProc?.name && oldProc?.end_time !== newProc?.end_time) {
+    watch(step, (oldStep, newStep) => {
+      if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
         if (autoScroll.value) {
           scrollDown();
         }
@@ -297,7 +297,7 @@ export default defineComponent({
 
     return {
       consoleElement,
-      proc,
+      step,
       log,
       loadedLogs,
       hasLogs,

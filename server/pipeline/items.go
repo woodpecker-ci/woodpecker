@@ -64,7 +64,7 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 		envs[k] = v
 	}
 
-	b := shared.ProcBuilder{
+	b := shared.StepBuilder{
 		Repo:  repo,
 		Curr:  pipeline,
 		Last:  last,

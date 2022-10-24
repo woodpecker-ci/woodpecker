@@ -81,7 +81,7 @@ export type Pipeline = {
 
   // The jobs associated with this pipeline.
   // A pipeline will have multiple jobs if a matrix pipeline was used or if a rebuild was requested.
-  procs?: PipelineProc[];
+  steps?: PipelineStep[];
 
   changed_files?: string[];
 };
@@ -98,7 +98,7 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
-export type PipelineProc = {
+export type PipelineStep = {
   id: number;
   pipeline_id: number;
   pid: number;
@@ -112,11 +112,11 @@ export type PipelineProc = {
   end_time?: number;
   machine?: string;
   error?: string;
-  children?: PipelineProc[];
+  children?: PipelineStep[];
 };
 
 export type PipelineLog = {
-  proc: string;
+  step: string;
   pos: number;
   out: string;
   time?: number;

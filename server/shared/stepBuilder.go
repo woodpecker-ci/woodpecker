@@ -39,8 +39,8 @@ import (
 
 // TODO(974) move to pipeline/*
 
-// ProcBuilder Takes the hook data and the yaml and returns in internal data model
-type ProcBuilder struct {
+// StepBuilder Takes the hook data and the yaml and returns in internal data model
+type StepBuilder struct {
 	Repo  *model.Repo
 	Curr  *model.Pipeline
 	Last  *model.Pipeline
@@ -53,7 +53,7 @@ type ProcBuilder struct {
 }
 
 type PipelineItem struct {
-	Proc      *model.Proc
+	Step      *model.Step
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
@@ -61,7 +61,7 @@ type PipelineItem struct {
 	Config    *backend.Config
 }
 
-func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
+func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 	var items []*PipelineItem
 
 	sort.Sort(remote.ByName(b.Yamls))
@@ -79,7 +79,7 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 		}
 
 		for _, axis := range axes {
-			proc := &model.Proc{
+			step := &model.Step{
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				PGID:       pidSequence,
@@ -88,7 +88,7 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, proc, b.Link)
+			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, step, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
 			// add global environment variables for substituting
@@ -121,12 +121,12 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 
 			// checking if filtered.
 			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
-				log.Debug().Str("pipeline", proc.Name).Msg(
+				log.Debug().Str("pipeline", step.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
-				proc.State = model.StatusSkipped
+				step.State = model.StatusSkipped
 			} else if err != nil {
-				log.Debug().Str("pipeline", proc.Name).Msg(
+				log.Debug().Str("pipeline", step.Name).Msg(
 					"Pipeline config could not be parsed",
 				)
 				return nil, err
@@ -134,13 +134,13 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 
 			// TODO: deprecated branches filter => remove after some time
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				log.Debug().Str("pipeline", proc.Name).Msg(
+				log.Debug().Str("pipeline", step.Name).Msg(
 					"Marked as skipped, dose not match branch",
 				)
-				proc.State = model.StatusSkipped
+				step.State = model.StatusSkipped
 			}
 
-			ir, err := b.toInternalRepresentation(parsed, environ, metadata, proc.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, step.ID)
 			if err != nil {
 				return nil, err
 			}
@@ -150,7 +150,7 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 			}
 
 			item := &PipelineItem{
-				Proc:      proc,
+				Step:      step,
 				Config:    ir,
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
@@ -168,17 +168,17 @@ func (b *ProcBuilder) Build() ([]*PipelineItem, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
-	// check if at least one proc can start, if list is not empty
-	if len(items) > 0 && !procListContainsItemsToRun(items) {
+	// check if at least one step can start, if list is not empty
+	if len(items) > 0 && !stepListContainsItemsToRun(items) {
 		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
 
 	return items, nil
 }
 
-func procListContainsItemsToRun(items []*PipelineItem) bool {
+func stepListContainsItemsToRun(items []*PipelineItem) bool {
 	for i := range items {
-		if items[i].Proc.State == model.StatusPending {
+		if items[i].Step.State == model.StatusPending {
 			return true
 		}
 	}
@@ -199,7 +199,7 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 	if len(itemsToRemove) > 0 {
 		filtered := make([]*PipelineItem, 0)
 		for _, item := range items {
-			if !containsItemWithName(item.Proc.Name, itemsToRemove) {
+			if !containsItemWithName(item.Step.Name, itemsToRemove) {
 				filtered = append(filtered, item)
 			}
 		}
@@ -212,14 +212,14 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 
 func containsItemWithName(name string, items []*PipelineItem) bool {
 	for _, item := range items {
-		if name == item.Proc.Name {
+		if name == item.Step.Name {
 			return true
 		}
 	}
 	return false
 }
 
-func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, error) {
+func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -229,7 +229,7 @@ func (b *ProcBuilder) envsubst(y string, environ map[string]string) (string, err
 	})
 }
 
-func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
@@ -237,7 +237,7 @@ func (b *ProcBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, procID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, stepID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -282,7 +282,7 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%d_%d",
-				procID,
+				stepID,
 				rand.Int(),
 			),
 		),
@@ -295,9 +295,9 @@ func (b *ProcBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*PipelineItem) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
-		pipeline.Procs = append(pipeline.Procs, item.Proc)
-		if pidSequence < item.Proc.PID {
-			pidSequence = item.Proc.PID
+		pipeline.Steps = append(pipeline.Steps, item.Step)
+		if pidSequence < item.Step.PID {
+			pidSequence = item.Step.PID
 		}
 	}
 
@@ -309,18 +309,18 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Pipel
 				if gid == 0 {
 					gid = pidSequence
 				}
-				proc := &model.Proc{
+				step := &model.Step{
 					PipelineID: pipeline.ID,
 					Name:       step.Alias,
 					PID:        pidSequence,
-					PPID:       item.Proc.PID,
+					PPID:       item.Step.PID,
 					PGID:       gid,
 					State:      model.StatusPending,
 				}
-				if item.Proc.State == model.StatusSkipped {
-					proc.State = model.StatusSkipped
+				if item.Step.State == model.StatusSkipped {
+					step.State = model.StatusSkipped
 				}
-				pipeline.Procs = append(pipeline.Procs, proc)
+				pipeline.Steps = append(pipeline.Steps, step)
 			}
 		}
 	}
@@ -329,7 +329,7 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Pipel
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, proc *model.Proc, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *model.Step, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -346,8 +346,8 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, proc *
 		Curr: metadataPipelineFromModelPipeline(pipeline, true),
 		Prev: metadataPipelineFromModelPipeline(last, false),
 		Job: frontend.Job{
-			Number: proc.PID,
-			Matrix: proc.Environ,
+			Number: step.PID,
+			Matrix: step.Environ,
 		},
 		Sys: frontend.System{
 			Name:     "woodpecker",
