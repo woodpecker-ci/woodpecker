@@ -37,6 +37,7 @@ type (
 		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
 		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
 		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
+		Directory     string                 `yaml:"directory,omitempty"`
 		Entrypoint    types.Command          `yaml:"entrypoint,omitempty"`
 		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
