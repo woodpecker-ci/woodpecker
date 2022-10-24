@@ -504,7 +504,7 @@ For more details check the [service docs](./60-services.md#detachment).
 
 ### `directory`
 
-Using `directory`, you can set a subdirectory of your repository in which your commands will run.
+Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
 
 ## `services`
 

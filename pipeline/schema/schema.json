@@ -467,6 +467,10 @@
       "items": { "type": "string" },
       "minLength": 1
     },
+    "step_directory": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#directory",
+      "type": "string"
+    },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "type": "object",
