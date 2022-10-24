@@ -215,6 +215,9 @@
         "environment": {
           "$ref": "#/definitions/step_environment"
         },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
         "secrets": {
           "$ref": "#/definitions/step_secrets"
         },
@@ -466,6 +469,10 @@
       "type": "array",
       "items": { "type": "string" },
       "minLength": 1
+    },
+    "step_directory": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#directory",
+      "type": "string"
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
