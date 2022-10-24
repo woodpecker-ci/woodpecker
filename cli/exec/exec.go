@@ -312,13 +312,13 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
+var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.Reader) error {
 	part, err := rc.NextPart()
 	if err != nil {
 		return err
 	}
 
-	logStream := NewLineWriter(proc.Alias)
+	logStream := NewLineWriter(step.Alias)
 	_, err = io.Copy(logStream, part)
 	return err
 })

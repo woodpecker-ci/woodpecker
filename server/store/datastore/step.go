@@ -20,46 +20,46 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) ProcLoad(id int64) (*model.Proc, error) {
-	proc := new(model.Proc)
-	return proc, wrapGet(s.engine.ID(id).Get(proc))
+func (s storage) StepLoad(id int64) (*model.Step, error) {
+	step := new(model.Step)
+	return step, wrapGet(s.engine.ID(id).Get(step))
 }
 
-func (s storage) ProcFind(pipeline *model.Pipeline, pid int) (*model.Proc, error) {
-	proc := &model.Proc{
+func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
+	step := &model.Step{
 		PipelineID: pipeline.ID,
 		PID:        pid,
 	}
-	return proc, wrapGet(s.engine.Get(proc))
+	return step, wrapGet(s.engine.Get(step))
 }
 
-func (s storage) ProcChild(pipeline *model.Pipeline, ppid int, child string) (*model.Proc, error) {
-	proc := &model.Proc{
+func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
+	step := &model.Step{
 		PipelineID: pipeline.ID,
 		PPID:       ppid,
 		Name:       child,
 	}
-	return proc, wrapGet(s.engine.Get(proc))
+	return step, wrapGet(s.engine.Get(step))
 }
 
-func (s storage) ProcList(pipeline *model.Pipeline) ([]*model.Proc, error) {
-	procList := make([]*model.Proc, 0, perPage)
-	return procList, s.engine.
-		Where("proc_pipeline_id = ?", pipeline.ID).
-		OrderBy("proc_pid").
-		Find(&procList)
+func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
+	stepList := make([]*model.Step, 0, perPage)
+	return stepList, s.engine.
+		Where("step_pipeline_id = ?", pipeline.ID).
+		OrderBy("step_pid").
+		Find(&stepList)
 }
 
-func (s storage) ProcCreate(procs []*model.Proc) error {
+func (s storage) StepCreate(steps []*model.Step) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	for i := range procs {
+	for i := range steps {
 		// only Insert on single object ref set auto created ID back to object
-		if _, err := sess.Insert(procs[i]); err != nil {
+		if _, err := sess.Insert(steps[i]); err != nil {
 			return err
 		}
 	}
@@ -67,12 +67,12 @@ func (s storage) ProcCreate(procs []*model.Proc) error {
 	return sess.Commit()
 }
 
-func (s storage) ProcUpdate(proc *model.Proc) error {
-	_, err := s.engine.ID(proc.ID).AllCols().Update(proc)
+func (s storage) StepUpdate(step *model.Step) error {
+	_, err := s.engine.ID(step.ID).AllCols().Update(step)
 	return err
 }
 
-func (s storage) ProcClear(pipeline *model.Pipeline) error {
+func (s storage) StepClear(pipeline *model.Pipeline) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -83,20 +83,20 @@ func (s storage) ProcClear(pipeline *model.Pipeline) error {
 		return err
 	}
 
-	if _, err := sess.Where("proc_pipeline_id = ?", pipeline.ID).Delete(new(model.Proc)); err != nil {
+	if _, err := sess.Where("step_pipeline_id = ?", pipeline.ID).Delete(new(model.Step)); err != nil {
 		return err
 	}
 
 	return sess.Commit()
 }
 
-func deleteProc(sess *xorm.Session, procID int64) error {
-	if _, err := sess.Where("log_job_id = ?", procID).Delete(new(model.Logs)); err != nil {
+func deleteStep(sess *xorm.Session, stepID int64) error {
+	if _, err := sess.Where("log_job_id = ?", stepID).Delete(new(model.Logs)); err != nil {
 		return err
 	}
-	if _, err := sess.Where("file_proc_id = ?", procID).Delete(new(model.File)); err != nil {
+	if _, err := sess.Where("file_step_id = ?", stepID).Delete(new(model.File)); err != nil {
 		return err
 	}
-	_, err := sess.ID(procID).Delete(new(model.Proc))
+	_, err := sess.ID(stepID).Delete(new(model.Step))
 	return err
 }

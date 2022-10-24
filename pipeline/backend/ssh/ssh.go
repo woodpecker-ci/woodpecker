@@ -84,33 +84,33 @@ func (e *ssh) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *ssh) Setup(ctx context.Context, proc *types.Config) error {
+func (e *ssh) Setup(ctx context.Context, step *types.Config) error {
 	return nil
 }
 
 // Exec the pipeline step.
-func (e *ssh) Exec(ctx context.Context, proc *types.Step) error {
+func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
 	Command := []string{}
-	for a, b := range proc.Environment {
+	for a, b := range step.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
 			Command = append(Command, a+"="+b)
 		}
 	}
 
-	if proc.Image == constant.DefaultCloneImage {
+	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
+		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, proc.Image)
+		Command = append(Command, step.Image)
 		Command = append(Command, "-c")
 
 		// Decode script and delete initial lines
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-		Command = append(Command, "cd "+e.workingdir+"/"+proc.Environment["CI_REPO"]+" && "+string(Script)[strings.Index(string(Script), "\n\n")+2:])
+		Script, _ := base64.RawStdEncoding.DecodeString(step.Environment["CI_SCRIPT"])
+		Command = append(Command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+string(Script)[strings.Index(string(Script), "\n\n")+2:])
 	}
 
 	// Prepare command

@@ -33,7 +33,7 @@ func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Rep
 		},
 	}
 	pipelineCopy := *pipeline
-	if pipelineCopy.Procs, err = model.Tree(pipelineCopy.Procs); err != nil {
+	if pipelineCopy.Steps, err = model.Tree(pipelineCopy.Steps); err != nil {
 		return err
 	}
 

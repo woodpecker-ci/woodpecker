@@ -17,11 +17,11 @@ services:
 The following are automatically set and can be overridden:
 
 - WOODPECKER_HOSTNAME if not set, becomes the OS' hostname
-- WOODPECKER_MAX_PROCS if not set, defaults to 1
+- WOODPECKER_MAX_STEPS if not set, defaults to 1
 
 ## Processes per agent
 
-By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parallel processing on a per-agent basis.
+By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_STEPS` to increase your parallel processing on a per-agent basis.
 
 ```yaml
 # docker-compose.yml
@@ -33,7 +33,7 @@ services:
   environment:
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+    - WOODPECKER_MAX_PROCS=4
++    - WOODPECKER_MAX_STEPS=4
 ```
 
 ## All agent configuration options
@@ -80,7 +80,7 @@ Disable colored debug output.
 
 Configures the agent hostname.
 
-### `WOODPECKER_MAX_PROCS`
+### `WOODPECKER_MAX_STEPS`
 > Default: `1`
 
 Configures the number of parallel builds.

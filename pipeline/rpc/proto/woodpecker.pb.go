@@ -75,7 +75,7 @@ type File struct {
 	unknownFields protoimpl.UnknownFields
 
 	Name string            `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Proc string            `protobuf:"bytes,2,opt,name=proc,proto3" json:"proc,omitempty"`
+	Step string            `protobuf:"bytes,2,opt,name=step,proto3" json:"step,omitempty"`
 	Mime string            `protobuf:"bytes,3,opt,name=mime,proto3" json:"mime,omitempty"`
 	Time int64             `protobuf:"varint,4,opt,name=time,proto3" json:"time,omitempty"`
 	Size int32             `protobuf:"varint,5,opt,name=size,proto3" json:"size,omitempty"`
@@ -122,9 +122,9 @@ func (x *File) GetName() string {
 	return ""
 }
 
-func (x *File) GetProc() string {
+func (x *File) GetStep() string {
 	if x != nil {
-		return x.Proc
+		return x.Step
 	}
 	return ""
 }
@@ -256,7 +256,7 @@ type Line struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Proc string `protobuf:"bytes,1,opt,name=proc,proto3" json:"proc,omitempty"`
+	Step string `protobuf:"bytes,1,opt,name=step,proto3" json:"step,omitempty"`
 	Time int64  `protobuf:"varint,2,opt,name=time,proto3" json:"time,omitempty"`
 	Pos  int32  `protobuf:"varint,3,opt,name=pos,proto3" json:"pos,omitempty"`
 	Out  string `protobuf:"bytes,4,opt,name=out,proto3" json:"out,omitempty"`
@@ -294,9 +294,9 @@ func (*Line) Descriptor() ([]byte, []int) {
 	return file_woodpecker_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Line) GetProc() string {
+func (x *Line) GetStep() string {
 	if x != nil {
-		return x.Proc
+		return x.Step
 	}
 	return ""
 }

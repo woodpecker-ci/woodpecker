@@ -14,7 +14,7 @@ type Tracer interface {
 // functions as a Tracer.
 type TraceFunc func(*State) error
 
-// Trace calls f(proc, state).
+// Trace calls f(step, state).
 func (f TraceFunc) Trace(state *State) error {
 	return f(state)
 }
