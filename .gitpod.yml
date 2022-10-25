@@ -93,7 +93,7 @@ vscode:
     - "dbaeumer.vscode-eslint"
     - "esbenp.prettier-vscode"
     - "voorjaar.windicss-intellisense"
-    - "johnsoncodehk.volar"
+    - "Vue.volar"
     - "redhat.vscode-yaml"
     - "davidanson.vscode-markdownlint"
     - "streetsidesoftware.code-spell-checker"
