@@ -96,12 +96,12 @@ func runCron(store store.Store, remote remote.Remote, cron *model.Cron, now time
 		return nil
 	}
 
-	repo, newBuild, err := CreatePipeline(ctx, store, remote, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, remote, cron)
 	if err != nil {
 		return err
 	}
 
-	_, err = pipeline.Create(ctx, store, repo, newBuild)
+	_, err = pipeline.Create(ctx, store, repo, newPipeline)
 	return err
 }
 

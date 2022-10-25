@@ -62,13 +62,13 @@ func RunCron(c *gin.Context) {
 		return
 	}
 
-	repo, newBuild, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Remote, cron)
+	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Remote, cron)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
 		return
 	}
 
-	pl, err := pipeline.Create(c, _store, repo, newBuild)
+	pl, err := pipeline.Create(c, _store, repo, newPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
 		return
