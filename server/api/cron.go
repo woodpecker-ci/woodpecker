@@ -23,6 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -43,6 +44,37 @@ func GetCron(c *gin.Context) {
 		return
 	}
 	c.JSON(200, cron)
+}
+
+// RunCron starts a cron job now.
+func RunCron(c *gin.Context) {
+	repo := session.Repo(c)
+	_store := store.FromContext(c)
+	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
+	if err != nil {
+		c.String(400, "Error parsing cron id. %s", err)
+		return
+	}
+
+	cron, err := _store.CronFind(repo, id)
+	if err != nil {
+		c.String(http.StatusNotFound, "Error getting cron %q. %s", id, err)
+		return
+	}
+
+	repo, newBuild, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Remote, cron)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
+		return
+	}
+
+	pl, err := pipeline.Create(c, _store, repo, newBuild)
+	if err != nil {
+		handlePipelineErr(c, err)
+		return
+	}
+
+	c.JSON(200, pl)
 }
 
 // PostCron persists the cron job to the database.

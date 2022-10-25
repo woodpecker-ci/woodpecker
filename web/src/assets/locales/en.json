@@ -154,6 +154,7 @@
                 "deleted": "Cron deleted",
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
+                "run": "Run now",
                 "branch": {
                     "title": "Branch",
                     "placeholder": "Branch (uses default branch if empty)"
