@@ -580,7 +580,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	if strings.Contains(client.CheckServerVersionConstraint("1.18.0").Error(), "does not satisfy version constraint") {
+	if client.CheckServerVersionConstraint("1.18.0") != nil {
 		// version too low
 		return []string{}, nil
 	}
