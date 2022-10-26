@@ -52,7 +52,7 @@ type Pipeline struct {
 	Files               []*File           `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	Labels              []string          `json:"labels,omitempty"        xorm:"-"`
+	Labels              []string          `json:"labels,omitempty"        xorm:"json 'labels'"`
 }
 
 // TableName return database table name for xorm
