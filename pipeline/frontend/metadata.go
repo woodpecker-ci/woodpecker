@@ -39,7 +39,7 @@ type (
 		Repo Repo     `json:"repo,omitempty"`
 		Curr Pipeline `json:"curr,omitempty"`
 		Prev Pipeline `json:"prev,omitempty"`
-		Job  Job      `json:"job,omitempty"`
+		Step Step     `json:"job,omitempty"`
 		Sys  System   `json:"sys,omitempty"`
 	}
 
@@ -88,8 +88,8 @@ type (
 		Avatar string `json:"avatar,omitempty"`
 	}
 
-	// Job defines runtime metadata for a job.
-	Job struct {
+	// Step defines runtime metadata for a step.
+	Step struct {
 		Number int               `json:"number,omitempty"`
 		Matrix map[string]string `json:"matrix,omitempty"`
 	}
@@ -171,7 +171,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
-		"CI_JOB_NUMBER":   strconv.Itoa(m.Job.Number),
+		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
 		"CI_JOB_STATUS":   "", // will be set by agent
 		"CI_JOB_STARTED":  "", // will be set by agent
 		"CI_JOB_FINISHED": "", // will be set by agent

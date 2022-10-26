@@ -10,6 +10,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_STEPS` (still available as fallback)
 
 ## 0.15.0
 

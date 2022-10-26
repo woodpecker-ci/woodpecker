@@ -345,7 +345,7 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *
 		},
 		Curr: metadataPipelineFromModelPipeline(pipeline, true),
 		Prev: metadataPipelineFromModelPipeline(last, false),
-		Job: frontend.Job{
+		Step: frontend.Step{
 			Number: step.PID,
 			Matrix: step.Environ,
 		},

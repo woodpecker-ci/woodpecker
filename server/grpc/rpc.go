@@ -102,21 +102,21 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	pproc, err := s.store.StepLoad(stepID)
+	pstep, err := s.store.StepLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find pproc with id %d: %s", stepID, err)
+		log.Error().Msgf("error: rpc.update: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pproc.PipelineID)
+	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pproc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pproc.PID, state.Proc)
+	step, err := s.store.StepChild(pipeline, pstep.PID, state.Step)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with name %s: %s", state.Proc, err)
+		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
 		return err
 	}
 
@@ -169,21 +169,21 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		return err
 	}
 
-	pproc, err := s.store.StepLoad(stepID)
+	pstep, err := s.store.StepLoad(stepID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find parent step with id %d: %s", stepID, err)
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pproc.PipelineID)
+	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pproc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pproc.PID, file.Proc)
+	step, err := s.store.StepChild(pipeline, pstep.PID, file.Step)
 	if err != nil {
-		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Proc, err)
+		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Step, err)
 		return err
 	}
 

@@ -88,7 +88,7 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -102,7 +102,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -115,7 +115,7 @@ func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
 		Name: req.GetFile().GetName(),
-		Proc: req.GetFile().GetStep(),
+		Step: req.GetFile().GetStep(),
 		Size: int(req.GetFile().GetSize()),
 		Time: req.GetFile().GetTime(),
 		Meta: req.GetFile().GetMeta(),
@@ -132,7 +132,7 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)

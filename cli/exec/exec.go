@@ -112,7 +112,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for key, val := range metadata.Job.Matrix {
+	for key, val := range metadata.Step.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
@@ -289,7 +289,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Job: frontend.Job{
+		Step: frontend.Step{
 			Number: c.Int("job-number"),
 			Matrix: axis,
 		},

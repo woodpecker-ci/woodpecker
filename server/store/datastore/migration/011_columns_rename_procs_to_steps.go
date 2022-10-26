@@ -32,18 +32,13 @@ var renameTableProcsToSteps = task{
 	},
 }
 
-type oldProcsColumn struct {
-	table   string
-	columns []string
-}
-
 var renameColumnsProcsToSteps = task{
 	name:     "rename-columns-procs-to-steps",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		var oldColumns []*oldBuildColumn
+		var oldColumns []*oldTable
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table: "steps",
 			columns: []string{
 				"proc_id",
@@ -64,9 +59,9 @@ var renameColumnsProcsToSteps = task{
 		},
 		)
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table:   "files",
-			columns: []string{"file_step_id"},
+			columns: []string{"file_proc_id"},
 		})
 
 		for _, table := range oldColumns {
@@ -86,9 +81,9 @@ var renameColumnsJobsToSteps = task{
 	name:     "rename-columns-jobs-to-steps",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		var oldColumns []*oldBuildColumn
+		var oldColumns []*oldTable
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table: "logs",
 			columns: []string{
 				"log_job_id",

@@ -20,7 +20,7 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldBuildColumn struct {
+type oldTable struct {
 	table   string
 	columns []string
 }
@@ -29,9 +29,9 @@ var renameColumnsBuildsToPipeline = task{
 	name:     "rename-columns-builds-to-pipeline",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		var oldColumns []*oldBuildColumn
+		var oldColumns []*oldTable
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table: "pipelines",
 			columns: []string{
 				"build_id",
@@ -68,17 +68,17 @@ var renameColumnsBuildsToPipeline = task{
 		},
 		)
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table:   "pipeline_config",
 			columns: []string{"build_id"},
 		})
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table:   "files",
 			columns: []string{"file_build_id"},
 		})
 
-		oldColumns = append(oldColumns, &oldBuildColumn{
+		oldColumns = append(oldColumns, &oldTable{
 			table:   "procs",
 			columns: []string{"proc_build_id"},
 		})

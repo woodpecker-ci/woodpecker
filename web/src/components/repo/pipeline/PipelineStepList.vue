@@ -65,12 +65,12 @@
             v-if="pipeline.steps && pipeline.steps.length > 1"
             type="button"
             class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
-            @click="procsCollapsed[step.id] = !!!procsCollapsed[step.id]"
+            @click="stepsCollapsed[step.id] = !!!stepsCollapsed[step.id]"
           >
             <Icon
               name="chevron-right"
               class="transition-transform duration-150 mr-2"
-              :class="{ 'transform rotate-90': !procsCollapsed[step.id] }"
+              :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
             />
             {{ step.name }}
           </button>
@@ -78,8 +78,8 @@
         <div
           class="transition-height duration-150 overflow-hidden"
           :class="{
-            'max-h-screen': !procsCollapsed[step.id],
-            'max-h-0': procsCollapsed[step.id],
+            'max-h-screen': !stepsCollapsed[step.id],
+            'max-h-0': stepsCollapsed[step.id],
             'ml-6': pipeline.steps && pipeline.steps.length > 1,
           }"
         >
@@ -131,5 +131,5 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
-const procsCollapsed = ref<Record<PipelineStep['id'], boolean>>({});
+const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>({});
 </script>
