@@ -83,7 +83,7 @@ Configures the agent hostname.
 ### `WOODPECKER_MAX_STEPS`
 > Default: `1`
 
-Configures the number of parallel builds.
+Configures the number of parallel steps.
 
 ### `WOODPECKER_FILTER_LABELS`
 > Default: empty
