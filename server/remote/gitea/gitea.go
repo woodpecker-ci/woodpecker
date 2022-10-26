@@ -579,6 +579,12 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 	if err != nil {
 		return nil, err
 	}
+
+	if strings.Contains(client.CheckServerVersionConstraint("1.18.0").Error(), "does not satisfy version constraint") {
+		// version too low
+		return []string{}, nil
+	}
+
 	return common.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
