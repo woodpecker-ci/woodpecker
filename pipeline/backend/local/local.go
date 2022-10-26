@@ -55,7 +55,7 @@ func (e *local) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, step *types.Config) error {
+func (e *local) Setup(ctx context.Context, config *types.Config) error {
 	return nil
 }
 

@@ -79,8 +79,8 @@ var renameColumnsBuildsToPipeline = task{
 		})
 
 		oldColumns = append(oldColumns, &oldBuildColumn{
-			table:   "steps",
-			columns: []string{"step_build_id"},
+			table:   "procs",
+			columns: []string{"proc_build_id"},
 		})
 
 		for _, table := range oldColumns {

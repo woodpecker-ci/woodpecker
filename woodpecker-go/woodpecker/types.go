@@ -85,11 +85,11 @@ type (
 		Link      string  `json:"link_url"`
 		Reviewer  string  `json:"reviewed_by"`
 		Reviewed  int64   `json:"reviewed_at"`
-		Steps     []*Step `json:"steps,omitempty"`
+		Procs     []*Proc `json:"procs,omitempty"`
 	}
 
-	// Step represents a process in the pipeline.
-	Step struct {
+	// Proc represents a process in the pipeline.
+	Proc struct {
 		ID       int64             `json:"id"`
 		PID      int               `json:"pid"`
 		PPID     int               `json:"ppid"`
@@ -103,7 +103,7 @@ type (
 		Machine  string            `json:"machine,omitempty"`
 		Platform string            `json:"platform,omitempty"`
 		Environ  map[string]string `json:"environ,omitempty"`
-		Children []*Step           `json:"children,omitempty"`
+		Children []*Proc           `json:"children,omitempty"`
 	}
 
 	// Registry represents a docker registry with credentials.
@@ -174,7 +174,7 @@ type (
 
 	// Logs is the JSON data for a logs response
 	Logs struct {
-		Step   string `json:"step"`
+		Proc   string `json:"proc"`
 		Output string `json:"out"`
 	}
 

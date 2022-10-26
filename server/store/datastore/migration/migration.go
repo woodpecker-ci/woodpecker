@@ -38,6 +38,9 @@ var migrationTasks = []*task{
 	&lowercaseSecretNames,
 	&renameBuildsToPipeline,
 	&renameColumnsBuildsToPipeline,
+	&renameTableProcsToSteps,
+	&renameColumnsProcsToSteps,
+	&renameColumnsJobsToSteps,
 }
 
 var allBeans = []interface{}{

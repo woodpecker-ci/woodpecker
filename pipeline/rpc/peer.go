@@ -14,7 +14,7 @@ type (
 
 	// State defines the pipeline state.
 	State struct {
-		Step     string `json:"step"`
+		Proc     string `json:"proc"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
 		Started  int64  `json:"started"`
@@ -32,7 +32,7 @@ type (
 	// File defines a pipeline artifact.
 	File struct {
 		Name string            `json:"name"`
-		Step string            `json:"step"`
+		Proc string            `json:"proc"`
 		Mime string            `json:"mime"`
 		Time int64             `json:"time"`
 		Size int               `json:"size"`

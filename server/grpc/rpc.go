@@ -114,9 +114,9 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pproc.PID, state.Step)
+	step, err := s.store.StepChild(pipeline, pproc.PID, state.Proc)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
+		log.Error().Msgf("error: cannot find step with name %s: %s", state.Proc, err)
 		return err
 	}
 
@@ -181,9 +181,9 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pproc.PID, file.Step)
+	step, err := s.store.StepChild(pipeline, pproc.PID, file.Proc)
 	if err != nil {
-		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Step, err)
+		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Proc, err)
 		return err
 	}
 

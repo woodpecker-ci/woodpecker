@@ -186,7 +186,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		file := &rpc.File{
 			Mime: "application/json+logs",
-			Step: step.Alias,
+			Proc: step.Alias,
 			Name: "logs.json",
 			Data: data,
 			Size: len(data),
@@ -218,7 +218,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		file = &rpc.File{
 			Mime: part.Header().Get("Content-Type"),
-			Step: step.Alias,
+			Proc: step.Alias,
 			Name: part.FileName(),
 			Data: data,
 			Size: len(data),
@@ -259,7 +259,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			Logger()
 
 		stepState := rpc.State{
-			Step:     state.Pipeline.Step.Alias,
+			Proc:     state.Pipeline.Step.Alias,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  time.Now().Unix(), // TODO do not do this

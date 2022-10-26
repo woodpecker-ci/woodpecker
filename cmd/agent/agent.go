@@ -85,7 +85,7 @@ func loop(c *cli.Context) error {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	counter.Polling = c.Int("max-steps")
+	counter.Polling = c.Int("max-procs")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -139,7 +139,7 @@ func loop(c *cli.Context) error {
 	backend.Init(context.WithValue(ctx, types.CliContext, c))
 
 	var wg sync.WaitGroup
-	parallel := c.Int("max-steps")
+	parallel := c.Int("max-procs")
 	wg.Add(parallel)
 
 	// new engine

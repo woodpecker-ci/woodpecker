@@ -42,7 +42,7 @@ func (s storage) LogSave(step *model.Step, reader io.Reader) error {
 	}
 
 	logs := new(model.Logs)
-	exist, err := sess.Where("log_job_id = ?", step.ID).Get(logs)
+	exist, err := sess.Where("log_step_id = ?", step.ID).Get(logs)
 	if err != nil {
 		return err
 	}
