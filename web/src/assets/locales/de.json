@@ -220,6 +220,7 @@
         "next_exec": "Nächste Ausführung",
         "none": "Derzeit existieren keine Crons.",
         "not_executed_yet": "Noch nicht ausgeführt",
+        "run": "Jetzt ausführen",
         "save": "Cron speichern",
         "saved": "Cron gespeichert",
         "schedule": {
