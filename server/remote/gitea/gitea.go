@@ -559,20 +559,24 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 }
 
 func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, index int64) ([]string, error) {
-	_store, ok := store.TryFromContext(ctx)
+	// for debugging purposes, we try to get the user directly from the context
+	user, ok := ctx.Value("user-debug").(*model.User)
 	if !ok {
-		log.Error().Msg("could not get store from context")
-		return []string{}, nil
-	}
+		_store, ok := store.TryFromContext(ctx)
+		if !ok {
+			log.Error().Msg("could not get store from context")
+			return []string{}, nil
+		}
 
-	repo, err := _store.GetRepoNameFallback(repo.RemoteID, repo.FullName)
-	if err != nil {
-		return nil, err
-	}
+		repo, err := _store.GetRepoNameFallback(repo.RemoteID, repo.FullName)
+		if err != nil {
+			return nil, err
+		}
 
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return nil, err
+		user, err = _store.GetUser(repo.UserID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	client, err := c.newClientToken(ctx, user.Token)
