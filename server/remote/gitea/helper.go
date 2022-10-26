@@ -232,9 +232,9 @@ func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
 }
 
 func convertLabels(from []*gitea.Label) []string {
-	var labels []string
-	for _, label := range from {
-		labels = append(labels, label.Name)
+	labels := make([]string, len(from))
+	for i, label := range from {
+		labels[i] = label.Name
 	}
 	return labels
 }
