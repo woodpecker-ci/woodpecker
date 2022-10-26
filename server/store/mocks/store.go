@@ -1126,140 +1126,6 @@ func (_m *Store) PipelineConfigCreate(_a0 *model.PipelineConfig) error {
 	return r0
 }
 
-// StepChild provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) StepChild(_a0 *model.Pipeline, _a1 int, _a2 string) (*model.Step, error) {
-	ret := _m.Called(_a0, _a1, _a2)
-
-	var r0 *model.Step
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, int, string) *model.Step); ok {
-		r0 = rf(_a0, _a1, _a2)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Step)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, int, string) error); ok {
-		r1 = rf(_a0, _a1, _a2)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// StepClear provides a mock function with given fields: _a0
-func (_m *Store) StepClear(_a0 *model.Pipeline) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Pipeline) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// StepCreate provides a mock function with given fields: _a0
-func (_m *Store) StepCreate(_a0 []*model.Step) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func([]*model.Step) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// StepFind provides a mock function with given fields: _a0, _a1
-func (_m *Store) StepFind(_a0 *model.Pipeline, _a1 int) (*model.Step, error) {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 *model.Step
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, int) *model.Step); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Step)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, int) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// StepList provides a mock function with given fields: _a0
-func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
-	ret := _m.Called(_a0)
-
-	var r0 []*model.Step
-	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.Step); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.Step)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// StepLoad provides a mock function with given fields: _a0
-func (_m *Store) StepLoad(_a0 int64) (*model.Step, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Step
-	if rf, ok := ret.Get(0).(func(int64) *model.Step); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Step)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// StepUpdate provides a mock function with given fields: _a0
-func (_m *Store) StepUpdate(_a0 *model.Step) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Step) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // RegistryCreate provides a mock function with given fields: _a0
 func (_m *Store) RegistryCreate(_a0 *model.Registry) error {
 	ret := _m.Called(_a0)
@@ -1524,6 +1390,140 @@ func (_m *Store) ServerConfigSet(_a0 string, _a1 string) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, string) error); ok {
 		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepChild provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) StepChild(_a0 *model.Pipeline, _a1 int, _a2 string) (*model.Step, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline, int, string) *model.Step); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline, int, string) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepClear provides a mock function with given fields: _a0
+func (_m *Store) StepClear(_a0 *model.Pipeline) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepCreate provides a mock function with given fields: _a0
+func (_m *Store) StepCreate(_a0 []*model.Step) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]*model.Step) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepFind provides a mock function with given fields: _a0, _a1
+func (_m *Store) StepFind(_a0 *model.Pipeline, _a1 int) (*model.Step, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline, int) *model.Step); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline, int) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepList provides a mock function with given fields: _a0
+func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepLoad provides a mock function with given fields: _a0
+func (_m *Store) StepLoad(_a0 int64) (*model.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(int64) *model.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepUpdate provides a mock function with given fields: _a0
+func (_m *Store) StepUpdate(_a0 *model.Step) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Step) error); ok {
+		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
 	}
