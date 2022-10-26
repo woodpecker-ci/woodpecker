@@ -51,7 +51,7 @@ onMounted(async () => {
 });
 
 // eslint-disable-next-line no-restricted-globals
-const address = `${location.protocol}//${location.host}`;
+const address = `${location.protocol}//${location.host}`; // port is included in location.host
 
 const usageWithShell = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;
