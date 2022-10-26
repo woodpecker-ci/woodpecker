@@ -176,6 +176,7 @@
         "next_exec": "Eksekusi berikutnya",
         "none": "Belum ada cron.",
         "not_executed_yet": "Belum dieksekusi",
+        "run": "Jalankan sekarang",
         "save": "Simpan cron",
         "saved": "Kron disimpan",
         "schedule": {
