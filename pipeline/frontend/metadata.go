@@ -161,7 +161,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
 		"CI_COMMIT_TAG":                 "", // will be set if event is tag
 		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
-		"CI_COMMIT_PULL_REQUEST_LABELS": "",
+		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
