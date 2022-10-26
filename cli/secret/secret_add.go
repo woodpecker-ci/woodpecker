@@ -42,6 +42,10 @@ var secretCreateCmd = &cli.Command{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},
+		&cli.BoolFlag{
+			Name:  "plugins-only",
+			Usage: "secret limited to plugins",
+		},
 	),
 }
 
@@ -52,10 +56,11 @@ func secretCreate(c *cli.Context) error {
 	}
 
 	secret := &woodpecker.Secret{
-		Name:   strings.ToLower(c.String("name")),
-		Value:  c.String("value"),
-		Images: c.StringSlice("image"),
-		Events: c.StringSlice("event"),
+		Name:        strings.ToLower(c.String("name")),
+		Value:       c.String("value"),
+		Images:      c.StringSlice("image"),
+		PluginsOnly: c.Bool("plugins-only"),
+		Events:      c.StringSlice("event"),
 	}
 	if len(secret.Events) == 0 {
 		secret.Events = defaultSecretEvents

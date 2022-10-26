@@ -16,6 +16,8 @@
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
         <TextField v-model="images" :placeholder="$t(i18nPrefix + 'images.desc')" />
+
+        <Checkbox v-model="innerValue.plugins_only" class="mt-4" :label="$t(i18nPrefix + 'plugins_only')" />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'events.events')">
