@@ -167,14 +167,14 @@ export default defineComponent({
         description: i18n.t('repo.settings.general.visibility.public.desc'),
       },
       {
-        value: RepoVisibility.Private,
-        text: i18n.t('repo.settings.general.visibility.private.private'),
-        description: i18n.t('repo.settings.general.visibility.private.desc'),
-      },
-      {
         value: RepoVisibility.Internal,
         text: i18n.t('repo.settings.general.visibility.internal.internal'),
         description: i18n.t('repo.settings.general.visibility.internal.desc'),
+      },
+      {
+        value: RepoVisibility.Private,
+        text: i18n.t('repo.settings.general.visibility.private.private'),
+        description: i18n.t('repo.settings.general.visibility.private.desc'),
       },
     ];
 

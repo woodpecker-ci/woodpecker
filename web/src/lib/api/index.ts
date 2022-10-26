@@ -162,6 +162,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/cron/${cronId}`);
   }
 
+  runCron(owner: string, repo: string, cronId: number): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/cron/${cronId}`) as Promise<Pipeline>;
+  }
+
   getOrgPermissions(owner: string): Promise<OrgPermissions> {
     return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
   }

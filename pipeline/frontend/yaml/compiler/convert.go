@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -68,7 +69,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingdir = c.stepWorkdir(container)
 	}
 
 	if !detached {
@@ -183,4 +184,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
 	}
+}
+
+func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+	if filepath.IsAbs(container.Directory) {
+		return container.Directory
+	}
+	return filepath.Join(c.base, c.path, container.Directory)
 }

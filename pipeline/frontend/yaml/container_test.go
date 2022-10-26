@@ -27,6 +27,7 @@ cpu_shares: 99
 detach: true
 devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
+directory: example/
 dns: 8.8.8.8
 dns_search: example.com
 entrypoint: /code/entrypoint.sh
@@ -81,6 +82,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:     "example/",
 		DNS:           types.Stringorslice{"8.8.8.8"},
 		DNSSearch:     types.Stringorslice{"example.com"},
 		Entrypoint:    types.Command{"/code/entrypoint.sh"},
