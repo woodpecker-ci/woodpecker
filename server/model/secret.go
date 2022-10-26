@@ -74,7 +74,7 @@ type Secret struct {
 	Name        string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 	Value       string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
 	Images      []string       `json:"image"           xorm:"json 'secret_images'"`
-	PluginsOnly bool           `json:"plugins_only"           xorm:"secret_plugins_only"`
+	PluginsOnly bool           `json:"plugins_only"    xorm:"secret_plugins_only"`
 	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
 	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
 	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
