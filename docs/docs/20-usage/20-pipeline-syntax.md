@@ -412,7 +412,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab and Gitea.
+It is currently **only available** for GitHub, GitLab and Gitea (versions newer than 1.18.0)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
