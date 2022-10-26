@@ -24,6 +24,8 @@
       </div>
 
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
+        <span class="text-color-alt <md:hidden">#{{ pipeline.number }}</span>
+        <span class="text-color-alt <md:hidden mx-2">-</span>
         <span class="text-color <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       </div>
 

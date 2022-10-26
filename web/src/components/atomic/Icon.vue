@@ -41,6 +41,7 @@
   <i-icon-park-outline-alarm-clock v-else-if="name === 'stopwatch'" class="h-6 w-6" />
   <i-ic-baseline-file-download v-else-if="name === 'auto-scroll'" class="h-6 w-6" />
   <i-ic-baseline-file-download-off v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
+  <i-ic-baseline-play-arrow v-else-if="name === 'play'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -90,7 +91,8 @@ export type IconNames =
   | 'stopwatch'
   | 'download'
   | 'auto-scroll'
-  | 'auto-scroll-off';
+  | 'auto-scroll-off'
+  | 'play';
 
 export default defineComponent({
   name: 'Icon',
