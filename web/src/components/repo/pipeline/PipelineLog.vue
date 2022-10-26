@@ -128,7 +128,7 @@ export default defineComponent({
     const loadedLogs = computed(() => !!log.value);
     const hasLogs = computed(
       () =>
-        // we do not have logs for skipped jobs
+        // we do not have logs for skipped steps
         repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'killed',
     );
     const autoScroll = useStorage('log-auto-scroll', false);

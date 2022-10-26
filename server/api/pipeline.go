@@ -164,7 +164,7 @@ func GetPipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	// parse the pipeline number and job sequence number from
+	// parse the pipeline number and step sequence number from
 	// the request parameter.
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
@@ -200,7 +200,7 @@ func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	// parse the pipeline number and job sequence number from
+	// parse the pipeline number and step sequence number from
 	// the request parameter.
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	pid, _ := strconv.Atoi(c.Params.ByName("pid"))

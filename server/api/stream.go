@@ -141,10 +141,10 @@ func LogStreamSSE(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// // parse the pipeline number and job sequence number from
+	// // parse the pipeline number and step sequence number from
 	// // the repquest parameter.
 	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
-	jobn, _ := strconv.Atoi(c.Param("number"))
+	stepn, _ := strconv.Atoi(c.Param("number"))
 
 	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
 	if err != nil {
@@ -152,7 +152,7 @@ func LogStreamSSE(c *gin.Context) {
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
-	step, err := _store.StepFind(pipeline, jobn)
+	step, err := _store.StepFind(pipeline, stepn)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))

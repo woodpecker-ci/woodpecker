@@ -290,7 +290,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			},
 		},
 		Step: frontend.Step{
-			Number: c.Int("job-number"),
+			Number: c.Int("step-number"),
 			Matrix: axis,
 		},
 		Sys: frontend.System{

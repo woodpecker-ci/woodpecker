@@ -91,7 +91,7 @@ type Store interface {
 	GetPipelineQueue() ([]*model.Feed, error)
 	// GetPipelineCount gets a count of all pipelines in the system.
 	GetPipelineCount() (int64, error)
-	// CreatePipeline creates a new pipeline and jobs.
+	// CreatePipeline creates a new pipeline and steps.
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error

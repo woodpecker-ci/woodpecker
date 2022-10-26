@@ -39,7 +39,7 @@ type (
 		Repo Repo     `json:"repo,omitempty"`
 		Curr Pipeline `json:"curr,omitempty"`
 		Prev Pipeline `json:"prev,omitempty"`
-		Step Step     `json:"job,omitempty"`
+		Step Step     `json:"step,omitempty"`
 		Sys  System   `json:"sys,omitempty"`
 	}
 
@@ -171,10 +171,10 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
-		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_JOB_STATUS":   "", // will be set by agent
-		"CI_JOB_STARTED":  "", // will be set by agent
-		"CI_JOB_FINISHED": "", // will be set by agent
+		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
+		"CI_STEP_STATUS":   "", // will be set by agent
+		"CI_STEP_STARTED":  "", // will be set by agent
+		"CI_STEP_FINISHED": "", // will be set by agent
 
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
@@ -224,6 +224,11 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
+		// use CI_STEP_*
+		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
+		"CI_JOB_STATUS":   "", // will be set by agent
+		"CI_JOB_STARTED":  "", // will be set by agent
+		"CI_JOB_FINISHED": "", // will be set by agent
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

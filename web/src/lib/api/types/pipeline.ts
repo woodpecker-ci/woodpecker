@@ -79,8 +79,8 @@ export type Pipeline = {
 
   reviewed_at: number;
 
-  // The jobs associated with this pipeline.
-  // A pipeline will have multiple jobs if a matrix pipeline was used or if a rebuild was requested.
+  // The steps associated with this pipeline.
+  // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
   steps?: PipelineStep[];
 
   changed_files?: string[];

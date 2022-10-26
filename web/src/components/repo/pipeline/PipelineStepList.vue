@@ -84,26 +84,26 @@
           }"
         >
           <button
-            v-for="job in step.children"
-            :key="job.pid"
+            v-for="subStep in step.children"
+            :key="subStep.pid"
             type="button"
             class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
-              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === job.pid,
+              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === subStep.pid,
               'mt-1':
-                (pipeline.steps && pipeline.steps.length > 1) || (step.children && job.pid !== step.children[0].pid),
+                (pipeline.steps && pipeline.steps.length > 1) || (step.children && subStep.pid !== step.children[0].pid),
             }"
-            @click="$emit('update:selected-step-id', job.pid)"
+            @click="$emit('update:selected-step-id', subStep.pid)"
           >
-            <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
-            <div v-if="['pending', 'skipped'].includes(job.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
+            <div v-if="['success'].includes(subStep.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
+            <div v-if="['pending', 'skipped'].includes(subStep.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
             <div
-              v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(job.state)"
+              v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(subStep.state)"
               class="w-2 h-2 bg-red-400 rounded-full"
             />
-            <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
-            <span class="ml-2">{{ job.name }}</span>
-            <PipelineStepDuration :step="job" />
+            <div v-if="['started', 'running'].includes(subStep.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
+            <span class="ml-2">{{ subStep.name }}</span>
+            <PipelineStepDuration :step="subStep" />
           </button>
         </div>
       </div>
