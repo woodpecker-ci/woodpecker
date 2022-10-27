@@ -23,7 +23,7 @@ tasks:
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
-      WOODPECKER_MAX_STEPS: 1
+      WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server

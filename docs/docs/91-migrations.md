@@ -12,7 +12,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
-- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_STEPS` (still available as fallback)
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 
 ## 0.15.0
 

@@ -28,4 +28,4 @@ services:
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
       - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
-      - WOODPECKER_MAX_STEPS=2
+      - WOODPECKER_MAX_WORKFLOWS=2
