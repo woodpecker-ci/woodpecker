@@ -111,3 +111,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 
 	return nil
 }
+
+func (c *Container) IsPlugin() bool {
+	return len(c.Commands) == 0 && len(c.Command) == 0
+}
