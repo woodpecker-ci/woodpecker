@@ -18,109 +18,98 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: need tests before converting to builder statement
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	err := s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM
- pipelines p
-,repos r
-WHERE p.pipeline_repo_id = r.repo_id
-  AND p.pipeline_status IN ('pending','running')
-`).Find(&feed)
+	status := []string{"pending", "running"}
+	err := s.engine.Table("pipelines p").
+		Select(`
+	r.repo_owner,
+	r.repo_name,
+	r.repo_full_name,
+	p.pipeline_number,
+	p.pipeline_event,
+	p.pipeline_status,
+	p.pipeline_created,
+	p.pipeline_started,
+	p.pipeline_finished,
+	p.pipeline_commit,
+	p.pipeline_branch,
+	p.pipeline_ref,
+	p.pipeline_refspec,
+	p.pipeline_remote,
+	p.pipeline_title,
+	p.pipeline_message,
+	p.pipeline_author,
+	p.pipeline_email,
+	p.pipeline_avatar`).
+		Join("INNER", "repos r", "p.pipeline_repo_id = r.repo_id").
+		In("p.pipeline_status", status).
+		Find(&feed)
 	return feed, err
 }
 
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	return feed, s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM repos
-INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
-INNER JOIN pipelines ON pipelines.pipeline_repo_id = repos.repo_id
-WHERE perms.perm_user_id = ?
-  AND (perms.perm_push = ? OR perms.perm_admin = ?)
-ORDER BY pipeline_id DESC
-LIMIT 50
-`, user.ID, true, true).Find(&feed)
+	err := s.engine.Table("repos r").
+		Select(`
+	r.repo_owner,
+	r.repo_name,
+	r.repo_full_name,
+	pl.pipeline_number,
+	pl.pipeline_event,
+	pl.pipeline_status,
+	pl.pipeline_created,
+	pl.pipeline_started,
+	pl.pipeline_finished,
+	pl.pipeline_commit,
+	pl.pipeline_branch,
+	pl.pipeline_ref,
+	pl.pipeline_refspec,
+	pl.pipeline_remote,
+	pl.pipeline_title,
+	pl.pipeline_message,
+	pl.pipeline_author,
+	pl.pipeline_email,
+	pl.pipeline_avatar`).
+		Join("INNER", "perms pe", "r.repo_id = pe.perm_repo_id").
+		Join("INNER", "pipelines pl", "r.repo_id = pl.pipeline_repo_id").
+		Where("pe.perm_user_id = ? AND (pe.perm_push = ? OR pe.perm_admin = ?)", user.ID, true, true).
+		Desc("pl.pipeline_id").
+		Limit(50).
+		Find(&feed)
+
+	return feed, err
 }
 
 func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	return feed, s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM repos LEFT OUTER JOIN pipelines ON pipeline_id = (
-	SELECT pipeline_id FROM pipelines
-	WHERE pipelines.pipeline_repo_id = repos.repo_id
-	ORDER BY pipeline_id DESC
-	LIMIT 1
-)
-INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
-WHERE perms.perm_user_id = ?
-  AND (perms.perm_push = ? OR perms.perm_admin = ?)
-  AND repos.repo_active = ?
-ORDER BY repo_full_name ASC;
-`, user.ID, true, true, true).
+
+	err := s.engine.Table("repos r").
+		Select(`
+	r.repo_owner,
+	r.repo_name,
+	r.repo_full_name,
+	pl.pipeline_number,
+	pl.pipeline_event,
+	pl.pipeline_status,
+	pl.pipeline_created,
+	pl.pipeline_started,
+	pl.pipeline_finished,
+	pl.pipeline_commit,
+	pl.pipeline_branch,
+	pl.pipeline_ref,
+	pl.pipeline_refspec,
+	pl.pipeline_remote,
+	pl.pipeline_title,
+	pl.pipeline_message,
+	pl.pipeline_author,
+	pl.pipeline_email,
+	pl.pipeline_avatar`).
+		Join("LEFT", "pipelines pl", "pl.pipeline_id = (SELECT pipeline_id FROM pipelines WHERE pipelines.pipeline_repo_id = r.repo_id ORDER BY pipeline_id DESC LIMIT 1)").
+		Join("INNER", "perms pe", "r.repo_id = pe.perm_repo_id").
+		Where("pe.perm_user_id = ? AND (pe.perm_push = ? OR pe.perm_admin = ?) AND r.repo_active = ?", user.ID, true, true, true).
+		Asc("r.repo_full_name").
 		Find(&feed)
+
+	return feed, err
 }
