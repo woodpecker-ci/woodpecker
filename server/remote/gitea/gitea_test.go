@@ -16,15 +16,12 @@
 package gitea
 
 import (
-	"bytes"
 	"context"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
@@ -157,20 +154,6 @@ func Test_gitea(t *testing.T) {
 			g.It("Should return push details")
 			g.It("Should handle a parsing error")
 		})
-
-		g.It("Given a PR hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := c.Hook(context.WithValue(ctx, "user-debug", &model.User{}), req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
-		})
-
 	})
 }
 

@@ -33,7 +33,6 @@ func Handler() http.Handler {
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
-	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
 
@@ -117,11 +116,7 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.18"})
-}
-
-func getPRFiles(c *gin.Context) {
-	c.String(200, prFilesPayload)
+	c.JSON(200, map[string]interface{}{"version": "1.12"})
 }
 
 const listRepoHookPayloads = `
@@ -177,21 +172,6 @@ const userRepoPayload = `
       "push": true,
       "pull": true
     }
-  }
-]
-`
-
-const prFilesPayload = `
-[
-  {
-    "filename": "README.md",
-    "status": "changed",
-    "additions": 2,
-    "deletions": 0,
-    "changes": 2,
-    "html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
-    "contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
-    "raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
   }
 ]
 `

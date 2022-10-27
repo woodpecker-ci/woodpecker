@@ -40,18 +40,6 @@ func Test_parser(t *testing.T) {
 			g.Assert(b).IsNil()
 			g.Assert(err).IsNil()
 		})
-		g.It("given a PR hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
-		})
 		g.Describe("given a push hook", func() {
 			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
