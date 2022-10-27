@@ -198,6 +198,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(droneEnv),
+		compiler.WithCacheConfig(false, ""),
 	).Compile(conf)
 	if err != nil {
 		return err

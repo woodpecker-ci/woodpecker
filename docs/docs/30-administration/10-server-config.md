@@ -316,6 +316,16 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
+### `WOODPECKER_ENABLE_CACHE`
+> Default: `false`
+
+Enable file cache for pipelines. Requires `WOODPECKER_CACHE_FILES` to be set.
+
+### `WOODPECKER_CACHE_FILES`
+> Default: empty
+
+Path to store cached files.
+
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`

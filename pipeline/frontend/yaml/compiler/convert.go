@@ -48,6 +48,15 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		volumes = append(volumes, volume.String())
 	}
 
+	if c.enableCache {
+		for _, cache := range container.Caches.Caches {
+			strCache := cache.String(c.cacheBase, c.path)
+			if strCache != "" {
+				volumes = append(volumes, strCache)
+			}
+		}
+	}
+
 	// append default environment variables
 	environment := map[string]string{}
 	for k, v := range container.Environment {

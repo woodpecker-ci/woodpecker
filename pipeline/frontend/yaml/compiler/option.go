@@ -219,6 +219,13 @@ func WithDefaultCloneImage(cloneImage string) Option {
 	}
 }
 
+func WithCacheConfig(enable bool, path string) Option {
+	return func(compiler *Compiler) {
+		compiler.enableCache = enable
+		compiler.cacheBase = path
+	}
+}
+
 // TODO(bradrydzewski) consider an alternate approach to
 // WithProxy where the proxy strings are passed directly
 // to the function as named parameters.

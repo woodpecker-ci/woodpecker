@@ -1,0 +1,89 @@
+package types
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/rs/zerolog/log"
+)
+
+// FileCaches represents a list of service volumes in compose file.
+// It has several representation, hence this specific struct.
+type FileCaches struct {
+	Caches []*FileCache
+}
+
+// FileCache represent a file-based cache
+type FileCache struct {
+	Name        string `yaml:"-"`
+	Destination string `yaml:"-"`
+}
+
+// String implements the Stringer interface.
+func (v *FileCache) String(basePath, repoBase string) string {
+	hostPath := v.HostCachePath(basePath, repoBase)
+	if hostPath == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s:%s", hostPath, v.Destination)
+}
+
+func (v *FileCache) HostCachePath(basePath, repoBase string) string {
+	path := filepath.Join(basePath, repoBase, escapeCacheName(v.Name))
+	err := os.MkdirAll(path, 0o750)
+	if err != nil {
+		log.Error().Err(err).Msgf("could not path %s for file caching", path)
+		return ""
+	}
+	return path
+}
+
+func escapeCacheName(path string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(path, ".", "_"), "/", "_")
+}
+
+// MarshalYAML implements the Marshaller interface.
+func (v FileCaches) MarshalYAML() (interface{}, error) {
+	var vs []string
+	for _, volume := range v.Caches {
+		vs = append(vs, volume.String("", ""))
+	}
+	return vs, nil
+}
+
+// UnmarshalYAML implements the Unmarshaler interface.
+func (v *FileCaches) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var sliceType []interface{}
+	if err := unmarshal(&sliceType); err == nil {
+		v.Caches = []*FileCache{}
+		for _, volume := range sliceType {
+			name, ok := volume.(string)
+			if !ok {
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
+			}
+			elts := strings.SplitN(name, ":", 2)
+			var vol *FileCache
+			switch {
+			case len(elts) == 1:
+				vol = &FileCache{
+					Destination: elts[0],
+				}
+			case len(elts) == 2:
+				vol = &FileCache{
+					Name:        elts[0],
+					Destination: elts[1],
+				}
+			default:
+				// FIXME
+				return fmt.Errorf("")
+			}
+			v.Caches = append(v.Caches, vol)
+		}
+		return nil
+	}
+
+	return errors.New("failed to unmarshal FileCaches")
+}

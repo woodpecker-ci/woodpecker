@@ -206,6 +206,23 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 For more details check the [secrets docs](./40-secrets.md).
 
+### `caches`
+
+Woodpecker gives the ability to define caches as Docker volumes in the YAML. You can use this parameter to mount files or folders into your containers that will persist between pipelines.
+
+Caches are defined by using a name, a colon and the path inside the container.
+
+```diff
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    caches:
++      - cache_name:/root/path/in/container
++      - cache_2:/root/second/cache/path/in/container
+```
+
 ### `when` - Conditional Execution
 
 Woodpecker supports defining a list of conditions for a pipeline step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:

@@ -206,6 +206,18 @@ var flags = []cli.Flag{
 		Usage:   "status context format",
 		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENABLE_CACHE"},
+		Name:    "enable-cache",
+		Usage:   "enable cache for pipelines",
+		Value:   false,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CACHE_FILES"},
+		Name:    "cache-files",
+		Usage:   "where to store cached files from pipelines",
+		Value:   "",
+	},
 	//
 	// resource limit parameters
 	//

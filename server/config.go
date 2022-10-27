@@ -80,6 +80,8 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		EnableCache                         bool
+		CacheBasePath                       string
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

@@ -57,6 +57,7 @@ type (
 		ShmSize       types.MemStringorInt   `yaml:"shm_size,omitempty"`
 		Ulimits       types.Ulimits          `yaml:"ulimits,omitempty"`
 		Volumes       types.Volumes          `yaml:"volumes,omitempty"`
+		Caches        types.FileCaches       `yaml:"caches,omitempty"`
 		Secrets       Secrets                `yaml:"secrets,omitempty"`
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
 		When          constraint.When        `yaml:"when,omitempty"`

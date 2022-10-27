@@ -70,6 +70,8 @@ type Compiler struct {
 	escalated         []string
 	prefix            string
 	volumes           []string
+	enableCache       bool
+	cacheBase         string
 	networks          []string
 	env               map[string]string
 	cloneEnv          map[string]string

@@ -324,6 +324,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// TODO(485) temporary workaround to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
+
+	// cache
+	server.Config.Pipeline.EnableCache = c.Bool("enable-cache") && c.String("cache-files") != ""
+	server.Config.Pipeline.CacheBasePath = c.String("cache-files")
 }
 
 type authorizer struct {
