@@ -20,15 +20,15 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
+func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*pipeline.PipelineItem, error) {
 	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
@@ -64,7 +64,7 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 		envs[k] = v
 	}
 
-	b := shared.ProcBuilder{
+	b := pipeline.ProcBuilder{
 		Repo:  repo,
 		Curr:  pipeline,
 		Last:  last,
@@ -77,14 +77,14 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {
-		pipeline, uerr := shared.UpdateToStatusError(store, *pipeline, err)
+		pipeline, uerr := UpdateToStatusError(store, *pipeline, err)
 		if uerr != nil {
 			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, pipeline.Number)
 		}
 		return pipeline, nil, err
 	}
 
-	pipeline = shared.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
+	pipeline = pipeline.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
 
 	return pipeline, pipelineItems, nil
 }

@@ -24,7 +24,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -60,7 +59,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	)
 
 	// fetch the pipeline file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := remote.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	remoteYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, remoteYamlConfigs)

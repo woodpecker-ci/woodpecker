@@ -18,16 +18,14 @@ package pipeline
 
 import (
 	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
 func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := shared.ProcBuilder{
+	b := pipeline.ProcBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},

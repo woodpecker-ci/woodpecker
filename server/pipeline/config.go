@@ -20,7 +20,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -32,7 +31,7 @@ func findOrPersistPipelineConfig(store store.Store, pipeline *model.Pipeline, re
 			RepoID: pipeline.RepoID,
 			Data:   remoteYamlConfig.Data,
 			Hash:   sha,
-			Name:   shared.SanitizePath(remoteYamlConfig.Name),
+			Name:   pipeline.SanitizePath(remoteYamlConfig.Name),
 		}
 		err = store.ConfigCreate(conf)
 		if err != nil {

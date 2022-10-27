@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"fmt"
@@ -22,8 +22,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
-
-// TODO(974) move to pipeline/*
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()

@@ -26,6 +26,7 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 
 	"github.com/prometheus/client_golang/prometheus"
 	grpcMetadata "google.golang.org/grpc/metadata"
@@ -37,7 +38,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -134,7 +134,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if _, err = shared.UpdateProcStatus(s.store, *proc, state, pipeline.Started); err != nil {
+	if _, err = pipeline.UpdateProcStatus(s.store, *proc, state, pipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update proc")
 	}
 
@@ -268,7 +268,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	if pipeline.Status == model.StatusPending {
-		if pipeline, err = shared.UpdateToStatusRunning(s.store, *pipeline, state.Started); err != nil {
+		if pipeline, err = pipeline.UpdateToStatusRunning(s.store, *pipeline, state.Started); err != nil {
 			log.Error().Msgf("error: init: cannot update build_id %d state: %s", pipeline.ID, err)
 		}
 	}
@@ -290,7 +290,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}()
 
-	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
+	_, err = pipeline.UpdateProcToStatusStarted(s.store, *proc, state)
 	return err
 }
 
@@ -325,7 +325,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		Str("proc_id", id).
 		Msgf("gRPC Done with state: %#v", state)
 
-	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
+	if proc, err = pipeline.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
 		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 	}
 
@@ -346,7 +346,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(procs, proc)
 
 	if !model.IsThereRunningStage(procs) {
-		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(procs), proc.Stopped); err != nil {
+		if pipeline, err = pipeline.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(procs), proc.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", pipeline.ID)
 		}
 	}
@@ -385,7 +385,7 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
 	for _, p := range procs {
 		if p.Running() && p.PPID == completedProc.PID {
-			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
+			if _, err := pipeline.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
 				log.Error().Msgf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
 			}
 		}

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package remote
 
 import (
 	"context"
@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -33,7 +32,7 @@ type UserSyncer interface {
 }
 
 type Syncer struct {
-	Remote remote.Remote
+	Remote Remote
 	Store  store.Store
 	Perms  model.PermStore
 	Match  FilterFunc

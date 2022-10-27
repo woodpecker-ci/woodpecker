@@ -23,11 +23,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -54,11 +52,11 @@ func GetFeed(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
+		sync := remote.Syncer{
 			Remote: remote,
 			Store:  _store,
 			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Match:  remote.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
@@ -103,11 +101,11 @@ func GetRepos(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
+		sync := remote.Syncer{
 			Remote: remote,
 			Store:  _store,
 			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Match:  remote.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {

@@ -22,7 +22,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -41,7 +40,7 @@ func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, ErrNotFound{Msg: msg}
 	}
 
-	if pipeline, err = shared.UpdateToStatusPending(store, *pipeline, user.Login); err != nil {
+	if pipeline, err = UpdateToStatusPending(store, *pipeline, user.Login); err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 

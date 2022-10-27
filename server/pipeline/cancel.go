@@ -23,7 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -74,18 +73,18 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 	for _, proc := range procs {
 		if proc.State == model.StatusPending {
 			if proc.PPID != 0 {
-				if _, err = shared.UpdateProcToStatusSkipped(store, *proc, 0); err != nil {
+				if _, err = UpdateProcToStatusSkipped(store, *proc, 0); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			} else {
-				if _, err = shared.UpdateProcToStatusKilled(store, *proc); err != nil {
+				if _, err = UpdateProcToStatusKilled(store, *proc); err != nil {
 					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(store, *pipeline)
+	killedBuild, err := UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
