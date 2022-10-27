@@ -47,7 +47,7 @@ type (
 	Repo struct {
 		Name    string   `json:"name,omitempty"`
 		Link    string   `json:"link,omitempty"`
-		Remote  string   `json:"remote,omitempty"`
+		Forge   string   `json:"remote,omitempty"`
 		Private bool     `json:"private,omitempty"`
 		Secrets []Secret `json:"secrets,omitempty"`
 		Branch  string   `json:"default_branch,omitempty"`
@@ -142,7 +142,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_LINK":           m.Repo.Link,
-		"CI_REPO_REMOTE":         m.Repo.Remote,
+		"CI_REPO_REMOTE":         m.Repo.Forge,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?

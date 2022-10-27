@@ -38,7 +38,7 @@ func GetSelf(c *gin.Context) {
 
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	remote := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -87,7 +87,7 @@ func GetFeed(c *gin.Context) {
 
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	remote := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))

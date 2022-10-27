@@ -196,21 +196,21 @@ func TestUsers(t *testing.T) {
 				Name:     "test",
 				FullName: "bradrydzewski/test",
 				IsActive: true,
-				RemoteID: "1",
+				ForgeID:  "1",
 			}
 			repo2 := &model.Repo{
 				Owner:    "test",
 				Name:     "test",
 				FullName: "test/test",
 				IsActive: true,
-				RemoteID: "2",
+				ForgeID:  "2",
 			}
 			repo3 := &model.Repo{
 				Owner:    "octocat",
 				Name:     "hello-world",
 				FullName: "octocat/hello-world",
 				IsActive: true,
-				RemoteID: "3",
+				ForgeID:  "3",
 			}
 			g.Assert(store.CreateRepo(repo1)).IsNil()
 			g.Assert(store.CreateRepo(repo2)).IsNil()

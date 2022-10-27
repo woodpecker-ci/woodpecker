@@ -32,17 +32,17 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 type RPC struct {
-	remote        remote.Remote
+	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        pubsub.Publisher
 	logger        logging.Log
@@ -399,7 +399,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline
 		return
 	}
 
-	if refresher, ok := s.remote.(remote.Refresher); ok {
+	if refresher, ok := s.forge.(forge.Refresher); ok {
 		ok, err := refresher.Refresh(ctx, user)
 		if err != nil {
 			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
@@ -412,7 +412,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline
 
 	// only do status updates for parent procs
 	if proc != nil && proc.IsParent() {
-		err = s.remote.Status(ctx, user, repo, pipeline, proc)
+		err = s.forge.Status(ctx, user, repo, pipeline, proc)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -33,7 +33,7 @@ type UserSyncer interface {
 }
 
 type Syncer struct {
-	Remote remote.Remote
+	Remote forge.Forge
 	Store  store.Store
 	Perms  model.PermStore
 	Match  FilterFunc

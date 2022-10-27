@@ -103,7 +103,7 @@ func TestWithMetadata(t *testing.T) {
 			Name:    "octocat/hello-world",
 			Private: true,
 			Link:    "https://github.com/octocat/hello-world",
-			Remote:  "https://github.com/octocat/hello-world.git",
+			Forge:   "https://github.com/octocat/hello-world.git",
 		},
 	}
 	compiler := New(
@@ -119,7 +119,7 @@ func TestWithMetadata(t *testing.T) {
 	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
 		t.Errorf("WithMetadata must set CI_REPO_LINK")
 	}
-	if compiler.env["CI_REPO_REMOTE"] != metadata.Repo.Remote {
+	if compiler.env["CI_REPO_REMOTE"] != metadata.Repo.Forge {
 		t.Errorf("WithMetadata must set CI_REPO_REMOTE")
 	}
 }

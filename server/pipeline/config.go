@@ -18,13 +18,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func findOrPersistPipelineConfig(store store.Store, pipeline *model.Pipeline, remoteYamlConfig *remote.FileMeta) (*model.Config, error) {
+func findOrPersistPipelineConfig(store store.Store, pipeline *model.Pipeline, remoteYamlConfig *forge.FileMeta) (*model.Config, error) {
 	sha := fmt.Sprintf("%x", sha256.Sum256(remoteYamlConfig.Data))
 	conf, err := store.ConfigFindIdentical(pipeline.RepoID, sha)
 	if err != nil {

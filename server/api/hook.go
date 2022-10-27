@@ -70,7 +70,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 // PostHook start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	remote := server.Config.Services.Forge
 
 	tmpRepo, tmpBuild, err := remote.Hook(c, c.Request)
 	if err != nil {
@@ -102,7 +102,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.RemoteID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeID, tmpRepo.FullName)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)

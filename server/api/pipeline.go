@@ -54,7 +54,7 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
 
 	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
 
