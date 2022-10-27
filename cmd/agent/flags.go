@@ -80,7 +80,7 @@ var flags = []cli.Flag{
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"},
-		Name:    "max-steps",
+		Name:    "max-workflows",
 		Usage:   "agent parallel workflows",
 		Value:   1,
 	},
