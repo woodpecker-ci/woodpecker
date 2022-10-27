@@ -260,7 +260,7 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NUMBER"},
+		EnvVars: []string{"CI_STEP_NUMBER", "CI_JOB_NUMBER"},
 		Name:    "step-number",
 	},
 	&cli.StringSliceFlag{

@@ -67,7 +67,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	meta, _ := metadata.FromOutgoingContext(ctx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
 
-	// get the next pipeline from the queue
+	// get the next workflow from the queue
 	work, err := r.client.Next(ctx, r.filter)
 	if err != nil {
 		return err
