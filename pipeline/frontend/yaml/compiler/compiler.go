@@ -185,9 +185,14 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
 			step := c.createProcess(name, container, defaultCloneName)
+
+			// only inject netrc to trusted plugins
+			// if container.IsPlugin() { // && match allowed clone plugins
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}
+			//}
+
 			stage.Steps = append(stage.Steps, step)
 
 			config.Stages = append(config.Stages, stage)
