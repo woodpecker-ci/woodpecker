@@ -66,19 +66,13 @@ func (v *FileCaches) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			}
 			elts := strings.SplitN(name, ":", 2)
 			var vol *FileCache
-			switch {
-			case len(elts) == 1:
-				vol = &FileCache{
-					Destination: elts[0],
-				}
-			case len(elts) == 2:
+			if len(elts) == 2 {
 				vol = &FileCache{
 					Name:        elts[0],
 					Destination: elts[1],
 				}
-			default:
-				// FIXME
-				return fmt.Errorf("")
+			} else {
+				return fmt.Errorf("cache must have a name and a destination")
 			}
 			v.Caches = append(v.Caches, vol)
 		}
