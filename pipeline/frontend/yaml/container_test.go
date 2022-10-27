@@ -3,6 +3,7 @@ package yaml
 import (
 	"testing"
 
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
@@ -300,4 +301,14 @@ func stringsToInterface(val ...string) []interface{} {
 		res[i] = val[i]
 	}
 	return res
+}
+
+func TestIsPlugin(t *testing.T) {
+	assert.True(t, (&Container{}).IsPlugin())
+	assert.True(t, (&Container{
+		Commands: types.Stringorslice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
 }

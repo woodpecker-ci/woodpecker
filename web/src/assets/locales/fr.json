@@ -25,12 +25,16 @@
       "settings": "Réglages"
     }
   },
+  "back": "Revenir en arrière",
+  "color_scheme_dark": "Basculer en couleurs claires",
+  "color_scheme_light": "Basculer en couleurs sombres",
   "docs": "Docs",
+  "documentation_for": "Documentation sur \"{topic}\"",
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
     "back_home": "Retour à l'accueil",
-    "not_found": "Whoa 404, soit nous avons cassé quelque chose ou vous avez fait une faute de frappe :-/"
+    "not_found": "Whoa 404, soit nous avons cassé quelque chose, soit vous avez fait une faute de frappe :-/"
   },
   "org": {
     "settings": {
@@ -109,6 +113,17 @@
       "reload": "Actualiser les dépôts",
       "success": "Dépôt activé"
     },
+    "manual_pipeline": {
+      "select_branch": "Sélectionner une branche",
+      "title": "Déclencher manuellement une exécution de pipeline",
+      "trigger": "Exécuter un pipeline",
+      "variables": {
+        "add": "Ajouter une variable",
+        "name": "Nom de la variable",
+        "title": "Variables de pipeline supplémentaire",
+        "value": "Valeur de la variable"
+      }
+    },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
     "pipeline": {
       "actions": {
@@ -124,8 +139,9 @@
       "config": "Configuration",
       "created": "Crée",
       "event": {
-        "cron": "Tache périodique",
+        "cron": "Tâche périodique",
         "deploy": "Déploiement",
+        "manual": "Manuel",
         "pr": "Pull Request",
         "push": "Push",
         "tag": "Tag"
@@ -170,7 +186,12 @@
       },
       "badge": {
         "badge": "Badge",
+        "branch": "Branche",
         "markdown": "Markdown",
+        "type": "Syntaxe",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL",
         "url_branch": "URL pour la branche spécifique"
       },
       "crons": {
@@ -181,8 +202,10 @@
         },
         "created": "Tâche planifiée crée",
         "crons": "Tâches planifiées",
+        "delete": "Effacer la tâche planifiée",
         "deleted": "Tâche planifiée effacée",
         "desc": "Les tâches planifiées peuvent déclencher des pipelines à intervalles réguliers.",
+        "edit": "Modifier la tâche planifiée",
         "name": {
           "name": "Nom",
           "placeholder": "Nom de la tache périodique"
@@ -253,8 +276,10 @@
         },
         "created": "Authentifiant de registre crée",
         "creds": "Authentifiants de connexion pour le registre",
+        "delete": "Effacer le registre",
         "deleted": "Authentifiant de registre effacé",
         "desc": "Des authentifiant de connexion pour les registres peuvent être ajouter pour permettre d'utiliser des images privés pour vos pipelines.",
+        "edit": "Modifier le registre",
         "none": "Il n'y a pas d’authentifiant de connexion de registre pour le moment.",
         "registries": "Registres",
         "save": "Enregistrer le registre",
@@ -264,8 +289,10 @@
       "secrets": {
         "add": "Ajouter un secret",
         "created": "Secret crée",
+        "delete": "Effacer le secret",
         "deleted": "Secret effacé",
         "desc": "Secrets qui peuvent être passé comme variable d'environnement à l’exécution d'une étape individuelle d'un pipeline.",
+        "edit": "Modifier le secret",
         "events": {
           "events": "Disponible pour les événements suivants"
         },
@@ -305,6 +332,7 @@
     "dl_cli": "Télécharger l'interface en ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
+    "settings": "Profil personnel",
     "shell_setup": "Utilisation avec un shell",
     "shell_setup_before": "faites la mise en place dans le shell avant",
     "token": "Votre jeton personnel"

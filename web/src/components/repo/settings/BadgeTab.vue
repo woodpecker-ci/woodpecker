@@ -25,16 +25,10 @@
           },
         ]"
         required
-        class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
       />
     </InputField>
     <InputField :label="$t('repo.settings.badge.branch')">
-      <SelectField
-        v-model="branch"
-        :options="branches"
-        required
-        class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400"
-      />
+      <SelectField v-model="branch" :options="branches" required />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">

@@ -46,7 +46,7 @@
         :title="$t('user.settings')"
         class="navbar-icon navbar-clickable !p-1.5"
       >
-        <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
+        <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </NavbarIcon>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />

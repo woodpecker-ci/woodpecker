@@ -33,6 +33,7 @@ declare module '@vue/runtime-core' {
     IIcBaselineFileDownload: typeof import('~icons/ic/baseline-file-download')['default']
     IIcBaselineFileDownloadOff: typeof import('~icons/ic/baseline-file-download-off')['default']
     IIcBaselineHealing: typeof import('~icons/ic/baseline-healing')['default']
+    IIcBaselinePlayArrow: typeof import('~icons/ic/baseline-play-arrow')['default']
     IIconoirArrowLeft: typeof import('~icons/iconoir/arrow-left')['default']
     IIconParkOutlineAlarmClock: typeof import('~icons/icon-park-outline/alarm-clock')['default']
     IIcRoundLightMode: typeof import('~icons/ic/round-light-mode')['default']
