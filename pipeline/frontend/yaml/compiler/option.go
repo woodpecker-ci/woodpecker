@@ -219,6 +219,13 @@ func WithDefaultCloneImage(cloneImage string) Option {
 	}
 }
 
+// WithTrusted configures the compiler with the trusted repo option
+func WithTrusted(trusted bool) Option {
+	return func(compiler *Compiler) {
+		compiler.trustedPipeline = trusted
+	}
+}
+
 // TODO(bradrydzewski) consider an alternate approach to
 // WithProxy where the proxy strings are passed directly
 // to the function as named parameters.

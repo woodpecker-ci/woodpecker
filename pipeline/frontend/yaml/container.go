@@ -3,6 +3,8 @@ package yaml
 import (
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
@@ -114,4 +116,8 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 && len(c.Command) == 0
+}
+
+func (c *Container) IsTrusted() bool {
+	return c.IsPlugin() && utils.SliceContainsString(constant.TrustedCloneImages, c.Image)
 }

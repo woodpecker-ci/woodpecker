@@ -25,3 +25,7 @@ var PrivilegedPlugins = []string{
 const (
 	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.6.0"
 )
+
+var TrustedCloneImages = []string{
+	DefaultCloneImage,
+}
