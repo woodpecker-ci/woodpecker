@@ -6,7 +6,7 @@
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
           <Icon v-if="pipeline.event === 'cron'" name="stopwatch" />
-          <img v-else class="w-6" :src="pipeline.author_avatar" />
+          <img v-else class="rounded-md w-6" :src="pipeline.author_avatar" />
         </div>
         <span>{{ pipeline.author }}</span>
       </div>
@@ -64,15 +64,16 @@
           <button
             v-if="pipeline.procs && pipeline.procs.length > 1"
             type="button"
-            class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+            :title="proc.name"
+            class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
             @click="procsCollapsed[proc.id] = !!!procsCollapsed[proc.id]"
           >
             <Icon
               name="chevron-right"
-              class="transition-transform duration-150 mr-2"
+              class="transition-transform duration-150 min-w-6 h-6"
               :class="{ 'transform rotate-90': !procsCollapsed[proc.id] }"
             />
-            {{ proc.name }}
+            <span class="truncate">{{ proc.name }}</span>
           </button>
         </div>
         <div
@@ -87,7 +88,8 @@
             v-for="job in proc.children"
             :key="job.pid"
             type="button"
-            class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+            :title="job.name"
+            class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
               'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedProcId && selectedProcId === job.pid,
               'mt-1':
@@ -95,14 +97,16 @@
             }"
             @click="$emit('update:selected-proc-id', job.pid)"
           >
-            <div v-if="['success'].includes(job.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
-            <div v-if="['pending', 'skipped'].includes(job.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
             <div
-              v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(job.state)"
-              class="w-2 h-2 bg-red-400 rounded-full"
+              class="min-w-2 h-2 rounded-full"
+              :class="{
+                'bg-lime-400': ['success'].includes(job.state),
+                'bg-gray-400': ['pending', 'skipped'].includes(job.state),
+                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(job.state),
+                'bg-blue-400': ['started', 'running'].includes(job.state),
+              }"
             />
-            <div v-if="['started', 'running'].includes(job.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
-            <span class="ml-2">{{ job.name }}</span>
+            <span class="truncate">{{ job.name }}</span>
             <PipelineProcDuration :proc="job" />
           </button>
         </div>

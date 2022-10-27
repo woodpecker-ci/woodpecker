@@ -65,11 +65,12 @@ func PostOrgSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		Owner:  owner,
-		Name:   in.Name,
-		Value:  in.Value,
-		Events: in.Events,
-		Images: in.Images,
+		Owner:       owner,
+		Name:        in.Name,
+		Value:       in.Value,
+		Events:      in.Events,
+		Images:      in.Images,
+		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error inserting org %q secret. %s", owner, err)
@@ -110,6 +111,7 @@ func PatchOrgSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
+	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error updating org %q secret. %s", owner, err)
