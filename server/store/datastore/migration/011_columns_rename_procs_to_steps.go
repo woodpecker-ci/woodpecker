@@ -21,50 +21,41 @@ import (
 )
 
 var renameTableProcsToSteps = task{
-	name:     "rename-table-procs-to-steps",
+	name:     "rename-procs-to-steps",
 	required: true,
 	fn: func(sess *xorm.Session) error {
 		err := renameTable(sess, "procs", "steps")
 		if err != nil {
 			return err
 		}
-		return nil
-	},
-}
 
-var renameColumnsProcsToSteps = task{
-	name:     "rename-columns-procs-to-steps",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		var oldColumns []*oldTable
-
-		oldColumns = append(oldColumns, &oldTable{
-			table: "steps",
-			columns: []string{
-				"proc_id",
-				"proc_pipeline_id",
-				"proc_pid",
-				"proc_ppid",
-				"proc_pgid",
-				"proc_name",
-				"proc_state",
-				"proc_error",
-				"proc_exit_code",
-				"proc_started",
-				"proc_stopped",
-				"proc_machine",
-				"proc_platform",
-				"proc_environ",
+		oldProcColumns := []*oldTable{
+			{
+				table: "steps",
+				columns: []string{
+					"proc_id",
+					"proc_pipeline_id",
+					"proc_pid",
+					"proc_ppid",
+					"proc_pgid",
+					"proc_name",
+					"proc_state",
+					"proc_error",
+					"proc_exit_code",
+					"proc_started",
+					"proc_stopped",
+					"proc_machine",
+					"proc_platform",
+					"proc_environ",
+				},
 			},
-		},
-		)
+			{
+				table:   "files",
+				columns: []string{"file_proc_id"},
+			},
+		}
 
-		oldColumns = append(oldColumns, &oldTable{
-			table:   "files",
-			columns: []string{"file_proc_id"},
-		})
-
-		for _, table := range oldColumns {
+		for _, table := range oldProcColumns {
 			for _, column := range table.columns {
 				err := renameColumn(sess, table.table, column, strings.Replace(column, "proc_", "step_", 1))
 				if err != nil {
@@ -73,25 +64,16 @@ var renameColumnsProcsToSteps = task{
 			}
 		}
 
-		return nil
-	},
-}
-
-var renameColumnsJobsToSteps = task{
-	name:     "rename-columns-jobs-to-steps",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		var oldColumns []*oldTable
-
-		oldColumns = append(oldColumns, &oldTable{
-			table: "logs",
-			columns: []string{
-				"log_job_id",
+		oldJobColumns := []*oldTable{
+			{
+				table: "logs",
+				columns: []string{
+					"log_job_id",
+				},
 			},
-		},
-		)
+		}
 
-		for _, table := range oldColumns {
+		for _, table := range oldJobColumns {
 			for _, column := range table.columns {
 				err := renameColumn(sess, table.table, column, strings.Replace(column, "job_", "step_", 1))
 				if err != nil {
