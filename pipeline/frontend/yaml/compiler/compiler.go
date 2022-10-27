@@ -35,9 +35,14 @@ type Registry struct {
 }
 
 type Secret struct {
-	Name  string
-	Value string
-	Match []string
+	Name       string
+	Value      string
+	Match      []string
+	PluginOnly bool
+}
+
+func (s *Secret) Available(container *yaml.Container) bool {
+	return (len(s.Match) == 0 || matchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
 }
 
 type secretMap map[string]Secret

@@ -64,15 +64,16 @@
           <button
             v-if="pipeline.steps && pipeline.steps.length > 1"
             type="button"
-            class="flex items-center py-2 pl-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+            :title="step.name"
+            class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
             @click="stepsCollapsed[step.id] = !!!stepsCollapsed[step.id]"
           >
             <Icon
               name="chevron-right"
-              class="transition-transform duration-150 mr-2"
+              class="transition-transform duration-150 min-w-6 h-6"
               :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
             />
-            {{ step.name }}
+            <span class="truncate">{{ step.name }}</span>
           </button>
         </div>
         <div
@@ -87,7 +88,8 @@
             v-for="subStep in step.children"
             :key="subStep.pid"
             type="button"
-            class="flex p-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+            :title="subStep.name"
+            class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
               'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5':
                 selectedStepId && selectedStepId === subStep.pid,
@@ -97,14 +99,16 @@
             }"
             @click="$emit('update:selected-step-id', subStep.pid)"
           >
-            <div v-if="['success'].includes(subStep.state)" class="w-2 h-2 bg-lime-400 rounded-full" />
-            <div v-if="['pending', 'skipped'].includes(subStep.state)" class="w-2 h-2 bg-gray-400 rounded-full" />
             <div
-              v-if="['killed', 'error', 'failure', 'blocked', 'declined'].includes(subStep.state)"
-              class="w-2 h-2 bg-red-400 rounded-full"
+              class="min-w-2 h-2 rounded-full"
+              :class="{
+                'bg-lime-400': ['success'].includes(subStep.state),
+                'bg-gray-400': ['pending', 'skipped'].includes(subStep.state),
+                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(subStep.state),
+                'bg-blue-400': ['started', 'running'].includes(subStep.state),
+              }"
             />
-            <div v-if="['started', 'running'].includes(subStep.state)" class="w-2 h-2 bg-blue-400 rounded-full" />
-            <span class="ml-2">{{ subStep.name }}</span>
+            <span class="truncate">{{ subStep.name }}</span>
             <PipelineStepDuration :step="subStep" />
           </button>
         </div>

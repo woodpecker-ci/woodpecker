@@ -118,11 +118,12 @@ type (
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
-		ID     int64    `json:"id"`
-		Name   string   `json:"name"`
-		Value  string   `json:"value,omitempty"`
-		Images []string `json:"image"`
-		Events []string `json:"event"`
+		ID          int64    `json:"id"`
+		Name        string   `json:"name"`
+		Value       string   `json:"value,omitempty"`
+		Images      []string `json:"image"`
+		PluginsOnly bool     `json:"plugins_only"`
+		Events      []string `json:"event"`
 	}
 
 	// Activity represents an item in the user's feed or timeline.

@@ -244,9 +244,10 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 			continue
 		}
 		secrets = append(secrets, compiler.Secret{
-			Name:  sec.Name,
-			Value: sec.Value,
-			Match: sec.Images,
+			Name:       sec.Name,
+			Value:      sec.Value,
+			Match:      sec.Images,
+			PluginOnly: sec.PluginsOnly,
 		})
 	}
 
