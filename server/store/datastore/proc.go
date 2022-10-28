@@ -45,7 +45,7 @@ func (s storage) ProcChild(pipeline *model.Pipeline, ppid int, child string) (*m
 func (s storage) ProcList(pipeline *model.Pipeline) ([]*model.Proc, error) {
 	procList := make([]*model.Proc, 0, perPage)
 	return procList, s.engine.
-		Where("proc_build_id = ?", pipeline.ID).
+		Where("proc_pipeline_id = ?", pipeline.ID).
 		OrderBy("proc_pid").
 		Find(&procList)
 }
@@ -79,11 +79,11 @@ func (s storage) ProcClear(pipeline *model.Pipeline) error {
 		return err
 	}
 
-	if _, err := sess.Where("file_build_id = ?", pipeline.ID).Delete(new(model.File)); err != nil {
+	if _, err := sess.Where("file_pipeline_id = ?", pipeline.ID).Delete(new(model.File)); err != nil {
 		return err
 	}
 
-	if _, err := sess.Where("proc_build_id = ?", pipeline.ID).Delete(new(model.Proc)); err != nil {
+	if _, err := sess.Where("proc_pipeline_id = ?", pipeline.ID).Delete(new(model.Proc)); err != nil {
 		return err
 	}
 
