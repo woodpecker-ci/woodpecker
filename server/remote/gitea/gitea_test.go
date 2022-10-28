@@ -24,15 +24,19 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
 )
 
 func Test_gitea(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	mock_store := mocks_store.NewStore(t)
 	s := httptest.NewServer(fixtures.Handler())
 	c, _ := New(Opts{
 		URL:        s.URL,
@@ -163,14 +167,17 @@ func Test_gitea(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := c.Hook(context.WithValue(ctx, "user-debug", &model.User{}), req)
+			hookCtx := store.InjectToContext(context.WithValue(ctx, "user-debug", &model.User{}), mock_store)
+			mock_store.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(&model.Repo{UserID: 3, Owner: "gordon", Name: "hello-world"}, nil)
+			mock_store.On("GetUser", mock.Anything).Return(&model.User{Token: "123"}, nil)
+
+			r, b, err := c.Hook(hookCtx, req)
 			g.Assert(r).IsNotNil()
 			g.Assert(b).IsNotNil()
 			g.Assert(err).IsNil()
 			g.Assert(b.Event).Equal(model.EventPull)
 			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
 		})
-
 	})
 }
 

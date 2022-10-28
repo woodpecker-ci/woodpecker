@@ -120,11 +120,16 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.18"})
+	c.JSON(200, map[string]interface{}{"version": "1.18.0"})
 }
 
 func getPRFiles(c *gin.Context) {
-	c.String(200, prFilesPayload)
+	page := c.Query("page")
+	if page == "1" {
+		c.String(200, prFilesPayload)
+	} else {
+		c.String(200, "[]")
+	}
 }
 
 const listRepoHookPayloads = `
