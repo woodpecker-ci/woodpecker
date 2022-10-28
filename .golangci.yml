@@ -41,3 +41,4 @@ issues:
     - path: server/store/context.go
       linters:
         - staticcheck
+        - revive
