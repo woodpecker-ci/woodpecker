@@ -1,16 +1,19 @@
 <template>
-  <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" :title="$t('back')" @click="goBack" />
-      <h1 class="text-xl ml-2 text-color">{{ $t('org.settings.settings') }}</h1>
-    </div>
+  <Scaffold enable-tabs :go-back="goBack">
+    <template #title>
+      <span>
+        <router-link :to="{ name: 'repos-owner', params: { repoOwner: org.name } }" class="hover:underline">
+          {{ org.name }}
+        </router-link>
+        /
+        {{ $t('org.settings.settings') }}
+      </span>
+    </template>
 
-    <Tabs>
-      <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
-        <OrgSecretsTab />
-      </Tab>
-    </Tabs>
-  </FluidContainer>
+    <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
+      <OrgSecretsTab />
+    </Tab>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -18,22 +21,16 @@ import { defineComponent, inject, onMounted, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
-import { OrgPermissions } from '~/lib/api/types';
+import { Org, OrgPermissions } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'OrgSettings',
 
   components: {
-    FluidContainer,
-    IconButton,
-    Tabs,
     Tab,
     OrgSecretsTab,
   },
@@ -48,6 +45,11 @@ export default defineComponent({
       throw new Error('Unexpected: "orgPermissions" should be provided at this place');
     }
 
+    const org = inject<Ref<Org>>('org');
+    if (!org) {
+      throw new Error('Unexpected: "org" should be provided at this place');
+    }
+
     onMounted(async () => {
       if (!orgPermissions.value.admin) {
         notifications.notify({ type: 'error', title: i18n.t('org.settings.not_allowed') });
@@ -56,6 +58,7 @@ export default defineComponent({
     });
 
     return {
+      org,
       goBack: useRouteBackOrDefault({ name: 'repos-owner' }),
     };
   },

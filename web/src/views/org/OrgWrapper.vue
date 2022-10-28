@@ -1,20 +1,20 @@
 <template>
-  <FluidContainer v-if="org && orgPermissions && $route.meta.orgHeader">
-    <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
-      <h1 class="text-xl text-color w-full md:w-auto text-center mb-4 md:mb-0">
-        {{ org.name }}
-      </h1>
+  <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader">
+    <template #title>
+      {{ org.name }}
+    </template>
+
+    <template #titleActions>
       <IconButton
         v-if="orgPermissions.admin"
-        class="ml-2"
         :to="{ name: 'repo-settings' }"
         :title="$t('org.settings.settings')"
         icon="settings"
       />
-    </div>
+    </template>
 
     <router-view />
-  </FluidContainer>
+  </Scaffold>
   <router-view v-else-if="org && orgPermissions" />
 </template>
 
@@ -22,14 +22,14 @@
 import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Org, OrgPermissions } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'OrgWrapper',
 
-  components: { FluidContainer, IconButton },
+  components: { IconButton, Scaffold },
 
   props: {
     repoOwner: {

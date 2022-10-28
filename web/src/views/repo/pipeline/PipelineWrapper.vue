@@ -1,48 +1,34 @@
 <template>
   <template v-if="pipeline && repo">
-    <FluidContainer class="flex flex-col min-w-0 dark:border-gray-600">
-      <div class="flex mb-2 items-center <md:flex-wrap">
-        <IconButton icon="back" :title="$t('back')" class="flex-shrink-0" @click="goBack" />
+    <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
+      <template #title>
+        <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+        <span class="<md:hidden">-</span>
+        <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
+      </template>
 
-        <h1
-          class="order-3 w-full <md:flex-wrap md:order-none md:w-auto md:ml-2 flex text-center text-xl text-color whitespace-nowrap overflow-hidden overflow-ellipsis"
-        >
-          <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
-          <span class="<md:hidden mx-2">-</span>
-          <span class="w-full md:w-auto text-center truncate">{{ message }}</span>
-        </h1>
-
-        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0 ml-auto" />
+      <template #titleActions>
+        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0" />
 
         <template v-if="repoPermissions.push">
           <Button
             v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
-            class="ml-4 flex-shrink-0"
+            class="flex-shrink-0"
             :text="$t('repo.pipeline.actions.cancel')"
             :is-loading="isCancelingPipeline"
             @click="cancelPipeline"
           />
           <Button
             v-else-if="pipeline.status !== 'blocked' && pipeline.status !== 'declined'"
-            class="ml-4 flex-shrink-0"
+            class="flex-shrink-0"
             :text="$t('repo.pipeline.actions.restart')"
             :is-loading="isRestartingPipeline"
             @click="restartPipeline"
           />
         </template>
-      </div>
+      </template>
 
-      <div class="flex flex-wrap gap-y-2 items-center justify-between">
-        <Tabs v-model="activeTab" disable-hash-mode class="order-2 md:order-none">
-          <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
-          <Tab id="config" :title="$t('repo.pipeline.config')" />
-          <Tab
-            v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
-            id="changed-files"
-            :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
-          />
-        </Tabs>
-
+      <template #tabActions>
         <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
@@ -58,8 +44,16 @@
             <span>{{ duration }}</span>
           </div>
         </div>
-      </div>
-    </FluidContainer>
+      </template>
+
+      <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
+      <Tab id="config" :title="$t('repo.pipeline.config')" />
+      <Tab
+        v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
+        id="changed-files"
+        :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
+      />
+    </Scaffold>
 
     <router-view />
   </template>
@@ -72,11 +66,9 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
@@ -90,13 +82,11 @@ export default defineComponent({
   name: 'PipelineWrapper',
 
   components: {
-    FluidContainer,
     Button,
     PipelineStatusIcon,
-    IconButton,
-    Tabs,
     Tab,
     Tooltip,
+    Scaffold,
   },
 
   props: {
