@@ -1,16 +1,12 @@
 <template>
-  <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" :title="$t('back')" @click="goBack" />
-      <h1 class="text-xl ml-2 text-color">{{ $t('admin.settings.settings') }}</h1>
-    </div>
-
-    <Tabs>
-      <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
-        <AdminSecretsTab />
-      </Tab>
-    </Tabs>
-  </FluidContainer>
+  <Scaffold enable-tabs>
+    <template #title>
+      {{ $t('repo.settings.settings') }}
+    </template>
+    <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
+      <AdminSecretsTab />
+    </Tab>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -19,23 +15,18 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 
 export default defineComponent({
   name: 'AdminSettings',
 
   components: {
-    FluidContainer,
-    IconButton,
-    Tabs,
     Tab,
     AdminSecretsTab,
+    Scaffold,
   },
 
   setup() {
@@ -50,10 +41,6 @@ export default defineComponent({
         await router.replace({ name: 'home' });
       }
     });
-
-    return {
-      goBack: useRouteBackOrDefault({ name: 'home' }),
-    };
   },
 });
 </script>
