@@ -39,6 +39,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 const (
@@ -475,7 +476,23 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(r)
+	repo, pipeline, err := parseHook(r)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
+		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
+		if err != nil {
+			log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
+		}
+	}
+
+	return repo, pipeline, nil
 }
 
 // OrgMembership returns if user is member of organization and if user
@@ -539,4 +556,47 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 	default:
 		return gitea.StatusFailure
 	}
+}
+
+func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, index int64) ([]string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return []string{}, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.RemoteID, repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	if client.CheckServerVersionConstraint("1.18.0") != nil {
+		// version too low
+		log.Debug().Msg("Gitea version does not support getting changed files for PRs")
+		return []string{}, nil
+	}
+
+	return common.Paginate(func(page int) ([]string, error) {
+		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
+			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
+		if err != nil {
+			return nil, err
+		}
+
+		var files []string
+		for _, file := range giteaFiles {
+			files = append(files, file.Filename)
+		}
+		return files, nil
+	})
 }
