@@ -3,12 +3,12 @@ package yaml
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type (
