@@ -33,7 +33,7 @@ type Feed struct {
 	Branch   string `json:"branch,omitempty"        xorm:"pipeline_branch"`
 	Ref      string `json:"ref,omitempty"           xorm:"pipeline_ref"`
 	Refspec  string `json:"refspec,omitempty"       xorm:"pipeline_refspec"`
-	CloneURL string `json:"clone_url,omitempty"        xorm:"pipeline_remote"`
+	CloneURL string `json:"clone_url,omitempty"        xorm:"pipeline_clone_url"`
 	Title    string `json:"title,omitempty"         xorm:"pipeline_title"`
 	Message  string `json:"message,omitempty"       xorm:"pipeline_message"`
 	Author   string `json:"author,omitempty"        xorm:"pipeline_author"`

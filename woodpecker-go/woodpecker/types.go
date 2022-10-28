@@ -73,9 +73,9 @@ type (
 		Commit    string  `json:"commit"`
 		Branch    string  `json:"branch"`
 		Ref       string  `json:"ref"`
-		Refspec  string `json:"refspec"`
-		CloneURL string `json:"clone_url"`
-		Title    string `json:"title"`
+		Refspec   string  `json:"refspec"`
+		CloneURL  string  `json:"clone_url"`
+		Title     string  `json:"title"`
 		Message   string  `json:"message"`
 		Timestamp int64   `json:"timestamp"`
 		Sender    string  `json:"sender"`

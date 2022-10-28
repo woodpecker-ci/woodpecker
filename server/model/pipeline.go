@@ -36,7 +36,7 @@ type Pipeline struct {
 	Branch              string            `json:"branch"                  xorm:"pipeline_branch"`
 	Ref                 string            `json:"ref"                     xorm:"pipeline_ref"`
 	Refspec             string            `json:"refspec"                 xorm:"pipeline_refspec"`
-	CloneURL            string            `json:"clone_url"                  xorm:"pipeline_remote"`
+	CloneURL            string            `json:"clone_url"                  xorm:"pipeline_clone_url"`
 	Title               string            `json:"title"                   xorm:"pipeline_title"`
 	Message             string            `json:"message"                 xorm:"TEXT 'pipeline_message'"`
 	Timestamp           int64             `json:"timestamp"               xorm:"pipeline_timestamp"`

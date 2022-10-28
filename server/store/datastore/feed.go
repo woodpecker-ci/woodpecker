@@ -37,7 +37,7 @@ SELECT
 ,pipeline_branch
 ,pipeline_ref
 ,pipeline_refspec
-,pipeline_remote
+,pipeline_clone_url
 ,pipeline_title
 ,pipeline_message
 ,pipeline_author
@@ -70,7 +70,7 @@ SELECT
 ,pipeline_branch
 ,pipeline_ref
 ,pipeline_refspec
-,pipeline_remote
+,pipeline_clone_url
 ,pipeline_title
 ,pipeline_message
 ,pipeline_author
@@ -104,7 +104,7 @@ SELECT
 ,pipeline_branch
 ,pipeline_ref
 ,pipeline_refspec
-,pipeline_remote
+,pipeline_clone_url
 ,pipeline_title
 ,pipeline_message
 ,pipeline_author

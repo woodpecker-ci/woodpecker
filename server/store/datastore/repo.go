@@ -188,8 +188,8 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			}
 			if repos[i].ForgeID.IsValid() {
 				if _, err := sess.
-					Where("remote_id = ?", repos[i].ForgeID).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Where("forge_id = ?", repos[i].ForgeID).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
@@ -197,14 +197,14 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 				if _, err := sess.
 					Where("repo_owner = ?", repos[i].Owner).
 					And(" repo_name = ?", repos[i].Name).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
 			}
 
 			_, err := sess.
-				Where("remote_id = ?", repos[i].ForgeID).
+				Where("forge_id = ?", repos[i].ForgeID).
 				Get(repos[i])
 			if err != nil {
 				return err

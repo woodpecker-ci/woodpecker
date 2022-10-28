@@ -268,7 +268,7 @@ func (_m *Store) CronList(_a0 *model.Repo) ([]*model.Cron, error) {
 }
 
 // CronListNextExecute provides a mock function with given fields: _a0, _a1
-func (_m *Store) CronListNextExecute(_a0 int64, _a1 int64) ([]*model.Cron, error) {
+func (_m *Store) CronListNextExecute(_a0, _a1 int64) ([]*model.Cron, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Cron
@@ -462,7 +462,7 @@ func (_m *Store) GetPipeline(_a0 int64) (*model.Pipeline, error) {
 }
 
 // GetPipelineCommit provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) GetPipelineCommit(_a0 *model.Repo, _a1 string, _a2 string) (*model.Pipeline, error) {
+func (_m *Store) GetPipelineCommit(_a0 *model.Repo, _a1, _a2 string) (*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 *model.Pipeline
@@ -988,7 +988,7 @@ func (_m *Store) Migrate() error {
 }
 
 // OrgSecretFind provides a mock function with given fields: _a0, _a1
-func (_m *Store) OrgSecretFind(_a0 string, _a1 string) (*model.Secret, error) {
+func (_m *Store) OrgSecretFind(_a0, _a1 string) (*model.Secret, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.Secret
@@ -1518,7 +1518,7 @@ func (_m *Store) ServerConfigGet(_a0 string) (string, error) {
 }
 
 // ServerConfigSet provides a mock function with given fields: _a0, _a1
-func (_m *Store) ServerConfigSet(_a0 string, _a1 string) error {
+func (_m *Store) ServerConfigSet(_a0, _a1 string) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
