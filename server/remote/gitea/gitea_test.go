@@ -36,14 +36,15 @@ import (
 func Test_gitea(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	mock_store := mocks_store.NewStore(t)
 	s := httptest.NewServer(fixtures.Handler())
 	c, _ := New(Opts{
 		URL:        s.URL,
 		SkipVerify: true,
 	})
 
-	ctx := context.Background()
+	mock_store := mocks_store.NewStore(t)
+	ctx := store.InjectToContext(context.Background(), mock_store)
+
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
 		g.After(func() {
@@ -167,11 +168,9 @@ func Test_gitea(t *testing.T) {
 			req, _ := http.NewRequest("POST", "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
-			hookCtx := store.InjectToContext(context.WithValue(ctx, "user-debug", &model.User{}), mock_store)
-			mock_store.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(&model.Repo{UserID: 3, Owner: "gordon", Name: "hello-world"}, nil)
-			mock_store.On("GetUser", mock.Anything).Return(&model.User{Token: "123"}, nil)
-
-			r, b, err := c.Hook(hookCtx, req)
+			mock_store.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
+			mock_store.On("GetUser", mock.Anything).Return(fakeUser, nil)
+			r, b, err := c.Hook(ctx, req)
 			g.Assert(r).IsNotNil()
 			g.Assert(b).IsNotNil()
 			g.Assert(err).IsNil()
