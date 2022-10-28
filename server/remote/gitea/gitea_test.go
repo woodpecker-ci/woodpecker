@@ -146,7 +146,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return nil from send pipeline status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeProc)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
 			g.Assert(err).IsNil()
 		})
 
@@ -209,7 +209,7 @@ var (
 		Commit: "9ecad50",
 	}
 
-	fakeProc = &model.Proc{
+	fakeStep = &model.Step{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

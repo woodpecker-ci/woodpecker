@@ -227,7 +227,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
