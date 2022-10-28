@@ -47,8 +47,8 @@
     },
     {
       "name": "Node PM",
-      "docs": "https://codeberg.org/qwerty287/woodpecker-node-pm/raw/branch/main/docs.md",
-      "verified": false
+      "docs": "https://codeberg.org/woodpecker-plugins/woodpecker-node-pm/raw/branch/main/docs.md",
+      "verified": true
     },
     {
       "// todo": true,
