@@ -44,16 +44,16 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should return client with default endpoint", func() {
-			remote, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
-			g.Assert(remote.(*config).URL).Equal(DefaultURL)
-			g.Assert(remote.(*config).API).Equal(DefaultAPI)
-			g.Assert(remote.(*config).Client).Equal("4vyW6b49Z")
-			g.Assert(remote.(*config).Secret).Equal("a5012f6c6")
+			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+			g.Assert(forge.(*config).URL).Equal(DefaultURL)
+			g.Assert(forge.(*config).API).Equal(DefaultAPI)
+			g.Assert(forge.(*config).Client).Equal("4vyW6b49Z")
+			g.Assert(forge.(*config).Secret).Equal("a5012f6c6")
 		})
 
 		g.It("Should return the netrc file", func() {
-			remote, _ := New(&Opts{})
-			netrc, _ := remote.Netrc(fakeUser, fakeRepo)
+			forge, _ := New(&Opts{})
+			netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 			g.Assert(netrc.Machine).Equal("bitbucket.org")
 			g.Assert(netrc.Login).Equal("x-token-auth")
 			g.Assert(netrc.Password).Equal(fakeUser.Token)

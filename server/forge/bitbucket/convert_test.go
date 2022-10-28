@@ -137,7 +137,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Link).Equal(hook.PullRequest.Links.HTML.Href)
 			g.Assert(pipeline.Ref).Equal("refs/heads/master")
 			g.Assert(pipeline.Refspec).Equal("change:master")
-			g.Assert(pipeline.Remote).Equal("https://bitbucket.org/baz/bar")
+			g.Assert(pipeline.CloneURL).Equal("https://bitbucket.org/baz/bar")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})

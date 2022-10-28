@@ -81,7 +81,7 @@ func (c *Coding) Name() string {
 }
 
 // Login authenticates the session and returns the
-// remote user details.
+// forge user details.
 func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(server.Config.Server.Host)
 
@@ -121,7 +121,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}, nil
 }
 
-// Auth authenticates the session and returns the remote user
+// Auth authenticates the session and returns the forge user
 // login for the given token and secret
 func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error) {
 	user, err := c.newClientToken(ctx, token).GetCurrentUser()
@@ -148,20 +148,20 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	return true, nil
 }
 
-// Teams fetches a list of team memberships from the remote system.
+// Teams fetches a list of team memberships from the forge.
 func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // TeamPerm fetches the named organization permissions from
-// the remote system for the specified user.
+// the forge for the specified user.
 func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil, nil
 }
 
-// Repo fetches the repository from the remote system.
+// Repo fetches the repository from the forge.
 func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
@@ -186,7 +186,7 @@ func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner
 	}, nil
 }
 
-// Repos fetches a list of repos from the remote system.
+// Repos fetches a list of repos from the forge.
 func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	projectList, err := client.GetProjectList()
@@ -218,7 +218,7 @@ func (c *Coding) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Perm fetches the named repository permissions from
-// the remote system for the specified user.
+// the forge for the specified user.
 func (c *Coding) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
 	project, err := c.newClient(ctx, u).GetProject(repo.Owner, repo.Name)
 	if err != nil {
@@ -234,7 +234,7 @@ func (c *Coding) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*mo
 	return &model.Perm{Pull: false, Push: false, Admin: false}, nil
 }
 
-// File fetches a file from the remote repository and returns in string
+// File fetches a file from the forge repository and returns in string
 // format.
 func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	data, err := c.newClient(ctx, u).GetFile(r.Owner, r.Name, b.Commit, f)
@@ -248,14 +248,14 @@ func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return nil, fmt.Errorf("Not implemented")
 }
 
-// Status sends the commit status to the remote system.
+// Status sends the commit status to the forge.
 func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, proc *model.Proc) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }
 
 // Netrc returns a .netrc file that can be used to clone
-// private repositories from a remote system.
+// private repositories from a forge.
 func (c *Coding) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
@@ -318,7 +318,7 @@ func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string)
 }
 
 // helper function to return the Coding oauth2 context using an HTTPClient that
-// disables TLS verification if disabled in the remote settings.
+// disables TLS verification if disabled in the forge settings.
 func (c *Coding) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
 		return ctx

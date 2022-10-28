@@ -338,11 +338,11 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, proc *
 	}
 	return frontend.Metadata{
 		Repo: frontend.Repo{
-			Name:    repo.FullName,
-			Link:    repo.Link,
-			Forge:   repo.Clone,
-			Private: repo.IsSCMPrivate,
-			Branch:  repo.Branch,
+			Name:     repo.FullName,
+			Link:     repo.Link,
+			CloneURL: repo.Clone,
+			Private:  repo.IsSCMPrivate,
+			Branch:   repo.Branch,
 		},
 		Curr: metadataPipelineFromModelPipeline(pipeline, true),
 		Prev: metadataPipelineFromModelPipeline(last, false),

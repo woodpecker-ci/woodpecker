@@ -39,12 +39,12 @@ func handlePipelineErr(c *gin.Context, err error) {
 	}
 }
 
-// if the remote has a refresh token, the current access token may be stale.
+// if the forge has a refresh token, the current access token may be stale.
 // Therefore, we should refresh prior to dispatching the job.
 func refreshUserToken(c *gin.Context, user *model.User) {
-	_remote := server.Config.Services.Forge
+	_forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
-	if refresher, ok := _remote.(forge.Refresher); ok {
+	if refresher, ok := _forge.(forge.Refresher); ok {
 		ok, err := refresher.Refresh(c, user)
 		if err != nil {
 			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)

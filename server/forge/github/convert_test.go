@@ -212,7 +212,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Base.Ref)
 			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
 			g.Assert(pipeline.Refspec).Equal("changes:master")
-			g.Assert(pipeline.Remote).Equal("https://github.com/octocat/hello-world-fork")
+			g.Assert(pipeline.CloneURL).Equal("https://github.com/octocat/hello-world-fork")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
 			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
 			g.Assert(pipeline.Title).Equal(*from.PullRequest.Title)
@@ -266,7 +266,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
 			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
 			g.Assert(pipeline.Email).Equal(*from.HeadCommit.Author.Email)
-			g.Assert(pipeline.Remote).Equal(*from.Repo.CloneURL)
+			g.Assert(pipeline.CloneURL).Equal(*from.Repo.CloneURL)
 		})
 
 		g.It("should convert a tag from webhook", func() {

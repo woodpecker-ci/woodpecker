@@ -36,7 +36,7 @@ const (
 	DefaultURL = "https://bitbucket.org"
 )
 
-// Opts are remote options for bitbucket
+// Opts are forge options for bitbucket
 type Opts struct {
 	Client string
 	Secret string
@@ -49,7 +49,7 @@ type config struct {
 	Secret string
 }
 
-// New returns a new remote Configuration for integrating with the Bitbucket
+// New returns a new forge Configuration for integrating with the Bitbucket
 // repository hosting service at https://bitbucket.org
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{

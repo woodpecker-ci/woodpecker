@@ -96,7 +96,7 @@ func (g *Gitlab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 }
 
 // Login authenticates the session and returns the
-// remote user details.
+// forge user details.
 func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
 
@@ -168,7 +168,7 @@ func (g *Gitlab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	return true, nil
 }
 
-// Auth authenticates the session and returns the remote user login for the given token
+// Auth authenticates the session and returns the forge user login for the given token
 func (g *Gitlab) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := newClient(g.URL, token, g.SkipVerify)
 	if err != nil {
@@ -182,7 +182,7 @@ func (g *Gitlab) Auth(ctx context.Context, token, _ string) (string, error) {
 	return login.Username, nil
 }
 
-// Teams fetches a list of team memberships from the remote system.
+// Teams fetches a list of team memberships from the forge.
 func (g *Gitlab) Teams(ctx context.Context, user *model.User) ([]*model.Team, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
@@ -217,7 +217,7 @@ func (g *Gitlab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 	return teams, nil
 }
 
-// getProject fetches the named repository from the remote system.
+// getProject fetches the named repository from the forge.
 func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, name string) (*gitlab.Project, error) {
 	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
 	if err != nil {
@@ -227,7 +227,7 @@ func (g *Gitlab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 	return repo, nil
 }
 
-// Repo fetches the repository from the remote system.
+// Repo fetches the repository from the forge.
 func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
@@ -254,7 +254,7 @@ func (g *Gitlab) Repo(ctx context.Context, user *model.User, id model.ForgeID, o
 	return g.convertGitlabRepo(_repo)
 }
 
-// Repos fetches a list of repos from the remote system.
+// Repos fetches a list of repos from the forge.
 func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
@@ -300,7 +300,7 @@ func (g *Gitlab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
-// Perm fetches the named repository from the remote system.
+// Perm fetches the named repository from the forge.
 func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
@@ -324,7 +324,7 @@ func (g *Gitlab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*mo
 	}, nil
 }
 
-// File fetches a file from the remote repository and returns in string format.
+// File fetches a file from the forge repository and returns in string format.
 func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, fileName string) ([]byte, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
@@ -338,7 +338,7 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	return file, err
 }
 
-// Dir fetches a folder from the remote repository
+// Dir fetches a folder from the forge repository
 func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge.FileMeta, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {

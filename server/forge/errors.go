@@ -14,7 +14,7 @@
 
 package forge
 
-// AuthError represents remote authentication error.
+// AuthError represents forge authentication error.
 type AuthError struct {
 	Err         string
 	Description string

@@ -55,7 +55,7 @@ func HandleAuth(c *gin.Context) {
 		c.Redirect(303, "/login?error=oauth_error")
 		return
 	}
-	// this will happen when the user is redirected by the remote provider as
+	// this will happen when the user is redirected by the forge as
 	// part of the authorization workflow.
 	if tmpuser == nil {
 		return

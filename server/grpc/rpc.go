@@ -351,7 +351,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	s.updateRemoteStatus(c, repo, pipeline, proc)
+	s.updateForgeStatus(c, repo, pipeline, proc)
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
@@ -392,7 +392,7 @@ func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedPr
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) {
+func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)

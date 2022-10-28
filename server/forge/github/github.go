@@ -84,7 +84,7 @@ func (c *client) Name() string {
 	return "github"
 }
 
-// Login authenticates the session and returns the remote user details.
+// Login authenticates the session and returns the forge user details.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)
 
@@ -332,7 +332,7 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 }
 
 // helper function to return the GitHub oauth2 context using an HTTPClient that
-// disables TLS verification if disabled in the remote settings.
+// disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
 		return ctx
@@ -435,7 +435,7 @@ func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 
 var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
-// Status sends the commit status to the remote system.
+// Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
 func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
 	client := c.newClientToken(ctx, user.Token)

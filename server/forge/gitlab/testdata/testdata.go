@@ -27,7 +27,7 @@ func NewServer(t *testing.T) *httptest.Server {
 
 	// handle requests and serve mock data
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t.Logf("gitlab remote mock server: [%s] %s", r.Method, r.URL.Path)
+		t.Logf("gitlab forge mock server: [%s] %s", r.Method, r.URL.Path)
 		// evaluate the path to serve a dummy data file
 
 		// TODO: find source of "/api/v4/" requests

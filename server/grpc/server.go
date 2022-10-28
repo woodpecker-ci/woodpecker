@@ -36,7 +36,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(remote forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
+func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -48,7 +48,7 @@ func NewWoodpeckerServer(remote forge.Forge, queue queue.Queue, logger logging.L
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		forge:         remote,
+		forge:         forge,
 		store:         store,
 		queue:         queue,
 		pubsub:        pubsub,

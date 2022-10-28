@@ -34,10 +34,10 @@ func Refresh(c *gin.Context) {
 		return
 	}
 
-	// check if the remote includes the ability to
+	// check if the forge includes the ability to
 	// refresh the user token.
-	_remote := server.Config.Services.Forge
-	refresher, ok := _remote.(forge.Refresher)
+	_forge := server.Config.Services.Forge
+	refresher, ok := _forge.(forge.Refresher)
 	if !ok {
 		c.Next()
 		return

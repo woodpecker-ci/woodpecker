@@ -140,7 +140,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		Remote:    fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
+		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
 		Link:      from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,

@@ -238,10 +238,10 @@ func TestFetch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
-			r := new(mocks.Remote)
+			f := new(mocks.Forge)
 			dirs := map[string][]*forge.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &forge.FileMeta{
@@ -252,15 +252,15 @@ func TestFetch(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors
-			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
 			configFetcher := shared.NewConfigFetcher(
-				r,
+				f,
 				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
@@ -443,10 +443,10 @@ func TestFetchFromConfigService(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
-			r := new(mocks.Remote)
+			f := new(mocks.Forge)
 			dirs := map[string][]*forge.FileMeta{}
 			for _, file := range tt.files {
-				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &forge.FileMeta{
@@ -457,15 +457,15 @@ func TestFetchFromConfigService(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors
-			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
 			configFetcher := shared.NewConfigFetcher(
-				r,
+				f,
 				configAPI,
 				&model.User{Token: "xxx"},
 				repo,

@@ -49,16 +49,16 @@ func Test_hook(t *testing.T) {
 			}
 
 			pipeline := &model.Pipeline{
-				Event:   model.EventPush,
-				Commit:  "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
-				Ref:     "refs/heads/master",
-				Link:    "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
-				Branch:  "master",
-				Message: "new file .woodpecker.yml\n",
-				Email:   "demo1@gmail.com",
-				Avatar:  "/static/fruit_avatar/Fruit-20.png",
-				Author:  "demo1",
-				Remote:  "https://git.coding.net/demo1/test1.git",
+				Event:    model.EventPush,
+				Commit:   "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
+				Ref:      "refs/heads/master",
+				Link:     "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
+				Branch:   "master",
+				Message:  "new file .woodpecker.yml\n",
+				Email:    "demo1@gmail.com",
+				Avatar:   "/static/fruit_avatar/Fruit-20.png",
+				Author:   "demo1",
+				CloneURL: "https://git.coding.net/demo1/test1.git",
 			}
 
 			actualRepo, actualPipeline, err := parseHook(r)
@@ -117,16 +117,16 @@ func Test_hook(t *testing.T) {
 			}
 
 			pipeline := &model.Pipeline{
-				Event:   model.EventPush,
-				Commit:  "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
-				Ref:     "refs/heads/master",
-				Link:    "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
-				Branch:  "master",
-				Message: "new file .woodpecker.yml\n",
-				Email:   "demo1@gmail.com",
-				Avatar:  "/static/fruit_avatar/Fruit-20.png",
-				Author:  "demo1",
-				Remote:  "https://git.coding.net/demo1/test1.git",
+				Event:    model.EventPush,
+				Commit:   "5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
+				Ref:      "refs/heads/master",
+				Link:     "https://coding.net/u/demo1/p/test1/git/commit/5b9912a6ff272e9c93a4c44c278fe9b359ed1ab4",
+				Branch:   "master",
+				Message:  "new file .woodpecker.yml\n",
+				Email:    "demo1@gmail.com",
+				Avatar:   "/static/fruit_avatar/Fruit-20.png",
+				Author:   "demo1",
+				CloneURL: "https://git.coding.net/demo1/test1.git",
 			}
 
 			actualRepo, actualPipeline, err := parsePushHook([]byte(fixtures.PushHook))
@@ -153,17 +153,17 @@ func Test_hook(t *testing.T) {
 			}
 
 			pipeline := &model.Pipeline{
-				Event:   model.EventPull,
-				Commit:  "55e77b328b71d3ee4f9e70a5f67231b0acceeadc",
-				Link:    "https://coding.net/u/demo1/p/test2/git/pull/1",
-				Ref:     "refs/pull/1/MERGE",
-				Branch:  "master",
-				Message: "pr message",
-				Author:  "demo2",
-				Avatar:  "/static/fruit_avatar/Fruit-2.png",
-				Title:   "pr1",
-				Remote:  "https://git.coding.net/demo1/test2.git",
-				Refspec: "master:master",
+				Event:    model.EventPull,
+				Commit:   "55e77b328b71d3ee4f9e70a5f67231b0acceeadc",
+				Link:     "https://coding.net/u/demo1/p/test2/git/pull/1",
+				Ref:      "refs/pull/1/MERGE",
+				Branch:   "master",
+				Message:  "pr message",
+				Author:   "demo2",
+				Avatar:   "/static/fruit_avatar/Fruit-2.png",
+				Title:    "pr1",
+				CloneURL: "https://git.coding.net/demo1/test2.git",
+				Refspec:  "master:master",
 			}
 
 			actualRepo, actualPipeline, err := parsePullRequestHook([]byte(fixtures.PullRequestHook))
@@ -183,17 +183,17 @@ func Test_hook(t *testing.T) {
 			}
 
 			pipeline := &model.Pipeline{
-				Event:   model.EventPull,
-				Commit:  "74e6755580c34e9fd81dbcfcbd43ee5f30259436",
-				Link:    "https://coding.net/u/demo1/p/test1/git/merge/1",
-				Ref:     "refs/merge/1/MERGE",
-				Branch:  "master",
-				Message: "<p>mr message</p>",
-				Author:  "demo1",
-				Avatar:  "/static/fruit_avatar/Fruit-20.png",
-				Title:   "mr1",
-				Remote:  "https://git.coding.net/demo1/test1.git",
-				Refspec: "branch1:master",
+				Event:    model.EventPull,
+				Commit:   "74e6755580c34e9fd81dbcfcbd43ee5f30259436",
+				Link:     "https://coding.net/u/demo1/p/test1/git/merge/1",
+				Ref:      "refs/merge/1/MERGE",
+				Branch:   "master",
+				Message:  "<p>mr message</p>",
+				Author:   "demo1",
+				Avatar:   "/static/fruit_avatar/Fruit-20.png",
+				Title:    "mr1",
+				CloneURL: "https://git.coding.net/demo1/test1.git",
+				Refspec:  "branch1:master",
 			}
 
 			actualRepo, actualPipeline, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))

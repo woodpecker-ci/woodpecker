@@ -45,12 +45,12 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string   `json:"name,omitempty"`
-		Link    string   `json:"link,omitempty"`
-		Forge   string   `json:"remote,omitempty"`
-		Private bool     `json:"private,omitempty"`
-		Secrets []Secret `json:"secrets,omitempty"`
-		Branch  string   `json:"default_branch,omitempty"`
+		Name     string   `json:"name,omitempty"`
+		Link     string   `json:"link,omitempty"`
+		CloneURL string   `json:"clone_url,omitempty"`
+		Private  bool     `json:"private,omitempty"`
+		Secrets  []Secret `json:"secrets,omitempty"`
+		Branch   string   `json:"default_branch,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -142,7 +142,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_LINK":           m.Repo.Link,
-		"CI_REPO_REMOTE":         m.Repo.Forge,
+		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
@@ -224,6 +224,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
+		// CI_REPO_CLONE_URL
+		"CI_REPO_REMOTE": m.Repo.CloneURL,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

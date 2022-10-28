@@ -167,16 +167,16 @@ func parsePushHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 
 	lastCommit := findLastCommit(hook.Commits, hook.After)
 	pipeline := &model.Pipeline{
-		Event:   model.EventPush,
-		Commit:  hook.After,
-		Ref:     hook.Ref,
-		Link:    fmt.Sprintf("%s/git/commit/%s", hook.Repository.WebURL, hook.After),
-		Branch:  strings.Replace(hook.Ref, "refs/heads/", "", -1),
-		Message: lastCommit.ShortMessage,
-		Email:   lastCommit.Committer.Email,
-		Avatar:  hook.User.Avatar,
-		Author:  hook.User.GlobalKey,
-		Remote:  hook.Repository.HTTPSURL,
+		Event:    model.EventPush,
+		Commit:   hook.After,
+		Ref:      hook.Ref,
+		Link:     fmt.Sprintf("%s/git/commit/%s", hook.Repository.WebURL, hook.After),
+		Branch:   strings.Replace(hook.Ref, "refs/heads/", "", -1),
+		Message:  lastCommit.ShortMessage,
+		Email:    lastCommit.Committer.Email,
+		Avatar:   hook.User.Avatar,
+		Author:   hook.User.GlobalKey,
+		CloneURL: hook.Repository.HTTPSURL,
 	}
 	return repo, pipeline, nil
 }
@@ -197,17 +197,17 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 		return nil, nil, err
 	}
 	pipeline := &model.Pipeline{
-		Event:   model.EventPull,
-		Commit:  hook.PullRequest.CommitSHA,
-		Link:    hook.PullRequest.WebURL,
-		Ref:     fmt.Sprintf("refs/pull/%d/MERGE", int(hook.PullRequest.Number)),
-		Branch:  hook.PullRequest.TargetBranch,
-		Message: hook.PullRequest.Body,
-		Author:  hook.PullRequest.User.GlobalKey,
-		Avatar:  hook.PullRequest.User.Avatar,
-		Title:   hook.PullRequest.Title,
-		Remote:  hook.Repository.HTTPSURL,
-		Refspec: fmt.Sprintf("%s:%s", hook.PullRequest.SourceBranch, hook.PullRequest.TargetBranch),
+		Event:    model.EventPull,
+		Commit:   hook.PullRequest.CommitSHA,
+		Link:     hook.PullRequest.WebURL,
+		Ref:      fmt.Sprintf("refs/pull/%d/MERGE", int(hook.PullRequest.Number)),
+		Branch:   hook.PullRequest.TargetBranch,
+		Message:  hook.PullRequest.Body,
+		Author:   hook.PullRequest.User.GlobalKey,
+		Avatar:   hook.PullRequest.User.Avatar,
+		Title:    hook.PullRequest.Title,
+		CloneURL: hook.Repository.HTTPSURL,
+		Refspec:  fmt.Sprintf("%s:%s", hook.PullRequest.SourceBranch, hook.PullRequest.TargetBranch),
 	}
 
 	return repo, pipeline, nil
@@ -230,17 +230,17 @@ func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:   model.EventPull,
-		Commit:  hook.MergeRequest.CommitSHA,
-		Link:    hook.MergeRequest.WebURL,
-		Ref:     fmt.Sprintf("refs/merge/%d/MERGE", int(hook.MergeRequest.Number)),
-		Branch:  hook.MergeRequest.TargetBranch,
-		Message: hook.MergeRequest.Body,
-		Author:  hook.MergeRequest.User.GlobalKey,
-		Avatar:  hook.MergeRequest.User.Avatar,
-		Title:   hook.MergeRequest.Title,
-		Remote:  hook.Repository.HTTPSURL,
-		Refspec: fmt.Sprintf("%s:%s", hook.MergeRequest.SourceBranch, hook.MergeRequest.TargetBranch),
+		Event:    model.EventPull,
+		Commit:   hook.MergeRequest.CommitSHA,
+		Link:     hook.MergeRequest.WebURL,
+		Ref:      fmt.Sprintf("refs/merge/%d/MERGE", int(hook.MergeRequest.Number)),
+		Branch:   hook.MergeRequest.TargetBranch,
+		Message:  hook.MergeRequest.Body,
+		Author:   hook.MergeRequest.User.GlobalKey,
+		Avatar:   hook.MergeRequest.User.Avatar,
+		Title:    hook.MergeRequest.Title,
+		CloneURL: hook.Repository.HTTPSURL,
+		Refspec:  fmt.Sprintf("%s:%s", hook.MergeRequest.SourceBranch, hook.MergeRequest.TargetBranch),
 	}
 	return repo, pipeline, nil
 }

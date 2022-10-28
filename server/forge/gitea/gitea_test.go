@@ -45,12 +45,12 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Creating a forge", func() {
 			g.It("Should return client with specified options", func() {
-				remote, _ := New(Opts{
+				forge, _ := New(Opts{
 					URL:        "http://localhost:8080",
 					SkipVerify: true,
 				})
-				g.Assert(remote.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(remote.(*Gitea).SkipVerify).Equal(true)
+				g.Assert(forge.(*Gitea).URL).Equal("http://localhost:8080")
+				g.Assert(forge.(*Gitea).SkipVerify).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})
@@ -60,15 +60,15 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Generating a netrc file", func() {
 			g.It("Should return a netrc with the user token", func() {
-				remote, _ := New(Opts{})
-				netrc, _ := remote.Netrc(fakeUser, fakeRepo)
+				forge, _ := New(Opts{})
+				netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
 				g.Assert(netrc.Login).Equal(fakeUser.Login)
 				g.Assert(netrc.Password).Equal(fakeUser.Token)
 			})
 			g.It("Should return a netrc with the machine account", func() {
-				remote, _ := New(Opts{})
-				netrc, _ := remote.Netrc(nil, fakeRepo)
+				forge, _ := New(Opts{})
+				netrc, _ := forge.Netrc(nil, fakeRepo)
 				g.Assert(netrc.Machine).Equal("gitea.com")
 				g.Assert(netrc.Login).Equal("")
 				g.Assert(netrc.Password).Equal("")

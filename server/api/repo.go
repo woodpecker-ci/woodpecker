@@ -39,7 +39,7 @@ const (
 )
 
 func PostRepo(c *gin.Context) {
-	remote := server.Config.Services.Forge
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
@@ -87,7 +87,7 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := remote.Repo(c, user, repo.ForgeID, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeID, repo.Owner, repo.Name)
 	if err == nil {
 		if repo.FullName != from.FullName {
 			// create a redirection
@@ -100,7 +100,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	}
 
-	err = remote.Activate(c, user, repo, link)
+	err = forge.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -262,7 +262,7 @@ func RepairRepo(c *gin.Context) {
 
 	from, err := forge.Repo(c, user, repo.ForgeID, repo.Owner, repo.Name)
 	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

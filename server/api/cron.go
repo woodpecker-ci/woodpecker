@@ -109,7 +109,7 @@ func PostCron(c *gin.Context) {
 	cron.NextExec = nextExec.Unix()
 
 	if in.Branch != "" {
-		// check if branch exists on remote
+		// check if branch exists on forge
 		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(400, "Error inserting cron. branch not resolved: %s", err)
@@ -129,7 +129,7 @@ func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	store := store.FromContext(c)
-	remote := server.Config.Services.Forge
+	forge := server.Config.Services.Forge
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
@@ -150,8 +150,9 @@ func PatchCron(c *gin.Context) {
 		return
 	}
 	if in.Branch != "" {
-		// check if branch exists on remote
-		_, err := remote.BranchHead(c, user, repo, in.Branch)
+		// check if branch exists on forge
+
+		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(400, "Error inserting cron. branch not resolved: %s", err)
 			return

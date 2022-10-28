@@ -37,7 +37,7 @@ const (
 )
 
 // Start starts the cron scheduler loop
-func Start(ctx context.Context, store store.Store, remote forge.Forge) error {
+func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -54,7 +54,7 @@ func Start(ctx context.Context, store store.Store, remote forge.Forge) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(store, remote, cron, now); err != nil {
+					if err := runCron(store, forge, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -77,7 +77,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runCron(store store.Store, remote forge.Forge, cron *model.Cron, now time.Time) error {
+func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func runCron(store store.Store, remote forge.Forge, cron *model.Cron, now time.T
 		return nil
 	}
 
-	repo, newPipeline, err := CreatePipeline(ctx, store, remote, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, forge, cron)
 	if err != nil {
 		return err
 	}

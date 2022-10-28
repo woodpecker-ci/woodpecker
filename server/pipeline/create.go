@@ -37,7 +37,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	// if the remote has a refresh token, the current access token
+	// if the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
 	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
@@ -59,7 +59,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		parseErr         error
 	)
 
-	// fetch the pipeline file from the remote
+	// fetch the pipeline file from the forge
 	configFetcher := shared.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
