@@ -127,8 +127,8 @@ func GetPipeline(c *gin.Context) {
 		return
 	}
 	files, _ := _store.FileList(pl)
-	procs, _ := _store.ProcList(pl)
-	if pl.Procs, err = model.Tree(procs); err != nil {
+	steps, _ := _store.StepList(pl)
+	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -148,12 +148,12 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	procs, err := _store.ProcList(pl)
+	steps, err := _store.StepList(pl)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	if pl.Procs, err = model.Tree(procs); err != nil {
+	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -164,11 +164,11 @@ func GetPipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	// parse the pipeline number and job sequence number from
+	// parse the pipeline number and step sequence number from
 	// the request parameter.
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
-	name := c.Params.ByName("proc")
+	name := c.Params.ByName("step")
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
@@ -176,13 +176,13 @@ func GetPipelineLogs(c *gin.Context) {
 		return
 	}
 
-	proc, err := _store.ProcChild(pl, ppid, name)
+	step, err := _store.StepChild(pl, ppid, name)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
 	}
 
-	rc, err := _store.LogFind(proc)
+	rc, err := _store.LogFind(step)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
@@ -196,11 +196,11 @@ func GetPipelineLogs(c *gin.Context) {
 	}
 }
 
-func GetProcLogs(c *gin.Context) {
+func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	// parse the pipeline number and job sequence number from
+	// parse the pipeline number and step sequence number from
 	// the request parameter.
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
@@ -211,13 +211,13 @@ func GetProcLogs(c *gin.Context) {
 		return
 	}
 
-	proc, err := _store.ProcFind(pl, pid)
+	step, err := _store.StepFind(pl, pid)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
-	rc, err := _store.LogFind(proc)
+	rc, err := _store.LogFind(step)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
@@ -407,7 +407,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	procs, err := _store.ProcList(pl)
+	steps, err := _store.StepList(pl)
 	if err != nil {
 		_ = c.AbortWithError(404, err)
 		return
@@ -419,10 +419,10 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	for _, proc := range procs {
+	for _, step := range steps {
 		t := time.Now().UTC()
-		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, proc.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := _store.LogSave(proc, buf)
+		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, step.Name, user.Login, t.Format(time.UnixDate)))
+		lerr := _store.LogSave(step, buf)
 		if lerr != nil {
 			err = lerr
 		}
@@ -437,7 +437,7 @@ func DeletePipelineLogs(c *gin.Context) {
 
 var deleteStr = `[
 	{
-		"proc": %q,
+		"step": %q,
 		"pos": 0,
 		"out": "logs purged by %s on %s\n"
 	}

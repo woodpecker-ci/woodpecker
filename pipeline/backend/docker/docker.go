@@ -104,19 +104,19 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
-	config := toConfig(proc)
-	hostConfig := toHostConfig(proc)
+func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
+	config := toConfig(step)
+	hostConfig := toHostConfig(step)
 
 	// create pull options with encoded authorization credentials.
 	pullopts := types.ImagePullOptions{}
-	if proc.AuthConfig.Username != "" && proc.AuthConfig.Password != "" {
-		pullopts.RegistryAuth, _ = encodeAuthToBase64(proc.AuthConfig)
+	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
+		pullopts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
 
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
-	if proc.Pull {
+	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
 			defer responseBody.Close()
@@ -128,7 +128,7 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
-		if perr != nil && proc.AuthConfig.Password != "" {
+		if perr != nil && step.AuthConfig.Password != "" {
 			return perr
 		}
 	}
@@ -136,7 +136,7 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 	// add default volumes to the host configuration
 	hostConfig.Binds = append(hostConfig.Binds, e.volumes...)
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
+	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -150,15 +150,15 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
+		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	}
 	if err != nil {
 		return err
 	}
 
-	if len(proc.NetworkMode) == 0 {
-		for _, net := range proc.Networks {
-			err = e.client.NetworkConnect(ctx, net.Name, proc.Name, &network.EndpointSettings{
+	if len(step.NetworkMode) == 0 {
+		for _, net := range step.Networks {
+			err = e.client.NetworkConnect(ctx, net.Name, step.Name, &network.EndpointSettings{
 				Aliases: net.Aliases,
 			})
 			if err != nil {
@@ -168,24 +168,24 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 
 		// join the container to an existing network
 		if e.network != "" {
-			err = e.client.NetworkConnect(ctx, e.network, proc.Name, &network.EndpointSettings{})
+			err = e.client.NetworkConnect(ctx, e.network, step.Name, &network.EndpointSettings{})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	return e.client.ContainerStart(ctx, proc.Name, startOpts)
+	return e.client.ContainerStart(ctx, step.Name, startOpts)
 }
 
-func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
-	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
+func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, error) {
+	wait, errc := e.client.ContainerWait(ctx, step.Name, "")
 	select {
 	case <-wait:
 	case <-errc:
 	}
 
-	info, err := e.client.ContainerInspect(ctx, proc.Name)
+	info, err := e.client.ContainerInspect(ctx, step.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -200,8 +200,8 @@ func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
-	logs, err := e.client.ContainerLogs(ctx, proc.Name, logsOpts)
+func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
+	logs, err := e.client.ContainerLogs(ctx, step.Name, logsOpts)
 	if err != nil {
 		return nil, err
 	}

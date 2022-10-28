@@ -97,26 +97,26 @@ func (s *RPC) Extend(c context.Context, id string) error {
 
 // Update implements the rpc.Update function
 func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	pproc, err := s.store.ProcLoad(procID)
+	pstep, err := s.store.StepLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find pproc with id %d: %s", procID, err)
+		log.Error().Msgf("error: rpc.update: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pproc.PipelineID)
+	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pproc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	proc, err := s.store.ProcChild(pipeline, pproc.PID, state.Proc)
+	step, err := s.store.StepChild(pipeline, pstep.PID, state.Step)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with name %s: %s", state.Proc, err)
+		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
 		return err
 	}
 
@@ -124,7 +124,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
-			proc.Machine = hostname[0]
+			step.Machine = hostname[0]
 		}
 	}
 
@@ -134,15 +134,15 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if _, err = shared.UpdateProcStatus(s.store, *proc, state, pipeline.Started); err != nil {
-		log.Error().Err(err).Msg("rpc.update: cannot update proc")
+	if _, err = shared.UpdateStepStatus(s.store, *step, state, pipeline.Started); err != nil {
+		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if pipeline.Procs, err = s.store.ProcList(pipeline); err != nil {
-		log.Error().Err(err).Msg("can not get proc list from store")
+	if pipeline.Steps, err = s.store.StepList(pipeline); err != nil {
+		log.Error().Err(err).Msg("can not get step list from store")
 	}
-	if pipeline.Procs, err = model.Tree(pipeline.Procs); err != nil {
-		log.Error().Err(err).Msg("can not build tree from proc list")
+	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
+		log.Error().Err(err).Msg("can not build tree from step list")
 		return err
 	}
 	message := pubsub.Message{
@@ -156,7 +156,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Pipeline: *pipeline,
 	})
 	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msg("can not publish proc list to")
+		log.Error().Err(err).Msg("can not publish step list to")
 	}
 
 	return nil
@@ -164,40 +164,40 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 
 // Upload implements the rpc.Upload function
 func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	pproc, err := s.store.ProcLoad(procID)
+	pstep, err := s.store.StepLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find parent proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find parent step with id %d: %s", stepID, err)
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pproc.PipelineID)
+	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pproc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	proc, err := s.store.ProcChild(pipeline, pproc.PID, file.Proc)
+	step, err := s.store.StepChild(pipeline, pstep.PID, file.Step)
 	if err != nil {
-		log.Error().Msgf("error: cannot find child proc with name %s: %s", file.Proc, err)
+		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Step, err)
 		return err
 	}
 
 	if file.Mime == "application/json+logs" {
 		return s.store.LogSave(
-			proc,
+			step,
 			bytes.NewBuffer(file.Data),
 		)
 	}
 
 	report := &model.File{
-		PipelineID: proc.PipelineID,
-		ProcID:     proc.ID,
-		PID:        proc.PID,
+		PipelineID: step.PipelineID,
+		StepID:     step.ID,
+		PID:        step.PID,
 		Mime:       file.Mime,
 		Name:       file.Name,
 		Size:       file.Size,
@@ -237,27 +237,27 @@ func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
 
 // Init implements the rpc.Init function
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	proc, err := s.store.ProcLoad(procID)
+	step, err := s.store.StepLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
 		if ok && len(hostname) != 0 {
-			proc.Machine = hostname[0]
+			step.Machine = hostname[0]
 		}
 	}
 
-	pipeline, err := s.store.GetPipeline(proc.PipelineID)
+	pipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", proc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
 		return err
 	}
 
@@ -274,7 +274,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	defer func() {
-		pipeline.Procs, _ = s.store.ProcList(pipeline)
+		pipeline.Steps, _ = s.store.StepList(pipeline)
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
@@ -286,30 +286,30 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Pipeline: *pipeline,
 		})
 		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-			log.Error().Err(err).Msg("can not publish proc list to")
+			log.Error().Err(err).Msg("can not publish step list to")
 		}
 	}()
 
-	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
+	_, err = shared.UpdateStepToStatusStarted(s.store, *step, state)
 	return err
 }
 
 // Done implements the rpc.Done function
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	proc, err := s.store.ProcLoad(procID)
+	step, err := s.store.StepLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(proc.PipelineID)
+	pipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", proc.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
 		return err
 	}
 
@@ -322,42 +322,42 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	log.Trace().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("build_id", fmt.Sprint(pipeline.ID)).
-		Str("proc_id", id).
+		Str("step_id", id).
 		Msgf("gRPC Done with state: %#v", state)
 
-	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
-		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+	if step, err = shared.UpdateStepStatusToDone(s.store, *step, state); err != nil {
+		log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 	}
 
 	var queueErr error
-	if proc.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Proc finished with exitcode %d, %s", state.ExitCode, state.Error))
+	if step.Failing() {
+		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exitcode %d, %s", state.ExitCode, state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, proc.State)
+		queueErr = s.queue.Done(c, id, step.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack proc_id %d: %s", procID, err)
+		log.Error().Msgf("error: done: cannot ack step_id %d: %s", stepID, err)
 	}
 
-	procs, err := s.store.ProcList(pipeline)
+	steps, err := s.store.StepList(pipeline)
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(procs, proc)
+	s.completeChildrenIfParentCompleted(steps, step)
 
-	if !model.IsThereRunningStage(procs) {
-		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(procs), proc.Stopped); err != nil {
+	if !model.IsThereRunningStage(steps) {
+		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(steps), step.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", pipeline.ID)
 		}
 	}
 
-	s.updateRemoteStatus(c, repo, pipeline, proc)
+	s.updateRemoteStatus(c, repo, pipeline, step)
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
+		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", step.ID)
 	}
 
-	if err := s.notify(c, repo, pipeline, procs); err != nil {
+	if err := s.notify(c, repo, pipeline, steps); err != nil {
 		return err
 	}
 
@@ -365,8 +365,8 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineCount.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Inc()
 		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Set(float64(pipeline.Finished - pipeline.Started))
 	}
-	if model.IsMultiPipeline(procs) {
-		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(proc.State), proc.Name).Set(float64(proc.Stopped - proc.Started))
+	if model.IsMultiPipeline(steps) {
+		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(step.State), step.Name).Set(float64(step.Stopped - step.Started))
 	}
 
 	return nil
@@ -382,17 +382,17 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
-	for _, p := range procs {
-		if p.Running() && p.PPID == completedProc.PID {
-			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
-				log.Error().Msgf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
+func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedStep *model.Step) {
+	for _, p := range steps {
+		if p.Running() && p.PPID == completedStep.PID {
+			if _, err := shared.UpdateStepToStatusSkipped(s.store, *p, completedStep.Stopped); err != nil {
+				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", p.ID, err)
 			}
 		}
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) {
+func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
@@ -410,17 +410,17 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline
 		}
 	}
 
-	// only do status updates for parent procs
-	if proc != nil && proc.IsParent() {
-		err = s.remote.Status(ctx, user, repo, pipeline, proc)
+	// only do status updates for parent steps
+	if step != nil && step.IsParent() {
+		err = s.remote.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline, procs []*model.Proc) (err error) {
-	if pipeline.Procs, err = model.Tree(procs); err != nil {
+func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline, steps []*model.Step) (err error) {
+	if pipeline.Steps, err = model.Tree(steps); err != nil {
 		return err
 	}
 	message := pubsub.Message{

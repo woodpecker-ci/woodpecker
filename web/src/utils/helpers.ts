@@ -1,40 +1,40 @@
-import { Pipeline, PipelineProc, Repo } from '~/lib/api/types';
+import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
 
-export function findProc(procs: PipelineProc[], pid: number): PipelineProc | undefined {
-  return procs.reduce((prev, proc) => {
-    if (proc.pid === pid) {
-      return proc;
+export function findStep(steps: PipelineStep[], pid: number): PipelineStep | undefined {
+  return steps.reduce((prev, step) => {
+    if (step.pid === pid) {
+      return step;
     }
 
-    if (proc.children) {
-      const result = findProc(proc.children, pid);
+    if (step.children) {
+      const result = findStep(step.children, pid);
       if (result) {
         return result;
       }
     }
 
     return prev;
-  }, undefined as PipelineProc | undefined);
+  }, undefined as PipelineStep | undefined);
 }
 
 /**
  * Returns true if the process is in a completed state.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcFinished(proc: PipelineProc): boolean {
-  return proc.state !== 'running' && proc.state !== 'pending';
+export function isStepFinished(step: PipelineStep): boolean {
+  return step.state !== 'running' && step.state !== 'pending';
 }
 
 /**
  * Returns true if the process is running.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcRunning(proc: PipelineProc): boolean {
-  return proc.state === 'running';
+export function isStepRunning(step: PipelineStep): boolean {
+  return step.state === 'running';
 }
 
 /**
