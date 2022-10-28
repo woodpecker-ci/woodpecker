@@ -1,17 +1,12 @@
 <template>
-  <FluidContainer class="flex flex-col">
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-dark-200">
-      <IconButton :to="{ name: 'repos' }" :title="$t('back')" icon="back" />
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.add') }}</h1>
-      <TextField v-model="search" class="w-auto ml-auto" :placeholder="$t('search')" />
-      <Button
-        class="ml-auto"
-        start-icon="sync"
-        :text="$t('repo.enable.reload')"
-        :is-loading="isReloadingRepos"
-        @click="reloadRepos"
-      />
-    </div>
+  <Scaffold v-model:search="search" :go-back="goBack">
+    <template #title>
+      {{ $t('repo.add') }}
+    </template>
+
+    <template #titleActions>
+      <Button start-icon="sync" :text="$t('repo.enable.reload')" :is-loading="isReloadingRepos" @click="reloadRepos" />
+    </template>
 
     <div class="space-y-4">
       <ListItem
@@ -32,7 +27,7 @@
         />
       </ListItem>
     </div>
-  </FluidContainer>
+  </Scaffold>
 </template>
 
 <script lang="ts">
@@ -41,14 +36,13 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import TextField from '~/components/form/TextField.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
+import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
@@ -56,10 +50,8 @@ export default defineComponent({
 
   components: {
     Button,
-    FluidContainer,
     ListItem,
-    IconButton,
-    TextField,
+    Scaffold,
   },
 
   setup() {
@@ -91,10 +83,13 @@ export default defineComponent({
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     });
 
+    const goBack = useRouteBackOrDefault({ name: 'repos' });
+
     return {
       isReloadingRepos,
       isActivatingRepo,
       repoToActivate,
+      goBack,
       reloadRepos,
       activateRepo,
       searchedRepos,
