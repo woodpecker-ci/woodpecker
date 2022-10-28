@@ -46,6 +46,11 @@
       "verified": false
     },
     {
+      "name": "Node PM",
+      "docs": "https://codeberg.org/qwerty287/woodpecker-node-pm/src/branch/main/docs.md",
+      "verified": false
+    },
+    {
       "// todo": true,
       "name": "Email",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
