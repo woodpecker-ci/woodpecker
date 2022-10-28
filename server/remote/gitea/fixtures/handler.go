@@ -28,7 +28,7 @@ func Handler() http.Handler {
 	e := gin.New()
 	e.GET("/api/v1/repos/:owner/:name", getRepo)
 	e.GET("/api/v1/repositories/:id", getRepoByID)
-	e.GET("/api/v1/repos/:owner/:name/raw/:commit/:file", getRepoFile)
+	e.GET("/api/v1/repos/:owner/:name/raw/:file", getRepoFile)
 	e.POST("/api/v1/repos/:owner/:name/hooks", createRepoHook)
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
@@ -70,10 +70,13 @@ func createRepoCommitStatus(c *gin.Context) {
 }
 
 func getRepoFile(c *gin.Context) {
-	if c.Param("file") == "file_not_found" {
+	file := c.Param("file")
+	ref := c.Query("ref")
+
+	if file == "file_not_found" {
 		c.String(404, "")
 	}
-	if c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50" {
+	if ref == "v1.0.0" || ref == "9ecad50" {
 		c.String(200, repoFilePayload)
 	}
 	c.String(404, "")

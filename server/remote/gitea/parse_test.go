@@ -50,7 +50,6 @@ func Test_parser(t *testing.T) {
 			g.Assert(b).IsNotNil()
 			g.Assert(err).IsNil()
 			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
 		})
 		g.Describe("given a push hook", func() {
 			g.It("should extract repository and pipeline details", func() {
