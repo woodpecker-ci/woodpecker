@@ -19,7 +19,7 @@ type RepoListOptions = {
   flush?: boolean;
 };
 
-type BuildOptions = {
+type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
 };
@@ -58,8 +58,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/repair`);
   }
 
-  createPipeline(owner: string, repo: string, options: BuildOptions): Promise<Pipeline> {
-    return this._post(`/api/repos/${owner}/${repo}/pipeline`, options) as Promise<Pipeline>;
+  createPipeline(owner: string, repo: string, options: PipelineOptions): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
   }
 
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
@@ -160,6 +160,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteCron(owner: string, repo: string, cronId: number): Promise<unknown> {
     return this._delete(`/api/repos/${owner}/${repo}/cron/${cronId}`);
+  }
+
+  runCron(owner: string, repo: string, cronId: number): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/cron/${cronId}`) as Promise<Pipeline>;
   }
 
   getOrgPermissions(owner: string): Promise<OrgPermissions> {

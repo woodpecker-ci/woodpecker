@@ -1,6 +1,6 @@
 <template>
   <!-- Navbar -->
-  <div class="flex shadow-lg dark:shadow-sm bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-900">
+  <div class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
     <!-- Left Links Box -->
     <div class="flex text-white dark:text-gray-400 items-center space-x-2">
       <!-- Logo -->
@@ -46,7 +46,7 @@
         :title="$t('user.settings')"
         class="navbar-icon navbar-clickable !p-1.5"
       >
-        <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
+        <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </NavbarIcon>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
