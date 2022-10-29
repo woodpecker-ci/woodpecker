@@ -79,7 +79,7 @@ const routes: RouteRecordRaw[] = [
         props: true,
         children: [
           {
-            path: ':procId?',
+            path: ':stepId?',
             name: 'repo-pipeline',
             component: (): Component => import('~/views/repo/pipeline/Pipeline.vue'),
             props: true,

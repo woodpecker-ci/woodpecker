@@ -4,7 +4,7 @@ depends_on:
 
 variables:
   - &golang_image 'golang:1.18'
-  - &node_image 'node:16-alpine'
+  - &node_image 'node:18-alpine'
   - &xgo_image 'techknowlogick/xgo:go-1.18.x'
   - &xgo_version 'go-1.18.x'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
@@ -24,8 +24,8 @@ pipeline:
   ###############
   build-web:
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build

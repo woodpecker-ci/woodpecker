@@ -5,7 +5,7 @@ package proto;
 
 message File {
   string name = 1;
-  string proc = 2;
+  string step = 2;
   string mime = 3;
   int64  time = 4;
   int32  size = 5;
@@ -23,7 +23,7 @@ message State {
 }
 
 message Line {
-  string proc = 1;
+  string step = 1;
   int64  time = 2;
   int32  pos = 3;
   string out = 4;

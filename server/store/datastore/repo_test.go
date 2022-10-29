@@ -383,7 +383,7 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Pipeline),
 		new(model.PipelineConfig),
 		new(model.Logs),
-		new(model.Proc),
+		new(model.Step),
 		new(model.File),
 		new(model.Secret),
 		new(model.Registry),
@@ -401,10 +401,10 @@ func TestRepoCrud(t *testing.T) {
 	pipeline := model.Pipeline{
 		RepoID: repo.ID,
 	}
-	proc := model.Proc{
-		Name: "a proc",
+	step := model.Step{
+		Name: "a step",
 	}
-	assert.NoError(t, store.CreatePipeline(&pipeline, &proc))
+	assert.NoError(t, store.CreatePipeline(&pipeline, &step))
 
 	// create unrelated
 	repoUnrelated := model.Repo{
@@ -417,10 +417,10 @@ func TestRepoCrud(t *testing.T) {
 	pipelineUnrelated := model.Pipeline{
 		RepoID: repoUnrelated.ID,
 	}
-	procUnrelated := model.Proc{
-		Name: "a unrelated proc",
+	stepUnrelated := model.Step{
+		Name: "a unrelated step",
 	}
-	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &procUnrelated))
+	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &stepUnrelated))
 
 	_, err := store.GetRepo(repo.ID)
 	assert.NoError(t, err)
@@ -428,9 +428,9 @@ func TestRepoCrud(t *testing.T) {
 	_, err = store.GetRepo(repo.ID)
 	assert.Error(t, err)
 
-	procCount, err := store.engine.Count(new(model.Proc))
+	stepCount, err := store.engine.Count(new(model.Step))
 	assert.NoError(t, err)
-	assert.EqualValues(t, 1, procCount)
+	assert.EqualValues(t, 1, stepCount)
 	pipelineCount, err := store.engine.Count(new(model.Pipeline))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, pipelineCount)

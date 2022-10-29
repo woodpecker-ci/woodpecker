@@ -21,7 +21,7 @@ import (
 )
 
 func TestTree(t *testing.T) {
-	procs := []*Proc{{
+	steps := []*Step{{
 		ID:         25,
 		PID:        2,
 		PipelineID: 6,
@@ -49,12 +49,12 @@ func TestTree(t *testing.T) {
 		State:      StatusFailure,
 		Error:      "1",
 	}}
-	procs, err := Tree(procs)
+	steps, err := Tree(steps)
 	assert.NoError(t, err)
-	assert.Len(t, procs, 1)
-	assert.Len(t, procs[0].Children, 2)
+	assert.Len(t, steps, 1)
+	assert.Len(t, steps[0].Children, 2)
 
-	procs = []*Proc{{
+	steps = []*Step{{
 		ID:         25,
 		PID:        2,
 		PipelineID: 6,
@@ -64,6 +64,6 @@ func TestTree(t *testing.T) {
 		State:      StatusSuccess,
 		Error:      "0",
 	}}
-	_, err = Tree(procs)
+	_, err = Tree(steps)
 	assert.Error(t, err)
 }

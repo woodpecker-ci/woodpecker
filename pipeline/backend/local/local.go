@@ -55,33 +55,33 @@ func (e *local) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, proc *types.Config) error {
+func (e *local) Setup(ctx context.Context, config *types.Config) error {
 	return nil
 }
 
 // Exec the pipeline step.
-func (e *local) Exec(ctx context.Context, proc *types.Step) error {
+func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
 	Env := os.Environ()
-	for a, b := range proc.Environment {
+	for a, b := range step.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
 			Env = append(Env, a+"="+b)
 		}
 	}
 
 	Command := []string{}
-	if proc.Image == constant.DefaultCloneImage {
+	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
+		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
 		Command = append(Command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, proc.Image)
+		Command = append(Command, step.Image)
 		Command = append(Command, "-c")
 
 		// Decode script and delete initial lines
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
+		Script, _ := base64.RawStdEncoding.DecodeString(step.Environment["CI_SCRIPT"])
 		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
 	}
 
@@ -90,10 +90,10 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 	e.cmd.Env = Env
 
 	// Prepare working directory
-	if proc.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO_OWNER"]
+	if step.Image == constant.DefaultCloneImage {
+		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO_OWNER"]
 	} else {
-		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO"]
+		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO"]
 	}
 	err := os.MkdirAll(e.cmd.Dir, 0o700)
 	if err != nil {

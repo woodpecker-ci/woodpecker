@@ -17,9 +17,10 @@
         },
         "name": "Name",
         "none": "Es gibt noch keine globalen Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Globales Geheimnis gespeichert",
-        "secrets": "Geheimnis",
+        "secrets": "Geheimnisse",
         "show": "Geheimnisse anzeigen",
         "value": "Wert",
         "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
@@ -31,6 +32,7 @@
   "color_scheme_dark": "Wechsle zu hellem Modus",
   "color_scheme_light": "Wechsle zu dunklem Modus",
   "docs": "Docs",
+  "documentation_for": "Dokumentation für „{topic}“",
   "login": "Anmelden",
   "logout": "Abmelden",
   "not_found": {
@@ -47,7 +49,7 @@
         "desc": "Organisation-Geheimnisse können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Secrets erhalten könnte."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -55,6 +57,7 @@
         },
         "name": "Name",
         "none": "Es existieren noch keine Organisations-Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Organisations-Geheimnis gespeichert",
         "secrets": "Geheimnisse",
@@ -161,7 +164,7 @@
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
       "pipeline": "Pipeline #{pipelineId}",
-      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
+      "pipelines_for": "Pipelines für den Branch „{branch}“",
       "protected": {
         "approve": "Genehmigen",
         "approve_success": "Pipeline genehmigt",
@@ -210,7 +213,7 @@
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
@@ -219,6 +222,7 @@
         "next_exec": "Nächste Ausführung",
         "none": "Derzeit existieren keine Crons.",
         "not_executed_yet": "Noch nicht ausgeführt",
+        "run": "Jetzt ausführen",
         "save": "Cron speichern",
         "saved": "Cron gespeichert",
         "schedule": {
@@ -284,7 +288,7 @@
         "creds": "Zugangsdaten für die Registry",
         "delete": "Registry löschen",
         "deleted": "Registry-Zugangsdaten gelöscht",
-        "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
+        "desc": "Zugangsdaten für die Registries können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
         "edit": "Registry bearbeiten",
         "none": "Es gibt noch keine Zugangsdaten für die Registry.",
         "registries": "Registries",
@@ -309,6 +313,7 @@
         },
         "name": "Name",
         "none": "Es gibt noch keine Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Geheimnis gespeichert",
         "secrets": "Geheimnisse",
@@ -340,7 +345,7 @@
     "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "settings": "Nutzer Einstellungen",
+    "settings": "Benutzer-Einstellungen",
     "shell_setup": "Kommandozeilen-Einrichtung",
     "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
     "token": "Dein persönlicher Token"
