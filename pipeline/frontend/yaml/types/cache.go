@@ -23,7 +23,7 @@ type FileCache struct {
 }
 
 func (v *FileCache) Validate() bool {
-	return strings.ContainsAny(v.Name, "/\\:.")
+	return !strings.ContainsAny(v.Name, "/\\:.") && !strings.Contains(v.Destination, ":")
 }
 
 // String implements the Stringer interface.
