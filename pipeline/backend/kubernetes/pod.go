@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"strings"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -10,8 +11,13 @@ import (
 )
 
 func Pod(namespace string, step *types.Step) *v1.Pod {
-	var vols []v1.Volume
-	var volMounts []v1.VolumeMount
+	var (
+		vols       []v1.Volume
+		volMounts  []v1.VolumeMount
+		entrypoint []string
+		args       []string
+	)
+
 	if step.WorkingDir != "" {
 		for _, vol := range step.Volumes {
 			vols = append(vols, v1.Volume{
@@ -34,6 +40,15 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 	pullPolicy := v1.PullIfNotPresent
 	if step.Pull {
 		pullPolicy = v1.PullAlways
+	}
+
+	if len(step.Commands) != 0 {
+		scriptEnv, entry, cmds := common.GenerateDockerConf(step.Commands)
+		for k, v := range scriptEnv {
+			step.Environment[k] = v
+		}
+		entrypoint = entry
+		args = cmds
 	}
 
 	hostAliases := []v1.HostAlias{}
@@ -88,8 +103,8 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 				Name:            podName(step),
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
-				Command:         step.Entrypoint,
-				Args:            step.Commands,
+				Command:         entrypoint,
+				Args:            args,
 				WorkingDir:      step.WorkingDir,
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
