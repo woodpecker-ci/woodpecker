@@ -304,20 +304,20 @@ func setupCoding(c *cli.Context) (forge.Forge, error) {
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "pending_jobs",
-		Help:      "Total number of pending pipeline processes.",
+		Name:      "pending_steps",
+		Help:      "Total number of pending pipeline steps.",
 	})
-	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "waiting_jobs",
+		Name:      "waiting_steps",
 		Help:      "Total number of pipeline waiting on deps.",
 	})
-	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "running_jobs",
-		Help:      "Total number of running pipeline processes.",
+		Name:      "running_steps",
+		Help:      "Total number of running pipeline steps.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
@@ -343,9 +343,9 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	g.Go(func() error {
 		for {
 			stats := server.Config.Services.Queue.Info(context.TODO())
-			pendingJobs.Set(float64(stats.Stats.Pending))
-			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
-			runningJobs.Set(float64(stats.Stats.Running))
+			pendingSteps.Set(float64(stats.Stats.Pending))
+			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
+			runningSteps.Set(float64(stats.Stats.Running))
 			workers.Set(float64(stats.Stats.Workers))
 			time.Sleep(500 * time.Millisecond)
 		}

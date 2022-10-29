@@ -58,7 +58,7 @@ WOODPECKER_GITHUB_SECRET=<redacted>
 # agent
 WOODPECKER_SERVER=localhost:9000
 WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-system
-WOODPECKER_MAX_PROCS=1
+WOODPECKER_MAX_WORKFLOWS=1
 
 # enable if you want to develop the UI
 # WOODPECKER_DEV_WWW_PROXY=http://localhost:8010

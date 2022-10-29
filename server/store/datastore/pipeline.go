@@ -97,7 +97,7 @@ func (s storage) GetPipelineCount() (int64, error) {
 	return s.engine.Count(new(model.Pipeline))
 }
 
-func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Proc) error {
+func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -127,10 +127,10 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, procList ...*model.Pro
 		return err
 	}
 
-	for i := range procList {
-		procList[i].PipelineID = pipeline.ID
+	for i := range stepList {
+		stepList[i].PipelineID = pipeline.ID
 		// only Insert set auto created ID back to object
-		if _, err := sess.Insert(procList[i]); err != nil {
+		if _, err := sess.Insert(stepList[i]); err != nil {
 			return err
 		}
 	}
@@ -144,18 +144,18 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 }
 
 func deletePipeline(sess *xorm.Session, pipelineID int64) error {
-	// delete related procs
-	for startProcs := 0; ; startProcs += perPage {
-		procIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startProcs).Table("procs").Cols("proc_id").Where("proc_pipeline_id = ?", pipelineID).Find(&procIDs); err != nil {
+	// delete related steps
+	for startSteps := 0; ; startSteps += perPage {
+		stepIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
 			return err
 		}
-		if len(procIDs) == 0 {
+		if len(stepIDs) == 0 {
 			break
 		}
 
-		for i := range procIDs {
-			if err := deleteProc(sess, procIDs[i]); err != nil {
+		for i := range stepIDs {
+			if err := deleteStep(sess, stepIDs[i]); err != nil {
 				return err
 			}
 		}

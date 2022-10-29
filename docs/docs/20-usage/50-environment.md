@@ -83,11 +83,11 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
-|                                  | **Current job**                                                                              |
-| `CI_JOB_NUMBER`                  | job number                                                                                   |
-| `CI_JOB_STATUS`                  | job status (success, failure)                                                                |
-| `CI_JOB_STARTED`                 | job started UNIX timestamp                                                                   |
-| `CI_JOB_FINISHED`                | job finished UNIX timestamp                                                                  |
+|                                  | **Current step**                                                                             |
+| `CI_STEP_NUMBER`                 | step number                                                                                  |
+| `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
+| `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
+| `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |
 |                                  | **Previous commit**                                                                          |
 | `CI_PREV_COMMIT_SHA`             | previous commit SHA                                                                          |
 | `CI_PREV_COMMIT_REF`             | previous commit ref                                                                          |

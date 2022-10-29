@@ -24,7 +24,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -38,7 +38,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM procs")
+			_, err = store.engine.Exec("DELETE FROM steps")
 			g.Assert(err).IsNil()
 		})
 

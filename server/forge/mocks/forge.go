@@ -342,11 +342,11 @@ func (_m *Forge) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 // Status provides a mock function with given fields: ctx, u, r, b, p
-func (_m *Forge) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Proc) error {
+func (_m *Forge) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Step) error {
 	ret := _m.Called(ctx, u, r, b, p)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, *model.Proc) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.Pipeline, *model.Step) error); ok {
 		r0 = rf(ctx, u, r, b, p)
 	} else {
 		r0 = ret.Error(0)

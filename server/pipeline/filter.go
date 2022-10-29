@@ -27,7 +27,7 @@ import (
 )
 
 func zeroSteps(pipeline *model.Pipeline, forgeYamlConfigs []*forge.FileMeta) bool {
-	b := shared.ProcBuilder{
+	b := shared.StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},

@@ -80,6 +80,8 @@ declare module '@vue/runtime-core' {
     PipelineProcList: typeof import('./src/components/repo/pipeline/PipelineProcList.vue')['default']
     PipelineRunningIcon: typeof import('./src/components/repo/pipeline/PipelineRunningIcon.vue')['default']
     PipelineStatusIcon: typeof import('./src/components/repo/pipeline/PipelineStatusIcon.vue')['default']
+    PipelineStepDuration: typeof import('./src/components/repo/pipeline/PipelineStepDuration.vue')['default']
+    PipelineStepList: typeof import('./src/components/repo/pipeline/PipelineStepList.vue')['default']
     Popup: typeof import('./src/components/layout/Popup.vue')['default']
     RadioField: typeof import('./src/components/form/RadioField.vue')['default']
     RegistriesTab: typeof import('./src/components/repo/settings/RegistriesTab.vue')['default']

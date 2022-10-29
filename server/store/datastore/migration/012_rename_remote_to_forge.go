@@ -24,9 +24,9 @@ var renameRemoteToForge = task{
 	name:     "rename-remote-to-forge",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		var cloneURLColumns []*oldBuildColumn
+		var cloneURLColumns []*oldTable
 
-		cloneURLColumns = append(cloneURLColumns, &oldBuildColumn{
+		cloneURLColumns = append(cloneURLColumns, &oldTable{
 			table: "pipelines",
 			columns: []string{
 				"pipeline_remote",
@@ -43,9 +43,9 @@ var renameRemoteToForge = task{
 			}
 		}
 
-		var forgeColumns []*oldBuildColumn
+		var forgeColumns []*oldTable
 
-		forgeColumns = append(forgeColumns, &oldBuildColumn{
+		forgeColumns = append(forgeColumns, &oldTable{
 			table: "repos",
 			columns: []string{
 				"remote_id",
