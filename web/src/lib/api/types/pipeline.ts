@@ -1,39 +1,39 @@
-// A build for a repository.
+// A pipeline for a repository.
 export type Pipeline = {
   id: number;
 
-  // The build number.
-  // This number is specified within the context of the repository the build belongs to and is unique within that.
+  // The pipeline number.
+  // This number is specified within the context of the repository the pipeline belongs to and is unique within that.
   number: number;
 
   parent: number;
 
   event: 'push' | 'tag' | 'pull_request' | 'deployment' | 'cron' | 'manual';
 
-  //  The current status of the build.
+  //  The current status of the pipeline.
   status: PipelineStatus;
 
   error: string;
 
-  // When the build request was received.
+  // When the pipeline request was received.
   created_at: number;
 
-  // When the build was updated last time in database.
+  // When the pipeline was updated last time in database.
   updated_at: number;
 
-  // When the build was enqueued.
+  // When the pipeline was enqueued.
   enqueued_at: number;
 
-  // When the build began execution.
+  // When the pipeline began execution.
   started_at: number;
 
-  // When the build was finished.
+  // When the pipeline was finished.
   finished_at: number;
 
   // Where the deployment should go.
   deploy_to: string;
 
-  // The commit for the build.
+  // The commit for the pipeline.
   commit: string;
 
   // The branch the commit was pushed to.
@@ -68,7 +68,7 @@ export type Pipeline = {
   author_email: string;
 
   // The link to view the repository.
-  // This link will point to the repository state associated with the build's commit.
+  // This link will point to the repository state associated with the pipeline's commit.
   link_url: string;
 
   signed: boolean;
@@ -79,9 +79,9 @@ export type Pipeline = {
 
   reviewed_at: number;
 
-  // The jobs associated with this build.
-  // A build will have multiple jobs if a matrix build was used or if a rebuild was requested.
-  procs?: PipelineProc[];
+  // The steps associated with this pipeline.
+  // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
+  steps?: PipelineStep[];
 
   changed_files?: string[];
 };
@@ -98,9 +98,9 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
-export type PipelineProc = {
+export type PipelineStep = {
   id: number;
-  build_id: number;
+  pipeline_id: number;
   pid: number;
   ppid: number;
   pgid: number;
@@ -112,11 +112,11 @@ export type PipelineProc = {
   end_time?: number;
   machine?: string;
   error?: string;
-  children?: PipelineProc[];
+  children?: PipelineStep[];
 };
 
 export type PipelineLog = {
-  proc: string;
+  step: string;
   pos: number;
   out: string;
   time?: number;

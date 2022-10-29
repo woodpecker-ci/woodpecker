@@ -36,6 +36,7 @@ type (
 		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
 		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
 		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
+		Directory     string                 `yaml:"directory,omitempty"`
 		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
 		Group         string                 `yaml:"group,omitempty"`
@@ -107,4 +108,8 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+func (c *Container) IsPlugin() bool {
+	return len(c.Commands) == 0
 }

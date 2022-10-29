@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -66,11 +67,18 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingdir = c.stepWorkdir(container)
 	}
 
 	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, c.secrets.toStringMap()); err != nil {
+		pluginSecrets := secretMap{}
+		for name, secret := range c.secrets {
+			if secret.Available(container) {
+				pluginSecrets[name] = secret
+			}
+		}
+
+		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
 			log.Error().Err(err).Msg("paramsToEnv")
 		}
 	}
@@ -95,7 +103,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	for _, requested := range container.Secrets.Secrets {
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && (len(secret.Match) == 0 || matchImage(container.Image, secret.Match...)) {
+		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		}
 	}
@@ -162,4 +170,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
 	}
+}
+
+func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+	if filepath.IsAbs(container.Directory) {
+		return container.Directory
+	}
+	return filepath.Join(c.base, c.path, container.Directory)
 }

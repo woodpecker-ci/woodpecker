@@ -13,87 +13,87 @@ import (
 )
 
 // returns a container configuration.
-func toConfig(proc *types.Step) *container.Config {
+func toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        proc.Image,
-		Labels:       proc.Labels,
-		WorkingDir:   proc.WorkingDir,
+		Image:        step.Image,
+		Labels:       step.Labels,
+		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
 
-	if len(proc.Commands) != 0 {
+	if len(step.Commands) != 0 {
 		if runtime.GOOS == "windows" {
-			proc.Environment["CI_SCRIPT"] = generateScriptWindows(proc.Commands)
-			proc.Environment["HOME"] = "c:\\root"
-			proc.Environment["SHELL"] = "powershell.exe"
-			proc.Entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
+			step.Environment["CI_SCRIPT"] = generateScriptWindows(step.Commands)
+			step.Environment["HOME"] = "c:\\root"
+			step.Environment["SHELL"] = "powershell.exe"
+			step.Entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
 			config.Cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 		} else {
-			proc.Environment["CI_SCRIPT"] = generateScriptPosix(proc.Commands)
-			proc.Environment["HOME"] = "/root"
-			proc.Environment["SHELL"] = "/bin/sh"
-			proc.Entrypoint = []string{"/bin/sh", "-c"}
+			step.Environment["CI_SCRIPT"] = generateScriptPosix(step.Commands)
+			step.Environment["HOME"] = "/root"
+			step.Environment["SHELL"] = "/bin/sh"
+			step.Entrypoint = []string{"/bin/sh", "-c"}
 			config.Cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 		}
 	}
 
-	if len(proc.Environment) != 0 {
-		config.Env = toEnv(proc.Environment)
+	if len(step.Environment) != 0 {
+		config.Env = toEnv(step.Environment)
 	}
-	if len(proc.Entrypoint) != 0 {
-		config.Entrypoint = proc.Entrypoint
+	if len(step.Entrypoint) != 0 {
+		config.Entrypoint = step.Entrypoint
 	}
-	if len(proc.Volumes) != 0 {
-		config.Volumes = toVol(proc.Volumes)
+	if len(step.Volumes) != 0 {
+		config.Volumes = toVol(step.Volumes)
 	}
 	return config
 }
 
 // returns a container host configuration.
-func toHostConfig(proc *types.Step) *container.HostConfig {
+func toHostConfig(step *types.Step) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
-			CPUQuota:   proc.CPUQuota,
-			CPUShares:  proc.CPUShares,
-			CpusetCpus: proc.CPUSet,
-			Memory:     proc.MemLimit,
-			MemorySwap: proc.MemSwapLimit,
+			CPUQuota:   step.CPUQuota,
+			CPUShares:  step.CPUShares,
+			CpusetCpus: step.CPUSet,
+			Memory:     step.MemLimit,
+			MemorySwap: step.MemSwapLimit,
 		},
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
-		Privileged: proc.Privileged,
-		ShmSize:    proc.ShmSize,
-		Sysctls:    proc.Sysctls,
+		Privileged: step.Privileged,
+		ShmSize:    step.ShmSize,
+		Sysctls:    step.Sysctls,
 	}
 
-	// if len(proc.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = proc.VolumesFrom
+	// if len(step.VolumesFrom) != 0 {
+	// 	config.VolumesFrom = step.VolumesFrom
 	// }
-	if len(proc.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(proc.NetworkMode)
+	if len(step.NetworkMode) != 0 {
+		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
-	if len(proc.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(proc.IpcMode)
+	if len(step.IpcMode) != 0 {
+		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
-	if len(proc.DNS) != 0 {
-		config.DNS = proc.DNS
+	if len(step.DNS) != 0 {
+		config.DNS = step.DNS
 	}
-	if len(proc.DNSSearch) != 0 {
-		config.DNSSearch = proc.DNSSearch
+	if len(step.DNSSearch) != 0 {
+		config.DNSSearch = step.DNSSearch
 	}
-	if len(proc.ExtraHosts) != 0 {
-		config.ExtraHosts = proc.ExtraHosts
+	if len(step.ExtraHosts) != 0 {
+		config.ExtraHosts = step.ExtraHosts
 	}
-	if len(proc.Devices) != 0 {
-		config.Devices = toDev(proc.Devices)
+	if len(step.Devices) != 0 {
+		config.Devices = toDev(step.Devices)
 	}
-	if len(proc.Volumes) != 0 {
-		config.Binds = proc.Volumes
+	if len(step.Volumes) != 0 {
+		config.Binds = step.Volumes
 	}
 	config.Tmpfs = map[string]string{}
-	for _, path := range proc.Tmpfs {
+	for _, path := range step.Tmpfs {
 		if !strings.Contains(path, ":") {
 			config.Tmpfs[path] = ""
 			continue

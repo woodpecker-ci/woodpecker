@@ -37,7 +37,7 @@ type config struct {
 
 type requestStructure struct {
 	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"build"`
+	Pipeline      *model.Pipeline `json:"pipeline"`
 	Configuration []*config       `json:"configs"`
 }
 

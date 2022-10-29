@@ -412,8 +412,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab.
-Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -501,6 +500,10 @@ For more details check the [volumes docs](./70-volumes.md).
 Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
 
 For more details check the [service docs](./60-services.md#detachment).
+
+### `directory`
+
+Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
 
 ## `services`
 

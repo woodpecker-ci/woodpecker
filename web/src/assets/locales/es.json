@@ -1,302 +1,57 @@
 {
-  "admin": {
-    "settings": {
-      "not_allowed": "",
-      "secrets": {
-        "add": "",
-        "created": "",
-        "deleted": "",
-        "desc": "",
-        "events": {
-          "events": "",
-          "pr_warning": ""
-        },
-        "images": {
-          "desc": "",
-          "images": ""
-        },
-        "name": "",
-        "none": "",
-        "save": "",
-        "saved": "",
-        "secrets": "",
-        "show": "",
-        "value": "",
-        "warning": ""
-      },
-      "settings": ""
-    }
-  },
-  "back": "",
-  "color_scheme_dark": "",
-  "color_scheme_light": "",
-  "docs": "",
-  "login": "",
-  "logout": "",
+  "back": "Atrás",
+  "color_scheme_dark": "Cambiar al modo claro",
+  "color_scheme_light": "Cambiar al modo oscuro",
+  "documentation_for": "Documentación de \"{topic}\"",
+  "login": "Iniciar sesión",
+  "logout": "Cerrar sesión",
   "not_found": {
-    "back_home": "",
-    "not_found": ""
+    "back_home": "Volver a la página principal"
   },
-  "org": {
-    "settings": {
-      "not_allowed": "",
-      "secrets": {
-        "add": "",
-        "created": "",
-        "deleted": "",
-        "desc": "",
-        "events": {
-          "events": "",
-          "pr_warning": ""
-        },
-        "images": {
-          "desc": "",
-          "images": ""
-        },
-        "name": "",
-        "none": "",
-        "save": "",
-        "saved": "",
-        "secrets": "",
-        "show": "",
-        "value": ""
-      },
-      "settings": ""
-    }
-  },
-  "password": "",
+  "password": "Contraseña",
   "repo": {
-    "activity": "",
-    "add": "",
-    "branches": "",
-    "build": {
-      "actions": {
-        "cancel": "",
-        "cancel_success": "",
-        "canceled": "",
-        "log_auto_scroll": "",
-        "log_auto_scroll_off": "",
-        "log_download": "",
-        "restart": "",
-        "restart_success": ""
-      },
-      "config": "",
-      "created": "",
-      "event": {
-        "cron": "",
-        "deploy": "",
-        "manual": "",
-        "pr": "",
-        "push": "",
-        "tag": ""
-      },
-      "execution_error": "",
-      "exit_code": "",
-      "files": "",
-      "loading": "",
-      "log_download_error": "",
-      "no_files": "",
-      "no_pipeline_steps": "",
-      "no_pipelines": "",
-      "pipeline": "",
-      "pipelines_for": "",
-      "protected": {
-        "approve": "",
-        "approve_success": "",
-        "awaits": "",
-        "decline": "",
-        "decline_success": "",
-        "declined": ""
-      },
-      "step_not_started": "",
-      "tasks": ""
-    },
+    "activity": "Actividad",
+    "add": "Añadir repositorio",
+    "branches": "Ramas",
     "enable": {
-      "enable": "",
-      "enabled": "",
-      "list_reloaded": "",
-      "reload": "",
-      "success": ""
+      "enable": "Activar",
+      "list_reloaded": "Lista de repositorios actualizada",
+      "reload": "Actualizar repositorios",
+      "success": "Repositorio activado"
     },
     "manual_pipeline": {
-      "select_branch": "",
-      "title": "",
-      "trigger": "",
+      "select_branch": "Escoger rama",
       "variables": {
-        "add": "",
-        "desc": "",
-        "name": "",
-        "title": "",
-        "value": ""
+        "add": "Añadir variable",
+        "name": "Nombre de la variable",
+        "value": "Valor de la variable"
       }
     },
-    "not_allowed": "",
+    "not_allowed": "No tienes acceso a este repositorio",
     "settings": {
-      "actions": {
-        "actions": "",
-        "delete": {
-          "confirm": "",
-          "delete": "",
-          "success": ""
-        },
-        "disable": {
-          "disable": "",
-          "success": ""
-        },
-        "repair": {
-          "repair": "",
-          "success": ""
-        }
-      },
-      "badge": {
-        "badge": "",
-        "markdown": "",
-        "url_branch": ""
-      },
-      "crons": {
-        "add": "",
-        "branch": {
-          "placeholder": "",
-          "title": ""
-        },
-        "created": "",
-        "crons": "",
-        "delete": "",
-        "deleted": "",
-        "desc": "",
-        "edit": "",
-        "name": {
-          "name": "",
-          "placeholder": ""
-        },
-        "next_exec": "",
-        "none": "",
-        "not_executed_yet": "",
-        "save": "",
-        "saved": "",
-        "schedule": {
-          "placeholder": "",
-          "title": ""
-        },
-        "show": ""
-      },
       "general": {
-        "allow_pr": {
-          "allow": "",
-          "desc": ""
-        },
-        "cancel_prev": {
-          "cancel": "",
-          "desc": ""
-        },
-        "general": "",
+        "general": "General",
         "pipeline_path": {
-          "default": "",
-          "desc": "",
-          "path": ""
+          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
         },
-        "project": "",
-        "protected": {
-          "desc": "",
-          "protected": ""
-        },
-        "save": "",
-        "success": "",
-        "timeout": {
-          "minutes": "",
-          "timeout": ""
-        },
-        "trusted": {
-          "desc": "",
-          "trusted": ""
-        },
-        "visibility": {
-          "internal": {
-            "desc": "",
-            "internal": ""
-          },
-          "private": {
-            "desc": "",
-            "private": ""
-          },
-          "public": {
-            "desc": "",
-            "public": ""
-          },
-          "visibility": ""
-        }
+        "project": "Configuración del proyecto",
+        "save": "Guardar configuración",
+        "success": "Configuración del repositorio actualizada"
       },
-      "not_allowed": "",
-      "registries": {
-        "add": "",
-        "address": {
-          "address": "",
-          "placeholder": ""
-        },
-        "created": "",
-        "creds": "",
-        "delete": "",
-        "deleted": "",
-        "desc": "",
-        "edit": "",
-        "none": "",
-        "registries": "",
-        "save": "",
-        "saved": "",
-        "show": ""
-      },
-      "secrets": {
-        "add": "",
-        "created": "",
-        "delete": "",
-        "deleted": "",
-        "desc": "",
-        "edit": "",
-        "events": {
-          "events": "",
-          "pr_warning": ""
-        },
-        "images": {
-          "desc": "",
-          "images": ""
-        },
-        "name": "",
-        "none": "",
-        "save": "",
-        "saved": "",
-        "secrets": "",
-        "show": "",
-        "value": ""
-      },
-      "settings": ""
+      "not_allowed": "No tienes acceso a la configuración del repositorio",
+      "settings": "Configuración"
     },
-    "user_none": ""
+    "user_none": "Esta organización / usuario no tiene proyectos aún."
   },
-  "repos": "",
-  "repositories": "",
-  "search": "",
+  "repos": "Repositorios",
+  "repositories": "Repositorios",
+  "search": "Buscar…",
   "time": {
-    "days_short": "",
-    "hours_short": "",
-    "min_short": "",
-    "not_started": "",
-    "sec_short": "",
-    "tmpl": "",
-    "weeks_short": ""
+    "days_short": "d",
+    "hours_short": "h",
+    "not_started": "no iniciado aún"
   },
-  "unknown_error": "",
-  "url": "",
-  "user": {
-    "access_denied": "",
-    "api_usage": "",
-    "cli_usage": "",
-    "dl_cli": "",
-    "internal_error": "",
-    "oauth_error": "",
-    "shell_setup": "",
-    "shell_setup_before": "",
-    "token": ""
-  },
-  "username": "",
-  "welcome": ""
+  "unknown_error": "Se ha producido un error desconocido",
+  "url": "URL",
+  "username": "Nombre de usuario"
 }

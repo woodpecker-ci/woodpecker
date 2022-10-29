@@ -1,0 +1,83 @@
+{
+  "back": "Terug",
+  "color_scheme_dark": "Wissel naar lichte modus",
+  "color_scheme_light": "Wissel naar donkere modus",
+  "documentation_for": "Documentatie voor \"{topic}\"",
+  "login": "Inloggen",
+  "logout": "Uitloggen",
+  "not_found": {
+    "back_home": "Terug naar startpagina",
+    "not_found": "Whoa 404, of wij hebben iets gesloopt of je hebt een typfoutje gemaakt :-/"
+  },
+  "password": "Wachtwoord",
+  "repo": {
+    "enable": {
+      "enable": "Activeer",
+      "enabled": "Al ingeschakeld",
+      "list_reloaded": "Repository lijst herladen",
+      "reload": "Opslagplaatsen herladen",
+      "success": "Repository ingeschakeld"
+    },
+    "manual_pipeline": {
+      "select_branch": "Selecteer branch",
+      "title": "Activeer een handmatige pipeline run",
+      "trigger": "Pipeline uitvoeren"
+    },
+    "not_allowed": "Je hebt geen toegang tot dit archief",
+    "settings": {
+      "general": {
+        "general": "Algemeen",
+        "project": "Project instellingen",
+        "save": "Instellingen opslaan",
+        "success": "Repository instellingen geüpdatet",
+        "timeout": {
+          "minutes": "minuten"
+        },
+        "trusted": {
+          "trusted": "Vertrouwd"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Alleen geauthenticeerde gebruikers van deze Woodpecker instantie kunnen dit project zien."
+          },
+          "private": {
+            "private": "Privé"
+          },
+          "visibility": "Project zichtbaarheid"
+        }
+      },
+      "secrets": {
+        "add": "Geheim toevoegen",
+        "created": "Geheim aangemaakt",
+        "delete": "Geheim verwijderen",
+        "deleted": "Geheim verwijderd",
+        "edit": "Geheim wijzigen",
+        "images": {
+          "images": "Beschikbaar voor de volgende afbeeldingen"
+        },
+        "name": "Naam",
+        "save": "Geheim opslaan",
+        "saved": "Geheim opgeslagen",
+        "secrets": "Geheimen",
+        "show": "Geheimen weergeven",
+        "value": "Waarde"
+      },
+      "settings": "Instellingen"
+    },
+    "user_none": "Deze organisatie / gebruiker heeft nog geen projecten."
+  },
+  "search": "Zoeken…",
+  "time": {
+    "not_started": "nog niet gestart"
+  },
+  "unknown_error": "Er is een onbekende fout opgetreden",
+  "url": "URL",
+  "user": {
+    "access_denied": "U heeft niet de rechten om in te loggen",
+    "internal_error": "Er is een interne fout opgetreden",
+    "settings": "Gebruikersinstellingen",
+    "token": "Uw persoonlijke sleutel"
+  },
+  "username": "Gebruikersnaam",
+  "welcome": "Welkom bij Woodpecker"
+}

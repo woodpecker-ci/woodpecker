@@ -27,7 +27,7 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo/name> [pipeline] [job]",
+	ArgsUsage: "<repo/name> [pipeline] [step]",
 	Action:    pipelineLogs,
 	Flags:     common.GlobalFlags,
 }
@@ -44,7 +44,7 @@ func pipelineLogs(c *cli.Context) error {
 		return err
 	}
 
-	job, err := strconv.Atoi(c.Args().Get(2))
+	step, err := strconv.Atoi(c.Args().Get(2))
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func pipelineLogs(c *cli.Context) error {
 		return err
 	}
 
-	logs, err := client.PipelineLogs(owner, name, number, job)
+	logs, err := client.PipelineLogs(owner, name, number, step)
 	if err != nil {
 		return err
 	}

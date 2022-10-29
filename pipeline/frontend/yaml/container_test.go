@@ -3,6 +3,7 @@ package yaml
 import (
 	"testing"
 
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
@@ -26,6 +27,7 @@ cpu_shares: 99
 detach: true
 devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
+directory: example/
 dns: 8.8.8.8
 dns_search: example.com
 environment:
@@ -78,6 +80,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:     "example/",
 		DNS:           types.Stringorslice{"8.8.8.8"},
 		DNSSearch:     types.Stringorslice{"example.com"},
 		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
@@ -294,4 +297,14 @@ func stringsToInterface(val ...string) []interface{} {
 		res[i] = val[i]
 	}
 	return res
+}
+
+func TestIsPlugin(t *testing.T) {
+	assert.True(t, (&Container{}).IsPlugin())
+	assert.True(t, (&Container{
+		Commands: types.Stringorslice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
 }

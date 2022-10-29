@@ -28,11 +28,12 @@ func Handler() http.Handler {
 	e := gin.New()
 	e.GET("/api/v1/repos/:owner/:name", getRepo)
 	e.GET("/api/v1/repositories/:id", getRepoByID)
-	e.GET("/api/v1/repos/:owner/:name/raw/:commit/:file", getRepoFile)
+	e.GET("/api/v1/repos/:owner/:name/raw/:file", getRepoFile)
 	e.POST("/api/v1/repos/:owner/:name/hooks", createRepoHook)
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
+	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
 
@@ -69,10 +70,13 @@ func createRepoCommitStatus(c *gin.Context) {
 }
 
 func getRepoFile(c *gin.Context) {
-	if c.Param("file") == "file_not_found" {
+	file := c.Param("file")
+	ref := c.Query("ref")
+
+	if file == "file_not_found" {
 		c.String(404, "")
 	}
-	if c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50" {
+	if ref == "v1.0.0" || ref == "9ecad50" {
 		c.String(200, repoFilePayload)
 	}
 	c.String(404, "")
@@ -116,7 +120,16 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.12"})
+	c.JSON(200, map[string]interface{}{"version": "1.18.0"})
+}
+
+func getPRFiles(c *gin.Context) {
+	page := c.Query("page")
+	if page == "1" {
+		c.String(200, prFilesPayload)
+	} else {
+		c.String(200, "[]")
+	}
 }
 
 const listRepoHookPayloads = `
@@ -172,6 +185,21 @@ const userRepoPayload = `
       "push": true,
       "pull": true
     }
+  }
+]
+`
+
+const prFilesPayload = `
+[
+  {
+    "filename": "README.md",
+    "status": "changed",
+    "additions": 2,
+    "deletions": 0,
+    "changes": 2,
+    "html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
+    "contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
+    "raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
   }
 ]
 `
