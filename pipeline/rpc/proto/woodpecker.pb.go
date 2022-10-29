@@ -7,11 +7,10 @@
 package proto
 
 import (
-	reflect "reflect"
-	sync "sync"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -1166,32 +1165,30 @@ func file_woodpecker_proto_rawDescGZIP() []byte {
 	return file_woodpecker_proto_rawDescData
 }
 
-var (
-	file_woodpecker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-	file_woodpecker_proto_msgTypes  = make([]protoimpl.MessageInfo, 19)
-	file_woodpecker_proto_goTypes   = []interface{}{
-		(HealthCheckResponse_ServingStatus)(0), // 0: proto.HealthCheckResponse.ServingStatus
-		(*File)(nil),                           // 1: proto.File
-		(*State)(nil),                          // 2: proto.State
-		(*Line)(nil),                           // 3: proto.Line
-		(*Filter)(nil),                         // 4: proto.Filter
-		(*Pipeline)(nil),                       // 5: proto.Pipeline
-		(*HealthCheckRequest)(nil),             // 6: proto.HealthCheckRequest
-		(*HealthCheckResponse)(nil),            // 7: proto.HealthCheckResponse
-		(*NextRequest)(nil),                    // 8: proto.NextRequest
-		(*NextReply)(nil),                      // 9: proto.NextReply
-		(*InitRequest)(nil),                    // 10: proto.InitRequest
-		(*WaitRequest)(nil),                    // 11: proto.WaitRequest
-		(*DoneRequest)(nil),                    // 12: proto.DoneRequest
-		(*ExtendRequest)(nil),                  // 13: proto.ExtendRequest
-		(*UploadRequest)(nil),                  // 14: proto.UploadRequest
-		(*UpdateRequest)(nil),                  // 15: proto.UpdateRequest
-		(*LogRequest)(nil),                     // 16: proto.LogRequest
-		(*Empty)(nil),                          // 17: proto.Empty
-		nil,                                    // 18: proto.File.MetaEntry
-		nil,                                    // 19: proto.Filter.LabelsEntry
-	}
-)
+var file_woodpecker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_woodpecker_proto_goTypes = []interface{}{
+	(HealthCheckResponse_ServingStatus)(0), // 0: proto.HealthCheckResponse.ServingStatus
+	(*File)(nil),                           // 1: proto.File
+	(*State)(nil),                          // 2: proto.State
+	(*Line)(nil),                           // 3: proto.Line
+	(*Filter)(nil),                         // 4: proto.Filter
+	(*Pipeline)(nil),                       // 5: proto.Pipeline
+	(*HealthCheckRequest)(nil),             // 6: proto.HealthCheckRequest
+	(*HealthCheckResponse)(nil),            // 7: proto.HealthCheckResponse
+	(*NextRequest)(nil),                    // 8: proto.NextRequest
+	(*NextReply)(nil),                      // 9: proto.NextReply
+	(*InitRequest)(nil),                    // 10: proto.InitRequest
+	(*WaitRequest)(nil),                    // 11: proto.WaitRequest
+	(*DoneRequest)(nil),                    // 12: proto.DoneRequest
+	(*ExtendRequest)(nil),                  // 13: proto.ExtendRequest
+	(*UploadRequest)(nil),                  // 14: proto.UploadRequest
+	(*UpdateRequest)(nil),                  // 15: proto.UpdateRequest
+	(*LogRequest)(nil),                     // 16: proto.LogRequest
+	(*Empty)(nil),                          // 17: proto.Empty
+	nil,                                    // 18: proto.File.MetaEntry
+	nil,                                    // 19: proto.Filter.LabelsEntry
+}
 var file_woodpecker_proto_depIdxs = []int32{
 	18, // 0: proto.File.meta:type_name -> proto.File.MetaEntry
 	19, // 1: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
