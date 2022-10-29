@@ -34,7 +34,7 @@ var pipelineStartCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
-			Usage:   "custom parameters to be injected into the job environment. Format: KEY=value",
+			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
 	),
 }
@@ -62,7 +62,7 @@ func pipelineStart(c *cli.Context) (err error) {
 		number = pipeline.Number
 	} else {
 		if len(pipelineArg) == 0 {
-			return errors.New("missing job number")
+			return errors.New("missing step number")
 		}
 		number, err = strconv.Atoi(pipelineArg)
 		if err != nil {

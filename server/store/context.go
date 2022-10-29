@@ -41,3 +41,7 @@ func TryFromContext(c context.Context) (Store, bool) {
 func ToContext(c Setter, store Store) {
 	c.Set(key, store)
 }
+
+func InjectToContext(ctx context.Context, store Store) context.Context {
+	return context.WithValue(ctx, key, store)
+}

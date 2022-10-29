@@ -6,15 +6,18 @@
         "add": "Ajouter un secret",
         "created": "Secret global crée",
         "deleted": "Secret global effacé",
+        "desc": "Les secrets globaux sont transmis sous forme de variable d’environnement lors de l’exécution de toutes les étapes d'un pipeline.",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Faites attention avec cette option car un acteur malicieux peut soumettre une pull request qui révélerait vos secrets."
         },
         "images": {
+          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
         "none": "Il n'y a pas de secrets globaux.",
+        "plugins_only": "Disponible uniquement pour les plugins",
         "save": "Enregistrer un secret",
         "saved": "Secret global enregistré",
         "secrets": "Secrets",
@@ -43,14 +46,18 @@
         "add": "Ajouter un secret",
         "created": "Secret d'organisation crée",
         "deleted": "Secret d'organisation effacé",
+        "desc": "Les secrets d'organisation sont transmis sous forme de variable d’environnement lors de l’exécution de chaque étape d'un pipeline de tout les dépôts de l'organisation.",
         "events": {
-          "events": "Disponible pour les événements suivants"
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre un pull request qui va afficher vos secrets."
         },
         "images": {
+          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
         "none": "Il n'y a pas de secrets d'organisation.",
+        "plugins_only": "Disponible uniquement pour les plugins",
         "save": "Enregistrer un secret",
         "saved": "Secret d'organisation enregistré",
         "secrets": "Secrets",
@@ -119,6 +126,7 @@
       "trigger": "Exécuter un pipeline",
       "variables": {
         "add": "Ajouter une variable",
+        "desc": "Ajoutez des variables pour le lancement du pipeline. Les variables existantes seront écrasés.",
         "name": "Nom de la variable",
         "title": "Variables de pipeline supplémentaire",
         "value": "Valeur de la variable"
@@ -213,6 +221,7 @@
         "next_exec": "Prochaine exécution",
         "none": "Il n'y a pas de tâche planifié pour le moment.",
         "not_executed_yet": "Non exécuté pour le moment",
+        "run": "Lancer immédiatement",
         "save": "Enregistrer la tâche planifiée",
         "saved": "Tâche planifiée enregistrée",
         "schedule": {
@@ -230,11 +239,11 @@
           "cancel": "Annuler les pipelines précédents",
           "desc": "Activer pour forcer l'annulation des pipelines en cours et en attente pour le même contexte et le même événement avant de démarrer un nouveau pipeline déclenché par un événement."
         },
-        "general": "Générale",
+        "general": "Général",
         "pipeline_path": {
-          "default": "Par défaut: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Par défaut : .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
           "desc": "Le chemin vers votre configuration de pipeline (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mon/chemin/</span>). Le dossier doit se terminer par <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
-          "path": "Chemin vers la pipeline"
+          "path": "Chemin vers le pipeline"
         },
         "project": "Paramètres du projet",
         "protected": {
@@ -248,7 +257,7 @@
           "timeout": "Délai d’inactivité"
         },
         "trusted": {
-          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le fait de monter un volume.",
+          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage un volume.",
           "trusted": "Vérifié"
         },
         "visibility": {
@@ -291,16 +300,19 @@
         "created": "Secret crée",
         "delete": "Effacer le secret",
         "deleted": "Secret effacé",
-        "desc": "Secrets qui peuvent être passé comme variable d'environnement à l’exécution d'une étape individuelle d'un pipeline.",
+        "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
         "edit": "Modifier le secret",
         "events": {
-          "events": "Disponible pour les événements suivants"
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre un pull request qui va afficher vos secrets."
         },
         "images": {
+          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
         "none": "Il n'y a pas de secrets pour le moment.",
+        "plugins_only": "Disponible uniquement pour les plugins",
         "save": "Enregistrer un secret",
         "saved": "Secret enregistré",
         "secrets": "Secrets",
@@ -315,13 +327,13 @@
   "repositories": "Dépôts",
   "search": "Rechercher…",
   "time": {
-    "days_short": "d",
+    "days_short": "j",
     "hours_short": "h",
     "min_short": "min",
-    "not_started": "Pas encore démarré",
+    "not_started": "pas encore démarré",
     "sec_short": "sec",
     "tmpl": "D MMM, YYYY, HH:mm z",
-    "weeks_short": "w"
+    "weeks_short": "s"
   },
   "unknown_error": "Une erreur inconnue est survenue",
   "url": "URL",

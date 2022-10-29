@@ -138,7 +138,7 @@ func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error
 		c.SetDefaultEventFilter()
 
 		// apply step only filters
-		match = c.Matrix.Match(metadata.Job.Matrix)
+		match = c.Matrix.Match(metadata.Step.Matrix)
 	}
 
 	match = match && c.Platform.Match(metadata.Sys.Platform) &&

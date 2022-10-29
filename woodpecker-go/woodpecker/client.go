@@ -37,7 +37,7 @@ const (
 	pathLogs           = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathApprove        = "%s/api/repos/%s/%s/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%s/%s/pipelines/%d/decline"
-	pathJob            = "%s/api/repos/%s/%s/pipelines/%d/%d"
+	pathStep           = "%s/api/repos/%s/%s/pipelines/%d/%d"
 	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
@@ -252,9 +252,9 @@ func (c *client) PipelineStart(owner, name string, num int, params map[string]st
 	return out, err
 }
 
-// PipelineStop cancels the running job.
-func (c *client) PipelineStop(owner, name string, num, job int) error {
-	uri := fmt.Sprintf(pathJob, c.addr, owner, name, num, job)
+// PipelineStop cancels the running step.
+func (c *client) PipelineStop(owner, name string, num, step int) error {
+	uri := fmt.Sprintf(pathStep, c.addr, owner, name, num, step)
 	err := c.delete(uri)
 	return err
 }
@@ -282,9 +282,9 @@ func (c *client) PipelineKill(owner, name string, num int) error {
 	return err
 }
 
-// PipelineLogs returns the pipeline logs for the specified job.
-func (c *client) PipelineLogs(owner, name string, num, job int) ([]*Logs, error) {
-	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, job)
+// PipelineLogs returns the pipeline logs for the specified step.
+func (c *client) PipelineLogs(owner, name string, num, step int) ([]*Logs, error) {
+	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, step)
 	var out []*Logs
 	err := c.get(uri, &out)
 	return out, err
