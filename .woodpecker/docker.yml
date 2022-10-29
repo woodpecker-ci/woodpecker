@@ -168,7 +168,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
-      tag: next
+      tag: [next, next-${CI_COMMIT_SHA:0:10}]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -181,7 +181,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
-      tag: next-alpine
+      tag: [next-alpine, next-${CI_COMMIT_SHA:0:10}-alpine]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
