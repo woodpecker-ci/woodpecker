@@ -36,10 +36,6 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 		pullPolicy = v1.PullAlways
 	}
 
-	command := step.Entrypoint
-	args := step.Commands
-	envs := mapToEnvVars(step.Environment)
-
 	hostAliases := []v1.HostAlias{}
 	for _, extraHost := range step.ExtraHosts {
 		host := strings.Split(extraHost, ":")
@@ -92,10 +88,10 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 				Name:            podName(step),
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
-				Command:         command,
-				Args:            args,
+				Command:         step.Entrypoint,
+				Args:            step.Commands,
 				WorkingDir:      step.WorkingDir,
-				Env:             envs,
+				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resources,
 				SecurityContext: &v1.SecurityContext{
