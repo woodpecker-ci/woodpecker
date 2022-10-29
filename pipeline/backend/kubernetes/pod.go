@@ -37,13 +37,8 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 	}
 
 	command := step.Entrypoint
-	args := step.Command
+	args := step.Commands
 	envs := mapToEnvVars(step.Environment)
-
-	if _, hasScript := step.Environment["CI_SCRIPT"]; !strings.HasSuffix(step.Name, "_clone") && hasScript {
-		command = []string{"/bin/sh", "-c"}
-		args = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-	}
 
 	hostAliases := []v1.HostAlias{}
 	for _, extraHost := range step.ExtraHosts {

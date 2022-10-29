@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package docker
+package common
 
 import (
 	"bytes"
@@ -21,46 +21,41 @@ import (
 	"strings"
 )
 
-// generateScriptPosix is a helper function that generates a step script
-// for a linux container using the given
-func generateScriptPosix(commands []string) string {
+func generateScriptWindows(commands []string) string {
 	var buf bytes.Buffer
 	for _, command := range commands {
 		escaped := fmt.Sprintf("%q", command)
 		escaped = strings.Replace(escaped, "$", `\$`, -1)
 		buf.WriteString(fmt.Sprintf(
-			traceScript,
+			traceScriptWin,
 			escaped,
 			command,
 		))
 	}
 	script := fmt.Sprintf(
-		setupScript,
+		setupScriptWin,
 		buf.String(),
 	)
 	return base64.StdEncoding.EncodeToString([]byte(script))
 }
 
-// setupScript is a helper script this is added to the step script to ensure
-// a minimum set of environment variables are set correctly.
-const setupScript = `
-if [ -n "$CI_NETRC_MACHINE" ]; then
-cat <<EOF > $HOME/.netrc
-machine $CI_NETRC_MACHINE
-login $CI_NETRC_USERNAME
-password $CI_NETRC_PASSWORD
-EOF
-chmod 0600 $HOME/.netrc
-fi
-unset CI_NETRC_USERNAME
-unset CI_NETRC_PASSWORD
-unset CI_SCRIPT
+const setupScriptWin = `
+$ErrorActionPreference = 'Stop';
+&cmd /c "mkdir c:\root";
+if ($Env:CI_NETRC_MACHINE) {
+$netrc=[string]::Format("{0}\_netrc",$Env:HOME);
+"machine $Env:CI_NETRC_MACHINE" >> $netrc;
+"login $Env:CI_NETRC_USERNAME" >> $netrc;
+"password $Env:CI_NETRC_PASSWORD" >> $netrc;
+};
+[Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
+[Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 %s
 `
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.
-const traceScript = `
-echo + %s
-%s
+const traceScriptWin = `
+Write-Output ('+ %s');
+& %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `
