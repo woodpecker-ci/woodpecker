@@ -101,7 +101,7 @@ module.exports = {
               },
               {
                 label: 'Mastodon',
-                href: 'https://mastodon.technology/@WoodpeckerCI',
+                href: 'https://floss.social/@WoodpeckerCI',
               },
             ],
           },
