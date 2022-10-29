@@ -3,14 +3,14 @@ depends_on:
   - web
 
 variables:
-  - &golang_image "golang:1.18"
-  - &node_image "node:18-alpine"
-  - &xgo_image "techknowlogick/xgo:go-1.18.x"
-  - &xgo_version "go-1.18.x"
-  - &platforms_release "linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64"
-  - &platforms_server "linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64"
-  - &platforms_preview "linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64"
-  - &platforms_alpine "linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le"
+  - &golang_image 'golang:1.18'
+  - &node_image 'node:18-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.18.x'
+  - &xgo_version 'go-1.18.x'
+  - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
+  - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
+  - &platforms_preview 'linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64'
+  - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
 
 pipeline:
   vendor:
@@ -44,7 +44,7 @@ pipeline:
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -56,7 +56,7 @@ pipeline:
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -82,7 +82,7 @@ pipeline:
   publish-next-server-alpine:
     image: woodpeckerci/plugin-docker-buildx
     group: docker
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -108,7 +108,7 @@ pipeline:
   publish-release-branch-server-alpine:
     image: woodpeckerci/plugin-docker-buildx
     group: docker
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -134,7 +134,7 @@ pipeline:
   release-server-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -151,7 +151,7 @@ pipeline:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -176,7 +176,7 @@ pipeline:
   publish-next-agent-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -202,7 +202,7 @@ pipeline:
   publish-release-branch-agent-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -228,7 +228,7 @@ pipeline:
   release-agent-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -245,7 +245,7 @@ pipeline:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -270,7 +270,7 @@ pipeline:
   publish-next-cli-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
@@ -296,7 +296,7 @@ pipeline:
   publish-release-branch-cli-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
@@ -322,7 +322,7 @@ pipeline:
   release-cli-alpine:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
