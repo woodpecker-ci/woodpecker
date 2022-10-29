@@ -83,8 +83,6 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		script := common.GenerateScript(step.Commands)
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
 		command = append(command, string(script)[strings.Index(string(script), "\n\n")+2:])
-
-		// TODO: use new proc.Commands - CI_SCRIPT no longer works
 	}
 
 	// Prepare command
