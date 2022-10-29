@@ -31,6 +31,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -283,6 +284,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
