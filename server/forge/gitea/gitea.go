@@ -565,7 +565,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.RemoteID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(repo.ForgeID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}

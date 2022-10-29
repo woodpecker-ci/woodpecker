@@ -38,7 +38,7 @@ func (s storage) GetRepoForgeID(id model.ForgeID) (*model.Repo, error) {
 
 func (s storage) getRepoForgeID(e *xorm.Session, id model.ForgeID) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
+	return repo, wrapGet(e.Where("forge_id = ?", id).Get(repo))
 }
 
 func (s storage) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error) {
