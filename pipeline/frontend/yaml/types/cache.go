@@ -22,6 +22,10 @@ type FileCache struct {
 	Destination string `yaml:"-"`
 }
 
+func (v *FileCache) Validate() bool {
+	return strings.ContainsAny(v.Name, "/\\:.")
+}
+
 // String implements the Stringer interface.
 func (v *FileCache) String(basePath, repoBase string) string {
 	hostPath := v.HostCachePath(basePath, repoBase)
@@ -32,17 +36,13 @@ func (v *FileCache) String(basePath, repoBase string) string {
 }
 
 func (v *FileCache) HostCachePath(basePath, repoBase string) string {
-	path := filepath.Join(basePath, repoBase, escapeCacheName(v.Name))
+	path := filepath.Join(basePath, repoBase, v.Name)
 	err := os.MkdirAll(path, 0o750)
 	if err != nil {
 		log.Error().Err(err).Msgf("could not path %s for file caching", path)
 		return ""
 	}
 	return path
-}
-
-func escapeCacheName(path string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(path, ".", "_"), "/", "_")
 }
 
 // MarshalYAML implements the Marshaller interface.

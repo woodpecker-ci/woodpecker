@@ -50,9 +50,8 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	if c.enableCache {
 		for _, cache := range container.Caches.Caches {
-			strCache := cache.String(c.cacheBase, c.path)
-			if strCache != "" {
-				volumes = append(volumes, strCache)
+			if cache.Validate() {
+				volumes = append(volumes, cache.String(c.cacheBase, c.path))
 			}
 		}
 	}
