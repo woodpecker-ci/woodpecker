@@ -14,7 +14,7 @@ type Logger interface {
 // function for process logging.
 type LogFunc func(*backend.Step, multipart.Reader) error
 
-// Log calls f(proc, r).
+// Log calls f(step, r).
 func (f LogFunc) Log(step *backend.Step, r multipart.Reader) error {
 	return f(step, r)
 }

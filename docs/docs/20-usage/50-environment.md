@@ -75,7 +75,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_AUTHOR_AVATAR`        | commit author avatar                                                                         |
 |                                  | **Current pipeline**                                                                         |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
-| `CI_PIPELINE_PARENT`             | number of parent pipeline                                                           |
+| `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
 | `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
@@ -83,11 +83,11 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
-|                                  | **Current job**                                                                              |
-| `CI_JOB_NUMBER`                  | job number                                                                                   |
-| `CI_JOB_STATUS`                  | job status (success, failure)                                                                |
-| `CI_JOB_STARTED`                 | job started UNIX timestamp                                                                   |
-| `CI_JOB_FINISHED`                | job finished UNIX timestamp                                                                  |
+|                                  | **Current step**                                                                             |
+| `CI_STEP_NUMBER`                 | step number                                                                                  |
+| `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
+| `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
+| `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |
 |                                  | **Previous commit**                                                                          |
 | `CI_PREV_COMMIT_SHA`             | previous commit SHA                                                                          |
 | `CI_PREV_COMMIT_REF`             | previous commit ref                                                                          |

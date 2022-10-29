@@ -200,7 +200,7 @@ func TestConfigApproved(t *testing.T) {
 }
 
 func TestConfigIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.Proc), new(model.Pipeline), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Config), new(model.Step), new(model.Pipeline), new(model.Repo))
 	defer closer()
 
 	var (
