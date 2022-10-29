@@ -14,9 +14,30 @@
 
 package common
 
-func GenerateScript(commands []string, isUnix bool) string {
-	if isUnix {
-		return generateScriptPosix(commands)
+import "runtime"
+
+func GenerateDockerConf(commands []string) (env map[string]string, entry, cmd []string) {
+	env = make(map[string]string)
+	if runtime.GOOS == "windows" {
+		env["CI_SCRIPT"] = generateScriptWindows(commands)
+		env["HOME"] = "c:\\root"
+		env["SHELL"] = "powershell.exe"
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
+		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+	} else {
+		env["CI_SCRIPT"] = generateScriptPosix(commands)
+		env["HOME"] = "/root"
+		env["SHELL"] = "/bin/sh"
+		entry = []string{"/bin/sh", "-c"}
+		cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
-	return generateScriptWindows(commands)
+
+	return env, entry, cmd
+}
+
+func GenerateScript(commands []string) string {
+	if runtime.GOOS == "windows" {
+		return generateScriptWindows(commands)
+	}
+	return generateScriptPosix(commands)
 }

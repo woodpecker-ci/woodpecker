@@ -18,7 +18,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -38,26 +37,16 @@ func toConfig(step *types.Step) *container.Config {
 	}
 
 	if len(step.Commands) != 0 {
-		if runtime.GOOS == "windows" {
-			step.Environment["CI_SCRIPT"] = common.GenerateScript(step.Commands, false)
-			step.Environment["HOME"] = "c:\\root"
-			step.Environment["SHELL"] = "powershell.exe"
-			step.Entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			config.Cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-		} else {
-			step.Environment["CI_SCRIPT"] = common.GenerateScript(step.Commands, true)
-			step.Environment["HOME"] = "/root"
-			step.Environment["SHELL"] = "/bin/sh"
-			step.Entrypoint = []string{"/bin/sh", "-c"}
-			config.Cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+		env, entry, cmd := common.GenerateDockerConf(step.Commands)
+		for k, v := range env {
+			step.Environment[k] = v
 		}
+		config.Entrypoint = entry
+		config.Cmd = cmd
 	}
 
 	if len(step.Environment) != 0 {
 		config.Env = toEnv(step.Environment)
-	}
-	if len(step.Entrypoint) != 0 {
-		config.Entrypoint = step.Entrypoint
 	}
 	if len(step.Volumes) != 0 {
 		config.Volumes = toVol(step.Volumes)
