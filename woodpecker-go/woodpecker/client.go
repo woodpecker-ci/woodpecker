@@ -253,8 +253,8 @@ func (c *client) PipelineStart(owner, name string, num int, params map[string]st
 }
 
 // PipelineStop cancels the running step.
-func (c *client) PipelineStop(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathStop, c.addr, owner, name, num)
+func (c *client) PipelineStop(owner, name string, pipeline int) error {
+	uri := fmt.Sprintf(pathStop, c.addr, owner, name, pipeline)
 	err := c.post(uri, nil, nil)
 	return err
 }
