@@ -25,7 +25,7 @@ onMounted(() => {
     title: props.title,
   };
 
-  // don't add tab if tab id already present
+  // don't add tab if tab id is already present
   if (!tabs.value.find(({ id }) => id === props.id)) {
     tabs.value.push(tab.value);
   }
