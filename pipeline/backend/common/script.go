@@ -16,7 +16,7 @@ package common
 
 import "runtime"
 
-func GenerateDockerConf(commands []string) (env map[string]string, entry, cmd []string) {
+func GenerateContainerConf(commands []string) (env map[string]string, entry, cmd []string) {
 	env = make(map[string]string)
 	if runtime.GOOS == "windows" {
 		env["CI_SCRIPT"] = generateScriptWindows(commands)

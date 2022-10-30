@@ -37,7 +37,7 @@ func toConfig(step *types.Step) *container.Config {
 	}
 
 	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateDockerConf(step.Commands)
+		env, entry, cmd := common.GenerateContainerConf(step.Commands)
 		for k, v := range env {
 			step.Environment[k] = v
 		}

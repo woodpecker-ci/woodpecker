@@ -43,7 +43,7 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 	}
 
 	if len(step.Commands) != 0 {
-		scriptEnv, entry, cmds := common.GenerateDockerConf(step.Commands)
+		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands)
 		for k, v := range scriptEnv {
 			step.Environment[k] = v
 		}
