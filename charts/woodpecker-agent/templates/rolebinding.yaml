@@ -1,4 +1,4 @@
-{{- if .Values.serviceAccount.rbac.create -}}
+{{- if and (.Values.serviceAccount.create) (.Values.serviceAccount.rbac.create) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
