@@ -1,0 +1,27 @@
+{{- if .Values.serviceAccount.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "woodpecker-agent.serviceAccountName" . }}
+  labels:
+    {{- include "woodpecker-agent.labels" . | nindent 4 }}
+    {{- with .Values.serviceAccount.rbac.role.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.serviceAccount.rbac.role.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+  - apiGroups: [''] # '' indicates core apiGroup (don't remove)
+    resources: ['persistentvolumeclaims']
+    verbs: ['create','delete']
+  - apiGroups: ['']
+    resources: ['services']
+    verbs: ['create','delete']
+  - apiGroups: ['']
+    resources:
+      - pods
+      - pods/log
+    verbs: ['watch','create','delete','get','list']
+{{- end }}

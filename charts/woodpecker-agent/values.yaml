@@ -31,13 +31,25 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # Specifies whether a service account should be created (also see RBAC subsection)
   create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+  rbac:
+    # If your cluster has RBAC enabled and you're using the Kubernetes agent-
+    # backend you'll need this. (this is true for almost all production clusters)
+    create: true
+    # additional annotations and labels in role and roleBinding are only needed, if you
+    # are using additional tooling to manage / verify roles or roleBindings (OPA, etc.)
+    role:
+      annotations: {}
+      labels: {}
+    roleBinding:
+      annotations: {}
+      labels: {}
 
 podAnnotations: {}
 
