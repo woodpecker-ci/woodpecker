@@ -1,7 +1,7 @@
 <template>
   <select
     v-model="innerValue"
-    class="w-full border border-gray-900 py-1 px-2 rounded-md bg-white focus:outline-none border-gray-900"
+    class="dark:bg-dark-gray-700 bg-transparent text-color border-gray-200 dark:border-dark-400 w-full border py-1 px-2 rounded-md focus:outline-none"
     :class="{
       'text-color': innerValue === '',
       'text-gray-900': innerValue !== '',

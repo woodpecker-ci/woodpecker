@@ -28,7 +28,7 @@ import (
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -62,7 +62,7 @@ pipeline:
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -96,7 +96,7 @@ pipeline:
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo: &model.Repo{},
 		Curr: &model.Pipeline{
 			Message: `aaa
@@ -133,7 +133,7 @@ pipeline:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -167,7 +167,7 @@ pipeline:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -213,7 +213,7 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -249,7 +249,7 @@ runs_on:
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -275,7 +275,7 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	pipelineNames := []string{pipelineItems[0].Proc.Name, pipelineItems[1].Proc.Name}
+	pipelineNames := []string{pipelineItems[0].Step.Name, pipelineItems[1].Step.Name}
 	if !containsItemWithName("lint", pipelineItems) || !containsItemWithName("test", pipelineItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
@@ -284,7 +284,7 @@ pipeline:
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Branch: "dev"},
 		Last:  &model.Pipeline{},
@@ -314,15 +314,15 @@ pipeline:
 	if len(pipelineItems) != 2 {
 		t.Fatal("Should have generated 2 pipeline")
 	}
-	if pipelineItems[0].Proc.State != model.StatusSkipped {
+	if pipelineItems[0].Step.State != model.StatusSkipped {
 		t.Fatal("Should not run on dev branch")
 	}
-	for _, child := range pipelineItems[0].Proc.Children {
+	for _, child := range pipelineItems[0].Step.Children {
 		if child.State != model.StatusSkipped {
 			t.Fatal("Children should skipped status too")
 		}
 	}
-	if pipelineItems[1].Proc.State != model.StatusPending {
+	if pipelineItems[1].Step.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
@@ -330,7 +330,7 @@ pipeline:
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tester"},
 		Last:  &model.Pipeline{},
@@ -378,7 +378,7 @@ func TestZeroSteps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -412,7 +412,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -450,7 +450,7 @@ depends_on: [ zerostep ]
 	if len(pipelineItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it should not generate a pipeline item")
 	}
-	if pipelineItems[0].Proc.Name != "justastep" {
+	if pipelineItems[0].Step.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -460,7 +460,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -504,7 +504,7 @@ depends_on: [ shouldbefiltered ]
 	if len(pipelineItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
 	}
-	if pipelineItems[0].Proc.Name != "justastep" {
+	if pipelineItems[0].Step.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -516,7 +516,7 @@ func TestTree(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	b := ProcBuilder{
+	b := StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -538,13 +538,13 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipeline.Procs) != 3 {
+	if len(pipeline.Steps) != 3 {
 		t.Fatal("Should generate three in total")
 	}
-	if pipeline.Procs[1].PPID != 1 {
+	if pipeline.Steps[1].PPID != 1 {
 		t.Fatal("Clone step should be a children of the stage")
 	}
-	if pipeline.Procs[2].PPID != 1 {
+	if pipeline.Steps[2].PPID != 1 {
 		t.Fatal("Pipeline step should be a children of the stage")
 	}
 }

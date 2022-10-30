@@ -32,11 +32,11 @@ export default () => {
     pipelineStore.setPipeline(repo.owner, repo.name, pipeline);
     pipelineStore.setPipelineFeedItem({ ...pipeline, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
-    // contains proc update
-    if (!data.proc) {
+    // contains step update
+    if (!data.step) {
       return;
     }
-    const { proc } = data;
-    pipelineStore.setProc(repo.owner, repo.name, pipeline.number, proc);
+    const { step } = data;
+    pipelineStore.setStep(repo.owner, repo.name, pipeline.number, step);
   });
 };

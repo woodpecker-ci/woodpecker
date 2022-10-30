@@ -9,7 +9,7 @@ A Woodpecker deployment consists of two parts:
 >
 > If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 builds in parallel.
 >
-> You can add more agents to increase the number of parallel builds or set the agent's `WOODPECKER_MAX_PROCS=1` environment variable to increase the number of parallel builds for that agent.
+> You can add more agents to increase the number of parallel steps or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
 
 ## Installation
 

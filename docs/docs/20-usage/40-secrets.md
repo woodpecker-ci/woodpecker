@@ -79,6 +79,15 @@ woodpecker-cli secret add \
 
 Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
 
+## Image filter
+
+To prevent abusing your secrets with malicious pull requests, you can limit a secret to a list of images. They are not available to any other container. In addition, you can make the secret available only for plugins (steps without user-defined commands).
+
+:::warning
+If you enable the option "Only available for plugins", always set an image filter too. Otherwise, the secret can be accessed by a very simple self-developed plugin and is thus *not* safe.
+If you only set an image filter, you could still access the secret using the same image and by specifying a command that prints it.
+:::
+
 ## Examples
 
 Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).

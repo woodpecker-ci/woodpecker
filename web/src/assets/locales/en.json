@@ -121,6 +121,7 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 },
+                "plugins_only": "Only available for plugins",
                 "edit": "Edit secret",
                 "delete":"Delete secret"
             },
@@ -258,6 +259,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -286,6 +288,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."

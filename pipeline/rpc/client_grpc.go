@@ -122,7 +122,7 @@ func (c *client) Init(ctx context.Context, id string, state State) (err error) {
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Proc
+	req.State.Name = state.Step
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -156,7 +156,7 @@ func (c *client) Done(ctx context.Context, id string, state State) (err error) {
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Proc
+	req.State.Name = state.Step
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -217,7 +217,7 @@ func (c *client) Update(ctx context.Context, id string, state State) (err error)
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Proc
+	req.State.Name = state.Step
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
@@ -248,7 +248,7 @@ func (c *client) Upload(ctx context.Context, id string, file *File) (err error) 
 	req.File = new(proto.File)
 	req.File.Name = file.Name
 	req.File.Mime = file.Mime
-	req.File.Proc = file.Proc
+	req.File.Step = file.Step
 	req.File.Size = int32(file.Size)
 	req.File.Time = file.Time
 	req.File.Data = file.Data
@@ -283,7 +283,7 @@ func (c *client) Log(ctx context.Context, id string, line *Line) (err error) {
 	req.Line = new(proto.Line)
 	req.Line.Out = line.Out
 	req.Line.Pos = int32(line.Pos)
-	req.Line.Proc = line.Proc
+	req.Line.Step = line.Step
 	req.Line.Time = line.Time
 	for {
 		_, err = c.client.Log(ctx, req)

@@ -35,7 +35,7 @@ scrape_configs:
 List of Prometheus metrics specific to Woodpecker:
 
 ```
-# HELP woodpecker_pipeline_count Build count.
+# HELP woodpecker_pipeline_count Pipeline count.
 # TYPE woodpecker_pipeline_count counter
 woodpecker_build_count{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
 woodpecker_build_count{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
@@ -46,21 +46,21 @@ woodpecker_build_time{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodp
 # HELP woodpecker_pipeline_total_count Total number of builds.
 # TYPE woodpecker_pipeline_total_count gauge
 woodpecker_build_total_count 1025
-# HELP woodpecker_pending_jobs Total number of pending build processes.
-# TYPE woodpecker_pending_jobs gauge
-woodpecker_pending_jobs 0
+# HELP woodpecker_pending_steps Total number of pending pipeline steps.
+# TYPE woodpecker_pending_steps gauge
+woodpecker_pending_steps 0
 # HELP woodpecker_repo_count Total number of repos.
 # TYPE woodpecker_repo_count gauge
 woodpecker_repo_count 9
-# HELP woodpecker_running_jobs Total number of running build processes.
-# TYPE woodpecker_running_jobs gauge
-woodpecker_running_jobs 0
+# HELP woodpecker_running_steps Total number of running pipeline steps.
+# TYPE woodpecker_running_steps gauge
+woodpecker_running_steps 0
 # HELP woodpecker_user_count Total number of users.
 # TYPE woodpecker_user_count gauge
 woodpecker_user_count 1
-# HELP woodpecker_waiting_jobs Total number of builds waiting on deps.
-# TYPE woodpecker_waiting_jobs gauge
-woodpecker_waiting_jobs 0
+# HELP woodpecker_waiting_steps Total number of pipeline waiting on deps.
+# TYPE woodpecker_waiting_steps gauge
+woodpecker_waiting_steps 0
 # HELP woodpecker_worker_count Total number of workers.
 # TYPE woodpecker_worker_count gauge
 woodpecker_worker_count 4
