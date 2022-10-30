@@ -24,7 +24,11 @@ onMounted(() => {
     id: props.id || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
     title: props.title,
   };
-  tabs.value.push(tab.value);
+
+  // don't add tab if tab id already present
+  if (!tabs.value.find(({ id }) => id === props.id)) {
+    tabs.value.push(tab.value);
+  }
 });
 
 const isActive = computed(() => tab.value && tab.value.id === activeTab.value);

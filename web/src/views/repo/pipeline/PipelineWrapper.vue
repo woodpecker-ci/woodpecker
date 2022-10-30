@@ -1,6 +1,12 @@
 <template>
   <template v-if="pipeline && repo">
-    <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
+    <Scaffold
+      v-model:activeTab="activeTab"
+      enable-tabs
+      disable-hash-mode
+      :go-back="goBack"
+      :no-fluid-wrapper="activeTab === 'tasks'"
+    >
       <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
         <span class="<md:hidden">-</span>
@@ -53,9 +59,8 @@
         id="changed-files"
         :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
       />
+      <router-view />
     </Scaffold>
-
-    <router-view />
   </template>
 </template>
 

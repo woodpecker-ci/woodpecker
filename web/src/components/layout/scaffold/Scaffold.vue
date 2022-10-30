@@ -10,7 +10,8 @@
     <template v-if="$slots.tabActions" #tabActions><slot name="tabActions" /></template>
   </Header>
 
-  <FluidContainer>
+  <slot v-if="noFluidWrapper" />
+  <FluidContainer v-else>
     <slot />
   </FluidContainer>
 </template>
@@ -32,6 +33,9 @@ export interface Props {
   enableTabs?: boolean;
   disableHashMode?: boolean;
   activeTab: string;
+
+  // Content
+  noFluidWrapper?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,6 +46,8 @@ const props = withDefaults(defineProps<Props>(), {
   // eslint-disable-next-line vue/no-boolean-default
   enableTabs: false,
   activeTab: '',
+  // eslint-disable-next-line vue/no-boolean-default
+  noFluidWrapper: false,
 });
 
 const emit = defineEmits(['update:activeTab', 'update:search']);

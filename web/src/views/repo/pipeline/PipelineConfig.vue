@@ -1,16 +1,13 @@
 <template>
-  <FluidContainer v-if="pipelineConfigs" class="flex flex-col gap-y-6 text-color justify-between !pt-0">
-    <Panel v-for="pipelineConfig in pipelineConfigs" :key="pipelineConfig.hash" :title="pipelineConfig.name">
-      <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
-    </Panel>
-  </FluidContainer>
+  <Panel v-for="pipelineConfig in pipelineConfigs || []" :key="pipelineConfig.hash" :title="pipelineConfig.name">
+    <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
+  </Panel>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
@@ -19,7 +16,6 @@ export default defineComponent({
   name: 'PipelineConfig',
 
   components: {
-    FluidContainer,
     Panel,
     SyntaxHighlight,
   },
