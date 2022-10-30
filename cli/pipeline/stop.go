@@ -27,7 +27,7 @@ import (
 var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a pipeline",
-	ArgsUsage: "<repo/name> [pipeline] [step]",
+	ArgsUsage: "<repo/name> [pipeline]",
 	Flags:     common.GlobalFlags,
 	Action:    pipelineStop,
 }
@@ -42,21 +42,17 @@ func pipelineStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	step, _ := strconv.Atoi(c.Args().Get(2))
-	if step == 0 {
-		step = 1
-	}
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	err = client.PipelineStop(owner, name, number, step)
+	err = client.PipelineStop(owner, name, number)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Stopping pipeline %s/%s#%d.%d\n", owner, name, number, step)
+	fmt.Printf("Stopping pipeline %s/%s#%d\n", owner, name, number)
 	return nil
 }

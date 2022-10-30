@@ -37,7 +37,7 @@ const (
 	pathLogs           = "%s/api/repos/%s/%s/logs/%d/%d"
 	pathApprove        = "%s/api/repos/%s/%s/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%s/%s/pipelines/%d/decline"
-	pathStep           = "%s/api/repos/%s/%s/pipelines/%d/%d"
+	pathStop           = "%s/api/repos/%s/%s/pipelines/%d/cancel"
 	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
 	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
@@ -253,9 +253,9 @@ func (c *client) PipelineStart(owner, name string, num int, params map[string]st
 }
 
 // PipelineStop cancels the running step.
-func (c *client) PipelineStop(owner, name string, num, step int) error {
-	uri := fmt.Sprintf(pathStep, c.addr, owner, name, num, step)
-	err := c.delete(uri)
+func (c *client) PipelineStop(owner, name string, num int) error {
+	uri := fmt.Sprintf(pathStop, c.addr, owner, name, num)
+	err := c.post(uri, nil, nil)
 	return err
 }
 
