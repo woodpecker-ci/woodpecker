@@ -37,6 +37,8 @@ var migrationTasks = []*task{
 	&alterTableSecretsAddUserCol,
 	&lowercaseSecretNames,
 	&renameBuildsToPipeline,
+	&renameColumnsBuildsToPipeline,
+	&renameTableProcsToSteps,
 }
 
 var allBeans = []interface{}{
@@ -47,7 +49,7 @@ var allBeans = []interface{}{
 	new(model.File),
 	new(model.Logs),
 	new(model.Perm),
-	new(model.Proc),
+	new(model.Step),
 	new(model.Registry),
 	new(model.Repo),
 	new(model.Secret),
@@ -113,6 +115,10 @@ func Migrate(e *xorm.Engine) error {
 	}
 
 	if err := sess.Commit(); err != nil {
+		return err
+	}
+
+	if err := e.ClearCache(allBeans...); err != nil {
 		return err
 	}
 

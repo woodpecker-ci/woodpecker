@@ -12,6 +12,7 @@ tasks:
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
+      make build-server
     command: |
       echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
@@ -22,7 +23,7 @@ tasks:
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
-      WOODPECKER_MAX_PROCS: 1
+      WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server
@@ -37,7 +38,7 @@ tasks:
       export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --raw)
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
-        -d "{ \"name\": \"Woodpecker CI\", \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
+        -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
       echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
       echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
       curl -X 'POST' \
@@ -73,16 +74,21 @@ tasks:
 
 ports:
   - port: 3000
+    name: Gitea
     onOpen: ignore
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 8000
+    name: Woodpecker
     onOpen: notify
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 9000
+    name: Woodpecker GRPC
     onOpen: ignore
   - port: 8010
+    description: Do not use! Access woodpecker on port 8000
     onOpen: ignore
   - port: 4000
+    name: Docs
     onOpen: notify
 
 vscode:
@@ -92,7 +98,7 @@ vscode:
     - "dbaeumer.vscode-eslint"
     - "esbenp.prettier-vscode"
     - "voorjaar.windicss-intellisense"
-    - "johnsoncodehk.volar"
+    - "Vue.volar"
     - "redhat.vscode-yaml"
     - "davidanson.vscode-markdownlint"
     - "streetsidesoftware.code-spell-checker"

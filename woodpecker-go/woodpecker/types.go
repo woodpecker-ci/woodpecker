@@ -54,7 +54,7 @@ type (
 		Timeout         *int64  `json:"timeout,omitempty"`
 		Visibility      *string `json:"visibility"`
 		AllowPull       *bool   `json:"allow_pr,omitempty"`
-		PipelineCounter *int    `json:"build_counter,omitempty"`
+		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
 	}
 
 	// Pipeline defines a pipeline object.
@@ -85,11 +85,11 @@ type (
 		Link      string  `json:"link_url"`
 		Reviewer  string  `json:"reviewed_by"`
 		Reviewed  int64   `json:"reviewed_at"`
-		Procs     []*Proc `json:"procs,omitempty"`
+		Steps     []*Step `json:"steps,omitempty"`
 	}
 
-	// Proc represents a process in the pipeline.
-	Proc struct {
+	// Step represents a process in the pipeline.
+	Step struct {
 		ID       int64             `json:"id"`
 		PID      int               `json:"pid"`
 		PPID     int               `json:"ppid"`
@@ -103,7 +103,7 @@ type (
 		Machine  string            `json:"machine,omitempty"`
 		Platform string            `json:"platform,omitempty"`
 		Environ  map[string]string `json:"environ,omitempty"`
-		Children []*Proc           `json:"children,omitempty"`
+		Children []*Step           `json:"children,omitempty"`
 	}
 
 	// Registry represents a docker registry with credentials.
@@ -118,11 +118,12 @@ type (
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
-		ID     int64    `json:"id"`
-		Name   string   `json:"name"`
-		Value  string   `json:"value,omitempty"`
-		Images []string `json:"image"`
-		Events []string `json:"event"`
+		ID          int64    `json:"id"`
+		Name        string   `json:"name"`
+		Value       string   `json:"value,omitempty"`
+		Images      []string `json:"image"`
+		PluginsOnly bool     `json:"plugins_only"`
+		Events      []string `json:"event"`
 	}
 
 	// Activity represents an item in the user's feed or timeline.
@@ -174,7 +175,7 @@ type (
 
 	// Logs is the JSON data for a logs response
 	Logs struct {
-		Proc   string `json:"proc"`
+		Step   string `json:"step"`
 		Output string `json:"out"`
 	}
 

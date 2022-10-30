@@ -27,9 +27,6 @@
       "settings": "设置"
     }
   },
-  "back": "",
-  "color_scheme_dark": "",
-  "color_scheme_light": "",
   "docs": "文档",
   "login": "登录",
   "logout": "退出登录",
@@ -85,8 +82,6 @@
       "event": {
         "cron": "计划任务",
         "deploy": "部署",
-        "manual": "",
-        "pr": "",
         "push": "推送",
         "tag": "标签"
       },
@@ -118,22 +113,49 @@
       "reload": "刷新项目列表",
       "success": "此仓库已成功启用"
     },
-    "manual_pipeline": {
-      "select_branch": "",
-      "title": "",
-      "trigger": "",
-      "variables": {
-        "add": "",
-        "desc": "",
-        "name": "",
-        "title": "",
-        "value": ""
-      }
-    },
     "not_allowed": "你没有权限访问这个仓库",
+    "pipeline": {
+      "actions": {
+        "cancel": "取消",
+        "cancel_success": "流水线已被取消",
+        "canceled": "该步骤已被取消。",
+        "log_auto_scroll": "自动滚动",
+        "log_auto_scroll_off": "关闭自动滚动",
+        "log_download": "下载",
+        "restart": "重启",
+        "restart_success": "流水线已重启"
+      },
+      "config": "配置",
+      "created": "已创建",
+      "event": {
+        "cron": "计划任务",
+        "deploy": "部署",
+        "push": "推送",
+        "tag": "标签"
+      },
+      "execution_error": "执行错误",
+      "exit_code": "退出代码 {exitCode}",
+      "files": "修改的文件（{files}）",
+      "loading": "载入中…",
+      "log_download_error": "下载日志文件中发生了错误",
+      "no_files": "没有文件修改。",
+      "no_pipeline_steps": "没有流水线步骤可用！",
+      "no_pipelines": "没有流水线曾启动。",
+      "pipeline": "流水线 #{pipelineId}",
+      "pipelines_for": "{branch} 分支的流水线",
+      "protected": {
+        "approve": "同意",
+        "approve_success": "流水线已被许可",
+        "awaits": "该流水线正在等待维护者许可！",
+        "decline": "拒绝",
+        "decline_success": "流水线已被拒绝",
+        "declined": "该流水线已被拒绝！"
+      },
+      "step_not_started": "该步骤还不曾启动过。",
+      "tasks": "任务"
+    },
     "settings": {
       "actions": {
-        "actions": "",
         "delete": {
           "confirm": "该操作将会删除所有数据！！！\n\n你确定真的要继续吗？",
           "delete": "删除仓库",
@@ -150,7 +172,6 @@
       },
       "badge": {
         "badge": "徽标",
-        "markdown": "",
         "url_branch": "特定分支的 URL"
       },
       "crons": {
@@ -161,10 +182,8 @@
         },
         "created": "计划已创建",
         "crons": "计划",
-        "delete": "",
         "deleted": "计划已删除",
         "desc": "计划作业可用于定期触发流水线。",
-        "edit": "",
         "name": {
           "name": "名称",
           "placeholder": "此计划的名称"
@@ -175,7 +194,6 @@
         "save": "保存计划",
         "saved": "计划已保存",
         "schedule": {
-          "placeholder": "",
           "title": "计划任务（基于 UTC）"
         },
         "show": "显示所有计划"
@@ -234,13 +252,9 @@
           "placeholder": "Registry 地址（如 docker.io）"
         },
         "created": "Registry 密码已创建",
-        "creds": "",
-        "delete": "",
         "deleted": "Registry 密码已删除",
         "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
-        "edit": "",
         "none": "现在没有 Registry 密码。",
-        "registries": "",
         "save": "保存 Registry",
         "saved": "Registry 密码已保存",
         "show": "显示 Registry"
@@ -248,10 +262,8 @@
       "secrets": {
         "add": "添加秘密",
         "created": "秘密已创建",
-        "delete": "",
         "deleted": "秘密已删除",
         "desc": "密钥可以在运行时作为环境变量传递给各个流水线步骤。",
-        "edit": "",
         "events": {
           "events": "对以下事件可用",
           "pr_warning": "慎选这个选项：用户可以提交一个恶意推送请求以暴露你的密钥。"
@@ -294,7 +306,6 @@
     "internal_error": "发生了一些内部错误",
     "oauth_error": "Oauth 认证错误",
     "shell_setup": "Shell 设置",
-    "shell_setup_before": "",
     "token": "你的私人 Token"
   },
   "username": "用户名",

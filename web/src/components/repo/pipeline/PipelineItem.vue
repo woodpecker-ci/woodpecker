@@ -20,10 +20,12 @@
     <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
       <div class="<md:hidden flex items-center flex-shrink-0">
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-color" />
-        <img v-else class="w-8" :src="pipeline.author_avatar" />
+        <img v-else class="rounded-md w-8" :src="pipeline.author_avatar" />
       </div>
 
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
+        <span class="text-color-alt <md:hidden">#{{ pipeline.number }}</span>
+        <span class="text-color-alt <md:hidden mx-2">-</span>
         <span class="text-color <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       </div>
 

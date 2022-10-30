@@ -55,5 +55,5 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_REMOTE"]
 	// misc
 	env["DRONE_SYSTEM_HOST"] = env["CI_SYSTEM_HOST"]
-	env["DRONE_STEP_NUMBER"] = env["CI_JOB_NUMBER"]
+	env["DRONE_STEP_NUMBER"] = env["CI_STEP_NUMBER"]
 }

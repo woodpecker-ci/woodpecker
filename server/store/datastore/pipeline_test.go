@@ -33,7 +33,7 @@ func TestPipelines(t *testing.T) {
 		Name:     "test",
 	}
 
-	store, closer := newTestStore(t, new(model.Repo), new(model.Proc), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.Step), new(model.Pipeline))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -53,8 +53,22 @@ func TestPipelines(t *testing.T) {
 		g.BeforeEach(func() {
 			_, err := store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM procs")
+			_, err = store.engine.Exec("DELETE FROM steps")
 			g.Assert(err).IsNil()
+		})
+
+		g.It("Should Fail early when the repo is not existing", func() {
+			pipeline := model.Pipeline{
+				RepoID: 100,
+				Status: model.StatusSuccess,
+			}
+			err := store.CreatePipeline(&pipeline)
+			g.Assert(err).IsNotNil()
+
+			count, err := store.GetPipelineCount()
+			g.Assert(err).IsNil()
+			g.Assert(count == 0).IsTrue()
+			fmt.Println("GOT COUNT", count)
 		})
 
 		g.It("Should Post a Pipeline", func() {
@@ -100,7 +114,7 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 			}
-			err := store.CreatePipeline(&pipeline, []*model.Proc{}...)
+			err := store.CreatePipeline(&pipeline, []*model.Step{}...)
 			g.Assert(err).IsNil()
 			GetPipeline, err := store.GetPipeline(pipeline.ID)
 			g.Assert(err).IsNil()
@@ -118,9 +132,9 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Status: model.StatusPending,
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineNumber(&model.Repo{ID: 1}, pipeline2.Number)
 			g.Assert(err3).IsNil()
@@ -140,9 +154,9 @@ func TestPipelines(t *testing.T) {
 				Status: model.StatusPending,
 				Ref:    "refs/pull/6",
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
 			g.Assert(err3).IsNil()
@@ -163,9 +177,9 @@ func TestPipelines(t *testing.T) {
 				Status: model.StatusPending,
 				Ref:    "refs/pull/6",
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
 			g.Assert(err3).IsNil()
@@ -188,9 +202,9 @@ func TestPipelines(t *testing.T) {
 				Branch: "dev",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
 			GetPipeline, err3 := store.GetPipelineCommit(&model.Repo{ID: 1}, pipeline2.Commit, pipeline2.Branch)
 			g.Assert(err3).IsNil()
@@ -216,8 +230,8 @@ func TestPipelines(t *testing.T) {
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 				Event:  model.EventPush,
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			GetPipeline, err3 := store.GetPipelineLast(&model.Repo{ID: 1}, pipeline2.Branch)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
@@ -249,11 +263,11 @@ func TestPipelines(t *testing.T) {
 				Branch: "master",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
-			err3 := store.CreatePipeline(pipeline3, []*model.Proc{}...)
+			err3 := store.CreatePipeline(pipeline3, []*model.Step{}...)
 			g.Assert(err3).IsNil()
 			GetPipeline, err4 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
 			g.Assert(err4).IsNil()
@@ -274,9 +288,9 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Proc{}...)
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Proc{}...)
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
 			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, 1)
 			g.Assert(err3).IsNil()
@@ -289,8 +303,11 @@ func TestPipelines(t *testing.T) {
 }
 
 func TestPipelineIncrement(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo))
 	defer closer()
+
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1"}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{ID: 2, Owner: "2", Name: "2", FullName: "2/2"}))
 
 	pipelineA := &model.Pipeline{RepoID: 1}
 	if !assert.NoError(t, store.CreatePipeline(pipelineA)) {

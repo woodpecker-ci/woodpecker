@@ -437,7 +437,7 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the remote system.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, proc *model.Proc) error {
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
@@ -456,10 +456,10 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, proc)),
-		State:       github.String(convertStatus(proc.State)),
-		Description: github.String(common.GetPipelineStatusDescription(proc.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, proc)),
+		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, step)),
+		State:       github.String(convertStatus(step.State)),
+		Description: github.String(common.GetPipelineStatusDescription(step.State)),
+		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, step)),
 	})
 	return err
 }

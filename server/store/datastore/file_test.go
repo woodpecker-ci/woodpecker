@@ -25,13 +25,13 @@ import (
 )
 
 func TestFileFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Proc))
+	store, closer := newTestStore(t, new(model.File), new(model.Step))
 	defer closer()
 
 	if err := store.FileCreate(
 		&model.File{
 			PipelineID: 2,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hello.txt",
 			Mime:       "text/plain",
 			Size:       11,
@@ -42,7 +42,7 @@ func TestFileFind(t *testing.T) {
 		return
 	}
 
-	file, err := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	file, err := store.FileFind(&model.Step{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
@@ -53,8 +53,8 @@ func TestFileFind(t *testing.T) {
 	if got, want := file.PipelineID, int64(2); got != want {
 		t.Errorf("Want file pipeline id %d, got %d", want, got)
 	}
-	if got, want := file.ProcID, int64(1); got != want {
-		t.Errorf("Want file proc id %d, got %d", want, got)
+	if got, want := file.StepID, int64(1); got != want {
+		t.Errorf("Want file step id %d, got %d", want, got)
 	}
 	if got, want := file.Name, "hello.txt"; got != want {
 		t.Errorf("Want file name %s, got %s", want, got)
@@ -66,7 +66,7 @@ func TestFileFind(t *testing.T) {
 		t.Errorf("Want file size %d, got %d", want, got)
 	}
 
-	rc, err := store.FileRead(&model.Proc{ID: 1}, "hello.txt")
+	rc, err := store.FileRead(&model.Step{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
@@ -84,7 +84,7 @@ func TestFileList(t *testing.T) {
 	assert.NoError(t, store.FileCreate(
 		&model.File{
 			PipelineID: 1,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hello.txt",
 			Mime:       "text/plain",
 			Size:       11,
@@ -94,7 +94,7 @@ func TestFileList(t *testing.T) {
 	assert.NoError(t, store.FileCreate(
 		&model.File{
 			PipelineID: 1,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hola.txt",
 			Mime:       "text/plain",
 			Size:       11,
@@ -120,7 +120,7 @@ func TestFileIndexes(t *testing.T) {
 	if err := store.FileCreate(
 		&model.File{
 			PipelineID: 1,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hello.txt",
 			Size:       11,
 			Mime:       "text/plain",
@@ -135,7 +135,7 @@ func TestFileIndexes(t *testing.T) {
 	if err := store.FileCreate(
 		&model.File{
 			PipelineID: 1,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hello.txt",
 			Mime:       "text/plain",
 			Size:       11,
@@ -147,23 +147,23 @@ func TestFileIndexes(t *testing.T) {
 }
 
 func TestFileCascade(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Proc), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.File), new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	procOne := &model.Proc{
+	stepOne := &model.Step{
 		PipelineID: 1,
 		PID:        1,
 		PGID:       1,
 		Name:       "build",
 		State:      "success",
 	}
-	err1 := store.ProcCreate([]*model.Proc{procOne})
-	assert.EqualValues(t, int64(1), procOne.ID)
+	err1 := store.StepCreate([]*model.Step{stepOne})
+	assert.EqualValues(t, int64(1), stepOne.ID)
 
 	err2 := store.FileCreate(
 		&model.File{
 			PipelineID: 1,
-			ProcID:     1,
+			StepID:     1,
 			Name:       "hello.txt",
 			Mime:       "text/plain",
 			Size:       11,
@@ -172,19 +172,19 @@ func TestFileCascade(t *testing.T) {
 	)
 
 	if err1 != nil {
-		t.Errorf("Unexpected error: cannot insert proc: %s", err1)
+		t.Errorf("Unexpected error: cannot insert step: %s", err1)
 	} else if err2 != nil {
 		t.Errorf("Unexpected error: cannot insert file: %s", err2)
 	}
 
-	if _, err3 := store.ProcFind(&model.Pipeline{ID: 1}, 1); err3 != nil {
-		t.Errorf("Unexpected error: cannot get inserted proc: %s", err3)
+	if _, err3 := store.StepFind(&model.Pipeline{ID: 1}, 1); err3 != nil {
+		t.Errorf("Unexpected error: cannot get inserted step: %s", err3)
 	}
 
-	err := store.ProcClear(&model.Pipeline{ID: 1, Procs: []*model.Proc{procOne}})
+	err := store.StepClear(&model.Pipeline{ID: 1, Steps: []*model.Step{stepOne}})
 	assert.NoError(t, err)
 
-	file, err4 := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	file, err4 := store.FileFind(&model.Step{ID: 1}, "hello.txt")
 	if err4 == nil {
 		t.Errorf("Expected no rows in result set error")
 		t.Log(file)

@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
-      <PipelineProcList v-model:selected-proc-id="selectedProcId" :pipeline="pipeline" />
+      <PipelineStepList
+        v-model:selected-step-id="selectedStepId"
+        :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
+        :pipeline="pipeline"
+      />
 
       <div class="flex flex-grow relative">
         <div v-if="error" class="flex flex-col p-4">
@@ -9,7 +13,7 @@
           <span class="text-red-400">{{ error }}</span>
         </div>
 
-        <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center">
+        <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
           <Icon name="status-blocked" class="w-32 h-32 text-color" />
           <p class="text-xl text-color">{{ $t('repo.pipeline.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
@@ -34,8 +38,8 @@
         </div>
 
         <PipelineLog
-          v-else-if="selectedProcId"
-          v-model:proc-id="selectedProcId"
+          v-else-if="selectedStepId"
+          v-model:step-id="selectedStepId"
           :pipeline="pipeline"
           class="fixed top-0 left-0 w-full h-full md:absolute"
         />
@@ -52,25 +56,25 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
-import PipelineProcList from '~/components/repo/pipeline/PipelineProcList.vue';
+import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, PipelineProc, Repo, RepoPermissions } from '~/lib/api/types';
-import { findProc } from '~/utils/helpers';
+import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
+import { findStep } from '~/utils/helpers';
 
 export default defineComponent({
   name: 'Pipeline',
 
   components: {
     Button,
-    PipelineProcList,
+    PipelineStepList,
     Icon,
     PipelineLog,
   },
 
   props: {
-    procId: {
+    stepId: {
       type: String as PropType<string | null>,
       default: null,
     },
@@ -90,51 +94,51 @@ export default defineComponent({
       throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
     }
 
-    const procId = toRef(props, 'procId');
+    const stepId = toRef(props, 'stepId');
 
-    const defaultProcId = computed(() => {
-      if (!pipeline.value || !pipeline.value.procs || !pipeline.value.procs[0].children) {
+    const defaultStepId = computed(() => {
+      if (!pipeline.value || !pipeline.value.steps || !pipeline.value.steps[0].children) {
         return null;
       }
 
-      return pipeline.value.procs[0].children[0].pid;
+      return pipeline.value.steps[0].children[0].pid;
     });
 
-    const selectedProcId = computed({
+    const selectedStepId = computed({
       get() {
-        if (procId.value !== '' && procId.value !== null) {
-          const id = parseInt(procId.value, 10);
-          const proc = pipeline.value?.procs?.reduce(
+        if (stepId.value !== '' && stepId.value !== null) {
+          const id = parseInt(stepId.value, 10);
+          const step = pipeline.value?.steps?.reduce(
             (prev, p) => prev || p.children?.find((c) => c.pid === id),
-            undefined as PipelineProc | undefined,
+            undefined as PipelineStep | undefined,
           );
-          if (proc) {
-            return proc.pid;
+          if (step) {
+            return step.pid;
           }
 
-          // return fallback if proc-id is provided, but proc can not be found
-          return defaultProcId.value;
+          // return fallback if step-id is provided, but step can not be found
+          return defaultStepId.value;
         }
 
         // is opened on >= md-screen
         if (window.innerWidth > 768) {
-          return defaultProcId.value;
+          return defaultStepId.value;
         }
 
         return null;
       },
-      set(_selectedProcId: number | null) {
-        if (!_selectedProcId) {
-          router.replace({ params: { ...route.params, procId: '' } });
+      set(_selectedStepId: number | null) {
+        if (!_selectedStepId) {
+          router.replace({ params: { ...route.params, stepId: '' } });
           return;
         }
 
-        router.replace({ params: { ...route.params, procId: `${_selectedProcId}` } });
+        router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
       },
     });
 
-    const selectedProc = computed(() => findProc(pipeline.value.procs || [], selectedProcId.value || -1));
-    const error = computed(() => pipeline.value?.error || selectedProc.value?.error);
+    const selectedStep = computed(() => findStep(pipeline.value.steps || [], selectedStepId.value || -1));
+    const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
 
     const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
       if (!repo) {
@@ -156,7 +160,7 @@ export default defineComponent({
 
     return {
       repoPermissions,
-      selectedProcId,
+      selectedStepId,
       pipeline,
       error,
       isApprovingPipeline,
