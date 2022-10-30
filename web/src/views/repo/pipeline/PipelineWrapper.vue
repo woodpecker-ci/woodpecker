@@ -156,7 +156,7 @@ export default defineComponent({
       //   throw new Error('Unexpected: Step not found');
       // }
 
-      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10), 0);
+      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
       notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_success'), type: 'success' });
     });
 
