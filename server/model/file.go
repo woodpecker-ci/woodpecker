@@ -20,8 +20,8 @@ import "io"
 // FileStore persists pipeline artifacts to storage.
 type FileStore interface {
 	FileList(*Pipeline) ([]*File, error)
-	FileFind(*Proc, string) (*File, error)
-	FileRead(*Proc, string) (io.ReadCloser, error)
+	FileFind(*Step, string) (*File, error)
+	FileRead(*Step, string) (io.ReadCloser, error)
 	FileCreate(*File, io.Reader) error
 }
 
@@ -29,7 +29,7 @@ type FileStore interface {
 type File struct {
 	ID         int64  `json:"id"      xorm:"pk autoincr 'file_id'"`
 	PipelineID int64  `json:"-"       xorm:"INDEX 'file_pipeline_id'"`
-	ProcID     int64  `json:"proc_id" xorm:"UNIQUE(s) INDEX 'file_proc_id'"`
+	StepID     int64  `json:"step_id" xorm:"UNIQUE(s) INDEX 'file_step_id'"`
 	PID        int    `json:"pid"     xorm:"file_pid"`
 	Name       string `json:"name"    xorm:"UNIQUE(s) file_name"`
 	Size       int    `json:"size"    xorm:"file_size"`

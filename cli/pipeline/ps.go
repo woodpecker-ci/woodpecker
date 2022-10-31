@@ -76,8 +76,8 @@ func pipelinePs(c *cli.Context) error {
 		return err
 	}
 
-	for _, proc := range pipeline.Procs {
-		for _, child := range proc.Children {
+	for _, step := range pipeline.Steps {
+		for _, child := range step.Children {
 			if err := tmpl.Execute(os.Stdout, child); err != nil {
 				return err
 			}
@@ -88,7 +88,7 @@ func pipelinePs(c *cli.Context) error {
 }
 
 // template for pipeline ps information
-var tmplPipelinePs = "\x1b[33mProc #{{ .PID }} \x1b[0m" + `
+var tmplPipelinePs = "\x1b[33mStep #{{ .PID }} \x1b[0m" + `
 Step: {{ .Name }}
 State: {{ .State }}
 `

@@ -53,7 +53,7 @@ var Command = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
-			Usage:   "custom parameters to be injected into the job environment. Format: KEY=value",
+			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
 	),
 }

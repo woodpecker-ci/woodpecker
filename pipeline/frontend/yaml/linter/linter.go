@@ -53,11 +53,6 @@ func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
 				return err
 			}
 		}
-		if block != blockServices && !container.Detached {
-			if err := l.lintEntrypoint(container); err != nil {
-				return err
-			}
-		}
 		if err := l.lintCommands(container); err != nil {
 			return err
 		}
@@ -82,22 +77,6 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 			keys = append(keys, key)
 		}
 		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)
-	}
-	if len(c.Entrypoint) != 0 {
-		return fmt.Errorf("Cannot configure both commands and entrypoint attributes")
-	}
-	if len(c.Command) != 0 {
-		return fmt.Errorf("Cannot configure both commands and command attributes")
-	}
-	return nil
-}
-
-func (l *Linter) lintEntrypoint(c *yaml.Container) error {
-	if len(c.Entrypoint) != 0 {
-		return fmt.Errorf("Cannot override container entrypoint")
-	}
-	if len(c.Command) != 0 {
-		return fmt.Errorf("Cannot override container command")
 	}
 	return nil
 }

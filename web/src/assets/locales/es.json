@@ -1,3 +1,57 @@
 {
-  "login": "Iniciar sesión"
+  "back": "Atrás",
+  "color_scheme_dark": "Cambiar al modo claro",
+  "color_scheme_light": "Cambiar al modo oscuro",
+  "documentation_for": "Documentación de \"{topic}\"",
+  "login": "Iniciar sesión",
+  "logout": "Cerrar sesión",
+  "not_found": {
+    "back_home": "Volver a la página principal"
+  },
+  "password": "Contraseña",
+  "repo": {
+    "activity": "Actividad",
+    "add": "Añadir repositorio",
+    "branches": "Ramas",
+    "enable": {
+      "enable": "Activar",
+      "list_reloaded": "Lista de repositorios actualizada",
+      "reload": "Actualizar repositorios",
+      "success": "Repositorio activado"
+    },
+    "manual_pipeline": {
+      "select_branch": "Escoger rama",
+      "variables": {
+        "add": "Añadir variable",
+        "name": "Nombre de la variable",
+        "value": "Valor de la variable"
+      }
+    },
+    "not_allowed": "No tienes acceso a este repositorio",
+    "settings": {
+      "general": {
+        "general": "General",
+        "pipeline_path": {
+          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+        },
+        "project": "Configuración del proyecto",
+        "save": "Guardar configuración",
+        "success": "Configuración del repositorio actualizada"
+      },
+      "not_allowed": "No tienes acceso a la configuración del repositorio",
+      "settings": "Configuración"
+    },
+    "user_none": "Esta organización / usuario no tiene proyectos aún."
+  },
+  "repos": "Repositorios",
+  "repositories": "Repositorios",
+  "search": "Buscar…",
+  "time": {
+    "days_short": "d",
+    "hours_short": "h",
+    "not_started": "no iniciado aún"
+  },
+  "unknown_error": "Se ha producido un error desconocido",
+  "url": "URL",
+  "username": "Nombre de usuario"
 }
