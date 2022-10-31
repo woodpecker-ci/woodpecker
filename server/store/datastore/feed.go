@@ -20,25 +20,25 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-var feedItemSelect = `repos.repo_owner,
-repos.repo_name,
-repos.repo_full_name,
-pipelines.pipeline_number,
-pipelines.pipeline_event,
-pipelines.pipeline_status,
-pipelines.pipeline_created,
-pipelines.pipeline_started,
-pipelines.pipeline_finished,
-pipelines.pipeline_commit,
-pipelines.pipeline_branch,
-pipelines.pipeline_ref,
-pipelines.pipeline_refspec,
-pipelines.pipeline_remote,
-pipelines.pipeline_title,
-pipelines.pipeline_message,
-pipelines.pipeline_author,
-pipelines.pipeline_email,
-pipelines.pipeline_avatar`
+var feedItemSelect = `repos.repo_owner as feed_repo_owner,
+repos.repo_name as feed_repo_name,
+repos.repo_full_name as feed_repo_full_name,
+pipelines.pipeline_number as feed_pipeline_number,
+pipelines.pipeline_event as feed_pipeline_event,
+pipelines.pipeline_status as feed_pipeline_status,
+pipelines.pipeline_created as feed_pipeline_created,
+pipelines.pipeline_started as feed_pipeline_started,
+pipelines.pipeline_finished as feed_pipeline_finished,
+pipelines.pipeline_commit as feed_pipeline_commit,
+pipelines.pipeline_branch as feed_pipeline_branch,
+pipelines.pipeline_ref as feed_pipeline_ref,
+pipelines.pipeline_refspec as feed_pipeline_refspec,
+pipelines.pipeline_remote as feed_pipeline_remote,
+pipelines.pipeline_title as feed_pipeline_title,
+pipelines.pipeline_message as feed_pipeline_message,
+pipelines.pipeline_author as feed_pipeline_author,
+pipelines.pipeline_email as feed_pipeline_email,
+pipelines.pipeline_avatar as feed_pipeline_avatar`
 
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
