@@ -112,7 +112,6 @@ func TestUserFeed(t *testing.T) {
 	if got, want := len(feed), 1; got != want {
 		t.Errorf("Want %d repositories, got %d", want, got)
 	}
-
 }
 
 func TestRepoListLatest(t *testing.T) {
