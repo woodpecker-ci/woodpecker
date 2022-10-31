@@ -50,19 +50,13 @@ func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	return feed, err
 }
 
-func userPipelineCondition(userID int64) builder.Cond {
-	return builder.Eq{"perms.perm_user_id": userID}.
-		And(builder.Eq{"perms.perm_push": true}.
-			Or(builder.Eq{"perms.perm_admin": true}))
-}
-
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("repos").
 		Select(feedItemSelect).
 		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
 		Join("INNER", "pipelines", "repos.repo_id = pipelines.pipeline_repo_id").
-		Where(userPipelineCondition(user.ID)).
+		Where(userPushOrAdminCondition(user.ID)).
 		Desc("pipelines.pipeline_id").
 		Limit(perPage).
 		Find(&feed)
@@ -82,7 +76,7 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 			ORDER BY pipelines.pipeline_id DESC
 			LIMIT 1
 			)`).
-		Where(userPipelineCondition(user.ID)).
+		Where(userPushOrAdminCondition(user.ID)).
 		And(builder.Eq{"repos.repo_active": true}).
 		Asc("repos.repo_full_name").
 		Find(&feed)
