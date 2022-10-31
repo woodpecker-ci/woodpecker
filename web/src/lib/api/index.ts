@@ -80,8 +80,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
   }
 
-  cancelPipeline(owner: string, repo: string, number: number, ppid: number): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}/pipelines/${number}/${ppid}`);
+  cancelPipeline(owner: string, repo: string, number: number): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}/cancel`);
   }
 
   approvePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
