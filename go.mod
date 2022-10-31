@@ -14,12 +14,14 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-ap/httpsig v0.0.0-20210714162115-62a09257db51
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/go-github/v39 v39.2.0
+	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.4.0
 	github.com/lafriks/ttlcache/v3 v3.2.0
@@ -64,7 +66,6 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect

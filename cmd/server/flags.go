@@ -525,4 +525,18 @@ var flags = []cli.Flag{
 		Hidden:  true,
 		// TODO(485) temporary workaround to not hit api rate limits
 	},
+	//
+	// secrets encryption in DB
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_KEYSET"},
+		Name:    "secrets-encryption-keyset",
+		Usage:   "Google tink DAEAD-compatible keyset to encrypt secrets in DB",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_MIXED_DB"},
+		Name:    "secrets-encryption-mixed-db",
+		Usage:   "Allow database in mixed-mode, where there is a mix of encrypted and plaintext data for migration purposes",
+		Value:   false,
+	},
 }
