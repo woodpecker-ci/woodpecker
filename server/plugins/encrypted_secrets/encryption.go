@@ -17,6 +17,9 @@ package encrypted_secrets
 import (
 	"encoding/base64"
 	"errors"
+	"os"
+	"strconv"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/tink/go/daead"
 	"github.com/google/tink/go/insecurecleartextkeyset"
@@ -26,8 +29,6 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"os"
-	"strconv"
 )
 
 type Encryption struct {
@@ -43,6 +44,9 @@ func newEncryptionService(ctx *cli.Context, s store.Store) Encryption {
 	filepath := ctx.String("secrets-encryption-keyset")
 	mixedDb := ctx.Bool("secrets-encryption-mixed-db")
 
+	if mixedDb {
+		log.Warn().Msg("Mixed DB compatibility mode is on. Some secrets could be stored in plaintext until first read")
+	}
 	result := Encryption{s, nil, "",
 		filepath, nil, mixedDb}
 	result.reloadEncryption()

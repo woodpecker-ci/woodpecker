@@ -528,7 +528,7 @@ var flags = []cli.Flag{
 	//
 	// secrets encryption in DB
 	//
-	&cli.BoolFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_KEYSET"},
 		Name:    "secrets-encryption-keyset",
 		Usage:   "Google tink DAEAD-compatible keyset to encrypt secrets in DB",

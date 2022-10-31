@@ -23,11 +23,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secrets"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secrets"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -166,11 +167,10 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	if c.String("secrets-encryption-keyset") != "" {
+	if c.IsSet("secrets-encryption-keyset") {
 		return encrypted_secrets.New(c, s)
-	} else {
-		return secrets.New(c.Context, s)
 	}
+	return secrets.New(c.Context, s)
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
