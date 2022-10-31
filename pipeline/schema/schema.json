@@ -38,53 +38,14 @@
         "git": {
           "type": "object",
           "properties": {
-            "image": {
-              "type": "string"
-            }
+            "image": { "type": "string" }
           }
         }
       }
     },
     "branches": {
       "description": "Only include commits based on their target branch. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branches",
-      "oneOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minProperties": 1
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "exclude": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "minLength": 1
-                },
-                { "type": "string" }
-              ]
-            },
-            "include": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "minLength": 1
-                },
-                { "type": "string" }
-              ]
-            }
-          }
-        }
-      ]
+      "$ref": "#/types/constraint_list"
     },
     "pipeline": {
       "description": "The pipeline section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
@@ -110,23 +71,12 @@
         },
         "commands": {
           "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-commands",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": { "type": "string" },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/types/oneOf_string_or_non-empty_string_array"
         },
         "environment": {
           "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
           "oneOf": [
-            {
-              "type": "array",
-              "items": { "type": "string" },
-              "minLength": 1
-            },
+            { "$ref": "#/types/non-empty_string_array" },
             {
               "type": "object",
               "additionalProperties": {
@@ -162,10 +112,7 @@
         },
         "volumes": {
           "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.org/docs/usage/volumes",
-          "oneOf": [
-            { "type": "string" },
-            { "type": "array", "items": { "type": "string" }, "minLength": 1 }
-          ]
+          "$ref": "#/types/oneOf_string_or_non-empty_string_array"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -187,74 +134,46 @@
       "properties": {
         "repo": {
           "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/conditional-execution#repo",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/types/constraint_list"
         },
         "branch": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
-          "type": "string"
+          "$ref": "#/types/constraint_list"
         },
         "event": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
           "oneOf": [
+            { "$ref": "#/types/event_enum" },
             {
               "type": "array",
-              "items": {
-                "enum": ["push", "pull_request", "tag", "deployment"]
-              },
+              "items": { "$ref": "#/types/event_enum" },
               "minLength": 1
-            },
-            {
-              "enum": ["push", "pull_request", "tag", "deployment"]
             }
           ]
         },
         "tag": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/types/constraint_list"
         },
         "status": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#status",
           "type": "array",
-          "items": {
-            "enum": ["success", "failure"]
-          }
+          "oneOf": [
+            { "$ref": "#/types/status_enum" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/types/status_enum" },
+              "minLength": 1
+            }
+          ]
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#platform",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minLength": 1
-            },
-            { "type": "string" }
-          ]
+          "$ref": "#/types/constraint_list"
         },
         "environment": {
           "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
-          "type": "string"
+          "$ref": "#/types/constraint_list"
         },
         "matrix": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#matrix",
@@ -265,7 +184,7 @@
         },
         "instance": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#instance",
-          "type": "string"
+          "$ref": "#/types/constraint_list"
         },
         "path": {
           "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#environment",
@@ -273,28 +192,20 @@
             { "type": "string" },
             {
               "type" :"array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
             },
             {
               "type": "object",
               "properties": {
                 "include": {
                   "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "items": { "type": "string" }
                 },
                 "exclude": {
                   "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "items": { "type": "string" }
                 },
-                "ignore_message": {
-                  "type": "string"
-                }
+                "ignore_message": { "type": "string" }
               },
               "additionalProperties": false
             }
@@ -318,9 +229,7 @@
       "properties": {
         "include": {
           "type": "array",
-          "items": {
-            "type": "object"
-          },
+          "items": { "type": "object" },
           "minLength": 1
         }
       },
@@ -331,6 +240,38 @@
         },
         "minLength": 1
       }
+    }
+  },
+  "types": {
+    "constraint_list": {
+      "oneOf": [
+        { "$ref": "#/types/oneOf_string_or_non-empty_string_array" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": { "$ref": "#/types/oneOf_string_or_non-empty_string_array" },
+            "exclude": { "$ref": "#/types/oneOf_string_or_non-empty_string_array" }
+          }
+        }
+      ]
+    },
+    "oneOf_string_or_non-empty_string_array": {
+      "oneOf": [
+        { "type": "string" },
+        { "$ref": "#/types/non-empty_string_array" }
+      ]
+    },
+    "non-empty_string_array": {
+      "type": "array",
+      "minLength": 1,
+      "items": { "type": "string" }
+    },
+    "event_enum": {
+      "enum": ["push", "pull_request", "tag", "deployment"]
+    },
+    "status_enum": {
+      "enum": ["success", "failure"]
     }
   }
 }
