@@ -255,8 +255,8 @@ func GetPipelineConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, configs)
 }
 
-// DeletePipeline cancels a pipeline
-func DeletePipeline(c *gin.Context) {
+// CancelPipeline cancels a pipeline
+func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
