@@ -22,6 +22,98 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+func TestGetPipelineQueue(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	defer closer()
+
+	user := &model.User{
+		Login: "joe",
+		Email: "foo@bar.com",
+		Token: "e42080dddf012c718e476da161d21ad5",
+	}
+	assert.NoError(t, store.CreateUser(user))
+
+	repo1 := &model.Repo{
+		Owner:    "bradrydzewski",
+		Name:     "test",
+		FullName: "bradrydzewski/test",
+		RemoteID: "1",
+		IsActive: true,
+	}
+
+	assert.NoError(t, store.CreateRepo(repo1))
+	for _, perm := range []*model.Perm{
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
+	pipeline1 := &model.Pipeline{
+		RepoID: repo1.ID,
+		Status: model.StatusPending,
+	}
+	assert.NoError(t, store.CreatePipeline(pipeline1))
+
+	feed, err := store.GetPipelineQueue()
+	if err != nil {
+		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
+		return
+	}
+	if got, want := len(feed), 1; got != want {
+		t.Errorf("Want %d repositories, got %d", want, got)
+	}
+}
+
+func TestUserFeed(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	defer closer()
+
+	user := &model.User{
+		Login: "joe",
+		Email: "foo@bar.com",
+		Token: "e42080dddf012c718e476da161d21ad5",
+	}
+	assert.NoError(t, store.CreateUser(user))
+
+	repo1 := &model.Repo{
+		Owner:    "bradrydzewski",
+		Name:     "test1",
+		FullName: "bradrydzewski/test1",
+		RemoteID: "1",
+		IsActive: true,
+	}
+	repo2 := &model.Repo{
+		Owner:    "johndoe",
+		Name:     "test",
+		FullName: "johndoe/test2",
+		RemoteID: "2",
+		IsActive: true,
+	}
+
+	assert.NoError(t, store.CreateRepo(repo1))
+	assert.NoError(t, store.CreateRepo(repo2))
+
+	for _, perm := range []*model.Perm{
+		{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+	} {
+		assert.NoError(t, store.PermUpsert(perm))
+	}
+
+	pipeline1 := &model.Pipeline{
+		RepoID: repo1.ID,
+		Status: model.StatusFailure,
+	}
+
+	assert.NoError(t, store.CreatePipeline(pipeline1))
+	feed, err := store.UserFeed(user)
+	if err != nil {
+		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
+		return
+	}
+	if got, want := len(feed), 1; got != want {
+		t.Errorf("Want %d repositories, got %d", want, got)
+	}
+}
+
 func TestRepoListLatest(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
 	defer closer()

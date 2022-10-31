@@ -49,7 +49,19 @@ func (s storage) UpdateUser(user *model.User) error {
 }
 
 func (s storage) DeleteUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).Delete(new(model.User))
-	// TODO: delete related content that need this user to work
-	return err
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if _, err := sess.ID(user.ID).Delete(new(model.User)); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }

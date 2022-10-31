@@ -26,8 +26,6 @@ pipeline:
 services:
   redis:
     image: redis
-    entrypoint: [ /bin/redis-server ]
-    command: [ -v ]
 `}, {Title: "list", Data: `
 pipeline:
   - name: build
@@ -116,24 +114,6 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "pipeline: { build: { image: golang, sysctls: [ net.core.somaxconn=1024 ] }  }",
 			want: "Insufficient privileges to use sysctls",
-		},
-		// cannot override entypoint, command for script steps
-		{
-			from: "pipeline: { build: { image: golang, commands: [ 'go build' ], entrypoint: [ '/bin/bash' ] } }",
-			want: "Cannot override container entrypoint",
-		},
-		{
-			from: "pipeline: { build: { image: golang, commands: [ 'go build' ], command: [ '/bin/bash' ] } }",
-			want: "Cannot override container command",
-		},
-		// cannot override entypoint, command for plugin steps
-		{
-			from: "pipeline: { publish: { image: plugins/docker, repo: foo/bar, entrypoint: [ '/bin/bash' ] } }",
-			want: "Cannot override container entrypoint",
-		},
-		{
-			from: "pipeline: { publish: { image: plugins/docker, repo: foo/bar, command: [ '/bin/bash' ] } }",
-			want: "Cannot override container command",
 		},
 	}
 
