@@ -73,6 +73,15 @@
               class="transition-transform duration-150 min-w-6 h-6"
               :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
             />
+            <div
+              class="min-w-2 h-2 rounded-full -ml-0.75"
+              :class="{
+                'bg-lime-400': ['success'].includes(step.state),
+                'bg-gray-400': ['pending', 'skipped'].includes(step.state),
+                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(step.state),
+                'bg-blue-400': ['started', 'running'].includes(step.state),
+              }"
+            />
             <span class="truncate">{{ step.name }}</span>
           </button>
         </div>
@@ -137,5 +146,10 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
-const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>({});
+const initiallyCollapsed = (props.pipeline.steps || []).reduce(
+  (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
+  {},
+);
+
+const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>(initiallyCollapsed);
 </script>
