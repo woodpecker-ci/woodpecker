@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
+  <header class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
     <FluidContainer class="!py-0">
       <div class="flex flex-wrap items-center justify-between py-4 <md:flex-row <md:gap-y-4">
         <div
@@ -42,7 +42,7 @@
         </div>
       </div>
     </FluidContainer>
-  </div>
+  </header>
 </template>
 
 <script setup lang="ts">
