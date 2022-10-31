@@ -9,7 +9,12 @@
     "username": "Username",
     "password": "Password",
     "url": "URL",
+    "back": "Back",
+    "color_scheme_light": "Switch to dark mode",
+    "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
+    "pipeline_feed": "Pipeline feed",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -116,7 +121,10 @@
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                }
+                },
+                "plugins_only": "Only available for plugins",
+                "edit": "Edit secret",
+                "delete":"Delete secret"
             },
             "registries": {
                 "registries": "Registries",
@@ -132,7 +140,9 @@
                 "address": {
                     "address": "Address",
                     "placeholder": "Registry Address (e.g. docker.io)"
-                }
+                },
+                "edit": "Edit registry",
+                "delete":"Delete registry"
             },
             "crons": {
                 "crons": "Crons",
@@ -146,6 +156,7 @@
                 "deleted": "Cron deleted",
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
+                "run": "Run now",
                 "branch": {
                     "title": "Branch",
                     "placeholder": "Branch (uses default branch if empty)"
@@ -157,12 +168,17 @@
                 "schedule": {
                     "title": "Schedule (based on UTC)",
                     "placeholder": "Schedule"
-                }
+                },
+                "edit": "Edit cron",
+                "delete": "Delete cron"
             },
             "badge": {
                 "badge": "Badge",
-                "url_branch": "URL for specific branch",
-                "markdown": "Markdown"
+                "type": "Syntax",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
             },
             "actions": {
                 "actions": "Actions",
@@ -181,7 +197,7 @@
                 }
             }
         },
-        "build": {
+        "pipeline": {
             "created": "Created",
             "tasks": "Tasks",
             "config": "Config",
@@ -194,7 +210,7 @@
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "exit_code": "exit code {exitCode}",
             "loading": "Loading…",
-            "pipeline": "Pipeline #{buildId}",
+            "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",
             "actions": {
                 "cancel": "Cancel",
@@ -244,6 +260,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -272,6 +289,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -302,6 +320,7 @@
         }
     },
     "user": {
+        "settings": "User Settings",
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",

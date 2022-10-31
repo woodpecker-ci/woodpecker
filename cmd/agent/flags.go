@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2019 Laszlo Fogas
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,9 +73,9 @@ var flags = []cli.Flag{
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
-		Name:    "max-procs",
-		Usage:   "agent parallel builds",
+		EnvVars: []string{"WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"},
+		Name:    "max-workflows",
+		Usage:   "agent parallel workflows",
 		Value:   1,
 	},
 	&cli.BoolFlag{

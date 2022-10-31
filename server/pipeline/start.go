@@ -24,31 +24,31 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// start a build, make sure it was stored persistent in the store before
-func start(ctx context.Context, store store.Store, activeBuild *model.Build, user *model.User, repo *model.Repo, buildItems []*shared.BuildItem) (*model.Build, error) {
-	// call to cancel previous builds if needed
-	if err := cancelPreviousPipelines(ctx, store, activeBuild, repo); err != nil {
+// start a pipeline, make sure it was stored persistent in the store before
+func start(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*shared.PipelineItem) (*model.Pipeline, error) {
+	// call to cancel previous pipelines if needed
+	if err := cancelPreviousPipelines(ctx, store, activePipeline, repo); err != nil {
 		// should be not breaking
-		log.Error().Err(err).Msg("Failed to cancel previous builds")
+		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
 	}
 
-	if err := store.ProcCreate(activeBuild.Procs); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting procs for %s#%d", repo.FullName, activeBuild.Number)
+	if err := store.StepCreate(activePipeline.Steps); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, activeBuild, repo); err != nil {
+	if err := publishToTopic(ctx, activePipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	if err := queueBuild(activeBuild, repo, buildItems); err != nil {
+	if err := queueBuild(activePipeline, repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queueBuild")
 		return nil, err
 	}
 
-	if err := updateBuildStatus(ctx, activeBuild, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, activePipeline, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 
-	return activeBuild, nil
+	return activePipeline, nil
 }

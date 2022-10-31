@@ -1,6 +1,6 @@
 variables:
   - &golang_image 'golang:1.18'
-  - &node_image 'node:16-alpine'
+  - &node_image 'node:18-alpine'
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
@@ -18,10 +18,11 @@ pipeline:
 
   build:
     image: *node_image
+    directory: docs/
     commands:
-      - cd docs/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
     when:
       path: *when_path
 

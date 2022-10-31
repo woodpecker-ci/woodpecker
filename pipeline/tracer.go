@@ -14,7 +14,7 @@ type Tracer interface {
 // functions as a Tracer.
 type TraceFunc func(*State) error
 
-// Trace calls f(proc, state).
+// Trace calls f(state).
 func (f TraceFunc) Trace(state *State) error {
 	return f(state)
 }
@@ -29,15 +29,26 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 	if state.Pipeline.Step.Environment == nil {
 		return nil
 	}
+	state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
+	state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+	state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+	state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "success"
+	state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+	state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+	// DEPRECATED
 	state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 	state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 	state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
 	state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 	state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 	state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 	if state.Pipeline.Error != nil {
+		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
+		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
+		// DEPRECATED
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 	}

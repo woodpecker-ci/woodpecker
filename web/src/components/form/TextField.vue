@@ -7,6 +7,7 @@
       v-if="lines === 1"
       v-model="innerValue"
       class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
+      :class="inputClass"
       :disabled="disabled"
       :type="type"
       :placeholder="placeholder"
@@ -15,6 +16,7 @@
       v-else
       v-model="innerValue"
       class="w-full bg-transparent text-color focus:outline-none focus:border-blue-400"
+      :class="inputClass"
       :disabled="disabled"
       :placeholder="placeholder"
       :rows="lines"
@@ -29,8 +31,6 @@ export default defineComponent({
   name: 'TextField',
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       default: '',
@@ -53,6 +53,11 @@ export default defineComponent({
 
     disabled: {
       type: Boolean,
+    },
+
+    inputClass: {
+      type: String,
+      default: '',
     },
   },
 

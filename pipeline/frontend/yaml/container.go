@@ -27,7 +27,6 @@ type (
 		AuthConfig    AuthConfig             `yaml:"auth_config,omitempty"`
 		CapAdd        []string               `yaml:"cap_add,omitempty"`
 		CapDrop       []string               `yaml:"cap_drop,omitempty"`
-		Command       types.Command          `yaml:"command,omitempty"`
 		Commands      types.Stringorslice    `yaml:"commands,omitempty"`
 		CPUQuota      types.StringorInt      `yaml:"cpu_quota,omitempty"`
 		CPUSet        string                 `yaml:"cpuset,omitempty"`
@@ -37,7 +36,7 @@ type (
 		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
 		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
 		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
-		Entrypoint    types.Command          `yaml:"entrypoint,omitempty"`
+		Directory     string                 `yaml:"directory,omitempty"`
 		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
 		Group         string                 `yaml:"group,omitempty"`
@@ -66,7 +65,7 @@ type (
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Kind {
-	// We support mapps ...
+	// We support maps ...
 	case yaml.MappingNode:
 		c.Containers = make([]*Container, 0, len(value.Content)/2+1)
 		// We cannot use decode on specific values
@@ -109,4 +108,8 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+func (c *Container) IsPlugin() bool {
+	return len(c.Commands) == 0
 }

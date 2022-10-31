@@ -96,16 +96,16 @@ func runCron(store store.Store, remote remote.Remote, cron *model.Cron, now time
 		return nil
 	}
 
-	repo, newBuild, err := createBuild(ctx, store, remote, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, remote, cron)
 	if err != nil {
 		return err
 	}
 
-	_, err = pipeline.Create(ctx, store, repo, newBuild)
+	_, err = pipeline.Create(ctx, store, repo, newPipeline)
 	return err
 }
 
-func createBuild(ctx context.Context, store store.Store, remote remote.Remote, cron *model.Cron) (*model.Repo, *model.Build, error) {
+func CreatePipeline(ctx context.Context, store store.Store, remote remote.Remote, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
 	repo, err := store.GetRepo(cron.RepoID)
 	if err != nil {
 		return nil, nil, err
@@ -126,7 +126,7 @@ func createBuild(ctx context.Context, store store.Store, remote remote.Remote, c
 		return nil, nil, err
 	}
 
-	return repo, &model.Build{
+	return repo, &model.Pipeline{
 		Event:     model.EventCron,
 		Commit:    commit,
 		Ref:       "refs/heads/" + cron.Branch,

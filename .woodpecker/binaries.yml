@@ -4,7 +4,7 @@ depends_on:
 
 variables:
   - &golang_image 'golang:1.18'
-  - &node_image 'node:16-alpine'
+  - &node_image 'node:18-alpine'
   - &when_path
       # related config files
       - ".woodpecker/binaries.yml"
@@ -19,10 +19,11 @@ pipeline:
   build-web:
     group: prepare
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
     when:
       path: *when_path
 
@@ -105,4 +106,3 @@ pipeline:
       title: ${CI_COMMIT_TAG##v}
     when:
       event: tag
-      # path conditions are ignored for tag events

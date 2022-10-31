@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +15,11 @@
 
 package model
 
-// EventType defines the possible types of build events.
+// EventType defines the possible types of pipeline events.
 type EventType string
 
-// Event represents a build event.
+// Event represents a pipeline event.
 type Event struct {
-	Repo  Repo  `json:"repo"`
-	Build Build `json:"build"`
+	Repo     Repo     `json:"repo"`
+	Pipeline Pipeline `json:"pipeline"`
 }

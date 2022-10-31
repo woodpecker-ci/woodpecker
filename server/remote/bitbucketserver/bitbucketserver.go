@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,29 +179,29 @@ func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*mo
 	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
-func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
+func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
 
-	return client.FindFileForRepo(r.Owner, r.Name, f, b.Ref)
+	return client.FindFileForRepo(r.Owner, r.Name, f, p.Ref)
 }
 
-func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
-	status := internal.BuildStatus{
-		State: convertStatus(build.Status),
-		Desc:  common.GetBuildStatusDescription(build.Status),
-		Name:  fmt.Sprintf("Woodpecker #%d - %s", build.Number, build.Branch),
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+	status := internal.PipelineStatus{
+		State: convertStatus(pipeline.Status),
+		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
+		Name:  fmt.Sprintf("Woodpecker #%d - %s", pipeline.Number, pipeline.Branch),
 		Key:   "Woodpecker",
-		URL:   common.GetBuildStatusLink(repo, build, nil),
+		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
 	}
 
 	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, user.Token)
 
-	return client.CreateStatus(build.Commit, &status)
+	return client.CreateStatus(pipeline.Commit, &status)
 }
 
 func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
@@ -247,7 +248,7 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Build, error) {
+func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r, c.URL)
 }
 

@@ -5,7 +5,7 @@
         <h1 class="text-xl text-color">{{ $t('repo.settings.crons.crons') }}</h1>
         <p class="text-sm text-color-alt">
           {{ $t('repo.settings.crons.desc') }}
-          <DocsLink url="docs/usage/crons" />
+          <DocsLink :topic="$t('repo.settings.crons.crons')" url="docs/usage/crons" />
         </p>
       </div>
       <Button
@@ -31,11 +31,13 @@
           {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span
         >
         <span v-else class="ml-auto">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
-        <IconButton icon="edit" class="ml-auto w-8 h-8" @click="selectedCron = cron" />
+        <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
+        <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
           class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
+          :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"
         />
       </ListItem>
@@ -74,6 +76,7 @@
 
         <Button
           type="submit"
+          color="green"
           :is-loading="isSaving"
           :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
         />
@@ -98,6 +101,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { Cron, Repo } from '~/lib/api/types';
+import router from '~/router';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -147,6 +151,22 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
   await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
   await loadCrons();
+});
+
+const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
+
+  const pipeline = await apiClient.runCron(repo.value.owner, repo.value.name, _cron.id);
+  await router.push({
+    name: 'repo-pipeline',
+    params: {
+      repoOwner: repo.value.owner,
+      repoName: repo.value.name,
+      pipelineId: pipeline.number,
+    },
+  });
 });
 
 onMounted(async () => {

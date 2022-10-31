@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +21,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-// AuthorizeAgent authorizes requests from build agents to access the queue.
+// AuthorizeAgent authorizes requests from agent to access the queue.
 func AuthorizeAgent(c *gin.Context) {
 	secret := c.MustGet("agent").(string)
 	if secret == "" {

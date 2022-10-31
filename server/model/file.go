@@ -19,26 +19,26 @@ import "io"
 
 // FileStore persists pipeline artifacts to storage.
 type FileStore interface {
-	FileList(*Build) ([]*File, error)
-	FileFind(*Proc, string) (*File, error)
-	FileRead(*Proc, string) (io.ReadCloser, error)
+	FileList(*Pipeline) ([]*File, error)
+	FileFind(*Step, string) (*File, error)
+	FileRead(*Step, string) (io.ReadCloser, error)
 	FileCreate(*File, io.Reader) error
 }
 
 // File represents a pipeline artifact.
 type File struct {
-	ID      int64  `json:"id"      xorm:"pk autoincr 'file_id'"`
-	BuildID int64  `json:"-"       xorm:"INDEX 'file_build_id'"`
-	ProcID  int64  `json:"proc_id" xorm:"UNIQUE(s) INDEX 'file_proc_id'"`
-	PID     int    `json:"pid"     xorm:"file_pid"`
-	Name    string `json:"name"    xorm:"UNIQUE(s) file_name"`
-	Size    int    `json:"size"    xorm:"file_size"`
-	Mime    string `json:"mime"    xorm:"file_mime"`
-	Time    int64  `json:"time"    xorm:"file_time"`
-	Passed  int    `json:"passed"  xorm:"file_meta_passed"`
-	Failed  int    `json:"failed"  xorm:"file_meta_failed"`
-	Skipped int    `json:"skipped" xorm:"file_meta_skipped"`
-	Data    []byte `json:"-"       xorm:"file_data"` // TODO: dont store in db but object storage?
+	ID         int64  `json:"id"      xorm:"pk autoincr 'file_id'"`
+	PipelineID int64  `json:"-"       xorm:"INDEX 'file_pipeline_id'"`
+	StepID     int64  `json:"step_id" xorm:"UNIQUE(s) INDEX 'file_step_id'"`
+	PID        int    `json:"pid"     xorm:"file_pid"`
+	Name       string `json:"name"    xorm:"UNIQUE(s) file_name"`
+	Size       int    `json:"size"    xorm:"file_size"`
+	Mime       string `json:"mime"    xorm:"file_mime"`
+	Time       int64  `json:"time"    xorm:"file_time"`
+	Passed     int    `json:"passed"  xorm:"file_meta_passed"`
+	Failed     int    `json:"failed"  xorm:"file_meta_failed"`
+	Skipped    int    `json:"skipped" xorm:"file_meta_skipped"`
+	Data       []byte `json:"-"       xorm:"file_data"` // TODO: don't store in db but object storage?
 }
 
 // TableName return database table name for xorm

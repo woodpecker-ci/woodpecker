@@ -88,7 +88,7 @@ func loop(c *cli.Context) error {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	counter.Polling = c.Int("max-procs")
+	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -141,7 +141,7 @@ func loop(c *cli.Context) error {
 	backend.Init(context.WithValue(ctx, types.CliContext, c))
 
 	var wg sync.WaitGroup
-	parallel := c.Int("max-procs")
+	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
@@ -194,7 +194,7 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				log.Debug().Msg("polling new jobs")
+				log.Debug().Msg("polling new steps")
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return

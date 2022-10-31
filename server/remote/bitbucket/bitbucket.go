@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -213,27 +214,27 @@ func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 }
 
 // File fetches the file from the Bitbucket repository and returns its contents.
-func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]byte, error) {
-	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, b.Commit, f)
+func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
+	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(*config), err
 }
 
-func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Build, f string) ([]*remote.FileMeta, error) {
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*remote.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
-// Status creates a build status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, build *model.Build, proc *model.Proc) error {
-	status := internal.BuildStatus{
-		State: convertStatus(build.Status),
-		Desc:  common.GetBuildStatusDescription(build.Status),
+// Status creates a pipeline status for the Bitbucket commit.
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+	status := internal.PipelineStatus{
+		State: convertStatus(pipeline.Status),
+		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetBuildStatusLink(repo, build, nil),
+		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
 	}
-	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, build.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
@@ -301,8 +302,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
-// Build details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Build, error) {
+// Pipeline details. If the hook is unsupported nil values are returned.
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(req)
 }
 

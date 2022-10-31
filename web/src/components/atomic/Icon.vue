@@ -42,6 +42,7 @@
   <i-ic-baseline-file-download v-else-if="name === 'auto-scroll'" class="h-6 w-6" />
   <i-ic-baseline-file-download-off v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
   <i-teenyicons-refresh-outline v-else-if="name === 'refresh'" class="h-6 w-6" />
+  <i-ic-baseline-play-arrow v-else-if="name === 'play'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -90,7 +91,8 @@ export type IconNames =
   | 'download'
   | 'auto-scroll'
   | 'auto-scroll-off'
-  | 'refresh';
+  | 'refresh'
+  | 'play';
 
 defineProps<{
   name: IconNames;

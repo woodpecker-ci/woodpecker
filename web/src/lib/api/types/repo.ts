@@ -35,23 +35,23 @@ export type Repo = {
   // Whether the repository is publicly visible.
   private: boolean;
 
-  // Whether the repository has trusted access for builds.
+  // Whether the repository has trusted access for pipelines.
   // If the repository is trusted then the host network can be used and
   // volumes can be created.
   trusted: boolean;
 
   // x-dart-type: Duration
-  // The amount of time in minutes before the build is killed.
+  // The amount of time in minutes before the pipeline is killed.
   timeout: number;
 
-  // Whether pull requests should trigger a build.
+  // Whether pull requests should trigger a pipeline.
   allow_pr: boolean;
 
   config_file: string;
 
   visibility: RepoVisibility;
 
-  last_build: number;
+  last_pipeline: number;
 
   gated: boolean;
 

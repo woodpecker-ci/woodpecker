@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +16,21 @@
 package gitea
 
 import (
+	"bytes"
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/mock"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
 )
 
 func Test_gitea(t *testing.T) {
@@ -35,7 +42,9 @@ func Test_gitea(t *testing.T) {
 		SkipVerify: true,
 	})
 
-	ctx := context.Background()
+	mockStore := mocks_store.NewStore(t)
+	ctx := store.InjectToContext(context.Background(), mockStore)
+
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
 		g.After(func() {
@@ -131,13 +140,13 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakeBuild, ".woodpecker.yml")
+			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
 			g.Assert(err).IsNil()
 			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
 		})
 
-		g.It("Should return nil from send build status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakeBuild, fakeProc)
+		g.It("Should return nil from send pipeline status", func() {
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
 			g.Assert(err).IsNil()
 		})
 
@@ -152,6 +161,21 @@ func Test_gitea(t *testing.T) {
 			g.It("Should skip non-push events")
 			g.It("Should return push details")
 			g.It("Should handle a parsing error")
+		})
+
+		g.It("Given a PR hook", func() {
+			buf := bytes.NewBufferString(fixtures.HookPullRequest)
+			req, _ := http.NewRequest("POST", "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, hookPullRequest)
+			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
+			mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+			r, b, err := c.Hook(ctx, req)
+			g.Assert(r).IsNotNil()
+			g.Assert(b).IsNotNil()
+			g.Assert(err).IsNil()
+			g.Assert(b.Event).Equal(model.EventPull)
+			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
 		})
 	})
 }
@@ -181,11 +205,11 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
-	fakeBuild = &model.Build{
+	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 
-	fakeProc = &model.Proc{
+	fakeStep = &model.Step{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

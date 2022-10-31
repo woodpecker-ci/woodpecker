@@ -139,7 +139,7 @@ Example configuration using a private image:
        - go test
 ```
 
-Woodpecker matches the registry hostname to each image in your yaml. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
+Woodpecker matches the registry hostname to each image in your YAML. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
 
 Example registry hostnames:
 
@@ -412,8 +412,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab.
-Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -434,6 +433,33 @@ when:
 ```
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+
+#### `evaluate`
+
+Execute a step only if the provided evaluate expression is equal to true. Each [`CI_` variable](./50-environment.md#built-in-environment-variables) can be used inside the expression.
+
+The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+
+Run on pushes to the default branch for the repository `owner/repo`:
+
+```yaml
+when:
+  - evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
+```
+
+Run on commits created by user `woodpecker-ci`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
+```
+
+Skip all commits containing `please ignore me` in the commit message:
+
+```yaml
+when:
+  - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
+```
 
 ### `group` - Parallel execution
 
@@ -475,6 +501,10 @@ Woodpecker gives the ability to detach steps to run them in background until the
 
 For more details check the [service docs](./60-services.md#detachment).
 
+### `directory`
+
+Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
+
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
@@ -483,7 +513,7 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository url.
+The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository URL.
 
 ```txt
 /woodpecker/src/github.com/octocat/hello-world

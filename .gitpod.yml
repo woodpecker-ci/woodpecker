@@ -12,20 +12,22 @@ tasks:
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
+      make build-server
+    command: |
       echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
-    command: go run github.com/woodpecker-ci/woodpecker/cmd/server
+      go run github.com/woodpecker-ci/woodpecker/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
-      WOODPECKER_MAX_PROCS: 1
+      WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
-    init: |
+    command: |
       gp sync-await woodpecker-server
-    command: go run github.com/woodpecker-ci/woodpecker/cmd/agent
+      go run github.com/woodpecker-ci/woodpecker/cmd/agent
   - name: Gitea
     command: |
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
@@ -36,35 +38,57 @@ tasks:
       export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --raw)
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
-        -d "{ \"name\": \"Woodpecker CI\", \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
+        -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
       echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
       echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
+      curl -X 'POST' \
+        'http://localhost:3000/api/v1/user/repos' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -H "Authorization: token ${GITEA_TOKEN}" \
+        -d '{ "auto_init": false, "name": "woodpecker-test", "private": true, "template": false, "trust_model": "default" }'
+      cd contrib/woodpecker-test-repo
+      git init
+      git checkout -b main
+      git remote add origin http://woodpecker:${GITEA_TOKEN}@localhost:3000/woodpecker/woodpecker-test.git
+      git add .
+      git commit -m ":tada: Initial commit"
+      git push -u origin main
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
-    init: |
+    before: |
       cd web/
-      yarn install
-    command: yarn start
-  - name: Docs
     init: |
+      pnpm install
+    command: |
+      pnpm start
+  - name: Docs
+    before: |
       cd docs/
-      yarn install
-      yarn build:woodpecker-plugins
-    command: yarn start --port 4000
+    init: |
+      pnpm install
+      pnpm build:woodpecker-plugins
+    command: |
+      pnpm start --port 4000
 
 ports:
   - port: 3000
+    name: Gitea
     onOpen: ignore
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 8000
+    name: Woodpecker
     onOpen: notify
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 9000
+    name: Woodpecker GRPC
     onOpen: ignore
   - port: 8010
+    description: Do not use! Access woodpecker on port 8000
     onOpen: ignore
   - port: 4000
+    name: Docs
     onOpen: notify
 
 vscode:
@@ -74,6 +98,7 @@ vscode:
     - "dbaeumer.vscode-eslint"
     - "esbenp.prettier-vscode"
     - "voorjaar.windicss-intellisense"
-    - "johnsoncodehk.volar"
+    - "Vue.volar"
     - "redhat.vscode-yaml"
     - "davidanson.vscode-markdownlint"
+    - "streetsidesoftware.code-spell-checker"

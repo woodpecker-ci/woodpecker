@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +67,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	meta, _ := metadata.FromOutgoingContext(ctx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
 
-	// get the next job from the queue
+	// get the next workflow from the queue
 	work, err := r.client.Next(ctx, r.filter)
 	if err != nil {
 		return err
@@ -80,20 +81,20 @@ func (r *Runner) Run(ctx context.Context) error {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config) // hack
-	buildNumber := extractBuildNumber(work.Config) // hack
+	repoName := extractRepositoryName(work.Config)       // hack
+	pipelineNumber := extractPipelineNumber(work.Config) // hack
 
 	r.counter.Add(
 		work.ID,
 		timeout,
 		repoName,
-		buildNumber,
+		pipelineNumber,
 	)
 	defer r.counter.Done(work.ID)
 
 	logger := log.With().
 		Str("repo", repoName).
-		Str("build", buildNumber).
+		Str("pipeline", pipelineNumber).
 		Str("id", work.ID).
 		Logger()
 
@@ -149,10 +150,10 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	var uploads sync.WaitGroup
-	defaultLogger := pipeline.LogFunc(func(proc *backend.Step, rc multipart.Reader) error {
+	defaultLogger := pipeline.LogFunc(func(step *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
-			Str("image", proc.Image).
-			Str("stage", proc.Alias).
+			Str("image", step.Image).
+			Str("stage", step.Alias).
 			Logger()
 
 		part, rerr := rc.NextPart()
@@ -171,7 +172,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		loglogger.Debug().Msg("log stream opened")
 
 		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logStream := rpc.NewLineWriter(r.client, work.ID, proc.Alias, secrets...)
+		logStream := rpc.NewLineWriter(r.client, work.ID, step.Alias, secrets...)
 		if _, err := io.Copy(logStream, limitedPart); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
@@ -185,7 +186,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		file := &rpc.File{
 			Mime: "application/json+logs",
-			Proc: proc.Alias,
+			Step: step.Alias,
 			Name: "logs.json",
 			Data: data,
 			Size: len(data),
@@ -217,7 +218,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		file = &rpc.File{
 			Mime: part.Header().Get("Content-Type"),
-			Proc: proc.Alias,
+			Step: step.Alias,
 			Name: part.FileName(),
 			Data: data,
 			Size: len(data),
@@ -249,7 +250,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	})
 
 	defaultTracer := pipeline.TraceFunc(func(state *pipeline.State) error {
-		proclogger := logger.With().
+		steplogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("stage", state.Pipeline.Step.Alias).
 			Err(state.Process.Error).
@@ -257,27 +258,27 @@ func (r *Runner) Run(ctx context.Context) error {
 			Bool("exited", state.Process.Exited).
 			Logger()
 
-		procState := rpc.State{
-			Proc:     state.Pipeline.Step.Alias,
+		stepState := rpc.State{
+			Step:     state.Pipeline.Step.Alias,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  time.Now().Unix(), // TODO do not do this
 			Finished: time.Now().Unix(),
 		}
 		if state.Process.Error != nil {
-			procState.Error = state.Process.Error.Error()
+			stepState.Error = state.Process.Error.Error()
 		}
 
 		defer func() {
-			proclogger.Debug().Msg("update step status")
+			steplogger.Debug().Msg("update step status")
 
-			if uerr := r.client.Update(ctxmeta, work.ID, procState); uerr != nil {
-				proclogger.Debug().
+			if uerr := r.client.Update(ctxmeta, work.ID, stepState); uerr != nil {
+				steplogger.Debug().
 					Err(uerr).
 					Msg("update step status error")
 			}
 
-			proclogger.Debug().Msg("update step status complete")
+			steplogger.Debug().Msg("update step status complete")
 		}()
 		if state.Process.Exited {
 			return nil
@@ -288,17 +289,30 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
+
+		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
+
+		// DEPRECATED
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
-		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
-
 		if state.Pipeline.Error != nil {
+			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
+			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
+
+			// DEPRECATED
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
@@ -311,9 +325,9 @@ func (r *Runner) Run(ctx context.Context) error {
 		pipeline.WithTracer(defaultTracer),
 		pipeline.WithEngine(*r.engine),
 		pipeline.WithDescription(map[string]string{
-			"ID":    work.ID,
-			"Repo":  repoName,
-			"Build": buildNumber,
+			"ID":       work.ID,
+			"Repo":     repoName,
+			"Pipeline": pipelineNumber,
 		}),
 	).Run()
 
@@ -363,7 +377,7 @@ func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract build number from the configuration
-func extractBuildNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_BUILD_NUMBER"]
+// extract pipeline number from the configuration
+func extractPipelineNumber(config *backend.Config) string {
+	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

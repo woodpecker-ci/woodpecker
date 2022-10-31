@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,18 +90,18 @@ func Test_parse(t *testing.T) {
 			g.Assert(hook.PullRequest.Head.Ref).Equal("feature/changes")
 		})
 
-		g.It("Should return a Build struct from a push hook", func() {
+		g.It("Should return a Pipeline struct from a push hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, _ := parsePush(buf)
-			build := buildFromPush(hook)
-			g.Assert(build.Event).Equal(model.EventPush)
-			g.Assert(build.Commit).Equal(hook.After)
-			g.Assert(build.Ref).Equal(hook.Ref)
-			g.Assert(build.Link).Equal(hook.Compare)
-			g.Assert(build.Branch).Equal("master")
-			g.Assert(build.Message).Equal(hook.Commits[0].Message)
-			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(build.Author).Equal(hook.Sender.Login)
+			pipeline := pipelineFromPush(hook)
+			g.Assert(pipeline.Event).Equal(model.EventPush)
+			g.Assert(pipeline.Commit).Equal(hook.After)
+			g.Assert(pipeline.Ref).Equal(hook.Ref)
+			g.Assert(pipeline.Link).Equal(hook.Compare)
+			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
+			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(pipeline.Author).Equal(hook.Sender.Login)
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {
@@ -113,18 +114,18 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Link).Equal(hook.Repo.HTMLURL)
 		})
 
-		g.It("Should return a Build struct from a pull_request hook", func() {
+		g.It("Should return a Pipeline struct from a pull_request hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
 			hook, _ := parsePullRequest(buf)
-			build := buildFromPullRequest(hook)
-			g.Assert(build.Event).Equal(model.EventPull)
-			g.Assert(build.Commit).Equal(hook.PullRequest.Head.Sha)
-			g.Assert(build.Ref).Equal("refs/pull/1/head")
-			g.Assert(build.Link).Equal(hook.PullRequest.URL)
-			g.Assert(build.Branch).Equal("master")
-			g.Assert(build.Message).Equal(hook.PullRequest.Title)
-			g.Assert(build.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(build.Author).Equal(hook.PullRequest.User.UserName)
+			pipeline := pipelineFromPullRequest(hook)
+			g.Assert(pipeline.Event).Equal(model.EventPull)
+			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
+			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
+			g.Assert(pipeline.Link).Equal(hook.PullRequest.URL)
+			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
+			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(pipeline.Author).Equal(hook.PullRequest.User.UserName)
 		})
 
 		g.It("Should return a Repo struct from a pull_request hook", func() {

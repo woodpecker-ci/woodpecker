@@ -22,6 +22,11 @@
       "success": "Repository abilitato"
     },
     "not_allowed": "Non è permesso accedere a questo repository",
+    "pipeline": {
+      "actions": {
+        "cancel": "Annulla"
+      }
+    },
     "settings": {
       "actions": {
         "actions": "Azioni"

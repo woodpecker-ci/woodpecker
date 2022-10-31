@@ -26,19 +26,19 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LOCAL"},
 		Name:    "local",
-		Usage:   "build from local directory",
+		Usage:   "run from local directory",
 		Value:   true,
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_TIMEOUT"},
 		Name:    "timeout",
-		Usage:   "build timeout",
+		Usage:   "pipeline timeout",
 		Value:   time.Hour,
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_VOLUMES"},
 		Name:    "volumes",
-		Usage:   "build volumes",
+		Usage:   "pipeline volumes",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_NETWORKS"},
@@ -131,41 +131,41 @@ var flags = []cli.Flag{
 		Name:    "repo-private",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_BUILD_NUMBER"},
-		Name:    "build-number",
+		EnvVars: []string{"CI_PIPELINE_NUMBER"},
+		Name:    "pipeline-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PARENT_BUILD_NUMBER"},
-		Name:    "parent-build-number",
+		EnvVars: []string{"CI_PIPELINE_PARENT"},
+		Name:    "pipeline-parent",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_BUILD_CREATED"},
-		Name:    "build-created",
+		EnvVars: []string{"CI_PIPELINE_CREATED"},
+		Name:    "pipeline-created",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_BUILD_STARTED"},
-		Name:    "build-started",
+		EnvVars: []string{"CI_PIPELINE_STARTED"},
+		Name:    "pipeline-started",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_BUILD_FINISHED"},
-		Name:    "build-finished",
+		EnvVars: []string{"CI_PIPELINE_FINISHED"},
+		Name:    "pipeline-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_BUILD_STATUS"},
-		Name:    "build-status",
+		EnvVars: []string{"CI_PIPELINE_STATUS"},
+		Name:    "pipeline-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_BUILD_EVENT"},
-		Name:    "build-event",
+		EnvVars: []string{"CI_PIPELINE_EVENT"},
+		Name:    "pipeline-event",
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_BUILD_LINK"},
-		Name:    "build-link",
+		EnvVars: []string{"CI_PIPELINE_LINK"},
+		Name:    "pipeline-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_BUILD_TARGET"},
-		Name:    "build-target",
+		EnvVars: []string{"CI_PIPELINE_TARGET"},
+		Name:    "pipeline-target",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_COMMIT_SHA"},
@@ -200,32 +200,32 @@ var flags = []cli.Flag{
 		Name:    "commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PREV_BUILD_NUMBER"},
-		Name:    "prev-build-number",
+		EnvVars: []string{"CI_PREV_PIPELINE_NUMBER"},
+		Name:    "prev-pipeline-number",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_BUILD_CREATED"},
-		Name:    "prev-build-created",
+		EnvVars: []string{"CI_PREV_PIPELINE_CREATED"},
+		Name:    "prev-pipeline-created",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_BUILD_STARTED"},
-		Name:    "prev-build-started",
+		EnvVars: []string{"CI_PREV_PIPELINE_STARTED"},
+		Name:    "prev-pipeline-started",
 	},
 	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_BUILD_FINISHED"},
-		Name:    "prev-build-finished",
+		EnvVars: []string{"CI_PREV_PIPELINE_FINISHED"},
+		Name:    "prev-pipeline-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_BUILD_STATUS"},
-		Name:    "prev-build-status",
+		EnvVars: []string{"CI_PREV_PIPELINE_STATUS"},
+		Name:    "prev-pipeline-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_BUILD_EVENT"},
-		Name:    "prev-build-event",
+		EnvVars: []string{"CI_PREV_PIPELINE_EVENT"},
+		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_BUILD_LINK"},
-		Name:    "prev-build-link",
+		EnvVars: []string{"CI_PREV_PIPELINE_LINK"},
+		Name:    "prev-pipeline-link",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_COMMIT_SHA"},
@@ -260,8 +260,8 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_JOB_NUMBER"},
-		Name:    "job-number",
+		EnvVars: []string{"CI_STEP_NUMBER", "CI_JOB_NUMBER"},
+		Name:    "step-number",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},

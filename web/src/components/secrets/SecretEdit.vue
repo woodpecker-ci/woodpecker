@@ -16,6 +16,8 @@
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
         <TextField v-model="images" :placeholder="$t(i18nPrefix + 'images.desc')" />
+
+        <Checkbox v-model="innerValue.plugins_only" class="mt-4" :label="$t(i18nPrefix + 'plugins_only')" />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'events.events')">
@@ -23,8 +25,9 @@
       </InputField>
 
       <Button
-        :is-loading="isSaving"
         type="submit"
+        color="green"
+        :is-loading="isSaving"
         :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
       />
     </form>
@@ -78,16 +81,16 @@ const images = computed<string>({
 const isEditingSecret = computed(() => !!innerValue.value?.id);
 
 const secretEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-  { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
   {
     value: WebhookEvents.PullRequest,
-    text: i18n.t('repo.build.event.pr'),
+    text: i18n.t('repo.pipeline.event.pr'),
     description: i18n.t('repo.settings.secrets.events.pr_warning'),
   },
-  { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
-  { value: WebhookEvents.Cron, text: i18n.t('repo.build.event.cron') },
-  { value: WebhookEvents.Manual, text: i18n.t('repo.build.event.manual') },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+  { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },
+  { value: WebhookEvents.Manual, text: i18n.t('repo.pipeline.event.manual') },
 ];
 
 function save() {

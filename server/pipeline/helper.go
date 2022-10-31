@@ -23,16 +23,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
-	for _, proc := range build.Procs {
-		// skip child procs
-		if !proc.IsParent() {
+func updatePipelineStatus(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, user *model.User) error {
+	for _, step := range pipeline.Steps {
+		// skip child steps
+		if !step.IsParent() {
 			continue
 		}
 
-		err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
+		err := server.Config.Services.Remote.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 			return err
 		}
 	}

@@ -31,7 +31,7 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretListBuild(*Repo, *Build) ([]*Secret, error)
+	SecretListPipeline(*Repo, *Pipeline) ([]*Secret, error)
 	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
 	SecretList(*Repo) ([]*Secret, error)
@@ -68,15 +68,16 @@ type SecretStore interface {
 // Secret represents a secret variable, such as a password or token.
 // swagger:model registry
 type Secret struct {
-	ID         int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	Owner      string         `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
-	RepoID     int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name       string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
-	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"`
-	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
+	ID          int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	Owner       string         `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
+	RepoID      int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name        string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	Value       string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images      []string       `json:"image"           xorm:"json 'secret_images'"`
+	PluginsOnly bool           `json:"plugins_only"    xorm:"secret_plugins_only"`
+	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
+	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
+	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
 }
 
 // TableName return database table name for xorm
@@ -152,12 +153,13 @@ func (s *Secret) Validate() error {
 // Copy makes a copy of the secret without the value.
 func (s *Secret) Copy() *Secret {
 	return &Secret{
-		ID:     s.ID,
-		Owner:  s.Owner,
-		RepoID: s.RepoID,
-		Name:   s.Name,
-		Images: s.Images,
-		Events: sortEvents(s.Events),
+		ID:          s.ID,
+		Owner:       s.Owner,
+		RepoID:      s.RepoID,
+		Name:        s.Name,
+		Images:      s.Images,
+		PluginsOnly: s.PluginsOnly,
+		Events:      sortEvents(s.Events),
 	}
 }
 

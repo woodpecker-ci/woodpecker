@@ -22,15 +22,15 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_TAG"] = env["CI_COMMIT_TAG"]
 	env["DRONE_SOURCE_BRANCH"] = env["CI_COMMIT_SOURCE_BRANCH"]
 	env["DRONE_TARGET_BRANCH"] = env["CI_COMMIT_TARGET_BRANCH"]
-	// build
-	env["DRONE_BUILD_NUMBER"] = env["CI_BUILD_NUMBER"]
-	env["DRONE_BUILD_PARENT"] = env["CI_BUILD_PARENT"]
-	env["DRONE_BUILD_EVENT"] = env["CI_BUILD_EVENT"]
-	env["DRONE_BUILD_STATUS"] = env["CI_BUILD_STATUS"]
-	env["DRONE_BUILD_LINK"] = env["CI_BUILD_LINK"]
-	env["DRONE_BUILD_CREATED"] = env["CI_BUILD_CREATED"]
-	env["DRONE_BUILD_STARTED"] = env["CI_BUILD_STARTED"]
-	env["DRONE_BUILD_FINISHED"] = env["CI_BUILD_FINISHED"]
+	// pipeline
+	env["DRONE_BUILD_NUMBER"] = env["CI_PIPELINE_NUMBER"]
+	env["DRONE_BUILD_PARENT"] = env["CI_PIPELINE_PARENT"]
+	env["DRONE_BUILD_EVENT"] = env["CI_PIPELINE_EVENT"]
+	env["DRONE_BUILD_STATUS"] = env["CI_PIPELINE_STATUS"]
+	env["DRONE_BUILD_LINK"] = env["CI_PIPELINE_LINK"]
+	env["DRONE_BUILD_CREATED"] = env["CI_PIPELINE_CREATED"]
+	env["DRONE_BUILD_STARTED"] = env["CI_PIPELINE_STARTED"]
+	env["DRONE_BUILD_FINISHED"] = env["CI_PIPELINE_FINISHED"]
 	// commit
 	env["DRONE_COMMIT"] = env["CI_COMMIT_SHA"]
 	env["DRONE_COMMIT_BEFORE"] = env["CI_PREV_COMMIT_SHA"]
@@ -55,5 +55,5 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_REMOTE"]
 	// misc
 	env["DRONE_SYSTEM_HOST"] = env["CI_SYSTEM_HOST"]
-	env["DRONE_STEP_NUMBER"] = env["CI_JOB_NUMBER"]
+	env["DRONE_STEP_NUMBER"] = env["CI_STEP_NUMBER"]
 }

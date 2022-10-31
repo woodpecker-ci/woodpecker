@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package woodpecker
 
 import (
@@ -59,46 +73,46 @@ type Client interface {
 	// RepoDel deletes a repository.
 	RepoDel(string, string) error
 
-	// Build returns a repository build by number.
-	Build(string, string, int) (*Build, error)
+	// Pipeline returns a repository pipeline by number.
+	Pipeline(string, string, int) (*Pipeline, error)
 
-	// BuildLast returns the latest repository build by branch. An empty branch
+	// PipelineLast returns the latest repository pipeline by branch. An empty branch
 	// will result in the default branch.
-	BuildLast(string, string, string) (*Build, error)
+	PipelineLast(string, string, string) (*Pipeline, error)
 
-	// BuildList returns a list of recent builds for the
+	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	BuildList(string, string) ([]*Build, error)
+	PipelineList(string, string) ([]*Pipeline, error)
 
-	// BuildCreate returns creates a build on specified branch.
-	BuildCreate(string, string, *BuildOptions) (*Build, error)
+	// PipelineQueue returns a list of enqueued pipelines.
+	PipelineQueue() ([]*Activity, error)
 
-	// BuildQueue returns a list of enqueued builds.
-	BuildQueue() ([]*Activity, error)
+	// PipelineCreate returns creates a pipeline on specified branch.
+	PipelineCreate(string, string, *PipelineOptions) (*Pipeline, error)
 
-	// BuildStart re-starts a stopped build.
-	BuildStart(string, string, int, map[string]string) (*Build, error)
+	// PipelineStart re-starts a stopped pipeline.
+	PipelineStart(string, string, int, map[string]string) (*Pipeline, error)
 
-	// BuildStop stops the specified running job for given build.
-	BuildStop(string, string, int, int) error
+	// PipelineStop stops the given pipeline.
+	PipelineStop(string, string, int) error
 
-	// BuildApprove approves a blocked build.
-	BuildApprove(string, string, int) (*Build, error)
+	// PipelineApprove approves a blocked pipeline.
+	PipelineApprove(string, string, int) (*Pipeline, error)
 
-	// BuildDecline declines a blocked build.
-	BuildDecline(string, string, int) (*Build, error)
+	// PipelineDecline declines a blocked pipeline.
+	PipelineDecline(string, string, int) (*Pipeline, error)
 
-	// BuildKill force kills the running build.
-	BuildKill(string, string, int) error
+	// PipelineKill force kills the running pipeline.
+	PipelineKill(string, string, int) error
 
-	// BuildLogs returns the logs for the given build
-	BuildLogs(string, string, int, int) ([]*Logs, error)
+	// PipelineLogs returns the logs for the given pipeline
+	PipelineLogs(string, string, int, int) ([]*Logs, error)
 
-	// Deploy triggers a deployment for an existing build using the specified
+	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(string, string, int, string, map[string]string) (*Build, error)
+	Deploy(string, string, int, string, map[string]string) (*Pipeline, error)
 
-	// LogsPurge purges the build logs for the specified build.
+	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(string, string, int) error
 
 	// Registry returns a registry by hostname.

@@ -21,11 +21,11 @@ func TestMarshalUlimit(t *testing.T) {
 							Soft: 65535,
 							Hard: 65535,
 						},
-						Name: "nproc",
+						Name: "nstep",
 					},
 				},
 			},
-			expected: `nproc: 65535
+			expected: `nstep: 65535
 `,
 		},
 		{
@@ -61,11 +61,11 @@ func TestUnmarshalUlimits(t *testing.T) {
 		expected *Ulimits
 	}{
 		{
-			yaml: "nproc: 65535",
+			yaml: "nstep: 65535",
 			expected: &Ulimits{
 				Elements: []Ulimit{
 					{
-						Name: "nproc",
+						Name: "nstep",
 						ulimitValues: ulimitValues{
 							Soft: 65535,
 							Hard: 65535,
@@ -91,7 +91,7 @@ func TestUnmarshalUlimits(t *testing.T) {
 			},
 		},
 		{
-			yaml: `nproc: 65535
+			yaml: `nstep: 65535
 nofile:
   soft: 20000
   hard: 40000`,
@@ -105,7 +105,7 @@ nofile:
 						},
 					},
 					{
-						Name: "nproc",
+						Name: "nstep",
 						ulimitValues: ulimitValues{
 							Soft: 65535,
 							Hard: 65535,

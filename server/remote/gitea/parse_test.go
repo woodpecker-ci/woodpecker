@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,8 +40,19 @@ func Test_parser(t *testing.T) {
 			g.Assert(b).IsNil()
 			g.Assert(err).IsNil()
 		})
+		g.It("given a PR hook", func() {
+			buf := bytes.NewBufferString(fixtures.HookPullRequest)
+			req, _ := http.NewRequest("POST", "/hook", buf)
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, hookPullRequest)
+			r, b, err := parseHook(req)
+			g.Assert(r).IsNotNil()
+			g.Assert(b).IsNotNil()
+			g.Assert(err).IsNil()
+			g.Assert(b.Event).Equal(model.EventPull)
+		})
 		g.Describe("given a push hook", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
@@ -54,7 +66,7 @@ func Test_parser(t *testing.T) {
 			})
 		})
 		g.Describe("given a push hook from an branch creation", func() {
-			g.It("should extract repository and build details", func() {
+			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPushBranch)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}

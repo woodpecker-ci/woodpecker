@@ -1,19 +1,15 @@
 <template>
-  <FluidContainer>
-    <div class="flex border-b items-center pb-4 mb-4 dark:border-gray-600">
-      <IconButton icon="back" @click="goBack" />
-      <h1 class="text-xl ml-2 text-color">{{ $t('admin.settings.settings') }}</h1>
-    </div>
-
-    <Tabs>
-      <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
-        <AdminSecretsTab />
-      </Tab>
-      <Tab id="agents" :title="$t('admin.settings.agents.agents')">
-        <AdminAgentsTab />
-      </Tab>
-    </Tabs>
-  </FluidContainer>
+  <Scaffold enable-tabs>
+    <template #title>
+      {{ $t('repo.settings.settings') }}
+    </template>
+    <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
+      <AdminSecretsTab />
+    </Tab>
+    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+      <AdminAgentsTab />
+    </Tab>
+  </Scaffold>
 </template>
 
 <script lang="ts" setup>
@@ -23,13 +19,10 @@ import { useRouter } from 'vue-router';
 
 import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 
 const notifications = useNotifications();
 const router = useRouter();
@@ -41,7 +34,10 @@ onMounted(async () => {
     notifications.notify({ type: 'error', title: i18n.t('admin.settings.not_allowed') });
     await router.replace({ name: 'home' });
   }
-});
 
-const goBack = useRouteBackOrDefault({ name: 'home' });
+  if (!user?.admin) {
+    notifications.notify({ type: 'error', title: i18n.t('admin.settings.not_allowed') });
+    await router.replace({ name: 'home' });
+  }
+});
 </script>

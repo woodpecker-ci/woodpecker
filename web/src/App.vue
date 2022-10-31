@@ -3,14 +3,14 @@
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
-      <div class="relative flex min-h-0 h-full">
+      <main class="relative flex min-h-0 h-full">
         <div class="flex flex-col overflow-y-auto flex-grow">
           <router-view />
         </div>
         <transition name="slide-right">
-          <BuildFeedSidebar class="shadow-md border-l w-full absolute top-0 right-0 bottom-0 max-w-80 xl:max-w-96" />
+          <PipelineFeedSidebar class="shadow-md border-l w-full absolute top-0 right-0 bottom-0 max-w-80 xl:max-w-96" />
         </transition>
-      </div>
+      </main>
     </template>
     <notifications position="bottom right" />
   </div>
@@ -21,8 +21,8 @@ import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import BuildFeedSidebar from '~/components/build-feed/BuildFeedSidebar.vue';
 import Navbar from '~/components/layout/header/Navbar.vue';
+import PipelineFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 
@@ -31,7 +31,7 @@ export default defineComponent({
 
   components: {
     Navbar,
-    BuildFeedSidebar,
+    PipelineFeedSidebar,
   },
 
   setup() {
@@ -54,7 +54,6 @@ export default defineComponent({
 
 <style scoped>
 .app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

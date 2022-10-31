@@ -1,8 +1,14 @@
 .wp-plugins-list {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(auto-fill,minmax(350px,1fr));
   grid-gap: 2rem;
   margin-top: 2rem;
+}
+
+@media screen and (max-width: 450px) {
+  .wp-plugins-list {
+    grid-template-columns: auto;
+  }
 }
 
 .wp-plugin-card {
@@ -13,6 +19,8 @@
   text-decoration: none;
   padding: .5rem 0 1rem;
   flex-grow: 1;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .wp-plugin-card:hover {
@@ -40,6 +48,7 @@
 .wp-plugin-tags {
   display: flex;
   gap: .5rem;
+  flex-wrap: wrap;
 }
 
 .wp-plugin-search {

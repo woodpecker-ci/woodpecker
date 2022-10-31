@@ -35,9 +35,14 @@ type Registry struct {
 }
 
 type Secret struct {
-	Name  string
-	Value string
-	Match []string
+	Name       string
+	Value      string
+	Match      []string
+	PluginOnly bool
+}
+
+func (s *Secret) Available(container *yaml.Container) bool {
+	return (len(s.Match) == 0 || matchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
@@ -93,13 +98,15 @@ func New(opts ...Option) *Compiler {
 
 // Compile compiles the YAML configuration to the pipeline intermediate
 // representation configuration format.
-func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
+func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 	config := new(backend.Config)
 
-	if !conf.When.Match(c.metadata, true) {
+	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
-		return config
+		return config, nil
+	} else if err != nil {
+		return nil, err
 	}
 
 	// create a default volume
@@ -166,9 +173,12 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.Containers {
-			if !container.When.Match(c.metadata, false) {
+			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 				continue
+			} else if err != nil {
+				return nil, err
 			}
+
 			stage := new(backend.Stage)
 			stage.Name = fmt.Sprintf("%s_clone_%v", c.prefix, i)
 			stage.Alias = container.Name
@@ -193,8 +203,10 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.Containers {
-			if !container.When.Match(c.metadata, false) {
+			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 				continue
+			} else if err != nil {
+				return nil, err
 			}
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
@@ -213,8 +225,10 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 			continue
 		}
 
-		if !container.When.Match(c.metadata, false) {
+		if match, err := container.When.Match(c.metadata, false); !match && err == nil {
 			continue
+		} else if err != nil {
+			return nil, err
 		}
 
 		if stage == nil || group != container.Group || container.Group == "" {
@@ -233,7 +247,7 @@ func (c *Compiler) Compile(conf *yaml.Config) *backend.Config {
 
 	c.setupCacheRebuild(conf, config)
 
-	return config
+	return config, nil
 }
 
 func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {

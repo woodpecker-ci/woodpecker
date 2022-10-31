@@ -1,7 +1,7 @@
 {
   "admin": {
     "settings": {
-      "not_allowed": "Du bist nicht berechtigt auf die Server Einstellungen zuzugreifen.",
+      "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Globales Geheimnis erstellt",
@@ -9,7 +9,7 @@
         "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten"
+          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -17,9 +17,10 @@
         },
         "name": "Name",
         "none": "Es gibt noch keine globalen Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Globales Geheimnis gespeichert",
-        "secrets": "Geheimnis",
+        "secrets": "Geheimnisse",
         "show": "Geheimnisse anzeigen",
         "value": "Wert",
         "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
@@ -27,7 +28,11 @@
       "settings": "Einstellungen"
     }
   },
+  "back": "Zurück",
+  "color_scheme_dark": "Wechsle zu hellem Modus",
+  "color_scheme_light": "Wechsle zu dunklem Modus",
   "docs": "Docs",
+  "documentation_for": "Dokumentation für „{topic}“",
   "login": "Anmelden",
   "logout": "Abmelden",
   "not_found": {
@@ -36,7 +41,7 @@
   },
   "org": {
     "settings": {
-      "not_allowed": "Du bist nicht berechtigt auf die Einstellungen dieser Organsitation zuzugreifen.",
+      "not_allowed": "Du darfst nicht auf die Einstellungen dieser Organisation nicht zugreifen",
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Organisations-Geheimnis erstellt",
@@ -44,7 +49,7 @@
         "desc": "Organisation-Geheimnisse können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig"
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -52,6 +57,7 @@
         },
         "name": "Name",
         "none": "Es existieren noch keine Organisations-Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Organisations-Geheimnis gespeichert",
         "secrets": "Geheimnisse",
@@ -82,6 +88,7 @@
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
+        "manual": "Manuell",
         "pr": "Pull-Request",
         "push": "Push",
         "tag": "Tag"
@@ -114,7 +121,61 @@
       "reload": "Repositories neu laden",
       "success": "Repository aktiviert"
     },
+    "manual_pipeline": {
+      "select_branch": "Branch auswählen",
+      "title": "Eine manuelle Pipeline ausführen",
+      "trigger": "Pipeline ausführen",
+      "variables": {
+        "add": "Variable hinzufügen",
+        "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+        "name": "Variablenname",
+        "title": "Zusätzliche Pipeline-Variablen",
+        "value": "Variablenwert"
+      }
+    },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
+    "pipeline": {
+      "actions": {
+        "cancel": "Abbrechen",
+        "cancel_success": "Pipeline abgebrochen",
+        "canceled": "Dieser Schritt wurde abgebrochen.",
+        "log_auto_scroll": "Automatisches folgen",
+        "log_auto_scroll_off": "Schalte automatisches folgen aus",
+        "log_download": "Herunterladen",
+        "restart": "Neustarten",
+        "restart_success": "Pipeline neu gestartet"
+      },
+      "config": "Konfiguration",
+      "created": "Erstellt",
+      "event": {
+        "cron": "Cron",
+        "deploy": "Deploy",
+        "manual": "Manuell",
+        "pr": "Pull-Request",
+        "push": "Push",
+        "tag": "Tag"
+      },
+      "execution_error": "Ausführungsfehler",
+      "exit_code": "Exit-Code {exitCode}",
+      "files": "Geänderte Dateien ({files})",
+      "loading": "Laden…",
+      "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
+      "no_files": "Es wurden keine Dateien geändert.",
+      "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
+      "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
+      "pipeline": "Pipeline #{pipelineId}",
+      "pipelines_for": "Pipelines für den Branch „{branch}“",
+      "protected": {
+        "approve": "Genehmigen",
+        "approve_success": "Pipeline genehmigt",
+        "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
+        "decline": "Ablehnen",
+        "decline_success": "Pipeline abgelehnt",
+        "declined": "Diese Pipeline ist abgelehnt worden!"
+      },
+      "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
+      "tasks": "Vorgänge"
+    },
     "settings": {
       "actions": {
         "actions": "Aktionen",
@@ -134,7 +195,12 @@
       },
       "badge": {
         "badge": "Abzeichen",
+        "branch": "Branch",
         "markdown": "Markdown",
+        "type": "Syntax",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL",
         "url_branch": "URL für bestimmten Branch"
       },
       "crons": {
@@ -145,8 +211,10 @@
         },
         "created": "Cron erstellt",
         "crons": "Crons",
+        "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
         "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
+        "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
           "placeholder": "Name des Cron"
@@ -154,6 +222,7 @@
         "next_exec": "Nächste Ausführung",
         "none": "Derzeit existieren keine Crons.",
         "not_executed_yet": "Noch nicht ausgeführt",
+        "run": "Jetzt ausführen",
         "save": "Cron speichern",
         "saved": "Cron gespeichert",
         "schedule": {
@@ -217,8 +286,10 @@
         },
         "created": "Registry-Zugangsdaten erstellt",
         "creds": "Zugangsdaten für die Registry",
+        "delete": "Registry löschen",
         "deleted": "Registry-Zugangsdaten gelöscht",
-        "desc": "Zugangsdaten für die Registry können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
+        "desc": "Zugangsdaten für die Registries können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
+        "edit": "Registry bearbeiten",
         "none": "Es gibt noch keine Zugangsdaten für die Registry.",
         "registries": "Registries",
         "save": "Registry speichern",
@@ -228,8 +299,10 @@
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Geheimnis erstellt",
+        "delete": "Geheimnis löschen",
         "deleted": "Geheimnis gelöscht",
         "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "edit": "Geheimnis bearbeiten",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
           "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
@@ -240,6 +313,7 @@
         },
         "name": "Name",
         "none": "Es gibt noch keine Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
         "save": "Geheimnis speichern",
         "saved": "Geheimnis gespeichert",
         "secrets": "Geheimnisse",
@@ -271,6 +345,7 @@
     "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
+    "settings": "Benutzer-Einstellungen",
     "shell_setup": "Kommandozeilen-Einrichtung",
     "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
     "token": "Dein persönlicher Token"

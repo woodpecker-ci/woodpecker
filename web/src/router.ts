@@ -56,7 +56,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'repo',
-        component: (): Component => import('~/views/repo/RepoBuilds.vue'),
+        component: (): Component => import('~/views/repo/RepoPipelines.vue'),
         meta: { repoHeader: true },
       },
       {
@@ -74,25 +74,25 @@ const routes: RouteRecordRaw[] = [
         props: (route) => ({ branch: route.params.branch }),
       },
       {
-        path: 'build/:buildId',
-        component: (): Component => import('~/views/repo/build/BuildWrapper.vue'),
+        path: 'pipeline/:pipelineId',
+        component: (): Component => import('~/views/repo/pipeline/PipelineWrapper.vue'),
         props: true,
         children: [
           {
-            path: ':procId?',
-            name: 'repo-build',
-            component: (): Component => import('~/views/repo/build/Build.vue'),
+            path: ':stepId?',
+            name: 'repo-pipeline',
+            component: (): Component => import('~/views/repo/pipeline/Pipeline.vue'),
             props: true,
           },
           {
             path: 'changed-files',
-            name: 'repo-build-changed-files',
-            component: (): Component => import('~/views/repo/build/BuildChangedFiles.vue'),
+            name: 'repo-pipeline-changed-files',
+            component: (): Component => import('~/views/repo/pipeline/PipelineChangedFiles.vue'),
           },
           {
             path: 'config',
-            name: 'repo-build-config',
-            component: (): Component => import('~/views/repo/build/BuildConfig.vue'),
+            name: 'repo-pipeline-config',
+            component: (): Component => import('~/views/repo/pipeline/PipelineConfig.vue'),
             props: true,
           },
         ],
@@ -106,8 +106,26 @@ const routes: RouteRecordRaw[] = [
       },
       // TODO: redirect to support backwards compatibility => remove after some time
       {
-        path: ':buildId',
-        redirect: (route) => ({ name: 'repo-build', params: route.params }),
+        path: ':pipelineId',
+        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+      },
+      {
+        path: 'build/:pipelineId',
+        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+        children: [
+          {
+            path: ':procId?',
+            redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+          },
+          {
+            path: 'changed-files',
+            redirect: (route) => ({ name: 'repo-pipeline-changed-files', params: route.params }),
+          },
+          {
+            path: 'config',
+            redirect: (route) => ({ name: 'repo-pipeline-config', params: route.params }),
+          },
+        ],
       },
     ],
   },

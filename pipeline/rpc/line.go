@@ -22,7 +22,7 @@ const (
 
 // Line is a line of console output.
 type Line struct {
-	Proc string `json:"proc,omitempty"`
+	Step string `json:"step,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
 	Pos  int    `json:"pos,omitempty"`
@@ -32,9 +32,9 @@ type Line struct {
 func (l *Line) String() string {
 	switch l.Type {
 	case LineExitCode:
-		return fmt.Sprintf("[%s] exit code %s", l.Proc, l.Out)
+		return fmt.Sprintf("[%s] exit code %s", l.Step, l.Out)
 	default:
-		return fmt.Sprintf("[%s:L%v:%vs] %s", l.Proc, l.Pos, l.Time, l.Out)
+		return fmt.Sprintf("[%s:L%v:%vs] %s", l.Step, l.Pos, l.Time, l.Out)
 	}
 }
 
@@ -70,7 +70,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	line := &Line{
 		Out:  out,
-		Proc: w.name,
+		Step: w.name,
 		Pos:  w.num,
 		Time: int64(time.Since(w.now).Seconds()),
 		Type: LineStdout,
@@ -83,7 +83,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	// for _, part := range bytes.Split(p, []byte{'\n'}) {
 	// 	line := &Line{
 	// 		Out:  string(part),
-	// 		Proc: w.name,
+	// 		Step: w.name,
 	// 		Pos:  w.num,
 	// 		Time: int64(time.Since(w.now).Seconds()),
 	// 		Type: LineStdout,
