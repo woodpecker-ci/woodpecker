@@ -219,7 +219,18 @@
         },
         "tag": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "status": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#status",
