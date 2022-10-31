@@ -10,10 +10,10 @@
     <template v-if="$slots.tabActions" #tabActions><slot name="tabActions" /></template>
   </Header>
 
-  <slot v-if="noFluidWrapper" />
-  <FluidContainer v-else>
+  <FluidContainer v-if="fluidContent">
     <slot />
   </FluidContainer>
+  <slot v-else />
 </template>
 
 <script setup lang="ts">
@@ -35,7 +35,7 @@ export interface Props {
   activeTab: string;
 
   // Content
-  noFluidWrapper?: boolean;
+  fluidContent?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -47,7 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
   enableTabs: false,
   activeTab: '',
   // eslint-disable-next-line vue/no-boolean-default
-  noFluidWrapper: false,
+  fluidContent: true,
 });
 
 const emit = defineEmits(['update:activeTab', 'update:search']);

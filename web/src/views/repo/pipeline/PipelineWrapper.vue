@@ -5,7 +5,7 @@
       enable-tabs
       disable-hash-mode
       :go-back="goBack"
-      :no-fluid-wrapper="activeTab === 'tasks'"
+      :fluid-content="activeTab !== 'tasks'"
     >
       <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
