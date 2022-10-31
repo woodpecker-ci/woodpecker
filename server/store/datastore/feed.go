@@ -74,7 +74,12 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	err := s.engine.Table("repos").
 		Select(feedItemSelect).
 		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
-		Join("LEFT", "pipelines", "pipelines.pipeline_id = (SELECT pipelines.pipeline_id FROM pipelines WHERE pipelines.pipeline_repo_id = repos.repo_id ORDER BY pipelines.pipeline_id DESC LIMIT 1)").
+		Join("LEFT", "pipelines", "pipelines.pipeline_id = "+`(
+			SELECT pipelines.pipeline_id FROM pipelines
+			WHERE pipelines.pipeline_repo_id = repos.repo_id
+			ORDER BY pipelines.pipeline_id DESC
+			LIMIT 1
+			)`).
 		Where(
 			builder.Eq{"perms.perm_user_id": user.ID}.And(
 				builder.Eq{"perms.perm_push": true}.Or(
