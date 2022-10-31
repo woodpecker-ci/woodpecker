@@ -4,7 +4,7 @@ depends_on:
 
 variables:
   - &golang_image 'golang:1.18'
-  - &node_image 'node:16-alpine'
+  - &node_image 'node:18-alpine'
   - &when_path
       # related config files
       - ".woodpecker/binaries.yml"
@@ -19,8 +19,8 @@ pipeline:
   build-web:
     group: prepare
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build

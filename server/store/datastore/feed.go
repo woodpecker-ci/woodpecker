@@ -15,112 +15,71 @@
 package datastore
 
 import (
+	"xorm.io/builder"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: need tests before converting to builder statement
+var feedItemSelect = `repos.repo_owner as feed_repo_owner,
+repos.repo_name as feed_repo_name,
+repos.repo_full_name as feed_repo_full_name,
+pipelines.pipeline_number as feed_pipeline_number,
+pipelines.pipeline_event as feed_pipeline_event,
+pipelines.pipeline_status as feed_pipeline_status,
+pipelines.pipeline_created as feed_pipeline_created,
+pipelines.pipeline_started as feed_pipeline_started,
+pipelines.pipeline_finished as feed_pipeline_finished,
+pipelines.pipeline_commit as feed_pipeline_commit,
+pipelines.pipeline_branch as feed_pipeline_branch,
+pipelines.pipeline_ref as feed_pipeline_ref,
+pipelines.pipeline_refspec as feed_pipeline_refspec,
+pipelines.pipeline_remote as feed_pipeline_remote,
+pipelines.pipeline_title as feed_pipeline_title,
+pipelines.pipeline_message as feed_pipeline_message,
+pipelines.pipeline_author as feed_pipeline_author,
+pipelines.pipeline_email as feed_pipeline_email,
+pipelines.pipeline_avatar as feed_pipeline_avatar`
+
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	err := s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM
- pipelines p
-,repos r
-WHERE p.pipeline_repo_id = r.repo_id
-  AND p.pipeline_status IN ('pending','running')
-`).Find(&feed)
+	err := s.engine.Table("pipelines").
+		Select(feedItemSelect).
+		Join("INNER", "repos", "pipelines.pipeline_repo_id = repos.repo_id").
+		In("pipelines.pipeline_status", model.StatusPending, model.StatusRunning).
+		Find(&feed)
 	return feed, err
 }
 
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	return feed, s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM repos
-INNER JOIN perms  ON perms.perm_repo_id   = repos.repo_id
-INNER JOIN pipelines ON pipelines.pipeline_repo_id = repos.repo_id
-WHERE perms.perm_user_id = ?
-  AND (perms.perm_push = ? OR perms.perm_admin = ?)
-ORDER BY pipeline_id DESC
-LIMIT 50
-`, user.ID, true, true).Find(&feed)
+	err := s.engine.Table("repos").
+		Select(feedItemSelect).
+		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
+		Join("INNER", "pipelines", "repos.repo_id = pipelines.pipeline_repo_id").
+		Where(userPushOrAdminCondition(user.ID)).
+		Desc("pipelines.pipeline_id").
+		Limit(perPage).
+		Find(&feed)
+
+	return feed, err
 }
 
 func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
-	// TODO: use builder (do not behave same as pure sql, fix that)
-	return feed, s.engine.SQL(`
-SELECT
- repo_owner
-,repo_name
-,repo_full_name
-,pipeline_number
-,pipeline_event
-,pipeline_status
-,pipeline_created
-,pipeline_started
-,pipeline_finished
-,pipeline_commit
-,pipeline_branch
-,pipeline_ref
-,pipeline_refspec
-,pipeline_remote
-,pipeline_title
-,pipeline_message
-,pipeline_author
-,pipeline_email
-,pipeline_avatar
-FROM repos LEFT OUTER JOIN pipelines ON pipeline_id = (
-	SELECT pipeline_id FROM pipelines
-	WHERE pipelines.pipeline_repo_id = repos.repo_id
-	ORDER BY pipeline_id DESC
-	LIMIT 1
-)
-INNER JOIN perms ON perms.perm_repo_id = repos.repo_id
-WHERE perms.perm_user_id = ?
-  AND (perms.perm_push = ? OR perms.perm_admin = ?)
-  AND repos.repo_active = ?
-ORDER BY repo_full_name ASC;
-`, user.ID, true, true, true).
+
+	err := s.engine.Table("repos").
+		Select(feedItemSelect).
+		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
+		Join("LEFT", "pipelines", "pipelines.pipeline_id = "+`(
+			SELECT pipelines.pipeline_id FROM pipelines
+			WHERE pipelines.pipeline_repo_id = repos.repo_id
+			ORDER BY pipelines.pipeline_id DESC
+			LIMIT 1
+			)`).
+		Where(userPushOrAdminCondition(user.ID)).
+		And(builder.Eq{"repos.repo_active": true}).
+		Asc("repos.repo_full_name").
 		Find(&feed)
+
+	return feed, err
 }

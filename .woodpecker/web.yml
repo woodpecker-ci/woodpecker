@@ -1,5 +1,5 @@
 variables:
-  - &node_image 'node:16-alpine'
+  - &node_image 'node:18-alpine'
   - &when_path
       # related config files
       - ".woodpecker/web.yml"
@@ -9,8 +9,8 @@ variables:
 pipeline:
   deps:
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm install --frozen-lockfile
     when:
@@ -19,8 +19,8 @@ pipeline:
   lint:
     group: test
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm lint
     when:
@@ -29,8 +29,8 @@ pipeline:
   formatcheck:
     group: test
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm formatcheck
     when:
@@ -39,8 +39,8 @@ pipeline:
   typecheck:
     group: test
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm typecheck
     when:
@@ -58,8 +58,8 @@ pipeline:
   test:
     group: test
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm test
     when:
