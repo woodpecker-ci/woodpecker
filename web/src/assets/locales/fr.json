@@ -68,6 +68,7 @@
     }
   },
   "password": "Mot de passe",
+  "pipeline_feed": "Fil du pipeline",
   "repo": {
     "activity": "Activité",
     "add": "Ajouter un dépôt",
