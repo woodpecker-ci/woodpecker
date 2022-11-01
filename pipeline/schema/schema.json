@@ -200,7 +200,18 @@
         },
         "branch": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#branch",
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "event": {
           "description": "TODO Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
