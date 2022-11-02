@@ -719,8 +719,8 @@ Example conditional execution by repository:
      image: plugins/slack
      settings:
        channel: dev
-+    when:
-+      repo: test/test
++when:
++  repo: test/test
 ```
 
 ### `branch`
@@ -737,8 +737,8 @@ pipeline:
     image: plugins/slack
     settings:
       channel: dev
-+   when:
-+     branch: master
++when:
++  branch: master
 ```
 
 > The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
