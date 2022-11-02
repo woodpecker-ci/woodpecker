@@ -167,7 +167,13 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	if c.IsSet("secrets-encryption-keyset") {
+	if c.IsSet("secrets-encryption-decrypt-all-keyset") && c.IsSet("secrets-encryption-keyset") {
+		log.Fatal().Msg("Secret service config conflict: you should specify either encryption or decryption keyset, " +
+			"not the both ones")
+	} else if c.IsSet("secrets-encryption-decrypt-all-keyset") {
+		encrypted_secrets.DecryptAll(c, s)
+		return secrets.New(c.Context, s)
+	} else if c.IsSet("secrets-encryption-keyset") {
 		return encrypted_secrets.New(c, s)
 	}
 	return secrets.New(c.Context, s)

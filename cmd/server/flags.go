@@ -529,14 +529,19 @@ var flags = []cli.Flag{
 	// secrets encryption in DB
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_KEYSET"},
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_KEYSET_FILE"},
 		Name:    "secrets-encryption-keyset",
 		Usage:   "Google tink DAEAD-compatible keyset to encrypt secrets in DB",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_MIXED_DB"},
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_ALLOW_MIXED_DB"},
 		Name:    "secrets-encryption-mixed-db",
 		Usage:   "Allow database in mixed-mode, where there is a mix of encrypted and plaintext data for migration purposes",
 		Value:   false,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SECRETS_DECRYPT_ALL_KEYSET_FILE"},
+		Name:    "secrets-encryption-decrypt-all-keyset",
+		Usage:   "Google tink DAEAD-compatible keyset to decrypt all secrets in database and disable secrets encryption on server",
 	},
 }
