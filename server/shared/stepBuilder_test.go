@@ -568,6 +568,18 @@ func TestSanitizePath(t *testing.T) {
 			path:          "folder/sub-folder/test.yml",
 			sanitizedPath: "test",
 		},
+		{
+			path:          ".woodpecker/test.yaml",
+			sanitizedPath: "test",
+		},
+		{
+			path:          ".woodpecker.yaml",
+			sanitizedPath: "woodpecker",
+		},
+		{
+			path:          "folder/sub-folder/test.yaml",
+			sanitizedPath: "test",
+		},
 	}
 
 	for _, test := range testTable {

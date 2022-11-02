@@ -18,6 +18,11 @@ func DetectPipelineConfig() (multiplies bool, config string, _ error) {
 		return true, config, nil
 	}
 
+	config = ".woodpecker.yaml"
+	if fi, err := os.Stat(config); err == nil && !fi.IsDir() {
+		return true, config, nil
+	}
+
 	config = ".drone.yml"
 	fi, err := os.Stat(config)
 	if err == nil && !fi.IsDir() {
