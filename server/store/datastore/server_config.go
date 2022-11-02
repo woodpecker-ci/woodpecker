@@ -26,6 +26,8 @@ func (s storage) ServerConfigSet(key, value string) error {
 		return err
 	}
 
+	config.Value = value
+
 	if count == 0 {
 		_, err := s.engine.Insert(config)
 		return err
