@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 func DetectPipelineConfig() (multiplies bool, config string, _ error) {
@@ -13,21 +14,12 @@ func DetectPipelineConfig() (multiplies bool, config string, _ error) {
 		return true, config, nil
 	}
 
-	config = ".woodpecker.yml"
-	if fi, err := os.Stat(config); err == nil && !fi.IsDir() {
-		return true, config, nil
+	for _, file := range constant.DefaultConfigFiles {
+		if fi, err := os.Stat(file); err == nil && !fi.IsDir() {
+			return true, config, nil
+		}
 	}
 
-	config = ".woodpecker.yaml"
-	if fi, err := os.Stat(config); err == nil && !fi.IsDir() {
-		return true, config, nil
-	}
-
-	config = ".drone.yml"
-	fi, err := os.Stat(config)
-	if err == nil && !fi.IsDir() {
-		return false, config, nil
-	}
 	return false, "", fmt.Errorf("could not detect pipeline config")
 }
 
