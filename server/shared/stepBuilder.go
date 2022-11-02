@@ -400,6 +400,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 func SanitizePath(path string) string {
 	path = filepath.Base(path)
 	path = strings.TrimSuffix(path, ".yml")
+	path = strings.TrimSuffix(path, ".yaml")
 	path = strings.TrimPrefix(path, ".")
 	return path
 }
