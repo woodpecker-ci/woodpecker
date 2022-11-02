@@ -22,7 +22,9 @@ var PrivilegedPlugins = []string{
 	"woodpeckerci/plugin-docker-buildx",
 }
 
+// folders may be added by supplying a trailing /
 var DefaultConfigFiles = [...]string{
+	".woodpecker/",
 	".woodpecker.yml",
 	".woodpecker.yaml",
 	".drone.yml",

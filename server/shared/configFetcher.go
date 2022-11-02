@@ -98,40 +98,23 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 
 	if len(config) > 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: use user config '%s'", cf.repo.FullName, config)
-		// either a file
-		if !strings.HasSuffix(config, "/") {
-			if fileMeta, found := cf.checkPipelineFile(ctx, config); found {
-				return fileMeta, nil
-			}
-		}
 
-		// or a folder
-		files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(config, "/"))
-		if err == nil && len(files) != 0 {
-			log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
-			return filterPipelineFiles(files), nil
+		// could be adapted to allow the user to supply a list like we do in the defaults
+		configs := []string{config}
+
+		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs, true)
+		if err == nil {
+			return fileMeta, err
 		}
 
 		return nil, fmt.Errorf("user defined config '%s' not found: %s", config, err)
 	}
 
-	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config follow default procedure", cf.repo.FullName)
-	// no user defined config so try .woodpecker/*.(yml|yaml)  -> .woodpecker.yml -> .woodpecker.yaml -> .drone.yml
-
-	// test .woodpecker/ folder
-	// if folder is not supported we will get a "Not implemented" error and continue
-	config = ".woodpecker"
-	files, err := cf.remote.Dir(ctx, cf.user, cf.repo, cf.pipeline, config)
-	files = filterPipelineFiles(files)
-	if err == nil && len(files) != 0 {
-		log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), config)
-		return files, nil
-	}
-
-	for _, file := range constant.DefaultConfigFiles {
-		if fileMeta, found := cf.checkPipelineFile(ctx, file); found {
-			return fileMeta, nil
-		}
+	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config, following default procedure", cf.repo.FullName)
+	// for the order see shared/constants/constants.go
+	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigFiles[:], false)
+	if err == nil {
+		return fileMeta, err
 	}
 
 	select {
@@ -167,4 +150,33 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 	}
 
 	return nil, false
+}
+
+func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*remote.FileMeta, error) {
+	userDefinedLog := ""
+	if userDefined {
+		userDefinedLog = "user defined"
+	}
+
+	for _, fileOrFolder := range configs {
+		if strings.HasSuffix(fileOrFolder, "/") {
+			// config is a folder
+			// if folder is not supported we will get a "Not implemented" error and continue
+			files, err := cf.remote.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
+			files = filterPipelineFiles(files)
+			if err == nil && len(files) != 0 {
+				log.Trace().Msgf("ConfigFetch[%s]: found %d %s files in '%s'", cf.repo.FullName, len(files), userDefinedLog, fileOrFolder)
+				return files, nil
+			}
+		}
+
+		// config is a file
+		if fileMeta, found := cf.checkPipelineFile(c, fileOrFolder); found {
+			log.Trace().Msgf("ConfigFetch[%s]: found %s file: '%s'", cf.repo.FullName, userDefinedLog, fileOrFolder)
+			return fileMeta, nil
+		}
+	}
+
+	// nothing found
+	return nil, fmt.Errorf("%s configs not found searched: %s", userDefinedLog, strings.Join(configs, ", "))
 }
