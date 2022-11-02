@@ -147,9 +147,11 @@ const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
 const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  (props.pipeline.steps || []).reduce(
-    (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
-    {},
-  ),
+  props.pipeline.steps && props.pipeline.steps.length > 1
+    ? (props.pipeline.steps || []).reduce(
+        (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
+        {},
+      )
+    : {},
 );
 </script>
