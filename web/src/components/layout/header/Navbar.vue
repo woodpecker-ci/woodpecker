@@ -1,6 +1,6 @@
 <template>
   <!-- Navbar -->
-  <div class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
+  <nav class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
     <!-- Left Links Box -->
     <div class="flex text-white dark:text-gray-400 items-center space-x-2">
       <!-- Logo -->
@@ -51,7 +51,7 @@
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
     </div>
-  </div>
+  </nav>
 </template>
 
 <script lang="ts">
