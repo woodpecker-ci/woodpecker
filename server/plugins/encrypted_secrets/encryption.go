@@ -47,12 +47,20 @@ func newEncryptionService(ctx *cli.Context, s store.Store) Encryption {
 	if mixedDb {
 		log.Warn().Msg("Mixed DB compatibility mode is on. Some secrets could be stored in plaintext until first read")
 	}
-	result := Encryption{s, nil, "",
-		filepath, nil, mixedDb}
+	result := Encryption{s, nil, "", filepath, nil, mixedDb}
 	result.reloadEncryption()
 	result.initFileWatcher()
 
 	return result
+}
+
+func DecryptAll(ctx *cli.Context, s store.Store) {
+	filepath := ctx.String("secrets-encryption-decrypt-all-keyset")
+	mixedDb := ctx.Bool("secrets-encryption-mixed-db")
+
+	result := Encryption{s, nil, "",
+		filepath, nil, mixedDb}
+	result.reloadEncryption()
 }
 
 func (svc *Encryption) encrypt(plaintext string, associatedData string) string {
@@ -108,7 +116,7 @@ func (svc *Encryption) handleFileEvents() {
 				log.Fatal().Msg("Error watching encryption keyset file changes")
 			}
 			if event.Op == fsnotify.Write {
-				log.Info().Msgf("Modified encryption keyset file:", event.Name)
+				log.Warn().Msgf("Changes detected in encryption keyset file: %s", event.Name)
 				svc.reloadEncryption()
 			}
 		case err, ok := <-svc.keysetFileWatcher.Errors:
@@ -121,6 +129,7 @@ func (svc *Encryption) handleFileEvents() {
 
 // Init and hot reload encryption primitive
 func (svc *Encryption) reloadEncryption() {
+	log.Warn().Msg("Reloading secrets encryption keyset")
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Error opening secret encryption keyset file")
@@ -155,6 +164,7 @@ func (svc *Encryption) validateKeyset() {
 	ciphertextSample, err := svc.store.ServerConfigGet("secrets-encryption-key-id")
 	if errors.Is(err, types.RecordNotExist) {
 		svc.updateCiphertextSample()
+		log.Warn().Msg("Secrets encryption enabled on server")
 		return
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Invalid secrets encryption key")
@@ -166,6 +176,7 @@ func (svc *Encryption) validateKeyset() {
 		log.Fatal().Err(err).Msgf("Secrets encryption error")
 	} else if plaintext != svc.primaryKeyId {
 		svc.updateCiphertextSample()
+		log.Info().Msg("Registered rotated secrets encryption key")
 	}
 }
 
@@ -177,4 +188,26 @@ func (svc *Encryption) updateCiphertextSample() {
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Storage error")
 	}
+}
+
+// Decrypt database and disable encryption in server config
+func (svc *Encryption) decryptDatabase() {
+	log.Warn().Msg("Decrypting secrets")
+	secrets, err := svc.store.SecretListAll()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Secrets decryption failed: could not fetch secrets from DB")
+	}
+	for _, secret := range secrets {
+		secret.Value = svc.decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+		err = svc.store.SecretUpdate(secret)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Secrets decryption failed: could not update secret in DB")
+		}
+	}
+	err = svc.store.ServerConfigDelete("secrets-encryption-key-id")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Disabling secrets encryption failed: could not update server config")
+	}
+	log.Warn().Msg("Secrets are decrypted. Encryption disabled")
+
 }

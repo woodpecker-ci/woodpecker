@@ -34,3 +34,12 @@ func (s storage) ServerConfigSet(key, value string) error {
 	_, err = s.engine.Where("key = ?", config.Key).AllCols().Update(config)
 	return err
 }
+
+func (s storage) ServerConfigDelete(key string) error {
+	config := &model.ServerConfig{
+		Key: key,
+	}
+
+	_, err := s.engine.Delete(config)
+	return err
+}
