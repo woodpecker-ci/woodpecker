@@ -146,10 +146,10 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
-const initiallyCollapsed = (props.pipeline.steps || []).reduce(
-  (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
-  {},
+const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
+  (props.pipeline.steps || []).reduce(
+    (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
+    {},
+  ),
 );
-
-const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>(initiallyCollapsed);
 </script>
