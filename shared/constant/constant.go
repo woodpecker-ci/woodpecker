@@ -22,6 +22,12 @@ var PrivilegedPlugins = []string{
 	"woodpeckerci/plugin-docker-buildx",
 }
 
+var DefaultConfigFiles = [...]string{
+	".woodpecker.yml",
+	".woodpecker.yaml",
+	".drone.yml",
+}
+
 const (
 	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.6.0"
 )

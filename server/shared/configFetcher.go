@@ -26,6 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type ConfigFetcher interface {
@@ -127,19 +128,10 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		return files, nil
 	}
 
-	config = ".woodpecker.yml"
-	if fileMeta, found := cf.checkPipelineFile(ctx, config); found {
-		return fileMeta, nil
-	}
-
-	config = ".woodpecker.yaml"
-	if fileMeta, found := cf.checkPipelineFile(ctx, config); found {
-		return fileMeta, nil
-	}
-
-	config = ".drone.yml"
-	if fileMeta, found := cf.checkPipelineFile(ctx, config); found {
-		return fileMeta, nil
+	for _, file := range constant.DefaultConfigFiles {
+		if fileMeta, found := cf.checkPipelineFile(ctx, file); found {
+			return fileMeta, nil
+		}
 	}
 
 	select {
