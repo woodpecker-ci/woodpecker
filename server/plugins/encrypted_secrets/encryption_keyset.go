@@ -13,7 +13,7 @@ import (
 
 // Init and hot reload encryption primitive
 func (svc *Encryption) initEncryption() {
-	log.Warn().Msg("Loading secrets encryption keyset")
+	log.Warn().Msgf("Loading secrets encryption keyset from file: %s", svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Error opening secret encryption keyset file")
