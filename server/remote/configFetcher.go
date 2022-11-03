@@ -161,6 +161,9 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 			// config is a folder
 			// if folder is not supported we will get a "Not implemented" error and continue
 			files, err := cf.remote.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
+			if err != nil && !errors.Is(err, types.ErrNotImplemented) {
+				return nil, err
+			}
 			files = filterPipelineFiles(files)
 			if err == nil && len(files) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found %d %s files in '%s'", cf.repo.FullName, len(files), userDefinedLog, fileOrFolder)
