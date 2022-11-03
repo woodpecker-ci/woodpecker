@@ -171,17 +171,21 @@ func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
 	decryptionKeysetProvided := c.IsSet("secrets-encryption-decrypt-all-keyset")
 	keysetProvided := c.IsSet("secrets-encryption-keyset")
 
-	if keysetProvided && decryptionKeysetProvided {
-		log.Fatal().Msg("Secret service config conflict: you should specify either encryption or decryption keyset, " +
-			"not the both ones")
-	} else if keysetProvided {
+	if keysetProvided {
+		if decryptionKeysetProvided {
+			log.Fatal().Msg("Secret service config conflict: you should specify either encryption or decryption keyset, " +
+				"not the both ones")
+		}
 		return encrypted_secrets.New(c, s)
-	} else if encryptionEnabled && decryptionKeysetProvided {
-		encrypted_secrets.DecryptAll(c, s)
-		return secrets.New(c.Context, s)
-	} else if encryptionEnabled && !keysetProvided {
-		log.Fatal().Msg("Failed to initialize secret service: secrets are encrypted but no encryption key provided")
 	}
+
+	if encryptionEnabled {
+		if !decryptionKeysetProvided {
+			log.Fatal().Msg("Failed to initialize secret service: secrets are encrypted but no keyset provided")
+		}
+		encrypted_secrets.DecryptAll(c, s)
+	}
+
 	return secrets.New(c.Context, s)
 }
 
