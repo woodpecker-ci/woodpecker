@@ -112,7 +112,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 
 	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config, following default procedure", cf.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigFiles[:], false)
+	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:], false)
 	if err == nil {
 		return fileMeta, err
 	}

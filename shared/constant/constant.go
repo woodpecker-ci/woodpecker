@@ -22,8 +22,9 @@ var PrivilegedPlugins = []string{
 	"woodpeckerci/plugin-docker-buildx",
 }
 
-// folders may be added by supplying a trailing /
-var DefaultConfigFiles = [...]string{
+// DefaultConfigOrder represent the priority in witch woodpecker serarch for a pipeline config by default
+// folders are indicated by supplying a trailing /
+var DefaultConfigOrder = [...]string{
 	".woodpecker/",
 	".woodpecker.yml",
 	".woodpecker.yaml",
