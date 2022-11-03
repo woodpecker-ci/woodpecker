@@ -11,6 +11,8 @@ import (
 	"strconv"
 )
 
+const keyIdAAD = "Primary key id"
+
 // Init and hot reload encryption primitive
 func (svc *Encryption) initEncryption() {
 	log.Warn().Msgf("Loading secrets encryption keyset from file: %s", svc.keysetFilePath)
@@ -19,7 +21,10 @@ func (svc *Encryption) initEncryption() {
 		log.Fatal().Err(err).Msgf("Error opening secret encryption keyset file")
 	}
 	defer func(file *os.File) {
-		_ = file.Close()
+		err = file.Close()
+		if err != nil {
+			log.Err(err).Msgf("Could not close keyset file: %s", svc.keysetFilePath)
+		}
 	}(file)
 
 	jsonKeyset := keyset.NewJSONReader(file)
@@ -52,8 +57,7 @@ func (svc *Encryption) validateKeyset() {
 		log.Fatal().Err(err).Msgf("Invalid secrets encryption key")
 	}
 
-	aad := "Primary key id"
-	plaintext := svc.decrypt(ciphertextSample, aad)
+	plaintext := svc.decrypt(ciphertextSample, keyIdAAD)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Secrets encryption error")
 	} else if plaintext != svc.primaryKeyId {
@@ -64,8 +68,7 @@ func (svc *Encryption) validateKeyset() {
 }
 
 func (svc *Encryption) updateCiphertextSample() {
-	aad := "Primary key id"
-	ct := svc.encrypt(svc.primaryKeyId, aad)
+	ct := svc.encrypt(svc.primaryKeyId, keyIdAAD)
 
 	err := svc.store.ServerConfigSet("secrets-encryption-key-id", ct)
 	if err != nil {
