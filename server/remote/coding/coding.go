@@ -249,7 +249,7 @@ func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 // Status sends the commit status to the remote system.
-func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, proc *model.Proc) error {
+func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, step *model.Step) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }

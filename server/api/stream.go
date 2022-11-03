@@ -141,10 +141,10 @@ func LogStreamSSE(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// // parse the pipeline number and job sequence number from
+	// // parse the pipeline number and step sequence number from
 	// // the repquest parameter.
 	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
-	jobn, _ := strconv.Atoi(c.Param("number"))
+	stepn, _ := strconv.Atoi(c.Param("number"))
 
 	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
 	if err != nil {
@@ -152,13 +152,13 @@ func LogStreamSSE(c *gin.Context) {
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
-	proc, err := _store.ProcFind(pipeline, jobn)
+	step, err := _store.StepFind(pipeline, stepn)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get proc number: %v", err)
+		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
-	if proc.State != model.StatusRunning {
+	if step.State != model.StatusRunning {
 		log.Debug().Msg("stream not found.")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
 		return
@@ -179,7 +179,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		// TODO remove global variable
-		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
+		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*logging.Entry) {
 			defer func() {
 				obj := recover() // fix #2480 // TODO: check if it's still needed
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)

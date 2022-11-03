@@ -93,8 +93,8 @@ type Client interface {
 	// PipelineStart re-starts a stopped pipeline.
 	PipelineStart(string, string, int, map[string]string) (*Pipeline, error)
 
-	// PipelineStop stops the specified running job for given pipeline.
-	PipelineStop(string, string, int, int) error
+	// PipelineStop stops the given pipeline.
+	PipelineStop(string, string, int) error
 
 	// PipelineApprove approves a blocked pipeline.
 	PipelineApprove(string, string, int) (*Pipeline, error)
