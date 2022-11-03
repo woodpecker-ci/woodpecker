@@ -17,8 +17,7 @@ func (s storage) ServerConfigGet(key string) (string, error) {
 
 func (s storage) ServerConfigSet(key, value string) error {
 	config := &model.ServerConfig{
-		Key:   key,
-		Value: value,
+		Key: key,
 	}
 
 	count, err := s.engine.Count(config)
