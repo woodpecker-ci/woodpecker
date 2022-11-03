@@ -497,12 +497,12 @@ func TestFetchFromConfigService(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
 			r := new(mocks.Remote)
-			dirs := map[string][]*remote.FileMeta{}
+			dirs := map[string][]*remote_types.FileMeta{}
 			for _, file := range tt.files {
 				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
-					dirs[path] = append(dirs[path], &remote.FileMeta{
+					dirs[path] = append(dirs[path], &remote_types.FileMeta{
 						Name: file.name,
 						Data: file.data,
 					})

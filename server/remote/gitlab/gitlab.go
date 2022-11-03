@@ -34,6 +34,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -102,7 +103,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &remote.AuthError{
+		return nil, &remote_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -339,13 +340,13 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 }
 
 // Dir fetches a folder from the remote repository
-func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*remote.FileMeta, error) {
+func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*remote_types.FileMeta, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	files := make([]*remote.FileMeta, 0, perPage)
+	files := make([]*remote_types.FileMeta, 0, perPage)
 	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
@@ -372,7 +373,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, &remote.FileMeta{
+			files = append(files, &remote_types.FileMeta{
 				Name: batch[i].Path,
 				Data: data,
 			})

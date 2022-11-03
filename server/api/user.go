@@ -26,8 +26,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	remote_syncer "github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -54,11 +54,11 @@ func GetFeed(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
+		sync := remote_syncer.Syncer{
 			Remote: remote,
 			Store:  _store,
 			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Match:  remote_syncer.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
@@ -103,11 +103,11 @@ func GetRepos(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
+		sync := remote_syncer.Syncer{
 			Remote: remote,
 			Store:  _store,
 			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Match:  remote_syncer.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {

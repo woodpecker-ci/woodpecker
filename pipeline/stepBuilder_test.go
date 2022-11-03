@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -40,7 +40,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:
@@ -74,7 +74,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:
@@ -105,7 +105,7 @@ bbb`,
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -139,7 +139,7 @@ func TestMultiPipeline(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -173,7 +173,7 @@ func TestDependsOn(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 pipeline:
   build:
@@ -219,7 +219,7 @@ func TestRunsOn(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   deploy:
@@ -255,7 +255,7 @@ func TestPipelineName(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 pipeline:
   build:
@@ -290,7 +290,7 @@ func TestBranchFilter(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -336,7 +336,7 @@ func TestRootWhenFilter(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 when:
   event:
@@ -384,7 +384,7 @@ func TestZeroSteps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 skip_clone: true
 pipeline:
@@ -418,7 +418,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
 pipeline:
@@ -466,7 +466,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
 pipeline:
@@ -522,7 +522,7 @@ func TestTree(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*remote.FileMeta{
+		Yamls: []*remote_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:

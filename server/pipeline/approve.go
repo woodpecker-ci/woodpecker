@@ -21,47 +21,47 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // Approve update the status to pending for blocked pipeline because of a gated repo
 // and start them afterwards
-func Approve(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
-	if pipeline.Status != model.StatusBlocked {
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", pipeline.Status)}
+func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	if currentPipeline.Status != model.StatusBlocked {
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", currentPipeline.Status)}
 	}
 
 	// fetch the pipeline file from the database
-	configs, err := store.ConfigsForPipeline(pipeline.ID)
+	configs, err := store.ConfigsForPipeline(currentPipeline.ID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
 		return nil, ErrNotFound{Msg: msg}
 	}
 
-	if pipeline, err = UpdateToStatusPending(store, *pipeline, user.Login); err != nil {
+	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
-	var yamls []*remote.FileMeta
+	var yamls []*remote_types.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		yamls = append(yamls, &remote_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	pipeline, pipelineItems, err := createPipelineItems(ctx, store, pipeline, user, repo, yamls, nil)
+	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, store, pipeline, user, repo, pipelineItems)
+	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return pipeline, nil
+	return currentPipeline, nil
 }

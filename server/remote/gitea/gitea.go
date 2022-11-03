@@ -39,6 +39,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -112,7 +113,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &remote.AuthError{
+		return nil, &remote_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -292,8 +293,8 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return cfg, err
 }
 
-func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
-	var configs []*remote.FileMeta
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote_types.FileMeta, error) {
+	var configs []*remote_types.FileMeta
 
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
@@ -316,7 +317,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
 			}
 
-			configs = append(configs, &remote.FileMeta{
+			configs = append(configs, &remote_types.FileMeta{
 				Name: e.Path,
 				Data: data,
 			})

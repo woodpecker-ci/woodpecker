@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -90,7 +91,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &remote.AuthError{
+		return nil, &remote_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -235,7 +236,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote_types.FileMeta, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
@@ -245,7 +246,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *remote.FileMeta)
+	fc := make(chan *remote_types.FileMeta)
 	errc := make(chan error)
 
 	for _, file := range data {
@@ -254,7 +255,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 			if err != nil {
 				errc <- err
 			} else {
-				fc <- &remote.FileMeta{
+				fc <- &remote_types.FileMeta{
 					Name: path,
 					Data: content,
 				}
@@ -262,7 +263,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		}(f + "/" + *file.Name)
 	}
 
-	var files []*remote.FileMeta
+	var files []*remote_types.FileMeta
 
 	for i := 0; i < len(data); i++ {
 		select {

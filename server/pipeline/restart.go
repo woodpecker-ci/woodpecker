@@ -25,7 +25,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -37,7 +37,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
 	}
 
-	var pipelineFiles []*remote.FileMeta
+	var pipelineFiles []*remote_types.FileMeta
 
 	// fetch the old pipeline config from database
 	configs, err := store.ConfigsForPipeline(lastBuild.ID)
@@ -48,14 +48,14 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	}
 
 	for _, y := range configs {
-		pipelineFiles = append(pipelineFiles, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		pipelineFiles = append(pipelineFiles, &remote_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	// If config extension is active we should refetch the config in case something changed
 	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
-		currentFileMeta := make([]*remote.FileMeta, len(configs))
+		currentFileMeta := make([]*remote_types.FileMeta, len(configs))
 		for i, cfg := range configs {
-			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
+			currentFileMeta[i] = &remote_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
 		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastBuild, currentFileMeta)

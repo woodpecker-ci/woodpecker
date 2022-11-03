@@ -34,6 +34,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote/types"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
@@ -45,7 +46,7 @@ type StepBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yamls []*types.FileMeta
+	Yamls []*remote_types.FileMeta
 	Envs  map[string]string
 }
 

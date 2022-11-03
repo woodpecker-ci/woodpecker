@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,4 +39,4 @@ func (ae *AuthError) Error() string {
 // check interface
 var _ error = new(AuthError)
 
-var NotImplemented = errors.New("Not implemented")
+var ErrNotImplemented = errors.New("Not implemented")

@@ -29,6 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 // Opts defines configuration options.
@@ -209,8 +210,8 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return cfg, err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
-	return nil, remote.NotImplemented
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote_types.FileMeta, error) {
+	return nil, remote_types.ErrNotImplemented
 }
 
 // Status is not supported by the Gogs driver.

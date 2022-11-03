@@ -29,6 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/coding/internal"
 	"github.com/woodpecker-ci/woodpecker/server/remote/common"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 const (
@@ -87,7 +88,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &remote.AuthError{
+		return nil, &remote_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -151,7 +152,7 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 // Teams fetches a list of team memberships from the remote system.
 func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
-	return nil, fmt.Errorf("Not implemented")
+	return nil, remote_types.ErrNotImplemented
 }
 
 // TeamPerm fetches the named organization permissions from
@@ -244,7 +245,7 @@ func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return data, nil
 }
 
-func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote.FileMeta, error) {
+func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*remote_types.FileMeta, error) {
 	return nil, fmt.Errorf("Not implemented")
 }
 
@@ -297,7 +298,7 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // BranchHead returns the sha of the head (lastest commit) of the specified branch
 func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
-	return "", fmt.Errorf("missing implementation")
+	return "", remote_types.ErrNotImplemented
 }
 
 // Hook parses the post-commit hook from the Request body and returns the

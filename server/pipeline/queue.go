@@ -19,14 +19,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*shared.PipelineItem) error {
+func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pipeline.PipelineItem) error {
 	var tasks []*queue.Task
 	for _, item := range pipelineItems {
 		if item.Step.State == model.StatusSkipped {
@@ -58,7 +58,7 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*sha
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*shared.PipelineItem) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*pipeline.PipelineItem) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
 			if pipelineItem.Step.Name == dep {

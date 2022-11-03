@@ -19,17 +19,17 @@ package pipeline
 import (
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
-func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := shared.StepBuilder{
+func zeroSteps(currentPipeline *model.Pipeline, remoteYamlConfigs []*remote_types.FileMeta) bool {
+	b := pipeline.StepBuilder{
 		Repo:  &model.Repo{},
-		Curr:  pipeline,
+		Curr:  currentPipeline,
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -51,7 +51,7 @@ func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) b
 
 // TODO: parse yaml once and not for each filter function
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
+func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote_types.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(remoteYamlConfigs))
 
 	matchMetadata := frontend.Metadata{
