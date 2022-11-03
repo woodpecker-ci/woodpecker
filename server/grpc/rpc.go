@@ -108,13 +108,13 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pstep.PID, state.Step)
+	step, err := s.store.StepChild(currentPipeline, pstep.PID, state.Step)
 	if err != nil {
 		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
 		return err
@@ -128,20 +128,20 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	repo, err := s.store.GetRepo(pipeline.RepoID)
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", pipeline.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 
-	if _, err = shared.UpdateStepStatus(s.store, *step, state, pipeline.Started); err != nil {
+	if _, err = currentPipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if pipeline.Steps, err = s.store.StepList(pipeline); err != nil {
+	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
-	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
+	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {
 		log.Error().Err(err).Msg("can not build tree from step list")
 		return err
 	}
@@ -153,7 +153,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	}
 	message.Data, _ = json.Marshal(model.Event{
 		Repo:     *repo,
-		Pipeline: *pipeline,
+		Pipeline: *currentPipeline,
 	})
 	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msg("can not publish step list to")

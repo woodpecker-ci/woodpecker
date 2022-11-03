@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package config
+package types
 
-import (
-	"context"
+import "sort"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
-)
+// FileMeta represents a file in version control
+type FileMeta struct {
+	Name string
+	Data []byte
+}
 
-type Extension interface {
-	IsConfigured() bool
-	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*remote_types.FileMeta) (configData []*remote_types.FileMeta, useOld bool, err error)
+type fileMetaList []*FileMeta
+
+func (a fileMetaList) Len() int           { return len(a) }
+func (a fileMetaList) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a fileMetaList) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func SortByName(fm []*FileMeta) []*FileMeta {
+	l := fileMetaList(fm)
+	sort.Sort(l)
+	return l
 }

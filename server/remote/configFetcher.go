@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package remote
 
 import (
 	"context"
@@ -23,27 +23,25 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
+	"github.com/woodpecker-ci/woodpecker/server/remote/types"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type ConfigFetcher interface {
-	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
+	Fetch(ctx context.Context) (files []*types.FileMeta, err error)
 }
 
-// TODO(974) move to new package
-
 type configFetcher struct {
-	remote          remote.Remote
+	remote          Remote
 	user            *model.User
 	repo            *model.Repo
 	pipeline        *model.Pipeline
 	configExtension config.Extension
 }
 
-func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
+func NewConfigFetcher(remote Remote, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
 	return &configFetcher{
 		remote:          remote,
 		user:            user,
@@ -57,7 +55,7 @@ func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, us
 var configFetchTimeout = time.Second * 3
 
 // Fetch pipeline config from source forge
-func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
+func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times
@@ -92,7 +90,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 }
 
 // fetch config by timeout
-func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
+func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*types.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
@@ -121,12 +119,12 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*remote.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
+		return []*types.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
 	}
 }
 
-func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
-	var res []*remote.FileMeta
+func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
+	var res []*types.FileMeta
 
 	for _, file := range files {
 		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
@@ -137,13 +135,13 @@ func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
 	return res
 }
 
-func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*remote.FileMeta, found bool) {
+func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*types.FileMeta, found bool) {
 	file, err := cf.remote.File(c, cf.user, cf.repo, cf.pipeline, config)
 
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 
-		return []*remote.FileMeta{{
+		return []*types.FileMeta{{
 			Name: config,
 			Data: file,
 		}}, true
@@ -152,7 +150,7 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 	return nil, false
 }
 
-func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*remote.FileMeta, error) {
+func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*types.FileMeta, error) {
 	userDefinedLog := ""
 	if userDefined {
 		userDefinedLog = "user defined"

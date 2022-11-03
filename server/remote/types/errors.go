@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package remote
+package types
+
+import "errors"
 
 // AuthError represents remote authentication error.
 type AuthError struct {
@@ -35,3 +37,5 @@ func (ae *AuthError) Error() string {
 
 // check interface
 var _ error = new(AuthError)
+
+var NotImplemented = errors.New("Not implemented")

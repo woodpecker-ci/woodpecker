@@ -13,14 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"fmt"
 	"math/rand"
 	"net/url"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/drone/envsubst"
@@ -34,10 +33,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
-
-// TODO(974) move to pipeline/*
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
 type StepBuilder struct {
@@ -48,7 +45,7 @@ type StepBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yamls []*remote.FileMeta
+	Yamls []*types.FileMeta
 	Envs  map[string]string
 }
 
@@ -64,7 +61,7 @@ type PipelineItem struct {
 func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 	var items []*PipelineItem
 
-	sort.Sort(remote.ByName(b.Yamls))
+	b.Yamls = types.SortByName(b.Yamls)
 
 	pidSequence := 1
 

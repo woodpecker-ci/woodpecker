@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared_test
+package remote_test
 
 import (
 	"context"
@@ -34,10 +34,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/remote/mocks"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
+	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
-
-// TODO(974) move to new package
 
 func TestFetch(t *testing.T) {
 	t.Parallel()
@@ -294,12 +292,12 @@ func TestFetch(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			r := new(mocks.Remote)
-			dirs := map[string][]*remote.FileMeta{}
+			dirs := map[string][]*remote_types.FileMeta{}
 			for _, file := range tt.files {
 				r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
-					dirs[path] = append(dirs[path], &remote.FileMeta{
+					dirs[path] = append(dirs[path], &remote_types.FileMeta{
 						Name: file.name,
 						Data: file.data,
 					})
@@ -314,7 +312,7 @@ func TestFetch(t *testing.T) {
 			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
+			configFetcher := remote.NewConfigFetcher(
 				r,
 				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
@@ -519,7 +517,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			r.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			r.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
+			configFetcher := remote.NewConfigFetcher(
 				r,
 				configAPI,
 				&model.User{Token: "xxx"},

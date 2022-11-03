@@ -24,6 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -53,7 +54,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	var (
-		remoteYamlConfigs []*remote.FileMeta
+		remoteYamlConfigs []*types.FileMeta
 		configFetchErr    error
 		filtered          bool
 		parseErr          error
