@@ -48,11 +48,11 @@ export type Pipeline = {
   // The alias for the commit.
   ref: string;
 
-  // The mapping from the local repository to a branch in the remote.
+  // The mapping from the local repository to a branch in the forge.
   refspec: string;
 
-  // The remote repository.
-  remote: string;
+  // The clone URL of the forge repository.
+  clone_url: string;
 
   title: string;
 

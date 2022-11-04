@@ -26,7 +26,7 @@ import (
 type Repo struct {
 	ID                           int64          `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID                       int64          `json:"-"                               xorm:"repo_user_id"`
-	RemoteID                     RemoteID       `json:"-"                               xorm:"'remote_id'"`
+	ForgeID                      ForgeID        `json:"-"                               xorm:"forge_id"`
 	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
@@ -75,8 +75,8 @@ func ParseRepo(str string) (user, repo string, err error) {
 
 // Update updates the repository with values from the given Repo.
 func (r *Repo) Update(from *Repo) {
-	if from.RemoteID.IsValid() {
-		r.RemoteID = from.RemoteID
+	if from.ForgeID.IsValid() {
+		r.ForgeID = from.ForgeID
 	}
 	r.Owner = from.Owner
 	r.Name = from.Name
@@ -109,8 +109,8 @@ type RepoPatch struct {
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 }
 
-type RemoteID string
+type ForgeID string
 
-func (r RemoteID) IsValid() bool {
+func (r ForgeID) IsValid() bool {
 	return r != "" && r != "0"
 }
