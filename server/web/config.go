@@ -51,7 +51,7 @@ func Config(c *gin.Context) {
 		"syncing": syncing,
 		"docs":    server.Config.Server.Docs,
 		"version": version.String(),
-		"forge":   server.Config.Services.Remote.Name(),
+		"forge":   server.Config.Services.Forge.Name(),
 	}
 
 	// default func map with json parser.

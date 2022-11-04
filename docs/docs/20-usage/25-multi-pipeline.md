@@ -10,7 +10,7 @@ The Multi-Pipeline feature allows the pipeline to be split into several files an
 
 ## Rational
 
-- faster lint/test feedback, the pipeline doesn't have to run fully to have a lint status pushed to the remote
+- faster lint/test feedback, the pipeline doesn't have to run fully to have a lint status pushed to the forge
 - better organization of the pipeline along various concerns: testing, linting, feature apps
 - utilizing more agents to speed up build
 

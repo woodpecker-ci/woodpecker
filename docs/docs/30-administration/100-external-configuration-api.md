@@ -69,7 +69,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "parent": 0,
     "ref": "refs/heads/master",
     "refspec": "",
-    "remote": "",
+    "clone_url": "",
     "reviewed_at": 0,
     "reviewed_by": "",
     "sender": "myUser",

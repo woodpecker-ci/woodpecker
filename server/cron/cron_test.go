@@ -22,13 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	mocks_forge "github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	mocks_remote "github.com/woodpecker-ci/woodpecker/server/remote/mocks"
 	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
 )
 
 func TestCreateBuild(t *testing.T) {
-	remote := mocks_remote.NewRemote(t)
+	forge := mocks_forge.NewForge(t)
 	store := mocks_store.NewStore(t)
 	ctx := context.Background()
 
@@ -47,9 +47,9 @@ func TestCreateBuild(t *testing.T) {
 	// mock things
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
 	store.On("GetUser", mock.Anything).Return(creator, nil)
-	remote.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
+	forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
 
-	_, pipeline, err := CreatePipeline(ctx, store, remote, &model.Cron{
+	_, pipeline, err := CreatePipeline(ctx, store, forge, &model.Cron{
 		Name: "test",
 	})
 	assert.NoError(t, err)

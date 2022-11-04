@@ -22,30 +22,30 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type ConfigFetcher interface {
-	Fetch(ctx context.Context) (files []*remote.FileMeta, err error)
+	Fetch(ctx context.Context) (files []*forge.FileMeta, err error)
 }
 
 // TODO(974) move to new package
 
 type configFetcher struct {
-	remote          remote.Remote
+	forge           forge.Forge
 	user            *model.User
 	repo            *model.Repo
 	pipeline        *model.Pipeline
 	configExtension config.Extension
 }
 
-func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
+func NewConfigFetcher(forge forge.Forge, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
 	return &configFetcher{
-		remote:          remote,
+		forge:           forge,
 		user:            user,
 		repo:            repo,
 		pipeline:        pipeline,
@@ -57,7 +57,7 @@ func NewConfigFetcher(remote remote.Remote, configExtension config.Extension, us
 var configFetchTimeout = time.Second * 3
 
 // Fetch pipeline config from source forge
-func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, err error) {
+func (cf *configFetcher) Fetch(ctx context.Context) (files []*forge.FileMeta, err error) {
 	log.Trace().Msgf("Start Fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times
@@ -92,7 +92,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*remote.FileMeta, e
 }
 
 // fetch config by timeout
-func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*remote.FileMeta, error) {
+func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*forge.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, timeout)
 	defer cancel()
 
@@ -121,12 +121,12 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*remote.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
+		return []*forge.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
 	}
 }
 
-func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
-	var res []*remote.FileMeta
+func filterPipelineFiles(files []*forge.FileMeta) []*forge.FileMeta {
+	var res []*forge.FileMeta
 
 	for _, file := range files {
 		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
@@ -137,13 +137,13 @@ func filterPipelineFiles(files []*remote.FileMeta) []*remote.FileMeta {
 	return res
 }
 
-func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*remote.FileMeta, found bool) {
-	file, err := cf.remote.File(c, cf.user, cf.repo, cf.pipeline, config)
+func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*forge.FileMeta, found bool) {
+	file, err := cf.forge.File(c, cf.user, cf.repo, cf.pipeline, config)
 
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
 
-		return []*remote.FileMeta{{
+		return []*forge.FileMeta{{
 			Name: config,
 			Data: file,
 		}}, true
@@ -152,7 +152,7 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 	return nil, false
 }
 
-func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*remote.FileMeta, error) {
+func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*forge.FileMeta, error) {
 	userDefinedLog := ""
 	if userDefined {
 		userDefinedLog = "user defined"
@@ -162,7 +162,7 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
 			// if folder is not supported we will get a "Not implemented" error and continue
-			files, err := cf.remote.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
+			files, err := cf.forge.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			files = filterPipelineFiles(files)
 			if err == nil && len(files) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found %d %s files in '%s'", cf.repo.FullName, len(files), userDefinedLog, fileOrFolder)
