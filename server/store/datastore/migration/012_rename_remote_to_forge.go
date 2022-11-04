@@ -18,6 +18,15 @@ import (
 	"xorm.io/xorm"
 )
 
+type oldRepo012 struct {
+	ID       int64  `xorm:"pk autoincr 'repo_id'"`
+	RemoteID string `xorm:"remote_id"`
+}
+
+func (oldRepo012) TableName() string {
+	return "repos"
+}
+
 var renameRemoteToForge = task{
 	name:     "rename-remote-to-forge",
 	required: true,
@@ -26,6 +35,10 @@ var renameRemoteToForge = task{
 			return err
 		}
 
+		// make sure the column exist before rename it
+		if err := sess.Sync2(new(oldRepo012)); err != nil {
+			return err
+		}
 		if err := renameColumn(sess, "repos", "remote_id", "forge_id"); err != nil {
 			return err
 		}
