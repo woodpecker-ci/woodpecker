@@ -15,8 +15,6 @@
 package migration
 
 import (
-	"strings"
-
 	"xorm.io/xorm"
 )
 
@@ -24,42 +22,12 @@ var renameRemoteToForge = task{
 	name:     "rename-remote-to-forge",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		var cloneURLColumns []*oldTable
-
-		cloneURLColumns = append(cloneURLColumns, &oldTable{
-			table: "pipelines",
-			columns: []string{
-				"pipeline_remote",
-			},
-		},
-		)
-
-		for _, table := range cloneURLColumns {
-			for _, column := range table.columns {
-				err := renameColumn(sess, table.table, column, strings.Replace(column, "remote", "clone_url", 1))
-				if err != nil {
-					return err
-				}
-			}
+		if err := renameColumn(sess, "pipelines", "pipeline_remote", "pipeline_clone_url"); err != nil {
+			return err
 		}
 
-		var forgeColumns []*oldTable
-
-		forgeColumns = append(forgeColumns, &oldTable{
-			table: "repos",
-			columns: []string{
-				"remote_id",
-			},
-		},
-		)
-
-		for _, table := range forgeColumns {
-			for _, column := range table.columns {
-				err := renameColumn(sess, table.table, column, strings.Replace(column, "remote", "forge", 1))
-				if err != nil {
-					return err
-				}
-			}
+		if err := renameColumn(sess, "repos", "remote_id", "forge_id"); err != nil {
+			return err
 		}
 
 		return nil

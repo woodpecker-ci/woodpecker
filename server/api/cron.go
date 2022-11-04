@@ -151,7 +151,6 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Branch != "" {
 		// check if branch exists on forge
-
 		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(400, "Error inserting cron. branch not resolved: %s", err)
