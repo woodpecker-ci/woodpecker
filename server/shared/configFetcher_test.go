@@ -75,6 +75,61 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
+			name:       "Default config with .yaml - .woodpecker/",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker/text.txt",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/release.yaml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/image.png",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker/release.yaml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Default config with .yaml, .yml mix - .woodpecker/",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker/text.txt",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/release.yaml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/other.yml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker/image.png",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker/release.yaml",
+				".woodpecker/other.yml",
+			},
+			expectedError: false,
+		},
+		{
+			name:       "Default config check .woodpecker.yml before .woodpecker.yaml",
+			repoConfig: "",
+			files: []file{{
+				name: ".woodpecker.yaml",
+				data: dummyData,
+			}, {
+				name: ".woodpecker.yml",
+				data: dummyData,
+			}},
+			expectedFileNames: []string{
+				".woodpecker.yml",
+			},
+			expectedError: false,
+		},
+		{
 			name:       "Override via API with custom config",
 			repoConfig: "",
 			files: []file{{
