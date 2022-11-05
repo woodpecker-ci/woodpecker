@@ -30,7 +30,8 @@ import (
 
 func createPipelineItems(ctx context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
-	yamls []*forge_types.FileMeta, envs map[string]string) (*model.Pipeline, []*pipeline.Item, error) {
+	yamls []*forge_types.FileMeta, envs map[string]string,
+) (*model.Pipeline, []*pipeline.Item, error) {
 	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
