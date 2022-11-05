@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-jsonnet"
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -131,6 +132,16 @@ func filterPipelineFiles(files []*forge.FileMeta) []*forge.FileMeta {
 	for _, file := range files {
 		if strings.HasSuffix(file.Name, ".yml") || strings.HasSuffix(file.Name, ".yaml") {
 			res = append(res, file)
+		} else if strings.HasSuffix(file.Name, ".jsonnet") {
+			jsonData, err := evaluateJsonnetFile(file)
+			if err == nil {
+				res = append(res, &forge.FileMeta{
+					Name: file.Name,
+					Data: jsonData,
+				})
+			} else {
+				log.Error().Err(err).Msgf("error evaluating jsonnet file %s", file.Name)
+			}
 		}
 	}
 
@@ -142,6 +153,18 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 
 	if err == nil && len(file) != 0 {
 		log.Trace().Msgf("ConfigFetch[%s]: found file '%s'", cf.repo.FullName, config)
+
+		if strings.HasSuffix(config, ".jsonnet") {
+			// Jsonnet file, must be evaluated first
+			file, err = evaluateJsonnetFile(&forge.FileMeta{
+				Name: config,
+				Data: file,
+			})
+			if err != nil {
+				log.Error().Err(err).Msgf("error evaluating jsonnet file %s", config)
+				return nil, false
+			}
+		}
 
 		return []*forge.FileMeta{{
 			Name: config,
@@ -179,4 +202,10 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 
 	// nothing found
 	return nil, fmt.Errorf("%s configs not found searched: %s", userDefinedLog, strings.Join(configs, ", "))
+}
+
+func evaluateJsonnetFile(file *forge.FileMeta) ([]byte, error) {
+	vm := jsonnet.MakeVM()
+	jsonData, err := vm.EvaluateAnonymousSnippet(file.Name, string(file.Data))
+	return []byte(jsonData), err
 }
