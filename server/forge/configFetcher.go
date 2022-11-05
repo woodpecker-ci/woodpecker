@@ -162,7 +162,7 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 			files, err := cf.forge.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil && !errors.Is(err, types.ErrNotImplemented) {
-				log.Error().Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Err(err)
+				log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login)
 			}
 			files = filterPipelineFiles(files)
 			if err == nil && len(files) != 0 {
