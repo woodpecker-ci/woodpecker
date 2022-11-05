@@ -39,6 +39,7 @@ var migrationTasks = []*task{
 	&renameBuildsToPipeline,
 	&renameColumnsBuildsToPipeline,
 	&renameTableProcsToSteps,
+	&renameRemoteToForge,
 }
 
 var allBeans = []interface{}{

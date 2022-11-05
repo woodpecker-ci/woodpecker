@@ -1,5 +1,5 @@
 <template>
-  <NavbarIcon :title="$t('repo.pipeline.tasks')" class="!p-1.5 relative" @click="toggle">
+  <NavbarIcon :title="$t('pipeline_feed')" class="!p-1.5 relative" @click="toggle">
     <div v-if="activePipelines.length > 0" class="spinner">
       <div class="spinner-ring ring1" />
       <div class="spinner-ring ring2" />

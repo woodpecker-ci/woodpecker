@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full h-full justify-center items-center">
+  <main class="flex flex-col w-full h-full justify-center items-center">
     <div v-if="errorMessage" class="bg-red-400 text-white dark:text-gray-500 p-4 rounded-md text-lg">
       {{ errorMessage }}
     </div>
@@ -15,7 +15,7 @@
         <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts">
