@@ -44,7 +44,7 @@
         v-if="user"
         :to="{ name: 'user' }"
         :title="$t('user.settings')"
-        class="navbar-icon navbar-clickable !p-1.5"
+        class="navbar-icon navbar-clickable !p-1.5 !rounded-lg"
       >
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </NavbarIcon>
