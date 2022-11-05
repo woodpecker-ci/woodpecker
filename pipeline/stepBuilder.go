@@ -49,7 +49,7 @@ type StepBuilder struct {
 	Envs  map[string]string
 }
 
-type PipelineItem struct {
+type Item struct {
 	Step      *model.Step
 	Platform  string
 	Labels    map[string]string
@@ -58,8 +58,8 @@ type PipelineItem struct {
 	Config    *backend.Config
 }
 
-func (b *StepBuilder) Build() ([]*PipelineItem, error) {
-	var items []*PipelineItem
+func (b *StepBuilder) Build() ([]*Item, error) {
+	var items []*Item
 
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
@@ -146,7 +146,7 @@ func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 				continue
 			}
 
-			item := &PipelineItem{
+			item := &Item{
 				Step:      step,
 				Config:    ir,
 				Labels:    parsed.Labels,
@@ -173,7 +173,7 @@ func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 	return items, nil
 }
 
-func stepListContainsItemsToRun(items []*PipelineItem) bool {
+func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
 		if items[i].Step.State == model.StatusPending {
 			return true
@@ -182,8 +182,8 @@ func stepListContainsItemsToRun(items []*PipelineItem) bool {
 	return false
 }
 
-func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
-	itemsToRemove := make([]*PipelineItem, 0)
+func filterItemsWithMissingDependencies(items []*Item) []*Item {
+	itemsToRemove := make([]*Item, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
@@ -194,7 +194,7 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 	}
 
 	if len(itemsToRemove) > 0 {
-		filtered := make([]*PipelineItem, 0)
+		filtered := make([]*Item, 0)
 		for _, item := range items {
 			if !containsItemWithName(item.Step.Name, itemsToRemove) {
 				filtered = append(filtered, item)
@@ -207,7 +207,7 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 	return items
 }
 
-func containsItemWithName(name string, items []*PipelineItem) bool {
+func containsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
 		if name == item.Step.Name {
 			return true
@@ -290,7 +290,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*PipelineItem) *model.Pipeline {
+func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		pipeline.Steps = append(pipeline.Steps, item.Step)
