@@ -23,6 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -45,12 +46,43 @@ func GetCron(c *gin.Context) {
 	c.JSON(200, cron)
 }
 
+// RunCron starts a cron job now.
+func RunCron(c *gin.Context) {
+	repo := session.Repo(c)
+	_store := store.FromContext(c)
+	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
+	if err != nil {
+		c.String(400, "Error parsing cron id. %s", err)
+		return
+	}
+
+	cron, err := _store.CronFind(repo, id)
+	if err != nil {
+		c.String(http.StatusNotFound, "Error getting cron %q. %s", id, err)
+		return
+	}
+
+	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Forge, cron)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
+		return
+	}
+
+	pl, err := pipeline.Create(c, _store, repo, newPipeline)
+	if err != nil {
+		handlePipelineErr(c, err)
+		return
+	}
+
+	c.JSON(200, pl)
+}
+
 // PostCron persists the cron job to the database.
 func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 
 	in := new(model.Cron)
 	if err := c.Bind(in); err != nil {
@@ -77,8 +109,8 @@ func PostCron(c *gin.Context) {
 	cron.NextExec = nextExec.Unix()
 
 	if in.Branch != "" {
-		// check if branch exists on remote
-		_, err := remote.BranchHead(c, user, repo, in.Branch)
+		// check if branch exists on forge
+		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(400, "Error inserting cron. branch not resolved: %s", err)
 			return
@@ -97,7 +129,7 @@ func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
@@ -118,8 +150,8 @@ func PatchCron(c *gin.Context) {
 		return
 	}
 	if in.Branch != "" {
-		// check if branch exists on remote
-		_, err := remote.BranchHead(c, user, repo, in.Branch)
+		// check if branch exists on forge
+		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(400, "Error inserting cron. branch not resolved: %s", err)
 			return

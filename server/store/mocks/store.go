@@ -110,7 +110,7 @@ func (_m *Store) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 }
 
 // CreatePipeline provides a mock function with given fields: _a0, _a1
-func (_m *Store) CreatePipeline(_a0 *model.Pipeline, _a1 ...*model.Proc) error {
+func (_m *Store) CreatePipeline(_a0 *model.Pipeline, _a1 ...*model.Step) error {
 	_va := make([]interface{}, len(_a1))
 	for _i := range _a1 {
 		_va[_i] = _a1[_i]
@@ -121,7 +121,7 @@ func (_m *Store) CreatePipeline(_a0 *model.Pipeline, _a1 ...*model.Proc) error {
 	ret := _m.Called(_ca...)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, ...*model.Proc) error); ok {
+	if rf, ok := ret.Get(0).(func(*model.Pipeline, ...*model.Step) error); ok {
 		r0 = rf(_a0, _a1...)
 	} else {
 		r0 = ret.Error(0)
@@ -347,11 +347,11 @@ func (_m *Store) FileCreate(_a0 *model.File, _a1 io.Reader) error {
 }
 
 // FileFind provides a mock function with given fields: _a0, _a1
-func (_m *Store) FileFind(_a0 *model.Proc, _a1 string) (*model.File, error) {
+func (_m *Store) FileFind(_a0 *model.Step, _a1 string) (*model.File, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *model.File
-	if rf, ok := ret.Get(0).(func(*model.Proc, string) *model.File); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step, string) *model.File); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -360,7 +360,7 @@ func (_m *Store) FileFind(_a0 *model.Proc, _a1 string) (*model.File, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Proc, string) error); ok {
+	if rf, ok := ret.Get(1).(func(*model.Step, string) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -393,11 +393,11 @@ func (_m *Store) FileList(_a0 *model.Pipeline) ([]*model.File, error) {
 }
 
 // FileRead provides a mock function with given fields: _a0, _a1
-func (_m *Store) FileRead(_a0 *model.Proc, _a1 string) (io.ReadCloser, error) {
+func (_m *Store) FileRead(_a0 *model.Step, _a1 string) (io.ReadCloser, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 io.ReadCloser
-	if rf, ok := ret.Get(0).(func(*model.Proc, string) io.ReadCloser); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step, string) io.ReadCloser); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -406,7 +406,7 @@ func (_m *Store) FileRead(_a0 *model.Proc, _a1 string) (io.ReadCloser, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Proc, string) error); ok {
+	if rf, ok := ret.Get(1).(func(*model.Step, string) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -710,6 +710,29 @@ func (_m *Store) GetRepoCount() (int64, error) {
 	return r0, r1
 }
 
+// GetRepoForgeID provides a mock function with given fields: _a0
+func (_m *Store) GetRepoForgeID(_a0 model.ForgeID) (*model.Repo, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Repo
+	if rf, ok := ret.Get(0).(func(model.ForgeID) *model.Repo); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Repo)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(model.ForgeID) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRepoName provides a mock function with given fields: _a0
 func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	ret := _m.Called(_a0)
@@ -733,13 +756,13 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	return r0, r1
 }
 
-// GetRepoNameFallback provides a mock function with given fields: remoteID, fullName
-func (_m *Store) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
-	ret := _m.Called(remoteID, fullName)
+// GetRepoNameFallback provides a mock function with given fields: forgeID, fullName
+func (_m *Store) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error) {
+	ret := _m.Called(forgeID, fullName)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.RemoteID, string) *model.Repo); ok {
-		r0 = rf(remoteID, fullName)
+	if rf, ok := ret.Get(0).(func(model.ForgeID, string) *model.Repo); ok {
+		r0 = rf(forgeID, fullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -747,31 +770,8 @@ func (_m *Store) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(model.RemoteID, string) error); ok {
-		r1 = rf(remoteID, fullName)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetRepoRemoteID provides a mock function with given fields: _a0
-func (_m *Store) GetRepoRemoteID(_a0 model.RemoteID) (*model.Repo, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.RemoteID) *model.Repo); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Repo)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(model.RemoteID) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(model.ForgeID, string) error); ok {
+		r1 = rf(forgeID, fullName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -937,11 +937,11 @@ func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 }
 
 // LogFind provides a mock function with given fields: _a0
-func (_m *Store) LogFind(_a0 *model.Proc) (io.ReadCloser, error) {
+func (_m *Store) LogFind(_a0 *model.Step) (io.ReadCloser, error) {
 	ret := _m.Called(_a0)
 
 	var r0 io.ReadCloser
-	if rf, ok := ret.Get(0).(func(*model.Proc) io.ReadCloser); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step) io.ReadCloser); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -950,7 +950,7 @@ func (_m *Store) LogFind(_a0 *model.Proc) (io.ReadCloser, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Proc) error); ok {
+	if rf, ok := ret.Get(1).(func(*model.Step) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -960,11 +960,11 @@ func (_m *Store) LogFind(_a0 *model.Proc) (io.ReadCloser, error) {
 }
 
 // LogSave provides a mock function with given fields: _a0, _a1
-func (_m *Store) LogSave(_a0 *model.Proc, _a1 io.Reader) error {
+func (_m *Store) LogSave(_a0 *model.Step, _a1 io.Reader) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Proc, io.Reader) error); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step, io.Reader) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
@@ -1118,140 +1118,6 @@ func (_m *Store) PipelineConfigCreate(_a0 *model.PipelineConfig) error {
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*model.PipelineConfig) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ProcChild provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) ProcChild(_a0 *model.Pipeline, _a1 int, _a2 string) (*model.Proc, error) {
-	ret := _m.Called(_a0, _a1, _a2)
-
-	var r0 *model.Proc
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, int, string) *model.Proc); ok {
-		r0 = rf(_a0, _a1, _a2)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Proc)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, int, string) error); ok {
-		r1 = rf(_a0, _a1, _a2)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ProcClear provides a mock function with given fields: _a0
-func (_m *Store) ProcClear(_a0 *model.Pipeline) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Pipeline) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ProcCreate provides a mock function with given fields: _a0
-func (_m *Store) ProcCreate(_a0 []*model.Proc) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func([]*model.Proc) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ProcFind provides a mock function with given fields: _a0, _a1
-func (_m *Store) ProcFind(_a0 *model.Pipeline, _a1 int) (*model.Proc, error) {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 *model.Proc
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, int) *model.Proc); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Proc)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, int) error); ok {
-		r1 = rf(_a0, _a1)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ProcList provides a mock function with given fields: _a0
-func (_m *Store) ProcList(_a0 *model.Pipeline) ([]*model.Proc, error) {
-	ret := _m.Called(_a0)
-
-	var r0 []*model.Proc
-	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.Proc); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.Proc)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ProcLoad provides a mock function with given fields: _a0
-func (_m *Store) ProcLoad(_a0 int64) (*model.Proc, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Proc
-	if rf, ok := ret.Get(0).(func(int64) *model.Proc); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Proc)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ProcUpdate provides a mock function with given fields: _a0
-func (_m *Store) ProcUpdate(_a0 *model.Proc) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Proc) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
@@ -1524,6 +1390,140 @@ func (_m *Store) ServerConfigSet(_a0 string, _a1 string) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, string) error); ok {
 		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepChild provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) StepChild(_a0 *model.Pipeline, _a1 int, _a2 string) (*model.Step, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline, int, string) *model.Step); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline, int, string) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepClear provides a mock function with given fields: _a0
+func (_m *Store) StepClear(_a0 *model.Pipeline) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepCreate provides a mock function with given fields: _a0
+func (_m *Store) StepCreate(_a0 []*model.Step) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]*model.Step) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StepFind provides a mock function with given fields: _a0, _a1
+func (_m *Store) StepFind(_a0 *model.Pipeline, _a1 int) (*model.Step, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline, int) *model.Step); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline, int) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepList provides a mock function with given fields: _a0
+func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*model.Step
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepLoad provides a mock function with given fields: _a0
+func (_m *Store) StepLoad(_a0 int64) (*model.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Step
+	if rf, ok := ret.Get(0).(func(int64) *model.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StepUpdate provides a mock function with given fields: _a0
+func (_m *Store) StepUpdate(_a0 *model.Step) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Step) error); ok {
+		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
 	}

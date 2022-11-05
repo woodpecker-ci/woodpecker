@@ -21,13 +21,13 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) bool {
-	b := shared.ProcBuilder{
+func zeroSteps(pipeline *model.Pipeline, forgeYamlConfigs []*forge.FileMeta) bool {
+	b := shared.StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -35,7 +35,7 @@ func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) b
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: remoteYamlConfigs,
+		Yamls: forgeYamlConfigs,
 	}
 
 	pipelineItems, err := b.Build()
@@ -51,8 +51,8 @@ func zeroSteps(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) b
 
 // TODO: parse yaml once and not for each filter function
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileMeta) (bool, error) {
-	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(remoteYamlConfigs))
+func checkIfFiltered(pipeline *model.Pipeline, forgeYamlConfigs []*forge.FileMeta) (bool, error) {
+	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(forgeYamlConfigs))
 
 	matchMetadata := frontend.Metadata{
 		Curr: frontend.Pipeline{
@@ -63,13 +63,13 @@ func checkIfFiltered(pipeline *model.Pipeline, remoteYamlConfigs []*remote.FileM
 		},
 	}
 
-	for _, remoteYamlConfig := range remoteYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseBytes(remoteYamlConfig.Data)
+	for _, forgeYamlConfig := range forgeYamlConfigs {
+		parsedPipelineConfig, err := yaml.ParseBytes(forgeYamlConfig.Data)
 		if err != nil {
-			log.Trace().Msgf("parse config '%s': %s", remoteYamlConfig.Name, err)
+			log.Trace().Msgf("parse config '%s': %s", forgeYamlConfig.Name, err)
 			return false, err
 		}
-		log.Trace().Msgf("config '%s': %#v", remoteYamlConfig.Name, parsedPipelineConfig)
+		log.Trace().Msgf("config '%s': %#v", forgeYamlConfig.Name, parsedPipelineConfig)
 
 		// ignore if the pipeline was filtered by matched constraints
 		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true); !match && err == nil {

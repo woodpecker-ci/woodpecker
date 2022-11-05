@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -20,8 +21,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
-		entrypoint  = container.Entrypoint
-		command     = container.Command
 		networkMode = container.NetworkMode
 		ipcMode     = container.IpcMode
 		// network    = container.Network
@@ -69,35 +68,24 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingdir = c.stepWorkdir(container)
 	}
 
 	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, c.secrets.toStringMap()); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+		pluginSecrets := secretMap{}
+		for name, secret := range c.secrets {
+			if secret.Available(container) {
+				pluginSecrets[name] = secret
+			}
 		}
-	}
 
-	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Platform == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\\root"
-			environment["SHELL"] = "powershell.exe"
-		} else {
-			entrypoint = []string{"/bin/sh", "-c"}
-			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-			environment["HOME"] = "/root"
-			environment["SHELL"] = "/bin/sh"
+		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+			log.Error().Err(err).Msg("paramsToEnv")
 		}
 	}
 
 	if matchImage(container.Image, c.escalated...) {
 		privileged = true
-		entrypoint = []string{}
-		command = []string{}
 	}
 
 	authConfig := backend.Auth{
@@ -116,7 +104,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	for _, requested := range container.Secrets.Secrets {
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && (len(secret.Match) == 0 || matchImage(container.Image, secret.Match...)) {
+		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		}
 	}
@@ -167,8 +155,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		WorkingDir:   workingdir,
 		Environment:  environment,
 		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
+		Commands:     container.Commands,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
 		Tmpfs:        container.Tmpfs,
@@ -190,4 +177,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
 	}
+}
+
+func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+	if filepath.IsAbs(container.Directory) {
+		return container.Directory
+	}
+	return filepath.Join(c.base, c.path, container.Directory)
 }

@@ -101,7 +101,7 @@ module.exports = {
               },
               {
                 label: 'Mastodon',
-                href: 'https://mastodon.technology/@WoodpeckerCI',
+                href: 'https://floss.social/@WoodpeckerCI',
               },
             ],
           },
@@ -166,6 +166,18 @@ module.exports = {
               },
             },
           ],
+        };
+      },
+    }),
+    () => ({
+      name: 'webpack-config',
+      configureWebpack() {
+        return {
+          devServer: {
+            client: {
+              webSocketURL: 'auto://0.0.0.0:0/ws',
+            },
+          },
         };
       },
     }),

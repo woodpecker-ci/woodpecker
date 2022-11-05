@@ -4,7 +4,7 @@
       <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
-    <div v-if="repoSettings" class="flex flex-col">
+    <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#pipeline-path"
         :label="$t('repo.settings.general.pipeline_path.path')"
@@ -72,13 +72,13 @@
       </InputField>
 
       <Button
+        type="submit"
         class="mr-auto"
         color="green"
         :is-loading="isSaving"
         :text="$t('repo.settings.general.save')"
-        @click="saveRepoSettings"
       />
-    </div>
+    </form>
   </Panel>
 </template>
 
@@ -167,14 +167,14 @@ export default defineComponent({
         description: i18n.t('repo.settings.general.visibility.public.desc'),
       },
       {
-        value: RepoVisibility.Private,
-        text: i18n.t('repo.settings.general.visibility.private.private'),
-        description: i18n.t('repo.settings.general.visibility.private.desc'),
-      },
-      {
         value: RepoVisibility.Internal,
         text: i18n.t('repo.settings.general.visibility.internal.internal'),
         description: i18n.t('repo.settings.general.visibility.internal.desc'),
+      },
+      {
+        value: RepoVisibility.Private,
+        text: i18n.t('repo.settings.general.visibility.private.private'),
+        description: i18n.t('repo.settings.general.visibility.private.desc'),
       },
     ];
 

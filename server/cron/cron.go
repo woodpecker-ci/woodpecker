@@ -22,9 +22,9 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -37,7 +37,7 @@ const (
 )
 
 // Start starts the cron scheduler loop
-func Start(ctx context.Context, store store.Store, remote remote.Remote) error {
+func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -54,7 +54,7 @@ func Start(ctx context.Context, store store.Store, remote remote.Remote) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(store, remote, cron, now); err != nil {
+					if err := runCron(store, forge, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -77,7 +77,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runCron(store store.Store, remote remote.Remote, cron *model.Cron, now time.Time) error {
+func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
@@ -96,16 +96,16 @@ func runCron(store store.Store, remote remote.Remote, cron *model.Cron, now time
 		return nil
 	}
 
-	repo, newBuild, err := createBuild(ctx, store, remote, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, forge, cron)
 	if err != nil {
 		return err
 	}
 
-	_, err = pipeline.Create(ctx, store, repo, newBuild)
+	_, err = pipeline.Create(ctx, store, repo, newPipeline)
 	return err
 }
 
-func createBuild(ctx context.Context, store store.Store, remote remote.Remote, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
+func CreatePipeline(ctx context.Context, store store.Store, forge forge.Forge, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
 	repo, err := store.GetRepo(cron.RepoID)
 	if err != nil {
 		return nil, nil, err
@@ -121,7 +121,7 @@ func createBuild(ctx context.Context, store store.Store, remote remote.Remote, c
 		return nil, nil, err
 	}
 
-	commit, err := remote.BranchHead(ctx, creator, repo, cron.Branch)
+	commit, err := forge.BranchHead(ctx, creator, repo, cron.Branch)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -22,7 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -34,10 +34,10 @@ func Refresh(c *gin.Context) {
 		return
 	}
 
-	// check if the remote includes the ability to
+	// check if the forge includes the ability to
 	// refresh the user token.
-	_remote := server.Config.Services.Remote
-	refresher, ok := _remote.(remote.Refresher)
+	_forge := server.Config.Services.Forge
+	refresher, ok := _forge.(forge.Refresher)
 	if !ok {
 		c.Next()
 		return

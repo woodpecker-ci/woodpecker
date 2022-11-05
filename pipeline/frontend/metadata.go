@@ -46,18 +46,18 @@ type (
 		Repo Repo     `json:"repo,omitempty"`
 		Curr Pipeline `json:"curr,omitempty"`
 		Prev Pipeline `json:"prev,omitempty"`
-		Job  Job      `json:"job,omitempty"`
+		Step Step     `json:"step,omitempty"`
 		Sys  System   `json:"sys,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string   `json:"name,omitempty"`
-		Link    string   `json:"link,omitempty"`
-		Remote  string   `json:"remote,omitempty"`
-		Private bool     `json:"private,omitempty"`
-		Secrets []Secret `json:"secrets,omitempty"`
-		Branch  string   `json:"default_branch,omitempty"`
+		Name     string   `json:"name,omitempty"`
+		Link     string   `json:"link,omitempty"`
+		CloneURL string   `json:"clone_url,omitempty"`
+		Private  bool     `json:"private,omitempty"`
+		Secrets  []Secret `json:"secrets,omitempty"`
+		Branch   string   `json:"default_branch,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -95,8 +95,8 @@ type (
 		Avatar string `json:"avatar,omitempty"`
 	}
 
-	// Job defines runtime metadata for a job.
-	Job struct {
+	// Step defines runtime metadata for a step.
+	Step struct {
 		Number int               `json:"number,omitempty"`
 		Matrix map[string]string `json:"matrix,omitempty"`
 	}
@@ -149,7 +149,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_LINK":           m.Repo.Link,
-		"CI_REPO_REMOTE":         m.Repo.Remote,
+		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
@@ -178,10 +178,10 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
-		"CI_JOB_NUMBER":   strconv.Itoa(m.Job.Number),
-		"CI_JOB_STATUS":   "", // will be set by agent
-		"CI_JOB_STARTED":  "", // will be set by agent
-		"CI_JOB_FINISHED": "", // will be set by agent
+		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
+		"CI_STEP_STATUS":   "", // will be set by agent
+		"CI_STEP_STARTED":  "", // will be set by agent
+		"CI_STEP_FINISHED": "", // will be set by agent
 
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
@@ -231,6 +231,13 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
 		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
+		// use CI_STEP_*
+		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
+		"CI_JOB_STATUS":   "", // will be set by agent
+		"CI_JOB_STARTED":  "", // will be set by agent
+		"CI_JOB_FINISHED": "", // will be set by agent
+		// CI_REPO_CLONE_URL
+		"CI_REPO_REMOTE": m.Repo.CloneURL,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

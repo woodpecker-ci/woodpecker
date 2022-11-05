@@ -39,12 +39,12 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -101,7 +101,7 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	_remote, err := setupRemote(c)
+	_forge, err := setupForge(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
@@ -116,14 +116,14 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _remote)
+	setupEvilGlobals(c, _store, _forge)
 
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _remote)
+		return cron.Start(c.Context, _store, _forge)
 	})
 
 	// start the grpc server
@@ -144,7 +144,7 @@ func run(c *cli.Context) error {
 			}),
 		)
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			_remote,
+			_forge,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
@@ -253,12 +253,12 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
+func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// storage
 	server.Config.Storage.Files = v
 
-	// remote
-	server.Config.Services.Remote = r
+	// forge
+	server.Config.Services.Forge = f
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
@@ -270,7 +270,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
-	server.Config.Services.Membership = setupMembershipService(c, r)
+	server.Config.Services.Membership = setupMembershipService(c, f)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 

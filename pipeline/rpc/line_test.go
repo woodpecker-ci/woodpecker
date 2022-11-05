@@ -6,7 +6,7 @@ import (
 
 func TestLine(t *testing.T) {
 	line := Line{
-		Proc: "redis",
+		Step: "redis",
 		Time: 60,
 		Pos:  1,
 		Out:  "starting redis server",

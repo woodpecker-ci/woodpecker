@@ -10,9 +10,11 @@
     "password": "Password",
     "url": "URL",
     "back": "Back",
-    "color_scheme_light": "Switch between dark and light mode (currently light mode)",
-    "color_scheme_dark": "Switch between dark and light mode (currently dark mode)",
+    "color_scheme_light": "Switch to dark mode",
+    "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
+    "documentation_for": "Documentation for \"{topic}\"",
+    "pipeline_feed": "Pipeline feed",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -120,6 +122,7 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 },
+                "plugins_only": "Only available for plugins",
                 "edit": "Edit secret",
                 "delete":"Delete secret"
             },
@@ -153,6 +156,7 @@
                 "deleted": "Cron deleted",
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
+                "run": "Run now",
                 "branch": {
                     "title": "Branch",
                     "placeholder": "Branch (uses default branch if empty)"
@@ -256,6 +260,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -284,6 +289,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -292,6 +298,7 @@
         }
     },
     "user": {
+        "settings": "User Settings",
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",

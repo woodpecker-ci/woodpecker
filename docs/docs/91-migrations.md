@@ -8,8 +8,13 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-pipeline-syntax.md#labels)
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
+- Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
+- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
+- Updated Prometheus gauge `*_job_*` to `*_step_*`
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
+- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
 
 ## 0.15.0
 

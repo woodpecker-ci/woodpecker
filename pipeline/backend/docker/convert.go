@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package docker
 
 import (
@@ -8,77 +22,82 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 // returns a container configuration.
-func toConfig(proc *types.Step) *container.Config {
+func toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        proc.Image,
-		Labels:       proc.Labels,
-		WorkingDir:   proc.WorkingDir,
+		Image:        step.Image,
+		Labels:       step.Labels,
+		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
-	if len(proc.Environment) != 0 {
-		config.Env = toEnv(proc.Environment)
+
+	if len(step.Commands) != 0 {
+		env, entry, cmd := common.GenerateContainerConf(step.Commands)
+		for k, v := range env {
+			step.Environment[k] = v
+		}
+		config.Entrypoint = entry
+		config.Cmd = cmd
 	}
-	if len(proc.Command) != 0 {
-		config.Cmd = proc.Command
+
+	if len(step.Environment) != 0 {
+		config.Env = toEnv(step.Environment)
 	}
-	if len(proc.Entrypoint) != 0 {
-		config.Entrypoint = proc.Entrypoint
-	}
-	if len(proc.Volumes) != 0 {
-		config.Volumes = toVol(proc.Volumes)
+	if len(step.Volumes) != 0 {
+		config.Volumes = toVol(step.Volumes)
 	}
 	return config
 }
 
 // returns a container host configuration.
-func toHostConfig(proc *types.Step) *container.HostConfig {
+func toHostConfig(step *types.Step) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
-			CPUQuota:   proc.CPUQuota,
-			CPUShares:  proc.CPUShares,
-			CpusetCpus: proc.CPUSet,
-			Memory:     proc.MemLimit,
-			MemorySwap: proc.MemSwapLimit,
+			CPUQuota:   step.CPUQuota,
+			CPUShares:  step.CPUShares,
+			CpusetCpus: step.CPUSet,
+			Memory:     step.MemLimit,
+			MemorySwap: step.MemSwapLimit,
 		},
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
-		Privileged: proc.Privileged,
-		ShmSize:    proc.ShmSize,
-		Sysctls:    proc.Sysctls,
+		Privileged: step.Privileged,
+		ShmSize:    step.ShmSize,
+		Sysctls:    step.Sysctls,
 	}
 
-	// if len(proc.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = proc.VolumesFrom
+	// if len(step.VolumesFrom) != 0 {
+	// 	config.VolumesFrom = step.VolumesFrom
 	// }
-	if len(proc.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(proc.NetworkMode)
+	if len(step.NetworkMode) != 0 {
+		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
-	if len(proc.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(proc.IpcMode)
+	if len(step.IpcMode) != 0 {
+		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
-	if len(proc.DNS) != 0 {
-		config.DNS = proc.DNS
+	if len(step.DNS) != 0 {
+		config.DNS = step.DNS
 	}
-	if len(proc.DNSSearch) != 0 {
-		config.DNSSearch = proc.DNSSearch
+	if len(step.DNSSearch) != 0 {
+		config.DNSSearch = step.DNSSearch
 	}
-	if len(proc.ExtraHosts) != 0 {
-		config.ExtraHosts = proc.ExtraHosts
+	if len(step.ExtraHosts) != 0 {
+		config.ExtraHosts = step.ExtraHosts
 	}
-	if len(proc.Devices) != 0 {
-		config.Devices = toDev(proc.Devices)
+	if len(step.Devices) != 0 {
+		config.Devices = toDev(step.Devices)
 	}
-	if len(proc.Volumes) != 0 {
-		config.Binds = proc.Volumes
+	if len(step.Volumes) != 0 {
+		config.Binds = step.Volumes
 	}
 	config.Tmpfs = map[string]string{}
-	for _, path := range proc.Tmpfs {
+	for _, path := range step.Tmpfs {
 		if !strings.Contains(path, ":") {
 			config.Tmpfs[path] = ""
 			continue

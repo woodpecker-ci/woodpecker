@@ -22,14 +22,14 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
+func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
+	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
 	}
@@ -64,7 +64,7 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 		envs[k] = v
 	}
 
-	b := shared.ProcBuilder{
+	b := shared.StepBuilder{
 		Repo:  repo,
 		Curr:  pipeline,
 		Last:  last,
