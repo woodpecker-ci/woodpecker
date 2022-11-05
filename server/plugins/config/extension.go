@@ -17,11 +17,11 @@ package config
 import (
 	"context"
 
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 type Extension interface {
 	IsConfigured() bool
-	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*remote_types.FileMeta) (configData []*remote_types.FileMeta, useOld bool, err error)
+	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta) (configData []*forge_types.FileMeta, useOld bool, err error)
 }

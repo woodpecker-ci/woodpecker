@@ -32,9 +32,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote/types"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
@@ -46,7 +45,7 @@ type StepBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yamls []*remote_types.FileMeta
+	Yamls []*forge_types.FileMeta
 	Envs  map[string]string
 }
 
@@ -62,7 +61,7 @@ type PipelineItem struct {
 func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 	var items []*PipelineItem
 
-	b.Yamls = types.SortByName(b.Yamls)
+	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
 
@@ -336,11 +335,11 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *
 	}
 	return frontend.Metadata{
 		Repo: frontend.Repo{
-			Name:    repo.FullName,
-			Link:    repo.Link,
-			Remote:  repo.Clone,
-			Private: repo.IsSCMPrivate,
-			Branch:  repo.Branch,
+			Name:     repo.FullName,
+			Link:     repo.Link,
+			CloneURL: repo.Clone,
+			Private:  repo.IsSCMPrivate,
+			Branch:   repo.Branch,
 		},
 		Curr: metadataPipelineFromModelPipeline(pipeline, true),
 		Prev: metadataPipelineFromModelPipeline(last, false),

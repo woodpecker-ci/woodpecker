@@ -20,8 +20,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -44,9 +44,9 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
-	var yamls []*remote_types.FileMeta
+	var yamls []*forge_types.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, &remote_types.FileMeta{Data: y.Data, Name: y.Name})
+		yamls = append(yamls, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)

@@ -23,13 +23,13 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote_types.FileMeta, envs map[string]string) (*model.Pipeline, []*pipeline.PipelineItem, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
+func createPipelineItems(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) (*model.Pipeline, []*pipeline.PipelineItem, error) {
+	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
 	}

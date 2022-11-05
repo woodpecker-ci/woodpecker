@@ -714,13 +714,14 @@ Woodpecker gives the ability to skip whole pipelines (not just steps #when---con
 Example conditional execution by repository:
 
 ```diff
++when:
++  repo: test/test
++
  pipeline:
    slack:
      image: plugins/slack
      settings:
        channel: dev
-+    when:
-+      repo: test/test
 ```
 
 ### `branch`
@@ -732,13 +733,14 @@ Branch conditions are not applied to tags.
 Example conditional execution by branch:
 
 ```diff
-pipeline:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     branch: master
++when:
++  branch: master
++
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
 ```
 
 > The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.

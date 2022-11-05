@@ -25,8 +25,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	remote_syncer "github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -38,7 +38,7 @@ func GetSelf(c *gin.Context) {
 
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -54,11 +54,11 @@ func GetFeed(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := remote_syncer.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  remote_syncer.NamespaceFilter(config.OwnersWhitelist),
+		sync := forge.Syncer{
+			Forge: _forge,
+			Store: _store,
+			Perms: _store,
+			Match: forge.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
@@ -87,7 +87,7 @@ func GetFeed(c *gin.Context) {
 
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
@@ -103,11 +103,11 @@ func GetRepos(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := remote_syncer.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  remote_syncer.NamespaceFilter(config.OwnersWhitelist),
+		sync := forge.Syncer{
+			Forge: _forge,
+			Store: _store,
+			Perms: _store,
+			Match: forge.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {

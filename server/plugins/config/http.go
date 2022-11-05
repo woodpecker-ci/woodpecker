@@ -19,9 +19,9 @@ import (
 	"crypto"
 	"fmt"
 
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
-	remote_types "github.com/woodpecker-ci/woodpecker/server/remote/types"
 )
 
 type http struct {
@@ -29,7 +29,7 @@ type http struct {
 	privateKey crypto.PrivateKey
 }
 
-// Same as remote.FileMeta but with json tags and string data
+// Same as forge.FileMeta but with json tags and string data
 type config struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
@@ -53,7 +53,7 @@ func (cp *http) IsConfigured() bool {
 	return cp.endpoint != ""
 }
 
-func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*remote_types.FileMeta) (configData []*remote_types.FileMeta, useOld bool, err error) {
+func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta) (configData []*forge_types.FileMeta, useOld bool, err error) {
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {
 		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}
@@ -66,13 +66,13 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *mod
 		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
 	}
 
-	var newFileMeta []*remote_types.FileMeta
+	var newFileMeta []*forge_types.FileMeta
 	if status != 200 {
-		newFileMeta = make([]*remote_types.FileMeta, 0)
+		newFileMeta = make([]*forge_types.FileMeta, 0)
 	} else {
-		newFileMeta = make([]*remote_types.FileMeta, len(response.Configs))
+		newFileMeta = make([]*forge_types.FileMeta, len(response.Configs))
 		for i, pipe := range response.Configs {
-			newFileMeta[i] = &remote_types.FileMeta{Name: pipe.Name, Data: []byte(pipe.Data)}
+			newFileMeta[i] = &forge_types.FileMeta{Name: pipe.Name, Data: []byte(pipe.Data)}
 		}
 	}
 
