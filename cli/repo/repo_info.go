@@ -53,5 +53,5 @@ Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
-Remote: {{ .Clone }}
+Forge: {{ .Clone }}
 `

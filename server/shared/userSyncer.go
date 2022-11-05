@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -33,10 +33,10 @@ type UserSyncer interface {
 }
 
 type Syncer struct {
-	Remote remote.Remote
-	Store  store.Store
-	Perms  model.PermStore
-	Match  FilterFunc
+	Forge forge.Forge
+	Store store.Store
+	Perms model.PermStore
+	Match FilterFunc
 }
 
 // FilterFunc can be used to filter which repositories are
@@ -64,12 +64,12 @@ func (s *Syncer) SetFilter(fn FilterFunc) {
 
 func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions bool) error {
 	unix := time.Now().Unix() - (3601) // force immediate expiration. note 1 hour expiration is hard coded at the moment
-	repos, err := s.Remote.Repos(ctx, user)
+	repos, err := s.Forge.Repos(ctx, user)
 	if err != nil {
 		return err
 	}
 
-	remoteRepos := make([]*model.Repo, 0, len(repos))
+	forgeRepos := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
 		if s.Match(repo) {
 			repo.Perm = &model.Perm{
@@ -87,20 +87,20 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 					repo.Perm.Admin = true
 				}
 			} else {
-				remotePerm, err := s.Remote.Perm(ctx, user, repo)
+				forgePerm, err := s.Forge.Perm(ctx, user, repo)
 				if err != nil {
 					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
 				}
-				repo.Perm.Pull = remotePerm.Pull
-				repo.Perm.Push = remotePerm.Push
-				repo.Perm.Admin = remotePerm.Admin
+				repo.Perm.Pull = forgePerm.Pull
+				repo.Perm.Push = forgePerm.Push
+				repo.Perm.Admin = forgePerm.Admin
 			}
 
-			remoteRepos = append(remoteRepos, repo)
+			forgeRepos = append(forgeRepos, repo)
 		}
 	}
 
-	err = s.Store.RepoBatch(remoteRepos)
+	err = s.Store.RepoBatch(forgeRepos)
 	if err != nil {
 		return err
 	}

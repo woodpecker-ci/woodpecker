@@ -30,7 +30,7 @@ func updatePipelineStatus(ctx context.Context, pipeline *model.Pipeline, repo *m
 			continue
 		}
 
-		err := server.Config.Services.Remote.Status(ctx, user, repo, pipeline, step)
+		err := server.Config.Services.Forge.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 			return err
