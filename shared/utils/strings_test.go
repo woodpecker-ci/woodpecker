@@ -74,23 +74,3 @@ func TestEqualStringSlice(t *testing.T) {
 		assert.EqualValues(t, tc.out, EqualStringSlice(tc.in1, tc.in2), "could not correctly process input: '%#v', %#v", tc.in1, tc.in2)
 	}
 }
-
-func TestSliceContainsString(t *testing.T) {
-	tests := []struct {
-		slice []string
-		str   string
-		out   bool
-	}{{
-		slice: []string{"", "ab", "12", "ab"},
-		str:   "12",
-		out:   true,
-	}, {
-		slice: []string{"AA", "AA", "2", " "},
-		str:   "A",
-		out:   false,
-	}}
-
-	for _, tc := range tests {
-		assert.EqualValues(t, tc.out, SliceContainsString(tc.slice, tc.str), "could not correctly process input: '%#v', %#v", tc.slice, tc.str)
-	}
-}
