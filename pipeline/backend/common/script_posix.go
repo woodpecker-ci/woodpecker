@@ -16,7 +16,6 @@ package common
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"strings"
 )
@@ -38,7 +37,7 @@ func generateScriptPosix(commands []string) string {
 		setupScript,
 		buf.String(),
 	)
-	return base64.StdEncoding.EncodeToString([]byte(script))
+	return script
 }
 
 // setupScript is a helper script this is added to the step script to ensure
