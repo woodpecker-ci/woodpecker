@@ -40,13 +40,13 @@ unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
 
-echo + "echo \${PATH}"
+echo + 'echo ${PATH}'
 echo ${PATH}
 
-echo + "go build"
+echo + 'go build'
 go build
 
-echo + "go test"
+echo + 'go test'
 go test
 
 `,
@@ -54,6 +54,6 @@ go test
 	}
 	for _, test := range testdata {
 		script := generateScriptPosix(test.from)
-		assert.EqualValues(t, script, test.want, "Want encoded script for %s", test.from)
+		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
 	}
 }
