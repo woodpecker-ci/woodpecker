@@ -4,7 +4,7 @@ variables:
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
-    # since we genereate docs for cli tool we have to watch this too
+    # since we generate docs for cli tool we have to watch this too
     - "cli/**"
     - "cmd/cli/**"
 
