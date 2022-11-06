@@ -1,6 +1,6 @@
 # Agent configuration
 
-Agents are configured by the command line or environement variables. At the minimum you need the following information:
+Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
 ```yaml
 # docker-compose.yml
