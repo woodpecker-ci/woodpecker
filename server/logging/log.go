@@ -11,7 +11,7 @@ import (
 // the stream. This should be resolved.
 
 // TODO (bradrydzewski) implement a mux.Info to fetch information and
-// statistics for the multiplexier. Streams, subscribers, etc
+// statistics for the multiplexer. Streams, subscribers, etc
 // mux.Info()
 
 // TODO (bradrydzewski) refactor code to place publisher and subscriber
