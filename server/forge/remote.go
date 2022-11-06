@@ -80,7 +80,7 @@ type Forge interface {
 	// TODO: Add proper pagination handling and remove workaround in gitea forge
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
 
-	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
