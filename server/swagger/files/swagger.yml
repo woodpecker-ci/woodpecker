@@ -198,7 +198,7 @@ paths:
       tags:
         - Repos
       summary: Encrypt repo secrets
-      description: Encryptes a Yaml file with secret environment variables for secure public storage.
+      description: Encrypts a Yaml file with secret environment variables for secure public storage.
       security:
         - accessToken: []
       responses:
