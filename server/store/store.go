@@ -130,7 +130,7 @@ type Store interface {
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList() ([]*model.Secret, error)
 
-	// Registrys
+	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
