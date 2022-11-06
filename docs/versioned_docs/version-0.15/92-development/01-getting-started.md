@@ -31,7 +31,7 @@ A common config for debugging would look like this:
 WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
-# if you want to test webhooks with an online SCM like Github this address needs to be accessible from public server
+# if you want to test webhooks with an online SCM like GitHub this address needs to be accessible from public server
 WOODPECKER_HOST=http://your-dev-address.com/
 
 # github (sample for a SCM config - see /docs/administration/vcs/overview for other SCMs)
@@ -59,7 +59,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup O-Auth
 
-Create an O-Auth app for your SCM as describe in the [SCM documentation](../30-administration/11-vcs/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific SCM to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an O-Auth app for your SCM as describe in the [SCM documentation](../30-administration/11-vcs/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific SCM to login without the need for a public address. For example for GitHub you would use `http://localhost:8000/authorize` as authorization callback URL.
 
 ## Developing with VS-Code
 

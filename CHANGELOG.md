@@ -105,7 +105,7 @@
   * Add page to view all projects of a user / group (#741)
   * Let non required migration tasks fail and continue (#729)
   * Improve pipeline compiler (#699)
-  * Support ChangedFiles for Github & Gitlab PRs and pushes and Gitea pushes (#697)
+  * Support ChangedFiles for GitHub & Gitlab PRs and pushes and Gitea pushes (#697)
   * Remove unused flags / options (#693)
   * Automatically determine platform of agent (#690)
   * Build ref link point to commit not compare if only one commit was pushed (#673)
