@@ -130,7 +130,7 @@ func Test_gogs(t *testing.T) {
 			})
 		})
 
-		g.It("Should register repositroy hooks", func() {
+		g.It("Should register repository hooks", func() {
 			err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
 			g.Assert(err).IsNil()
 		})
