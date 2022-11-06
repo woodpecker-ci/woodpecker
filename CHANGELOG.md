@@ -229,7 +229,7 @@
 ## [v0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
 
 * BUGFIXES
-  * Fix sanitziePath (#326) (aa4fa9aab3)
+  * Fix sanitizePath (#326) (aa4fa9aab3)
   * Fix json tag for `Pos` at struct `Line` (#422) (#424)
   * Fix channel buffer used with signal.Notify (#421) (#423)
 * ENHANCEMENTS
