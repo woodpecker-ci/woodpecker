@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package forge
+package types
+
+import "errors"
 
 // AuthError represents forge authentication error.
 type AuthError struct {
@@ -35,3 +38,5 @@ func (ae *AuthError) Error() string {
 
 // check interface
 var _ error = new(AuthError)
+
+var ErrNotImplemented = errors.New("Not implemented")

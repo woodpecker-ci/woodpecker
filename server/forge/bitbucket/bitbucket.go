@@ -27,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -73,7 +74,7 @@ func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Req
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -222,8 +223,8 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
@@ -298,7 +299,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 // BranchHead returns the sha of the head (lastest commit) of the specified branch
 func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
-	return "", fmt.Errorf("missing implementation")
+	return "", forge_types.ErrNotImplemented
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and

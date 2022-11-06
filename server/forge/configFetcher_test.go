@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared_test
+package forge_test
 
 import (
 	"context"
@@ -32,12 +32,10 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
-
-// TODO(974) move to new package
 
 func TestFetch(t *testing.T) {
 	t.Parallel()
@@ -294,12 +292,12 @@ func TestFetch(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			f := new(mocks.Forge)
-			dirs := map[string][]*forge.FileMeta{}
+			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
-					dirs[path] = append(dirs[path], &forge.FileMeta{
+					dirs[path] = append(dirs[path], &forge_types.FileMeta{
 						Name: file.name,
 						Data: file.data,
 					})
@@ -314,7 +312,7 @@ func TestFetch(t *testing.T) {
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
+			configFetcher := forge.NewConfigFetcher(
 				f,
 				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
@@ -499,12 +497,12 @@ func TestFetchFromConfigService(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
 			f := new(mocks.Forge)
-			dirs := map[string][]*forge.FileMeta{}
+			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
-					dirs[path] = append(dirs[path], &forge.FileMeta{
+					dirs[path] = append(dirs[path], &forge_types.FileMeta{
 						Name: file.name,
 						Data: file.data,
 					})
@@ -519,7 +517,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
-			configFetcher := shared.NewConfigFetcher(
+			configFetcher := forge.NewConfigFetcher(
 				f,
 				configAPI,
 				&model.User{Token: "xxx"},

@@ -13,17 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO(974) move to pipeline/*
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
@@ -42,7 +40,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:
@@ -76,7 +74,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:
@@ -107,7 +105,7 @@ bbb`,
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -141,7 +139,7 @@ func TestMultiPipeline(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -175,7 +173,7 @@ func TestDependsOn(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 pipeline:
   build:
@@ -221,7 +219,7 @@ func TestRunsOn(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   deploy:
@@ -257,7 +255,7 @@ func TestPipelineName(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 pipeline:
   build:
@@ -292,7 +290,7 @@ func TestBranchFilter(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   xxx:
@@ -338,7 +336,7 @@ func TestRootWhenFilter(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
   event:
@@ -386,7 +384,7 @@ func TestZeroSteps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 skip_clone: true
 pipeline:
@@ -420,7 +418,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
 pipeline:
@@ -468,7 +466,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
 pipeline:
@@ -524,7 +522,7 @@ func TestTree(t *testing.T) {
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
 		Link:  "",
-		Yamls: []*forge.FileMeta{
+		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 pipeline:
   build:
