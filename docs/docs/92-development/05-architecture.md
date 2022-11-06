@@ -8,13 +8,14 @@
 
 ### main package hierarchy
 
-| package    | meaning                                                      | imports
-|------------|--------------------------------------------------------------|----------
-| `cmd/**`   | parse command-line args & environment to stat server/cli/agent | all other
-| `agent/**` | code only agent (remote worker) will need                    | `pipeline`, `shared`
-| `cli/**`   | code only cli tool does need                                 | `pipeline`, `shared`, `woodpecker-go`
-| `server/**`| code only server will need                                   | `pipeline`, `shared`
-| `shared/**`| code shared for all three main tools (go help utils)         | only std and external libs
+| package       | meaning                                                      | imports
+|---------------|--------------------------------------------------------------|----------
+| `cmd/**`      | parse command-line args & environment to stat server/cli/agent | all other
+| `agent/**`    | code only agent (remote worker) will need                    | `pipeline`, `shared`
+| `cli/**`      | code only cli tool does need                                 | `pipeline`, `shared`, `woodpecker-go`
+| `pipeline/**` | code to parse, compile and run pipelines                     |  pipeline backend libs
+| `server/**`   | code only server will need                                   | `pipeline`, `shared`
+| `shared/**`   | code shared for all three main tools (go help utils)         | only std and external libs
 | `woodpecker-go/**` | go client for server rest api                        | std
 
 ### Server
