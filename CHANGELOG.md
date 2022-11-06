@@ -26,7 +26,7 @@
 * SECURITY
   * Update github.com/containerd/containerd (#978) (#980)
 * BUGFIXES
-  * Return to page after clikcing login at navbar (#975) (#976)
+  * Return to page after clicking login at navbar (#975) (#976)
 
 ## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
 
