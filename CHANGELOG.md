@@ -84,7 +84,7 @@
   * Skip nested GitLab repositories during sync (#656), (#652)
   * Build proc tree function should not depend on sorted procs list (#647)
   * Fix sqlite migration on column drop of abnormal schemas (#629)
-  * Fix gRPC incomapatability in helm chart (#627)
+  * Fix gRPC incompatibility in helm chart (#627)
   * Fix new pipeline not published to UI if protected repo mode enabled (#619)
   * Dont panic, report error back (#582)
   * Improve status updates (#561)
