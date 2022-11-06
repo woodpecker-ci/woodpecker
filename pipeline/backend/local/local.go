@@ -21,10 +21,22 @@ import (
 	"os/exec"
 	"strings"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
+
+// notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
+var notAllowedEnvVarOverwrites = []string{
+	"CI_NETRC_MACHINE",
+	"CI_NETRC_USERNAME",
+	"CI_NETRC_PASSWORD",
+	"CI_SCRIPT",
+	"HOME",
+	"SHELL",
+}
 
 type local struct {
 	cmd        *exec.Cmd
@@ -64,7 +76,8 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
 	env := os.Environ()
 	for a, b := range step.Environment {
-		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
+		// append allowed env vars to command env
+		if !slices.Contains(notAllowedEnvVarOverwrites, a) {
 			env = append(env, a+"="+b)
 		}
 	}
@@ -72,6 +85,8 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
+		// TODO: creat tmp HOME and insert netrc
+		// TODO: download plugin-git binary if not exist
 		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
 		command = append(command, "plugin-git")
 	} else {
