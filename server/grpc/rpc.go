@@ -33,17 +33,17 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 type RPC struct {
-	remote        remote.Remote
+	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        pubsub.Publisher
 	logger        logging.Log
@@ -352,7 +352,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	s.updateRemoteStatus(c, repo, pipeline, step)
+	s.updateForgeStatus(c, repo, pipeline, step)
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", step.ID)
@@ -421,14 +421,14 @@ func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedSt
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) {
+func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
 		return
 	}
 
-	if refresher, ok := s.remote.(remote.Refresher); ok {
+	if refresher, ok := s.forge.(forge.Refresher); ok {
 		ok, err := refresher.Refresh(ctx, user)
 		if err != nil {
 			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
@@ -441,7 +441,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline
 
 	// only do status updates for parent steps
 	if step != nil && step.IsParent() {
-		err = s.remote.Status(ctx, user, repo, pipeline, step)
+		err = s.forge.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

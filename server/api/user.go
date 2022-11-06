@@ -38,7 +38,7 @@ func GetSelf(c *gin.Context) {
 
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -55,10 +55,10 @@ func GetFeed(c *gin.Context) {
 		config := ToConfig(c)
 
 		sync := shared.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Forge: forge,
+			Store: _store,
+			Perms: _store,
+			Match: shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
@@ -87,7 +87,7 @@ func GetFeed(c *gin.Context) {
 
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
@@ -104,10 +104,10 @@ func GetRepos(c *gin.Context) {
 		config := ToConfig(c)
 
 		sync := shared.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+			Forge: forge,
+			Store: _store,
+			Perms: _store,
+			Match: shared.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
