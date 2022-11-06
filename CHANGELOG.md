@@ -147,7 +147,7 @@
   * Serve index.html directly without template (#539)
   * Add linter revive, unused, ineffassign, varcheck, structcheck, staticcheck, whitespace, misspell (#550), (#551), (#554), (#538), (#537), (#535), (#531), (#530)
   * Rename struct field and add new types into server/model's (#523)
-  * Update database in one transaction on syncing user repositorys (#513)
+  * Update database in one transaction on syncing user repositories (#513)
   * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
