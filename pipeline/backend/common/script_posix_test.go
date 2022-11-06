@@ -15,7 +15,6 @@
 package common
 
 import (
-	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -55,8 +54,6 @@ go test
 	}
 	for _, test := range testdata {
 		script := generateScriptPosix(test.from)
-		decoded, _ := base64.StdEncoding.DecodeString(script)
-		got := string(decoded)
-		assert.EqualValues(t, got, test.want, "Want encoded script for %s", test.from)
+		assert.EqualValues(t, script, test.want, "Want encoded script for %s", test.from)
 	}
 }
