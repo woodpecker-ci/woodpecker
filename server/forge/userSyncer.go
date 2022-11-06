@@ -13,19 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package forge
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
-
-// TODO(974) move to new package
 
 // UserSyncer syncs the user repository and permissions.
 type UserSyncer interface {
@@ -33,7 +30,7 @@ type UserSyncer interface {
 }
 
 type Syncer struct {
-	Forge forge.Forge
+	Forge Forge
 	Store store.Store
 	Perms model.PermStore
 	Match FilterFunc

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"errors"
@@ -22,8 +22,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO(974) move to server/pipeline/*
 
 type mockUpdatePipelineStore struct{}
 
