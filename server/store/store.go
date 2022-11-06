@@ -148,7 +148,7 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idear
+	// TODO: since we do ReadAll in any case a ioReader is not the best idea
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Step, io.Reader) error
 
