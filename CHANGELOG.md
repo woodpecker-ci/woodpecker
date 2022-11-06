@@ -153,7 +153,7 @@
   * Embedding libcompose types for yaml parsing (#495)
   * Use std method to get SystemCertPool (#488)
   * Upgrade urfave/cli to v2 (#483)
-  * Remove some wrapper and make code more redable (#478)
+  * Remove some wrapper and make code more readable (#478)
   * More logging and refactor (#457)
   * Simplify routes (#437)
   * Move api-routes to separate file (#434)
