@@ -91,6 +91,7 @@ func runExec(c *cli.Context, file, repoPath string) error {
 		return err
 	}
 
+	// use pipeline.StepBuilder
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
 		return fmt.Errorf("Parse matrix fail")
@@ -166,6 +167,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
+	// TODO: trusted = flag
 	if lerr := linter.New(linter.WithTrusted(true)).Lint(conf); lerr != nil {
 		return lerr
 	}

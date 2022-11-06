@@ -67,17 +67,12 @@ func createPipelineItems(ctx context.Context, store store.Store,
 		envs[k] = v
 	}
 
-	b := pipeline.StepBuilder{
-		Repo:  repo,
-		Curr:  currentPipeline,
-		Last:  last,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Link:  server.Config.Server.Host,
-		Yamls: yamls,
-	}
+	b := pipeline.NewStepBuilder(repo, currentPipeline, last,
+		netrc, secs, regs,
+		server.Config.Server.Host,
+		yamls,
+		envs)
+
 	pipelineItems, err := b.Build()
 	if err != nil {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
@@ -87,7 +82,7 @@ func createPipelineItems(ctx context.Context, store store.Store,
 		return currentPipeline, nil, err
 	}
 
-	currentPipeline = pipeline.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
+	currentPipeline = pipeline.SetPipelineStepsOnPipeline(b.CurrentPipeline(), pipelineItems)
 
 	return currentPipeline, pipelineItems, nil
 }

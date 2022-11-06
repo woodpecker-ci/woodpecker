@@ -27,16 +27,12 @@ import (
 )
 
 func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) bool {
-	b := pipeline.StepBuilder{
-		Repo:  &model.Repo{},
-		Curr:  currentPipeline,
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Link:  "",
-		Yamls: forgeYamlConfigs,
-	}
+	b := pipeline.NewStepBuilder(&model.Repo{}, currentPipeline, &model.Pipeline{},
+		&model.Netrc{}, []*model.Secret{}, []*model.Registry{},
+		"",
+		forgeYamlConfigs,
+		make(map[string]string),
+	)
 
 	pipelineItems, err := b.Build()
 	if err != nil {

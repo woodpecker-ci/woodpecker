@@ -31,13 +31,44 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
+
+	// TODO: remove server dependency
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
-type StepBuilder struct {
+type StepBuilder interface {
+	Build() ([]*Item, error)
+	CurrentPipeline() *model.Pipeline
+}
+
+func NewStepBuilder(
+	repo *model.Repo,
+	curr *model.Pipeline,
+	last *model.Pipeline,
+	netrc *model.Netrc,
+	secs []*model.Secret,
+	regs []*model.Registry,
+	link string,
+	yamls []*forge_types.FileMeta,
+	envs map[string]string,
+) StepBuilder {
+	return &stepBuilder{
+		Repo:  repo,
+		Curr:  curr,
+		Last:  last,
+		Netrc: netrc,
+		Secs:  secs,
+		Regs:  regs,
+		Link:  link,
+		Yamls: yamls,
+		Envs:  envs,
+	}
+}
+
+type stepBuilder struct {
 	Repo  *model.Repo
 	Curr  *model.Pipeline
 	Last  *model.Pipeline
@@ -58,7 +89,11 @@ type Item struct {
 	Config    *backend.Config
 }
 
-func (b *StepBuilder) Build() ([]*Item, error) {
+func (b *stepBuilder) CurrentPipeline() *model.Pipeline {
+	return b.Curr
+}
+
+func (b *stepBuilder) Build() ([]*Item, error) {
 	var items []*Item
 
 	b.Yamls = forge_types.SortByName(b.Yamls)
@@ -216,7 +251,7 @@ func containsItemWithName(name string, items []*Item) bool {
 	return false
 }
 
-func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, error) {
+func (b *stepBuilder) envsubst(y string, environ map[string]string) (string, error) {
 	return envsubst.Eval(y, func(name string) string {
 		env := environ[name]
 		if strings.Contains(env, "\n") {
@@ -226,7 +261,7 @@ func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, err
 	})
 }
 
-func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *stepBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
@@ -234,7 +269,7 @@ func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, stepID int64) (*backend.Config, error) {
+func (b *stepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, stepID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {

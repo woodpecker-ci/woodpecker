@@ -26,7 +26,7 @@ import (
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -60,7 +60,7 @@ pipeline:
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -94,7 +94,7 @@ pipeline:
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo: &model.Repo{},
 		Curr: &model.Pipeline{
 			Message: `aaa
@@ -131,7 +131,7 @@ pipeline:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -165,7 +165,7 @@ pipeline:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -211,7 +211,7 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -247,7 +247,7 @@ runs_on:
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -282,7 +282,7 @@ pipeline:
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Branch: "dev"},
 		Last:  &model.Pipeline{},
@@ -328,7 +328,7 @@ pipeline:
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tester"},
 		Last:  &model.Pipeline{},
@@ -376,7 +376,7 @@ func TestZeroSteps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -410,7 +410,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -458,7 +458,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -514,7 +514,7 @@ func TestTree(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	b := StepBuilder{
+	b := stepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
