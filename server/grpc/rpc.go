@@ -29,7 +29,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -385,24 +384,7 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 }
 
 func (s *RPC) RegisterAgent(ctx context.Context, platform, backend string, capacity int32) error {
-	token, err := s.getAgentToken(ctx)
-	if err != nil {
-		return err
-	}
-
-	if token == server.Config.Server.AgentToken {
-		agent := new(model.Agent)
-		agent.Name = ""
-		agent.OwnerID = -1 // system agent
-		agent.Token = server.Config.Server.AgentToken
-		agent.Backend = backend
-		agent.Platform = platform
-		agent.Capacity = capacity
-		err := s.store.AgentCreate(agent)
-		return err
-	}
-
-	agent, err := s.store.AgentFindByToken(token)
+	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -415,7 +397,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend string, capac
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {
-	agent, err := s.getAgentFromToken(ctx)
+	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -486,29 +468,11 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 	return nil
 }
 
-func (s *RPC) getAgentToken(ctx context.Context) (string, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
+func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
+	agentID, ok := ctx.Value("agent_id").(int64) // TODO: improve this
 	if !ok {
-		return "", fmt.Errorf("Can't get token")
+		return nil, fmt.Errorf("agent_id not found in context")
 	}
 
-	if len(md["token"]) != 1 {
-		return "", fmt.Errorf("Token not found")
-	}
-	token := md["token"][0]
-
-	return token, nil
-}
-
-func (s *RPC) getAgentFromToken(ctx context.Context) (*model.Agent, error) {
-	token, err := s.getAgentToken(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if token == "" {
-		return nil, fmt.Errorf("Nice try :)")
-	}
-
-	return s.store.AgentFindByToken(token)
+	return s.store.AgentFind(agentID)
 }

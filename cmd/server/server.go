@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -34,7 +33,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -133,16 +131,15 @@ func run(c *cli.Context) error {
 			log.Err(err).Msg("")
 			return err
 		}
-		authorizer := &authorizer{
-			token: c.String("agent-secret"),
-		}
+		authorizer := woodpeckerGrpcServer.NewAuthorizer(c.String("agent-secret"))
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(authorizer.streamInterceptor),
-			grpc.UnaryInterceptor(authorizer.unaryInterceptor),
+			grpc.StreamInterceptor(authorizer.StreamInterceptor),
+			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
+
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
 			_remote,
 			server.Config.Services.Queue,
@@ -152,6 +149,13 @@ func run(c *cli.Context) error {
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
+
+		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
+			server.Config.Server.AgentToken, // TODO: think about proper jwt secret (maybe randomly generated one on startup?)
+			server.Config.Server.AgentToken,
+			_store,
+		)
+		proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
@@ -324,35 +328,4 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// TODO(485) temporary workaround to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
-}
-
-type authorizer struct {
-	token string
-}
-
-func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	if err := a.authorize(stream.Context()); err != nil {
-		return err
-	}
-	return handler(srv, stream)
-}
-
-func (a *authorizer) unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	if err := a.authorize(ctx); err != nil {
-		return nil, err
-	}
-	return handler(ctx, req)
-}
-
-func (a *authorizer) authorize(ctx context.Context) error {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if len(md["token"]) > 0 && md["token"][0] == a.token {
-			return nil
-		}
-
-		// TODO: check if token is system token or a token of an pending agent from the database
-
-		return errors.New("invalid agent token")
-	}
-	return errors.New("missing agent token")
 }

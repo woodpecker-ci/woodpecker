@@ -98,7 +98,7 @@ message Empty {
 }
 
 message ReportHealthRequest {
-  // TODO: think about useful arguments
+  // TODO: think about other useful arguments
   string status = 1;
 }
 
@@ -109,4 +109,22 @@ message RegisterAgentRequest {
 }
 
 message RegisterAgentResponse {
+}
+
+
+// Woodpecker auth service is a simple service to authenticate agents and aquire a token
+
+service WoodpeckerAuth {
+  rpc Auth          (AuthRequest)          returns (AuthReply) {}
+}
+
+message AuthRequest {
+  string agent_token = 1;
+  int64  agent_id    = 2;
+}
+
+message AuthReply {
+  string status        = 1;
+  int64  agent_id      = 2;
+  string access_token  = 3;
 }
