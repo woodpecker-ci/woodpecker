@@ -99,10 +99,6 @@ func loop(c *cli.Context) error {
 		}()
 	}
 
-	// TODO pass version information to grpc server
-	// TODO authenticate to grpc server
-
-	// grpc.Dial(target, ))
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
 		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
@@ -110,16 +106,37 @@ func loop(c *cli.Context) error {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	conn, err := grpc.Dial(
+	authConn, err := grpc.Dial(
 		c.String("server"),
 		transport,
-		grpc.WithPerRPCCredentials(&credentials{
-			token: c.String("grpc-token"),
-		}),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			Time:    c.Duration("grpc-keepalive-time"),
 			Timeout: c.Duration("grpc-keepalive-timeout"),
 		}),
+	)
+	if err != nil {
+		return err
+	}
+	defer authConn.Close()
+
+	agentID := int64(-1) // TODO: store agent id in a file
+	agentToken := c.String("grpc-token")
+	authClient := rpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+
+	authInterceptor, err := rpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	conn, err := grpc.Dial(
+		c.String("server"),
+		transport,
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:    c.Duration("grpc-keepalive-time"),
+			Timeout: c.Duration("grpc-keepalive-timeout"),
+		}),
+		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
+		grpc.WithStreamInterceptor(authInterceptor.Stream()),
 	)
 	if err != nil {
 		return err
@@ -209,18 +226,4 @@ func loop(c *cli.Context) error {
 
 	wg.Wait()
 	return nil
-}
-
-type credentials struct {
-	token string
-}
-
-func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{
-		"token": c.token,
-	}, nil
-}
-
-func (c *credentials) RequireTransportSecurity() bool {
-	return false
 }

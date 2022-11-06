@@ -12,13 +12,13 @@ import (
 
 type WoodpeckerAuthServer struct {
 	proto.UnimplementedWoodpeckerAuthServer
-	jwtSecret        string
+	jwtManager       *JWTManager
 	agentMasterToken string
 	store            store.Store
 }
 
-func NewWoodpeckerAuthServer(jwtSecret, agentMasterToken string, store store.Store) *WoodpeckerAuthServer {
-	return &WoodpeckerAuthServer{jwtSecret: jwtSecret, agentMasterToken: agentMasterToken, store: store}
+func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, store store.Store) *WoodpeckerAuthServer {
+	return &WoodpeckerAuthServer{jwtManager: jwtManager, agentMasterToken: agentMasterToken, store: store}
 }
 
 func (s *WoodpeckerAuthServer) Auth(c context.Context, req *proto.AuthRequest) (*proto.AuthReply, error) {
@@ -27,9 +27,7 @@ func (s *WoodpeckerAuthServer) Auth(c context.Context, req *proto.AuthRequest) (
 		return nil, err
 	}
 
-	jwt := NewJWTManager(s.jwtSecret)
-
-	accessToken, err := jwt.Generate(agent.ID)
+	accessToken, err := s.jwtManager.Generate(agent.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -131,7 +131,11 @@ func run(c *cli.Context) error {
 			log.Err(err).Msg("")
 			return err
 		}
-		authorizer := woodpeckerGrpcServer.NewAuthorizer(c.String("agent-secret"))
+
+		jwtSecret := "secret" // TODO: make configurable
+		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
+
+		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
 		grpcServer := grpc.NewServer(
 			grpc.StreamInterceptor(authorizer.StreamInterceptor),
 			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
@@ -151,7 +155,7 @@ func run(c *cli.Context) error {
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
 		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
-			server.Config.Server.AgentToken, // TODO: think about proper jwt secret (maybe randomly generated one on startup?)
+			jwtManager,
 			server.Config.Server.AgentToken,
 			_store,
 		)

@@ -29,6 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -469,9 +470,20 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	agentID, ok := ctx.Value("agent_id").(int64) // TODO: improve this
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("agent_id not found in context")
+		return nil, fmt.Errorf("metadata is not provided")
+	}
+
+	values := md["agent_id"]
+	if len(values) == 0 {
+		return nil, fmt.Errorf("agent_id is not provided")
+	}
+
+	_agentID := values[0]
+	agentID, err := strconv.ParseInt(_agentID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("agent_id is not a valid integer")
 	}
 
 	return s.store.AgentFind(agentID)
