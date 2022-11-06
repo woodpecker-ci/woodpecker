@@ -16,14 +16,15 @@ package local
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/alessio/shellescape"
 	"golang.org/x/exp/slices"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
@@ -95,9 +96,14 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		command = append(command, "-c")
 
 		// TODO: use commands directly
-		script := common.GenerateScript(step.Commands)
+		script := ""
+		for _, cmd := range step.Commands {
+			script += fmt.Sprintf("echo + %s\n%s\n\n", shellescape.Quote(cmd), cmd)
+		}
+		script = strings.TrimSpace(script)
+
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		command = append(command, script[strings.Index(script, "\n\n")+2:])
+		command = append(command, script)
 	}
 
 	// Prepare command
