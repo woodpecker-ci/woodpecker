@@ -256,7 +256,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	})
 }
 
-// Deactivate deactives the repository be removing repository push hooks from
+// Deactivate deactivates the repository be removing repository push hooks from
 // the Bitbucket repository.
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)

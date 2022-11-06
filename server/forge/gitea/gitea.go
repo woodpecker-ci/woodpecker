@@ -406,7 +406,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	return nil
 }
 
-// Deactivate deactives the repository be removing repository push hooks from
+// Deactivate deactivates the repository be removing repository push hooks from
 // the Gitea repository.
 func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client, err := c.newClientToken(ctx, u.Token)
