@@ -261,7 +261,7 @@
   * Add support to gitea remote for path-prefix condition (#235)
   * Enable go vet for ci (#230)
   * Enforce code format (#228)
-  * Add mutli-pipeline to Gitea (#225)
+  * Add multi-pipeline to Gitea (#225)
   * Move flag definitions into extra files (#215)
   * Remove unused code in server (#213)
   * Docs URL configuration (#206)
