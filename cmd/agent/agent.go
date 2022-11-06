@@ -168,12 +168,12 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	err = client.RegisterAgent(ctx, platform, engine.Name(), parallel)
+	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
 
-	log.Debug().Msgf("agent registered")
+	log.Debug().Msgf("agent registered with id %d", agentID)
 
 	go func() {
 		for {
@@ -221,8 +221,8 @@ func loop(c *cli.Context) error {
 	}
 
 	log.Info().Msgf(
-		"Starting Woodpecker agent with version '%s' and backend '%s' running up to %d pipelines in parallel",
-		version.String(), engine.Name(), parallel)
+		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
+		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
 	return nil

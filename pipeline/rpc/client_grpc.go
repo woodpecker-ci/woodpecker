@@ -308,14 +308,15 @@ func (c *client) Log(ctx context.Context, id string, line *Line) (err error) {
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, platform, backend string, capacity int) error {
+func (c *client) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error) {
 	req := new(proto.RegisterAgentRequest)
 	req.Platform = platform
 	req.Backend = backend
+	req.Version = version
 	req.Capacity = int32(capacity)
 
-	_, err := c.client.RegisterAgent(ctx, req)
-	return err
+	res, err := c.client.RegisterAgent(ctx, req)
+	return res.GetAgentId(), err
 }
 
 func (c *client) ReportHealth(ctx context.Context) (err error) {

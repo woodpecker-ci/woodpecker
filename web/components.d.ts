@@ -8,15 +8,13 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ActionsTab: typeof import('./src/components/repo/settings/ActionsTab.vue')['default']
-    ActiveBuilds: typeof import('./src/components/layout/header/ActiveBuilds.vue')['default']
-    AdminAgentssTab: typeof import('./src/components/admin/settings/AdminAgentssTab.vue')['default']
+    ActivePipelines: typeof import('./src/components/layout/header/ActivePipelines.vue')['default']
     AdminAgentsTab: typeof import('./src/components/admin/settings/AdminAgentsTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
     BadgeTab: typeof import('./src/components/repo/settings/BadgeTab.vue')['default']
     Button: typeof import('./src/components/atomic/Button.vue')['default']
     Checkbox: typeof import('./src/components/form/Checkbox.vue')['default']
     CheckboxesField: typeof import('./src/components/form/CheckboxesField.vue')['default']
-    copy: typeof import('./src/components/admin/settings/AdminSecretsTab copy.vue')['default']
     CronTab: typeof import('./src/components/repo/settings/CronTab.vue')['default']
     DocsLink: typeof import('./src/components/atomic/DocsLink.vue')['default']
     FluidContainer: typeof import('./src/components/layout/FluidContainer.vue')['default']

@@ -384,17 +384,23 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, platform, backend string, capacity int32) error {
+func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	agent.Backend = backend
 	agent.Platform = platform
 	agent.Capacity = capacity
+	agent.Version = version
 
-	return s.store.AgentUpdate(agent)
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return -1, err
+	}
+
+	return agent.ID, nil
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {

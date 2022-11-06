@@ -8,4 +8,5 @@ export type Agent = {
   platform: string;
   backend: string;
   capacity: number;
+  version: string;
 };

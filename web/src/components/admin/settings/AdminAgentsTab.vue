@@ -64,6 +64,10 @@
             <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
+          <InputField :label="$t('admin.settings.agents.version')">
+            <TextField :model-value="selectedAgent.version" disabled />
+          </InputField>
+
           <InputField :label="$t('admin.settings.agents.last_contact')">
             <TextField
               :model-value="
