@@ -16,7 +16,6 @@ package common
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"strings"
 )
@@ -36,7 +35,7 @@ func generateScriptWindows(commands []string) string {
 		setupScriptWin,
 		buf.String(),
 	)
-	return base64.StdEncoding.EncodeToString([]byte(script))
+	return script
 }
 
 const setupScriptWin = `

@@ -22,6 +22,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -58,7 +59,7 @@ type Forge interface {
 	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
 
 	// Dir fetches a folder from the forge repository
-	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*FileMeta, error)
+	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error)
 
 	// Status sends the commit status to the forge.
 	// An example would be the GitHub pull request status.
@@ -90,18 +91,6 @@ type Forge interface {
 	// is admin/owner in that organization.
 	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
 }
-
-// FileMeta represents a file in version control
-type FileMeta struct {
-	Name string
-	Data []byte
-}
-
-type ByName []*FileMeta
-
-func (a ByName) Len() int           { return len(a) }
-func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 // Refresher refreshes an oauth token and expiration for the given user. It
 // returns true if the token was refreshed, false if the token was not refreshed,

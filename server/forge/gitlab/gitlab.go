@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
@@ -102,7 +103,7 @@ func (g *Gitlab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -339,13 +340,13 @@ func (g *Gitlab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 }
 
 // Dir fetches a folder from the forge repository
-func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge.FileMeta, error) {
+func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	files := make([]*forge.FileMeta, 0, perPage)
+	files := make([]*forge_types.FileMeta, 0, perPage)
 	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
@@ -372,7 +373,7 @@ func (g *Gitlab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, &forge.FileMeta{
+			files = append(files, &forge_types.FileMeta{
 				Name: batch[i].Path,
 				Data: data,
 			})
