@@ -5,6 +5,7 @@ go 1.18
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0
 	codeberg.org/6543/go-yaml2json v0.3.0
+	github.com/alessio/shellescape v1.4.1
 	github.com/antonmedv/expr v1.9.0
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/caddyserver/certmagic v0.17.2
