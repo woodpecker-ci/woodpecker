@@ -32,6 +32,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
@@ -90,7 +91,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -235,7 +236,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryContentGetOptions)
@@ -245,7 +246,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *forge.FileMeta)
+	fc := make(chan *forge_types.FileMeta)
 	errc := make(chan error)
 
 	for _, file := range data {
@@ -254,7 +255,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 			if err != nil {
 				errc <- err
 			} else {
-				fc <- &forge.FileMeta{
+				fc <- &forge_types.FileMeta{
 					Name: path,
 					Data: content,
 				}
@@ -262,7 +263,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		}(f + "/" + *file.Name)
 	}
 
-	var files []*forge.FileMeta
+	var files []*forge_types.FileMeta
 
 	for i := 0; i < len(data); i++ {
 		select {

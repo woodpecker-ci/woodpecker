@@ -2,6 +2,7 @@
   <FluidContainer full-width class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
+        v-if="pipeline?.steps?.length || 0 > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"

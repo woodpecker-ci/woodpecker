@@ -28,6 +28,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -209,8 +210,8 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return cfg, err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Status is not supported by the Gogs driver.
