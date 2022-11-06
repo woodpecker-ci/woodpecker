@@ -40,7 +40,7 @@ var notAllowedEnvVarOverwrites = []string{
 }
 
 type local struct {
-	// TODO: make cmd a cmd list to itterate over, the hard part is to have a common ReadCloser
+	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
 	cmd        *exec.Cmd
 	output     io.ReadCloser
 	workingdir string
