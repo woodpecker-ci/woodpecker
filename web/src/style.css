@@ -10,7 +10,7 @@ body,
 }
 
 .vue-notification .notification-title {
-  @apply font-normal;
+  @apply font-normal text-base;
 }
 
 .vue-notification.success {
