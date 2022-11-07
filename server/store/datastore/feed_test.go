@@ -37,7 +37,7 @@ func TestGetPipelineQueue(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
-		RemoteID: "1",
+		ForgeID:  "1",
 		IsActive: true,
 	}
 
@@ -78,14 +78,14 @@ func TestUserFeed(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test1",
 		FullName: "bradrydzewski/test1",
-		RemoteID: "1",
+		ForgeID:  "1",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
 		Owner:    "johndoe",
 		Name:     "test",
 		FullName: "johndoe/test2",
-		RemoteID: "2",
+		ForgeID:  "2",
 		IsActive: true,
 	}
 
@@ -129,21 +129,21 @@ func TestRepoListLatest(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 		FullName: "bradrydzewski/test",
-		RemoteID: "1",
+		ForgeID:  "1",
 		IsActive: true,
 	}
 	repo2 := &model.Repo{
 		Owner:    "test",
 		Name:     "test",
 		FullName: "test/test",
-		RemoteID: "2",
+		ForgeID:  "2",
 		IsActive: true,
 	}
 	repo3 := &model.Repo{
 		Owner:    "octocat",
 		Name:     "hello-world",
 		FullName: "octocat/hello-world",
-		RemoteID: "3",
+		ForgeID:  "3",
 		IsActive: true,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
