@@ -13,14 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"fmt"
 	"math/rand"
 	"net/url"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/drone/envsubst"
@@ -33,11 +32,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO(974) move to pipeline/*
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
 type StepBuilder struct {
@@ -48,11 +45,11 @@ type StepBuilder struct {
 	Secs  []*model.Secret
 	Regs  []*model.Registry
 	Link  string
-	Yamls []*forge.FileMeta
+	Yamls []*forge_types.FileMeta
 	Envs  map[string]string
 }
 
-type PipelineItem struct {
+type Item struct {
 	Step      *model.Step
 	Platform  string
 	Labels    map[string]string
@@ -61,10 +58,10 @@ type PipelineItem struct {
 	Config    *backend.Config
 }
 
-func (b *StepBuilder) Build() ([]*PipelineItem, error) {
-	var items []*PipelineItem
+func (b *StepBuilder) Build() ([]*Item, error) {
+	var items []*Item
 
-	sort.Sort(forge.ByName(b.Yamls))
+	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
 
@@ -149,7 +146,7 @@ func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 				continue
 			}
 
-			item := &PipelineItem{
+			item := &Item{
 				Step:      step,
 				Config:    ir,
 				Labels:    parsed.Labels,
@@ -176,7 +173,7 @@ func (b *StepBuilder) Build() ([]*PipelineItem, error) {
 	return items, nil
 }
 
-func stepListContainsItemsToRun(items []*PipelineItem) bool {
+func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
 		if items[i].Step.State == model.StatusPending {
 			return true
@@ -185,8 +182,8 @@ func stepListContainsItemsToRun(items []*PipelineItem) bool {
 	return false
 }
 
-func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
-	itemsToRemove := make([]*PipelineItem, 0)
+func filterItemsWithMissingDependencies(items []*Item) []*Item {
+	itemsToRemove := make([]*Item, 0)
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
@@ -197,7 +194,7 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 	}
 
 	if len(itemsToRemove) > 0 {
-		filtered := make([]*PipelineItem, 0)
+		filtered := make([]*Item, 0)
 		for _, item := range items {
 			if !containsItemWithName(item.Step.Name, itemsToRemove) {
 				filtered = append(filtered, item)
@@ -210,7 +207,7 @@ func filterItemsWithMissingDependencies(items []*PipelineItem) []*PipelineItem {
 	return items
 }
 
-func containsItemWithName(name string, items []*PipelineItem) bool {
+func containsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
 		if name == item.Step.Name {
 			return true
@@ -294,7 +291,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
-func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*PipelineItem) *model.Pipeline {
+func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		pipeline.Steps = append(pipeline.Steps, item.Step)
