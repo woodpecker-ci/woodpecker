@@ -2,7 +2,8 @@
 FROM golang:1.18-alpine as golang_image
 FROM node:18-alpine
 
-RUN apk add --no-cache --update make gcc binutils-gold musl-dev
+RUN apk add --no-cache --update make gcc binutils-gold musl-dev && \
+  corepack enable
 
 # Build packages.
 COPY --from=golang_image /usr/local/go /usr/local/go
