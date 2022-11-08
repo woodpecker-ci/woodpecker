@@ -13,15 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO(974) move to server/pipeline/*
 
 func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {
 	pipeline.Status = model.StatusRunning

@@ -38,6 +38,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -112,7 +113,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -292,8 +293,8 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return cfg, err
 }
 
-func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	var configs []*forge.FileMeta
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var configs []*forge_types.FileMeta
 
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
@@ -316,7 +317,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
 			}
 
-			configs = append(configs, &forge.FileMeta{
+			configs = append(configs, &forge_types.FileMeta{
 				Name: e.Path,
 				Data: data,
 			})

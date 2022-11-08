@@ -23,8 +23,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -53,14 +53,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	var (
-		forgeYamlConfigs []*forge.FileMeta
+		forgeYamlConfigs []*types.FileMeta
 		configFetchErr   error
 		filtered         bool
 		parseErr         error
 	)
 
 	// fetch the pipeline file from the forge
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)

@@ -16,9 +16,9 @@ package common
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
-	"strings"
+
+	"github.com/alessio/shellescape"
 )
 
 // generateScriptPosix is a helper function that generates a step script
@@ -26,11 +26,9 @@ import (
 func generateScriptPosix(commands []string) string {
 	var buf bytes.Buffer
 	for _, command := range commands {
-		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.Replace(escaped, "$", `\$`, -1)
 		buf.WriteString(fmt.Sprintf(
 			traceScript,
-			escaped,
+			shellescape.Quote(command),
 			command,
 		))
 	}
@@ -38,7 +36,7 @@ func generateScriptPosix(commands []string) string {
 		setupScript,
 		buf.String(),
 	)
-	return base64.StdEncoding.EncodeToString([]byte(script))
+	return script
 }
 
 // setupScript is a helper script this is added to the step script to ensure
