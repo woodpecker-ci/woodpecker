@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 )
 
@@ -23,7 +24,7 @@ type client struct {
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(conn *grpc.ClientConn) Peer {
+func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
@@ -35,7 +36,7 @@ func (c *client) Close() error {
 }
 
 // Next returns the next pipeline in the queue.
-func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
+func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
 	var res *proto.NextReply
 	var err error
 	req := new(proto.NextRequest)
@@ -75,7 +76,7 @@ func (c *client) Next(ctx context.Context, f Filter) (*Pipeline, error) {
 		return nil, nil
 	}
 
-	p := new(Pipeline)
+	p := new(rpc.Pipeline)
 	p.ID = res.GetPipeline().GetId()
 	p.Timeout = res.GetPipeline().GetTimeout()
 	p.Config = new(backend.Config)
@@ -113,7 +114,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 }
 
 // Init signals the pipeline is initialized.
-func (c *client) Init(ctx context.Context, id string, state State) (err error) {
+func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
 	req := new(proto.InitRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -147,7 +148,7 @@ func (c *client) Init(ctx context.Context, id string, state State) (err error) {
 }
 
 // Done signals the pipeline is complete.
-func (c *client) Done(ctx context.Context, id string, state State) (err error) {
+func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
 	req := new(proto.DoneRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -208,7 +209,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the pipeline state.
-func (c *client) Update(ctx context.Context, id string, state State) (err error) {
+func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
 	req := new(proto.UpdateRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -242,7 +243,7 @@ func (c *client) Update(ctx context.Context, id string, state State) (err error)
 }
 
 // Upload uploads the pipeline artifact.
-func (c *client) Upload(ctx context.Context, id string, file *File) (err error) {
+func (c *client) Upload(ctx context.Context, id string, file *rpc.File) (err error) {
 	req := new(proto.UploadRequest)
 	req.Id = id
 	req.File = new(proto.File)
@@ -277,7 +278,7 @@ func (c *client) Upload(ctx context.Context, id string, file *File) (err error) 
 }
 
 // Log writes the pipeline log entry.
-func (c *client) Log(ctx context.Context, id string, line *Line) (err error) {
+func (c *client) Log(ctx context.Context, id string, line *rpc.Line) (err error) {
 	req := new(proto.LogRequest)
 	req.Id = id
 	req.Line = new(proto.Line)

@@ -36,6 +36,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
+	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -121,9 +122,8 @@ func loop(c *cli.Context) error {
 
 	agentID := int64(-1) // TODO: store agent id in a file
 	agentToken := c.String("grpc-token")
-	authClient := rpc.NewAuthGrpcClient(authConn, agentToken, agentID)
-
-	authInterceptor, err := rpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func loop(c *cli.Context) error {
 	}
 	defer conn.Close()
 
-	client := rpc.NewGrpcClient(conn)
+	client := agentRpc.NewGrpcClient(conn)
 
 	sigterm := abool.New()
 	ctx := metadata.NewOutgoingContext(
